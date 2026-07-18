@@ -38,3 +38,4 @@ export * from "@/table/utils/mobileTable.utils";
 export * from "@/utils/currencyFormatters";
 export * from "@/utils/dateFormatters";
 export * from "@/utils/downloadFile";
+export * from "@/history";

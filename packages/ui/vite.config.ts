@@ -30,6 +30,8 @@ export default defineConfig({
         /^@vireocodedev\//,
         /^sonner$/,
         /^react-hook-form($|\/)/,
+        /^react-i18next$/,
+        /^i18next$/,
         /^dayjs($|\/)/,
       ],
     },
