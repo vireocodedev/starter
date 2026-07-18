@@ -1,21 +1,13 @@
+import { PLATFORM_TRANSLATION_NAMESPACE } from "@/namespace";
 import PLATFORM_EN from "@/platform.en";
 import PLATFORM_HR from "@/platform.hr";
-import {
-  createNamespaceResources,
-  type DeepPartial,
-  type WidenLeaves,
-} from "@/toolkit/createNamespaceResources";
-import { PLATFORM_TRANSLATION_NAMESPACE } from "@/namespace";
+import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 import { type i18n as I18nInstance } from "i18next";
 
 export { usePlatformTranslation } from "@/hooks/usePlatformTranslation";
-export { deepMerge } from "@/toolkit/deepMerge";
-export {
-  createNamespaceResources,
-  type DeepPartial,
-  type WidenLeaves,
-} from "@/toolkit/createNamespaceResources";
 export { PLATFORM_TRANSLATION_NAMESPACE, type PlatformTranslationNamespace } from "@/namespace";
+export { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
+export { deepMerge } from "@/toolkit/deepMerge";
 
 /** The canonical resource shape. English is the single source of truth. */
 export type PlatformResources = typeof PLATFORM_EN;
@@ -89,3 +81,5 @@ export function registerPlatformResources<L extends string>(
     );
   }
 }
+
+// TODO: test comment
