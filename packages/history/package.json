@@ -1,0 +1,55 @@
+{
+  "name": "@vireocodedev/starter-history",
+  "version": "0.1.0",
+  "description": "Framework-agnostic entity history engine (diff/build/render definitions) and generic history models for the vireocodedev starter product.",
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vireocodedev/starter.git",
+    "directory": "packages/history"
+  },
+  "keywords": [
+    "history",
+    "audit-log",
+    "diff",
+    "zod",
+    "starter"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "zod": ">=3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "react": "^18.3.1",
+    "typescript": "^5.7.0",
+    "vite": "^6.4.3",
+    "vite-plugin-dts": "^4.5.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.9",
+    "zod": "^3.24.2"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
