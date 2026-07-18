@@ -37,7 +37,7 @@
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
-    "@vireocodedev/starter-localization": "^0.1.0"
+    "@vireocodedev/starter-localization": "^0.2.0"
   },
   "peerDependencies": {
     "@preact/signals-react": ">=2",
