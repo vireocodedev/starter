@@ -1,4 +1,4 @@
-import { AppBottomDrawer } from "@/components/AppBottomDrawer";
+import { AppBottomDrawer } from "@vireocodedev/starter-core";
 import { type RgoServerTableColumnWithSort, type SortDirection } from "@/table/types";
 import { renderDirectionIcon, renderHeader } from "@/table/utils/mobileTable.utils";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
