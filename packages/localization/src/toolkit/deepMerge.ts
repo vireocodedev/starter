@@ -31,9 +31,7 @@ export function deepMerge<T>(base: T, override: unknown): T {
 
     const baseValue = result[key];
     result[key] =
-      isPlainObject(baseValue) && isPlainObject(overrideValue)
-        ? deepMerge(baseValue, overrideValue)
-        : overrideValue;
+      isPlainObject(baseValue) && isPlainObject(overrideValue) ? deepMerge(baseValue, overrideValue) : overrideValue;
   }
 
   return result as T;

@@ -113,15 +113,15 @@ declare module "i18next" {
 
 ## Public API
 
-| Export | Purpose |
-| --- | --- |
-| `usePlatformTranslation()` | `react-i18next` hook bound to the `platform` namespace. |
-| `createPlatformResources({ locales, seedFrom?, overrides? })` | Build fully-populated platform resources per locale. |
-| `registerPlatformResources(i18n, config)` | Imperatively add platform resources to an existing i18next instance. |
-| `platformBaseResources`, `PLATFORM_BASE_LOCALES` | The shipped base resources and locales. |
-| `PLATFORM_TRANSLATION_NAMESPACE` | The namespace string (`"platform"`). |
-| `createNamespaceResources`, `deepMerge` | Generic toolkit reused by other starter libraries. |
-| `PlatformResources`, `PlatformResourcesOverride`, `DeepPartial`, `WidenLeaves` | Types. |
+| Export                                                                         | Purpose                                                              |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `usePlatformTranslation()`                                                     | `react-i18next` hook bound to the `platform` namespace.              |
+| `createPlatformResources({ locales, seedFrom?, overrides? })`                  | Build fully-populated platform resources per locale.                 |
+| `registerPlatformResources(i18n, config)`                                      | Imperatively add platform resources to an existing i18next instance. |
+| `platformBaseResources`, `PLATFORM_BASE_LOCALES`                               | The shipped base resources and locales.                              |
+| `PLATFORM_TRANSLATION_NAMESPACE`                                               | The namespace string (`"platform"`).                                 |
+| `createNamespaceResources`, `deepMerge`                                        | Generic toolkit reused by other starter libraries.                   |
+| `PlatformResources`, `PlatformResourcesOverride`, `DeepPartial`, `WidenLeaves` | Types.                                                               |
 
 ## Versioning contract
 

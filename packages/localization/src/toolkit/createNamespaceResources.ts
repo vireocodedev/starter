@@ -7,8 +7,8 @@ import { deepMerge } from "@/toolkit/deepMerge";
 export type DeepPartial<T> = T extends (infer U)[]
   ? DeepPartial<U>[]
   : T extends object
-    ? { [K in keyof T]?: DeepPartial<T[K]> }
-    : T;
+  ? { [K in keyof T]?: DeepPartial<T[K]> }
+  : T;
 
 /**
  * Widens leaf string/number/boolean literals to their base primitive while
@@ -18,14 +18,14 @@ export type DeepPartial<T> = T extends (infer U)[]
 export type WidenLeaves<T> = T extends string
   ? string
   : T extends number
-    ? number
-    : T extends boolean
-      ? boolean
-      : T extends (infer U)[]
-        ? WidenLeaves<U>[]
-        : T extends object
-          ? { [K in keyof T]: WidenLeaves<T[K]> }
-          : T;
+  ? number
+  : T extends boolean
+  ? boolean
+  : T extends (infer U)[]
+  ? WidenLeaves<U>[]
+  : T extends object
+  ? { [K in keyof T]: WidenLeaves<T[K]> }
+  : T;
 
 export type CreateNamespaceResourcesConfig<TShape extends object, B extends string, L extends string> = {
   /** The i18next namespace the resulting resources are keyed under. */

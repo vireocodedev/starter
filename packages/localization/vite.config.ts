@@ -1,12 +1,9 @@
-import { defineConfig } from "vitest/config";
 import dts from "vite-plugin-dts";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [
-    tsconfigPaths(),
-    dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" }),
-  ],
+  plugins: [tsconfigPaths(), dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" })],
   build: {
     lib: {
       entry: "src/index.ts",

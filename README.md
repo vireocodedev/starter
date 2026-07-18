@@ -6,8 +6,8 @@ the `@vireocodedev` scope.
 
 ## Packages
 
-| Package | Description |
-| --- | --- |
+| Package                                                       | Description                                               |
+| ------------------------------------------------------------- | --------------------------------------------------------- |
 | [`@vireocodedev/starter-localization`](packages/localization) | Foundation i18n toolkit + shared `platform` translations. |
 
 ## Prerequisites
