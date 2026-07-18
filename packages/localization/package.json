@@ -1,0 +1,62 @@
+{
+  "name": "@vireocodedev/starter-localization",
+  "version": "0.1.0",
+  "description": "Foundation i18n toolkit and shared platform translations for the vireocodedev starter product.",
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vireocodedev/starter.git",
+    "directory": "packages/localization"
+  },
+  "keywords": [
+    "i18n",
+    "i18next",
+    "react-i18next",
+    "localization",
+    "starter"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "peerDependencies": {
+    "i18next": ">=25",
+    "react": ">=18",
+    "react-i18next": ">=15"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "i18next": "^25.4.1",
+    "react": "^18.3.1",
+    "react-i18next": "^15.4.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.4.3",
+    "vite-plugin-dts": "^4.5.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.9"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

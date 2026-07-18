@@ -1,0 +1,25 @@
+{
+  "name": "@vireocodedev/starter",
+  "private": true,
+  "version": "0.0.0",
+  "description": "vireocodedev starter — shared frontend libraries.",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.9",
+    "typescript": "^5.7.0"
+  }
+}
