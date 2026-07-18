@@ -1,0 +1,72 @@
+{
+  "name": "@vireocodedev/starter-ui",
+  "version": "0.1.0",
+  "description": "MUI-based UI component library (responsive cards, mobile tables, overlays, providers, hooks, formatters) for the vireocodedev starter product.",
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vireocodedev/starter.git",
+    "directory": "packages/ui"
+  },
+  "keywords": [
+    "ui",
+    "mui",
+    "react",
+    "components",
+    "starter"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "dependencies": {
+    "@vireocodedev/starter-localization": "^0.2.0"
+  },
+  "peerDependencies": {
+    "@mui/icons-material": ">=6",
+    "@mui/material": ">=6",
+    "@mui/x-date-pickers": ">=7",
+    "@rgo/front-ui": ">=1.9",
+    "dayjs": ">=1.11",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "react-hook-form": ">=7",
+    "sonner": ">=2"
+  },
+  "devDependencies": {
+    "@mui/icons-material": "^6.4.3",
+    "@mui/material": "^6.4.1",
+    "@mui/x-date-pickers": "^7.27.0",
+    "@rgo/front-ui": "^1.9.13",
+    "@types/react": "^18.3.18",
+    "dayjs": "^1.11.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "sonner": "^2.0.7",
+    "typescript": "^5.7.0",
+    "vite": "^6.4.3",
+    "vite-plugin-dts": "^4.5.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.9"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
