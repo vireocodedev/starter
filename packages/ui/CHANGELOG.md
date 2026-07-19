@@ -1,5 +1,12 @@
 # @vireocodedev/starter-ui
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [b090ec4]
+  - @vireocodedev/starter-history@0.3.0
+
 ## 0.4.0
 
 ### Minor Changes
