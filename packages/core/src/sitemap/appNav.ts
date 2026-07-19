@@ -2,12 +2,15 @@ import {
   type AppConfigIconName,
   type AppConfigLabel,
   type AppConfigPermission,
+  type AppConfigTranslationFn,
   type AppPageConfig,
   type AppShellNavEntry,
 } from "@/config/app.config.types";
 
 export const appNav = {
-  item(page: AppPageConfig): AppShellNavEntry {
+  item<TPermission extends AppConfigPermission = AppConfigPermission, TTranslationFn = AppConfigTranslationFn>(
+    page: AppPageConfig<string, string, TPermission, TTranslationFn>,
+  ): AppShellNavEntry<TPermission, TTranslationFn> {
     return {
       type: "item",
       page,
@@ -17,17 +20,17 @@ export const appNav = {
     };
   },
 
-  disabledItem({
+  disabledItem<TPermission extends AppConfigPermission = AppConfigPermission, TTranslationFn = AppConfigTranslationFn>({
     label,
     icon,
     disabledTooltip,
     permission,
   }: {
-    label: AppConfigLabel;
+    label: AppConfigLabel<TTranslationFn>;
     icon: AppConfigIconName;
-    disabledTooltip: AppConfigLabel;
-    permission?: AppConfigPermission;
-  }): AppShellNavEntry {
+    disabledTooltip: AppConfigLabel<TTranslationFn>;
+    permission?: TPermission;
+  }): AppShellNavEntry<TPermission, TTranslationFn> {
     return {
       type: "item",
       label,
@@ -38,7 +41,11 @@ export const appNav = {
     };
   },
 
-  separator(id: string, label: AppConfigLabel, options?: { hideWhenCollapsed?: boolean }): AppShellNavEntry {
+  separator<TPermission extends AppConfigPermission = AppConfigPermission, TTranslationFn = AppConfigTranslationFn>(
+    id: string,
+    label: AppConfigLabel<TTranslationFn>,
+    options?: { hideWhenCollapsed?: boolean },
+  ): AppShellNavEntry<TPermission, TTranslationFn> {
     return {
       type: "separator",
       id,

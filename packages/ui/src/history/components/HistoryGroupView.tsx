@@ -1,14 +1,10 @@
-import { useHistoryTranslation } from "@/history/localization";
 import { HistoryFieldRowView } from "@/history/components/HistoryFieldRowView";
-import {
-  type HistoryGroupChangeType,
-  type HistoryGroupNode,
-  type HistoryNode,
-} from "@vireocodedev/starter-history";
+import { useHistoryTranslation } from "@/history/localization";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Button } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
+import { type HistoryGroupChangeType, type HistoryGroupNode, type HistoryNode } from "@vireocodedev/starter-history";
 import { useEffect, useState } from "react";
 
 const TABLE_BORDER_COLOR = "var(--mui-palette-grey-300)";
@@ -248,7 +244,7 @@ export function HistoryGroupView({
     }
   }, [groupKey, defaultShowUnchanged, isRootGroup]);
 
-  const showUnchanged = isRootGroup ? rootShowUnchanged : (inheritedShowUnchanged ?? defaultShowUnchanged);
+  const showUnchanged = isRootGroup ? rootShowUnchanged : inheritedShowUnchanged ?? defaultShowUnchanged;
 
   const toggleButton = (
     <HistoryGroupToggleButton expanded={expanded} onToggle={() => setExpanded(current => !current)} />

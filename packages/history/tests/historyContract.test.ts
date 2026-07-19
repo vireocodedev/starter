@@ -1,6 +1,6 @@
+import { createHistoryDefinitionBuilderFn, createHistoryNodes, createHistorySchemas } from "@/index";
 import { describe, expect, it } from "vitest";
 import z from "zod";
-import { createHistoryDefinitionBuilderFn, createHistoryNodes, createHistorySchemas } from "@/index";
 
 const baseRecord = {
   id: "h1",

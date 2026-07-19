@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { createMonthFormatter, createMonthYearFormatter } from "@/utils/dateFormatters";
-import { createCurrencyFormatter, formatCompactCurrency } from "@/utils/currencyFormatters";
-import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/localization/namespace";
 import HISTORY_EN from "@/history/localization/history.en";
 import HISTORY_HR from "@/history/localization/history.hr";
+import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/localization/namespace";
+import { createCurrencyFormatter, formatCompactCurrency } from "@/utils/currencyFormatters";
+import { createMonthFormatter, createMonthYearFormatter } from "@/utils/dateFormatters";
+import { describe, expect, it } from "vitest";
 
 /**
  * Contract guard for the headless `@vireocodedev/starter-ui` utilities. The MUI

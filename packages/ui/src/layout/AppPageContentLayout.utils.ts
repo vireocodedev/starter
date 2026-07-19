@@ -1,10 +1,10 @@
+import { type AppPageContentLayout, type AppPageContentMode } from "@/layout/AppPageContentLayoutContext";
 import {
   APP_PAGE_CONTENT_COMPACT_ENTER_WIDTH,
   APP_PAGE_CONTENT_COMPACT_EXIT_WIDTH,
   APP_PAGE_CONTENT_WIDE_ENTER_WIDTH,
   APP_PAGE_CONTENT_WIDE_EXIT_WIDTH,
 } from "@vireocodedev/starter-core";
-import { type AppPageContentLayout, type AppPageContentMode } from "@/layout/AppPageContentLayoutContext";
 
 export type { AppPageContentLayout, AppPageContentMode };
 

@@ -1,13 +1,17 @@
 import {
   type AppConfigIconName,
   type AppConfigLabel,
+  type AppConfigTranslationFn,
   type AppMobileBottomNavItem,
   type AppPageConfig,
 } from "@/config/app.config.types";
 import { getRouteNodeKey } from "@/sitemap/routeMetadata";
 
 export const appMobileNav = {
-  item(page: AppPageConfig, value = getRouteNodeKey(page)): AppMobileBottomNavItem {
+  item<TPermission extends string = string, TTranslationFn = AppConfigTranslationFn>(
+    page: AppPageConfig<string, string, TPermission, TTranslationFn>,
+    value = getRouteNodeKey(page as AppPageConfig),
+  ): AppMobileBottomNavItem<TPermission, TTranslationFn> {
     return {
       value,
       page,
@@ -17,10 +21,10 @@ export const appMobileNav = {
     };
   },
 
-  more(
-    label: AppConfigLabel,
+  more<TPermission extends string = string, TTranslationFn = AppConfigTranslationFn>(
+    label: AppConfigLabel<TTranslationFn>,
     options?: { value?: string; icon?: AppConfigIconName },
-  ): Omit<AppMobileBottomNavItem, "path" | "page"> {
+  ): Omit<AppMobileBottomNavItem<TPermission, TTranslationFn>, "path" | "page"> {
     return {
       value: options?.value ?? "more",
       label,

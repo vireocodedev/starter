@@ -1,5 +1,3 @@
-import { CanceledError } from "axios";
-import { describe, expect, it } from "vitest";
 import {
   AppOfflineError,
   createPersistentSignal,
@@ -11,6 +9,8 @@ import {
   isRequestCanceled,
   sanitizeAxiosError,
 } from "@/index";
+import { CanceledError } from "axios";
+import { describe, expect, it } from "vitest";
 
 describe("infrastructure contract", () => {
   it("detects offline errors", () => {

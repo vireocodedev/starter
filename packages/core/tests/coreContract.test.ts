@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
 import {
   assertLocalRoutePath,
   getRequiredParamNames,
   joinRoutePattern,
   normalizeRoutePath,
 } from "@/sitemap/routePath.utils";
+import { describe, expect, it } from "vitest";
 
 /**
  * Contract guard for the headless route-path helpers. The MUI shell/nav
