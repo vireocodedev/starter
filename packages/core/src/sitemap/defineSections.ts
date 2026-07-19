@@ -17,7 +17,8 @@ type AppSectionRecord<
     TSections[K]["routePath"],
     TPermission,
     TTranslationFn
-  > & TSections[K];
+  > &
+    TSections[K];
 };
 
 export function defineSections<

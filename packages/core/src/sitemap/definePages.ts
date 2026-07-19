@@ -23,7 +23,9 @@ export function definePages<
     string,
     AppPageDefinition<TPermission, TTranslationFn>
   >,
->(pages: StrictConfigRecord<TPages, AppPageDefinition<TPermission, TTranslationFn>>): AppPageRecord<TPages, TPermission, TTranslationFn> {
+>(
+  pages: StrictConfigRecord<TPages, AppPageDefinition<TPermission, TTranslationFn>>,
+): AppPageRecord<TPages, TPermission, TTranslationFn> {
   return Object.fromEntries(
     Object.entries(pages).map(([key, page]) => [key, defineRouteNodeMetadata(page, "page", key)]),
   ) as AppPageRecord<TPages, TPermission, TTranslationFn>;
