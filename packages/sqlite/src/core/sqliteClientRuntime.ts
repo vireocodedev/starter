@@ -1,4 +1,9 @@
-import { type WorkerRequest, type WorkerRequestInput, type WorkerResponse, type WorkerResponseResult } from "./sqliteWorkerProtocol";
+import {
+  type WorkerRequest,
+  type WorkerRequestInput,
+  type WorkerResponse,
+  type WorkerResponseResult,
+} from "./sqliteWorkerProtocol";
 
 export type SqliteClientRuntimeConfig = {
   workerFactory: () => Worker;

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  createSqliteClientRuntime,
-  createSqliteWorkerRuntime,
-  createSqliteWorkerRuntimeConfig,
-} from "../src";
+import { createSqliteClientRuntime, createSqliteWorkerRuntime, createSqliteWorkerRuntimeConfig } from "../src";
 
 describe("starter-sqlite exports", () => {
   it("exposes runtime factories", () => {

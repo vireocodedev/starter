@@ -69,7 +69,9 @@ function openDatabase(module: SqliteModule, dbFile: string): SqliteDatabase {
     return new module.oo1.OpfsDb(dbFile);
   } catch (error) {
     throw new Error(
-      `[offline-sqlite] Failed to open OPFS SQLite database: ${mapSqliteRuntimeError(error)}. Diagnostics: ${formatOpfsDiagnostics(module)}.`,
+      `[offline-sqlite] Failed to open OPFS SQLite database: ${mapSqliteRuntimeError(
+        error,
+      )}. Diagnostics: ${formatOpfsDiagnostics(module)}.`,
     );
   }
 }

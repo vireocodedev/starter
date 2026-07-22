@@ -4,7 +4,4 @@ export { createSqliteWorkerRuntimeConfig } from "../sqliteWorkerConfig";
 
 export type { SqliteRequestHandlers } from "../core/sqliteRequestHandlers";
 export type { SqliteMigration } from "../core/sqliteTypes";
-export type {
-  CreateSqliteWorkerRuntimeConfigInput,
-  SqliteWorkerEntityBundleConfig,
-} from "./contracts";
+export type { CreateSqliteWorkerRuntimeConfigInput, SqliteWorkerEntityBundleConfig } from "./contracts";
