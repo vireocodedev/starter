@@ -23,7 +23,7 @@ export default defineConfig({
         "offline/index": resolve(__dirname, "src/offline/index.ts"),
       },
       formats: ["es"],
-      fileName: (_format, entryName) => entryName,
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     rollupOptions: {
       external: [
