@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "App-shell framework for the vireocodedev starter product: config/sitemap/routing scaffolding, route guards, the responsive shell + navigation, and shell layout presets.",
   "type": "module",
   "sideEffects": false,
@@ -21,6 +21,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./offline": {
+      "types": "./dist/offline/index.d.ts",
+      "import": "./dist/offline/index.js"
     }
   },
   "main": "./dist/index.js",

@@ -1,6 +1,7 @@
 import dts from "vite-plugin-dts";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
+import { resolve } from "node:path";
 
 export default defineConfig({
   // Per-file declarations: api-extractor's rollup cannot bundle the deep MUI /
@@ -17,9 +18,12 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: "src/index.ts",
+      entry: {
+        index: resolve(__dirname, "src/index.ts"),
+        "offline/index": resolve(__dirname, "src/offline/index.ts"),
+      },
       formats: ["es"],
-      fileName: "index",
+      fileName: (_format, entryName) => entryName,
     },
     rollupOptions: {
       external: [
