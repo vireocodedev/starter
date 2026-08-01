@@ -1,5 +1,12 @@
 # @vireocodedev/starter-core
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [dfe6b35]
+  - @vireocodedev/starter-localization@0.5.0
+
 ## 0.6.0
 
 ### Minor Changes
