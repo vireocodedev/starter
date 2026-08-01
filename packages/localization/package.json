@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-localization",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Foundation i18n toolkit and shared platform translations for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": false,
