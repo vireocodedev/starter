@@ -9,6 +9,7 @@ import {
 } from "@/shell/hooks/useWindowControlsOverlay";
 import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 import { Outlet } from "react-router";
 
@@ -21,9 +22,7 @@ export function AppBareShellLayout({ config, runtime }: AppBareShellLayoutProps)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const windowControlsOverlay = useWindowControlsOverlay();
-  const {
-    i18n: { t },
-  } = runtime;
+  const { t } = usePlatformTranslation();
   const windowControlsOverlayStyle = React.useMemo(
     () => createWindowControlsOverlayRootStyle(windowControlsOverlay),
     [windowControlsOverlay],

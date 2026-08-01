@@ -7,6 +7,7 @@ import { AppNavResizeHandle } from "@/shell/layout/nav/AppNavResizeHandle";
 import { useVisibleNavEntries } from "@/shell/layout/nav/useVisibleNavEntries";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { Box } from "@mui/material";
+import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 import { useLocation, useNavigate } from "react-router";
 
@@ -39,6 +40,7 @@ export function AppLayoutNav({
 }: AppLayoutNavProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { t: tPlatform } = usePlatformTranslation();
   const {
     config,
     runtime: {
@@ -86,7 +88,7 @@ export function AppLayoutNav({
   return (
     <Box
       component="nav"
-      aria-label={t("common.mainNavigation")}
+      aria-label={tPlatform("common.mainNavigation")}
       sx={{
         width,
         borderRight: "1px solid",
@@ -105,10 +107,10 @@ export function AppLayoutNav({
     >
       <AppNavHeader
         brand={config.brand}
-        closeNavigationLabel={t("common.closeNavigation")}
+        closeNavigationLabel={tPlatform("common.closeNavigation")}
         collapsed={isCollapsed}
-        collapseLabel={t("common.collapse")}
-        expandLabel={t("common.expand")}
+        collapseLabel={tPlatform("common.collapse")}
+        expandLabel={tPlatform("common.expand")}
         mobile={mobile}
         navLocked={navLocked}
         onClose={onClose}

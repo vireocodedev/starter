@@ -3,6 +3,7 @@ import { useAppNavLayout } from "@/shell/layout/AppNavLayoutContext";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { RgoIcon } from "@rgo/front-ui";
+import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 import { flushSync } from "react-dom";
 import { useLocation, useNavigate } from "react-router";
@@ -66,6 +67,7 @@ export function AppMobileBottomNavigation() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { openMobileNav } = useAppNavLayout();
+  const { t: tPlatform } = usePlatformTranslation();
   const {
     config,
     runtime: {
@@ -74,7 +76,7 @@ export function AppMobileBottomNavigation() {
       permissions: { canAccess },
     },
   } = useAppShellContext();
-  const bottomNavigationLabel = t("common.bottomNavigation");
+  const bottomNavigationLabel = tPlatform("common.bottomNavigation");
   const {
     shell: { mobileBottomNavigation },
     routes: { getPath },

@@ -15,6 +15,7 @@ import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { getLayoutBorderColor } from "@/shell/layout/layout.tokens";
 import { Box, Button, Container, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { RgoIcon } from "@rgo/front-ui";
+import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 
@@ -32,6 +33,7 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { t: tPlatform } = usePlatformTranslation();
   const {
     i18n: { t },
     permissions: { canAccess },
@@ -57,7 +59,7 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
           setHeaderActions: () => undefined,
         }}
       >
-        <AppSkipToContentLink label={t("common.skipToMainContent")} />
+        <AppSkipToContentLink label={tPlatform("common.skipToMainContent")} />
         <AppPwaUpdateBanner />
         <Box
           data-window-controls-overlay={windowControlsOverlay.visible ? "visible" : undefined}
@@ -108,7 +110,7 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
                   alignItems="center"
                   spacing={1}
                   component="nav"
-                  aria-label={t("common.mainNavigation")}
+                  aria-label={tPlatform("common.mainNavigation")}
                 >
                   {navItems.map(item => {
                     const itemPath = item.to ?? (item.page ? config.routes.getPath(item.page) : undefined);

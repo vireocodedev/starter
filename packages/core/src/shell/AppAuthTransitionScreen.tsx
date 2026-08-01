@@ -1,14 +1,11 @@
 import { AppBrandLogo } from "@/shell/components/AppBrandLogo";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 
 export function AppAuthTransitionScreen({ fullscreen = true }: { fullscreen?: boolean }) {
-  const {
-    config,
-    runtime: {
-      i18n: { t },
-    },
-  } = useAppShellContext();
+  const { config } = useAppShellContext();
+  const { t } = usePlatformTranslation();
 
   return (
     <Box

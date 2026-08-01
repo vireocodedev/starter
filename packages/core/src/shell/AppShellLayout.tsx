@@ -18,6 +18,7 @@ import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { NAV_MIN_EXPANDED_WIDTH, NAV_WIDTH_CSS_VAR } from "@/shell/layout/layoutNav.constants";
 import { APP_PAGE_CONTENT_MIN_WIDTH } from "@/shell/layout/shell.constants";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 import { Outlet, useLocation } from "react-router";
 
@@ -28,8 +29,8 @@ export type AppShellLayoutProps = {
 
 export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
   const theme = useTheme();
+  const { t } = usePlatformTranslation();
   const {
-    i18n: { t },
     preferences: { navCollapsed, navLocked: runtimeNavLocked, navWidth, setNavCollapsed, setNavWidth },
   } = runtime;
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
