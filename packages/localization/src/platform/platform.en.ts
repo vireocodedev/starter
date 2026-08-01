@@ -68,6 +68,31 @@ const en = {
     url: "URL",
     youAreOffline: "Offline mode",
   },
+  routing: {
+    errorChunkMessage:
+      "This page could not be loaded. This can happen after an app update — try refreshing the application.",
+    errorGenericMessage: "An unexpected error occurred while loading this page.",
+    errorOfflineMessage: "You appear to be offline. Check your connection and try again.",
+    errorRefresh: "Refresh app",
+    errorRetry: "Retry",
+    errorTitle: "Something went wrong",
+    goHome: "Go to overview",
+    notFoundMessage: "The page you requested does not exist or may have moved.",
+    notFoundTitle: "Page not found",
+    unauthorizedMessage: "You do not have permission to view this page.",
+    unauthorizedTitle: "Access denied",
+  },
+  unsavedChanges: {
+    discardAndLeave: "Discard and leave",
+    message: "You have unsaved changes. Discard them and leave?",
+    savingMessage: "Your changes are being saved. Wait for the save to finish before leaving.",
+    savingTitle: "Saving changes",
+    stay: "Stay",
+    title: "Unsaved changes",
+  },
+  validation: {
+    thisFieldIsRequired: "This field is required.",
+  },
 } as const;
 
 export default en;

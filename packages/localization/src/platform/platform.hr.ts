@@ -68,6 +68,31 @@ const hr = {
     url: "URL",
     youAreOffline: "Offline način rada",
   },
+  routing: {
+    errorChunkMessage:
+      "Ova stranica nije mogla biti učitana. To se može dogoditi nakon ažuriranja aplikacije — pokušajte osvježiti aplikaciju.",
+    errorGenericMessage: "Došlo je do neočekivane greške prilikom učitavanja ove stranice.",
+    errorOfflineMessage: "Izgleda da ste offline. Provjerite internetsku vezu i pokušajte ponovno.",
+    errorRefresh: "Osvježi aplikaciju",
+    errorRetry: "Pokušaj ponovno",
+    errorTitle: "Nešto je pošlo po zlu",
+    goHome: "Idi na pregled",
+    notFoundMessage: "Tražena stranica ne postoji ili je premještena.",
+    notFoundTitle: "Stranica nije pronađena",
+    unauthorizedMessage: "Nemate dopuštenje za prikaz ove stranice.",
+    unauthorizedTitle: "Pristup odbijen",
+  },
+  unsavedChanges: {
+    discardAndLeave: "Odbaci i napusti",
+    message: "Imate nespremljene promjene. Odbaciti ih i napustiti stranicu?",
+    savingMessage: "Promjene se spremaju. Pričekajte završetak spremanja prije napuštanja stranice.",
+    savingTitle: "Spremanje promjena",
+    stay: "Ostani",
+    title: "Nespremljene promjene",
+  },
+  validation: {
+    thisFieldIsRequired: "Ovo polje je obavezno.",
+  },
 } as const;
 
 export default hr;
