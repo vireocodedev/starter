@@ -1,5 +1,19 @@
 # @vireocodedev/starter-ui
 
+## 0.5.0
+
+### Minor Changes
+
+- cc8ae97: `MobileTableAccordionRow`'s row `Accordion` no longer wraps its summary title
+  in an implicit `<h3>` (MUI's default `Accordion` heading slot). Mobile table
+  rows render their title in a plain `<div>` via `slots={{ heading: "div" }}`,
+  avoiding spurious headings in server-table mobile list views.
+
+### Patch Changes
+
+- Updated dependencies [cc8ae97]
+  - @vireocodedev/starter-core@0.5.0
+
 ## 0.4.1
 
 ### Patch Changes
