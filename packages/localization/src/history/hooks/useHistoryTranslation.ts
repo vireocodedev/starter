@@ -1,4 +1,4 @@
-import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/localization/namespace";
+import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/namespace";
 import { useTranslation } from "react-i18next";
 
 export function useHistoryTranslation() {

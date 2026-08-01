@@ -5,4 +5,3 @@ export * from "@/history/components/HistoryHoverableTableRow";
 export * from "@/history/components/HistoryNodeView";
 export * from "@/history/components/HistoryTableColGroup";
 export * from "@/history/components/HistoryValueContent";
-export * from "@/history/localization";

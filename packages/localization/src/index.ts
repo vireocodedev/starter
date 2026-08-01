@@ -1,70 +1,76 @@
-import { PLATFORM_TRANSLATION_NAMESPACE } from "@/namespace";
-import PLATFORM_EN from "@/platform.en";
-import PLATFORM_HR from "@/platform.hr";
-import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
+import {
+  createPlatformResources,
+  PLATFORM_TRANSLATION_NAMESPACE,
+  platformBaseResources,
+  type CreatePlatformResourcesConfig,
+} from "@/platform";
 import { type i18n as I18nInstance } from "i18next";
 
-export { usePlatformTranslation } from "@/hooks/usePlatformTranslation";
-export { PLATFORM_TRANSLATION_NAMESPACE, type PlatformTranslationNamespace } from "@/namespace";
+export {
+  createStarterResources,
+  registerStarterResources,
+  STARTER_BASE_LOCALES,
+  STARTER_TRANSLATION_NAMESPACES,
+  type CreateStarterResourcesConfig,
+  type StarterBaseLocale,
+  type StarterNamespaceResources,
+  type StarterResourcesOverride,
+  type StarterTranslationNamespace,
+} from "@/createStarterResources";
+
+export {
+  createPlatformResources,
+  platformBaseResources,
+  PLATFORM_BASE_LOCALES,
+  PLATFORM_TRANSLATION_NAMESPACE,
+  usePlatformTranslation,
+  type CreatePlatformResourcesConfig,
+  type PlatformBaseLocale,
+  type PlatformResources,
+  type PlatformResourcesOverride,
+  type PlatformResourcesShape,
+  type PlatformTranslationNamespace,
+} from "@/platform";
+
+export {
+  createQueryEngineResources,
+  queryEngineBaseResources,
+  QUERYENGINE_BASE_LOCALES,
+  QUERYENGINE_TRANSLATION_NAMESPACE,
+  useQueryEngineTranslation,
+  type CreateQueryEngineResourcesConfig,
+  type QueryEngineBaseLocale,
+  type QueryEngineResources,
+  type QueryEngineResourcesOverride,
+  type QueryEngineResourcesShape,
+  type QueryEngineTranslationNamespace,
+} from "@/queryengine";
+
+export {
+  createHistoryResources,
+  historyBaseResources,
+  HISTORY_BASE_LOCALES,
+  HISTORY_TRANSLATION_NAMESPACE,
+  useHistoryTranslation,
+  type CreateHistoryResourcesConfig,
+  type HistoryBaseLocale,
+  type HistoryResources,
+  type HistoryResourcesOverride,
+  type HistoryResourcesShape,
+  type HistoryTranslationNamespace,
+} from "@/history";
+
 export { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 export { deepMerge } from "@/toolkit/deepMerge";
-
-/** The canonical resource shape. English is the single source of truth. */
-export type PlatformResources = typeof PLATFORM_EN;
-
-/** A recursively partial platform resource, used for per-locale value overrides. */
-export type PlatformResourcesOverride = DeepPartial<PlatformResources>;
-
-/**
- * The platform resource shape with leaf string literals widened to `string`.
- * Non-English base locales share the shape but not the literal values, so the
- * base map is typed against this widened form.
- */
-export type PlatformResourcesShape = WidenLeaves<PlatformResources>;
-
-/** Locales the platform ships out of the box. */
-export const PLATFORM_BASE_LOCALES = ["en", "hr"] as const;
-export type PlatformBaseLocale = (typeof PLATFORM_BASE_LOCALES)[number];
-
-export const platformBaseResources: Record<PlatformBaseLocale, PlatformResourcesShape> = {
-  en: PLATFORM_EN,
-  hr: PLATFORM_HR,
-};
 
 /** @deprecated Prefer {@link platformBaseResources} or {@link createPlatformResources}. */
 export const PLATFORM_TRANSLATION_RESOURCES = platformBaseResources;
 
-export type CreatePlatformResourcesConfig<L extends string> = {
-  /** The full set of locales the consumer app wants to support. */
-  locales: readonly L[];
-  /** Base locale used to seed locales the platform does not ship. Defaults to `"en"`. */
-  seedFrom?: PlatformBaseLocale;
-  /** Optional per-locale value overrides, deep-merged over the seeded base. */
-  overrides?: Partial<Record<L, PlatformResourcesOverride>>;
-};
-
-/**
- * Builds a fully-populated platform resource map for every requested locale.
- *
- * Consumers can override any shipped value per locale and add brand-new
- * languages (seeded from a base locale until translated) without ever ending
- * up with a missing platform key.
- */
-export function createPlatformResources<L extends string>(
-  config: CreatePlatformResourcesConfig<L>,
-): Record<L, { [PLATFORM_TRANSLATION_NAMESPACE]: PlatformResources }> {
-  return createNamespaceResources({
-    namespace: PLATFORM_TRANSLATION_NAMESPACE,
-    baseResources: platformBaseResources,
-    seedFrom: config.seedFrom ?? "en",
-    locales: config.locales,
-    overrides: config.overrides,
-  }) as Record<L, { [PLATFORM_TRANSLATION_NAMESPACE]: PlatformResources }>;
-}
-
 /**
  * Imperatively registers platform resources onto an existing i18next instance.
  * Useful when resources are added after i18next has already been initialized.
+ *
+ * @deprecated Prefer `registerStarterResources`, which covers every starter namespace.
  */
 export function registerPlatformResources<L extends string>(
   i18n: I18nInstance,
@@ -81,5 +87,3 @@ export function registerPlatformResources<L extends string>(
     );
   }
 }
-
-// TODO: test comment

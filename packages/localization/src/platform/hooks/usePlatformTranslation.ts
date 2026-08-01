@@ -1,4 +1,4 @@
-import { PLATFORM_TRANSLATION_NAMESPACE } from "@/namespace";
+import { PLATFORM_TRANSLATION_NAMESPACE } from "@/platform/namespace";
 import { useTranslation } from "react-i18next";
 
 export function usePlatformTranslation() {

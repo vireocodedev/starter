@@ -2,7 +2,7 @@
 
 Framework-agnostic **query engine client** for the vireocodedev **starter**
 product: typed models + zod schemas, an injectable HTTP-port API, a react-query
-layer, shared signals, and its own i18n namespace.
+layer, and shared signals.
 
 The engine is **generic over entity keys** (opaque strings) and **transport-
 agnostic** (you inject an HTTP client). No app/domain specifics live here.
@@ -16,9 +16,12 @@ localization package README for `.npmrc` setup):
 npm install @vireocodedev/starter-queryengine
 ```
 
-Peers: `react`, `react-i18next`, `i18next`, `zod`, `@tanstack/react-query`,
-`@preact/signals-react`. Depends on `@vireocodedev/starter-localization` (reuses
-its i18n toolkit). All peers must resolve to a single instance in the app.
+Peers: `react`, `zod`, `@tanstack/react-query`, `@preact/signals-react`. All
+peers must resolve to a single instance in the app.
+
+The `queryengine` translation namespace lives in
+`@vireocodedev/starter-localization` — install it alongside this package if you
+render the query-engine UI.
 
 ## Wiring (host application)
 
@@ -46,17 +49,21 @@ export const QueryEngineQuery = createQueryEngineQueries(queryEngineApi);
 
 ## i18n
 
-```ts
-import { createQueryEngineResources, useQueryEngineTranslation } from "@vireocodedev/starter-queryengine";
+The `queryengine` namespace is **owned by
+`@vireocodedev/starter-localization`**, so a single package ships every starter
+translation:
 
-const queryengine = createQueryEngineResources({ locales: ["en", "hr"] });
-// merge queryengine.en / queryengine.hr into your i18next resources
+```ts
+import { createStarterResources, useQueryEngineTranslation } from "@vireocodedev/starter-localization";
+
+const starter = createStarterResources({ locales: ["en", "hr"] });
+// spread starter.en / starter.hr into your i18next resources
 ```
 
 Augment i18next with the `queryengine` namespace:
 
 ```ts
-import type { QueryEngineResources } from "@vireocodedev/starter-queryengine";
+import type { QueryEngineResources } from "@vireocodedev/starter-localization";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -75,10 +82,14 @@ declare module "i18next" {
   `QueryEngineRequestOptions`, `CreateQueryEngineApiOptions`.
 - **Queries:** `createQueryEngineQueries`, `QueryEngineQueries`, `QueryEngineQueryKey`.
 - **Signals:** `sigQueryEngineEntityDefinitions`, `sigQueryEngineEntitySummaries`.
-- **i18n:** `useQueryEngineTranslation`, `createQueryEngineResources`,
-  `queryEngineBaseResources`, `QUERYENGINE_TRANSLATION_NAMESPACE`, types.
+
+> **i18n moved.** `useQueryEngineTranslation`, `createQueryEngineResources`,
+> `queryEngineBaseResources`, `QUERYENGINE_TRANSLATION_NAMESPACE` and the
+> `QueryEngineResources` types are now exported by
+> `@vireocodedev/starter-localization`.
 
 ## Versioning contract
 
-Operator/field-type/relation-mode sets and the localization key surface are a
-contract (add = minor, remove/rename = major), guarded by the contract test.
+Operator/field-type/relation-mode sets are a contract (add = minor,
+remove/rename = major), guarded by the contract test. The `queryengine`
+translation key surface is guarded in `@vireocodedev/starter-localization`.

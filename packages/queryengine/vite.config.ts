@@ -25,16 +25,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: [
-        "react",
-        "react-dom",
-        "i18next",
-        "react-i18next",
-        "zod",
-        "@tanstack/react-query",
-        "@preact/signals-react",
-        "@vireocodedev/starter-localization",
-      ],
+      external: ["react", "react-dom", "zod", "@tanstack/react-query", "@preact/signals-react"],
     },
     sourcemap: true,
   },

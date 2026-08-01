@@ -1,22 +1,24 @@
-import HISTORY_EN from "@/history/localization/history.en";
-import HISTORY_HR from "@/history/localization/history.hr";
-import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@vireocodedev/starter-localization";
+import HISTORY_EN from "@/history/history.en";
+import HISTORY_HR from "@/history/history.hr";
+import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/namespace";
+import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 
-export { useHistoryTranslation } from "@/history/localization/hooks/useHistoryTranslation";
-export { HISTORY_TRANSLATION_NAMESPACE, type HistoryTranslationNamespace } from "@/history/localization/namespace";
-
-import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/localization/namespace";
+export { useHistoryTranslation } from "@/history/hooks/useHistoryTranslation";
+export { HISTORY_TRANSLATION_NAMESPACE, type HistoryTranslationNamespace } from "@/history/namespace";
 
 /** The canonical resource shape. English is the single source of truth. */
 export type HistoryResources = typeof HISTORY_EN;
 
-/** A recursively partial resource, used for per-locale value overrides. */
-export type HistoryResourcesOverride = DeepPartial<HistoryResources>;
-
 /** The resource shape with leaf string literals widened to `string`. */
 export type HistoryResourcesShape = WidenLeaves<HistoryResources>;
 
-/** Locales the History module ships out of the box. */
+/**
+ * A recursively partial resource, used for per-locale value overrides. Leaves
+ * are widened, so an override may supply any string for a shipped key.
+ */
+export type HistoryResourcesOverride = DeepPartial<HistoryResourcesShape>;
+
+/** Locales the History namespace ships out of the box. */
 export const HISTORY_BASE_LOCALES = ["en", "hr"] as const;
 export type HistoryBaseLocale = (typeof HISTORY_BASE_LOCALES)[number];
 
@@ -28,7 +30,7 @@ export const historyBaseResources: Record<HistoryBaseLocale, HistoryResourcesSha
 export type CreateHistoryResourcesConfig<L extends string> = {
   /** The full set of locales the consumer app wants to support. */
   locales: readonly L[];
-  /** Base locale used to seed locales the module does not ship. Defaults to `"en"`. */
+  /** Base locale used to seed locales the namespace does not ship. Defaults to `"en"`. */
   seedFrom?: HistoryBaseLocale;
   /** Optional per-locale value overrides, deep-merged over the seeded base. */
   overrides?: Partial<Record<L, HistoryResourcesOverride>>;
