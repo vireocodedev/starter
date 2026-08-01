@@ -85,6 +85,8 @@ export function AppLayoutNav({
 
   return (
     <Box
+      component="nav"
+      aria-label={t("common.mainNavigation")}
       sx={{
         width,
         borderRight: "1px solid",

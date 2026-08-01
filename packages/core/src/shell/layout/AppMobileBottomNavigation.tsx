@@ -74,6 +74,7 @@ export function AppMobileBottomNavigation() {
       permissions: { canAccess },
     },
   } = useAppShellContext();
+  const bottomNavigationLabel = t("common.bottomNavigation");
   const {
     shell: { mobileBottomNavigation },
     routes: { getPath },
@@ -134,6 +135,8 @@ export function AppMobileBottomNavigation() {
 
   return (
     <Paper
+      component="nav"
+      aria-label={bottomNavigationLabel}
       elevation={8}
       sx={theme => ({
         position: "fixed",

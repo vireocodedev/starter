@@ -3,6 +3,7 @@ import { type AppShellRuntime } from "@/shell/app.shell-runtime.types";
 import { AppShellProvider } from "@/shell/AppShellContext";
 import { AppBrandLogo } from "@/shell/components/AppBrandLogo";
 import { AppPwaUpdateBanner } from "@/shell/components/AppPwaUpdateBanner";
+import { AppSkipToContentLink } from "@/shell/components/AppSkipToContentLink";
 import {
   APP_WINDOW_CONTROLS_OVERLAY_HEIGHT_CSS_VAR,
   APP_WINDOW_CONTROLS_OVERLAY_LEFT_INSET_CSS_VAR,
@@ -56,6 +57,7 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
           setHeaderActions: () => undefined,
         }}
       >
+        <AppSkipToContentLink label={t("common.skipToMainContent")} />
         <AppPwaUpdateBanner />
         <Box
           data-window-controls-overlay={windowControlsOverlay.visible ? "visible" : undefined}
@@ -101,7 +103,13 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
                   </Typography>
                 </Stack>
 
-                <Stack direction="row" alignItems="center" spacing={1} component="nav">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1}
+                  component="nav"
+                  aria-label={t("common.mainNavigation")}
+                >
                   {navItems.map(item => {
                     const itemPath = item.to ?? (item.page ? config.routes.getPath(item.page) : undefined);
                     const selected = Boolean(
@@ -132,7 +140,12 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
             </Container>
           </Box>
 
-          <Box component="main" sx={{ flex: 1, minHeight: 0 }}>
+          <Box
+            component="main"
+            id="main-content"
+            tabIndex={-1}
+            sx={{ flex: 1, minHeight: 0, outline: "none" }}
+          >
             <Outlet />
           </Box>
         </Box>

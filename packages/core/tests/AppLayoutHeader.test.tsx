@@ -39,4 +39,11 @@ describe("AppLayoutHeader", () => {
     expect(titlebar).toHaveClass("app-window-titlebar");
     expect(titlebar).toContainElement(saveButton);
   });
+
+  it("renders as a header landmark with the current route as the page's h1", () => {
+    render(<AppLayoutHeader actions={null} />);
+
+    expect(screen.getByRole("banner")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Overview" })).toBeInTheDocument();
+  });
 });

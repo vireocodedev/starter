@@ -3,6 +3,7 @@ import { type AppShellRuntime } from "@/shell/app.shell-runtime.types";
 import { AppShellProvider } from "@/shell/AppShellContext";
 import { AppMobileNavDrawer } from "@/shell/components/AppMobileNavDrawer";
 import { AppPwaUpdateBanner } from "@/shell/components/AppPwaUpdateBanner";
+import { AppSkipToContentLink } from "@/shell/components/AppSkipToContentLink";
 import { useResizableNav } from "@/shell/hooks/useResizableNav";
 import { useShellViewportWidth } from "@/shell/hooks/useShellViewport";
 import {
@@ -28,6 +29,7 @@ export type AppShellLayoutProps = {
 export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
   const theme = useTheme();
   const {
+    i18n: { t },
     preferences: { navCollapsed, navLocked: runtimeNavLocked, navWidth, setNavCollapsed, setNavWidth },
   } = runtime;
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -103,6 +105,7 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
           style={shellStyle}
           sx={{ minWidth: 0, height: "100%", position: "relative" }}
         >
+          <AppSkipToContentLink label={t("common.skipToMainContent")} />
           <AppPwaUpdateBanner />
 
           {!isMobile ? (
@@ -145,7 +148,7 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
             }}
           >
             <AppLayoutHeader actions={headerActions} />
-            <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+            <Box component="main" id="main-content" tabIndex={-1} sx={{ flex: 1, minHeight: 0, overflow: "auto", outline: "none" }}>
               <Outlet />
             </Box>
           </Box>

@@ -164,6 +164,7 @@ export function MobileTableRows<TElement>({
                 disableGutters
                 expanded={expanded}
                 onChange={(_event, nextExpanded) => handleExpandedChange(key, nextExpanded)}
+                slots={{ heading: "div" }}
                 sx={{
                   boxShadow: "none",
                   "&::before": {

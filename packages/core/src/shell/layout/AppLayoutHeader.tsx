@@ -41,6 +41,7 @@ export function AppLayoutHeader({ actions }: AppLayoutHeaderProps) {
 
   return (
     <Box
+      component="header"
       className="app-window-titlebar app-window-titlebar-main"
       //className="AppLayoutHeader"
       sx={{
@@ -74,7 +75,7 @@ export function AppLayoutHeader({ actions }: AppLayoutHeaderProps) {
 
             {currentBreadcrumb ? (
               <Typography
-                component="span"
+                component="h1"
                 fontWeight={600}
                 color="text.primary"
                 whiteSpace="nowrap"

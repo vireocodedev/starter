@@ -2,6 +2,7 @@ import { type AppConfig } from "@/config/app.config.types";
 import { type AppShellRuntime } from "@/shell/app.shell-runtime.types";
 import { AppShellProvider } from "@/shell/AppShellContext";
 import { AppPwaUpdateBanner } from "@/shell/components/AppPwaUpdateBanner";
+import { AppSkipToContentLink } from "@/shell/components/AppSkipToContentLink";
 import {
   createWindowControlsOverlayRootStyle,
   useWindowControlsOverlay,
@@ -20,6 +21,9 @@ export function AppBareShellLayout({ config, runtime }: AppBareShellLayoutProps)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const windowControlsOverlay = useWindowControlsOverlay();
+  const {
+    i18n: { t },
+  } = runtime;
   const windowControlsOverlayStyle = React.useMemo(
     () => createWindowControlsOverlayRootStyle(windowControlsOverlay),
     [windowControlsOverlay],
@@ -35,6 +39,7 @@ export function AppBareShellLayout({ config, runtime }: AppBareShellLayoutProps)
           setHeaderActions: () => undefined,
         }}
       >
+        <AppSkipToContentLink label={t("common.skipToMainContent")} />
         <AppPwaUpdateBanner />
         <Box
           data-window-controls-overlay={windowControlsOverlay.visible ? "visible" : undefined}
@@ -42,7 +47,7 @@ export function AppBareShellLayout({ config, runtime }: AppBareShellLayoutProps)
           sx={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column" }}
         >
           <Box className="app-window-titlebar-bare" aria-hidden="true" />
-          <Box sx={{ flex: 1, minHeight: 0 }}>
+          <Box component="main" id="main-content" tabIndex={-1} sx={{ flex: 1, minHeight: 0, outline: "none" }}>
             <Outlet />
           </Box>
         </Box>
