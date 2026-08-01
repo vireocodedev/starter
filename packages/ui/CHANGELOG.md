@@ -1,5 +1,24 @@
 # @vireocodedev/starter-ui
 
+## 1.0.0
+
+### Major Changes
+
+- 9f71a98: **Breaking:** the `history` translation namespace moved to
+  `@vireocodedev/starter-localization`.
+
+  `useHistoryTranslation`, `createHistoryResources`, `historyBaseResources`,
+  `HISTORY_TRANSLATION_NAMESPACE` and the `HistoryResources` types are no longer
+  exported from this package — import them from
+  `@vireocodedev/starter-localization` instead. Translation keys are unchanged, so
+  only import specifiers need updating.
+
+### Patch Changes
+
+- Updated dependencies [9f71a98]
+  - @vireocodedev/starter-localization@0.3.0
+  - @vireocodedev/starter-core@0.5.1
+
 ## 0.5.0
 
 ### Minor Changes
