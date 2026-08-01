@@ -1,5 +1,13 @@
 # @vireocodedev/starter-ui
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [10c930e]
+  - @vireocodedev/starter-localization@0.4.0
+  - @vireocodedev/starter-core@0.6.0
+
 ## 1.0.0
 
 ### Major Changes
