@@ -21,12 +21,6 @@ jobs:
           node-version: 20
           registry-url: https://npm.pkg.github.com
           scope: "@vireocodedev"
-      # The @rgo scope lives on a private registry; inject its token (from the
-      # RGO_TOKEN repo secret) so workspaces depending on @rgo/front-ui resolve.
-      - name: Authenticate to the @rgo registry
-        run: echo "//git.rgo.hr/api/packages/RGO/npm/:_authToken=${RGO_TOKEN}" >> .npmrc
-        env:
-          RGO_TOKEN: ${{ secrets.RGO_TOKEN }}
       - run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

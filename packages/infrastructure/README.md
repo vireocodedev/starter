@@ -2,11 +2,12 @@
 
 Framework-agnostic **frontend infrastructure utilities** for the vireocodedev
 **starter** product. This is the dependency-light, portable core — it has **no
-UI-framework or private-registry coupling**.
+UI-framework coupling**.
 
-> The `@rgo/front-ui`-coupled pieces (the `AxiosHttpClient` base, the axios/query
-> React providers, and the local-storage service) intentionally stay in the host
-> application, mirroring how the query engine keeps its HTTP adapter app-side.
+> The UI-coupled pieces (the `AxiosHttpClient` base, the axios/query React
+> providers, and the local-storage service) live in `@vireocodedev/starter-ui`
+> or the host application, mirroring how the query engine keeps its HTTP
+> adapter app-side.
 
 ## Install
 
