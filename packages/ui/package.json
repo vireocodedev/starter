@@ -36,7 +36,6 @@
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
-    "@vireocodedev/starter-core": "^0.6.2",
     "@vireocodedev/starter-history": "^0.3.0",
     "@vireocodedev/starter-localization": "^0.6.0"
   },

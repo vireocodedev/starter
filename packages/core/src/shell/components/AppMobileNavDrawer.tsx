@@ -1,6 +1,6 @@
 import { type AppConfig } from "@/config/app.config.types";
-import { AppBottomDrawer } from "@/shell/components/AppBottomDrawer";
 import { AppLayoutNav } from "@/shell/layout/AppLayoutNav";
+import { AppBottomDrawer } from "@vireocodedev/starter-ui";
 
 export function AppMobileNavDrawer({
   config,

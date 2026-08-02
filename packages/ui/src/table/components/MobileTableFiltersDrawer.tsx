@@ -1,9 +1,9 @@
+import { AppBottomDrawer } from "@/components/AppBottomDrawer";
 import { type RgoServerTableColumnWithSort, type SortDirection } from "@/table/types";
 import { renderDirectionIcon, renderHeader } from "@/table/utils/mobileTable.utils";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { Box, Button, IconButton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { RgoInputSelect, RgoLabelBox } from "@rgo/front-ui";
-import { AppBottomDrawer } from "@vireocodedev/starter-core";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 

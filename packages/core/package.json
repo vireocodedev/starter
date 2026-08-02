@@ -41,7 +41,8 @@
   },
   "dependencies": {
     "@vireocodedev/starter-infrastructure": "^0.3.0",
-    "@vireocodedev/starter-localization": "^0.6.0"
+    "@vireocodedev/starter-localization": "^0.6.0",
+    "@vireocodedev/starter-ui": "^1.0.3"
   },
   "peerDependencies": {
     "@mui/icons-material": ">=6",
