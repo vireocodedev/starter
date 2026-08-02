@@ -16,9 +16,9 @@ import { AppLayoutNav } from "@/shell/layout/AppLayoutNav";
 import { AppMobileBottomNavigation } from "@/shell/layout/AppMobileBottomNavigation";
 import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { NAV_MIN_EXPANDED_WIDTH, NAV_WIDTH_CSS_VAR } from "@/shell/layout/layoutNav.constants";
-import { APP_PAGE_CONTENT_MIN_WIDTH } from "@/shell/layout/shell.constants";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
+import { APP_PAGE_CONTENT_MIN_WIDTH } from "@vireocodedev/starter-ui";
 import React from "react";
 import { Outlet, useLocation } from "react-router";
 

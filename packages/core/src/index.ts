@@ -11,7 +11,6 @@ export * from "@/shell/AppAuthTransitionScreen";
 export * from "@/shell/AppShellContext";
 export * from "@/shell/AppShellLayout";
 export * from "@/shell/app.shell-runtime.types";
-export * from "@/shell/components/AppBottomDrawer";
 export * from "@/shell/components/AppBrandLogo";
 export * from "@/shell/components/AppMobileNavDrawer";
 export * from "@/shell/components/AppPwaUpdateBanner";
@@ -39,7 +38,6 @@ export * from "@/shell/layout/nav/useVisibleNavEntries";
 export * from "@/shell/layout/presets/AppBareShellLayout";
 export * from "@/shell/layout/presets/AppDashboardShellLayout";
 export * from "@/shell/layout/presets/AppPublicShellLayout";
-export * from "@/shell/layout/shell.constants";
 export * from "@/shell/useAppShellContext";
 export * from "@/sitemap/appMobileNav";
 export * from "@/sitemap/appNav";
@@ -52,3 +50,19 @@ export * from "@/sitemap/routeMetadata";
 export * from "@/sitemap/routePath.types";
 export * from "@/sitemap/routePath.utils";
 export * from "@/sitemap/strictConfig.types";
+
+// Compatibility re-exports. `AppBottomDrawer` and the page-content width
+// constants now live in @vireocodedev/starter-ui, which core depends on. These
+// aliases keep the existing core import paths working; import them from
+// starter-ui directly in new code.
+export {
+  APP_PAGE_CONTENT_COMPACT_BREAKPOINT,
+  APP_PAGE_CONTENT_COMPACT_ENTER_WIDTH,
+  APP_PAGE_CONTENT_COMPACT_EXIT_WIDTH,
+  APP_PAGE_CONTENT_MIN_WIDTH,
+  APP_PAGE_CONTENT_WIDE_BREAKPOINT,
+  APP_PAGE_CONTENT_WIDE_ENTER_WIDTH,
+  APP_PAGE_CONTENT_WIDE_EXIT_WIDTH,
+  AppBottomDrawer,
+  type AppBottomDrawerProps,
+} from "@vireocodedev/starter-ui";

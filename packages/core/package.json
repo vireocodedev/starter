@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@vireocodedev/starter-infrastructure": "^0.3.0",
+    "@vireocodedev/starter-ui": "^1.0.3",
     "@vireocodedev/starter-localization": "^0.7.0"
   },
   "peerDependencies": {
