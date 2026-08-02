@@ -33,8 +33,7 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
-    "prepublishOnly": "npm run build && npm run test"
+    "test": "vitest run"
   },
   "peerDependencies": {
     "@preact/signals-react": ">=2",

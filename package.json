@@ -16,7 +16,7 @@
     "test": "npm run test --workspaces --if-present",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run build && changeset publish"
+    "release": "npm run build && npm run test && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",

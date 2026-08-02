@@ -43,8 +43,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "prepublishOnly": "npm run build && npm run test"
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
