@@ -1,4 +1,4 @@
-import { type PageableResponse } from "@rgo/front-ui";
+import { type PageableResponse } from "@/utils/apiutils";
 
 export function mergePageableResponses<TElement>(
   pages: readonly PageableResponse<TElement>[],

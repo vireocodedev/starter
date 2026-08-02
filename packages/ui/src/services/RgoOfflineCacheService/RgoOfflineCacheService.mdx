@@ -1,0 +1,232 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Services/RgoOfflineCacheService" />
+
+# RgoOfflineCacheService
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+An IndexedDB-backed offline cache service using the `idb` library. Supports versioned schema upgrades, bulk data loading with batched writes, and selective cache reloading.
+
+---
+
+## Why it exists
+
+Client-side offline caching with IndexedDB is powerful but low-level. `RgoOfflineCacheService` wraps the `idb` library to provide a streamlined API for opening/upgrading databases, bulk-loading data in configurable batches, and clearing stores — all with full TypeScript inference over the `DBSchema` type.
+
+---
+
+## Setup
+
+```tsx
+import { RgoOfflineCacheService } from "@vireocodedev/starter-ui";
+import type { DBSchema } from "idb";
+
+// Define your IndexedDB schema
+interface MyDBSchema extends DBSchema {
+  users: {
+    key: number;
+    value: { id: number; name: string; email: string };
+  };
+  products: {
+    key: string;
+    value: { sku: string; name: string; price: number };
+    indexes: { "by-name": string };
+  };
+}
+
+// Define stores with key paths and indexes
+const stores = {
+  users: {
+    options: { keyPath: "id" },
+    indexes: {},
+  },
+  products: {
+    options: { keyPath: "sku" },
+    indexes: {
+      "by-name": { keyPath: "name", options: { unique: false } },
+    },
+  },
+};
+
+// Create the service
+const offlineCache = new RgoOfflineCacheService<MyDBSchema>(stores, {
+  version: 1,
+  debug: false,
+});
+
+// Initialize (opens/upgrades the database)
+await offlineCache.init();
+```
+
+---
+
+## Usage
+
+```tsx
+// Load data into the cache (clears existing data first)
+await offlineCache.loadCache({
+  users: [
+    { id: 1, name: "Alice", email: "alice@example.com" },
+    { id: 2, name: "Bob", email: "bob@example.com" },
+  ],
+  products: [{ sku: "A001", name: "Widget", price: 9.99 }],
+});
+
+// Access the IDB database directly for reads
+const db = offlineCache.db;
+const user = await db.get("users", 1);
+const allProducts = await db.getAll("products");
+```
+
+---
+
+## Constructor
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>storeCollection</code>
+      </td>
+      <td>
+        <code>{"Record<keyof EntityMap<TSchema>, ObjectStore>"}</code>
+      </td>
+      <td>Object store definitions including key paths and indexes</td>
+    </tr>
+    <tr>
+      <td>
+        <code>config</code>
+      </td>
+      <td>
+        <code>RgoOfflineCacheServiceConfig</code>
+      </td>
+      <td>Service configuration (version, debug, skip list)</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Configuration
+
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>version</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>Yes</td>
+      <td>—</td>
+      <td>
+        IndexedDB version number — incrementing triggers the <code>upgrade</code> callback
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>debug</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>No</td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Log cache operations to the console</td>
+    </tr>
+    <tr>
+      <td>
+        <code>skipCacheReloadFor</code>
+      </td>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>No</td>
+      <td>
+        <code>[]</code>
+      </td>
+      <td>
+        Store names to skip when clearing during <code>loadCache</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Methods
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Signature</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>init</code>
+      </td>
+      <td>
+        <code>{"init(): Promise<void>"}</code>
+      </td>
+      <td>Opens (or upgrades) the IndexedDB database. Must be called before any other operation.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>loadCache</code>
+      </td>
+      <td>
+        <code>{"loadCache(cache): Promise<void>"}</code>
+      </td>
+      <td>
+        Clears all stores (respecting <code>skipCacheReloadFor</code>) then bulk-inserts the provided data in batches of
+        1 000.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>db</code>
+      </td>
+      <td>
+        <code>{"get db(): IDBPDatabase<TSchema>"}</code>
+      </td>
+      <td>
+        Returns the raw <code>idb</code> database instance for direct reads/writes. Throws if <code>init()</code> has
+        not been called.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Behavior
+
+- **Initialization** — `init()` opens the database with the configured version. If the version is higher than the existing one, the `upgrade` callback creates any missing object stores and their indexes.
+- **Blocking / Blocked** — if other tabs hold an older connection, console warnings are logged (`blocked` / `blocking` events).
+- **Cache loading** — `loadCache` first clears all stores (except those in `skipCacheReloadFor`), then bulk-inserts items using `readwrite` transactions in batches of 1 000 records per transaction.
+- **Error handling** — initialization and bulk-save errors are logged and re-thrown. Cache-load errors are logged but do not throw.
+- **Console logging** — all operations emit styled `console.debug` / `console.warn` / `console.error` messages tagged with `RgoOfflineCacheService` and the store name.

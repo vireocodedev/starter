@@ -14,7 +14,7 @@ import {
 import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { getLayoutBorderColor } from "@/shell/layout/layout.tokens";
 import { Box, Button, Container, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { RgoIcon } from "@rgo/front-ui";
+import { RgoIcon } from "@vireocodedev/starter-ui";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";

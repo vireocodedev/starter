@@ -1,0 +1,161 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Providers/RgoThemeProvider" />
+
+# RgoThemeProvider
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+![REQUIRED](https://img.shields.io/badge/REQUIRED-blue?style=flat-square)
+
+Wraps MUI's `ThemeProvider` with automatic `CssBaseline` injection. This is the **foundational provider** — every MUI component in the tree depends on it.
+
+---
+
+## Why it exists
+
+Material UI components read their palette, typography, spacing, and breakpoints from a `Theme` object delivered via React context. Without a theme provider, MUI components render with hard-coded defaults and no design-system coherence.
+
+`RgoThemeProvider` pairs MUI's `ThemeProvider` with `CssBaseline` into a single component so consumer apps never forget the CSS reset and don't have to import two separate wrappers.
+
+---
+
+## Provider setup
+
+```tsx
+import { createTheme } from "@mui/material/styles";
+import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+
+const theme = createTheme({
+  palette: {
+    primary: { main: "#1976d2" },
+    secondary: { main: "#9c27b0" },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", sans-serif',
+  },
+});
+
+function App() {
+  return (
+    <RgoThemeProvider theme={theme}>
+      <YourApplication />
+    </RgoThemeProvider>
+  );
+}
+```
+
+---
+
+## Props
+
+<table>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>theme</code></td>
+      <td><code>Theme</code></td>
+      <td>Yes</td>
+      <td>MUI theme object created with <code>createTheme()</code></td>
+    </tr>
+    <tr>
+      <td><code>children</code></td>
+      <td><code>ReactNode</code></td>
+      <td>Yes</td>
+      <td>Application tree</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## What it renders
+
+Internally the provider produces:
+
+```tsx
+<MuiThemeProvider theme={theme}>
+  <CssBaseline />
+  {children}
+</MuiThemeProvider>
+```
+
+`CssBaseline` normalizes browser defaults (margins, box-sizing, font smoothing) — equivalent to a modern CSS reset scoped to MUI conventions.
+
+---
+
+## Consumer hook
+
+There is no custom consumer hook. Use MUI's built-in `useTheme()`:
+
+```tsx
+import { useTheme } from "@mui/material/styles";
+
+function StatusBadge({ active }: { active: boolean }) {
+  const theme = useTheme();
+
+  return (
+    <span style={{ color: active ? theme.palette.success.main : theme.palette.text.disabled }}>
+      {active ? "Online" : "Offline"}
+    </span>
+  );
+}
+```
+
+Other MUI hooks that depend on this provider:
+
+- `useMediaQuery(theme.breakpoints.down("md"))` — responsive breakpoints
+- `useTheme().palette` — color tokens
+- `useTheme().spacing()` — spacing scale
+
+---
+
+## Nesting order
+
+`RgoThemeProvider` must be the **outermost** provider (or among the outermost) because:
+
+1. `RgoConfirmProvider` renders MUI `Dialog`, `Button`, `DialogActions` — all need a theme.
+2. `RgoIconsProvider` uses `createSvgIcon` which inherits theme color tokens.
+3. `RgoLocalizationProvider` wraps MUI X `LocalizationProvider` — date pickers need theme styling.
+
+```
+RgoThemeProvider        ← outermost
+  └─ RgoIconsProvider
+       └─ RgoLocalizationProvider
+            └─ RgoConfirmProvider
+                 └─ ...
+```
+
+---
+
+## Real-world consumer app pattern
+
+Consumer applications typically wrap `RgoThemeProvider` in their own provider that handles theme creation, dynamic theme switching, or initialization logic:
+
+```tsx
+import { RgoThemeProvider, type RgoProvider } from "@vireocodedev/starter-ui";
+import { createTheme } from "@mui/material/styles";
+
+const appTheme = createTheme({ /* ... */ });
+
+export const AppThemeProvider: RgoProvider = ({ children }) => (
+  <RgoThemeProvider theme={appTheme}>
+    {children}
+  </RgoThemeProvider>
+);
+```
+
+---
+
+## Key details
+
+- **No custom context** — delegates entirely to MUI's internal `ThemeContext`.
+- **One theme per tree** — nesting multiple `RgoThemeProvider`s is supported (MUI allows theme overrides) but not the intended pattern.
+- **CssBaseline is always applied** — you don't need to add it separately.
+- **Type:** `RgoProvider<RgoThemeProviderProps>` — conforms to the standard `RgoProvider` generic.

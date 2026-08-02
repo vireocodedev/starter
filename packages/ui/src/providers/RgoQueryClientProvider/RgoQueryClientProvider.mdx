@@ -1,0 +1,203 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Providers/RgoQueryClientProvider" />
+
+# RgoQueryClientProvider
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+Thin wrapper around TanStack Query's `QueryClientProvider`. Injects a `QueryClient` instance into the React tree so that `useQuery`, `useSuspenseQuery`, `useMutation`, and all other TanStack Query hooks can function.
+
+---
+
+## Why it exists
+
+TanStack Query requires a `QueryClient` instance delivered via context. Rather than importing TanStack's provider directly in every consumer app, `RgoQueryClientProvider` standardizes the integration point and conforms to the `RgoProvider` type signature, making it composable with `RgoProviders`.
+
+---
+
+## Provider setup
+
+```tsx
+import { QueryClient } from "@tanstack/react-query";
+import { RgoQueryClientProvider } from "@vireocodedev/starter-ui";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+function App() {
+  return (
+    <RgoQueryClientProvider client={queryClient}>
+      <YourApplication />
+    </RgoQueryClientProvider>
+  );
+}
+```
+
+---
+
+## Props
+
+<table>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>client</code>
+      </td>
+      <td>
+        <code>QueryClient</code>
+      </td>
+      <td>Yes</td>
+      <td>
+        TanStack <code>QueryClient</code> instance — owns the cache, default options, and mutation defaults
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>Yes</td>
+      <td>Application tree</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## What it renders
+
+```tsx
+<TanstackQueryClientProvider client={client}>{children}</TanstackQueryClientProvider>
+```
+
+A direct delegation — no extra logic, no additional context layers.
+
+---
+
+## Consumer hooks
+
+There is no custom consumer hook. Use TanStack Query's standard hooks:
+
+### Queries
+
+```tsx
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+
+function UserList() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => fetchUsers(),
+  });
+
+  if (isLoading) return <Skeleton />;
+  if (error) return <ErrorMessage error={error} />;
+
+  return <List items={data} />;
+}
+```
+
+### Mutations
+
+```tsx
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function CreateUserButton() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (newUser: CreateUserDto) => api.createUser(newUser),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+
+  return (
+    <button onClick={() => mutation.mutate({ name: "Jane" })} disabled={mutation.isPending}>
+      {mutation.isPending ? "Creating..." : "Create User"}
+    </button>
+  );
+}
+```
+
+### Cache access
+
+```tsx
+import { useQueryClient } from "@tanstack/react-query";
+
+function CacheInspector() {
+  const queryClient = useQueryClient();
+
+  const clearCache = () => queryClient.clear();
+  const invalidateUsers = () => queryClient.invalidateQueries({ queryKey: ["users"] });
+
+  return (
+    <>
+      <button onClick={clearCache}>Clear all cache</button>
+      <button onClick={invalidateUsers}>Refresh users</button>
+    </>
+  );
+}
+```
+
+---
+
+## Nesting order
+
+`RgoQueryClientProvider` should be placed **after** `RgoThemeProvider` and **before** any feature providers that perform data fetching:
+
+```
+RgoThemeProvider
+  └─ RgoQueryClientProvider    ← here
+       └─ RgoLocalizationProvider
+            └─ ...feature providers that call useQuery
+```
+
+---
+
+## Real-world consumer app pattern
+
+```tsx
+import { RgoQueryClientProvider, type RgoProvider } from "@vireocodedev/starter-ui";
+import { QueryClient } from "@tanstack/react-query";
+
+const QUERY_CLIENT = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+    },
+  },
+});
+
+export const AppQueryClientProvider: RgoProvider = ({ children }) => (
+  <RgoQueryClientProvider client={QUERY_CLIENT}>{children}</RgoQueryClientProvider>
+);
+```
+
+---
+
+## Key details
+
+- **No custom context** — delegates entirely to TanStack Query's internal context.
+- **Single instance** — create the `QueryClient` **outside** of React (module scope) to avoid re-creating it on every render.
+- **Configuration is on the client, not the provider** — all default options, retry logic, and cache behavior live on the `QueryClient` instance itself.
+- **Type:** `RgoProvider<RgoQueryClientProviderProps>` — composable with `RgoProviders`.
+- **Companion hook `useRgoMutation`** — the library ships a `useRgoMutation` hook that wraps TanStack's `useMutation` with built-in snackbar notifications for success/error states. It depends on this provider being in the tree.

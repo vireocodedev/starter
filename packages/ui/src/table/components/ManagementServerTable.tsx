@@ -2,7 +2,9 @@ import { ResponsiveCard } from "@/components/ResponsiveCard";
 import { useAppPageContentLayout } from "@/hooks/useAppPageContentLayout";
 import { RgoServerTableMobile } from "@/table/components/RgoServerTableMobile";
 import { CardHeader } from "@mui/material";
-import { RgoServerTable, type PageableParams, type PageableResponse, type ReactStateSetter } from "@rgo/front-ui";
+import { RgoServerTable } from "@/components/data-display/RgoServerTable/RgoServerTable";
+import { type PageableParams, type PageableResponse } from "@/utils/apiutils";
+import { type ReactStateSetter } from "@/utils/typeutils";
 import React from "react";
 
 type RgoServerTableProps<TElement> = React.ComponentProps<typeof RgoServerTable<TElement>>;

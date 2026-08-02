@@ -3,7 +3,8 @@ import { type RgoServerTableColumnWithSort, type SortDirection } from "@/table/t
 import { renderDirectionIcon, renderHeader } from "@/table/utils/mobileTable.utils";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { Box, Button, IconButton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { RgoInputSelect, RgoLabelBox } from "@rgo/front-ui";
+import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 

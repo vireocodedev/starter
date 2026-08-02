@@ -1,0 +1,14 @@
+.rgo-value-with-unit {
+  white-space: nowrap;
+}
+
+.rgo-value-with-unit .value,
+.rgo-value-with-unit .unit {
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.rgo-value-with-unit .unit {
+  color: var(--mui-palette-grey-600);
+}

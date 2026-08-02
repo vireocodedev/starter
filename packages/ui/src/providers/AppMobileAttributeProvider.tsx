@@ -1,5 +1,5 @@
 import { useResponsiveProps } from "@/hooks/useResponsiveProps";
-import { type RgoProvider } from "@rgo/front-ui";
+import { type RgoProvider } from "@/providers/RgoProviders";
 import { useEffect } from "react";
 
 export const AppMobileAttributeProvider: RgoProvider = ({ children }) => {

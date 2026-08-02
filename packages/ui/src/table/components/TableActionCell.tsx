@@ -1,5 +1,6 @@
 import { Box, IconButton, Tooltip, type IconButtonProps } from "@mui/material";
-import { RgoIcon, useRgoConfirm } from "@rgo/front-ui";
+import { RgoIcon } from "@/components/data-display/RgoIcon/RgoIcon";
+import { useRgoConfirm } from "@/hooks/useRgoConfirm/useRgoConfirm";
 import React from "react";
 
 export type TableActionCellProps = {
