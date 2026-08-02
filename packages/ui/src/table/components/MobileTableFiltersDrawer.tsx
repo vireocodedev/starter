@@ -1,10 +1,24 @@
 import { AppBottomDrawer } from "@/components/AppBottomDrawer";
-import { type RgoServerTableColumnWithSort, type SortDirection } from "@/table/types";
-import { renderDirectionIcon, renderHeader } from "@/table/utils/mobileTable.utils";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { Box, Button, IconButton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
 import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
+import {
+  type RgoServerTableColumnWithSort,
+  type SortDirection,
+} from "@/table/types";
+import {
+  renderDirectionIcon,
+  renderHeader,
+} from "@/table/utils/mobileTable.utils";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import {
+  Box,
+  Button,
+  IconButton,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 
@@ -31,13 +45,21 @@ export function MobileTableFiltersDrawer<TElement>({
   onDone?: () => void;
   onOpen: () => void;
   onSortColumnChange: (sortBy: string | null) => void;
-  onSortDirectionChange: (event: React.MouseEvent<HTMLElement>, sortDirection: SortDirection | null) => void;
+  onSortDirectionChange: (
+    event: React.MouseEvent<HTMLElement>,
+    sortDirection: SortDirection | null,
+  ) => void;
   open: boolean;
   sortableColumns: RgoServerTableColumnWithSort<TElement>[];
 }) {
   const { t } = usePlatformTranslation();
   return (
-    <AppBottomDrawer open={open} onClose={onClose} onOpen={onOpen} maxHeight="88dvh">
+    <AppBottomDrawer
+      open={open}
+      onClose={onClose}
+      onOpen={onOpen}
+      maxHeight="88dvh"
+    >
       <Box
         display="flex"
         alignItems="center"
@@ -58,7 +80,7 @@ export function MobileTableFiltersDrawer<TElement>({
 
       <Stack
         spacing={2}
-        sx={theme => ({
+        sx={(theme) => ({
           flex: 1,
           overflow: "auto",
           p: "1.5rem",
@@ -73,8 +95,8 @@ export function MobileTableFiltersDrawer<TElement>({
                 options={sortableColumns}
                 value={activeSortValue}
                 onChange={onSortColumnChange}
-                renderOption={o => renderHeader(o)}
-                renderValue={o => o.sort}
+                renderOption={(o) => renderHeader(o)}
+                renderValue={(o) => o.sort}
               />
             </RgoLabelBox>
 
@@ -86,14 +108,30 @@ export function MobileTableFiltersDrawer<TElement>({
                 onChange={onSortDirectionChange}
                 aria-label={t("common.direction")}
               >
-                <ToggleButton value="asc" aria-label={t("common.ascendingSortDirection")}>
-                  <Stack direction="row" alignItems="center" justifyContent="center" gap={0.75}>
+                <ToggleButton
+                  value="asc"
+                  aria-label={t("common.ascendingSortDirection")}
+                >
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="center"
+                    gap={0.75}
+                  >
                     {renderDirectionIcon("asc")}
                     <span>{t("common.ascending")}</span>
                   </Stack>
                 </ToggleButton>
-                <ToggleButton value="desc" aria-label={t("common.descendingSortDirection")}>
-                  <Stack direction="row" alignItems="center" justifyContent="center" gap={0.75}>
+                <ToggleButton
+                  value="desc"
+                  aria-label={t("common.descendingSortDirection")}
+                >
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="center"
+                    gap={0.75}
+                  >
                     {renderDirectionIcon("desc")}
                     <span>{t("common.descending")}</span>
                   </Stack>
@@ -106,7 +144,14 @@ export function MobileTableFiltersDrawer<TElement>({
         {filtersNode ? <Box width="100%">{filtersNode}</Box> : null}
       </Stack>
 
-      <Box display="flex" gap={1} sx={{ p: "1rem 1.5rem", borderTop: "1px solid var(--mui-palette-grey-300)" }}>
+      <Box
+        display="flex"
+        gap={1}
+        sx={{
+          p: "1rem 1.5rem",
+          borderTop: "1px solid var(--mui-palette-grey-300)",
+        }}
+      >
         <Button
           color="secondary"
           variant="outlined"

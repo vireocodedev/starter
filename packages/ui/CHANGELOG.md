@@ -11,7 +11,7 @@
   hooks, the providers (`RgoProviders`, theme/localization/query-client/snackbar/
   confirm/icons), the `RgoLocalStorageService` / `RgoOfflineCacheService` /
   `RgoWebWorkerService` services, the `axios` / `@tanstack/react-query` /
-  `i18next` / `@hello-pangea/dnd` / `tseep` feature adapters, and the `utils`
+  `i18next` / `@hello-pangea/dnd` feature adapters, and the `utils`
   modules. Every former `@rgo/front-ui` export is re-exported from the
   `@vireocodedev/starter-ui` barrel under the same name, and the unbundled `dist`
   keeps the same subpath layout — `@rgo/front-ui/utils/apiutils` becomes

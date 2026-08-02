@@ -15,7 +15,10 @@ import { AppLayoutHeader } from "@/shell/layout/AppLayoutHeader";
 import { AppLayoutNav } from "@/shell/layout/AppLayoutNav";
 import { AppMobileBottomNavigation } from "@/shell/layout/AppMobileBottomNavigation";
 import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
-import { NAV_MIN_EXPANDED_WIDTH, NAV_WIDTH_CSS_VAR } from "@/shell/layout/layoutNav.constants";
+import {
+  NAV_MIN_EXPANDED_WIDTH,
+  NAV_WIDTH_CSS_VAR,
+} from "@/shell/layout/layoutNav.constants";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import { APP_PAGE_CONTENT_MIN_WIDTH } from "@vireocodedev/starter-ui";
@@ -31,35 +34,52 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
   const theme = useTheme();
   const { t } = usePlatformTranslation();
   const {
-    preferences: { navCollapsed, navLocked: runtimeNavLocked, navWidth, setNavCollapsed, setNavWidth },
+    preferences: {
+      navCollapsed,
+      navLocked: runtimeNavLocked,
+      navWidth,
+      setNavCollapsed,
+      setNavWidth,
+    },
   } = runtime;
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { pathname } = useLocation();
   const loginPath = config.routes.getPath(config.routes.loginPage);
-  const loginMode = pathname === loginPath || pathname.startsWith(`${loginPath}/`);
+  const loginMode =
+    pathname === loginPath || pathname.startsWith(`${loginPath}/`);
   const navLocked = loginMode ? true : runtimeNavLocked;
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
-  const [headerActions, setHeaderActions] = React.useState<React.ReactNode>(null);
+  const [headerActions, setHeaderActions] =
+    React.useState<React.ReactNode>(null);
   const viewportWidth = useShellViewportWidth();
   const windowControlsOverlay = useWindowControlsOverlay();
   const shellRootRef = React.useRef<HTMLDivElement | null>(null);
 
   const maxDesktopNavWidth = React.useMemo(() => {
-    return Math.max(NAV_MIN_EXPANDED_WIDTH, viewportWidth - APP_PAGE_CONTENT_MIN_WIDTH);
+    return Math.max(
+      NAV_MIN_EXPANDED_WIDTH,
+      viewportWidth - APP_PAGE_CONTENT_MIN_WIDTH,
+    );
   }, [viewportWidth]);
 
-  const { desktopCollapsed, desktopNavWidth, desktopResizing, onResizeDoubleClick, onResizeStart, onToggleCollapsed } =
-    useResizableNav({
-      initialCollapsed: navCollapsed,
-      initialWidth: navWidth,
-      isMobile,
-      loginMode,
-      maxDesktopNavWidth,
-      navLocked,
-      setNavCollapsed,
-      setNavWidth,
-      shellRootRef,
-    });
+  const {
+    desktopCollapsed,
+    desktopNavWidth,
+    desktopResizing,
+    onResizeDoubleClick,
+    onResizeStart,
+    onToggleCollapsed,
+  } = useResizableNav({
+    initialCollapsed: navCollapsed,
+    initialWidth: navWidth,
+    isMobile,
+    loginMode,
+    maxDesktopNavWidth,
+    navLocked,
+    setNavCollapsed,
+    setNavWidth,
+    shellRootRef,
+  });
 
   const visibleDesktopNavWidth = React.useMemo(
     () =>
@@ -84,7 +104,12 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
   }, [pathname]);
 
   const navLayoutContextValue = React.useMemo(
-    () => ({ isMobile, openMobileNav, desktopNavWidth: visibleDesktopNavWidth, setHeaderActions }),
+    () => ({
+      isMobile,
+      openMobileNav,
+      desktopNavWidth: visibleDesktopNavWidth,
+      setHeaderActions,
+    }),
     [isMobile, openMobileNav, visibleDesktopNavWidth],
   );
 
@@ -93,7 +118,7 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
       ({
         ...createWindowControlsOverlayRootStyle(windowControlsOverlay),
         [NAV_WIDTH_CSS_VAR]: `${visibleDesktopNavWidth}px`,
-      }) as React.CSSProperties,
+      } as React.CSSProperties),
     [visibleDesktopNavWidth, windowControlsOverlay],
   );
 
@@ -102,7 +127,9 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
       <AppNavLayoutContext.Provider value={navLayoutContextValue}>
         <Box
           ref={shellRootRef}
-          data-window-controls-overlay={windowControlsOverlay.visible ? "visible" : undefined}
+          data-window-controls-overlay={
+            windowControlsOverlay.visible ? "visible" : undefined
+          }
           style={shellStyle}
           sx={{ minWidth: 0, height: "100%", position: "relative" }}
         >
@@ -149,7 +176,12 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
             }}
           >
             <AppLayoutHeader actions={headerActions} />
-            <Box component="main" id="main-content" tabIndex={-1} sx={{ flex: 1, minHeight: 0, overflow: "auto", outline: "none" }}>
+            <Box
+              component="main"
+              id="main-content"
+              tabIndex={-1}
+              sx={{ flex: 1, minHeight: 0, overflow: "auto", outline: "none" }}
+            >
               <Outlet />
             </Box>
           </Box>
