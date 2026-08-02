@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-ui",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MUI-based UI component library (responsive cards, mobile tables, overlays, providers, hooks, formatters) for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": false,
@@ -36,9 +36,9 @@
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
-    "@vireocodedev/starter-core": "^0.6.1",
+    "@vireocodedev/starter-core": "^0.6.2",
     "@vireocodedev/starter-history": "^0.3.0",
-    "@vireocodedev/starter-localization": "^0.5.0"
+    "@vireocodedev/starter-localization": "^0.6.0"
   },
   "peerDependencies": {
     "@mui/icons-material": ">=6",
