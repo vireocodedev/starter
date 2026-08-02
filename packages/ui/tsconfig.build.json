@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src"],
+  "exclude": ["tests", "**/*.stories.*", "**/stories/**"],
+  // Emit extensioned relative specifiers so dist is resolvable by Node's ESM
+  // loader, not just by bundlers.
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}
