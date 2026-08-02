@@ -93,6 +93,33 @@ const en = {
   validation: {
     thisFieldIsRequired: "This field is required.",
   },
+  auth: {
+    currentUserLoadFailed: "Sign-in succeeded, but your account could not be loaded. Please try again.",
+    discardPendingSyncCancel: "Stay signed in",
+    discardPendingSyncConfirm: "Sign out and discard",
+    discardPendingSyncMessage:
+      "{{count}} offline change(s) have not been synced yet. Signing out deletes the local data on this device, so those changes will be lost permanently.",
+    discardPendingSyncTitle: "Unsynced offline changes",
+    invalidCredentials: "Invalid credentials.",
+    password: "Password",
+    sessionExpired: "Your session has expired. Sign in again to continue.",
+    signIn: "Sign in",
+    signInSubtitle: "Enter your credentials to access your account.",
+    signedInAs: "Signed in as",
+    username: "Username",
+  },
+  settings: {
+    lockNavigationBar: "Lock navigation bar",
+    noMaxWidth: "No max width",
+    pageBodyMaxWidth: "Page content width",
+    pageBodyMaxWidthLg: "Large",
+    pageBodyMaxWidthMd: "Medium",
+    pageBodyMaxWidthSm: "Small",
+    pageBodyMaxWidthXl: "Extra large",
+    pageBodyMaxWidthXs: "Extra small",
+    title: "Application settings",
+    userSettingsSavedSuccessfully: "User settings saved.",
+  },
 } as const;
 
 export default en;

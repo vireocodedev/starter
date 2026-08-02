@@ -93,6 +93,33 @@ const hr = {
   validation: {
     thisFieldIsRequired: "Ovo polje je obavezno.",
   },
+  auth: {
+    currentUserLoadFailed: "Prijava je uspjela, ali vaš račun nije moguće učitati. Pokušajte ponovno.",
+    discardPendingSyncCancel: "Ostani prijavljen",
+    discardPendingSyncConfirm: "Odjavi se i odbaci",
+    discardPendingSyncMessage:
+      "Broj nesinkroniziranih offline promjena: {{count}}. Odjavom se lokalni podaci na ovom uređaju brišu pa će te promjene biti trajno izgubljene.",
+    discardPendingSyncTitle: "Nesinkronizirane offline promjene",
+    invalidCredentials: "Neispravni podaci za prijavu.",
+    password: "Lozinka",
+    sessionExpired: "Vaša sesija je istekla. Prijavite se ponovno za nastavak.",
+    signIn: "Prijava",
+    signInSubtitle: "Unesite svoje podatke za pristup računu.",
+    signedInAs: "Prijavljen kao",
+    username: "Korisničko ime",
+  },
+  settings: {
+    lockNavigationBar: "Zaključaj navigacijsku traku",
+    noMaxWidth: "Bez maksimalne širine",
+    pageBodyMaxWidth: "Širina sadržaja stranice",
+    pageBodyMaxWidthLg: "Široko",
+    pageBodyMaxWidthMd: "Srednje",
+    pageBodyMaxWidthSm: "Usko",
+    pageBodyMaxWidthXl: "Vrlo široko",
+    pageBodyMaxWidthXs: "Vrlo usko",
+    title: "Postavke aplikacije",
+    userSettingsSavedSuccessfully: "Postavke korisnika spremljene.",
+  },
 } as const;
 
 export default hr;
