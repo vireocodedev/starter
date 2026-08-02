@@ -1,8 +1,14 @@
-import { type RgoServerTable } from "@rgo/front-ui";
+import type {
+  RgoServerTableColumn,
+  RgoServerTableProps,
+} from "@/components/data-display/RgoServerTable/RgoServerTable";
 import type React from "react";
 
-export type RgoServerTableProps<TElement> = React.ComponentProps<typeof RgoServerTable<TElement>>;
-export type RgoServerTableColumn<TElement> = RgoServerTableProps<TElement>["columns"][number];
+export type {
+  RgoServerTableColumn,
+  RgoServerTableProps,
+} from "@/components/data-display/RgoServerTable/RgoServerTable";
+
 export type SortDirection = "asc" | "desc";
 export type ActionsColumnAlign = "left" | "center" | "right";
 

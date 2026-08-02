@@ -1,6 +1,6 @@
 import { useResponsiveProps } from "@/hooks/useResponsiveProps";
 import { useTheme } from "@mui/material";
-import { type RgoProvider } from "@rgo/front-ui";
+import { type RgoProvider } from "@/providers/RgoProviders";
 import { Toaster, type ToasterProps } from "sonner";
 
 /**

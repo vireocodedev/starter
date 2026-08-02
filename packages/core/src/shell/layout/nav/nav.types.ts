@@ -1,5 +1,5 @@
 import { type AppConfigTranslationFn, type AppShellNavEntry } from "@/config/app.config.types";
-import { type RgoIcon } from "@rgo/front-ui";
+import { type RgoIcon } from "@vireocodedev/starter-ui";
 import type React from "react";
 
 export type NavEntry = AppShellNavEntry;

@@ -1,0 +1,13 @@
+.rgo-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(2 * var(--mui-spacing));
+  min-height: 64px;
+  background-color: var(--mui-palette-background-default);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--mui-palette-grey-200);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

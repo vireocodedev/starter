@@ -1,0 +1,43 @@
+.rgo-snack {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.rgo-snack__adornment {
+  display: flex;
+  align-items: center;
+}
+
+div[data-rht-toaster] > div > div:has(.rgo-snack[data-variant="default"]) {
+  background-color: var(--mui-palette-background-default);
+}
+div[data-rht-toaster] > div > div:has(.rgo-snack[data-variant="error"]) {
+  background-color: var(--mui-palette-error-main);
+}
+div[data-rht-toaster] > div > div:has(.rgo-snack[data-variant="info"]) {
+  background-color: var(--mui-palette-info-main);
+}
+div[data-rht-toaster] > div > div:has(.rgo-snack[data-variant="success"]) {
+  background-color: var(--mui-palette-success-main);
+}
+div[data-rht-toaster] > div > div:has(.rgo-snack[data-variant="warning"]) {
+  background-color: var(--mui-palette-warning-main);
+}
+
+div[data-rht-toaster] .rgo-snack[data-variant="default"] {
+  color: var(--mui-palette-text-primary);
+}
+div[data-rht-toaster] .rgo-snack[data-variant="error"] {
+  color: var(--mui-palette-error-contrastText);
+}
+div[data-rht-toaster] .rgo-snack[data-variant="info"] {
+  color: var(--mui-palette-info-contrastText);
+}
+div[data-rht-toaster] .rgo-snack[data-variant="success"] {
+  color: var(--mui-palette-success-contrastText);
+}
+div[data-rht-toaster] .rgo-snack[data-variant="warning"] {
+  color: var(--mui-palette-warning-contrastText);
+}

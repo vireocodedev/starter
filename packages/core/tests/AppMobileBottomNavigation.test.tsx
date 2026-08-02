@@ -2,7 +2,7 @@ import { AppMobileBottomNavigation } from "@/shell/layout/AppMobileBottomNavigat
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@rgo/front-ui", () => ({
+vi.mock("@vireocodedev/starter-ui", () => ({
   RgoIcon: () => null,
 }));
 

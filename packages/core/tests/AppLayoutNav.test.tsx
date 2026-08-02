@@ -25,7 +25,7 @@ vi.mock("react-router", () => ({
   useNavigate: () => () => undefined,
 }));
 
-vi.mock("@rgo/front-ui", () => ({
+vi.mock("@vireocodedev/starter-ui", () => ({
   RgoIcon: () => null,
 }));
 

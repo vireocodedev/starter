@@ -11,8 +11,9 @@ npm install @vireocodedev/starter-core
 ```
 
 Peers: `react`, `react-dom`, `react-router`, `@mui/material`,
-`@mui/icons-material`, `@rgo/front-ui`, `@tanstack/react-query`. Depends on
-`@vireocodedev/starter-localization` and `@vireocodedev/starter-infrastructure`.
+`@mui/icons-material`, `@tanstack/react-query`. Depends on
+`@vireocodedev/starter-ui`, `@vireocodedev/starter-localization` and
+`@vireocodedev/starter-infrastructure`.
 
 ## Consumer requirements
 
@@ -20,7 +21,8 @@ Peers: `react`, `react-dom`, `react-router`, `@mui/material`,
   `virtual:pwa-register/react` module (externalized here; your build resolves it).
 - **Theme + icons contract** — the shell reads numeric MUI palette shades
   (e.g. `palette.primary[600]`) and a `"dots-vertical"` overflow icon; provide
-  these via your MUI theme + `@rgo/front-ui` icon registry (the starter does).
+  these via your MUI theme + the `@vireocodedev/starter-ui` icon registry (the
+  starter does).
 
 ## What's included
 

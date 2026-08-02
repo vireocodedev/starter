@@ -1,4 +1,5 @@
-import { DEFAULT_PAGINATION_OPTIONS, type PageableParams } from "@rgo/front-ui";
+import { DEFAULT_PAGINATION_OPTIONS } from "@/components/data-display/RgoTable";
+import { type PageableParams } from "@/utils/apiutils";
 import React from "react";
 
 export type UseManagementTableStateProps<TFilters> = {

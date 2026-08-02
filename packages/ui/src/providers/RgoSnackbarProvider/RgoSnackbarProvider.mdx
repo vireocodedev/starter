@@ -1,0 +1,286 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Providers/RgoSnackbarProvider" />
+
+# RgoSnackbarProvider
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+Configures toast notifications powered by `react-hot-toast`. Renders a global `<Toaster>` with configurable position and duration. Consumers trigger toasts via the `toast()` function — no hook wrapper needed.
+
+---
+
+## Why it exists
+
+Toast notifications (snackbars) are an app-wide concern. `react-hot-toast` needs a `<Toaster>` component mounted somewhere in the tree to display notifications. `RgoSnackbarProvider` standardizes that mount point and exposes sensible defaults while conforming to the `RgoProvider` type for composability.
+
+---
+
+## Provider setup
+
+```tsx
+import { RgoSnackbarProvider } from "@vireocodedev/starter-ui";
+
+function App() {
+  return (
+    <RgoSnackbarProvider>
+      <YourApplication />
+    </RgoSnackbarProvider>
+  );
+}
+```
+
+With custom configuration:
+
+```tsx
+<RgoSnackbarProvider position="top-right" duration={3000}>
+  <YourApplication />
+</RgoSnackbarProvider>
+```
+
+---
+
+## Props
+
+<table>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>position</code></td>
+      <td><code>{"ToasterProps[\"position\"]"}</code></td>
+      <td>No</td>
+      <td><code>{"\"bottom-center\""}</code></td>
+      <td>Screen position for toasts</td>
+    </tr>
+    <tr>
+      <td><code>duration</code></td>
+      <td><code>number</code></td>
+      <td>No</td>
+      <td><code>5000</code></td>
+      <td>Auto-dismiss delay in milliseconds</td>
+    </tr>
+    <tr>
+      <td><code>children</code></td>
+      <td><code>ReactNode</code></td>
+      <td>Yes</td>
+      <td>—</td>
+      <td>Application tree</td>
+    </tr>
+  </tbody>
+</table>
+
+### Available positions
+
+`"top-left"` · `"top-center"` · `"top-right"` · `"bottom-left"` · `"bottom-center"` · `"bottom-right"`
+
+---
+
+## What it renders
+
+```tsx
+<>
+  {children}
+  <Toaster position={position} toastOptions={{ duration }} />
+</>
+```
+
+The `<Toaster>` is rendered **after** children (not wrapping them). It uses a portal internally, so DOM position doesn't affect visual placement.
+
+---
+
+## Consumer API
+
+### Basic toast with `react-hot-toast`
+
+```tsx
+import toast from "react-hot-toast";
+
+function SaveButton() {
+  const handleSave = async () => {
+    await api.save(data);
+    toast("Document saved");
+  };
+
+  return <button onClick={handleSave}>Save</button>;
+}
+```
+
+### Styled toast with `RgoSnack`
+
+The library ships an `RgoSnack` component designed to be rendered inside toasts for consistent visual styling:
+
+```tsx
+import toast from "react-hot-toast";
+import { RgoSnack } from "@vireocodedev/starter-ui";
+
+// Success notification
+toast(<RgoSnack variant="success" message="User created successfully" />);
+
+// Error notification
+toast(<RgoSnack variant="error" message="Failed to save changes" />);
+
+// Warning with custom adornment
+toast(
+  <RgoSnack
+    variant="warning"
+    message="Session expires in 5 minutes"
+    endAdornment={<RefreshIcon />}
+  />
+);
+```
+
+### `RgoSnack` variants
+
+<table>
+  <thead>
+    <tr>
+      <th>Variant</th>
+      <th>Use case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>{"\"default\""}</code></td>
+      <td>Neutral informational messages</td>
+    </tr>
+    <tr>
+      <td><code>{"\"success\""}</code></td>
+      <td>Successful operations</td>
+    </tr>
+    <tr>
+      <td><code>{"\"error\""}</code></td>
+      <td>Failed operations, validation errors</td>
+    </tr>
+    <tr>
+      <td><code>{"\"warning\""}</code></td>
+      <td>Caution, degraded state, upcoming expiration</td>
+    </tr>
+    <tr>
+      <td><code>{"\"info\""}</code></td>
+      <td>Informational, non-critical updates</td>
+    </tr>
+  </tbody>
+</table>
+
+### `RgoSnack` props
+
+<table>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>message</code></td>
+      <td><code>string</code></td>
+      <td>Yes</td>
+      <td>Toast message text</td>
+    </tr>
+    <tr>
+      <td><code>variant</code></td>
+      <td><code>RgoSnackVariant</code></td>
+      <td>No</td>
+      <td>Visual variant — defaults to <code>{"\"default\""}</code></td>
+    </tr>
+    <tr>
+      <td><code>startAdornment</code></td>
+      <td><code>ReactNode</code></td>
+      <td>No</td>
+      <td>Icon or element before the message</td>
+    </tr>
+    <tr>
+      <td><code>endAdornment</code></td>
+      <td><code>ReactNode</code></td>
+      <td>No</td>
+      <td>Icon or element after the message</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Advanced patterns
+
+### Toast from outside React (services, interceptors)
+
+`react-hot-toast`'s `toast()` is a standalone function — it works anywhere, not just inside React components:
+
+```tsx
+// In an API interceptor
+import toast from "react-hot-toast";
+import { RgoSnack } from "@vireocodedev/starter-ui";
+
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      toast(<RgoSnack variant="error" message="Session expired. Please log in again." />);
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+### Promise-based toast
+
+```tsx
+import toast from "react-hot-toast";
+
+function UploadButton() {
+  const handleUpload = () => {
+    toast.promise(api.uploadFile(file), {
+      loading: "Uploading...",
+      success: "File uploaded!",
+      error: "Upload failed",
+    });
+  };
+
+  return <button onClick={handleUpload}>Upload</button>;
+}
+```
+
+### Dismissible toast
+
+```tsx
+import toast from "react-hot-toast";
+
+const toastId = toast("Processing...", { duration: Infinity });
+// Later:
+toast.dismiss(toastId);
+```
+
+---
+
+## Nesting order
+
+Position is flexible. Typically placed after providers that might trigger toasts (e.g., after `RgoConfirmProvider`):
+
+```
+RgoThemeProvider
+  └─ RgoLocalizationProvider
+       └─ RgoConfirmProvider
+            └─ RgoSnackbarProvider    ← here
+                 └─ ...
+```
+
+---
+
+## Key details
+
+- **No custom React context** — `react-hot-toast` manages its own internal state.
+- **No custom hook** — consumers import `toast` directly from `react-hot-toast`.
+- **`RgoSnack` is optional** — you can pass plain strings to `toast()`, but `RgoSnack` provides consistent styling with variant-based coloring.
+- **Single `<Toaster>` instance** — mounting multiple `RgoSnackbarProvider`s will render multiple `<Toaster>` components, which may cause duplicate toasts.
+- **Type:** `RgoProvider<RgoSnackbarProviderProps>` — composable with `RgoProviders`.

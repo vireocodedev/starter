@@ -1,0 +1,275 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Providers/RgoProviders" />
+
+# RgoProviders
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+A utility component that composes multiple providers into a flat, readable list — eliminating the deeply nested JSX pyramid that grows with every new provider.
+
+---
+
+## Why it exists
+
+A typical React app with 6+ providers looks like this:
+
+```tsx
+// 😵 The pyramid of doom
+<ThemeProvider theme={theme}>
+  <IconsProvider icons={icons}>
+    <LocalizationProvider>
+      <ConfirmProvider>
+        <SnackbarProvider>
+          <QueryClientProvider client={client}>
+            <App />
+          </QueryClientProvider>
+        </SnackbarProvider>
+      </ConfirmProvider>
+    </LocalizationProvider>
+  </IconsProvider>
+</ThemeProvider>
+```
+
+Every new provider adds another level of indentation. `RgoProviders` flattens this into a declarative array:
+
+```tsx
+// ✅ Flat and composable
+<RgoProviders list={providers}>
+  <App />
+</RgoProviders>
+```
+
+---
+
+## How it works
+
+`RgoProviders` uses `reduceRight` to nest providers from the array. The **first** element in the array becomes the **outermost** provider, and the **last** becomes the innermost:
+
+```ts
+const nest = (children, Provider) => <Provider>{children}</Provider>;
+
+// list = [A, B, C]
+// Result: <A><B><C>{children}</C></B></A>
+list.reduceRight(nest, children);
+```
+
+---
+
+## The `RgoProvider<T>` type
+
+All providers in the `@vireocodedev/starter-ui` ecosystem conform to a common generic type:
+
+```ts
+type RgoProvider<T extends Record<string, any> = {}> = React.FC<{ children: React.ReactNode } & T>;
+```
+
+- When `T = {}` (no extra props): the provider only takes `children` (e.g., `RgoConfirmProvider`).
+- When `T` has properties: the provider requires those props in addition to `children` (e.g., `RgoThemeProvider` needs `theme`).
+
+Providers with extra props must be **pre-configured** before being added to the list (see below).
+
+---
+
+## Usage
+
+### Basic — providers with no extra props
+
+```tsx
+import { RgoProviders, RgoConfirmProvider, RgoLocalizationProvider } from "@vireocodedev/starter-ui";
+
+const providers = [RgoConfirmProvider, RgoLocalizationProvider];
+
+<RgoProviders list={providers}>
+  <App />
+</RgoProviders>
+```
+
+### With pre-configured providers
+
+Providers that require props (like `theme` or `client`) must be wrapped in a closure or a named component:
+
+```tsx
+import {
+  RgoProviders,
+  RgoThemeProvider,
+  RgoIconsProvider,
+  RgoLocalizationProvider,
+  RgoConfirmProvider,
+  RgoSnackbarProvider,
+  RgoQueryClientProvider,
+  type RgoProvider,
+} from "@vireocodedev/starter-ui";
+
+// Pre-configure providers that need props
+const AppThemeProvider: RgoProvider = ({ children }) => (
+  <RgoThemeProvider theme={myTheme}>{children}</RgoThemeProvider>
+);
+
+const AppIconsProvider: RgoProvider = ({ children }) => (
+  <RgoIconsProvider icons={myIcons}>{children}</RgoIconsProvider>
+);
+
+const AppQueryProvider: RgoProvider = ({ children }) => (
+  <RgoQueryClientProvider client={myQueryClient}>{children}</RgoQueryClientProvider>
+);
+
+// Compose — order = outermost → innermost
+const APP_PROVIDERS: RgoProvider[] = [
+  AppThemeProvider,         // 1st = outermost
+  AppIconsProvider,
+  RgoLocalizationProvider,
+  RgoConfirmProvider,
+  RgoSnackbarProvider,
+  AppQueryProvider,         // last = innermost
+];
+
+function Root() {
+  return (
+    <RgoProviders list={APP_PROVIDERS}>
+      <App />
+    </RgoProviders>
+  );
+}
+```
+
+---
+
+## Props
+
+<table>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><code>{"RgoProvider[]"}</code></td>
+      <td>Yes</td>
+      <td>Ordered array of provider components. First = outermost, last = innermost.</td>
+    </tr>
+    <tr>
+      <td><code>children</code></td>
+      <td><code>ReactNode</code></td>
+      <td>Yes</td>
+      <td>Application tree — wrapped by all providers</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Recommended provider order
+
+Order matters because inner providers may depend on context from outer ones:
+
+<table>
+  <thead>
+    <tr>
+      <th>Position</th>
+      <th>Provider</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1 (outermost)</td>
+      <td><code>RgoThemeProvider</code></td>
+      <td>MUI components need theme context</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><code>RgoIconsProvider</code></td>
+      <td>Icons use <code>createSvgIcon</code> (needs theme)</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><code>RgoLocalizationProvider</code></td>
+      <td>Date pickers need theme; provides i18n</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><code>RgoConfirmProvider</code></td>
+      <td>Dialog uses MUI components + translated labels</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><code>RgoSnackbarProvider</code></td>
+      <td>Toasts may be triggered by confirm actions</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><code>RgoQueryClientProvider</code></td>
+      <td>Data fetching layer — used by feature providers</td>
+    </tr>
+    <tr>
+      <td>7+</td>
+      <td>App-specific providers</td>
+      <td>Domain logic, auth, routing, etc.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Composability patterns
+
+### Feature-level provider groups
+
+```tsx
+const CORE_PROVIDERS: RgoProvider[] = [
+  AppThemeProvider,
+  AppIconsProvider,
+  RgoLocalizationProvider,
+];
+
+const FEEDBACK_PROVIDERS: RgoProvider[] = [
+  RgoConfirmProvider,
+  RgoSnackbarProvider,
+];
+
+const DATA_PROVIDERS: RgoProvider[] = [
+  AppQueryProvider,
+  AppSseProvider,
+];
+
+// Combine
+const ALL_PROVIDERS = [
+  ...CORE_PROVIDERS,
+  ...FEEDBACK_PROVIDERS,
+  ...DATA_PROVIDERS,
+];
+
+<RgoProviders list={ALL_PROVIDERS}>
+  <App />
+</RgoProviders>
+```
+
+### Conditional providers
+
+```tsx
+const providers: RgoProvider[] = [
+  AppThemeProvider,
+  RgoConfirmProvider,
+  ...(enableRealtime ? [AppSseProvider] : []),
+];
+
+<RgoProviders list={providers}>
+  <App />
+</RgoProviders>
+```
+
+---
+
+## Key details
+
+- **Order is significant** — first in array = outermost in the tree.
+- **`reduceRight` under the hood** — the implementation is a single-line reducer, zero overhead.
+- **Providers must be `RgoProvider` type** — they must accept `{ children: ReactNode }` as props.
+- **Pre-configure props externally** — `RgoProviders` passes only `children` to each provider in the list. Providers needing extra props must be wrapped.
+- **Flat array, nested tree** — the array is flat for readability, but the resulting React tree is nested (each provider wraps the next).

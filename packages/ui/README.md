@@ -1,21 +1,19 @@
 # @vireocodedev/starter-ui
 
 The **MUI-based UI component library** for the vireocodedev **starter** product:
-responsive cards, mobile/infinite server tables, overlays, app providers,
-layout hooks, and formatters.
+the `Rgo*` design-system primitives (inputs, tables, layout, providers, hooks,
+services), plus responsive cards, mobile/infinite server tables, overlays, app
+providers, layout hooks, and formatters.
 
-> This package takes `@mui/*` and `@rgo/front-ui` as **peer dependencies** — it
-> is tied to the starter design system, not a generic component kit.
+> This package takes `@mui/*` as **peer dependencies** — it is tied to the
+> starter design system, not a generic component kit.
 
 ## Install
 
-Published to **GitHub Packages** under the `@vireocodedev` scope. Because it
-peers on `@rgo/front-ui` (a private registry), consumers need both scopes routed
-in `.npmrc`:
+Published to **GitHub Packages** under the `@vireocodedev` scope:
 
 ```
 @vireocodedev:registry=https://npm.pkg.github.com
-@rgo:registry=https://git.rgo.hr/api/packages/RGO/npm/
 ```
 
 ```bash
@@ -23,9 +21,14 @@ npm install @vireocodedev/starter-ui
 ```
 
 Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
-`@mui/x-date-pickers`, `@rgo/front-ui`, `react-hook-form`, `sonner`, `dayjs`.
-Depends on `@vireocodedev/starter-localization`, which owns the `platform` and
-`history` translation namespaces this package renders.
+`@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,
+`@tanstack/react-query`, `axios`, `i18next`, `react-i18next`, `react-hook-form`,
+`zod`, `sonner`, `dayjs`. Depends on `@vireocodedev/starter-localization`, which
+owns the `platform` and `history` translation namespaces this package renders.
+
+The package ships unbundled: `dist` mirrors `src` file-for-file, so subpaths can
+be imported directly (`@vireocodedev/starter-ui/utils/apiutils`) when pulling the
+whole barrel — and its MUI graph — is not acceptable.
 
 ## What's included
 

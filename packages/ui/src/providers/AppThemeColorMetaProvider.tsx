@@ -1,5 +1,5 @@
 import { useTheme } from "@mui/material";
-import { type RgoProvider } from "@rgo/front-ui";
+import { type RgoProvider } from "@/providers/RgoProviders";
 import { useEffect } from "react";
 
 export const AppThemeColorMetaProvider: RgoProvider = ({ children }) => {

@@ -1,5 +1,5 @@
 import { type NavEntry, type NavIconName } from "@/shell/layout/nav/nav.types";
-import { RgoIcon } from "@rgo/front-ui";
+import { RgoIcon } from "@vireocodedev/starter-ui";
 import React from "react";
 
 export function navIcon(icon: NavIconName): React.ReactNode {

@@ -1,0 +1,146 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Providers/createRgoFormDialogProvider" />
+
+# createRgoFormDialogProvider
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+Factory that builds a `Provider + Context + useFormDialog` hook triplet for a single form-dialog feature. Centralizes the boilerplate every form-dialog provider repeats: open/close state, form lifecycle, group derivation, and submit-success handling.
+
+---
+
+## Why it exists
+
+Apps typically have several feature-scoped form dialogs (e.g. *edit user*, *finalize order*, *create lockage*). Each of them tends to repeat the same scaffolding:
+
+1. `useState<Config | null>` + an `open = config !== null` derivation.
+2. A `useForm` call with the entity's schema and defaults.
+3. `handleOpen(entity, config)` that resets the form and stores the config.
+4. `handleClose()` that calls `onCancel` and clears the config.
+5. `handleSubmitSuccess(entity)` that calls `onSubmitSuccess` and clears the config.
+6. A Context, Provider, and `useContext` hook with the standard "must be inside the provider" guard.
+
+`createRgoFormDialogProvider` abstracts all of that while leaving the JSX (Dialog, header, form composition) under the caller's control.
+
+---
+
+## API
+
+### `createRgoFormDialogProvider<TEntity, TConfig, TOpenArg = TEntity>(options)`
+
+Returns `{ Provider, Context, useFormDialog }`.
+
+#### Required options
+
+- `useForm: () => UseFormReturn<TEntity>` — hook called inside the Provider. Inject your app's pre-configured form hook (e.g. `useLmsForm`) so translations and other concerns flow in naturally. Must obey the rules of hooks.
+- `resolveConfig: (arg, callerConfig) => TConfig` — build the persisted config from the open arg and the caller-provided config. Typically derives `group` from `arg.id` and copies callbacks through.
+- `renderDialog: (helpers) => React.ReactNode` — render the JSX rendered alongside `children` (typically a `<Dialog>` with header and form). Helpers expose `{ open, config, form, handleClose, handleSubmitSuccess }`.
+
+#### Optional options
+
+- `resolveFormData?: (arg) => TEntity` — map the open arg to form data passed to `form.reset`. Defaults to identity (treats the arg as the entity).
+- `onSubmitSuccess?: (entity, helpers) => void` — override default submit-success behavior. Default: invoke `config.onSubmitSuccess?.(entity)` then close. Override to keep the dialog open, transition `group`, or re-seed the form. Helpers expose `{ form, config, setConfig, defaultClose }`.
+- `displayName?: string` — surfaced in the `useFormDialog` error message and assigned to `Provider.displayName` / `Context.displayName`.
+
+#### Type parameters
+
+- `TEntity` — the form's field-value type.
+- `TConfig` — caller-extensible config; must extend `RgoFormDialogConfigBase` (`{ group?, onCancel? }`).
+- `TOpenArg` — the type accepted by `handleOpen`. Defaults to `TEntity`. Use this to e.g. allow `handleOpen()` (no args) for *create* mode.
+
+---
+
+## Example
+
+```tsx
+import { createRgoFormDialogProvider, RgoDialogHeader, RgoFormGroup, type RgoProvider } from "@vireocodedev/starter-ui";
+import { Dialog, DialogActions, DialogContent } from "@mui/material";
+import { useLmsForm } from "@/shared/hooks/useLmsForm";
+import { DEFAULT_USER, userSchema, type User } from "@/features/user/models/User";
+import { UserForm } from "@/features/user/components/UserForm/UserForm";
+
+interface UserFormDialogConfig {
+  group?: RgoFormGroup;
+  readOnly?: boolean;
+  onCancel?: () => void;
+  onSubmitSuccess?: (user: User) => void;
+}
+
+const { Provider, useFormDialog } = createRgoFormDialogProvider<User, UserFormDialogConfig>({
+  displayName: "UserFormDialog",
+  useForm: () => useLmsForm({ schema: userSchema, defaultValues: DEFAULT_USER }),
+  resolveConfig: (user, callerConfig) => ({
+    ...callerConfig,
+    group: callerConfig?.group ?? (typeof user.id === "number" ? RgoFormGroup.UPDATE : RgoFormGroup.CREATE),
+  }),
+  renderDialog: ({ open, config, form, handleClose, handleSubmitSuccess }) => (
+    <Dialog fullScreen maxWidth={false} open={open} onClose={handleClose}>
+      {config && (
+        <>
+          <RgoDialogHeader title="Edit user" onClose={handleClose} />
+          <UserForm
+            form={form}
+            group={config.group}
+            readOnly={config.readOnly}
+            onCancel={handleClose}
+            onSubmitSuccess={handleSubmitSuccess}
+            ContentComponent={DialogContent}
+            ActionsComponent={DialogActions}
+          />
+        </>
+      )}
+    </Dialog>
+  ),
+});
+
+export const UserFormDialogProvider: RgoProvider = Provider;
+export const useUserFormDialogContext = useFormDialog;
+```
+
+Consumers then use it imperatively:
+
+```tsx
+function EditUserButton({ user }: { user: User }) {
+  const { handleOpen } = useUserFormDialogContext();
+  return (
+    <button onClick={() => handleOpen(user, { onSubmitSuccess: u => console.log("saved", u) })}>
+      Edit
+    </button>
+  );
+}
+```
+
+---
+
+## Customizing submit-success
+
+The default behavior — invoke `config.onSubmitSuccess` then close — fits most cases. Override `onSubmitSuccess` when the dialog should stay open after a successful submit, or when the persisted entity needs to be re-seeded into the form.
+
+```tsx
+createRgoFormDialogProvider<Shift, ShiftFormDialogConfig>({
+  // ...
+  onSubmitSuccess: (shift, { form, setConfig, config }) => {
+    // Re-seed with the persisted entity so subsequent saves use UPDATE semantics
+    form.reset(shift);
+    setConfig(prev => (prev ? { ...prev, group: RgoFormGroup.UPDATE } : prev));
+    config?.onSubmitSuccess?.(shift);
+  },
+});
+```
+
+---
+
+## Why a hook injection for `useForm`?
+
+Different apps wrap `useRgoForm` to inject app-specific concerns (translations, telemetry, default options). Accepting a `useForm: () => UseFormReturn<TEntity>` hook lets each caller pass its preferred wrapper without coupling the factory to any specific form configuration.
+
+---
+
+## When to reach for it
+
+- A feature exposes a single, app-wide form dialog reachable from many places.
+- The dialog's open/close state should not be owned by any specific component.
+- The form-dialog plumbing (state, reset, group derivation, success/cancel handling) is identical to other dialogs in the app.
+
+When the dialog is local to a single component (e.g. a settings panel that only opens its own dialog), a plain `useState` + inline `<Dialog>` is simpler and more direct.

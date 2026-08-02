@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   // Per-file declarations: api-extractor's rollup cannot bundle the deep MUI /
-  // @rgo / react-router type graphs. `entryRoot: "src"` roots the d.ts at
+  // react-router type graphs. `entryRoot: "src"` roots the d.ts at
   // dist/index.d.ts; aliases are rewritten to relative paths; tests excluded.
   plugins: [
     tsconfigPaths(),
@@ -31,7 +31,6 @@ export default defineConfig({
         /^react-dom($|\/)/,
         /^react-router($|\/)/,
         /^@mui\//,
-        /^@rgo\//,
         /^@vireocodedev\//,
         /^@tanstack\//,
         /^virtual:/,

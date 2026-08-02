@@ -1,4 +1,6 @@
-import { RgoInputSelect, RgoInputToggleButtonGroup, RgoLabelBox } from "@rgo/front-ui";
+import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
+import { RgoInputToggleButtonGroup } from "@/components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup";
 import { type ReactNode } from "react";
 import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
 

@@ -1,0 +1,183 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Documentation/Overview" />
+
+![RGO Front UI Logo](https://rgo.hr/rgo-en/d/logo.png)
+
+# RGO Front UI - Overview
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+A comprehensive React component library built on Material-UI providing production-ready components, hooks, and utilities for modern web applications.
+
+## Table of Contents
+
+- [What is RGO Front UI?](#what-is-rgo-front-ui)
+- [Component Categories](#component-categories)
+  - [Input Components (17)](#input-components-17)
+  - [Data Display Components (12)](#data-display-components-12)
+  - [Feedback Components (4)](#feedback-components-4)
+  - [Layout Components (3)](#layout-components-3)
+  - [Navigation Components (1)](#navigation-components-1)
+  - [Wrapper Components (3)](#wrapper-components-3)
+  - [Miscellaneous Components (1)](#miscellaneous-components-1)
+- [Hooks (18)](#hooks-18)
+- [Architecture](#architecture)
+- [Key Features](#key-features)
+- [Getting Started](#getting-started)
+- [Next Steps](#next-steps)
+
+## What is RGO Front UI?
+
+RGO Front UI provides:
+
+- **Components**: 41 production-ready UI components across 7 categories
+- **Hooks**: 18 specialized hooks for forms, confirmations, translations, and more
+- **Providers**: 7 modular providers for theming, notifications, localization, and icons
+- **Services**: 3 utility services for local storage, offline caching, and web workers
+- **TypeScript**: Full type safety with comprehensive type definitions
+- **Storybook**: Interactive documentation with live examples
+
+## Component Categories
+
+### Input Components (17)
+
+Form controls and user input elements:
+
+- **RgoForm**: Advanced form wrapper with validation and submission handling
+- **RgoInputNumber**: Numeric input with min/max constraints
+- **RgoInputPassword**: Password input with visibility toggle
+- **RgoInputText**: Text input with helper text and error states
+- **RgoInputDate**: Date picker input
+- **RgoInputDateTime**: Combined date and time picker
+- **RgoInputTime**: Time-only picker
+- **RgoInputDuration**: Duration input (hours:minutes)
+- **RgoInputCounter**: Numeric counter with increment/decrement buttons
+- **RgoInputAutocomplete**: Searchable single-select with type-ahead
+- **RgoInputAutocompleteMultiple**: Searchable multi-select with chips
+- **RgoInputSelect**: Single-select dropdown
+- **RgoInputSelectMultiple**: Multi-select dropdown
+- **RgoInputSlider**: Range and value sliders
+- **RgoInputSwitch**: Toggle switch input
+- **RgoInputToggleButtonGroup**: Segmented button group
+
+### Data Display Components (12)
+
+Components for presenting data and information:
+
+- **RgoClientTable/RgoServerTable**: Feature-rich data tables with pagination, sorting, filtering
+- **RgoTable**: Composable table primitives (header cells, pagination, sorting)
+- **RgoIcon**: Standardized icon component using the icon registry
+- **RgoIconContainer**: SVG icon container with size normalization
+- **RgoValueWithUnit**: Numeric display with unit formatting
+- **RgoLabelBox**: Consistent labeling wrapper for form elements
+- **RgoTruncatedText**: Text truncation with expand/collapse
+- **RgoSnack**: Toast notification component
+- **RgoStopwatch**: Time duration display
+- **RgoVideoStreamPlayer**: WebRTC video streaming with OvenPlayer
+
+### Feedback Components (4)
+
+User feedback and status indication:
+
+- **RgoDialogHeader**: Standardized dialog headers
+- **RgoDrawer**: Slide-in side panel for detail views
+- **RgoLoader**: Loading indicators with size variants
+- **RgoQueryErrorLoaderSuspense**: Combined loading/error states for async operations
+
+### Layout Components (3)
+
+Page structure and layout:
+
+- **RgoPage**: Full-page layout container
+- **RgoPageBody**: Page body content area
+- **RgoPageHeader**: Page header with title and actions
+
+### Navigation Components (1)
+
+- **RgoTabs**: Tab navigation with URL state synchronization
+
+### Wrapper Components (3)
+
+Container and composition utilities:
+
+- **RgoFormSection**: Groups form fields in a vertical section
+- **RgoFormSectionGrid**: Responsive grid layout for form sections
+- **RgoInfiniteCanvas**: Pannable and zoomable infinite canvas with grid background
+
+### Miscellaneous Components (1)
+
+- **RgoInitializable**: Async initialization wrapper with loading state
+
+## Hooks (18)
+
+Specialized functionality hooks:
+
+- **useRgoForm**: Advanced form handling with Zod validation
+- **useRgoMultiStepForm**: Multi-step form wizard with step navigation and validation
+- **useRgoConfirm**: Modal confirmation dialogs
+- **useTranslation**: Internationalization and localization (i18next wrapper)
+- **useTranslationLocal**: Built-in front-ui translation strings (8 locales)
+- **useTheme**: Theme switching and customization
+- **useRgoTabs**: Tab navigation state management
+- **useRgoUrlState**: URL-synchronized state management
+- **useRgoDependentFieldValidation**: Cross-field form validation
+- **useRgoDebounce**: Debounced function calls
+- **useEffectOnce**: Run effect exactly once (Strict Mode safe)
+- **useRgoFullscreenListener**: Listen for fullscreen state changes
+- **useRgoResizeListener**: Listen for window resize events
+- **useRgoIcons**: Access the icon registry from RgoIconsProvider
+- **useRgoInfiniteCanvas**: Access infinite canvas transform state
+
+## Architecture
+
+Provider-based architecture with optional functionality:
+
+```tsx
+<RgoThemeProvider theme={customTheme}>
+  {/* Required */}
+  <RgoQueryClientProvider>
+    {/* Optional: for data fetching */}
+    <RgoLocalizationProvider>
+      {/* Optional: for translations */}
+      <RgoConfirmProvider>
+        {/* Optional: for confirmations */}
+        <RgoSnackbarProvider>
+          {/* Optional: for notifications */}
+          <YourApp />
+        </RgoSnackbarProvider>
+      </RgoConfirmProvider>
+    </RgoLocalizationProvider>
+  </RgoQueryClientProvider>
+</RgoThemeProvider>
+```
+
+## Key Features
+
+- **Consistent Design**: All components follow Material-UI design principles
+- **Responsive**: Mobile-first responsive design patterns
+- **Accessible**: ARIA compliance and keyboard navigation
+- **Customizable**: Theme-based styling and component variants
+- **Type Safe**: Full TypeScript support with strict typing
+- **Well Documented**: Interactive examples for every component and hook in Storybook
+
+## Getting Started
+
+1. **Installation**: Set up the library and peer dependencies
+2. **Providers**: Configure required providers for your app
+3. **Components**: Start using components in your application
+4. **Customization**: Customize themes and component behavior
+
+## Next Steps
+
+- 📦 [Installation Guide](?path=/docs/documentation-installation--docs) - Set up the library
+- 🎨 [Theming Guide](?path=/docs/documentation-theming-guide--docs) - Customize your theme
+- 🔌 [Providers Guide](?path=/docs/documentation-providers-guide--docs) - Configure providers
+- 📋 [Common Patterns](?path=/docs/documentation-common-patterns--docs) - Learn best practices
+- 📊 [Table Patterns](?path=/docs/documentation-table-patterns-guide--docs) - Build data tables
+- 📝 [Form & Input Style Guide](?path=/docs/documentation-form-and-input-style-guide--docs) - Form architecture
+- 🔧 [Services & Utilities](?path=/docs/documentation-services-and-utilities--docs) - Utility services
+- 🧩 **Browse Components** - Explore components in the sidebar
+- 🪝 **Explore Hooks** - Check out specialized hooks
+
+Ready to get started? Check out the [Installation Guide](?path=/docs/documentation-installation--docs) next!
