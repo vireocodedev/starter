@@ -3,6 +3,7 @@ const HISTORY_EN = {
   empty: "No history yet.",
   showUnchanged: "Show unchanged",
   hideUnchanged: "Hide unchanged",
+  viewHistory: "View history",
 } as const;
 
 export default HISTORY_EN;
