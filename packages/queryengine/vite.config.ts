@@ -2,7 +2,7 @@ import dts from "vite-plugin-dts";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // rollupTypes is intentionally disabled: api-extractor cannot bundle
   // @tanstack/react-query's unique-symbol `DataTag` types (re-exported via the
   // query layer). Per-file declarations still rewrite the `@/*` aliases to
@@ -19,13 +19,20 @@ export default defineConfig({
     }),
   ],
   build: {
+    emptyOutDir: mode !== "watch",
     lib: {
       entry: "src/index.ts",
       formats: ["es"],
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "zod", "@tanstack/react-query", "@preact/signals-react"],
+      external: [
+        "react",
+        "react-dom",
+        "zod",
+        "@tanstack/react-query",
+        "@preact/signals-react",
+      ],
     },
     sourcemap: true,
   },
@@ -33,4 +40,4 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.{test,spec}.ts"],
   },
-});
+}));

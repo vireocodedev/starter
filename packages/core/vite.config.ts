@@ -3,7 +3,7 @@ import dts from "vite-plugin-dts";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // Per-file declarations: api-extractor's rollup cannot bundle the deep MUI /
   // react-router type graphs. `entryRoot: "src"` roots the d.ts at
   // dist/index.d.ts; aliases are rewritten to relative paths; tests excluded.
@@ -17,6 +17,7 @@ export default defineConfig({
     }),
   ],
   build: {
+    emptyOutDir: mode !== "watch",
     lib: {
       entry: {
         index: resolve(__dirname, "src/index.ts"),
@@ -43,4 +44,4 @@ export default defineConfig({
     include: ["tests/**/*.{test,spec}.{ts,tsx}"],
     setupFiles: ["tests/setup.ts"],
   },
-});
+}));
