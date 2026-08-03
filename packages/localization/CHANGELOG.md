@@ -1,5 +1,11 @@
 # @vireocodedev/starter-localization
 
+## 0.8.0
+
+### Minor Changes
+
+- ada88d7: Remove tseep dependency, add turbo for build
+
 ## 0.7.0
 
 ### Minor Changes

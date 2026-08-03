@@ -1,5 +1,11 @@
 # @vireocodedev/starter-queryengine
 
+## 1.1.0
+
+### Minor Changes
+
+- ada88d7: Remove tseep dependency, add turbo for build
+
 ## 1.0.0
 
 ### Major Changes
