@@ -13,9 +13,9 @@ const DESKTOP_TABLE_BODY_CELL_HEIGHT = 40;
 function DesktopManagementTableSkeleton() {
   return (
     <DelayedRender>
-      <Card sx={{ overflow: "hidden" }}>
+      <Card sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <CardHeader
-          sx={{ p: 2 }}
+          sx={{ p: 2, flexShrink: 0 }}
           title={
             <Stack direction="row" spacing={1.5} alignItems="center">
               {/* noop */}
@@ -33,6 +33,8 @@ function DesktopManagementTableSkeleton() {
 
         <Box
           sx={{
+            flex: 1,
+            minHeight: 0,
             borderTop: "1px solid var(--mui-palette-grey-300)",
             overflow: "hidden",
           }}

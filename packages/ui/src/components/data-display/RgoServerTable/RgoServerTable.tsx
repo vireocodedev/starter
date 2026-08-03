@@ -16,6 +16,13 @@ export type RgoServerTableColumn<T> = DtBaseColumn<T, string>;
 export type RgoServerTableProps<T> = DtBaseProps<T> & {
   columns: RgoServerTableColumn<T>[];
   count: number;
+  /**
+   * Fill the available height of a flex-column parent instead of growing with the row count.
+   * The body scrolls internally and the header sticks, with no height measurement and no
+   * `calc(100dvh - Npx)` guess — so the table is at its final height on the very first paint.
+   * Takes precedence over {@link DtBaseProps.stickyMaxHeight}.
+   */
+  fillHeight?: boolean;
 } & PaginationProps;
 
 export function RgoServerTable<T>({
@@ -32,6 +39,7 @@ export function RgoServerTable<T>({
   className,
   highlighted,
   stickyMaxHeight,
+  fillHeight = false,
   paperClassName,
   noDataMessage = "No data available",
   disableHeader = false,
@@ -39,7 +47,8 @@ export function RgoServerTable<T>({
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
   const sortBy = pagination.sortBy;
   const sortDirection = pagination.sortDirection || "asc";
-  const useStickyHeader = typeof stickyMaxHeight === "number" || typeof stickyMaxHeight === "string";
+  const useStickyHeader =
+    fillHeight || typeof stickyMaxHeight === "number" || typeof stickyMaxHeight === "string";
 
   const handlePaginationChange: PaginationProps["onPaginationChange"] = React.useCallback(
     value => {
@@ -145,9 +154,19 @@ export function RgoServerTable<T>({
         outline: "1px solid var(--mui-palette-grey-300)",
         borderTopLeftRadius: "unset !important",
         borderTopRightRadius: "unset !important",
+        ...(fillHeight && {
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          "& > .MuiTablePagination-root": { flexShrink: 0 },
+        }),
       }}
     >
-      <TableContainer ref={tableContainerRef} sx={{ maxHeight: useStickyHeader ? stickyMaxHeight : undefined }}>
+      <TableContainer
+        ref={tableContainerRef}
+        sx={fillHeight ? { flex: 1, minHeight: 0 } : { maxHeight: useStickyHeader ? stickyMaxHeight : undefined }}
+      >
         <Table stickyHeader={useStickyHeader} className={`${className} rgo-table`} size={size}>
           {!disableHeader && (
             <TableHead>
