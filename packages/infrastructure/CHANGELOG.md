@@ -1,5 +1,11 @@
 # @vireocodedev/starter-infrastructure
 
+## 0.4.0
+
+### Minor Changes
+
+- ada88d7: Remove tseep dependency, add turbo for build
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,17 @@
 # @vireocodedev/starter-ui
 
+## 2.1.0
+
+### Minor Changes
+
+- ada88d7: Remove tseep dependency, add turbo for build
+
+### Patch Changes
+
+- Updated dependencies [ada88d7]
+  - @vireocodedev/starter-localization@0.8.0
+  - @vireocodedev/starter-history@0.4.0
+
 ## 2.0.0
 
 ### Major Changes

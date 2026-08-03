@@ -1,5 +1,11 @@
 # @vireocodedev/starter-history
 
+## 0.4.0
+
+### Minor Changes
+
+- ada88d7: Remove tseep dependency, add turbo for build
+
 ## 0.3.0
 
 ### Minor Changes
