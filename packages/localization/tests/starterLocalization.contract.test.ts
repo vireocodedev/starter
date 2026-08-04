@@ -1,6 +1,10 @@
-import { createStarterResources, STARTER_BASE_LOCALES, STARTER_TRANSLATION_NAMESPACES } from "@/index";
 import HISTORY_EN from "@/history/history.en";
 import HISTORY_HR from "@/history/history.hr";
+import {
+  createStarterResources,
+  STARTER_BASE_LOCALES,
+  STARTER_TRANSLATION_NAMESPACES,
+} from "@/index";
 import PLATFORM_EN from "@/platform/platform.en";
 import PLATFORM_HR from "@/platform/platform.hr";
 import QUERYENGINE_EN from "@/queryengine/queryengine.en";
@@ -14,7 +18,9 @@ function flattenKeys(obj: JsonRecord, prefix = ""): string[] {
   return Object.entries(obj)
     .flatMap(([key, value]) => {
       const path = prefix ? `${prefix}.${key}` : key;
-      return value !== null && typeof value === "object" && !Array.isArray(value)
+      return value !== null &&
+        typeof value === "object" &&
+        !Array.isArray(value)
         ? flattenKeys(value as JsonRecord, path)
         : [path];
     })
@@ -85,12 +91,14 @@ const EXPECTED_PLATFORM_KEYS = [
   "network.actionQueued",
   "network.actionUnavailable",
   "network.commandId",
+  "network.connectingToLiveUpdates",
   "network.createdAt",
   "network.dataUnavailable",
   "network.diagnostics",
   "network.errorMessage",
   "network.failedLoadingData",
   "network.httpMethod",
+  "network.hydratingInBackground",
   "network.lastHeartbeat",
   "network.lastSyncFailure",
   "network.mutationQueuedOffline",
@@ -184,7 +192,13 @@ const EXPECTED_QUERYENGINE_KEYS = [
   "value",
 ].sort();
 
-const EXPECTED_HISTORY_KEYS = ["empty", "hideUnchanged", "showUnchanged", "title", "viewHistory"].sort();
+const EXPECTED_HISTORY_KEYS = [
+  "empty",
+  "hideUnchanged",
+  "showUnchanged",
+  "title",
+  "viewHistory",
+].sort();
 
 describe.each([
   ["platform", PLATFORM_EN, PLATFORM_HR, EXPECTED_PLATFORM_KEYS],
@@ -196,7 +210,9 @@ describe.each([
   });
 
   it("keeps every base locale structurally identical to the canonical (en) shape", () => {
-    expect(flattenKeys(hr as JsonRecord)).toEqual(flattenKeys(en as JsonRecord));
+    expect(flattenKeys(hr as JsonRecord)).toEqual(
+      flattenKeys(en as JsonRecord),
+    );
   });
 });
 
@@ -206,20 +222,32 @@ describe("starter localization contract", () => {
   });
 
   it("ships the expected namespaces", () => {
-    expect([...STARTER_TRANSLATION_NAMESPACES]).toEqual(["platform", "queryengine", "history"]);
+    expect([...STARTER_TRANSLATION_NAMESPACES]).toEqual([
+      "platform",
+      "queryengine",
+      "history",
+    ]);
   });
 
   it("builds every namespace for every requested locale", () => {
-    const resources = createStarterResources({ locales: ["en", "hr"] as const });
+    const resources = createStarterResources({
+      locales: ["en", "hr"] as const,
+    });
 
     expect(Object.keys(resources).sort()).toEqual(["en", "hr"]);
     for (const locale of ["en", "hr"] as const) {
-      expect(Object.keys(resources[locale]).sort()).toEqual(["history", "platform", "queryengine"]);
+      expect(Object.keys(resources[locale]).sort()).toEqual([
+        "history",
+        "platform",
+        "queryengine",
+      ]);
     }
   });
 
   it("seeds unshipped locales from the base locale", () => {
-    const resources = createStarterResources({ locales: ["en", "de"] as const });
+    const resources = createStarterResources({
+      locales: ["en", "de"] as const,
+    });
 
     expect(resources.de.platform).toEqual(resources.en.platform);
     expect(resources.de.queryengine).toEqual(resources.en.queryengine);

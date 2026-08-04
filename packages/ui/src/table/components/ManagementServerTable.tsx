@@ -59,10 +59,16 @@ export function ManagementServerTable<TElement>({
   const mobileSearchNode = isCompact ? renderMobileSearch?.() : undefined;
 
   return (
-    <ResponsiveCard sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+    <ResponsiveCard
+      sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+    >
       {!isCompact && (
         <CardHeader
-          sx={{ p: 2, flexShrink: 0, backgroundColor: "var(--mui-palette-grey-50)" }}
+          sx={{
+            p: 2,
+            flexShrink: 0,
+            backgroundColor: "var(--mui-palette-grey-50)",
+          }}
           title={filtersNode}
         />
       )}

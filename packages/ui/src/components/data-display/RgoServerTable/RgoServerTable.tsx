@@ -7,7 +7,15 @@ import {
 import { RgoTableCellSortable } from "@/components/data-display/RgoTable/components/RgoTableCellSortable/RgoTableCellSortable";
 import { RgoTablePagination } from "@/components/data-display/RgoTable/components/RgoTablePagination/RgoTablePagination";
 import { RgoTableRowExpandable } from "@/components/data-display/RgoTable/components/RgoTableRowExpandable/RgoTableRowExpandable";
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import React from "react";
 import "./RgoServerTable.css";
 
@@ -48,15 +56,18 @@ export function RgoServerTable<T>({
   const sortBy = pagination.sortBy;
   const sortDirection = pagination.sortDirection || "asc";
   const useStickyHeader =
-    fillHeight || typeof stickyMaxHeight === "number" || typeof stickyMaxHeight === "string";
+    fillHeight ||
+    typeof stickyMaxHeight === "number" ||
+    typeof stickyMaxHeight === "string";
 
-  const handlePaginationChange: PaginationProps["onPaginationChange"] = React.useCallback(
-    value => {
-      onPaginationChange(value);
-      tableContainerRef.current?.scrollTo({ top: 0 });
-    },
-    [onPaginationChange],
-  );
+  const handlePaginationChange: PaginationProps["onPaginationChange"] =
+    React.useCallback(
+      (value) => {
+        onPaginationChange(value);
+        tableContainerRef.current?.scrollTo({ top: 0 });
+      },
+      [onPaginationChange],
+    );
 
   const columns = React.useMemo(() => {
     return [...columnsProp].sort((a, b) => {
@@ -65,15 +76,23 @@ export function RgoServerTable<T>({
       // third those with sticky === "right"
       if (a.sticky === "left" && b.sticky !== "left") return -1;
       if (a.sticky !== "left" && b.sticky === "left") return 1;
-      if ((a.sticky === false || a.sticky === undefined) && b.sticky === "right") return -1;
-      if (a.sticky === "right" && (b.sticky === false || b.sticky === undefined)) return 1;
+      if (
+        (a.sticky === false || a.sticky === undefined) &&
+        b.sticky === "right"
+      )
+        return -1;
+      if (
+        a.sticky === "right" &&
+        (b.sticky === false || b.sticky === undefined)
+      )
+        return 1;
       return 0;
     });
   }, [columnsProp]);
 
   const onSortColumnClick = React.useCallback(
     (id: string) => {
-      handlePaginationChange(prev => {
+      handlePaginationChange((prev) => {
         let newSortBy = id;
         let newSortDirection: "asc" | "desc" = "desc";
 
@@ -94,55 +113,76 @@ export function RgoServerTable<T>({
 
   const headerCells = React.useMemo(
     () =>
-      columns.map(({ id, HeaderComponent, align, sort, widthPctShare, widthPxMin }, i) => {
-        const active = id === sortBy;
-        const direction = sortDirection;
-        const colSpan = i === 0 && isAccordionComponentDefined ? 2 : undefined;
+      columns.map(
+        (
+          { id, HeaderComponent, align, sort, widthPctShare, widthPxMin },
+          i,
+        ) => {
+          const active = id === sortBy;
+          const direction = sortDirection;
+          const colSpan =
+            i === 0 && isAccordionComponentDefined ? 2 : undefined;
 
-        return (
-          <React.Fragment key={id}>
-            {sort ? (
-              <RgoTableCellSortable
-                id={id}
-                align={align}
-                HeaderComponent={HeaderComponent}
-                active={active}
-                direction={direction}
-                priority={undefined}
-                onClick={onSortColumnClick}
-                widthPctShare={widthPctShare}
-                colSpan={colSpan}
-                widthPxMin={widthPxMin}
-                sx={calculateStickySx(
-                  columns,
-                  i,
-                  isAccordionComponentDefined && i > 0 ? (size === "medium" ? 52 : 46) : 0,
-                  true,
-                )}
-              />
-            ) : (
-              <TableCell
-                align={align}
-                data-column={id}
-                sx={{
-                  width: `${widthPctShare}%`,
-                  minWidth: `${widthPxMin}px`,
-                  ...calculateStickySx(
+          return (
+            <React.Fragment key={id}>
+              {sort ? (
+                <RgoTableCellSortable
+                  id={id}
+                  align={align}
+                  HeaderComponent={HeaderComponent}
+                  active={active}
+                  direction={direction}
+                  priority={undefined}
+                  onClick={onSortColumnClick}
+                  widthPctShare={widthPctShare}
+                  colSpan={colSpan}
+                  widthPxMin={widthPxMin}
+                  sx={calculateStickySx(
                     columns,
                     i,
-                    isAccordionComponentDefined && i > 0 ? (size === "medium" ? 52 : 46) : 0,
+                    isAccordionComponentDefined && i > 0
+                      ? size === "medium"
+                        ? 52
+                        : 46
+                      : 0,
                     true,
-                  ),
-                }}
-                colSpan={colSpan}
-              >
-                <HeaderComponent />
-              </TableCell>
-            )}
-          </React.Fragment>
-        );
-      }),
-    [columns, sortBy, sortDirection, onSortColumnClick, isAccordionComponentDefined, size],
+                  )}
+                />
+              ) : (
+                <TableCell
+                  align={align}
+                  data-column={id}
+                  sx={{
+                    width: `${widthPctShare}%`,
+                    minWidth: `${widthPxMin}px`,
+                    ...calculateStickySx(
+                      columns,
+                      i,
+                      isAccordionComponentDefined && i > 0
+                        ? size === "medium"
+                          ? 52
+                          : 46
+                        : 0,
+                      true,
+                    ),
+                  }}
+                  colSpan={colSpan}
+                >
+                  <HeaderComponent />
+                </TableCell>
+              )}
+            </React.Fragment>
+          );
+        },
+      ),
+    [
+      columns,
+      sortBy,
+      sortDirection,
+      onSortColumnClick,
+      isAccordionComponentDefined,
+      size,
+    ],
   );
 
   return (
@@ -165,9 +205,17 @@ export function RgoServerTable<T>({
     >
       <TableContainer
         ref={tableContainerRef}
-        sx={fillHeight ? { flex: 1, minHeight: 0 } : { maxHeight: useStickyHeader ? stickyMaxHeight : undefined }}
+        sx={
+          fillHeight
+            ? { flex: 1, minHeight: 0 }
+            : { maxHeight: useStickyHeader ? stickyMaxHeight : undefined }
+        }
       >
-        <Table stickyHeader={useStickyHeader} className={`${className} rgo-table`} size={size}>
+        <Table
+          stickyHeader={useStickyHeader}
+          className={`${className} rgo-table`}
+          size={size}
+        >
           {!disableHeader && (
             <TableHead>
               <TableRow>{headerCells}</TableRow>
@@ -175,8 +223,10 @@ export function RgoServerTable<T>({
           )}
 
           <TableBody>
-            {data.map(item => {
-              const isExpandable = isRowExpandable ? isRowExpandable(item) : true;
+            {data.map((item) => {
+              const isExpandable = isRowExpandable
+                ? isRowExpandable(item)
+                : true;
 
               return (
                 <React.Fragment key={keyMapper(item)}>
@@ -190,9 +240,24 @@ export function RgoServerTable<T>({
                       tableSize={size}
                     />
                   ) : (
-                    <TableRow className={highlighted?.(item) ? "highlighted" : ""} hover role="checkbox" tabIndex={-1}>
+                    <TableRow
+                      className={highlighted?.(item) ? "highlighted" : ""}
+                      hover
+                      role="checkbox"
+                      tabIndex={-1}
+                    >
                       {columns.map(({ id, align, BodyComponent }, index) => (
-                        <TableCell key={id} align={align} sx={calculateStickySx(columns, index, null, false, true)}>
+                        <TableCell
+                          key={id}
+                          align={align}
+                          sx={calculateStickySx(
+                            columns,
+                            index,
+                            null,
+                            false,
+                            true,
+                          )}
+                        >
                           <BodyComponent element={item} index={-1} />
                         </TableCell>
                       ))}
@@ -203,7 +268,10 @@ export function RgoServerTable<T>({
             })}
             {data.length === 0 && (
               <TableRow>
-                <TableCell colSpan={columns.length + (AccordionComponent ? 1 : 0)} align="center">
+                <TableCell
+                  colSpan={columns.length + (AccordionComponent ? 1 : 0)}
+                  align="center"
+                >
                   {noDataMessage}
                 </TableCell>
               </TableRow>
