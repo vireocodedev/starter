@@ -1,0 +1,43 @@
+{
+  "package": "@vireocodedev/starter-infrastructure",
+  "entryPoints": {
+    ".": {
+      "exports": [
+        "APP_SESSION_EXPIRED_EVENT",
+        "AppOfflineError",
+        "AppOfflineQueuedError",
+        "OfflineModeNotSupportedError",
+        "PersistentSignal",
+        "SanitizedAxiosError",
+        "TANSTACK_QUERY_CLIENT",
+        "beginManualLogout",
+        "cancelManualLogout",
+        "createPersistentSignal",
+        "findFirstTruthy",
+        "formatDate",
+        "formatDateTime",
+        "formatDateTimeUpsert",
+        "formatDateUpsert",
+        "formatTime",
+        "formatTimeUpsert",
+        "getAppOnlineStatus",
+        "getAxiosRequestPath",
+        "isAppOfflineError",
+        "isRequestCanceled",
+        "notifySessionExpired",
+        "resetSessionExpiryNotification",
+        "sanitizeAxiosError",
+        "subscribeToSessionExpiry",
+        "useAppOnlineStatus"
+      ],
+      "dependencies": [
+        "@preact/signals-react",
+        "@tanstack/react-query",
+        "axios",
+        "dayjs",
+        "react"
+      ],
+      "workerSafe": false
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "package": "@vireocodedev/starter-localization",
+  "entryPoints": {
+    ".": {
+      "exports": [
+        "CreateHistoryResourcesConfig",
+        "CreatePlatformResourcesConfig",
+        "CreateQueryEngineResourcesConfig",
+        "CreateStarterResourcesConfig",
+        "DeepPartial",
+        "HISTORY_BASE_LOCALES",
+        "HISTORY_TRANSLATION_NAMESPACE",
+        "HistoryBaseLocale",
+        "HistoryResources",
+        "HistoryResourcesOverride",
+        "HistoryResourcesShape",
+        "HistoryTranslationNamespace",
+        "PLATFORM_BASE_LOCALES",
+        "PLATFORM_TRANSLATION_NAMESPACE",
+        "PLATFORM_TRANSLATION_RESOURCES",
+        "PlatformBaseLocale",
+        "PlatformResources",
+        "PlatformResourcesOverride",
+        "PlatformResourcesShape",
+        "PlatformTranslationNamespace",
+        "QUERYENGINE_BASE_LOCALES",
+        "QUERYENGINE_TRANSLATION_NAMESPACE",
+        "QueryEngineBaseLocale",
+        "QueryEngineResources",
+        "QueryEngineResourcesOverride",
+        "QueryEngineResourcesShape",
+        "QueryEngineTranslationNamespace",
+        "STARTER_BASE_LOCALES",
+        "STARTER_TRANSLATION_NAMESPACES",
+        "StarterBaseLocale",
+        "StarterNamespaceResources",
+        "StarterResourcesOverride",
+        "StarterTranslationNamespace",
+        "WidenLeaves",
+        "createHistoryResources",
+        "createNamespaceResources",
+        "createPlatformResources",
+        "createQueryEngineResources",
+        "createStarterResources",
+        "deepMerge",
+        "historyBaseResources",
+        "platformBaseResources",
+        "queryEngineBaseResources",
+        "registerPlatformResources",
+        "registerStarterResources",
+        "useHistoryTranslation",
+        "usePlatformTranslation",
+        "useQueryEngineTranslation"
+      ],
+      "dependencies": [
+        "react-i18next"
+      ],
+      "workerSafe": false
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "package": "@vireocodedev/starter-queryengine",
+  "entryPoints": {
+    ".": {
+      "exports": [
+        "CreateQueryEngineApiOptions",
+        "QueryEngineApi",
+        "QueryEngineEntityDefinition",
+        "QueryEngineEntityKey",
+        "QueryEngineEntitySchemas",
+        "QueryEngineEntitySummary",
+        "QueryEngineFieldDefinition",
+        "QueryEngineFieldType",
+        "QueryEngineFieldTypeSchema",
+        "QueryEngineHttpClient",
+        "QueryEngineOperator",
+        "QueryEngineOperatorSchema",
+        "QueryEngineQueries",
+        "QueryEngineQueryKey",
+        "QueryEngineRelationFieldOptionsRequest",
+        "QueryEngineRelationMode",
+        "QueryEngineRelationModeSchema",
+        "QueryEngineRelationOption",
+        "QueryEngineRelationOptionSchema",
+        "QueryEngineRequestOptions",
+        "createQueryEngineApi",
+        "createQueryEngineEntitySchemas",
+        "createQueryEngineQueries",
+        "sigQueryEngineEntityDefinitions",
+        "sigQueryEngineEntitySummaries"
+      ],
+      "dependencies": [
+        "@preact/signals-react",
+        "@tanstack/react-query",
+        "zod"
+      ],
+      "workerSafe": false
+    }
+  }
+}

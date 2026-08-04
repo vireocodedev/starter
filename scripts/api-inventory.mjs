@@ -21,16 +21,22 @@
  * rather than failing - the EXPORTED and REACHABLE analysis stands on its own.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import {
+  analyseExportsMap,
+  collectExports,
+  PACKAGE_PREFIX,
+  readStarterPackages,
+  SCOPE,
+  sourceForEntry,
+  walkSources,
+} from "./lib/module-graph.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagesRoot = join(repoRoot, "packages");
-
-const SCOPE = "@vireocodedev";
-const PACKAGE_PREFIX = "starter-";
 
 const args = process.argv.slice(2);
 const asJson = args.includes("--json");
@@ -39,142 +45,6 @@ const appRoot = resolve(
   appFlagIndex === -1 ? join(repoRoot, "..", "leather-production", "frontend") : args[appFlagIndex + 1],
 );
 
-const SOURCE_EXTENSIONS = [".ts", ".tsx"];
-
-function walk(directory, predicate) {
-  if (!existsSync(directory)) return [];
-  return readdirSync(directory).flatMap(entry => {
-    if (entry === "node_modules" || entry === "dist") return [];
-    const full = join(directory, entry);
-    if (statSync(full).isDirectory()) return walk(full, predicate);
-    return predicate(full) ? [full] : [];
-  });
-}
-
-/* ------------------------------------------------------------------ *
- * B. Exported - symbols reachable from a declared entry point.
- * ------------------------------------------------------------------ */
-
-/** Resolves a `@/foo` or relative specifier to a file on disk. */
-function resolveSpecifier(specifier, fromFile, srcRoot) {
-  const base = specifier.startsWith("@/")
-    ? join(srcRoot, specifier.slice(2))
-    : specifier.startsWith(".")
-      ? resolve(dirname(fromFile), specifier)
-      : undefined;
-
-  if (!base) return undefined;
-
-  const candidates = [
-    `${base}.ts`,
-    `${base}.tsx`,
-    join(base, "index.ts"),
-    join(base, "index.tsx"),
-    base.replace(/\.js$/, ".ts"),
-    base.replace(/\.js$/, ".tsx"),
-  ];
-  return candidates.find(candidate => existsSync(candidate));
-}
-
-function hasExportModifier(node) {
-  return ts.canHaveModifiers(node)
-    ? (ts.getModifiers(node) ?? []).some(modifier => modifier.kind === ts.SyntaxKind.ExportKeyword)
-    : false;
-}
-
-/** Collects every named export of a module, following `export *` chains. */
-function collectExports(file, srcRoot, seen = new Set()) {
-  const names = new Set();
-  if (seen.has(file)) return names;
-  seen.add(file);
-
-  const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
-
-  for (const statement of source.statements) {
-    if (ts.isExportDeclaration(statement)) {
-      if (statement.exportClause && ts.isNamedExports(statement.exportClause)) {
-        for (const element of statement.exportClause.elements) names.add(element.name.text);
-        continue;
-      }
-
-      const specifier = statement.moduleSpecifier;
-      if (!specifier || !ts.isStringLiteral(specifier)) continue;
-      const target = resolveSpecifier(specifier.text, file, srcRoot);
-      if (target) for (const name of collectExports(target, srcRoot, seen)) names.add(name);
-      continue;
-    }
-
-    if (!hasExportModifier(statement)) continue;
-
-    if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        if (ts.isIdentifier(declaration.name)) names.add(declaration.name.text);
-      }
-      continue;
-    }
-
-    if (
-      (ts.isFunctionDeclaration(statement) ||
-        ts.isClassDeclaration(statement) ||
-        ts.isInterfaceDeclaration(statement) ||
-        ts.isTypeAliasDeclaration(statement) ||
-        ts.isEnumDeclaration(statement) ||
-        ts.isModuleDeclaration(statement)) &&
-      statement.name &&
-      ts.isIdentifier(statement.name)
-    ) {
-      names.add(statement.name.text);
-    }
-  }
-
-  return names;
-}
-
-/* ------------------------------------------------------------------ *
- * C. Reachable - what the `exports` map physically lets a consumer import.
- * ------------------------------------------------------------------ */
-
-function analyseExportsMap(packageDirectory, exportsMap) {
-  const declared = [];
-  const wildcards = [];
-
-  for (const [subpath, target] of Object.entries(exportsMap ?? {})) {
-    if (subpath.includes("*")) wildcards.push({ subpath, target });
-    else declared.push({ subpath, target });
-  }
-
-  // A wildcard subpath makes every matching build artefact importable.
-  let wildcardFiles = [];
-  if (wildcards.length > 0) {
-    const distRoot = join(packageDirectory, "dist");
-    wildcardFiles = walkDist(distRoot)
-      .filter(file => file.endsWith(".js"))
-      .map(file => `./${relative(distRoot, file).replace(/\\/g, "/").replace(/\.js$/, "")}`);
-  }
-
-  return { declared, wildcards, wildcardFiles };
-}
-
-function walkDist(directory) {
-  if (!existsSync(directory)) return [];
-  return readdirSync(directory).flatMap(entry => {
-    const full = join(directory, entry);
-    return statSync(full).isDirectory() ? walkDist(full) : [full];
-  });
-}
-
-/** Maps a declared entry's dist target back to its source file. */
-function sourceForEntry(packageDirectory, target) {
-  const distPath = typeof target === "string" ? target : (target?.import ?? target?.default);
-  if (!distPath) return undefined;
-  const withoutDist = distPath.replace(/^\.\/dist\//, "").replace(/\.js$/, "");
-  const candidates = [
-    join(packageDirectory, "src", `${withoutDist}.ts`),
-    join(packageDirectory, "src", `${withoutDist}.tsx`),
-  ];
-  return candidates.find(candidate => existsSync(candidate));
-}
-
 /* ------------------------------------------------------------------ *
  * A. Used - what the consuming app imports, and how.
  * ------------------------------------------------------------------ */
@@ -182,9 +52,7 @@ function sourceForEntry(packageDirectory, target) {
 function collectAppUsage(root) {
   if (!existsSync(root)) return undefined;
 
-  const files = ["src", "tests", "scripts"].flatMap(directory =>
-    walk(join(root, directory), file => SOURCE_EXTENSIONS.some(extension => file.endsWith(extension))),
-  );
+  const files = ["src", "tests", "scripts"].flatMap(directory => walkSources(join(root, directory)));
 
   /** package name -> { symbols: Map<symbol, Set<file>>, subpaths: Map<subpath, Set<file>> } */
   const usage = new Map();
@@ -247,15 +115,7 @@ function addSymbol(record, symbol, file, root) {
 function buildReport() {
   const appUsage = collectAppUsage(appRoot);
 
-  const packages = readdirSync(packagesRoot)
-    .filter(entry => statSync(join(packagesRoot, entry)).isDirectory())
-    .sort();
-
-  return packages.map(directoryName => {
-    const packageDirectory = join(packagesRoot, directoryName);
-    const manifest = JSON.parse(readFileSync(join(packageDirectory, "package.json"), "utf8"));
-    const srcRoot = join(packageDirectory, "src");
-
+  return readStarterPackages(packagesRoot).map(({ directoryName, directory: packageDirectory, manifest, srcRoot }) => {
     const { declared, wildcards, wildcardFiles } = analyseExportsMap(packageDirectory, manifest.exports);
 
     const entries = declared.map(entry => {

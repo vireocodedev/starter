@@ -1,7 +1,6 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -13,83 +12,29 @@ import { describe, expect, it } from "vitest";
  * `closeNotiSnackStatic`, `RgoWebWorkerService`, `RgoSseProvider`,
  * `RgoInitializable`), each found only by chance. This test parses every
  * `import ... from "@vireocodedev/starter-ui"` in the `.mdx` docs and in the
- * story demos, and asserts the symbol is actually exported from the barrel.
+ * story demos, and asserts the symbol is actually exported.
+ *
+ * It checks against `api-surface.json` - the frozen public surface - rather than
+ * against the barrel directly. A symbol can sit in a module the barrel never
+ * re-exports, or behind an entry point the docs never mention; either way it is
+ * not something a reader can import, so documenting it is a bug. The snapshot is
+ * kept honest by `scripts/public-surface.mjs`.
  */
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const srcRoot = join(packageRoot, "src");
-const barrel = join(srcRoot, "index.ts");
 
 const PACKAGE_NAME = "@vireocodedev/starter-ui";
 
-/** Resolves a barrel-style `@/foo` specifier to a file on disk. */
-function resolveSpecifier(specifier: string, fromFile: string): string | undefined {
-  const base = specifier.startsWith("@/")
-    ? join(srcRoot, specifier.slice(2))
-    : specifier.startsWith(".")
-      ? resolve(dirname(fromFile), specifier)
-      : undefined;
+const surface = JSON.parse(readFileSync(join(packageRoot, "api-surface.json"), "utf8")) as {
+  package: string;
+  entryPoints: Record<string, { exports: string[] }>;
+};
 
-  if (!base) return undefined;
-
-  const candidates = [`${base}.ts`, `${base}.tsx`, join(base, "index.ts"), join(base, "index.tsx")];
-  return candidates.find(candidate => existsSync(candidate));
-}
-
-function hasExportModifier(node: ts.Node): boolean {
-  return ts.canHaveModifiers(node)
-    ? (ts.getModifiers(node) ?? []).some(modifier => modifier.kind === ts.SyntaxKind.ExportKeyword)
-    : false;
-}
-
-/** Collects every named export of a module, following `export *` chains. */
-function collectExports(file: string, seen = new Set<string>()): Set<string> {
-  const names = new Set<string>();
-  if (seen.has(file)) return names;
-  seen.add(file);
-
-  const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
-
-  for (const statement of source.statements) {
-    if (ts.isExportDeclaration(statement)) {
-      if (statement.exportClause && ts.isNamedExports(statement.exportClause)) {
-        for (const element of statement.exportClause.elements) names.add(element.name.text);
-        continue;
-      }
-
-      // `export * from "..."` - recurse into local modules only.
-      const specifier = statement.moduleSpecifier;
-      if (!specifier || !ts.isStringLiteral(specifier)) continue;
-      const target = resolveSpecifier(specifier.text, file);
-      if (target) for (const name of collectExports(target, seen)) names.add(name);
-      continue;
-    }
-
-    if (!hasExportModifier(statement)) continue;
-
-    if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        if (ts.isIdentifier(declaration.name)) names.add(declaration.name.text);
-      }
-      continue;
-    }
-
-    if (
-      (ts.isFunctionDeclaration(statement) ||
-        ts.isClassDeclaration(statement) ||
-        ts.isInterfaceDeclaration(statement) ||
-        ts.isTypeAliasDeclaration(statement) ||
-        ts.isEnumDeclaration(statement) ||
-        ts.isModuleDeclaration(statement)) &&
-      statement.name &&
-      ts.isIdentifier(statement.name)
-    ) {
-      names.add(statement.name.text);
-    }
-  }
-
-  return names;
-}
+/** subpath (`.`, `./api`, ...) -> the symbols importable through it. */
+const exportsBySubpath = new Map(
+  Object.entries(surface.entryPoints).map(([subpath, entry]) => [subpath, new Set(entry.exports)]),
+);
 
 const DOC_EXTENSIONS = [".mdx", ".ts", ".tsx"];
 
@@ -103,20 +48,27 @@ function findDocFiles(directory: string): string[] {
 
 interface DocReference {
   doc: string;
+  subpath: string;
   symbol: string;
 }
+
+// `[^}]` keeps each match bounded to a single import clause, including
+// multi-line ones, without running past the closing brace into later prose.
+const IMPORT_PATTERN = new RegExp(
+  `import\\s+(?:type\\s+)?\\{([^}]*)\\}\\s*from\\s*["']${PACKAGE_NAME}(/[^"']+)?["']`,
+  "g",
+);
 
 /** Extracts the named specifiers of every `starter-ui` import in a doc or story. */
 function extractReferences(file: string): DocReference[] {
   const content = readFileSync(file, "utf8");
   const doc = relative(packageRoot, file);
-  // `[^}]` keeps each match bounded to a single import clause, including
-  // multi-line ones, without running past the closing brace into later prose.
-  const importPattern = new RegExp(`import\\s+(?:type\\s+)?\\{([^}]*)\\}\\s*from\\s*["']${PACKAGE_NAME}["']`, "g");
 
   const references: DocReference[] = [];
 
-  for (const match of content.matchAll(importPattern)) {
+  for (const match of content.matchAll(IMPORT_PATTERN)) {
+    const subpath = match[2] ? `.${match[2]}` : ".";
+
     for (const raw of (match[1] ?? "").split(",")) {
       const symbol = raw
         .trim()
@@ -124,7 +76,7 @@ function extractReferences(file: string): DocReference[] {
         .split(/\s+as\s+/)[0]
         ?.trim();
 
-      if (symbol) references.push({ doc, symbol });
+      if (symbol) references.push({ doc, subpath, symbol });
     }
   }
 
@@ -132,21 +84,29 @@ function extractReferences(file: string): DocReference[] {
 }
 
 describe("starter-ui docs contract", () => {
-  const exported = collectExports(barrel);
   const references = findDocFiles(srcRoot).flatMap(extractReferences);
 
-  it("resolves the package barrel", () => {
-    expect(exported.size).toBeGreaterThan(100);
+  it("resolves the frozen public surface", () => {
+    expect(surface.package).toBe(PACKAGE_NAME);
+    expect(exportsBySubpath.get(".")?.size ?? 0).toBeGreaterThan(100);
   });
 
   it("finds documented imports to verify", () => {
     expect(references.length).toBeGreaterThan(50);
   });
 
-  it("only documents symbols the package actually exports", () => {
+  it("only documents entry points the package declares", () => {
+    const undeclared = references
+      .filter(({ subpath }) => !exportsBySubpath.has(subpath))
+      .map(({ doc, subpath }) => `${subpath} (${doc})`);
+
+    expect([...new Set(undeclared)]).toEqual([]);
+  });
+
+  it("only documents symbols the matching entry point actually exports", () => {
     const missing = references
-      .filter(({ symbol }) => !exported.has(symbol))
-      .map(({ doc, symbol }) => `${symbol} (${doc})`);
+      .filter(({ subpath, symbol }) => exportsBySubpath.has(subpath) && !exportsBySubpath.get(subpath)!.has(symbol))
+      .map(({ doc, subpath, symbol }) => `${symbol} from "${subpath}" (${doc})`);
 
     expect(missing).toEqual([]);
   });

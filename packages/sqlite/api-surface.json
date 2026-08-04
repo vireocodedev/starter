@@ -1,0 +1,61 @@
+{
+  "package": "@vireocodedev/starter-sqlite",
+  "entryPoints": {
+    ".": {
+      "exports": [
+        "CreateSqliteWorkerRuntimeConfigInput",
+        "HYDRATION_ENTITY_STATE_SQLITE_REQUEST_HANDLERS",
+        "HydrationEntityStateSqliteOperationMap",
+        "OFFLINE_SYNC_COMMAND_SQLITE_REQUEST_HANDLERS",
+        "OfflineSyncCommandRecord",
+        "OfflineSyncCommandSqliteOperationMap",
+        "SQL_CONSOLE_SQLITE_REQUEST_HANDLERS",
+        "SqlConsoleSqliteOperationMap",
+        "SqlExecutionResult",
+        "SqlExecutionStatementResult",
+        "SqlPagedQueryRequest",
+        "SqlPagedQueryResult",
+        "SqliteClientRuntimeConfig",
+        "SqliteDatabase",
+        "SqliteEntityBundle",
+        "SqliteEntityOperationMapFromBundle",
+        "SqliteEntityRecordFromBundle",
+        "SqliteEntitySpec",
+        "SqliteEntitySseConfig",
+        "SqliteHydrationEntityStateRecord",
+        "SqliteMigration",
+        "SqliteRequestHandler",
+        "SqliteRequestHandlers",
+        "SqliteStatement",
+        "SqliteWorkerEntityBundleConfig",
+        "SqliteWorkerRuntimeConfig",
+        "WorkerRequest",
+        "WorkerRequestInput",
+        "WorkerResponse",
+        "WorkerResponseResult",
+        "createSqliteClientRuntime",
+        "createSqliteEntityBundle",
+        "createSqliteRequestHandlers",
+        "createSqliteWorkerRuntime",
+        "createSqliteWorkerRuntimeConfig",
+        "deleteOfflineSyncCommands",
+        "deleteSqliteRowsByKey",
+        "dispatchSqliteRequest",
+        "enqueueOfflineSyncCommand",
+        "executePagedQuery",
+        "executeSqlScript",
+        "getOfflineSyncCommandsBatch",
+        "getOfflineSyncQueueSize",
+        "listHydrationEntityStates",
+        "listSqliteRows",
+        "mergeSqliteRequestHandlers",
+        "runSqliteTransaction",
+        "upsertHydrationEntityState"
+      ],
+      "dependencies": [
+        "@sqlite.org/sqlite-wasm"
+      ],
+      "workerSafe": true
+    }
+  }
+}
