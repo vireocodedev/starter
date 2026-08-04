@@ -28,7 +28,7 @@ Internationalized applications need three i18n layers working together:
 import { RgoLocalizationProvider } from "@vireocodedev/starter-ui";
 
 // i18next must be initialized BEFORE this provider mounts.
-// Typically done in a parent RgoInitializable or an app-level init.
+// Typically done in a parent RgoInitializeProvider or an app-level init.
 
 function App() {
   return (
@@ -77,11 +77,11 @@ No configuration props. The provider reads the current language from `i18n.langu
 <></>   // empty fragment — children are not mounted
 
 // If i18next IS ready:
-<RgoInitializable onInit={registerCountryLocales}>
+<RgoInitializeProvider onInit={registerCountryLocales}>
   <LocalizationProvider adapterLocale={dayjsLocale} dateAdapter={AdapterDayjs}>
     {children}
   </LocalizationProvider>
-</RgoInitializable>
+</RgoInitializeProvider>
 ```
 
 ---
@@ -192,7 +192,7 @@ This means:
 
 ## Country name registration
 
-On first mount, `RgoInitializable` runs the `onInit` function once, which registers country locale data:
+On first mount, `RgoInitializeProvider` runs the `onInit` function once, which registers country locale data:
 
 ```tsx
 import countries from "i18n-iso-countries";
@@ -268,7 +268,7 @@ RgoThemeProvider
 Consumer apps typically wrap `RgoLocalizationProvider` in their own initializable provider that configures `i18next`:
 
 ```tsx
-import { RgoLocalizationProvider, RgoInitializable, type RgoProvider } from "@vireocodedev/starter-ui";
+import { RgoLocalizationProvider, RgoInitializeProvider, type RgoProvider } from "@vireocodedev/starter-ui";
 import { configureI18nClient } from "@vireocodedev/starter-ui";
 import i18n from "i18next";
 import { AppTranslations } from "./translations";
@@ -278,9 +278,9 @@ function onInit() {
 }
 
 export const AppLocalizationProvider: RgoProvider = ({ children }) => (
-  <RgoInitializable onInit={onInit}>
+  <RgoInitializeProvider onInit={onInit}>
     <RgoLocalizationProvider>{children}</RgoLocalizationProvider>
-  </RgoInitializable>
+  </RgoInitializeProvider>
 );
 ```
 
@@ -290,6 +290,6 @@ export const AppLocalizationProvider: RgoProvider = ({ children }) => (
 
 - **No custom context** — delegates to MUI X's `LocalizationProvider` and `react-i18next`.
 - **Blocks rendering** until i18next is ready — acts as a Suspense-like gate.
-- **Country locale registration is idempotent** — `RgoInitializable` ensures `onInit` runs exactly once.
+- **Country locale registration is idempotent** — `RgoInitializeProvider` ensures `onInit` runs exactly once.
 - **dayjs locale imports are bundled** — all 8 locale files are statically imported (no dynamic loading).
 - **i18next must be initialized externally** — this provider does not configure i18next itself; it only consumes it.

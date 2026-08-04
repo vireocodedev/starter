@@ -220,10 +220,11 @@ function App() {
 
 ## Using the useTheme Hook
 
-The `useTheme` hook provides access to the current MUI theme:
+MUI's `useTheme` hook provides access to the current theme. Import it from `@mui/material` — `RgoThemeProvider` mounts
+MUI's own `ThemeProvider`, so the standard hook works unchanged:
 
 ```tsx
-import { useTheme } from "@vireocodedev/starter-ui";
+import { useTheme } from "@mui/material";
 
 function ThemedComponent() {
   const theme = useTheme();

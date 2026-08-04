@@ -163,7 +163,7 @@ const meta: Meta<typeof FormDemo> = {
     schema: {
       control: false,
       description: "Zod schema factory function that receives translation function and returns validation schema",
-      table: { type: { summary: "(t: I18nTranslationFn) => z.ZodType<TFieldValues>" } },
+      table: { type: { summary: "(t: RgoTranslationFn) => z.ZodType<TFieldValues>" } },
     },
   },
   tags: ["autodocs"],

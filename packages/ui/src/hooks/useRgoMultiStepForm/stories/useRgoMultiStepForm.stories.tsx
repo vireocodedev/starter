@@ -68,7 +68,7 @@ type Step<FormData> = {
   label: string;
 };
 
-type StepConfigFn<FormData> = (t: I18nTranslationFn) => Step<FormData>[];
+type StepConfigFn<FormData> = (t: RgoTranslationFn) => Step<FormData>[];
 \`\`\`
 
 #### Step Properties

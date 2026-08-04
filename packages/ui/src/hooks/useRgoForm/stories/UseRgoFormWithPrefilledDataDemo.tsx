@@ -129,7 +129,7 @@ export function UseFormWithPrefilledDataDemo(props: Pick<UseFormProps<BasicFormD
 }
 
 export const UseFormWithPrefilledDataDemoCode = `
-import { RgoLabelBox, RgoForm, RgoInputNumber, useRgoForm, type UseFormProps, type I18nTranslationFn } from "@vireocodedev/starter-ui";
+import { RgoLabelBox, RgoForm, RgoInputNumber, useRgoForm, type UseFormProps, type RgoTranslationFn } from "@vireocodedev/starter-ui";
 import { Box, Paper, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
 import z from "zod";
@@ -143,7 +143,7 @@ type BasicFormData = {
 
 // Schema factory for basic form
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const basicSchema = (_t: I18nTranslationFn) =>
+const basicSchema = (_t: RgoTranslationFn) =>
   z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email format"),

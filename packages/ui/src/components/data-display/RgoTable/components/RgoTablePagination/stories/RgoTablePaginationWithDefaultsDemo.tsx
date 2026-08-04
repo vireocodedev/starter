@@ -27,11 +27,11 @@ export function RgoTablePaginationWithDefaultsDemo({
 }
 
 export const RgoTablePaginationWithDefaultsDemoCode = `
-import { 
-  DEFAULT_PAGINATION_OPTIONS
-  RgoTablePagination
-  type RgoTablePaginationProps
-  type PageableParams
+import {
+  DEFAULT_PAGINATION_OPTIONS,
+  RgoTablePagination,
+  type RgoTablePaginationProps,
+  type PageableParams,
 } from "@vireocodedev/starter-ui";
 import React from "react";
 

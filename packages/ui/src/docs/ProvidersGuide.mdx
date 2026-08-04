@@ -409,29 +409,32 @@ function MyComponent() {
 <RgoIcon name="home" fontSize="large" color="primary" />;
 ```
 
-## RgoSseProvider
+## useRgoSseEmitter
 
-Manages Server-Sent Events (SSE) connections with typed event handlers.
+Manages Server-Sent Events (SSE) connections with typed event handlers. This is a hook rather than a provider — mount it
+once in a component near the root of the tree that needs the connection.
 
 ```tsx
-import { RgoSseProvider } from "@vireocodedev/starter-ui";
+import { useRgoSseEmitter } from "@vireocodedev/starter-ui";
 
-<RgoSseProvider
-  url="/api/events"
-  eventHandlers={{
-    notification: data => handleNotification(data),
-    update: data => handleUpdate(data),
-  }}
-  withCredentials
->
-  <App />
-</RgoSseProvider>;
+function AppEvents() {
+  useRgoSseEmitter({
+    url: "/api/events",
+    eventHandlers: {
+      notification: data => handleNotification(data),
+      update: data => handleUpdate(data),
+    },
+    withCredentials: true,
+  });
+
+  return null;
+}
 ```
 
 <table>
   <thead>
     <tr>
-      <th>Prop</th>
+      <th>Option</th>
       <th>Type</th>
       <th>Description</th>
     </tr>

@@ -341,20 +341,19 @@ function DeleteButton({ userId }) {
 
 ### Notifications
 
-Using useSnackbar for user feedback:
+Using `toast` for user feedback. The package re-exports [sonner](https://sonner.emilkowal.ski/)'s `toast`, so the full
+sonner API is available:
 
 ```tsx
-import { useSnackbar } from "@vireocodedev/starter-ui";
+import { toast } from "@vireocodedev/starter-ui";
 
 function SaveButton({ data }) {
-  const snackbar = useSnackbar();
-
   const handleSave = async () => {
     try {
       await saveData(data);
-      snackbar.success("Data saved successfully!");
+      toast.success("Data saved successfully!");
     } catch (error) {
-      snackbar.error("Failed to save data. Please try again.");
+      toast.error("Failed to save data. Please try again.");
     }
   };
 
@@ -368,13 +367,14 @@ function SaveButton({ data }) {
 
 ### Translations
 
-Using useTranslation for internationalization:
+Translations come from `react-i18next` directly — the package does not wrap it. Scope the hook to a namespace and read
+`t` off the result:
 
 ```tsx
-import { useTranslation } from "@vireocodedev/starter-ui";
+import { useTranslation } from "react-i18next";
 
 function WelcomeMessage() {
-  const t = useTranslation();
+  const { t } = useTranslation("app");
 
   return (
     <div>
@@ -470,20 +470,29 @@ const brandTheme = createTheme({
 
 ### Dark Theme Support
 
-Supporting light and dark themes:
+`RgoThemeProvider` takes a fixed `theme` prop and does not manage colour mode itself. To support light and dark, own the
+mode in the app and rebuild the theme:
 
 ```tsx
-import { useTheme } from "@vireocodedev/starter-ui";
+import { createTheme } from "@mui/material/styles";
+import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+import React from "react";
 
-function ThemeToggleButton() {
-  const { toggleTheme, isDarkMode } = useTheme();
+function App() {
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+  const theme = React.useMemo(() => createTheme({ palette: { mode: isDarkMode ? "dark" : "light" } }), [isDarkMode]);
 
   return (
-    <IconButton onClick={toggleTheme} aria-label="Toggle theme">
-      {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
-    </IconButton>
+    <RgoThemeProvider theme={theme}>
+      <IconButton onClick={() => setIsDarkMode(prev => !prev)} aria-label="Toggle theme">
+        {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+      </IconButton>
+      <YourApp />
+    </RgoThemeProvider>
   );
 }
 ```
+
+See the [Theming Guide](?path=/docs/guides-theming--docs) for the full pattern.
 
 These patterns provide a solid foundation for building robust applications with RGO Front UI. Use them as starting points and adapt them to your specific requirements.
