@@ -6,19 +6,11 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: [
-      "**/dist/**",
-      "**/node_modules/**",
-      "**/storybook-static/**",
-      "**/*.mdx",
-    ],
+    ignores: ["**/dist/**", "**/node_modules/**", "**/storybook-static/**", "**/*.mdx"],
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: [
-      "packages/*/{src,tests}/**/*.{ts,tsx}",
-      "packages/*/.storybook/**/*.{ts,tsx}",
-    ],
+    files: ["packages/*/{src,tests}/**/*.{ts,tsx}", "packages/*/.storybook/**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,
       globals: { ...globals.browser, ...globals.node },
@@ -31,10 +23,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/consistent-type-imports": "error",
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "no-restricted-imports": [
         "error",
         {
