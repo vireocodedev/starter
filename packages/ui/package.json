@@ -25,10 +25,15 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js",
-      "default": "./dist/*.js"
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js",
+      "default": "./dist/api/index.js"
+    },
+    "./country": {
+      "types": "./dist/country/index.d.ts",
+      "import": "./dist/country/index.js",
+      "default": "./dist/country/index.js"
     }
   },
   "main": "./dist/index.js",

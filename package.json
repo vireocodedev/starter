@@ -17,6 +17,7 @@
     "test": "turbo run test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "api:inventory": "node scripts/api-inventory.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",

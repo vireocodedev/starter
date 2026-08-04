@@ -65,4 +65,14 @@ export default tseslint.config(
       globals: globals.node,
     },
   },
+  {
+    // Repo tooling: plain Node ESM, not shipped in any package.
+    extends: [js.configs.recommended],
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.node,
+      sourceType: "module",
+    },
+  },
 );
