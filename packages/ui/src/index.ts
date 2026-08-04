@@ -110,7 +110,6 @@ export * from "@/providers/RgoProviders";
 export * from "@/providers/RgoQueryClientProvider/RgoQueryClientProvider";
 export * from "@/providers/RgoThemeProvider/RgoThemeProvider";
 export * from "@/services/RgoLocalStorageService/RgoLocalStorageService";
-export * from "@/services/RgoOfflineCacheService/RgoOfflineCacheService";
 export * from "@/setup/config/RgoLocale";
 export * from "@/table/components/ManagementServerTable";
 export * from "@/table/components/ManagementTableSkeleton";
