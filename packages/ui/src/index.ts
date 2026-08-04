@@ -109,7 +109,6 @@ export * from "@/providers/RgoInitializeProvider/RgoInitializeProvider";
 export * from "@/providers/RgoLocalizationProvider/RgoLocalizationProvider";
 export * from "@/providers/RgoProviders";
 export * from "@/providers/RgoQueryClientProvider/RgoQueryClientProvider";
-export * from "@/providers/RgoSnackbarProvider/RgoSnackbarProvider";
 export * from "@/providers/RgoThemeProvider/RgoThemeProvider";
 export * from "@/services/RgoLocalStorageService/RgoLocalStorageService";
 export * from "@/services/RgoOfflineCacheService/RgoOfflineCacheService";
@@ -148,4 +147,4 @@ export * from "@/utils/tsutils";
 export * from "@/utils/typeutils";
 export * from "@/utils/zodutils";
 
-export { toast } from "react-hot-toast";
+export { toast } from "sonner";

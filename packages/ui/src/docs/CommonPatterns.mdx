@@ -69,7 +69,7 @@ import {
   RgoQueryClientProvider,
   RgoLocalizationProvider,
   RgoConfirmProvider,
-  RgoSnackbarProvider,
+  AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
 
 function App() {
@@ -78,9 +78,9 @@ function App() {
       <RgoQueryClientProvider>
         <RgoLocalizationProvider>
           <RgoConfirmProvider>
-            <RgoSnackbarProvider>
+            <AppSnackbarProvider>
               <YourAppContent />
-            </RgoSnackbarProvider>
+            </AppSnackbarProvider>
           </RgoConfirmProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
@@ -98,9 +98,9 @@ Add only the providers you need:
 function AppWithNotifications() {
   return (
     <RgoThemeProvider theme={theme}>
-      <RgoSnackbarProvider>
+      <AppSnackbarProvider>
         <YourAppContent />
-      </RgoSnackbarProvider>
+      </AppSnackbarProvider>
     </RgoThemeProvider>
   );
 }

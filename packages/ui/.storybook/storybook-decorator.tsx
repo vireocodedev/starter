@@ -1,4 +1,3 @@
-/* eslint-disable import-alias/import-alias */
 // Date picker translations
 import "dayjs/locale/en";
 import "dayjs/locale/hr";

@@ -7,7 +7,7 @@ export type OfflineSyncCommandSqliteOperationMap = {
   enqueue: { request: { command: OfflineSyncCommandRecord }; response: null };
   getBatch: { request: { batchSize: number }; response: OfflineSyncCommandRecord[] };
   deleteCommands: { request: { commandIds: string[] }; response: null };
-  getQueueSize: { request: {}; response: number };
+  getQueueSize: { request: Record<string, never>; response: number };
 };
 
 const OFFLINE_SYNC_TABLE = "offline_sync_commands";

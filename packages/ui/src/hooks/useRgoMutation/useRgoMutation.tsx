@@ -12,7 +12,7 @@ import {
   type DefaultError,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 export type UseMutationBasicProps<
   TData = unknown,
@@ -68,13 +68,13 @@ export function useRgoMutation<
             ? messageSuccess(data)
             : messageSuccess;
         if (message) {
-          toast(
+          toast.custom(() => (
             <RgoSnack
               variant="success"
               startAdornment={<RgoIcon icon="check-circle" />}
               message={message}
-            />,
-          );
+            />
+          ));
         }
       }
     },
@@ -87,7 +87,7 @@ export function useRgoMutation<
             ? messageError(error)
             : messageError;
         if (message) {
-          toast(
+          toast.custom(() => (
             <RgoSnack
               variant="error"
               startAdornment={<RgoIcon icon="x-circle" />}
@@ -95,8 +95,8 @@ export function useRgoMutation<
               endAdornment={
                 <RgoSnackDetailsButton data={serializeError(error)} />
               }
-            />,
-          );
+            />
+          ));
         }
       }
     },

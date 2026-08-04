@@ -96,7 +96,7 @@ import {
   RgoIconsProvider,
   RgoLocalizationProvider,
   RgoConfirmProvider,
-  RgoSnackbarProvider,
+  AppSnackbarProvider,
   RgoQueryClientProvider,
   type RgoProvider,
 } from "@vireocodedev/starter-ui";
@@ -120,7 +120,7 @@ const APP_PROVIDERS: RgoProvider[] = [
   AppIconsProvider,
   RgoLocalizationProvider,
   RgoConfirmProvider,
-  RgoSnackbarProvider,
+  AppSnackbarProvider,
   AppQueryProvider,         // last = innermost
 ];
 
@@ -199,7 +199,7 @@ Order matters because inner providers may depend on context from outer ones:
     </tr>
     <tr>
       <td>5</td>
-      <td><code>RgoSnackbarProvider</code></td>
+      <td><code>AppSnackbarProvider</code></td>
       <td>Toasts may be triggered by confirm actions</td>
     </tr>
     <tr>
@@ -230,7 +230,7 @@ const CORE_PROVIDERS: RgoProvider[] = [
 
 const FEEDBACK_PROVIDERS: RgoProvider[] = [
   RgoConfirmProvider,
-  RgoSnackbarProvider,
+  AppSnackbarProvider,
 ];
 
 const DATA_PROVIDERS: RgoProvider[] = [

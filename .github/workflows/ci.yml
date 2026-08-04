@@ -23,6 +23,7 @@ jobs:
       - run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm run lint
       - run: npm run build
       - run: npm run typecheck
       - run: npm run test
