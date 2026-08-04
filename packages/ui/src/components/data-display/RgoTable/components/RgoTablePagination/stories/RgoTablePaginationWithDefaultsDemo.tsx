@@ -1,7 +1,7 @@
 import { DEFAULT_PAGINATION_OPTIONS } from "@/components/data-display/RgoTable";
 import {
-  RgoTablePagination,
-  type RgoTablePaginationProps,
+    RgoTablePagination,
+    type RgoTablePaginationProps,
 } from "@/components/data-display/RgoTable/components/RgoTablePagination/RgoTablePagination";
 import { type PageableParams } from "@/utils/apiutils";
 import React from "react";
