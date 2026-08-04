@@ -13,9 +13,7 @@ type ValidationIssue = {
 };
 
 type AppPermissionRegistry<TPermission extends AppConfigPermission = AppConfigPermission> =
-  | ReadonlySet<TPermission>
-  | readonly TPermission[]
-  | Record<TPermission, unknown>;
+  ReadonlySet<TPermission> | readonly TPermission[] | Record<TPermission, unknown>;
 
 export type AppConfigValidationOptions<TPermission extends AppConfigPermission = AppConfigPermission> = {
   permissions?: AppPermissionRegistry<TPermission>;

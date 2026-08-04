@@ -1,9 +1,5 @@
 import { type AppRouteObject } from "@/config/app.config.routes.types";
-import {
-  type AppPageConfig,
-  type AppRouteNodeConfig,
-  type AppRouteTreeNode,
-} from "@/config/app.config.types";
+import { type AppPageConfig, type AppRouteNodeConfig, type AppRouteTreeNode } from "@/config/app.config.types";
 
 type NormalizePath<TPath extends string> = TPath extends `/${infer Rest}`
   ? NormalizePath<Rest>
@@ -31,13 +27,12 @@ type RouteNodePageEntry<TNode, TParentPath extends string, TDepth extends number
     : TNode extends { node: infer TConfig; children?: infer TChildren }
       ? TConfig extends AppRouteNodeConfig
         ? TConfig extends AppPageConfig
-          ?
-              | { page: TConfig; path: JoinRoutePath<TParentPath, RouteNodePath<TConfig>> }
-              | RouteTreePageEntries<
-                  Extract<TChildren, readonly AppRouteTreeNode[]>,
-                  JoinRoutePath<TParentPath, RouteNodePath<TConfig>>,
-                  PreviousDepth[TDepth]
-                >
+          ? | { page: TConfig; path: JoinRoutePath<TParentPath, RouteNodePath<TConfig>> }
+            | RouteTreePageEntries<
+                Extract<TChildren, readonly AppRouteTreeNode[]>,
+                JoinRoutePath<TParentPath, RouteNodePath<TConfig>>,
+                PreviousDepth[TDepth]
+              >
           : RouteTreePageEntries<
               Extract<TChildren, readonly AppRouteTreeNode[]>,
               JoinRoutePath<TParentPath, RouteNodePath<TConfig>>,

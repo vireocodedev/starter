@@ -26,13 +26,7 @@ export default defineConfig(({ mode }) => ({
       fileName: "index",
     },
     rollupOptions: {
-      external: [
-        "react",
-        "react-dom",
-        "zod",
-        "@tanstack/react-query",
-        "@preact/signals-react",
-      ],
+      external: ["react", "react-dom", "zod", "@tanstack/react-query", "@preact/signals-react"],
     },
     sourcemap: true,
   },

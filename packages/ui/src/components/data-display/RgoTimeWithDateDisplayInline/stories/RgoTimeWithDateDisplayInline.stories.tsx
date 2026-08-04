@@ -11,7 +11,7 @@ const STORY_NAMES = ["With default props"];
 const DESCRIPTION = createStorybookDescription({
   badge: "STABLE",
   description:
-    "Single-line timestamp display: time and date joined by a separator (defaults to `•`). Inherits from MUI `Typography`, so any `variant`, `color`, `sx`, etc. can be passed through. When `timestamp` is `null`/`undefined`, renders the `fallback` (defaults to `\"-\"`).",
+    'Single-line timestamp display: time and date joined by a separator (defaults to `•`). Inherits from MUI `Typography`, so any `variant`, `color`, `sx`, etc. can be passed through. When `timestamp` is `null`/`undefined`, renders the `fallback` (defaults to `"-"`).',
   stories: createStories(STORY_NAMES),
   usage: RgoTimeWithDateDisplayInlineWithDefaultPropsDemoCode,
 });
@@ -53,7 +53,9 @@ export const WithDefaultProps: Story = {
   render: () => <RgoTimeWithDateDisplayInlineWithDefaultPropsDemo />,
   parameters: {
     docs: {
-      description: { story: "Default style, custom separator, custom Typography props, and the null + custom-fallback variant." },
+      description: {
+        story: "Default style, custom separator, custom Typography props, and the null + custom-fallback variant.",
+      },
       source: { code: RgoTimeWithDateDisplayInlineWithDefaultPropsDemoCode },
     },
   },

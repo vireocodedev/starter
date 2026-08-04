@@ -1,10 +1,6 @@
 import HISTORY_EN from "@/history/history.en";
 import HISTORY_HR from "@/history/history.hr";
-import {
-  createStarterResources,
-  STARTER_BASE_LOCALES,
-  STARTER_TRANSLATION_NAMESPACES,
-} from "@/index";
+import { createStarterResources, STARTER_BASE_LOCALES, STARTER_TRANSLATION_NAMESPACES } from "@/index";
 import PLATFORM_EN from "@/platform/platform.en";
 import PLATFORM_HR from "@/platform/platform.hr";
 import QUERYENGINE_EN from "@/queryengine/queryengine.en";
@@ -18,9 +14,7 @@ function flattenKeys(obj: JsonRecord, prefix = ""): string[] {
   return Object.entries(obj)
     .flatMap(([key, value]) => {
       const path = prefix ? `${prefix}.${key}` : key;
-      return value !== null &&
-        typeof value === "object" &&
-        !Array.isArray(value)
+      return value !== null && typeof value === "object" && !Array.isArray(value)
         ? flattenKeys(value as JsonRecord, path)
         : [path];
     })
@@ -192,13 +186,7 @@ const EXPECTED_QUERYENGINE_KEYS = [
   "value",
 ].sort();
 
-const EXPECTED_HISTORY_KEYS = [
-  "empty",
-  "hideUnchanged",
-  "showUnchanged",
-  "title",
-  "viewHistory",
-].sort();
+const EXPECTED_HISTORY_KEYS = ["empty", "hideUnchanged", "showUnchanged", "title", "viewHistory"].sort();
 
 describe.each([
   ["platform", PLATFORM_EN, PLATFORM_HR, EXPECTED_PLATFORM_KEYS],
@@ -210,9 +198,7 @@ describe.each([
   });
 
   it("keeps every base locale structurally identical to the canonical (en) shape", () => {
-    expect(flattenKeys(hr as JsonRecord)).toEqual(
-      flattenKeys(en as JsonRecord),
-    );
+    expect(flattenKeys(hr as JsonRecord)).toEqual(flattenKeys(en as JsonRecord));
   });
 });
 
@@ -222,11 +208,7 @@ describe("starter localization contract", () => {
   });
 
   it("ships the expected namespaces", () => {
-    expect([...STARTER_TRANSLATION_NAMESPACES]).toEqual([
-      "platform",
-      "queryengine",
-      "history",
-    ]);
+    expect([...STARTER_TRANSLATION_NAMESPACES]).toEqual(["platform", "queryengine", "history"]);
   });
 
   it("builds every namespace for every requested locale", () => {
@@ -236,11 +218,7 @@ describe("starter localization contract", () => {
 
     expect(Object.keys(resources).sort()).toEqual(["en", "hr"]);
     for (const locale of ["en", "hr"] as const) {
-      expect(Object.keys(resources[locale]).sort()).toEqual([
-        "history",
-        "platform",
-        "queryengine",
-      ]);
+      expect(Object.keys(resources[locale]).sort()).toEqual(["history", "platform", "queryengine"]);
     }
   });
 

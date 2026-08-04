@@ -59,22 +59,18 @@ const en = {
     errorMessage: "Error message",
     failedLoadingData: "Failed loading data.",
     httpMethod: "HTTP method",
-    hydratingInBackground:
-      "Syncing local data in background. You can keep using the app.",
+    hydratingInBackground: "Syncing local data in background. You can keep using the app.",
     lastHeartbeat: "Last heartbeat",
     lastSyncFailure: "Last failure",
     mutationQueuedOffline: "Saved locally — pending sync",
     offline: "Offline",
-    offlineBanner:
-      "You are offline. Data may be unavailable and changes are disabled.",
-    offlineModeNotSupported:
-      "This action is not available in offline mode yet.",
+    offlineBanner: "You are offline. Data may be unavailable and changes are disabled.",
+    offlineModeNotSupported: "This action is not available in offline mode yet.",
     offlineQueuePending: "Offline — {{count}} changes pending sync",
     online: "Online",
     owner: "Owner",
     processedAt: "Processed at",
-    queuePermanentlyFailed:
-      "{{count}} change(s) failed to sync and need attention",
+    queuePermanentlyFailed: "{{count}} change(s) failed to sync and need attention",
     queueSize: "Queued commands",
     queueSynced: "Synced",
     reconnecting: "Reconnecting",
@@ -93,10 +89,8 @@ const en = {
   routing: {
     errorChunkMessage:
       "This page could not be loaded. This can happen after an app update — try refreshing the application.",
-    errorGenericMessage:
-      "An unexpected error occurred while loading this page.",
-    errorOfflineMessage:
-      "You appear to be offline. Check your connection and try again.",
+    errorGenericMessage: "An unexpected error occurred while loading this page.",
+    errorOfflineMessage: "You appear to be offline. Check your connection and try again.",
     errorRefresh: "Refresh app",
     errorRetry: "Retry",
     errorTitle: "Something went wrong",
@@ -109,8 +103,7 @@ const en = {
   unsavedChanges: {
     discardAndLeave: "Discard and leave",
     message: "You have unsaved changes. Discard them and leave?",
-    savingMessage:
-      "Your changes are being saved. Wait for the save to finish before leaving.",
+    savingMessage: "Your changes are being saved. Wait for the save to finish before leaving.",
     savingTitle: "Saving changes",
     stay: "Stay",
     title: "Unsaved changes",
@@ -119,8 +112,7 @@ const en = {
     thisFieldIsRequired: "This field is required.",
   },
   auth: {
-    currentUserLoadFailed:
-      "Sign-in succeeded, but your account could not be loaded. Please try again.",
+    currentUserLoadFailed: "Sign-in succeeded, but your account could not be loaded. Please try again.",
     discardPendingSyncCancel: "Stay signed in",
     discardPendingSyncConfirm: "Sign out and discard",
     discardPendingSyncMessage:

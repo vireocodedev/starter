@@ -3,10 +3,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => ({
-  plugins: [
-    tsconfigPaths(),
-    dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" }),
-  ],
+  plugins: [tsconfigPaths(), dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" })],
   build: {
     emptyOutDir: mode !== "watch",
     lib: {

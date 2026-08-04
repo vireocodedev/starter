@@ -43,7 +43,7 @@ export function RgoTablePagination({
 
   const onPageChange = React.useCallback(
     (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-      onPaginationChange((prev) => ({ ...prev, page: newPage }));
+      onPaginationChange(prev => ({ ...prev, page: newPage }));
     },
     [onPaginationChange],
   );
@@ -51,7 +51,7 @@ export function RgoTablePagination({
   const onRowsPerPageChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newRowsPerPage = +event.target.value;
-      onPaginationChange((prev) => ({
+      onPaginationChange(prev => ({
         ...prev,
         page: 0,
         rowsPerPage: newRowsPerPage,

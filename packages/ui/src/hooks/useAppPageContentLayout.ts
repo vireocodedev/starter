@@ -1,9 +1,6 @@
 import { useResponsiveProps } from "@/hooks/useResponsiveProps";
 import { createAppPageContentLayout } from "@/layout/AppPageContentLayout.utils";
-import {
-  AppPageContentLayoutContext,
-  type AppPageContentLayout,
-} from "@/layout/AppPageContentLayoutContext";
+import { AppPageContentLayoutContext, type AppPageContentLayout } from "@/layout/AppPageContentLayoutContext";
 import React from "react";
 
 export function useAppPageContentLayout(): AppPageContentLayout {

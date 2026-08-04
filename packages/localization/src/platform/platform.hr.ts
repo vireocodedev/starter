@@ -59,22 +59,18 @@ const hr = {
     errorMessage: "Poruka greške",
     failedLoadingData: "Neuspjelo učitavanje podataka.",
     httpMethod: "HTTP metoda",
-    hydratingInBackground:
-      "Lokalni podaci se sinkroniziraju u pozadini. Možete nastaviti koristiti aplikaciju.",
+    hydratingInBackground: "Lokalni podaci se sinkroniziraju u pozadini. Možete nastaviti koristiti aplikaciju.",
     lastHeartbeat: "Zadnji heartbeat",
     lastSyncFailure: "Zadnja greška",
     mutationQueuedOffline: "Spremljeno lokalno — čeka sinkronizaciju",
     offline: "Offline",
-    offlineBanner:
-      "Niste povezani s mrežom. Podaci možda nisu dostupni, a promjene su onemogućene.",
-    offlineModeNotSupported:
-      "Ova akcija još nije dostupna u offline načinu rada.",
+    offlineBanner: "Niste povezani s mrežom. Podaci možda nisu dostupni, a promjene su onemogućene.",
+    offlineModeNotSupported: "Ova akcija još nije dostupna u offline načinu rada.",
     offlineQueuePending: "Offline — {{count}} promjene čekaju sinkronizaciju",
     online: "Online",
     owner: "Vlasnik",
     processedAt: "Obrađeno",
-    queuePermanentlyFailed:
-      "{{count}} promjena nije uspjelo sinkronizirati — potrebna provjera",
+    queuePermanentlyFailed: "{{count}} promjena nije uspjelo sinkronizirati — potrebna provjera",
     queueSize: "Naredbe u redu",
     queueSynced: "Sinkronizirano",
     reconnecting: "Ponovno povezivanje",
@@ -93,10 +89,8 @@ const hr = {
   routing: {
     errorChunkMessage:
       "Ova stranica nije mogla biti učitana. To se može dogoditi nakon ažuriranja aplikacije — pokušajte osvježiti aplikaciju.",
-    errorGenericMessage:
-      "Došlo je do neočekivane greške prilikom učitavanja ove stranice.",
-    errorOfflineMessage:
-      "Izgleda da ste offline. Provjerite internetsku vezu i pokušajte ponovno.",
+    errorGenericMessage: "Došlo je do neočekivane greške prilikom učitavanja ove stranice.",
+    errorOfflineMessage: "Izgleda da ste offline. Provjerite internetsku vezu i pokušajte ponovno.",
     errorRefresh: "Osvježi aplikaciju",
     errorRetry: "Pokušaj ponovno",
     errorTitle: "Nešto je pošlo po zlu",
@@ -109,8 +103,7 @@ const hr = {
   unsavedChanges: {
     discardAndLeave: "Odbaci i napusti",
     message: "Imate nespremljene promjene. Odbaciti ih i napustiti stranicu?",
-    savingMessage:
-      "Promjene se spremaju. Pričekajte završetak spremanja prije napuštanja stranice.",
+    savingMessage: "Promjene se spremaju. Pričekajte završetak spremanja prije napuštanja stranice.",
     savingTitle: "Spremanje promjena",
     stay: "Ostani",
     title: "Nespremljene promjene",
@@ -119,8 +112,7 @@ const hr = {
     thisFieldIsRequired: "Ovo polje je obavezno.",
   },
   auth: {
-    currentUserLoadFailed:
-      "Prijava je uspjela, ali vaš račun nije moguće učitati. Pokušajte ponovno.",
+    currentUserLoadFailed: "Prijava je uspjela, ali vaš račun nije moguće učitati. Pokušajte ponovno.",
     discardPendingSyncCancel: "Ostani prijavljen",
     discardPendingSyncConfirm: "Odjavi se i odbaci",
     discardPendingSyncMessage:

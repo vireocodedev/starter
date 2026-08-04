@@ -11,7 +11,7 @@ const STORY_NAMES = ["With default props"];
 const DESCRIPTION = createStorybookDescription({
   badge: "STABLE",
   description:
-    "A self-documenting conditional render gate. Use for permission checks, feature flags, and any other \"show this only if…\" pattern that you want explicit at the call site. Permission/flag resolution is the caller's job — pass a boolean or a function returning a boolean.",
+    'A self-documenting conditional render gate. Use for permission checks, feature flags, and any other "show this only if…" pattern that you want explicit at the call site. Permission/flag resolution is the caller\'s job — pass a boolean or a function returning a boolean.',
   stories: createStories(STORY_NAMES),
   usage: RgoShowIfWithDefaultPropsDemoCode,
 });

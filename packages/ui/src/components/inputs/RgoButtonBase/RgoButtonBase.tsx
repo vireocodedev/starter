@@ -7,15 +7,7 @@ type RgoButtonBaseColorMap = { standard: string; hover: string };
 export type RgoButtonBaseColorSeverity = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 
 export type RgoButtonBaseColorMuiName =
-  | "primary"
-  | "error"
-  | "grey"
-  | "secondary"
-  | "info"
-  | "success"
-  | "warning"
-  | "black"
-  | "white";
+  "primary" | "error" | "grey" | "secondary" | "info" | "success" | "warning" | "black" | "white";
 
 function getMuiColorMapWithSeverity(
   muiColorName: RgoButtonBaseColorMuiName,

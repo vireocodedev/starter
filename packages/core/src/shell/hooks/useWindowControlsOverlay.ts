@@ -62,9 +62,7 @@ function windowControlsOverlayStatesEqual(
   );
 }
 
-export function createWindowControlsOverlayRootStyle(
-  state: AppWindowControlsOverlayState,
-): React.CSSProperties {
+export function createWindowControlsOverlayRootStyle(state: AppWindowControlsOverlayState): React.CSSProperties {
   return {
     [APP_WINDOW_CONTROLS_OVERLAY_HEIGHT_CSS_VAR]: `${state.height}px`,
     [APP_WINDOW_CONTROLS_OVERLAY_LEFT_INSET_CSS_VAR]: `${state.leftInset}px`,

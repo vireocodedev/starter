@@ -1,8 +1,5 @@
 import { type QueryEngineApi } from "@/api/queryengine.api";
-import {
-  type QueryEngineEntityDefinition,
-  type QueryEngineEntityKey,
-} from "@/models/queryengine.models";
+import { type QueryEngineEntityDefinition, type QueryEngineEntityKey } from "@/models/queryengine.models";
 import { QueryEngineQueryKey } from "@/queryengine.querykeys";
 import { sigQueryEngineEntityDefinitions } from "@/signals/sigQueryEngineEntityDefinitions";
 import { sigQueryEngineEntitySummaries } from "@/signals/sigQueryEngineEntitySummaries";

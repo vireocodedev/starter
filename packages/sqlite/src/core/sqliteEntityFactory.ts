@@ -16,13 +16,13 @@ type SqliteEntityFields = Record<string, SqliteEntityField<any>>;
 type SqliteEntityFieldValue<TField> = TField extends SqliteEntityField<infer TValue> ? TValue : never;
 
 type SqliteEntityRecordFromFields<TFields extends SqliteEntityFields> = {
-  [TProperty in keyof TFields as undefined extends SqliteEntityFieldValue<TFields[TProperty]>
-    ? never
-    : TProperty]: SqliteEntityFieldValue<TFields[TProperty]>;
+  [
+    TProperty in keyof TFields as undefined extends SqliteEntityFieldValue<TFields[TProperty]> ? never : TProperty
+  ]: SqliteEntityFieldValue<TFields[TProperty]>;
 } & {
-  [TProperty in keyof TFields as undefined extends SqliteEntityFieldValue<TFields[TProperty]>
-    ? TProperty
-    : never]?: Exclude<SqliteEntityFieldValue<TFields[TProperty]>, undefined>;
+  [
+    TProperty in keyof TFields as undefined extends SqliteEntityFieldValue<TFields[TProperty]> ? TProperty : never
+  ]?: Exclude<SqliteEntityFieldValue<TFields[TProperty]>, undefined>;
 };
 
 type SqliteEntityIdPropertyName<TFields extends SqliteEntityFields> = {

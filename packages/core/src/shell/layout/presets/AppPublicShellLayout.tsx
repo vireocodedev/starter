@@ -142,12 +142,7 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
             </Container>
           </Box>
 
-          <Box
-            component="main"
-            id="main-content"
-            tabIndex={-1}
-            sx={{ flex: 1, minHeight: 0, outline: "none" }}
-          >
+          <Box component="main" id="main-content" tabIndex={-1} sx={{ flex: 1, minHeight: 0, outline: "none" }}>
             <Outlet />
           </Box>
         </Box>

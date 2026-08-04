@@ -244,7 +244,7 @@ export function HistoryGroupView({
     }
   }, [groupKey, defaultShowUnchanged, isRootGroup]);
 
-  const showUnchanged = isRootGroup ? rootShowUnchanged : inheritedShowUnchanged ?? defaultShowUnchanged;
+  const showUnchanged = isRootGroup ? rootShowUnchanged : (inheritedShowUnchanged ?? defaultShowUnchanged);
 
   const toggleButton = (
     <HistoryGroupToggleButton expanded={expanded} onToggle={() => setExpanded(current => !current)} />

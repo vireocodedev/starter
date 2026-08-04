@@ -35,7 +35,8 @@ const meta: Meta<typeof RgoButtonBase> = {
     colorSeverity: {
       control: "select",
       options: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900],
-      description: "MUI palette severity (50…900). Hover bumps to the next step (capped at 900). Ignored for `black`/`white`.",
+      description:
+        "MUI palette severity (50…900). Hover bumps to the next step (capped at 900). Ignored for `black`/`white`.",
       table: { defaultValue: { summary: "100" } },
     },
     component: {
@@ -59,7 +60,10 @@ export const WithDefaultProps: Story = {
   render: () => <RgoButtonBaseWithDefaultPropsDemo />,
   parameters: {
     docs: {
-      description: { story: "All available colors at the default severity, a severity gradient on `primary`, and the non-clickable variant." },
+      description: {
+        story:
+          "All available colors at the default severity, a severity gradient on `primary`, and the non-clickable variant.",
+      },
       source: { code: RgoButtonBaseWithDefaultPropsDemoCode },
     },
   },

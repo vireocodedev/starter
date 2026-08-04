@@ -1,8 +1,4 @@
-import {
-  type AppConfig,
-  type AppShellNavControlConfig,
-  type AppShellNavSlotConfig,
-} from "@/config/app.config.types";
+import { type AppConfig, type AppShellNavControlConfig, type AppShellNavSlotConfig } from "@/config/app.config.types";
 import { AppNavControlItem } from "@/shell/layout/nav/AppNavControlItem";
 import { AppNavItem } from "@/shell/layout/nav/AppNavItem";
 import { AppNavSeparator } from "@/shell/layout/nav/AppNavSeparator";

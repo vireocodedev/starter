@@ -34,7 +34,8 @@ const meta: Meta<typeof RgoStatusDot> = {
     },
     selected: {
       control: "boolean",
-      description: "Inverts the dot to white. Use on dark/colored backgrounds where the standard color would not be visible.",
+      description:
+        "Inverts the dot to white. Use on dark/colored backgrounds where the standard color would not be visible.",
       table: { defaultValue: { summary: "false" } },
     },
     marginLeft: {

@@ -105,7 +105,7 @@ export function createQueryEngineApi(
   };
 
   return {
-    listEntities: (reqOptions) => getParsed("entities", entitySummary.array(), reqOptions),
+    listEntities: reqOptions => getParsed("entities", entitySummary.array(), reqOptions),
     describeEntity,
     listRelationOptions,
   };

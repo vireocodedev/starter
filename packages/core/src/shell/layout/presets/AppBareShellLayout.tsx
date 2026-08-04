@@ -3,10 +3,7 @@ import { type AppShellRuntime } from "@/shell/app.shell-runtime.types";
 import { AppShellProvider } from "@/shell/AppShellContext";
 import { AppPwaUpdateBanner } from "@/shell/components/AppPwaUpdateBanner";
 import { AppSkipToContentLink } from "@/shell/components/AppSkipToContentLink";
-import {
-  createWindowControlsOverlayRootStyle,
-  useWindowControlsOverlay,
-} from "@/shell/hooks/useWindowControlsOverlay";
+import { createWindowControlsOverlayRootStyle, useWindowControlsOverlay } from "@/shell/hooks/useWindowControlsOverlay";
 import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";

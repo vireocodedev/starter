@@ -3,10 +3,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => ({
-  plugins: [
-    tsconfigPaths(),
-    dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" }),
-  ],
+  plugins: [tsconfigPaths(), dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" })],
   build: {
     emptyOutDir: mode !== "watch",
     lib: {
@@ -15,14 +12,7 @@ export default defineConfig(({ mode }) => ({
       fileName: "index",
     },
     rollupOptions: {
-      external: [
-        "react",
-        "react-dom",
-        "axios",
-        "dayjs",
-        "@preact/signals-react",
-        "@tanstack/react-query",
-      ],
+      external: ["react", "react-dom", "axios", "dayjs", "@preact/signals-react", "@tanstack/react-query"],
     },
     sourcemap: true,
   },

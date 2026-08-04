@@ -34,7 +34,10 @@ export const WithDefaultProps: Story = {
   render: () => <UseRgoFadePresenceWithDefaultPropsDemo />,
   parameters: {
     docs: {
-      description: { story: "Selecting an item fades a detail panel in; dismissing fades it out while preserving the last selected value during the transition." },
+      description: {
+        story:
+          "Selecting an item fades a detail panel in; dismissing fades it out while preserving the last selected value during the transition.",
+      },
       source: { code: UseRgoFadePresenceWithDefaultPropsDemoCode },
     },
   },

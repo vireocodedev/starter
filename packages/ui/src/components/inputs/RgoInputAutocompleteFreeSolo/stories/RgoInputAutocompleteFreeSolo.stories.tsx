@@ -32,13 +32,19 @@ const meta: Meta<typeof RgoInputAutocompleteFreeSolo> = {
     options: { control: false, description: "Predefined `TOption[]`." },
     getOptionLabel: { control: false, description: "`(option: TOption) => string`." },
     isOptionEqualToValue: { control: false, description: "`(option: TOption, value: TOption) => boolean`." },
-    getStringValue: { control: false, description: "`(option: TOption) => string | null` — value persisted via `onChange`." },
-    createSyntheticOption: { control: false, description: "`(text: string) => TOption` — used when the current value doesn't match any option." },
-    addLabel: { control: false, description: "`(input: string) => ReactNode` — label of the extra \"add\" menu entry." },
+    getStringValue: {
+      control: false,
+      description: "`(option: TOption) => string | null` — value persisted via `onChange`.",
+    },
+    createSyntheticOption: {
+      control: false,
+      description: "`(text: string) => TOption` — used when the current value doesn't match any option.",
+    },
+    addLabel: { control: false, description: '`(input: string) => ReactNode` — label of the extra "add" menu entry.' },
     addIcon: {
       control: false,
       description:
-        "Optional leading icon for the \"add\" entry. Pass any `ReactNode` (e.g. `<RgoIcon icon=\"plus\" />`); not provided by default since the icon registry is consumer-augmented.",
+        'Optional leading icon for the "add" entry. Pass any `ReactNode` (e.g. `<RgoIcon icon="plus" />`); not provided by default since the icon registry is consumer-augmented.',
     },
   },
   tags: ["autodocs"],
@@ -52,7 +58,9 @@ export const WithDefaultProps: Story = {
   render: () => <RgoInputAutocompleteFreeSoloWithDefaultPropsDemo />,
   parameters: {
     docs: {
-      description: { story: "Pick from a small preset list of tags, or type a new tag and add it via the \"Add new tag\" menu entry." },
+      description: {
+        story: 'Pick from a small preset list of tags, or type a new tag and add it via the "Add new tag" menu entry.',
+      },
       source: { code: RgoInputAutocompleteFreeSoloWithDefaultPropsDemoCode },
     },
   },

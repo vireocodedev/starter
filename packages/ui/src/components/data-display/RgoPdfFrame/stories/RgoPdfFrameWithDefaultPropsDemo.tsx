@@ -11,16 +11,10 @@ export function RgoPdfFrameWithDefaultPropsDemo() {
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={1}>
-        <Button
-          variant={loading ? "contained" : "outlined"}
-          onClick={() => setLoading(prev => !prev)}
-        >
+        <Button variant={loading ? "contained" : "outlined"} onClick={() => setLoading(prev => !prev)}>
           {loading ? "Stop loading" : "Simulate loading"}
         </Button>
-        <Button
-          variant={hideToolbar ? "contained" : "outlined"}
-          onClick={() => setHideToolbar(prev => !prev)}
-        >
+        <Button variant={hideToolbar ? "contained" : "outlined"} onClick={() => setHideToolbar(prev => !prev)}>
           {hideToolbar ? "Show toolbar" : "Hide toolbar"}
         </Button>
       </Stack>

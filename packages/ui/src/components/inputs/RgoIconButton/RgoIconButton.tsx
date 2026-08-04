@@ -1,6 +1,14 @@
 import { RgoIcon, type RgoIconProps } from "@/components/data-display/RgoIcon/RgoIcon";
 import { composeSx } from "@/utils/muiutils";
-import { Box, type BoxProps, Button, type ButtonProps, type Theme, Typography, type TypographyProps } from "@mui/material";
+import {
+  Box,
+  type BoxProps,
+  Button,
+  type ButtonProps,
+  type Theme,
+  Typography,
+  type TypographyProps,
+} from "@mui/material";
 import React from "react";
 
 export type RgoIconButtonSlotProps = Partial<{
@@ -100,11 +108,7 @@ export function RgoIconButton({
           fontSize: "0.75rem",
           lineHeight: "1.25rem",
           overflow: "hidden",
-          color: disabled
-            ? theme.palette.grey[400]
-            : selected
-              ? theme.palette.text.primary
-              : theme.palette.grey[500],
+          color: disabled ? theme.palette.grey[400] : selected ? theme.palette.text.primary : theme.palette.grey[500],
         }))}
       >
         {label}

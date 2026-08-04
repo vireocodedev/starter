@@ -112,11 +112,7 @@ Augment i18next with the exported resource types so `t()` gets autocomplete and
 strict key checks:
 
 ```ts
-import type {
-  HistoryResources,
-  PlatformResources,
-  QueryEngineResources,
-} from "@vireocodedev/starter-localization";
+import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/starter-localization";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -132,17 +128,17 @@ declare module "i18next" {
 
 ## Public API
 
-| Export                                                                          | Purpose                                                             |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `createStarterResources({ locales, seedFrom?, overrides? })`                    | Build every starter namespace per locale in one call.               |
-| `registerStarterResources(i18n, config)`                                        | Imperatively add every starter namespace to a live i18next instance. |
-| `usePlatformTranslation()` / `useQueryEngineTranslation()` / `useHistoryTranslation()` | `react-i18next` hooks bound to their namespace.                |
-| `createPlatformResources` / `createQueryEngineResources` / `createHistoryResources` | Per-namespace resource builders.                               |
-| `STARTER_TRANSLATION_NAMESPACES`, `STARTER_BASE_LOCALES`                        | The shipped namespace and locale sets.                              |
-| `platformBaseResources`, `queryEngineBaseResources`, `historyBaseResources`     | The shipped base resources.                                          |
-| `PLATFORM_/QUERYENGINE_/HISTORY_TRANSLATION_NAMESPACE`                          | The namespace strings.                                               |
-| `createNamespaceResources`, `deepMerge`                                         | Generic toolkit reused by other starter libraries.                   |
-| `PlatformResources`, `QueryEngineResources`, `HistoryResources`, `DeepPartial`, `WidenLeaves` | Types.                                                  |
+| Export                                                                                        | Purpose                                                              |
+| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `createStarterResources({ locales, seedFrom?, overrides? })`                                  | Build every starter namespace per locale in one call.                |
+| `registerStarterResources(i18n, config)`                                                      | Imperatively add every starter namespace to a live i18next instance. |
+| `usePlatformTranslation()` / `useQueryEngineTranslation()` / `useHistoryTranslation()`        | `react-i18next` hooks bound to their namespace.                      |
+| `createPlatformResources` / `createQueryEngineResources` / `createHistoryResources`           | Per-namespace resource builders.                                     |
+| `STARTER_TRANSLATION_NAMESPACES`, `STARTER_BASE_LOCALES`                                      | The shipped namespace and locale sets.                               |
+| `platformBaseResources`, `queryEngineBaseResources`, `historyBaseResources`                   | The shipped base resources.                                          |
+| `PLATFORM_/QUERYENGINE_/HISTORY_TRANSLATION_NAMESPACE`                                        | The namespace strings.                                               |
+| `createNamespaceResources`, `deepMerge`                                                       | Generic toolkit reused by other starter libraries.                   |
+| `PlatformResources`, `QueryEngineResources`, `HistoryResources`, `DeepPartial`, `WidenLeaves` | Types.                                                               |
 
 ## Versioning contract
 

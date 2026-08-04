@@ -7,9 +7,7 @@ import { type ReactStateSetter } from "@/utils/typeutils";
 import { CardHeader } from "@mui/material";
 import React from "react";
 
-type RgoServerTableProps<TElement> = React.ComponentProps<
-  typeof RgoServerTable<TElement>
->;
+type RgoServerTableProps<TElement> = React.ComponentProps<typeof RgoServerTable<TElement>>;
 
 const DEFAULT_ROWS_PER_PAGE_OPTIONS = [10, 20, 50];
 
@@ -59,9 +57,7 @@ export function ManagementServerTable<TElement>({
   const mobileSearchNode = isCompact ? renderMobileSearch?.() : undefined;
 
   return (
-    <ResponsiveCard
-      sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
-    >
+    <ResponsiveCard sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!isCompact && (
         <CardHeader
           sx={{

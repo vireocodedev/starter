@@ -63,12 +63,10 @@ export function RgoInfiniteCanvas({
       if (e.button !== 0) return;
 
       // If e.target doesn't have id id then return
-      if (
-        !(
-          e.target instanceof HTMLElement &&
-          (e.target.id === id || e.target.classList.contains(RGO_INFINITE_CANVAS_BODY_CLASSNAME))
-        )
-      )
+      if (!(
+        e.target instanceof HTMLElement &&
+        (e.target.id === id || e.target.classList.contains(RGO_INFINITE_CANVAS_BODY_CLASSNAME))
+      ))
         return;
 
       (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);

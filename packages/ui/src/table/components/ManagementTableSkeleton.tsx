@@ -34,11 +34,7 @@ function DesktopManagementTableSkeleton() {
                 width="100%"
                 height={DESKTOP_ACTIONS_HEADER_HEIGHT}
               />
-              <Skeleton
-                variant="rounded"
-                width={112}
-                height={DESKTOP_ACTIONS_HEADER_HEIGHT}
-              />
+              <Skeleton variant="rounded" width={112} height={DESKTOP_ACTIONS_HEADER_HEIGHT} />
             </Stack>
           }
         />
@@ -78,28 +74,17 @@ function DesktopManagementTableSkeleton() {
                 gridTemplateColumns: `repeat(${DESKTOP_COLUMNS}, minmax(0, 1fr))`,
                 gap: 2,
                 p: 2,
-                borderBottom:
-                  rowIndex === DESKTOP_ROWS - 1
-                    ? 0
-                    : "1px solid var(--mui-palette-grey-200)",
+                borderBottom: rowIndex === DESKTOP_ROWS - 1 ? 0 : "1px solid var(--mui-palette-grey-200)",
               }}
             >
-              {Array.from({ length: DESKTOP_COLUMNS }).map(
-                (__, columnIndex) => (
-                  <Skeleton
-                    key={columnIndex}
-                    variant="rounded"
-                    height={DESKTOP_TABLE_BODY_CELL_HEIGHT}
-                    width={
-                      columnIndex === DESKTOP_COLUMNS - 1
-                        ? "50%"
-                        : columnIndex % 2 === 0
-                        ? "85%"
-                        : "65%"
-                    }
-                  />
-                ),
-              )}
+              {Array.from({ length: DESKTOP_COLUMNS }).map((__, columnIndex) => (
+                <Skeleton
+                  key={columnIndex}
+                  variant="rounded"
+                  height={DESKTOP_TABLE_BODY_CELL_HEIGHT}
+                  width={columnIndex === DESKTOP_COLUMNS - 1 ? "50%" : columnIndex % 2 === 0 ? "85%" : "65%"}
+                />
+              ))}
             </Box>
           ))}
         </Box>

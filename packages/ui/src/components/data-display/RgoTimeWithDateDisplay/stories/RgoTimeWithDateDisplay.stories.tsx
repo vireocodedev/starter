@@ -11,7 +11,7 @@ const STORY_NAMES = ["With default props"];
 const DESCRIPTION = createStorybookDescription({
   badge: "STABLE",
   description:
-    "Two-line timestamp display: the time formatted on top in a bolder/larger style, and the date below in a smaller, dimmed style. When `timestamp` is `null`/`undefined`, renders the `fallback` (defaults to `\"-\"`). Both the root and the time/date `<span>`s expose `slotProps` for styling overrides.",
+    'Two-line timestamp display: the time formatted on top in a bolder/larger style, and the date below in a smaller, dimmed style. When `timestamp` is `null`/`undefined`, renders the `fallback` (defaults to `"-"`). Both the root and the time/date `<span>`s expose `slotProps` for styling overrides.',
   stories: createStories(STORY_NAMES),
   usage: RgoTimeWithDateDisplayWithDefaultPropsDemoCode,
 });
