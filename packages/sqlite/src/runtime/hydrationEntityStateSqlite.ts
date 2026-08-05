@@ -3,7 +3,7 @@ import { type SqliteDatabase } from "../core/sqliteTypes";
 import { type SqliteHydrationEntityStateRecord } from "./contracts";
 
 export type HydrationEntityStateSqliteOperationMap = {
-  listHydrationEntityStates: { request: {}; response: SqliteHydrationEntityStateRecord[] };
+  listHydrationEntityStates: { request: Record<string, never>; response: SqliteHydrationEntityStateRecord[] };
   upsertHydrationEntityState: { request: { state: SqliteHydrationEntityStateRecord }; response: null };
 };
 

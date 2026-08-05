@@ -31,23 +31,23 @@ export function RgoVideoStreamPlayer({
     width === undefined || width === null
       ? "100%"
       : typeof width === "number"
-      ? `${width}px`
-      : width === ""
-      ? "100%"
-      : isNaN(Number(width))
-      ? width
-      : `${width}px`;
+        ? `${width}px`
+        : width === ""
+          ? "100%"
+          : isNaN(Number(width))
+            ? width
+            : `${width}px`;
 
   const computedHeight =
     height === undefined || height === null
       ? "100%"
       : typeof height === "number"
-      ? `${height}px`
-      : height === ""
-      ? "100%"
-      : isNaN(Number(height))
-      ? height
-      : `${height}px`;
+        ? `${height}px`
+        : height === ""
+          ? "100%"
+          : isNaN(Number(height))
+            ? height
+            : `${height}px`;
 
   const initializePlayer = React.useCallback(() => {
     if (!container.current) return;

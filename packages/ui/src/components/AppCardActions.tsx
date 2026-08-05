@@ -10,10 +10,7 @@ export function AppCardActions({ children, sx, ...props }: ComponentProps<typeof
   const mergedSx = sx ? (Array.isArray(sx) ? [baseSx, ...sx] : [baseSx, sx]) : baseSx;
 
   return (
-    <CardActions
-      {...props}
-      sx={mergedSx}
-    >
+    <CardActions {...props} sx={mergedSx}>
       {children}
     </CardActions>
   );

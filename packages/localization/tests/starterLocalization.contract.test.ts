@@ -1,6 +1,6 @@
-import { createStarterResources, STARTER_BASE_LOCALES, STARTER_TRANSLATION_NAMESPACES } from "@/index";
 import HISTORY_EN from "@/history/history.en";
 import HISTORY_HR from "@/history/history.hr";
+import { createStarterResources, STARTER_BASE_LOCALES, STARTER_TRANSLATION_NAMESPACES } from "@/index";
 import PLATFORM_EN from "@/platform/platform.en";
 import PLATFORM_HR from "@/platform/platform.hr";
 import QUERYENGINE_EN from "@/queryengine/queryengine.en";
@@ -85,12 +85,14 @@ const EXPECTED_PLATFORM_KEYS = [
   "network.actionQueued",
   "network.actionUnavailable",
   "network.commandId",
+  "network.connectingToLiveUpdates",
   "network.createdAt",
   "network.dataUnavailable",
   "network.diagnostics",
   "network.errorMessage",
   "network.failedLoadingData",
   "network.httpMethod",
+  "network.hydratingInBackground",
   "network.lastHeartbeat",
   "network.lastSyncFailure",
   "network.mutationQueuedOffline",
@@ -210,7 +212,9 @@ describe("starter localization contract", () => {
   });
 
   it("builds every namespace for every requested locale", () => {
-    const resources = createStarterResources({ locales: ["en", "hr"] as const });
+    const resources = createStarterResources({
+      locales: ["en", "hr"] as const,
+    });
 
     expect(Object.keys(resources).sort()).toEqual(["en", "hr"]);
     for (const locale of ["en", "hr"] as const) {
@@ -219,7 +223,9 @@ describe("starter localization contract", () => {
   });
 
   it("seeds unshipped locales from the base locale", () => {
-    const resources = createStarterResources({ locales: ["en", "de"] as const });
+    const resources = createStarterResources({
+      locales: ["en", "de"] as const,
+    });
 
     expect(resources.de.platform).toEqual(resources.en.platform);
     expect(resources.de.queryengine).toEqual(resources.en.queryengine);

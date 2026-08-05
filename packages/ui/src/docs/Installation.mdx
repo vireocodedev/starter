@@ -23,7 +23,7 @@ Complete setup guide for RGO Front UI in your React application.
   - [RgoQueryClientProvider (Optional)](#rgoqueryclientprovider-optional)
   - [RgoLocalizationProvider (Optional)](#rgolocalizationprovider-optional)
   - [RgoConfirmProvider (Optional)](#rgoconfirmprovider-optional)
-  - [RgoSnackbarProvider (Optional)](#rgosnackbarprovider-optional)
+  - [AppSnackbarProvider (Optional)](#appsnackbarprovider-optional)
 - [5. Complete Setup Example](#5-complete-setup-example)
 - [6. Special Components](#6-special-components)
 - [Next Steps](#next-steps)
@@ -148,16 +148,16 @@ import { RgoConfirmProvider } from "@vireocodedev/starter-ui";
 </RgoConfirmProvider>;
 ```
 
-### RgoSnackbarProvider (Optional)
+### AppSnackbarProvider (Optional)
 
-Add if using the `useSnackbar` hook:
+Add if you want toast notifications via `toast()`:
 
 ```tsx
-import { RgoSnackbarProvider } from "@vireocodedev/starter-ui";
+import { AppSnackbarProvider } from "@vireocodedev/starter-ui";
 
-<RgoSnackbarProvider>
+<AppSnackbarProvider>
   <App />
-</RgoSnackbarProvider>;
+</AppSnackbarProvider>;
 ```
 
 ## 5. Complete Setup Example
@@ -172,7 +172,7 @@ import {
   RgoQueryClientProvider,
   RgoLocalizationProvider,
   RgoConfirmProvider,
-  RgoSnackbarProvider,
+  AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
 
 const theme = createTheme({
@@ -188,9 +188,9 @@ function App() {
       <RgoQueryClientProvider>
         <RgoLocalizationProvider>
           <RgoConfirmProvider>
-            <RgoSnackbarProvider>
+            <AppSnackbarProvider>
               <YourAppContent />
-            </RgoSnackbarProvider>
+            </AppSnackbarProvider>
           </RgoConfirmProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
@@ -203,10 +203,11 @@ function App() {
 
 ### RgoVideoStreamPlayer
 
-Requires WebRTC stream server setup:
+Requires WebRTC stream server setup. It lives behind its own entry point so that
+`ovenplayer` is only resolved by consumers that render a stream:
 
 ```tsx
-import { RgoVideoStreamPlayer } from "@vireocodedev/starter-ui";
+import { RgoVideoStreamPlayer } from "@vireocodedev/starter-ui/video";
 
 <RgoVideoStreamPlayer url="wss://your-stream-server.com/app/stream-name" width="100%" height="100%" autoStart={true} />;
 ```

@@ -77,10 +77,8 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Purpose</strong>
       </td>
       <td>
-        Maps icon names to React component types. Every key becomes a valid{" "}
-        <code>RgoIconName</code> usable with{" "}
-        <code>{'<RgoIcon icon="..." />'}</code> and the <code>useIcons</code>{" "}
-        hook.
+        Maps icon names to React component types. Every key becomes a valid <code>RgoIconName</code> usable with{" "}
+        <code>{'<RgoIcon icon="..." />'}</code> and the <code>useIcons</code> hook.
       </td>
     </tr>
     <tr>
@@ -88,8 +86,7 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Consumed by</strong>
       </td>
       <td>
-        <code>RgoIcon</code>, <code>useIcons</code>,{" "}
-        <code>RgoIconsProvider</code>
+        <code>RgoIcon</code>, <code>useIcons</code>, <code>RgoIconsProvider</code>
       </td>
     </tr>
   </tbody>
@@ -100,8 +97,7 @@ import { MY_ICON_REGISTRY } from "@/setup/icons/icons.registry";
 import type React from "react";
 
 declare module "@vireocodedev/starter-ui" {
-  interface RgoIconRegistry
-    extends Record<keyof typeof MY_ICON_REGISTRY, React.ComponentType> {}
+  interface RgoIconRegistry extends Record<keyof typeof MY_ICON_REGISTRY, React.ComponentType> {}
 }
 ```
 
@@ -130,9 +126,8 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Purpose</strong>
       </td>
       <td>
-        Maps draggable type names to their ID payload shapes. Each key becomes
-        the <code>type</code> discriminator in the <code>RgoDraggableId</code>{" "}
-        union.
+        Maps draggable type names to their ID payload shapes. Each key becomes the <code>type</code> discriminator in
+        the <code>RgoDraggableId</code> union.
       </td>
     </tr>
     <tr>
@@ -140,8 +135,7 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Consumed by</strong>
       </td>
       <td>
-        DnD utilities: <code>serializeDraggableId</code>,{" "}
-        <code>deserializeDraggableId</code>
+        DnD utilities: <code>serializeDraggableId</code>, <code>deserializeDraggableId</code>
       </td>
     </tr>
   </tbody>
@@ -164,9 +158,7 @@ declare module "@vireocodedev/starter-ui" {
 Produces:
 
 ```ts
-type RgoDraggableId =
-  | { type: "convoy"; convoyId: number }
-  | { type: "task"; taskId: string; groupIndex: number };
+type RgoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; taskId: string; groupIndex: number };
 ```
 
 ---
@@ -194,9 +186,8 @@ type RgoDraggableId =
         <strong>Purpose</strong>
       </td>
       <td>
-        Maps droppable type names to their ID payload shapes. Each key becomes
-        the <code>type</code> discriminator in the <code>RgoDroppableId</code>{" "}
-        union.
+        Maps droppable type names to their ID payload shapes. Each key becomes the <code>type</code> discriminator in
+        the <code>RgoDroppableId</code> union.
       </td>
     </tr>
     <tr>
@@ -204,8 +195,7 @@ type RgoDraggableId =
         <strong>Consumed by</strong>
       </td>
       <td>
-        DnD utilities: <code>serializeDroppableId</code>,{" "}
-        <code>deserializeDroppableId</code>
+        DnD utilities: <code>serializeDroppableId</code>, <code>deserializeDroppableId</code>
       </td>
     </tr>
   </tbody>
@@ -243,17 +233,12 @@ A complete `rgo.d.ts` file augmenting all four registries:
 ```ts
 // src/@types/rgo.d.ts
 import { type IDBCache } from "@/infrastructure/browser";
-import {
-  type ChamberSide,
-  type Direction,
-  type StreamType,
-} from "@/infrastructure/enums";
+import { type ChamberSide, type Direction, type StreamType } from "@/infrastructure/enums";
 import { type APP_ICON_REGISTRY } from "@/setup/icons/icons.registry";
 import type React from "react";
 
 declare module "@vireocodedev/starter-ui" {
-  interface RgoIconRegistry
-    extends Record<keyof typeof APP_ICON_REGISTRY, React.ComponentType> {}
+  interface RgoIconRegistry extends Record<keyof typeof APP_ICON_REGISTRY, React.ComponentType> {}
 
   interface RgoEventSchema {
     "app:ready": undefined;

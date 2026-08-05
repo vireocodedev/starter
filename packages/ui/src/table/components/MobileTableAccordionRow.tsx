@@ -1,15 +1,7 @@
 import { MobileTableViewport } from "@/table/components/MobileTableViewport";
 import { type ActionsColumnAlign, type RgoServerTableColumn } from "@/table/types";
-import {
-  isNearScrollEnd,
-  MOBILE_TABLE_LOAD_MORE_THRESHOLD_PX,
-} from "@/table/utils/mobileInfiniteScroll.utils";
-import {
-  ACTIONS_COLUMN_JUSTIFY_CONTENT,
-  getColumnId,
-  renderBody,
-  renderHeader,
-} from "@/table/utils/mobileTable.utils";
+import { isNearScrollEnd, MOBILE_TABLE_LOAD_MORE_THRESHOLD_PX } from "@/table/utils/mobileInfiniteScroll.utils";
+import { ACTIONS_COLUMN_JUSTIFY_CONTENT, getColumnId, renderBody, renderHeader } from "@/table/utils/mobileTable.utils";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import { Accordion, AccordionDetails, AccordionSummary, Box, CircularProgress, Stack, Typography } from "@mui/material";

@@ -18,7 +18,7 @@ RGO Front UI uses a provider-based architecture to deliver optional functionalit
 - [RgoQueryClientProvider](#rgoqueryclientprovider)
 - [RgoLocalizationProvider](#rgolocalizationprovider)
 - [RgoConfirmProvider](#rgoconfirmprovider)
-- [RgoSnackbarProvider](#rgosnackbarprovider)
+- [AppSnackbarProvider](#appsnackbarprovider)
 - [RgoIconsProvider](#rgoiconsprovider)
 - [RgoSseProvider](#rgosseprovider)
 - [RgoProviders Utility](#rgoproviders-utility)
@@ -81,11 +81,11 @@ RGO Front UI uses a provider-based architecture to deliver optional functionalit
     </tr>
     <tr>
       <td>
-        <code>RgoSnackbarProvider</code>
+        <code>AppSnackbarProvider</code>
       </td>
       <td>Toast notifications</td>
       <td>
-        <code>react-hot-toast</code>
+        <code>sonner</code>
       </td>
       <td>
         <code>toast</code>
@@ -125,7 +125,7 @@ import {
   RgoLocalizationProvider,
   RgoIconsProvider,
   RgoConfirmProvider,
-  RgoSnackbarProvider,
+  AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
 
 function App() {
@@ -135,9 +135,9 @@ function App() {
         <RgoLocalizationProvider>
           <RgoIconsProvider icons={icons}>
             <RgoConfirmProvider>
-              <RgoSnackbarProvider>
+              <AppSnackbarProvider>
                 <YourApp />
-              </RgoSnackbarProvider>
+              </AppSnackbarProvider>
             </RgoConfirmProvider>
           </RgoIconsProvider>
         </RgoLocalizationProvider>
@@ -339,100 +339,25 @@ function DeleteButton() {
   </tbody>
 </table>
 
-## RgoSnackbarProvider
+## AppSnackbarProvider
 
-Wraps react-hot-toast's `Toaster` with Material Design styling and static access methods.
+Mounts sonner's `Toaster` with responsive placement (top-right on mobile,
+bottom-center on desktop) and follows the active MUI theme mode.
 
 ```tsx
-import { RgoSnackbarProvider } from "@vireocodedev/starter-ui";
+import { AppSnackbarProvider, toast } from "@vireocodedev/starter-ui";
 
-<RgoSnackbarProvider anchorHorizontal="right" anchorVertical="top" autoHideDuration={5000} maxSnack={3}>
+<AppSnackbarProvider>
   <App />
-</RgoSnackbarProvider>;
+</AppSnackbarProvider>;
+
+// Anywhere in the tree:
+toast.success("Saved");
 ```
 
-<table>
-  <thead>
-    <tr>
-      <th>Prop</th>
-      <th>Type</th>
-      <th>Default</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>anchorHorizontal</code>
-      </td>
-      <td>
-        <code>"left" | "center" | "right"</code>
-      </td>
-      <td>
-        <code>"right"</code>
-      </td>
-      <td>Horizontal position</td>
-    </tr>
-    <tr>
-      <td>
-        <code>anchorVertical</code>
-      </td>
-      <td>
-        <code>"top" | "bottom"</code>
-      </td>
-      <td>
-        <code>"top"</code>
-      </td>
-      <td>Vertical position</td>
-    </tr>
-    <tr>
-      <td>
-        <code>autoHideDuration</code>
-      </td>
-      <td>
-        <code>number</code>
-      </td>
-      <td>
-        <code>5000</code>
-      </td>
-      <td>Auto-dismiss delay (ms)</td>
-    </tr>
-    <tr>
-      <td>
-        <code>maxSnack</code>
-      </td>
-      <td>
-        <code>number</code>
-      </td>
-      <td>
-        <code>3</code>
-      </td>
-      <td>Maximum visible snackbars</td>
-    </tr>
-    <tr>
-      <td>
-        <code>TransitionComponent</code>
-      </td>
-      <td>
-        <code>React.ComponentType</code>
-      </td>
-      <td>—</td>
-      <td>Custom transition</td>
-    </tr>
-  </tbody>
-</table>
-
-### Static Access
-
-For showing snackbars outside React components:
-
-```tsx
-import { showNotiSnackStatic, closeNotiSnackStatic } from "@vireocodedev/starter-ui";
-
-// From an API interceptor, service, etc.
-const id = showNotiSnackStatic("Operation completed", { variant: "success" });
-closeNotiSnackStatic(id);
-```
+The provider takes no props — placement, duration and theme are derived from
+the viewport and theme. Import `toast` from `@vireocodedev/starter-ui` rather
+than from `sonner` directly so the library owns the toast implementation.
 
 ## RgoIconsProvider
 
@@ -484,29 +409,32 @@ function MyComponent() {
 <RgoIcon name="home" fontSize="large" color="primary" />;
 ```
 
-## RgoSseProvider
+## useRgoSseEmitter
 
-Manages Server-Sent Events (SSE) connections with typed event handlers.
+Manages Server-Sent Events (SSE) connections with typed event handlers. This is a hook rather than a provider — mount it
+once in a component near the root of the tree that needs the connection.
 
 ```tsx
-import { RgoSseProvider } from "@vireocodedev/starter-ui";
+import { useRgoSseEmitter } from "@vireocodedev/starter-ui";
 
-<RgoSseProvider
-  url="/api/events"
-  eventHandlers={{
-    notification: data => handleNotification(data),
-    update: data => handleUpdate(data),
-  }}
-  withCredentials
->
-  <App />
-</RgoSseProvider>;
+function AppEvents() {
+  useRgoSseEmitter({
+    url: "/api/events",
+    eventHandlers: {
+      notification: data => handleNotification(data),
+      update: data => handleUpdate(data),
+    },
+    withCredentials: true,
+  });
+
+  return null;
+}
 ```
 
 <table>
   <thead>
     <tr>
-      <th>Prop</th>
+      <th>Option</th>
       <th>Type</th>
       <th>Description</th>
     </tr>
@@ -583,12 +511,12 @@ import { RgoSseProvider } from "@vireocodedev/starter-ui";
 A utility component that reduces provider nesting boilerplate by composing multiple providers:
 
 ```tsx
-import { RgoProviders, RgoThemeProvider, RgoConfirmProvider, RgoSnackbarProvider } from "@vireocodedev/starter-ui";
+import { RgoProviders, RgoThemeProvider, RgoConfirmProvider, AppSnackbarProvider } from "@vireocodedev/starter-ui";
 
 const providers = [
   props => <RgoThemeProvider theme={theme} {...props} />,
   props => <RgoConfirmProvider {...props} />,
-  props => <RgoSnackbarProvider {...props} />,
+  props => <AppSnackbarProvider {...props} />,
 ];
 
 <RgoProviders list={providers}>

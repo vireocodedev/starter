@@ -107,7 +107,7 @@ Container and composition utilities:
 
 ### Miscellaneous Components (1)
 
-- **RgoInitializable**: Async initialization wrapper with loading state
+- **RgoInitializeProvider**: Async initialization wrapper with loading state
 
 ## Hooks (18)
 
@@ -142,10 +142,10 @@ Provider-based architecture with optional functionality:
       {/* Optional: for translations */}
       <RgoConfirmProvider>
         {/* Optional: for confirmations */}
-        <RgoSnackbarProvider>
+        <AppSnackbarProvider>
           {/* Optional: for notifications */}
           <YourApp />
-        </RgoSnackbarProvider>
+        </AppSnackbarProvider>
       </RgoConfirmProvider>
     </RgoLocalizationProvider>
   </RgoQueryClientProvider>

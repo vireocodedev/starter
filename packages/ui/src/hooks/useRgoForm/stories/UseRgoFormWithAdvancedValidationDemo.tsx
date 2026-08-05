@@ -161,7 +161,7 @@ export function UseFormWithAdvancedValidationDemo() {
 }
 
 export const UseFormWithAdvancedValidationDemoCode = `
-import { RgoLabelBox, RgoForm, useRgoForm, type I18nTranslationFn } from "@vireocodedev/starter-ui";
+import { RgoLabelBox, RgoForm, useRgoForm, type RgoTranslationFn } from "@vireocodedev/starter-ui";
 import { Box, Checkbox, FormControlLabel, Paper, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
 import z from "zod";
@@ -175,7 +175,7 @@ type AdvancedFormData = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const advancedSchema = (_t: I18nTranslationFn) =>
+const advancedSchema = (_t: RgoTranslationFn) =>
   z
     .object({
       username: z

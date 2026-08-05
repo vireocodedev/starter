@@ -1,16 +1,15 @@
+import { RgoServerTable } from "@/components/data-display/RgoServerTable/RgoServerTable";
 import { ResponsiveCard } from "@/components/ResponsiveCard";
 import { useAppPageContentLayout } from "@/hooks/useAppPageContentLayout";
 import { RgoServerTableMobile } from "@/table/components/RgoServerTableMobile";
-import { CardHeader } from "@mui/material";
-import { RgoServerTable } from "@/components/data-display/RgoServerTable/RgoServerTable";
 import { type PageableParams, type PageableResponse } from "@/utils/apiutils";
 import { type ReactStateSetter } from "@/utils/typeutils";
+import { CardHeader } from "@mui/material";
 import React from "react";
 
 type RgoServerTableProps<TElement> = React.ComponentProps<typeof RgoServerTable<TElement>>;
 
 const DEFAULT_ROWS_PER_PAGE_OPTIONS = [10, 20, 50];
-const DEFAULT_STICKY_MAX_HEIGHT = "calc(100dvh - 268px)";
 
 export type ManagementServerTableProps<TElement> = {
   data: PageableResponse<TElement>;
@@ -31,7 +30,6 @@ export type ManagementServerTableProps<TElement> = {
   columnIdToUseAsActions?: string;
   titleEndAdornmentFn?: (element: TElement) => React.ReactNode;
   rowsPerPageOptions?: RgoServerTableProps<TElement>["rowsPerPageOptions"];
-  stickyMaxHeight?: RgoServerTableProps<TElement>["stickyMaxHeight"];
 };
 
 export function ManagementServerTable<TElement>({
@@ -53,15 +51,23 @@ export function ManagementServerTable<TElement>({
   columnIdToUseAsActions,
   titleEndAdornmentFn,
   rowsPerPageOptions = DEFAULT_ROWS_PER_PAGE_OPTIONS,
-  stickyMaxHeight = DEFAULT_STICKY_MAX_HEIGHT,
 }: ManagementServerTableProps<TElement>) {
   const { isCompact } = useAppPageContentLayout();
   const filtersNode = isCompact ? renderMobileFilters?.() : renderFilters();
   const mobileSearchNode = isCompact ? renderMobileSearch?.() : undefined;
 
   return (
-    <ResponsiveCard>
-      {!isCompact && <CardHeader sx={{ p: 2, backgroundColor: "var(--mui-palette-grey-50)" }} title={filtersNode} />}
+    <ResponsiveCard sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+      {!isCompact && (
+        <CardHeader
+          sx={{
+            p: 2,
+            flexShrink: 0,
+            backgroundColor: "var(--mui-palette-grey-50)",
+          }}
+          title={filtersNode}
+        />
+      )}
 
       {!isCompact && (
         <RgoServerTable
@@ -72,7 +78,7 @@ export function ManagementServerTable<TElement>({
           onPaginationChange={onPaginationChange}
           columns={columns}
           rowsPerPageOptions={rowsPerPageOptions}
-          stickyMaxHeight={stickyMaxHeight}
+          fillHeight
         />
       )}
 

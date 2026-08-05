@@ -74,15 +74,15 @@ export function useRgoTabs(props?: UseTabsProps) {
 
 /*
 
-import { RgoTabPanel } from "@vireocodedev/starter-ui";
+import { useRgoTabs } from "@vireocodedev/starter-ui";
 
 function() {
 
-  const [tab, setTab] = useRgoUrlState("currentTab", 0);
+  const { tab, onTabChange, a11yProps, TabPanel } = useRgoTabs({ useUrlForTabState: true });
 
   return (
     <>
-      <Tabs value={tab} onChange={setTab}>
+      <Tabs value={tab} onChange={onTabChange}>
         <Tab label="Tab One" {...a11yProps(0)} />
         <Tab label="Tab Two" {...a11yProps(1)} />
         <Tab label="Tab Three" {...a11yProps(2)} />

@@ -12,7 +12,7 @@ Factory that builds a `Provider + Context + useFormDialog` hook triplet for a si
 
 ## Why it exists
 
-Apps typically have several feature-scoped form dialogs (e.g. *edit user*, *finalize order*, *create lockage*). Each of them tends to repeat the same scaffolding:
+Apps typically have several feature-scoped form dialogs (e.g. _edit user_, _finalize order_, _create lockage_). Each of them tends to repeat the same scaffolding:
 
 1. `useState<Config | null>` + an `open = config !== null` derivation.
 2. A `useForm` call with the entity's schema and defaults.
@@ -47,7 +47,7 @@ Returns `{ Provider, Context, useFormDialog }`.
 
 - `TEntity` — the form's field-value type.
 - `TConfig` — caller-extensible config; must extend `RgoFormDialogConfigBase` (`{ group?, onCancel? }`).
-- `TOpenArg` — the type accepted by `handleOpen`. Defaults to `TEntity`. Use this to e.g. allow `handleOpen()` (no args) for *create* mode.
+- `TOpenArg` — the type accepted by `handleOpen`. Defaults to `TEntity`. Use this to e.g. allow `handleOpen()` (no args) for _create_ mode.
 
 ---
 
@@ -103,11 +103,7 @@ Consumers then use it imperatively:
 ```tsx
 function EditUserButton({ user }: { user: User }) {
   const { handleOpen } = useUserFormDialogContext();
-  return (
-    <button onClick={() => handleOpen(user, { onSubmitSuccess: u => console.log("saved", u) })}>
-      Edit
-    </button>
-  );
+  return <button onClick={() => handleOpen(user, { onSubmitSuccess: u => console.log("saved", u) })}>Edit</button>;
 }
 ```
 

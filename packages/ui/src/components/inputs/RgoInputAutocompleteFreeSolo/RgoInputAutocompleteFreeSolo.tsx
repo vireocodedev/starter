@@ -112,5 +112,4 @@ function RgoInputAutocompleteFreeSoloImpl<TOption>(
   );
 }
 
-
 export const RgoInputAutocompleteFreeSolo = fixedForwardRef(RgoInputAutocompleteFreeSoloImpl);

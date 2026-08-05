@@ -14,16 +14,30 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
+    "test": "turbo run test && npm run surface",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "api:inventory": "node scripts/api-inventory.mjs",
+    "surface": "node scripts/public-surface.mjs",
+    "surface:update": "node scripts/public-surface.mjs --update",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "npm run build && npm run test && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
-    "@types/node": "^20",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "globals": "^15.15.0",
+    "prettier": "^3.9.6",
     "turbo": "^2.10.8",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.66.0"
   },
   "packageManager": "npm@11.16.0"
 }

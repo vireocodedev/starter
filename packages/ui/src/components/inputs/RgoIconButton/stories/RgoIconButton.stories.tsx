@@ -55,7 +55,8 @@ const meta: Meta<typeof RgoIconButton> = {
     onClick: { control: false, description: "`() => void`." },
     rgoSlotProps: {
       control: false,
-      description: "Per-slot prop overrides: `root`, `rootContent`, `rootContentIcon`, `rootContentStatusDot`, `label`.",
+      description:
+        "Per-slot prop overrides: `root`, `rootContent`, `rootContentIcon`, `rootContentStatusDot`, `label`.",
     },
   },
   tags: ["autodocs"],

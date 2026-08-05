@@ -21,8 +21,8 @@ export function UseRgoFadePresenceWithDefaultPropsDemo() {
   return (
     <Stack spacing={3} alignItems="flex-start">
       <Typography variant="body2" color="text.secondary">
-        Click an item to show its detail panel; click "Dismiss" to fade it out. The panel keeps rendering its
-        last value during the fade-out so the content doesn't snap to empty.
+        Click an item to show its detail panel; click "Dismiss" to fade it out. The panel keeps rendering its last value
+        during the fade-out so the content doesn't snap to empty.
       </Typography>
 
       <Stack direction="row" spacing={1}>

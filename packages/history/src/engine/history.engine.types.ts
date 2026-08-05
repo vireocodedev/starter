@@ -63,9 +63,7 @@ export type HistoryArrayFieldConfig<TValue, TParent> =
     : never;
 
 export type HistoryArrayItemConfig<TItem> =
-  | HistoryAtomicFieldConfig<TItem, TItem>
-  | HistoryArrayFieldConfig<TItem, TItem>
-  | HistoryObjectFieldConfig<TItem>;
+  HistoryAtomicFieldConfig<TItem, TItem> | HistoryArrayFieldConfig<TItem, TItem> | HistoryObjectFieldConfig<TItem>;
 
 export type HistoryObjectFieldConfig<TValue> =
   NonNullable<TValue> extends object

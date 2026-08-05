@@ -21,6 +21,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./offline": {
+      "types": "./dist/offline/index.d.ts",
+      "import": "./dist/offline/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -35,10 +39,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
-  "dependencies": {
-    "@sqlite.org/sqlite-wasm": "^3.53.0-build1"
+  "peerDependencies": {
+    "@sqlite.org/sqlite-wasm": ">=3.53.0-build1"
   },
   "devDependencies": {
+    "@sqlite.org/sqlite-wasm": "^3.53.0-build1",
+    "jsdom": "^25.0.1",
     "typescript": "^5.7.0",
     "vite": "^6.4.3",
     "vite-plugin-dts": "^4.5.0",

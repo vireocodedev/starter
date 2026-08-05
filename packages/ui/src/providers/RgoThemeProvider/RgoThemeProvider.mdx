@@ -59,14 +59,24 @@ function App() {
   </thead>
   <tbody>
     <tr>
-      <td><code>theme</code></td>
-      <td><code>Theme</code></td>
+      <td>
+        <code>theme</code>
+      </td>
+      <td>
+        <code>Theme</code>
+      </td>
       <td>Yes</td>
-      <td>MUI theme object created with <code>createTheme()</code></td>
+      <td>
+        MUI theme object created with <code>createTheme()</code>
+      </td>
     </tr>
     <tr>
-      <td><code>children</code></td>
-      <td><code>ReactNode</code></td>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
       <td>Yes</td>
       <td>Application tree</td>
     </tr>
@@ -142,12 +152,10 @@ Consumer applications typically wrap `RgoThemeProvider` in their own provider th
 import { RgoThemeProvider, type RgoProvider } from "@vireocodedev/starter-ui";
 import { createTheme } from "@mui/material/styles";
 
-const appTheme = createTheme({ /* ... */ });
+const appTheme = createTheme({/* ... */});
 
 export const AppThemeProvider: RgoProvider = ({ children }) => (
-  <RgoThemeProvider theme={appTheme}>
-    {children}
-  </RgoThemeProvider>
+  <RgoThemeProvider theme={appTheme}>{children}</RgoThemeProvider>
 );
 ```
 

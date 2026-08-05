@@ -80,7 +80,7 @@ export type AxiosBadRequestError = AxiosError<ValidationResult>;
 
 export function handleBadRequestError(error: TODO, handler: (validationResult: ValidationResult) => void) {
   if (error.status !== 400) return;
-  const responseData: TODO = error?.response.data;
+  const responseData: TODO = error?.response?.data;
   if (
     !responseData ||
     !("status" in responseData) ||

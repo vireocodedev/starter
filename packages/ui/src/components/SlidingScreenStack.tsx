@@ -11,7 +11,10 @@ export type SlidingScreenStackProps<TScreen extends string> = {
   screens: SlidingScreenStackScreen<TScreen>[];
 };
 
-export function SlidingScreenStack<TScreen extends string>({ activeScreen, screens }: SlidingScreenStackProps<TScreen>) {
+export function SlidingScreenStack<TScreen extends string>({
+  activeScreen,
+  screens,
+}: SlidingScreenStackProps<TScreen>) {
   const theme = useTheme();
   const activeScreenIndex = Math.max(
     screens.findIndex(screen => screen.id === activeScreen),

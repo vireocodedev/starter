@@ -1,9 +1,5 @@
 import { HISTORY_DEFAULT_POSITION_LABEL } from "@/engine/history.engine.constants";
-import {
-  renderArrayValue,
-  renderDefinitionValue,
-  renderFieldValue,
-} from "@/engine/history.engine.render";
+import { renderArrayValue, renderDefinitionValue, renderFieldValue } from "@/engine/history.engine.render";
 import {
   areHistoryValuesEqual,
   getObjectFieldValue,

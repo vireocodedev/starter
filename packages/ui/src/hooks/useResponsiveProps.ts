@@ -13,12 +13,12 @@ type UndefinedConstraint = typeof UndefinedConstraintSentinel;
 export function useResponsiveProps<
   T = UndefinedConstraint,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const M extends T extends UndefinedConstraint ? Record<string, any> : T = T extends UndefinedConstraint
+  const M extends (T extends UndefinedConstraint ? Record<string, any> : T) = T extends UndefinedConstraint
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
       Record<string, any>
     : T,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const D extends T extends UndefinedConstraint ? Record<string, any> : T = T extends UndefinedConstraint
+  const D extends (T extends UndefinedConstraint ? Record<string, any> : T) = T extends UndefinedConstraint
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
       Record<string, any>
     : T,

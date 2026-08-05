@@ -1,0 +1,49 @@
+{
+  "package": "@vireocodedev/starter-history",
+  "entryPoints": {
+    ".": {
+      "exports": [
+        "AnyArrayFieldConfig",
+        "AnyArrayItemConfig",
+        "AnyAtomicFieldConfig",
+        "AnyHistoryDefinition",
+        "AnyHistoryFieldConfig",
+        "AnyNonIgnoredHistoryFieldConfig",
+        "AnyObjectFieldConfig",
+        "History",
+        "HistoryArrayFieldConfig",
+        "HistoryArrayItemConfig",
+        "HistoryArrayMode",
+        "HistoryAtomicFieldConfig",
+        "HistoryChangeType",
+        "HistoryDefinition",
+        "HistoryDefinitionBuilder",
+        "HistoryDefinitionBuilderForSchema",
+        "HistoryDefinitionFields",
+        "HistoryDefinitionOptions",
+        "HistoryEngineOptions",
+        "HistoryEntityKey",
+        "HistoryEntityKind",
+        "HistoryFieldConfig",
+        "HistoryFieldRow",
+        "HistoryGroupChangeType",
+        "HistoryGroupNode",
+        "HistoryNode",
+        "HistoryObjectFieldConfig",
+        "HistoryRenderContext",
+        "HistoryRenderSide",
+        "HistorySchemas",
+        "HistorySnapshot",
+        "HistorySnapshotSchema",
+        "createHistoryDefinitionBuilderFn",
+        "createHistoryGroup",
+        "createHistoryNodes",
+        "createHistorySchemas"
+      ],
+      "dependencies": [
+        "zod"
+      ],
+      "workerSafe": false
+    }
+  }
+}

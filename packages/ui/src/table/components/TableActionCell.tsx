@@ -23,7 +23,11 @@ export type ConfirmTableActionIconButtonProps = Omit<TableActionIconButtonProps,
 };
 
 export function TableActionCell({ children }: TableActionCellProps) {
-  return <Box display="flex" justifyContent="center">{children}</Box>;
+  return (
+    <Box display="flex" justifyContent="center">
+      {children}
+    </Box>
+  );
 }
 
 export function TableActionIconButton({

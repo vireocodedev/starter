@@ -60,7 +60,10 @@ export const WithDefaultProps: Story = {
   render: () => <RgoPdfFrameWithDefaultPropsDemo />,
   parameters: {
     docs: {
-      description: { story: "Loads a sample PDF in the browser-native viewer; toggles for the loader overlay and the toolbar are above the frame." },
+      description: {
+        story:
+          "Loads a sample PDF in the browser-native viewer; toggles for the loader overlay and the toolbar are above the frame.",
+      },
       source: { code: RgoPdfFrameWithDefaultPropsDemoCode },
     },
   },

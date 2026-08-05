@@ -82,7 +82,7 @@ const providers = [RgoConfirmProvider, RgoLocalizationProvider];
 
 <RgoProviders list={providers}>
   <App />
-</RgoProviders>
+</RgoProviders>;
 ```
 
 ### With pre-configured providers
@@ -96,19 +96,15 @@ import {
   RgoIconsProvider,
   RgoLocalizationProvider,
   RgoConfirmProvider,
-  RgoSnackbarProvider,
+  AppSnackbarProvider,
   RgoQueryClientProvider,
   type RgoProvider,
 } from "@vireocodedev/starter-ui";
 
 // Pre-configure providers that need props
-const AppThemeProvider: RgoProvider = ({ children }) => (
-  <RgoThemeProvider theme={myTheme}>{children}</RgoThemeProvider>
-);
+const AppThemeProvider: RgoProvider = ({ children }) => <RgoThemeProvider theme={myTheme}>{children}</RgoThemeProvider>;
 
-const AppIconsProvider: RgoProvider = ({ children }) => (
-  <RgoIconsProvider icons={myIcons}>{children}</RgoIconsProvider>
-);
+const AppIconsProvider: RgoProvider = ({ children }) => <RgoIconsProvider icons={myIcons}>{children}</RgoIconsProvider>;
 
 const AppQueryProvider: RgoProvider = ({ children }) => (
   <RgoQueryClientProvider client={myQueryClient}>{children}</RgoQueryClientProvider>
@@ -116,12 +112,12 @@ const AppQueryProvider: RgoProvider = ({ children }) => (
 
 // Compose — order = outermost → innermost
 const APP_PROVIDERS: RgoProvider[] = [
-  AppThemeProvider,         // 1st = outermost
+  AppThemeProvider, // 1st = outermost
   AppIconsProvider,
   RgoLocalizationProvider,
   RgoConfirmProvider,
-  RgoSnackbarProvider,
-  AppQueryProvider,         // last = innermost
+  AppSnackbarProvider,
+  AppQueryProvider, // last = innermost
 ];
 
 function Root() {
@@ -148,14 +144,22 @@ function Root() {
   </thead>
   <tbody>
     <tr>
-      <td><code>list</code></td>
-      <td><code>{"RgoProvider[]"}</code></td>
+      <td>
+        <code>list</code>
+      </td>
+      <td>
+        <code>{"RgoProvider[]"}</code>
+      </td>
       <td>Yes</td>
       <td>Ordered array of provider components. First = outermost, last = innermost.</td>
     </tr>
     <tr>
-      <td><code>children</code></td>
-      <td><code>ReactNode</code></td>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
       <td>Yes</td>
       <td>Application tree — wrapped by all providers</td>
     </tr>
@@ -179,32 +183,46 @@ Order matters because inner providers may depend on context from outer ones:
   <tbody>
     <tr>
       <td>1 (outermost)</td>
-      <td><code>RgoThemeProvider</code></td>
+      <td>
+        <code>RgoThemeProvider</code>
+      </td>
       <td>MUI components need theme context</td>
     </tr>
     <tr>
       <td>2</td>
-      <td><code>RgoIconsProvider</code></td>
-      <td>Icons use <code>createSvgIcon</code> (needs theme)</td>
+      <td>
+        <code>RgoIconsProvider</code>
+      </td>
+      <td>
+        Icons use <code>createSvgIcon</code> (needs theme)
+      </td>
     </tr>
     <tr>
       <td>3</td>
-      <td><code>RgoLocalizationProvider</code></td>
+      <td>
+        <code>RgoLocalizationProvider</code>
+      </td>
       <td>Date pickers need theme; provides i18n</td>
     </tr>
     <tr>
       <td>4</td>
-      <td><code>RgoConfirmProvider</code></td>
+      <td>
+        <code>RgoConfirmProvider</code>
+      </td>
       <td>Dialog uses MUI components + translated labels</td>
     </tr>
     <tr>
       <td>5</td>
-      <td><code>RgoSnackbarProvider</code></td>
+      <td>
+        <code>AppSnackbarProvider</code>
+      </td>
       <td>Toasts may be triggered by confirm actions</td>
     </tr>
     <tr>
       <td>6</td>
-      <td><code>RgoQueryClientProvider</code></td>
+      <td>
+        <code>RgoQueryClientProvider</code>
+      </td>
       <td>Data fetching layer — used by feature providers</td>
     </tr>
     <tr>
@@ -222,46 +240,28 @@ Order matters because inner providers may depend on context from outer ones:
 ### Feature-level provider groups
 
 ```tsx
-const CORE_PROVIDERS: RgoProvider[] = [
-  AppThemeProvider,
-  AppIconsProvider,
-  RgoLocalizationProvider,
-];
+const CORE_PROVIDERS: RgoProvider[] = [AppThemeProvider, AppIconsProvider, RgoLocalizationProvider];
 
-const FEEDBACK_PROVIDERS: RgoProvider[] = [
-  RgoConfirmProvider,
-  RgoSnackbarProvider,
-];
+const FEEDBACK_PROVIDERS: RgoProvider[] = [RgoConfirmProvider, AppSnackbarProvider];
 
-const DATA_PROVIDERS: RgoProvider[] = [
-  AppQueryProvider,
-  AppSseProvider,
-];
+const DATA_PROVIDERS: RgoProvider[] = [AppQueryProvider, AppSseProvider];
 
 // Combine
-const ALL_PROVIDERS = [
-  ...CORE_PROVIDERS,
-  ...FEEDBACK_PROVIDERS,
-  ...DATA_PROVIDERS,
-];
+const ALL_PROVIDERS = [...CORE_PROVIDERS, ...FEEDBACK_PROVIDERS, ...DATA_PROVIDERS];
 
 <RgoProviders list={ALL_PROVIDERS}>
   <App />
-</RgoProviders>
+</RgoProviders>;
 ```
 
 ### Conditional providers
 
 ```tsx
-const providers: RgoProvider[] = [
-  AppThemeProvider,
-  RgoConfirmProvider,
-  ...(enableRealtime ? [AppSseProvider] : []),
-];
+const providers: RgoProvider[] = [AppThemeProvider, RgoConfirmProvider, ...(enableRealtime ? [AppSseProvider] : [])];
 
 <RgoProviders list={providers}>
   <App />
-</RgoProviders>
+</RgoProviders>;
 ```
 
 ---
