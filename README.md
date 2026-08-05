@@ -48,6 +48,15 @@ npm run test
 npm run build
 ```
 
+`npm run dev` watches every package. Note that watch mode never deletes from
+`dist` — deleting or renaming a source file leaves its old output behind, so take
+a one-shot `npm run build` whenever a file disappears.
+
+To try a change in a consuming app before publishing it, that app aliases the
+package specifiers to these `dist` directories. The consumer side of that loop —
+including why the aliases redirect the runtime but not the types — is documented
+in the leather-production repository under `docs/STARTER_WORKFLOW.md`.
+
 ## Release (Changesets)
 
 1. `npx changeset` — describe the change and pick the semver bump per package.
