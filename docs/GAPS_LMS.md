@@ -324,4 +324,6 @@ permissions — independently required by both LMS and FRED) and **G0** (the
 starter is behind its own ancestor). G13/G14 rank next, since an event-driven
 consumer is the case the starter claims to support and does not.
 
-Cross-reference with the FRED gap list in 2.2 before triaging in 2.3.
+Cross-reference with the FRED gap list in 2.2 before triaging in 2.3: see
+[GAPS_FRED.md](GAPS_FRED.md), whose closing section tabulates the themes common
+to both prototypes.
