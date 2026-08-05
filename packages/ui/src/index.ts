@@ -19,7 +19,6 @@ export * from "@/components/data-display/RgoTimeWithDateDisplay/RgoTimeWithDateD
 export * from "@/components/data-display/RgoTimeWithDateDisplayInline/RgoTimeWithDateDisplayInline";
 export * from "@/components/data-display/RgoTruncatedText/RgoTruncatedText";
 export * from "@/components/data-display/RgoValueWithUnit/RgoValueWithUnit";
-export * from "@/components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer";
 export * from "@/components/DelayedRender";
 export * from "@/components/feedback/RgoDialogHeader/RgoDialogHeader";
 export * from "@/components/feedback/RgoDrawer/RgoDrawer";

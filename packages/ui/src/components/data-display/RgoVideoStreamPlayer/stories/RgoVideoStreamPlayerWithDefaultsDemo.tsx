@@ -8,7 +8,7 @@ export function RgoVideoStreamPlayerWithDefaultsDemo(props: RgoVideoStreamPlayer
 }
 
 export const RgoVideoStreamPlayerWithDefaultsDemoCode = `
-import { RgoVideoStreamPlayer, type RgoVideoStreamPlayerProps } from "@vireocodedev/starter-ui";
+import { RgoVideoStreamPlayer, type RgoVideoStreamPlayerProps } from "@vireocodedev/starter-ui/video";
 
 export function RgoVideoStreamPlayerWithDefaultsDemo(props: RgoVideoStreamPlayerProps) {
   return <RgoVideoStreamPlayer {...props} />;

@@ -127,7 +127,7 @@ describe("package entry points", () => {
   it("declares every entry point explicitly", () => {
     const subpaths = Object.keys(manifest.exports);
 
-    expect(subpaths).toEqual([".", "./api", "./country"]);
+    expect(subpaths).toEqual([".", "./api", "./country", "./video"]);
   });
 
   it("exposes no wildcard subpath", () => {

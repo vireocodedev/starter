@@ -203,10 +203,11 @@ function App() {
 
 ### RgoVideoStreamPlayer
 
-Requires WebRTC stream server setup:
+Requires WebRTC stream server setup. It lives behind its own entry point so that
+`ovenplayer` is only resolved by consumers that render a stream:
 
 ```tsx
-import { RgoVideoStreamPlayer } from "@vireocodedev/starter-ui";
+import { RgoVideoStreamPlayer } from "@vireocodedev/starter-ui/video";
 
 <RgoVideoStreamPlayer url="wss://your-stream-server.com/app/stream-name" width="100%" height="100%" autoStart={true} />;
 ```

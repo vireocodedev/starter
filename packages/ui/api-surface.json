@@ -314,8 +314,6 @@
         "RgoValueWithUnit",
         "RgoValueWithUnitProps",
         "RgoValueWithUnitSlotProps",
-        "RgoVideoStreamPlayer",
-        "RgoVideoStreamPlayerProps",
         "RhfInputProps",
         "SlidingScreenStack",
         "SlidingScreenStackProps",
@@ -482,7 +480,6 @@
         "i18next",
         "i18next-browser-languagedetector",
         "jsoncrush",
-        "ovenplayer",
         "react",
         "react-error-boundary",
         "react-hook-form",
@@ -530,6 +527,19 @@
       "dependencies": [
         "country-flag-icons/react/3x2",
         "i18n-iso-countries"
+      ],
+      "workerSafe": false
+    },
+    "./video": {
+      "exports": [
+        "RgoVideoStreamPlayer",
+        "RgoVideoStreamPlayerProps"
+      ],
+      "dependencies": [
+        "@mui/icons-material",
+        "@mui/material",
+        "ovenplayer",
+        "react"
       ],
       "workerSafe": false
     }

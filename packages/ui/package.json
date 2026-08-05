@@ -34,6 +34,11 @@
       "types": "./dist/country/index.d.ts",
       "import": "./dist/country/index.js",
       "default": "./dist/country/index.js"
+    },
+    "./video": {
+      "types": "./dist/video/index.d.ts",
+      "import": "./dist/video/index.js",
+      "default": "./dist/video/index.js"
     }
   },
   "main": "./dist/index.js",
