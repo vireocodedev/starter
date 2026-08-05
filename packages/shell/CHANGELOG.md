@@ -1,5 +1,104 @@
 # @vireocodedev/starter-core
 
+## 1.1.0
+
+### Minor Changes
+
+- cd33fb5: `shell.mobileBottomNavigation` is now optional.
+
+  The bottom bar only exists in `dashboard` mode, but the config demanded
+  `authenticatedItems`, `loginItem` and `moreItem` from every app regardless. A
+  `bare` or `public` app had to invent three items it would never render just to
+  satisfy the type.
+
+  The key may now be omitted. `AppMobileBottomNavigation` renders nothing when it
+  is absent, and `validateAppConfig` only checks the block when it is present.
+
+  Additive — apps that declare it are unaffected.
+
+  Closes gap F6 (roadmap 2.4, work item W7).
+
+- cd33fb5: Permissions can now be evaluated against a scope.
+
+  A permission alone answers "may this role ever do X". Both second-domain apps
+  needed the narrower question "may this user do X _here_" and neither could
+  express it: LMS scopes by the shift a user is on duty for, FRED by the tenant
+  that owns the record (`companyId`, enforced server-side by `CompanyIdValidator`).
+
+  `runtime.permissions.canAccess` now takes an optional second argument:
+
+  ```ts
+  canAccess: (permission: string | undefined, scope?: AppPermissionScope) => boolean;
+  ```
+
+  `AppPermissionScope` is an opaque `Record<string, unknown>` — the starter does
+  not know what an app's scoping dimensions are, so the app's own `canAccess`
+  implementation interprets it.
+
+  A static `permissionScope` can be declared anywhere a `permission` already can:
+  nav entries (`appNav.item`, `disabledItem`, `control`, `slot`), page and section
+  definitions, mobile bottom nav items, nav control configs, and route handles. The
+  nav visibility filter, the mobile bottom navigation, the public shell layout and
+  `AppRouteGuardLayout` all pass it through.
+
+  Scopes that vary per record can only be known at the call site, so two hooks are
+  exported for that: `useAppPermissions()` returns the checker, and `useAppCan()`
+  resolves one permission:
+
+  ```tsx
+  <RgoShowIf when={useAppCan("lockage:finalize", { shiftId })}>
+    <FinalizeButton />
+  </RgoShowIf>
+  ```
+
+  Fully additive. An existing `(permission) => boolean` implementation stays
+  assignable and every existing call site keeps working.
+
+  Closes gaps G11 and F17 — the highest-ranked structural theme from both paper
+  prototypes (roadmap 2.4, work item W1).
+
+- cd33fb5: Shell mode is now resolved per route, and actually drives the layout.
+
+  `config.shell.mode` was declared, validated, and then read by nothing — the app
+  had to import a layout preset and wire it into the route tree by hand, which
+  made the config field decorative and the choice permanent for the whole app.
+
+  `AppShellModeLayout` closes the loop. It picks the preset that matches the
+  resolved mode:
+
+  ```tsx
+  <AppShellModeLayout config={APP_CONFIG} runtime={runtime} />
+  ```
+
+  `config.shell.mode` remains the app-wide default. Any route may override it via
+  `handle.shellMode`, and the deepest matched override wins:
+
+  ```ts
+  {
+    path: "map",
+    element: <MapPage />,
+    handle: { shellMode: "bare" },
+  }
+  ```
+
+  That is what both paper prototypes needed and neither could express: FRED's map
+  is full-bleed while its admin pages are not, and LMS varies its chrome by role.
+
+  `useAppShellMode(config)` is exported for apps that need the resolved mode
+  without the layout.
+
+  Additive — the presets are still exported and still work when imported directly.
+
+  Closes gaps G7 and F3, and resolves G8 (roadmap 2.4, work item W2).
+
+### Patch Changes
+
+- Updated dependencies [cd33fb5]
+- Updated dependencies [cd33fb5]
+- Updated dependencies [cd33fb5]
+  - @vireocodedev/starter-localization@0.10.0
+  - @vireocodedev/starter-ui@3.2.0
+
 ## 1.0.0
 
 ### Major Changes
