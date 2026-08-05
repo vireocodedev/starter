@@ -1,5 +1,127 @@
 # @vireocodedev/starter-ui
 
+## 3.0.0
+
+### Major Changes
+
+- 6394ad9: Remove `RgoOfflineCacheService` and the `idb` dependency.
+
+  The service was an IndexedDB-backed offline cache. Offline persistence in the starter
+  is now owned by `@vireocodedev/starter-sqlite` (SQLite over OPFS), so the two told
+  contradictory stories about where offline data lives, and the IndexedDB path had no
+  consumers.
+
+  Removed along with it:
+
+  - the `idb` runtime dependency
+  - the IndexedDB-only helper types `IndexedDBEntity`, `EntityMap`, `ObjectStore` and
+    `ObjectStoreIndex` from `utils/typeutils`
+  - the `RgoWebWorkerService` documentation section, which documented a service that
+    was never implemented
+
+  Use `@vireocodedev/starter-sqlite` for offline persistence.
+
+- a194df9: Remove duplicated exports so each symbol has exactly one home.
+
+  **Breaking changes**
+
+  - `@vireocodedev/starter-shell` no longer re-exports `AppBottomDrawer`, `AppBottomDrawerProps` or the `APP_PAGE_CONTENT_*` width constants. Import them from `@vireocodedev/starter-ui`, where they are defined.
+  - `@vireocodedev/starter-ui` no longer exports `AppConfirmProvider`. It was a pass-through wrapper that rendered `RgoConfirmProvider` and added nothing — use `RgoConfirmProvider` directly.
+
+- 04d26a3: Replace the `exports` wildcard with three declared entry points.
+
+  `exports` previously mapped `"./*"` onto the build output, which made all 183 built modules public API. Any internal
+  rename was therefore a breaking change, and the honest semver bump for almost any change was major. The map now
+  declares exactly `.`, `./api` and `./country`; importing an undeclared internal path no longer resolves.
+
+  **This is the breaking part.** Every symbol reachable through the old wildcard is still reachable — the six that the
+  reference application used through deep paths (`endpoint`, `PageableParams`, `PageableResponse`, `zodParse`,
+  `CountryCode`, `getCountryName`) were all already exported from the root barrel. Consumers using deep paths must
+  repoint the import specifier; no symbol was removed or renamed.
+
+  The two extra entry points exist for reasons the root barrel cannot serve:
+
+  - **`./api`** is framework-free and safe to import from a Web Worker. The root barrel pulls in React, MUI and
+    DOM-dependent providers, so a worker that imports it fails on load. This subpath re-exports the request and response
+    helpers that the online and offline API modules share, and nothing else.
+  - **`./country`** gives the API layer a narrow import for country data instead of the whole component library. It is
+    **not** worker-safe: `RGO_COUNTRY_CODES` and `CountryCode` derive from `country-flag-icons/react`, so importing it
+    evaluates React components.
+
+  A new `entryPoints` test enforces both promises. It fails if a wildcard reappears, if an entry point points at a file
+  the build does not produce, or if anything in the `./api` runtime graph reaches for React, MUI or the DOM. Its
+  third-party surface is frozen to `axios` and `zod`, so a new runtime dependency has to be argued for rather than
+  acquired by accident through a convenience import.
+
+- 829c409: Consolidate toast notifications on `sonner` and drop the `react-hot-toast` dependency.
+
+  The library previously shipped two competing toast stacks: `AppSnackbarProvider` (sonner) and `RgoSnackbarProvider` (react-hot-toast). `useRgoMutation` emitted its toasts through react-hot-toast, so any app mounting `AppSnackbarProvider` — the documented default — silently dropped every success and error toast.
+
+  **Breaking changes**
+
+  - `RgoSnackbarProvider` and `RgoSnackbarProviderProps` are removed. Use `AppSnackbarProvider`, which mounts sonner's `Toaster` with responsive placement and theme-aware colors.
+  - `toast` is now re-exported from `sonner` instead of `react-hot-toast`. Replace `toast(<node />)` with `toast.custom(() => <node />)`, and prefer `toast.success` / `toast.error` / `toast.warning` for plain messages.
+
+  `useRgoMutation` now renders through sonner, so its snackbars appear as intended.
+
+- c49616c: Move `RgoVideoStreamPlayer` out of the root barrel and onto its own
+  `@vireocodedev/starter-ui/video` entry point.
+
+  **Breaking change**
+
+  - `RgoVideoStreamPlayer` and `RgoVideoStreamPlayerProps` are no longer exported
+    from `@vireocodedev/starter-ui`. Import them from
+    `@vireocodedev/starter-ui/video`. Nothing about the component changed.
+
+  **Why**
+
+  `ovenplayer` is by a wide margin the heaviest dependency in this package, and
+  until now every consumer of the root barrel pulled it into the module graph
+  whether or not it rendered a stream. A bundler cannot reliably drop it either:
+  the component imports its own stylesheet, and `ovenplayer` itself is not
+  side-effect free, so removing it requires the consumer to declare the package's
+  JavaScript side-effect free by hand.
+
+  Behind a subpath the cost is structural rather than configuration-dependent — a
+  consumer that never imports `./video` never resolves `ovenplayer` at all.
+
+  `RgoClientTable`, the other component with no consumer today, stays in the root
+  barrel. It carries no comparable transitive dependency, so moving it would trade
+  a real import path for no saving.
+
+### Patch Changes
+
+- 3feef19: `handleBadRequestError` no longer throws when a 400 arrives without a response body.
+
+  The guard read `error?.response.data`, so the optional chain stopped one level short:
+  any 400-status error lacking a `response` (a synthesized error, an aborted request)
+  raised a `TypeError` from inside the error handler instead of being ignored.
+
+- 2b53a55: Fix documentation drift and add a contract test that prevents it recurring.
+
+  A new `docsContract` test parses every `import ... from "@vireocodedev/starter-ui"` in the `.mdx` docs and in the
+  Storybook code samples, and asserts the symbol is actually exported from the package barrel. It found eleven defects,
+  all now corrected:
+
+  - `RgoSseProvider` was documented as a provider but has never existed — the real API is the `useRgoSseEmitter` hook. The
+    option table was already accurate and has been kept.
+  - `RgoInitializable` was documented in nine places; the component is named `RgoInitializeProvider`.
+  - `useSnackbar` was documented as a starter-ui export; toasts moved to sonner, so the example now uses `toast`.
+  - `useTranslation` was documented as a starter-ui export; it comes from `react-i18next`.
+  - `useTheme` was documented as a starter-ui export with a `{ toggleTheme, isDarkMode }` return that never existed. It is
+    MUI's hook, and `RgoThemeProvider` does not manage colour mode — the dark-theme example now shows the real pattern.
+  - `I18nTranslationFn` was referenced in four story samples; the exported type is `RgoTranslationFn`.
+  - `RgoTabPanel` was shown as an import in the `useRgoTabs` example, but it is module-private; the example now uses the
+    `TabPanel` returned by the hook.
+  - The `RgoTablePagination` code sample was missing the commas in its import statement.
+  - A `storybookutils` JSDoc example imported a nonexistent `Provider`.
+
+- 829c409: Fix a layout height jump in the management server table by keeping the loading skeleton's row height in sync with the rendered table rows.
+- Updated dependencies [a194df9]
+- Updated dependencies [829c409]
+  - @vireocodedev/starter-history@0.4.1
+  - @vireocodedev/starter-localization@0.9.0
+
 ## 2.1.0
 
 ### Minor Changes

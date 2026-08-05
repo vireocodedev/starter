@@ -1,5 +1,11 @@
 # @vireocodedev/starter-localization
 
+## 0.9.0
+
+### Minor Changes
+
+- 829c409: Add `network.connectingToLiveUpdates` and `network.hydratingInBackground` to the platform namespace so consumers can localize offline hydration and live-update banners.
+
 ## 0.8.0
 
 ### Minor Changes
