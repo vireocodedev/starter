@@ -1,7 +1,7 @@
 import { type AppBrand } from "@/config/app.config.brand";
 import { type AppRouteObject, type AppRouteTranslationFn } from "@/config/app.config.routes.types";
-import { type RgoIcon } from "@vireocodedev/starter-ui";
 import { type QueryKey } from "@tanstack/react-query";
+import { type RgoIcon } from "@vireocodedev/starter-ui";
 import type React from "react";
 
 export const APP_ROUTE_NODE_KEY: unique symbol = Symbol("appRouteNodeKey");

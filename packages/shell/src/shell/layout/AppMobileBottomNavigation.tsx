@@ -2,8 +2,8 @@ import { type AppConfig, type AppMobileBottomNavItem } from "@/config/app.config
 import { useAppNavLayout } from "@/shell/layout/AppNavLayoutContext";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
-import { RgoIcon } from "@vireocodedev/starter-ui";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
+import { RgoIcon } from "@vireocodedev/starter-ui";
 import React from "react";
 import { flushSync } from "react-dom";
 import { useLocation, useNavigate } from "react-router";
