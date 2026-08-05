@@ -21,7 +21,6 @@ export default defineConfig(({ mode }) => ({
     lib: {
       entry: {
         index: resolve(__dirname, "src/index.ts"),
-        "offline/index": resolve(__dirname, "src/offline/index.ts"),
       },
       formats: ["es"],
       fileName: (_format, entryName) => `${entryName}.js`,

@@ -12,6 +12,10 @@ Snapshot taken 2026-08-04 against `leather-production/frontend` as the consumer.
 > **Status.** The baseline below is the pre-1.2 measurement, kept because it is the evidence the entry-point
 > decision was made from. Step **1.2** has since been implemented: `starter-ui` no longer declares a wildcard, and
 > its REACHABLE count fell from 183 to 3. Findings 1 and 2 carry resolution notes; findings 3 and 4 still stand.
+>
+> **Naming.** Step **1.5** renamed `starter-core` to `starter-shell` and moved its `./offline` entry point to
+> `starter-sqlite/offline`. Every `starter-core` below is that package under its old name; see
+> [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the reasoning.
 
 ---
 

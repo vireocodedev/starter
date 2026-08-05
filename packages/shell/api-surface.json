@@ -1,5 +1,5 @@
 {
-  "package": "@vireocodedev/starter-core",
+  "package": "@vireocodedev/starter-shell",
   "entryPoints": {
     ".": {
       "exports": [
@@ -199,32 +199,6 @@
         "zod"
       ],
       "workerSafe": false
-    },
-    "./offline": {
-      "exports": [
-        "FetchPage",
-        "MapRow",
-        "OFFLINE_TEMP_ID_HEADER",
-        "OFFLINE_TEMP_PRODUCT_ID_LEGACY_HEADER",
-        "OfflineStatusRuntime",
-        "OfflineStatusRuntimeOptions",
-        "OfflineStatusSnapshot",
-        "OfflineSyncCommand",
-        "PageResult",
-        "QueueableRequest",
-        "QueueingPolicyOptions",
-        "ReplaceSnapshot",
-        "createOfflineStatusRuntime",
-        "extractReplayHeaders",
-        "hydratePagedSnapshot",
-        "isOfflineQueueableRequest",
-        "normalizeHeaders",
-        "runOfflineCreateWithTempId",
-        "runOfflineDelete",
-        "runOfflineUpdate"
-      ],
-      "dependencies": [],
-      "workerSafe": true
     }
   }
 }

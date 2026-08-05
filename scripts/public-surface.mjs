@@ -60,8 +60,7 @@ const update = process.argv.includes("--update");
  * property is part of their contract rather than an accident of the current code.
  */
 const WORKER_SAFE_ENTRY_POINTS = {
-  "@vireocodedev/starter-core": ["./offline"],
-  "@vireocodedev/starter-sqlite": ["."],
+  "@vireocodedev/starter-sqlite": [".", "./offline"],
   "@vireocodedev/starter-ui": ["./api"],
 };
 

@@ -1,4 +1,4 @@
-# @vireocodedev/starter-core
+# @vireocodedev/starter-shell
 
 The **app-shell framework** for the vireocodedev **starter** product: config /
 sitemap / routing scaffolding, route guards, the responsive shell + navigation,
@@ -7,7 +7,7 @@ and shell layout presets.
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-core
+npm install @vireocodedev/starter-shell
 ```
 
 Peers: `react`, `react-dom`, `react-router`, `@mui/material`,

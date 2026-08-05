@@ -9,7 +9,7 @@ views) — and exports the reusable utilities (`createStarterResources`,
 `createNamespaceResources`, `deepMerge`, types) that other `starter` libraries
 build on.
 
-Other starter packages (`starter-ui`, `starter-queryengine`, `starter-core`) do
+Other starter packages (`starter-ui`, `starter-queryengine`, `starter-shell`) do
 **not** ship translations; they depend on this package for both resources and
 namespace hooks. App consumers therefore wire i18n once and inherit every shared
 string instead of restating it.

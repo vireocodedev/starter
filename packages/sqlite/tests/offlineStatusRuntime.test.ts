@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { createOfflineStatusRuntime } from "@/offline/status/offlineStatusRuntime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

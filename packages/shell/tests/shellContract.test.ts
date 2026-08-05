@@ -11,7 +11,7 @@ import { describe, expect, it } from "vitest";
  * components are validated by consuming apps; these pure routing utilities are
  * the dependency-light surface worth pinning here.
  */
-describe("starter-core routePath contract", () => {
+describe("starter-shell routePath contract", () => {
   it("normalizes leading/trailing slashes", () => {
     expect(normalizeRoutePath("/foo/bar/")).toBe("foo/bar");
     expect(normalizeRoutePath("baz")).toBe("baz");
