@@ -354,3 +354,6 @@ Two candidates stand out for 2.4:
 
 And one cheap fix that needs no triage: **F13**, the untranslated strings in a
 published component.
+
+All of the above were triaged in 2.3 — see [GAPS_TRIAGE.md](GAPS_TRIAGE.md) for
+the decision on every gap and the scoped work items for 2.4.
