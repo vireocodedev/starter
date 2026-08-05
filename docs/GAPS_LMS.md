@@ -38,20 +38,27 @@ parts removed and admin-app parts added**. That reframes 2.1's real question fro
 "would the starter fit LMS?" to "what did the starter lose on the way?", which is
 a sharper question with a more uncomfortable answer.
 
-### G0 — the starter dropped four primitives LMS depends on — **Blocker**
+### G0 — the starter dropped four primitives LMS depends on — **Major**
+
+> **Updated after roadmap 2.4.** Originally filed as a **Blocker**. Triage split
+> it four ways (see `GAPS_TRIAGE.md`); the fix-now half shipped in 2.4, so it no
+> longer blocks.
 
 Present in `front-ui`, absent from every starter package:
 
-| Primitive                | front-ui files | starter |
-| ------------------------ | -------------- | ------- |
-| `RgoOfflineCacheService` | 4              | 0       |
-| `RgoWebWorkerService`    | 6              | 0       |
-| `RgoSnackbarProvider`    | 8              | 0       |
-| `tseep` (event bus)      | 6              | 0       |
+| Primitive                | front-ui files | starter | Status after 2.4                                                                     |
+| ------------------------ | -------------- | ------- | ------------------------------------------------------------------------------------ |
+| `tseep` (event bus)      | 6              | 0       | **Closed** — `RgoEventBus` / `useRgoEventListener` published from `starter-ui` (W4). |
+| `RgoWebWorkerService`    | 6              | 0       | Fix later — no starter consumer yet, so the API would be guessed.                    |
+| `RgoSnackbarProvider`    | 8              | 0       | Fix later — the starter deliberately chose `sonner`; this is a decision, not a loss. |
+| `RgoOfflineCacheService` | 4              | 0       | Accepted — superseded by `starter-sqlite`'s offline layer.                           |
 
-Moving LMS onto the starter today is a **regression**, not a migration. This is
-the single most important finding in this document, and it was invisible from
-inside leather-production.
+Moving LMS onto the starter still costs work, but it is a **migration with two
+known gaps**, not a regression. The one primitive with no substitute at all — the
+event bus — now exists.
+
+This remains the most important finding in this document, and it was invisible
+from inside leather-production.
 
 ---
 
@@ -296,34 +303,40 @@ The starter has no event bus. Two of three apps wanted one.
 
 ## Summary
 
-| ID  | Gap                                                    | Severity    |
-| --- | ------------------------------------------------------ | ----------- |
-| G0  | Starter dropped 4 primitives LMS depends on            | **Blocker** |
-| G1  | No entity registry; the two that exist barely overlap  | Major       |
-| G3  | Live operational state has no home in the query model  | Major       |
-| G4  | Filter DSL + builder stranded in the app               | Major       |
-| G5  | `javaType` leaks the backend into a published contract | Major       |
-| G7  | Shell varies by mode; LMS varies by role               | Major       |
-| G8  | Primary surface is not a page                          | Major       |
-| G11 | No contextual/scoped permissions (shift, tenant)       | Major       |
-| G13 | SSE emitter is transport only                          | Major       |
-| G14 | No reconnect strategy, no missed-event replay          | Major       |
-| G16 | Two incompatible offline implementations               | Major       |
-| G2  | Registry ceremony does not scale to 50 entities        | Minor       |
-| G6  | LMS tables bypass the query engine                     | Minor       |
-| G9  | No per-role nav substitution                           | Minor       |
-| G12 | No effective-role / impersonation                      | Minor       |
-| G15 | SSE handlers frozen at mount                           | Minor       |
-| G17 | Recurring need for an event bus                        | Minor       |
-| G10 | Flat role→permission granularity                       | **Fits**    |
+> **Updated after roadmap 2.4.** The **Status** column records what shipped. See
+> `GAPS_TRIAGE.md` for the reasoning behind every disposition.
 
-**One blocker, ten majors, six minors, one clean fit.**
+| ID  | Gap                                                    | Severity | Status after 2.4                               |
+| --- | ------------------------------------------------------ | -------- | ---------------------------------------------- |
+| G0  | Starter dropped 4 primitives LMS depends on            | Major    | Split — bus closed, 2 later, 1 accepted        |
+| G1  | No entity registry; the two that exist barely overlap  | Major    | Fix later                                      |
+| G3  | Live operational state has no home in the query model  | Major    | Out of scope                                   |
+| G4  | Filter DSL + builder stranded in the app               | Major    | Fix later                                      |
+| G5  | `javaType` leaks the backend into a published contract | Major    | **Closed** (W5)                                |
+| G7  | Shell varies by mode; LMS varies by role               | Major    | **Closed** (W2)                                |
+| G8  | Primary surface is not a page                          | Major    | **Resolved** by W2                             |
+| G11 | No contextual/scoped permissions (shift, tenant)       | Major    | **Closed** (W1)                                |
+| G13 | SSE emitter is transport only                          | Major    | Accept                                         |
+| G14 | No reconnect strategy, no missed-event replay          | Major    | **Reconnect closed** (W3); replay out of scope |
+| G16 | Two incompatible offline implementations               | Major    | Accept — row-shaped by design                  |
+| G2  | Registry ceremony does not scale to 50 entities        | Minor    | Fix later                                      |
+| G6  | LMS tables bypass the query engine                     | Minor    | No action                                      |
+| G9  | No per-role nav substitution                           | Minor    | No action                                      |
+| G12 | No effective-role / impersonation                      | Minor    | Out of scope                                   |
+| G15 | SSE handlers frozen at mount                           | Minor    | **Closed** (W3)                                |
+| G17 | Recurring need for an event bus                        | Minor    | **Closed** (W4)                                |
+| G10 | Flat role→permission granularity                       | **Fits** | No action                                      |
 
-The two findings most likely to survive triage are **G11** (contextual
+**As filed: one blocker, ten majors, six minors, one clean fit.**
+
+**After 2.4: no blockers.** Six gaps closed outright (G5, G7, G11, G15, G17 and
+the reconnect half of G14), one resolved as a side effect (G8), and G0 downgraded
+to Major with its only irreplaceable primitive — the event bus — now published.
+
+The two findings that ranked highest at filing time were **G11** (contextual
 permissions — independently required by both LMS and FRED) and **G0** (the
-starter is behind its own ancestor). G13/G14 rank next, since an event-driven
-consumer is the case the starter claims to support and does not.
+starter is behind its own ancestor). Both were acted on first.
 
-Cross-reference with the FRED gap list in 2.2 before triaging in 2.3: see
+Cross-reference with the FRED gap list in 2.2: see
 [GAPS_FRED.md](GAPS_FRED.md), whose closing section tabulates the themes common
 to both prototypes.

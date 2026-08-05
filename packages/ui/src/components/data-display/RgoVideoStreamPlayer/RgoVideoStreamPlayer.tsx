@@ -1,5 +1,6 @@
 import { Error as ErrorIcon, Refresh } from "@mui/icons-material";
 import { Box, Button, Typography, type SxProps } from "@mui/material";
+import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import OvenPlayer from "ovenplayer";
 import React from "react";
 import "./RgoVideoStreamPlayer.css";
@@ -23,6 +24,7 @@ export function RgoVideoStreamPlayer({
 }: RgoVideoStreamPlayerProps) {
   const container = React.useRef<HTMLDivElement>(null);
   const [error, setError] = React.useState(false);
+  const { t } = usePlatformTranslation();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = React.useRef<any>(null);
   const id = React.useId();
@@ -119,7 +121,7 @@ export function RgoVideoStreamPlayer({
         >
           <ErrorIcon sx={{ fontSize: 48, opacity: 0.7 }} />
           <Typography variant="h6" align="center" color="error.main">
-            Error Loading Stream
+            {t("video.streamErrorTitle")}
           </Typography>
           <Typography
             variant="body2"
@@ -130,10 +132,10 @@ export function RgoVideoStreamPlayer({
               color: "text.secondary",
             }}
           >
-            Unable to connect to the video stream. Please check the URL and try again.
+            {t("video.streamErrorMessage")}
           </Typography>
           <Button variant="contained" color="error" startIcon={<Refresh />} onClick={handleRetry} sx={{ mt: 1 }}>
-            Retry
+            {t("video.streamRetry")}
           </Button>
         </Box>
       )}

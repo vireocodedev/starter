@@ -4,6 +4,7 @@ import {
   type AppConfigPermission,
   type AppConfigTranslationFn,
   type AppPageConfig,
+  type AppPermissionScope,
   type AppShellNavEntry,
 } from "@/config/app.config.types";
 
@@ -17,6 +18,7 @@ export const appNav = {
       label: page.label,
       icon: page.icon,
       permission: page.permission,
+      permissionScope: page.permissionScope,
     };
   },
 
@@ -25,11 +27,13 @@ export const appNav = {
     icon,
     disabledTooltip,
     permission,
+    permissionScope,
   }: {
     label: AppConfigLabel<TTranslationFn>;
     icon: AppConfigIconName;
     disabledTooltip: AppConfigLabel<TTranslationFn>;
     permission?: TPermission;
+    permissionScope?: AppPermissionScope;
   }): AppShellNavEntry<TPermission, TTranslationFn> {
     return {
       type: "item",
@@ -38,6 +42,7 @@ export const appNav = {
       disabled: true,
       disabledTooltip,
       permission,
+      permissionScope,
     };
   },
 
@@ -60,19 +65,27 @@ export const appNav = {
     };
   },
 
-  control(id: string, options?: { permission?: AppConfigPermission }): AppShellNavEntry {
+  control(
+    id: string,
+    options?: { permission?: AppConfigPermission; permissionScope?: AppPermissionScope },
+  ): AppShellNavEntry {
     return {
       type: "control",
       id,
       permission: options?.permission,
+      permissionScope: options?.permissionScope,
     };
   },
 
-  slot(id: string, options?: { permission?: AppConfigPermission }): AppShellNavEntry {
+  slot(
+    id: string,
+    options?: { permission?: AppConfigPermission; permissionScope?: AppPermissionScope },
+  ): AppShellNavEntry {
     return {
       type: "slot",
       id,
       permission: options?.permission,
+      permissionScope: options?.permissionScope,
     };
   },
 };

@@ -46,7 +46,7 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
 
   const navItems = React.useMemo(() => {
     const entries = config.shell.publicNavEntries ?? config.shell.loginNavEntries;
-    return getPublicNavItems(entries).filter(item => canAccess(item.permission));
+    return getPublicNavItems(entries).filter(item => canAccess(item.permission, item.permissionScope));
   }, [canAccess, config.shell.loginNavEntries, config.shell.publicNavEntries]);
 
   return (

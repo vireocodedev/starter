@@ -301,28 +301,36 @@ flat-list-instead-of-nesting-pyramid idea, twice, absent from the starter.
 
 ## Summary
 
-| ID  | Gap                                                       | Severity |
-| --- | --------------------------------------------------------- | -------- |
-| F1  | 40 primitives reinvented; consumes no shared library      | Major    |
-| F3  | `shell.mode` is global per app, not per route             | Major    |
-| F4  | Shell requires a router and 5 route config keys           | Major    |
-| F5  | Chrome is floating panels, not nav slots                  | Major    |
-| F8  | Geometry editing is a live projection, not a submit cycle | Major    |
-| F9  | Zero `useMutation`; write path is bespoke                 | Major    |
-| F10 | Imperative map object graph + global event bus            | Major    |
-| F13 | `RgoVideoStreamPlayer` hardcodes English copy             | Major    |
-| F16 | Row-shaped offline model inapplicable to spatial data     | Major    |
-| F17 | Role-only checks plus tenant scope; no permissions        | Major    |
-| F6  | `mobileBottomNavigation` required even when bare          | Minor    |
-| F11 | StrictMode worked around via `useEffectNoStrict`          | Minor    |
-| F14 | Unbounded concurrent video streams                        | Minor    |
-| F18 | Provider composition rebuilt per app                      | Minor    |
-| F2  | `bare` shell mode hosts a full-bleed map                  | **Fits** |
-| F7  | react-hook-form + zod + create/update group               | **Fits** |
-| F12 | Starter's video player beats FRED's                       | **Fits** |
-| F15 | No offline expectations to violate                        | **Fits** |
+> **Updated after roadmap 2.4.** The **Status** column records what shipped. See
+> `GAPS_TRIAGE.md` for the reasoning behind every disposition.
 
-**No blockers, ten majors, four minors, four clean fits.**
+| ID  | Gap                                                       | Severity | Status after 2.4                                 |
+| --- | --------------------------------------------------------- | -------- | ------------------------------------------------ |
+| F1  | 40 primitives reinvented; consumes no shared library      | Major    | Fix later                                        |
+| F3  | `shell.mode` is global per app, not per route             | Major    | **Closed** (W2)                                  |
+| F4  | Shell requires a router and 5 route config keys           | Major    | Out of scope                                     |
+| F5  | Chrome is floating panels, not nav slots                  | Major    | Out of scope                                     |
+| F8  | Geometry editing is a live projection, not a submit cycle | Major    | Out of scope                                     |
+| F9  | Zero `useMutation`; write path is bespoke                 | Major    | Accept — divergent                               |
+| F10 | Imperative map object graph + global event bus            | Major    | **Bus half closed** (W4); map graph out of scope |
+| F13 | `RgoVideoStreamPlayer` hardcodes English copy             | Major    | **Closed** (W6)                                  |
+| F16 | Row-shaped offline model inapplicable to spatial data     | Major    | Accept — row-shaped by design                    |
+| F17 | Role-only checks plus tenant scope; no permissions        | Major    | **Closed** (W1)                                  |
+| F6  | `mobileBottomNavigation` required even when bare          | Minor    | **Closed** (W7)                                  |
+| F11 | StrictMode worked around via `useEffectNoStrict`          | Minor    | No action                                        |
+| F14 | Unbounded concurrent video streams                        | Minor    | Fix later                                        |
+| F18 | Provider composition rebuilt per app                      | Minor    | Refused                                          |
+| F2  | `bare` shell mode hosts a full-bleed map                  | **Fits** | No action                                        |
+| F7  | react-hook-form + zod + create/update group               | **Fits** | No action                                        |
+| F12 | Starter's video player beats FRED's                       | **Fits** | No action                                        |
+| F15 | No offline expectations to violate                        | **Fits** | No action                                        |
+
+**As filed: no blockers, ten majors, four minors, four clean fits.**
+
+**After 2.4:** five gaps closed outright (F3, F6, F13, F17 and the event-bus half
+of F10). What remains is either a deliberate scope boundary — the starter is a
+routed, table-first admin app, and F4/F5/F8 ask it not to be — or work deferred
+for want of a second consumer.
 
 FRED scores _better_ than LMS on blockers and worse on adoption: nothing stops it
 from using the starter, and it uses none of it.

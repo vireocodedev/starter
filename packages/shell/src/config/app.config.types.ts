@@ -11,6 +11,20 @@ export type AppRouteParamValue = string | number;
 export type AppRouteParams = Record<string, string | undefined>;
 export type AppRoutePathParams = Record<string, AppRouteParamValue | undefined>;
 export type AppConfigPermission = string;
+/**
+ * Extra context a permission is evaluated against.
+ *
+ * A permission alone answers "may this role ever do X". Real apps also need
+ * "may this user do X *here*" — scoped to the shift they are on duty for, the
+ * tenant that owns the record, the site they are assigned to. The starter does
+ * not know what those dimensions are, so the scope is an opaque bag that the
+ * app's own `canAccess` implementation interprets.
+ *
+ * @example
+ *   canAccess("lockage:finalize", { shiftId: activeShift.id });
+ *   canAccess("area:edit", { companyId: area.companyId });
+ */
+export type AppPermissionScope = Record<string, unknown>;
 export type AppConfigTranslationFn = AppRouteTranslationFn;
 export type AppConfigLabel<TTranslationFn = AppConfigTranslationFn> = (
   t: TTranslationFn,
@@ -38,6 +52,7 @@ export type AppPageDefinition<
   icon: AppConfigIconName;
   Component: React.ComponentType;
   permission?: TPermission;
+  permissionScope?: AppPermissionScope;
 };
 
 export type AppSectionDefinition<
@@ -48,6 +63,7 @@ export type AppSectionDefinition<
   label: AppConfigLabel<TTranslationFn>;
   icon?: AppConfigIconName;
   permission?: TPermission;
+  permissionScope?: AppPermissionScope;
 };
 
 export type AppPageConfig<
@@ -111,6 +127,7 @@ export type AppShellNavEntry<
       disabled?: boolean;
       disabledTooltip?: AppConfigLabel<TTranslationFn>;
       permission?: TPermission;
+      permissionScope?: AppPermissionScope;
     }
   | {
       type: "separator";
@@ -122,11 +139,13 @@ export type AppShellNavEntry<
       type: "control";
       id: string;
       permission?: TPermission;
+      permissionScope?: AppPermissionScope;
     }
   | {
       type: "slot";
       id: string;
       permission?: TPermission;
+      permissionScope?: AppPermissionScope;
     }
   | {
       type: "divider";
@@ -142,6 +161,7 @@ export type AppMobileBottomNavItem<
   label: AppConfigLabel<TTranslationFn>;
   icon: AppConfigIconName;
   permission?: TPermission;
+  permissionScope?: AppPermissionScope;
 };
 
 export type AppShellNavControlConfig<
@@ -152,6 +172,7 @@ export type AppShellNavControlConfig<
   icon: AppConfigIconName;
   Component: React.ComponentType<AppShellNavControlProps>;
   permission?: TPermission;
+  permissionScope?: AppPermissionScope;
 };
 
 export type AppShellNavSlotConfig = {
@@ -185,7 +206,12 @@ export type AppConfig<
     navSlots?: Record<string, AppShellNavSlotConfig>;
     navControls?: Record<string, AppShellNavControlConfig<TPermission, TTranslationFn>>;
     accountSlot?: AppShellNavSlotConfig;
-    mobileBottomNavigation: {
+    /**
+     * Optional. The mobile bottom bar only exists in `dashboard` mode; a `bare`
+     * or `public` app has no use for it and should not be forced to invent one.
+     * When omitted, `AppMobileBottomNavigation` renders nothing.
+     */
+    mobileBottomNavigation?: {
       authenticatedItems: AppMobileBottomNavItem<TPermission, TTranslationFn>[];
       loginItem: AppMobileBottomNavItem<TPermission, TTranslationFn>;
       moreItem: Omit<AppMobileBottomNavItem<TPermission, TTranslationFn>, "path" | "page">;

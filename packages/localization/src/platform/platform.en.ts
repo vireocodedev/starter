@@ -138,6 +138,11 @@ const en = {
     title: "Application settings",
     userSettingsSavedSuccessfully: "User settings saved.",
   },
+  video: {
+    streamErrorMessage: "Unable to connect to the video stream. Please check the URL and try again.",
+    streamErrorTitle: "Error loading stream",
+    streamRetry: "Retry",
+  },
 } as const;
 
 export default en;

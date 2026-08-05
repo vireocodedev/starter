@@ -138,6 +138,12 @@
         "RgoDropZoneState",
         "RgoDroppableId",
         "RgoDroppableIdRegistry",
+        "RgoEventBus",
+        "RgoEventListener",
+        "RgoEventName",
+        "RgoEventPayload",
+        "RgoEventRegistry",
+        "RgoEventUnsubscribe",
         "RgoForm",
         "RgoFormBaseProps",
         "RgoFormDialogConfigBase",
@@ -284,6 +290,7 @@
         "RgoSnackDetailsButtonProps",
         "RgoSnackProps",
         "RgoSnackVariant",
+        "RgoSseStatus",
         "RgoStatusDot",
         "RgoStatusDotProps",
         "RgoStatusText",
@@ -397,6 +404,7 @@
         "resolveAppPageContentMode",
         "reverseFormArray",
         "reverseNumericScale",
+        "rgoEventBus",
         "roundToDecimals",
         "serializeError",
         "sortKeysDeep",
@@ -417,6 +425,7 @@
         "useRgoDebounce",
         "useRgoDependentFieldValidation",
         "useRgoDownloadFn",
+        "useRgoEventListener",
         "useRgoFadePresence",
         "useRgoForm",
         "useRgoFullscreenListener",
@@ -539,7 +548,8 @@
         "@mui/icons-material",
         "@mui/material",
         "ovenplayer",
-        "react"
+        "react",
+        "react-i18next"
       ],
       "workerSafe": false
     }

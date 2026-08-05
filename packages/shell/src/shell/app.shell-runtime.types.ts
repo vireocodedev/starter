@@ -1,4 +1,4 @@
-import { type AppConfigTranslationFn } from "@/config/app.config.types";
+import { type AppConfigTranslationFn, type AppPermissionScope } from "@/config/app.config.types";
 
 export type AppShellPageBodyMaxWidth = false | "xs" | "sm" | "md" | "lg" | "xl";
 
@@ -16,7 +16,14 @@ export type AppShellRuntime = {
     logout: () => Promise<void>;
   };
   permissions: {
-    canAccess: (permission: string | undefined) => boolean;
+    /**
+     * Answers whether the current user holds `permission`.
+     *
+     * `scope` narrows the question to a particular context — a shift, a tenant,
+     * a site. Implementations that do not need it can ignore the argument
+     * entirely; a plain `(permission) => boolean` remains assignable here.
+     */
+    canAccess: (permission: string | undefined, scope?: AppPermissionScope) => boolean;
   };
   preferences: {
     navCollapsed: boolean;

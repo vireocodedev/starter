@@ -138,6 +138,11 @@ const hr = {
     title: "Postavke aplikacije",
     userSettingsSavedSuccessfully: "Postavke korisnika spremljene.",
   },
+  video: {
+    streamErrorMessage: "Nije moguće povezati se s videostreamom. Provjerite URL i pokušajte ponovno.",
+    streamErrorTitle: "Greška pri učitavanju streama",
+    streamRetry: "Pokušaj ponovno",
+  },
 } as const;
 
 export default hr;

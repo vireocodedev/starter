@@ -62,16 +62,23 @@ export interface QueryEngineFieldDefinition {
   children: QueryEngineFieldDefinition[];
 }
 
+/**
+ * The published shape of an entity. Backends are free to send more — the parse
+ * schemas pass unknown keys through untouched, so a consumer can widen this type
+ * with its own backend-specific fields:
+ *
+ * ```ts
+ * type AppEntityDefinition = QueryEngineEntityDefinition & { javaType: string };
+ * ```
+ */
 export interface QueryEngineEntityDefinition {
   key: QueryEngineEntityKey;
   title: string;
-  javaType: string;
   fields: QueryEngineFieldDefinition[];
 }
 
 export interface QueryEngineEntitySummary {
   key: QueryEngineEntityKey;
-  javaType: string;
   filterableFieldCount: number;
 }
 
@@ -114,18 +121,20 @@ export function createQueryEngineEntitySchemas(
     }),
   );
 
-  const entityDefinition: z.ZodType<QueryEngineEntityDefinition, z.ZodTypeDef, unknown> = z.object({
-    key: entityKeySchema,
-    title: z.string(),
-    javaType: z.string(),
-    fields: z.array(fieldDefinition),
-  });
+  const entityDefinition: z.ZodType<QueryEngineEntityDefinition, z.ZodTypeDef, unknown> = z
+    .object({
+      key: entityKeySchema,
+      title: z.string(),
+      fields: z.array(fieldDefinition),
+    })
+    .passthrough();
 
-  const entitySummary: z.ZodType<QueryEngineEntitySummary, z.ZodTypeDef, unknown> = z.object({
-    key: entityKeySchema,
-    javaType: z.string(),
-    filterableFieldCount: z.number().int(),
-  });
+  const entitySummary: z.ZodType<QueryEngineEntitySummary, z.ZodTypeDef, unknown> = z
+    .object({
+      key: entityKeySchema,
+      filterableFieldCount: z.number().int(),
+    })
+    .passthrough();
 
   return { fieldDefinition, entityDefinition, entitySummary };
 }

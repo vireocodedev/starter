@@ -1,4 +1,8 @@
-import { type AppShellNavControlConfig, type AppShellNavSlotConfig } from "@/config/app.config.types";
+import {
+  type AppPermissionScope,
+  type AppShellNavControlConfig,
+  type AppShellNavSlotConfig,
+} from "@/config/app.config.types";
 import { type NavEntry } from "@/shell/layout/nav/nav.types";
 import { compactNavEntries } from "@/shell/layout/nav/nav.utils";
 import React from "react";
@@ -13,7 +17,7 @@ export function useVisibleNavEntries({
   navEntries,
   navSlots,
 }: {
-  canAccess: (permission: string | undefined) => boolean;
+  canAccess: (permission: string | undefined, scope?: AppPermissionScope) => boolean;
   collapsedSections: Record<string, boolean>;
   isCollapsed: boolean;
   loginMode: boolean;
@@ -26,27 +30,23 @@ export function useVisibleNavEntries({
     const entries = loginMode ? loginNavEntries : navEntries;
 
     const visibleEntries = entries.filter(entry => {
-      if (entry.type === "control" && !navControls?.[entry.id]) {
-        return false;
-      }
+      if (entry.type === "control") {
+        const control = navControls?.[entry.id];
 
-      if (entry.type === "control" && !canAccess(entry.permission)) {
-        return false;
-      }
-
-      if (entry.type === "control" && !canAccess(navControls?.[entry.id]?.permission)) {
-        return false;
+        if (!control) return false;
+        if (!canAccess(entry.permission, entry.permissionScope)) return false;
+        if (!canAccess(control.permission, control.permissionScope)) return false;
       }
 
       if (entry.type === "slot" && !navSlots?.[entry.id]) {
         return false;
       }
 
-      if (entry.type === "slot" && !canAccess(entry.permission)) {
+      if (entry.type === "slot" && !canAccess(entry.permission, entry.permissionScope)) {
         return false;
       }
 
-      if (entry.type === "item" && !canAccess(entry.permission)) {
+      if (entry.type === "item" && !canAccess(entry.permission, entry.permissionScope)) {
         return false;
       }
 

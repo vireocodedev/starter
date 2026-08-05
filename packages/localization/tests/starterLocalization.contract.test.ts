@@ -148,6 +148,9 @@ const EXPECTED_PLATFORM_KEYS = [
   "unsavedChanges.stay",
   "unsavedChanges.title",
   "validation.thisFieldIsRequired",
+  "video.streamErrorMessage",
+  "video.streamErrorTitle",
+  "video.streamRetry",
 ].sort();
 
 const EXPECTED_QUERYENGINE_KEYS = [

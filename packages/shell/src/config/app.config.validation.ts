@@ -210,40 +210,43 @@ export function validateAppConfig<
     validatePermission(control.permission, `shell.navControls.${controlId}.permission`, issues, options);
   });
 
-  const mobileItems = config.shell.mobileBottomNavigation.authenticatedItems;
-  mobileItems.forEach((item, index) => {
+  const mobileBottomNavigation = config.shell.mobileBottomNavigation;
+
+  if (mobileBottomNavigation) {
+    mobileBottomNavigation.authenticatedItems.forEach((item, index) => {
+      validatePermission(
+        item.permission,
+        `shell.mobileBottomNavigation.authenticatedItems[${index}].permission`,
+        issues,
+        options,
+      );
+      validatePageNavigationPath({
+        page: item.page,
+        path: `shell.mobileBottomNavigation.authenticatedItems[${index}].page`,
+        config,
+        issues,
+      });
+    });
+
     validatePermission(
-      item.permission,
-      `shell.mobileBottomNavigation.authenticatedItems[${index}].permission`,
+      mobileBottomNavigation.loginItem.permission,
+      "shell.mobileBottomNavigation.loginItem.permission",
       issues,
       options,
     );
     validatePageNavigationPath({
-      page: item.page,
-      path: `shell.mobileBottomNavigation.authenticatedItems[${index}].page`,
+      page: mobileBottomNavigation.loginItem.page,
+      path: "shell.mobileBottomNavigation.loginItem.page",
       config,
       issues,
     });
-  });
 
-  validatePermission(
-    config.shell.mobileBottomNavigation.loginItem.permission,
-    "shell.mobileBottomNavigation.loginItem.permission",
-    issues,
-    options,
-  );
-  validatePageNavigationPath({
-    page: config.shell.mobileBottomNavigation.loginItem.page,
-    path: "shell.mobileBottomNavigation.loginItem.page",
-    config,
-    issues,
-  });
-
-  addDuplicateIssues(
-    mobileItems.map(item => item.value),
-    "shell.mobileBottomNavigation.authenticatedItems.value",
-    issues,
-  );
+    addDuplicateIssues(
+      mobileBottomNavigation.authenticatedItems.map(item => item.value),
+      "shell.mobileBottomNavigation.authenticatedItems.value",
+      issues,
+    );
+  }
 
   if (issues.length === 0) {
     return;

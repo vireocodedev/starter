@@ -4,8 +4,18 @@ import { useAppShellContext } from "@/shell/useAppShellContext";
 import { Navigate, Outlet, useLocation, useMatches } from "react-router";
 import { createAuthRedirectState } from "./authRedirect";
 
-function isDefinedPermission(permission: string | undefined): permission is string {
-  return permission != null;
+type RequiredPermission = {
+  permission: string;
+  scope?: Record<string, unknown>;
+};
+
+function toRequiredPermission(handle: AppRouteHandle | undefined): RequiredPermission | null {
+  if (handle?.permission == null) return null;
+  return { permission: handle.permission, scope: handle.permissionScope };
+}
+
+function isRequiredPermission(value: RequiredPermission | null): value is RequiredPermission {
+  return value !== null;
 }
 
 export function AppRouteGuardLayout() {
@@ -18,8 +28,8 @@ export function AppRouteGuardLayout() {
   const location = useLocation();
   const matches = useMatches();
   const requiredPermissions = matches
-    .map(match => (match.handle as AppRouteHandle | undefined)?.permission)
-    .filter(isDefinedPermission);
+    .map(match => toRequiredPermission(match.handle as AppRouteHandle | undefined))
+    .filter(isRequiredPermission);
 
   if (isLoading || isAuthTransitioning) return <AppAuthTransitionScreen fullscreen={false} />;
   if (!isAuthenticated) {
@@ -30,7 +40,7 @@ export function AppRouteGuardLayout() {
     return <AppAuthTransitionScreen fullscreen={false} />;
   }
 
-  if (!requiredPermissions.every(permission => permissions.canAccess(permission))) {
+  if (!requiredPermissions.every(({ permission, scope }) => permissions.canAccess(permission, scope))) {
     return <Navigate to={unauthorizedPath} replace />;
   }
 

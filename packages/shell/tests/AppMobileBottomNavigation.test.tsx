@@ -1,6 +1,14 @@
 import { AppMobileBottomNavigation } from "@/shell/layout/AppMobileBottomNavigation";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const defaultMobileBottomNavigation = {
+  authenticatedItems: [],
+  loginItem: { value: "login", label: () => "Login", icon: "log-in-01" },
+  moreItem: { value: "more", label: () => "More", icon: "dots-horizontal" },
+};
+
+let mobileBottomNavigation: typeof defaultMobileBottomNavigation | undefined;
 
 vi.mock("@vireocodedev/starter-ui", () => ({
   RgoIcon: () => null,
@@ -13,13 +21,7 @@ vi.mock("@/shell/layout/AppNavLayoutContext", () => ({
 vi.mock("@/shell/useAppShellContext", () => ({
   useAppShellContext: () => ({
     config: {
-      shell: {
-        mobileBottomNavigation: {
-          authenticatedItems: [],
-          loginItem: { value: "login", label: () => "Login", icon: "log-in-01" },
-          moreItem: { value: "more", label: () => "More", icon: "dots-horizontal" },
-        },
-      },
+      shell: { mobileBottomNavigation },
       routes: { getPath: () => "/" },
       brand: { navigation: { bottomNavHeightPx: 64 } },
     },
@@ -37,9 +39,22 @@ vi.mock("react-router", () => ({
 }));
 
 describe("AppMobileBottomNavigation", () => {
+  beforeEach(() => {
+    mobileBottomNavigation = defaultMobileBottomNavigation;
+  });
+
   it("renders as a labelled navigation landmark", () => {
     render(<AppMobileBottomNavigation />);
 
     expect(screen.getByRole("navigation", { name: "common.bottomNavigation" })).toBeInTheDocument();
+  });
+
+  it("renders nothing when the app declares no bottom navigation", () => {
+    mobileBottomNavigation = undefined;
+
+    const { container } = render(<AppMobileBottomNavigation />);
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
 });

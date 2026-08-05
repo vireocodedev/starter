@@ -13,16 +13,27 @@ vi.mock("@vireocodedev/starter-ui", () => ({ RgoIcon: () => null }));
  * paths are pinned here.
  */
 
-const item = (name: string, permission?: string): NavEntry => ({
+const item = (name: string, permission?: string, permissionScope?: Record<string, unknown>): NavEntry => ({
   type: "item",
   label: () => name,
   icon: "check-circle",
   to: `/${name}`,
   permission,
+  permissionScope,
 });
 
-const control = (id: string, permission?: string): NavEntry => ({ type: "control", id, permission });
-const slot = (id: string, permission?: string): NavEntry => ({ type: "slot", id, permission });
+const control = (id: string, permission?: string, permissionScope?: Record<string, unknown>): NavEntry => ({
+  type: "control",
+  id,
+  permission,
+  permissionScope,
+});
+const slot = (id: string, permission?: string, permissionScope?: Record<string, unknown>): NavEntry => ({
+  type: "slot",
+  id,
+  permission,
+  permissionScope,
+});
 const separator = (id: string, hideWhenCollapsed?: boolean): NavEntry => ({
   type: "separator",
   id,
@@ -197,5 +208,63 @@ describe("useVisibleNavEntries", () => {
     });
 
     expect(labels(entries)).toEqual(["/home"]);
+  });
+
+  describe("permission scopes", () => {
+    it("passes an item's scope to the checker", () => {
+      const canAccess = vi.fn().mockReturnValue(true);
+
+      renderEntries({
+        navEntries: [item("area", "area:read", { companyId: "acme" })],
+        canAccess,
+      });
+
+      expect(canAccess).toHaveBeenCalledWith("area:read", { companyId: "acme" });
+    });
+
+    it("hides an item allowed globally but denied in its scope", () => {
+      const entries = renderEntries({
+        navEntries: [
+          item("mine", "area:read", { companyId: "acme" }),
+          item("theirs", "area:read", { companyId: "other" }),
+        ],
+        canAccess: (_permission, scope) => scope?.companyId === "acme",
+      });
+
+      expect(labels(entries)).toEqual(["/mine"]);
+    });
+
+    it("gates a control on both its own scope and the registered control's scope", () => {
+      const canAccess = vi.fn().mockReturnValue(true);
+
+      renderEntries({
+        navEntries: [control("theme", "theme:read", { siteId: 1 })],
+        navControls: { theme: { ...controlConfig("theme:write"), permissionScope: { siteId: 2 } } },
+        canAccess,
+      });
+
+      expect(canAccess).toHaveBeenCalledWith("theme:read", { siteId: 1 });
+      expect(canAccess).toHaveBeenCalledWith("theme:write", { siteId: 2 });
+    });
+
+    it("passes a slot's scope to the checker", () => {
+      const canAccess = vi.fn().mockReturnValue(true);
+
+      renderEntries({
+        navEntries: [slot("account", "account:read", { shiftId: 9 })],
+        navSlots: { account: slotConfig },
+        canAccess,
+      });
+
+      expect(canAccess).toHaveBeenCalledWith("account:read", { shiftId: 9 });
+    });
+
+    it("leaves the scope undefined when none is declared", () => {
+      const canAccess = vi.fn().mockReturnValue(true);
+
+      renderEntries({ navEntries: [item("home", "home:read")], canAccess });
+
+      expect(canAccess).toHaveBeenCalledWith("home:read", undefined);
+    });
   });
 });

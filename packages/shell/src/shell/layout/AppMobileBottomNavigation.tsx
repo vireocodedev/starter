@@ -63,7 +63,30 @@ function getActiveValue({
   return findPathItem(pathname, allowedAuthenticatedItems, getPath)?.value ?? moreItem.value;
 }
 
+type MobileBottomNavigationConfig = NonNullable<AppConfig["shell"]["mobileBottomNavigation"]>;
+
+/**
+ * The mobile bottom bar is optional config, so the exported component is a guard
+ * around the real one - an app that never renders a bottom bar must not be made
+ * to declare items for it.
+ */
 export function AppMobileBottomNavigation() {
+  const {
+    config: {
+      shell: { mobileBottomNavigation },
+    },
+  } = useAppShellContext();
+
+  if (!mobileBottomNavigation) return null;
+
+  return <AppMobileBottomNavigationBar mobileBottomNavigation={mobileBottomNavigation} />;
+}
+
+function AppMobileBottomNavigationBar({
+  mobileBottomNavigation,
+}: {
+  mobileBottomNavigation: MobileBottomNavigationConfig;
+}) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { openMobileNav } = useAppNavLayout();
@@ -78,14 +101,16 @@ export function AppMobileBottomNavigation() {
   } = useAppShellContext();
   const bottomNavigationLabel = tPlatform("common.bottomNavigation");
   const {
-    shell: { mobileBottomNavigation },
     routes: { getPath },
   } = config;
   const { authenticatedItems, loginItem, moreItem } = mobileBottomNavigation;
   const bottomNavHeightPx = config.brand.navigation.bottomNavHeightPx;
   const loginPath = resolveMobileNavItemPath(loginItem, getPath);
   const loginMode = Boolean(loginPath && isPathInGroup(pathname, loginPath));
-  const canAccessItem = React.useCallback((item: AppMobileBottomNavItem) => canAccess(item.permission), [canAccess]);
+  const canAccessItem = React.useCallback(
+    (item: AppMobileBottomNavItem) => canAccess(item.permission, item.permissionScope),
+    [canAccess],
+  );
   const visibleItems = React.useMemo(
     () => (loginMode ? [loginItem] : authenticatedItems.filter(canAccessItem)),
     [authenticatedItems, canAccessItem, loginItem, loginMode],
