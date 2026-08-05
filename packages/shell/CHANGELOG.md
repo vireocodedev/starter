@@ -1,5 +1,60 @@
 # @vireocodedev/starter-core
 
+## 1.0.0
+
+### Major Changes
+
+- e82b9e6: Rename `@vireocodedev/starter-core` to `@vireocodedev/starter-shell`, and move
+  its `./offline` entry point into `@vireocodedev/starter-sqlite/offline`.
+
+  **Why**
+
+  The package never was a core. Nothing depends on it, and it depends on
+  `starter-ui`, `starter-localization` and `starter-infrastructure` — it sits at
+  the top of the graph, not the bottom. Its entire root barrel is app-shell:
+  config, sitemap, route guards, the responsive shell and the layout presets. A
+  name that claims to be the foundation while shipping a shell makes the layering
+  impossible to reason about from the outside.
+
+  The `offline/` area was the one genuinely foundational thing inside it: twenty
+  exports, zero runtime dependencies, and no relationship to a shell. It belongs
+  with `starter-sqlite`, which already owns `offlineSyncCommandSqlite` and
+  `hydrationEntityStateSqlite` and is likewise dependency-free and worker-safe.
+
+  **Breaking changes**
+
+  - `@vireocodedev/starter-core` no longer exists. Replace every specifier with
+    `@vireocodedev/starter-shell`. No symbol was renamed, removed or changed.
+  - `@vireocodedev/starter-core/offline` is now
+    `@vireocodedev/starter-sqlite/offline`. Again, no symbol changed.
+
+  **For `starter-sqlite` consumers**
+
+  `./offline` is a new, additive entry point. The root entry is untouched. Both are
+  covered by the worker-safety guarantee in `scripts/public-surface.mjs`, so
+  neither may acquire a React, MUI or DOM dependency without failing CI.
+
+- a194df9: Remove duplicated exports so each symbol has exactly one home.
+
+  **Breaking changes**
+
+  - `@vireocodedev/starter-shell` no longer re-exports `AppBottomDrawer`, `AppBottomDrawerProps` or the `APP_PAGE_CONTENT_*` width constants. Import them from `@vireocodedev/starter-ui`, where they are defined.
+  - `@vireocodedev/starter-ui` no longer exports `AppConfirmProvider`. It was a pass-through wrapper that rendered `RgoConfirmProvider` and added nothing — use `RgoConfirmProvider` directly.
+
+### Patch Changes
+
+- Updated dependencies [6394ad9]
+- Updated dependencies [3feef19]
+- Updated dependencies [a194df9]
+- Updated dependencies [04d26a3]
+- Updated dependencies [829c409]
+- Updated dependencies [2b53a55]
+- Updated dependencies [829c409]
+- Updated dependencies [829c409]
+- Updated dependencies [c49616c]
+  - @vireocodedev/starter-ui@3.0.0
+  - @vireocodedev/starter-localization@0.9.0
+
 ## 0.9.0
 
 ### Minor Changes
