@@ -20,11 +20,12 @@
     "api:inventory": "node scripts/api-inventory.mjs",
     "surface": "node scripts/public-surface.mjs",
     "surface:update": "node scripts/public-surface.mjs --update",
+    "types:strict": "node scripts/strict-consumer-types.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run build && npm run test && changeset publish"
+    "release": "npm run build && npm run test && npm run types:strict && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",

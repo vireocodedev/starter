@@ -1,5 +1,5 @@
 import { type RgoNationality } from "@/features/i18next";
-import { type TFunction } from "i18next";
+import { type Namespace, type TFunction } from "i18next";
 import { z } from "zod";
 
 /**
@@ -26,10 +26,20 @@ export type RgoLocale = z.infer<typeof RgoLocale>;
 export const RGO_LOCALE_NAMESPACE = "rgo-ui";
 
 /**
- * RgoTranslationFn is a type that represents the translation function for the RGO UI namespace. It is defined using the TFunction type from i18next, with the RGO_LOCALE_NAMESPACE as the namespace parameter.
- * This type ensures that when using the translation function in the RGO UI components, the correct namespace is enforced, providing type safety and better developer experience when accessing translations.
+ * RgoTranslationFn is the translation function this library hands to, and accepts from, consumers.
+ *
+ * It is deliberately parameterised by `Namespace` rather than by
+ * `typeof RGO_LOCALE_NAMESPACE`. Our own `"rgo-ui"` namespace is declared in an
+ * ambient augmentation under `src/@types`, which `tsc` does not copy to `dist`,
+ * so it never reaches consumers. Any consumer that augments i18next with its
+ * own `resources` narrows `Namespace` away from `string`, and a published type
+ * naming `"rgo-ui"` then fails their compile — invisibly to us, because
+ * `skipLibCheck` hides it until someone turns it off.
+ *
+ * Shipping our augmentation instead is not an option: it would overwrite the
+ * consumer's `CustomTypeOptions.resources` wholesale.
  */
-export type RgoTranslationFn = TFunction<typeof RGO_LOCALE_NAMESPACE>;
+export type RgoTranslationFn = TFunction<Namespace>;
 
 /**
  * RGO_LOCALE_TO_TRANSLATED_LABEL maps each supported locale to its translated label in the respective language.

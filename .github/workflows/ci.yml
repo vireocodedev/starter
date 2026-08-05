@@ -28,3 +28,7 @@ jobs:
       - run: npm run build
       - run: npm run typecheck
       - run: npm run test
+      # Reads dist, so it has to follow build. Compiles every published entry
+      # point with skipLibCheck disabled, which is the only way defects in our
+      # own .d.ts become visible from inside this repo.
+      - run: npm run types:strict
