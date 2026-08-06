@@ -15,7 +15,8 @@ import com.vireocode.starter.auth.StarterUserRepository;
  * <p>
  * The library ships the user table, the {@code UserDetailsService} and the
  * password encoder, but deliberately not a way to create users — who exists is
- * an application decision. This is what a consumer writes to make that decision,
+ * an application decision. This is what a consumer writes to make that
+ * decision,
  * and the fact that it needs nothing but the published beans is the point.
  *
  * <p>
