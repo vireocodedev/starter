@@ -10,3 +10,8 @@ include 'vireo-starter-auth'
 include 'vireo-starter-queryengine'
 include 'vireo-starter-offline'
 include 'vireo-starter-history'
+
+// Not an artifact. A stand-in consumer that depends on all five modules and
+// asserts they wire themselves, so the auto-configuration is tested from the
+// outside rather than from inside a module that already knows its own beans.
+include 'vireo-starter-autoconfigure-tests'

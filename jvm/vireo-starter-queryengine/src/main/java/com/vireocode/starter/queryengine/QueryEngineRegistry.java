@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Holds the entity-key to JPA-entity bindings the query engine filters over.
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
  * keys to upper case on the way in and compares case-insensitively on the way
  * out, so a request may spell a key however it likes.
  */
-@Component
 public class QueryEngineRegistry {
 
     private final Map<String, Class<?>> entityTypes;

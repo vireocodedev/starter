@@ -7,13 +7,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
 import jakarta.persistence.PersistenceContext;
 
-@Service
 public class QueryEngineRelationOptionService {
 
     private static final int DEFAULT_LIMIT = 20;

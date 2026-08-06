@@ -10,13 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vireocode.starter.spi.OfflineChangeBroadcaster;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-@Service
 public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
 
     private static final Logger log = LoggerFactory.getLogger(OfflineHeartbeatService.class);

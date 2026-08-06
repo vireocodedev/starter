@@ -17,8 +17,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
 
+import com.vireocode.starter.spi.FilterSpecificationBuilder;
 import com.vireocode.starter.spi.QueryFilterCriteria;
 import com.vireocode.starter.web.RestUtils;
 
@@ -33,8 +33,7 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-@Component
-public class QueryEngineFilterSpecificationBuilder {
+public class QueryEngineFilterSpecificationBuilder implements FilterSpecificationBuilder {
 
     private final QueryEngineRegistry registry;
     private final List<QueryCustomFieldResolver<?>> customFieldResolvers;
@@ -50,6 +49,7 @@ public class QueryEngineFilterSpecificationBuilder {
         this.customFieldResolvers = customFieldResolvers;
     }
 
+    @Override
     public <DOMAIN> Specification<DOMAIN> build(Class<DOMAIN> domainType, QueryFilterCriteria criteria) {
         if (criteria != null && !(criteria instanceof QueryFilterRequest)) {
             throw new IllegalArgumentException(

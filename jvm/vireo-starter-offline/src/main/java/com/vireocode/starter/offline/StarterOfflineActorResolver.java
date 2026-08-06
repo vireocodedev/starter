@@ -3,7 +3,6 @@ package com.vireocode.starter.offline;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import com.vireocode.starter.auth.StarterUserDetails;
 import com.vireocode.starter.web.RestUtils;
@@ -21,7 +20,6 @@ import com.vireocode.starter.web.RestUtils;
  * The privileged role is a property rather than a constant: the starter has no
  * opinion on what an application calls its administrators.
  */
-@Component
 public class StarterOfflineActorResolver implements OfflineActorResolver {
 
     private final String privilegedRole;

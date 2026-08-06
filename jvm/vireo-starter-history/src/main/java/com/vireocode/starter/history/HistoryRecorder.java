@@ -5,7 +5,6 @@ import java.time.Instant;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
  * Central sink for entity change history. Serializes DTO snapshots to JSON and
  * stamps each row with the acting user resolved from the security context.
  */
-@Component
 @Slf4j
 public class HistoryRecorder implements HistoryEventsRecorder {
 

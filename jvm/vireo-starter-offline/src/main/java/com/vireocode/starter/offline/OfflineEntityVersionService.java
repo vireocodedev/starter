@@ -9,10 +9,8 @@ import java.util.Map;
 import com.vireocode.starter.spi.OfflineRevisionTracker;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 public class OfflineEntityVersionService implements OfflineRevisionTracker {
 
     private final OfflineEntityVersionRepository repository;

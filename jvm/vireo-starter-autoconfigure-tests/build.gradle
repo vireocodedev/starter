@@ -1,0 +1,13 @@
+description = 'Proves a consumer gets full wiring from the dependencies alone, and can replace any single bean. Never published.'
+
+dependencies {
+    testImplementation project(':vireo-starter-core')
+    testImplementation project(':vireo-starter-auth')
+    testImplementation project(':vireo-starter-queryengine')
+    testImplementation project(':vireo-starter-offline')
+    testImplementation project(':vireo-starter-history')
+
+    testImplementation 'org.springframework.boot:spring-boot-starter'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'com.h2database:h2'
+}

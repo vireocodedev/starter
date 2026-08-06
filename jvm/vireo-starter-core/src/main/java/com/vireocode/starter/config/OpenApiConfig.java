@@ -1,6 +1,7 @@
 package com.vireocode.starter.config;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,11 +16,12 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @SecurityScheme(name = "cookieAuth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.COOKIE, paramName = "JSESSIONID")
 public class OpenApiConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     OpenAPI starterOpenApi() {
         return new OpenAPI()
                 .info(new Info()
@@ -32,6 +34,7 @@ public class OpenApiConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     OpenApiCustomizer globalErrorResponseCustomizer() {
         return openApi -> {
             if (openApi.getPaths() != null) {

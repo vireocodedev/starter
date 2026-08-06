@@ -1,6 +1,7 @@
 package com.vireocode.starter.config;
 
 import org.openapitools.jackson.nullable.JsonNullableModule;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -19,9 +20,10 @@ import com.fasterxml.jackson.databind.introspect.DefaultAccessorNamingStrategy;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class JsonConfig {
     @Bean
+    @ConditionalOnMissingBean
     @Primary
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = JsonMapper.builder()
@@ -39,6 +41,7 @@ public class JsonConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
         return new MappingJackson2HttpMessageConverter(objectMapper);
     }

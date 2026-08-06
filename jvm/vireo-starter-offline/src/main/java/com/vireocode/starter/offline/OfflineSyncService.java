@@ -19,7 +19,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -36,7 +35,6 @@ import com.vireocode.starter.web.SearchablePageable;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-@Service
 public class OfflineSyncService {
 
     private static final String API_PREFIX = "/api/";

@@ -3,7 +3,6 @@ package com.vireocode.starter.queryengine.savedfilter;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.stereotype.Service;
 
 import com.vireocode.starter.auth.StarterUser;
 import com.vireocode.starter.auth.StarterUserDetails;
@@ -13,7 +12,6 @@ import com.vireocode.starter.base.EntityConfig;
 import com.vireocode.starter.queryengine.QueryEngineRegistry;
 import com.vireocode.starter.web.RestUtils;
 
-@Service
 public class SavedFilterService extends BaseService<Long, SavedFilter, SavedFilterDTO> {
 
     private final StarterUserRepository userRepository;

@@ -15,7 +15,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vireocode.starter.web.SearchablePageable;
@@ -30,7 +29,6 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 
-@Service
 @Slf4j
 public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     protected final SearchableRepository<DOMAIN, ID> repository;
