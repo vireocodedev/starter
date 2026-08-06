@@ -2,6 +2,8 @@ plugins {
     id 'java-platform'
 }
 
+description = 'Version alignment for the vireo starter modules. Consumers import this platform instead of pinning each artifact.'
+
 group = rootProject.group
 version = rootProject.version
 

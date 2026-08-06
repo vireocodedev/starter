@@ -11,5 +11,6 @@ storybook-static/
 jvm/build/
 jvm/*/build/
 jvm/.gradle/
+jvm/buildSrc/.gradle/
 # Written by the VS Code Java extension's Eclipse JDT builder, not by Gradle.
 jvm/*/bin/

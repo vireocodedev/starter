@@ -91,3 +91,30 @@ until the bump is made deliberately rather than by accident.
 
 > First-time setup: run `npm install` once and commit the generated
 > `package-lock.json` so CI's `npm ci` has a lockfile.
+
+## Release (JVM)
+
+The `jvm/` half has no Changesets equivalent, so its release is deliberately
+smaller:
+
+1. Bump `version` in `jvm/gradle.properties` in the same pull request as the
+   change that warrants it. One version covers all six artifacts — they are a
+   set, and the BOM exists so a consumer never mixes them.
+2. If the change moved the public API, run `./gradlew apiSurfaceUpdate` in `jvm/`
+   and commit the updated `api-surface.txt` files. This is the forcing function:
+   the check task fails the build until the snapshot matches, so a widened
+   surface always shows up in the diff next to the version bump.
+3. Merge to `main`. The **Release** workflow publishes the JVM artifacts only in
+   a run that also published npm packages — that is the lockstep rule from
+   `docs/BACKEND_PARITY.md` made mechanical. If the JVM version is already in the
+   registry the publish is skipped, so an npm-only release is a no-op here rather
+   than a failure.
+4. A final job resolves the artifacts from GitHub Packages into a throwaway
+   project with an empty Gradle home, so "it published" and "it is usable" are
+   checked separately.
+
+The same bump table applies. Note that MapStruct's generated `*Impl` classes are
+part of the recorded surface, because they are genuinely part of the jar.
+
+To publish from a workstation, set `gpr.user` and `gpr.key` in
+`~/.gradle/gradle.properties` and run `./gradlew publish` from `jvm/`.
