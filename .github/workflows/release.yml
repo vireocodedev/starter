@@ -36,15 +36,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # The lockstep rule from docs/BACKEND_PARITY.md, enforced rather than written
-  # down: the JVM artifacts only ever go out in the same workflow run that
-  # published the npm packages. The two halves are versioned independently -
-  # changesets bumps each package on its own line, and jvm/gradle.properties
-  # carries one version for all six artifacts - so lockstep means "released
-  # together", not "numbered the same".
+  # The two halves are versioned independently - changesets bumps each npm
+  # package on its own line, jvm/gradle.properties carries one version for all
+  # six artifacts - and they release independently too. `version=` is the whole
+  # signal: bump it and this job publishes, leave it and the registry check
+  # below turns the job into a no-op.
+  #
+  # This deliberately does not gate on the npm release having published. The
+  # lockstep rule in docs/BACKEND_PARITY.md is about the query-engine wire
+  # contract moving on both sides in one PR, which is a review constraint, not
+  # something CI can check - and gating here would make a backend-only release
+  # impossible, which is exactly what the extraction itself was.
   jvm:
     needs: release
-    if: needs.release.outputs.published == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
