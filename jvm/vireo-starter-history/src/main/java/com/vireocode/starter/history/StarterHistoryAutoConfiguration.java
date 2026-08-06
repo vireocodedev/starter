@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.starter.base.HistoryEventsRecorder;
+import com.vireocode.starter.flyway.StarterFlywayModule;
 
 /**
  * Wires audit history from the dependency alone.
@@ -18,6 +19,11 @@ import com.vireocode.starter.base.HistoryEventsRecorder;
  */
 @AutoConfiguration
 public class StarterHistoryAutoConfiguration {
+
+    @Bean
+    StarterFlywayModule historyFlywayModule() {
+        return new StarterFlywayModule("history", 20);
+    }
 
     @Bean
     @ConditionalOnMissingBean(HistoryEventsRecorder.class)

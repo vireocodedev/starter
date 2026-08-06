@@ -1,0 +1,173 @@
+package com.example.consumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import com.vireocode.starter.flyway.StarterFlywayMigrations;
+import com.vireocode.starter.flyway.StarterFlywayModule;
+
+/**
+ * The proof behind the split: upgrading the library on a database an earlier
+ * version created must not disturb the consumer's own migration history.
+ *
+ * <p>
+ * Round one plays the part of the deployed release. Round two adds a location to
+ * the auth module only, which is exactly what a version bump looks like from
+ * Flyway's point of view — the same V1 it already applied, plus a file it has
+ * never seen. Both rounds go through {@link StarterFlywayMigrations}, so the
+ * test cannot pass by configuring Flyway more forgivingly than production does.
+ *
+ * <p>
+ * Note that round two is itself a checksum assertion. Flyway validates applied
+ * migrations against resolved ones before every migrate, so if the library's V1
+ * had landed in the consumer's history, or if a module's history had been shared
+ * with another, this call would fail rather than return.
+ *
+ * <p>
+ * Run against every vendor the library supports, because the vendor location and
+ * the identity/timestamp syntax differ between them.
+ */
+abstract class AbstractLibraryUpgradeTest {
+
+    private static final List<StarterFlywayModule> RELEASED_MODULES = List.of(
+            new StarterFlywayModule("auth", 10),
+            new StarterFlywayModule("history", 20),
+            new StarterFlywayModule("queryengine", 20),
+            new StarterFlywayModule("offline", 20));
+
+    private static final String NEXT_AUTH_RELEASE = "classpath:db/vireo-next/auth";
+
+    protected abstract DataSource dataSource();
+
+    @Test
+    void aLibraryUpgradeLeavesTheConsumerHistoryUntouched() {
+        DataSource dataSource = dataSource();
+
+        deploy(dataSource);
+        List<Map<String, Object>> consumerHistoryBefore = historyRows(dataSource, "flyway_schema_history");
+
+        upgrade(dataSource);
+
+        assertThat(historyRows(dataSource, "flyway_schema_history"))
+                .as("the consumer's history after a library upgrade")
+                .isEqualTo(consumerHistoryBefore);
+    }
+
+    @Test
+    void aLibraryUpgradeAppliesTheNewMigrationToTheOwningModuleOnly() {
+        DataSource dataSource = dataSource();
+
+        deploy(dataSource);
+        upgrade(dataSource);
+
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_auth")).containsExactly("1", "2");
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_history")).containsExactly("1");
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_queryengine")).containsExactly("1");
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1");
+    }
+
+    @Test
+    void aLibraryUpgradeChangesTheSchemaItShipped() {
+        DataSource dataSource = dataSource();
+
+        deploy(dataSource);
+        assertThat(columnNames(dataSource, "app_user")).doesNotContain("LAST_LOGIN_AT");
+
+        upgrade(dataSource);
+        assertThat(columnNames(dataSource, "app_user")).contains("LAST_LOGIN_AT");
+    }
+
+    /** A second deploy of the same version is a no-op, not an error. */
+    @Test
+    void redeployingTheSameVersionIsIdempotent() {
+        DataSource dataSource = dataSource();
+
+        deploy(dataSource);
+        List<Map<String, Object>> before = historyRows(dataSource, "flyway_schema_history_vireo_auth");
+
+        deploy(dataSource);
+
+        assertThat(historyRows(dataSource, "flyway_schema_history_vireo_auth")).isEqualTo(before);
+    }
+
+    /**
+     * The state an application is in the moment it adopts the library: the
+     * tables are already there, created by a migration of its own, but none of
+     * the library's histories exist yet. Adoption has to claim them in place
+     * rather than try to create them again or wipe them.
+     */
+    @Test
+    void adoptingTheLibraryOnADatabaseThatAlreadyHasItsTablesKeepsTheData() {
+        DataSource dataSource = dataSource();
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+
+        deploy(dataSource);
+        jdbc.update("INSERT INTO app_user (id, username, password_hash, role, enabled, deleted)"
+                + " VALUES ('11111111-1111-1111-1111-111111111111', 'kept', 'x', 'USER', TRUE, FALSE)");
+
+        for (StarterFlywayModule module : RELEASED_MODULES) {
+            jdbc.execute("DROP TABLE \"" + module.historyTable() + "\"");
+        }
+
+        deploy(dataSource);
+
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM app_user WHERE username = 'kept'", Integer.class))
+                .isEqualTo(1);
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_auth")).containsExactly("1");
+    }
+
+    private void deploy(DataSource dataSource) {
+        migrateAll(dataSource);
+    }
+
+    private void upgrade(DataSource dataSource) {
+        migrateAll(dataSource, NEXT_AUTH_RELEASE);
+    }
+
+    private void migrateAll(DataSource dataSource, String... nextAuthRelease) {
+        String vendor = StarterFlywayMigrations.resolveVendor(dataSource);
+
+        Flyway consumerFlyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                .load();
+
+        StarterFlywayMigrations.prepareConsumerHistory(consumerFlyway.getConfiguration());
+
+        for (StarterFlywayModule module : RELEASED_MODULES) {
+            String[] extras = "auth".equals(module.name()) ? nextAuthRelease : new String[0];
+            StarterFlywayMigrations.migrate(module, dataSource, vendor, extras);
+        }
+
+        consumerFlyway.migrate();
+    }
+
+    private List<Map<String, Object>> historyRows(DataSource dataSource, String table) {
+        return new JdbcTemplate(dataSource).queryForList(
+                "SELECT \"installed_rank\", \"version\", \"description\", \"checksum\","
+                        + " \"installed_on\", \"success\""
+                        + " FROM \"" + table + "\" ORDER BY \"installed_rank\"");
+    }
+
+    private List<String> appliedVersions(DataSource dataSource, String table) {
+        return new JdbcTemplate(dataSource).queryForList(
+                "SELECT \"version\" FROM \"" + table
+                        + "\" WHERE \"type\" = 'SQL' ORDER BY \"installed_rank\"",
+                String.class);
+    }
+
+    private List<String> columnNames(DataSource dataSource, String table) {
+        return new JdbcTemplate(dataSource).queryForList(
+                "SELECT UPPER(column_name) FROM information_schema.columns"
+                        + " WHERE UPPER(table_name) = UPPER(?)",
+                String.class, table);
+    }
+}

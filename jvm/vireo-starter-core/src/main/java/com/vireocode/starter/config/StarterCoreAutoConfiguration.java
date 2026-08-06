@@ -1,11 +1,17 @@
 package com.vireocode.starter.config;
 
+import java.util.Comparator;
 import java.util.Optional;
 
+import javax.sql.DataSource;
+
+import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration;
+import org.springframework.boot.flyway.autoconfigure.FlywayMigrationStrategy;
 import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +29,8 @@ import com.vireocode.starter.base.JsonNodeMapper;
 import com.vireocode.starter.base.JsonNodeMapperImpl;
 import com.vireocode.starter.base.JsonNullableMapper;
 import com.vireocode.starter.base.JsonNullableMapperImpl;
+import com.vireocode.starter.flyway.StarterFlywayMigrations;
+import com.vireocode.starter.flyway.StarterFlywayModule;
 import com.vireocode.starter.web.GlobalExceptionHandler;
 
 /**
@@ -50,6 +58,40 @@ public class StarterCoreAutoConfiguration {
     @ConditionalOnMissingBean
     GlobalExceptionHandler starterGlobalExceptionHandler(Environment environment) {
         return new GlobalExceptionHandler(environment);
+    }
+
+    /**
+     * Runs every library module's migrations, each into its own history table,
+     * before handing over to the consumer's own Flyway.
+     *
+     * <p>
+     * A {@code FlywayMigrationStrategy} is the right hook because Boot passes
+     * its own fully configured {@code Flyway} in. The library therefore inherits
+     * the consumer's datasource — including a {@code spring.flyway.url} override
+     * — rather than guessing at one, and library tables are guaranteed to exist
+     * before the consumer's migrations run, which is what makes a foreign key
+     * into {@code app_user} safe to write.
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(Flyway.class)
+    public static class StarterFlywayConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        FlywayMigrationStrategy starterFlywayMigrationStrategy(ObjectProvider<StarterFlywayModule> modules) {
+            return consumerFlyway -> {
+                DataSource dataSource = consumerFlyway.getConfiguration().getDataSource();
+                String vendor = StarterFlywayMigrations.resolveVendor(dataSource);
+
+                StarterFlywayMigrations.prepareConsumerHistory(consumerFlyway.getConfiguration());
+
+                modules.orderedStream()
+                        .sorted(Comparator.comparingInt(StarterFlywayModule::order))
+                        .forEach(module -> StarterFlywayMigrations.migrate(module, dataSource, vendor));
+
+                consumerFlyway.migrate();
+            };
+        }
     }
 
     @Bean

@@ -11,4 +11,10 @@ dependencies {
     // Every module's controllers carry @Tag / @Operation, so this is part of
     // the compile surface rather than an implementation detail.
     api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+
+    // Optional on purpose. The library ships migrations and knows how to run
+    // them, but a consumer managing their schema some other way should not
+    // inherit Flyway; the migration strategy is @ConditionalOnClass.
+    compileOnly 'org.flywaydb:flyway-core'
+    compileOnly 'org.springframework.boot:spring-boot-flyway'
 }

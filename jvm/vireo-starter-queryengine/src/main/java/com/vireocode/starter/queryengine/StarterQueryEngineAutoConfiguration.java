@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 
 import com.vireocode.starter.auth.StarterUserRepository;
+import com.vireocode.starter.flyway.StarterFlywayModule;
 import com.vireocode.starter.queryengine.savedfilter.SavedFilterController;
 import com.vireocode.starter.queryengine.savedfilter.SavedFilterMapper;
 import com.vireocode.starter.queryengine.savedfilter.SavedFilterMapperImpl;
@@ -26,6 +27,11 @@ import com.vireocode.starter.spi.FilterSpecificationBuilder;
  */
 @AutoConfiguration
 public class StarterQueryEngineAutoConfiguration {
+
+    @Bean
+    StarterFlywayModule queryEngineFlywayModule() {
+        return new StarterFlywayModule("queryengine", 20);
+    }
 
     @Bean
     @ConditionalOnMissingBean

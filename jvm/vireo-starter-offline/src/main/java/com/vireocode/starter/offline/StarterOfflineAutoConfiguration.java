@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vireocode.starter.flyway.StarterFlywayModule;
 import com.vireocode.starter.queryengine.QueryEngineFilterSpecificationBuilder;
 import com.vireocode.starter.spi.OfflineChangeBroadcaster;
 import com.vireocode.starter.spi.OfflineRevisionTracker;
@@ -24,6 +25,11 @@ import com.vireocode.starter.spi.OfflineRevisionTracker;
  */
 @AutoConfiguration
 public class StarterOfflineAutoConfiguration {
+
+    @Bean
+    StarterFlywayModule offlineFlywayModule() {
+        return new StarterFlywayModule("offline", 20);
+    }
 
     /**
      * Keyed on its own type for the same reason as the heartbeat service: it is

@@ -9,5 +9,14 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-flyway'
+
     testRuntimeOnly 'com.h2database:h2'
+
+    // The library's migrations have to hold up on the vendor a consumer actually
+    // deploys to, not only on the in-memory database the suite defaults to.
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testRuntimeOnly 'org.postgresql:postgresql'
+    testRuntimeOnly 'org.flywaydb:flyway-database-postgresql'
 }

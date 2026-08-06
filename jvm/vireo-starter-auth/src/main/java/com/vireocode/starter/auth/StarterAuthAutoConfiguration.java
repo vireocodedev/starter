@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vireocode.starter.flyway.StarterFlywayModule;
 import com.vireocode.starter.web.ApiError;
 
 import jakarta.servlet.FilterChain;
@@ -60,6 +61,15 @@ import jakarta.servlet.http.HttpServletResponse;
 @AutoConfiguration
 @EnableConfigurationProperties(StarterAuthProperties.class)
 public class StarterAuthAutoConfiguration {
+
+    /**
+     * Migrates first of all the modules. Three other modules put foreign keys
+     * into {@code app_user}, so the table has to exist before they run.
+     */
+    @Bean
+    StarterFlywayModule authFlywayModule() {
+        return new StarterFlywayModule("auth", 10);
+    }
 
     @Bean
     @ConditionalOnMissingBean(UserDetailsService.class)
