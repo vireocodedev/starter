@@ -1,9 +1,9 @@
 package com.vireocode.starter.config;
 
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
  * Adds {@code com.vireocode.starter} to the set of packages Spring Boot treats
@@ -16,7 +16,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * something has to tell Boot where they live.
  *
  * <p>
- * The obvious tools are the wrong ones. {@code @EntityScan} replaces the default
+ * The obvious tools are the wrong ones. {@code @EntityScan} replaces the
+ * default
  * entity packages rather than adding to them, so declaring it here would hide
  * the consumer's own entities. {@code @EnableJpaRepositories} makes Boot's
  * {@code JpaRepositoriesAutoConfiguration} back off entirely, so declaring it

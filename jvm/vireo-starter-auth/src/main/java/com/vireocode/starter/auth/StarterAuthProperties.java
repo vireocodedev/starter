@@ -17,7 +17,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("vireo.starter.auth")
 public class StarterAuthProperties {
 
-    /** Path the default login endpoint is published on, and left unauthenticated. */
+    /**
+     * Path the default login endpoint is published on, and left unauthenticated.
+     */
     private String loginPath = "/api/auth/login";
 
     /** Path the default logout endpoint is published on. */

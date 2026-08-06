@@ -7,7 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
  * it.
  *
  * <p>
- * Replacing the whole {@code SecurityFilterChain} is always available and is the
+ * Replacing the whole {@code SecurityFilterChain} is always available and is
+ * the
  * right move when the authentication model genuinely differs. It is the wrong
  * move when all that is wanted is one more public path, and forcing that choice
  * is how library security configuration ends up copy-pasted and then drifting.
