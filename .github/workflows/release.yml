@@ -3,6 +3,9 @@ name: Release
 on:
   push:
     branches: [main]
+  # A release is the one thing worth being able to start by hand: a publish that
+  # failed halfway, or a version bump that needs to go out without a code change.
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
