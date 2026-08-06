@@ -8,8 +8,13 @@ dependencies {
     testImplementation project(':vireo-starter-history')
 
     testImplementation 'org.springframework.boot:spring-boot-starter'
-    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-flyway'
+
+    // The controller tests drive the library's endpoints through MockMvc, which
+    // is the only way to prove the auto-configured controllers are actually
+    // mapped and actually secured rather than merely present as beans.
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 
     testRuntimeOnly 'com.h2database:h2'
 

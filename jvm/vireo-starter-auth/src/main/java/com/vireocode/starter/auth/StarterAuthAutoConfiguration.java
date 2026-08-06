@@ -124,10 +124,17 @@ public class StarterAuthAutoConfiguration {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(properties.getLoginPath()).permitAll();
 
-                    if (StringUtils.hasText(properties.getDocsRole())) {
-                        auth.requestMatchers(docsMatchers).hasRole(properties.getDocsRole());
-                    } else {
-                        auth.requestMatchers(docsMatchers).authenticated();
+                    // An empty matcher list is how a consumer says "the docs are
+                    // not a protected resource here" — a dev profile, typically.
+                    // Skipping the rule lets them fall through to the permissive
+                    // catch-all below; passing an empty array to requestMatchers
+                    // would throw instead.
+                    if (docsMatchers.length > 0) {
+                        if (StringUtils.hasText(properties.getDocsRole())) {
+                            auth.requestMatchers(docsMatchers).hasRole(properties.getDocsRole());
+                        } else {
+                            auth.requestMatchers(docsMatchers).authenticated();
+                        }
                     }
 
                     auth.requestMatchers(properties.getApiPathPattern()).authenticated();
@@ -142,11 +149,15 @@ public class StarterAuthAutoConfiguration {
                                 response, HttpServletResponse.SC_FORBIDDEN, "Forbidden")))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
-                        .ignoringRequestMatchers(properties.getLoginPath(), properties.getLogoutPath())
-                        .ignoringRequestMatchers(docsMatchers))
+                .csrf(csrf -> {
+                    csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                            .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+                            .ignoringRequestMatchers(properties.getLoginPath(), properties.getLogoutPath());
+
+                    if (docsMatchers.length > 0) {
+                        csrf.ignoringRequestMatchers(docsMatchers);
+                    }
+                })
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
 
         for (StarterHttpSecurityCustomizer customizer : customizers) {

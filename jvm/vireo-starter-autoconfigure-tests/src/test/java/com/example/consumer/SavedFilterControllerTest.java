@@ -1,0 +1,148 @@
+package com.example.consumer;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vireocode.starter.auth.AuthController;
+import com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+@ActiveProfiles("test")
+@DisplayName("SavedFilterControllerIntegrationTests")
+class SavedFilterControllerTest {
+
+    private static final String AUTH_BASE_URL = "/api/auth";
+    private static final String API_BASE_URL = "/api/filters";
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    @DisplayName("POST /api/filters - Deserializes boolean field from isPublic and serializes it back")
+    void create_DeserializesAndSerializesBooleanAsIsPublic() throws Exception {
+        MockHttpSession session = loginAsDemo();
+
+        mockMvc.perform(post(API_BASE_URL)
+                .with(csrf())
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "name": "Order filter",
+                          "description": "ATest",
+                          "entityName": "WIDGET",
+                          "engineVersion": "1.0",
+                          "filtersJson": "{\\\"entity\\\":\\\"WIDGET\\\",\\\"filters\\\":[]}",
+                          "isPublic": false,
+                          "isDefault": false
+                        }
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isPublic").value(false))
+                .andExpect(jsonPath("$.isDefault").value(false))
+                .andExpect(jsonPath("$.public").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("POST /api/filters/search - Serializes boolean field as isPublic")
+    void search_SerializesBooleanAsIsPublic() throws Exception {
+        MockHttpSession session = loginAsDemo();
+
+        SavedFilterDTO payload = new SavedFilterDTO(
+                null,
+                "Order filter",
+                "ATest",
+                "WIDGET",
+                "1.0",
+                "{\"entity\":\"WIDGET\",\"filters\":[]}",
+                true,
+                false,
+                null,
+                null);
+
+        mockMvc.perform(post(API_BASE_URL)
+                .with(csrf())
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post(API_BASE_URL + "/search")
+                .with(csrf())
+                .session(session)
+                .queryParam("page", "0")
+                .queryParam("rowsPerPage", "10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("null"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].isPublic").value(true))
+                .andExpect(jsonPath("$.content[0].isDefault").value(false))
+                .andExpect(jsonPath("$.content[0].public").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("GET /api/filters/default - Returns current user's default filter for an entity")
+    void findDefaultByEntity_ReturnsCurrentUserDefaultFirst() throws Exception {
+        MockHttpSession session = loginAsDemo();
+
+        SavedFilterDTO payload = new SavedFilterDTO(
+                null,
+                "Default item filter",
+                "ATest",
+                "WIDGET",
+                "1.0",
+                "{\"entity\":\"WIDGET\",\"rows\":[]}",
+                true,
+                true,
+                null,
+                null);
+
+        mockMvc.perform(post(API_BASE_URL)
+                .with(csrf())
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get(API_BASE_URL + "/default")
+                .session(session)
+                .queryParam("entityName", "WIDGET"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.entityName").value("WIDGET"))
+                .andExpect(jsonPath("$.isDefault").value(true))
+                .andExpect(jsonPath("$.name").value("Default item filter"));
+    }
+
+    private MockHttpSession loginAsDemo() throws Exception {
+        String loginPayload = objectMapper.writeValueAsString(new AuthController.LoginRequest("demo", "demo123"));
+
+        MvcResult loginResult = mockMvc.perform(post(AUTH_BASE_URL + "/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginPayload))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return (MockHttpSession) loginResult.getRequest().getSession(false);
+    }
+}
