@@ -14,7 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 /**
  * Adapts an {@link StarterUser} to Spring Security.
  *
- * <p>The role is carried as a plain string. Which strings are valid is the
+ * <p>
+ * The role is carried as a plain string. Which strings are valid is the
  * application's business, so nothing here validates against a fixed set.
  */
 public class StarterUserDetails implements UserDetails, Serializable {
