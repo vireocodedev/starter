@@ -1,0 +1,25 @@
+plugins {
+    id 'java-platform'
+}
+
+group = rootProject.group
+version = rootProject.version
+
+// Consumers import this once and then declare the modules they want without
+// versions. It also pins the Spring Boot line the modules were compiled
+// against, so a consumer cannot silently drift onto an incompatible one.
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    api platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+
+    constraints {
+        api project(':vireo-starter-core')
+        api project(':vireo-starter-auth')
+        api project(':vireo-starter-queryengine')
+        api project(':vireo-starter-offline')
+        api project(':vireo-starter-history')
+    }
+}

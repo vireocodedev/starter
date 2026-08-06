@@ -1,10 +1,23 @@
 # @vireocodedev/starter
 
-Shared frontend libraries for the vireocodedev **starter** product. npm workspaces
-monorepo; each library under `packages/*` is published to **GitHub Packages** under
-the `@vireocodedev` scope.
+Shared libraries for the vireocodedev **starter** product, in two halves that
+ship together because they live in one repository:
 
-## Packages
+- `packages/*` — the frontend libraries. npm workspaces monorepo, published to
+  **GitHub Packages** under the `@vireocodedev` scope.
+- `jvm/*` — the Spring Boot backend libraries. A separate Gradle build,
+  published as Maven artifacts under the `com.vireocode` group.
+
+turbo never invokes Gradle and Gradle never invokes npm; CI runs them as
+independent jobs. Keeping them in one repository makes a change that spans both
+halves a single reviewable pull request, which is the only reason they are
+neighbours. See [jvm/](jvm) and [docs/BACKEND_PARITY.md](docs/BACKEND_PARITY.md).
+
+Note that the two halves reuse names for different things: the npm package
+`@vireocodedev/starter-core` is the React app shell, whereas the Maven artifact
+`com.vireocode:vireo-starter-core` is the backend's base entity/service layer.
+
+## Frontend packages
 
 | Package                                                           | Version | Description                                                                                                                                             |
 | ----------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |

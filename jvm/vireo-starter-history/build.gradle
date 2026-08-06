@@ -1,0 +1,6 @@
+description = 'Append-only audit log of every create, update and delete performed through BaseService.'
+
+dependencies {
+    api project(':vireo-starter-core')
+    api project(':vireo-starter-auth')
+}

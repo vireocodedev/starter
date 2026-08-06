@@ -5,3 +5,11 @@ storybook-static/
 .DS_Store
 *.log
 .turbo
+
+# jvm/ is a separate Gradle build. turbo never invokes Gradle and Gradle never
+# invokes npm; the only thing they share is this repository.
+jvm/build/
+jvm/*/build/
+jvm/.gradle/
+# Written by the VS Code Java extension's Eclipse JDT builder, not by Gradle.
+jvm/*/bin/

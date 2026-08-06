@@ -1,0 +1,12 @@
+// The JVM half of the starter. It is a completely separate Gradle build from
+// the TypeScript workspace above it: turbo never invokes Gradle and Gradle
+// never invokes npm. The two are held in lockstep by living in one repository,
+// not by a shared task graph.
+rootProject.name = 'vireo-starter-jvm'
+
+include 'vireo-starter-bom'
+include 'vireo-starter-core'
+include 'vireo-starter-auth'
+include 'vireo-starter-queryengine'
+include 'vireo-starter-offline'
+include 'vireo-starter-history'

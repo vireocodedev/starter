@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   build:
+    name: TypeScript
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,3 +33,22 @@ jobs:
       # point with skipLibCheck disabled, which is the only way defects in our
       # own .d.ts become visible from inside this repo.
       - run: npm run types:strict
+
+  # Deliberately a sibling of the TypeScript job rather than a step inside it.
+  # The two halves of the starter are released together because they live in one
+  # repository, not because they share a task graph — neither job can see the
+  # other's toolchain, and neither needs to.
+  jvm:
+    name: JVM
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jvm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew build

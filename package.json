@@ -2,7 +2,7 @@
   "name": "@vireocodedev/starter",
   "private": true,
   "version": "0.0.0",
-  "description": "vireocodedev starter — shared frontend libraries.",
+  "description": "vireocodedev starter — shared frontend libraries. The backend libraries live in jvm/ and are built by Gradle.",
   "type": "module",
   "workspaces": [
     "packages/*"
