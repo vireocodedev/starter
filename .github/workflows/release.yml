@@ -75,13 +75,23 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           url="https://maven.pkg.github.com/vireocodedev/starter/com/vireocode/vireo-starter-bom/$version/vireo-starter-bom-$version.pom"
           status="$(curl -s -o /dev/null -w '%{http_code}' -u "x:${{ secrets.GITHUB_TOKEN }}" "$url")"
-          if [ "$status" = "200" ]; then
-            echo "Version $version is already in GitHub Packages; nothing to publish."
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Version $version is not published yet (HTTP $status)."
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
+          # An artifact that exists answers 302, redirecting to blob storage;
+          # only a missing one answers 404. Treating 302 as "absent" is what
+          # made this job publish an existing version and die on the 409 the
+          # check was written to avoid. Redirects are deliberately not followed
+          # with -L: the target is a pre-signed URL on another host, curl drops
+          # the credentials crossing that hop, and a 403 there would read as
+          # "absent" all over again.
+          case "$status" in
+            200 | 302)
+              echo "Version $version is already in GitHub Packages; nothing to publish."
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Version $version is not published yet (HTTP $status)."
+              echo "publish=true" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
 
       # `publish` depends on apiSurfaceCheck, so a widened public surface with a
       # stale snapshot cannot reach the registry.
@@ -92,13 +102,20 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Deliberately not gated on the publish having run. 0.1.0 reached the
+      # registry before this step existed, so the marker 3.8 assumes exists is
+      # missing and would otherwise never appear. Creating the tag only when it
+      # is absent keeps the step safe to re-run on every push.
       - name: Tag the JVM release
-        if: steps.registry.outputs.publish == 'true'
         working-directory: .
         run: |
           tag="jvm-v${{ steps.registry.outputs.version }}"
-          git tag "$tag"
-          git push origin "$tag"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "$tag already exists; nothing to tag."
+          else
+            git tag "$tag"
+            git push origin "$tag"
+          fi
 
   # Publishing succeeding is not the same as the artifacts being usable. This
   # resolves them the way a real consumer would - from the registry, with an
