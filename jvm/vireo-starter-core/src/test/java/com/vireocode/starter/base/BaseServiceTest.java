@@ -357,13 +357,13 @@ class BaseServiceTest {
 
         when(criteriaBuilder.or(any(Predicate[].class))).thenReturn(orPredicate);
         when(criteriaBuilder.and(any(Predicate[].class))).thenReturn(andPredicate);
-        when(query.distinct(true)).thenReturn(query);
 
         Predicate result = specification.toPredicate(root, query, criteriaBuilder);
 
         assertNotNull(result);
         verify(criteriaBuilder).or(any(Predicate[].class));
         verify(criteriaBuilder).and(any(Predicate[].class));
+        verify(query, never()).distinct(true);
     }
 
     @Test
@@ -397,7 +397,6 @@ class BaseServiceTest {
         when(root.getJavaType()).thenReturn((Class) TestEntity.class);
         when(criteriaBuilder.conjunction()).thenReturn(conjunction);
         when(criteriaBuilder.and(any(Predicate[].class))).thenReturn(conjunction);
-        when(query.distinct(true)).thenReturn(query);
 
         Predicate result = specification.toPredicate(root, query, criteriaBuilder);
 

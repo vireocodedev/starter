@@ -339,8 +339,8 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     private Specification<DOMAIN> makeSearchSpecification(String searchText) {
         return (root, query, criteriaBuilder) -> {
-            query.distinct(true);
-
+            // No DISTINCT here: makeChunkPredicate only ever joins to-one relations, so rows are never
+            // duplicated, and DISTINCT would make Postgres reject sorting by a joined column.
             String[] chunks = searchText.trim().toLowerCase(Locale.ROOT).split("\\s+");
             List<Predicate> chunkPredicates = Arrays.stream(chunks)
                     .filter(chunk -> !chunk.isBlank())
