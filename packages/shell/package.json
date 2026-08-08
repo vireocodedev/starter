@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-shell",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "App-shell framework for the vireocodedev starter product: config/sitemap/routing scaffolding, route guards, the responsive shell + navigation, and shell layout presets.",
   "type": "module",
   "sideEffects": false,
@@ -36,9 +36,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@vireocodedev/starter-infrastructure": "^0.4.0",
-    "@vireocodedev/starter-localization": "^0.10.0",
-    "@vireocodedev/starter-ui": "^3.2.0"
+    "@vireocodedev/starter-infrastructure": "^1.0.0",
+    "@vireocodedev/starter-localization": "^1.0.0",
+    "@vireocodedev/starter-ui": "^4.0.0"
   },
   "peerDependencies": {
     "@mui/icons-material": ">=6",
