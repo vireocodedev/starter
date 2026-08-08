@@ -17,12 +17,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vireocode.starter.web.SearchablePageable;
-import com.vireocode.starter.web.RestUtils;
 import com.vireocode.starter.spi.FilterSpecificationBuilder;
 import com.vireocode.starter.spi.OfflineChangeBroadcaster;
 import com.vireocode.starter.spi.OfflineRevisionTracker;
 import com.vireocode.starter.spi.QueryFilterCriteria;
+import com.vireocode.starter.web.RestUtils;
+import com.vireocode.starter.web.SearchablePageable;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.criteria.JoinType;
@@ -339,8 +339,10 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     private Specification<DOMAIN> makeSearchSpecification(String searchText) {
         return (root, query, criteriaBuilder) -> {
-            // No DISTINCT here: makeChunkPredicate only ever joins to-one relations, so rows are never
-            // duplicated, and DISTINCT would make Postgres reject sorting by a joined column.
+            // No DISTINCT here: makeChunkPredicate only ever joins to-one relations, so
+            // rows are never
+            // duplicated, and DISTINCT would make Postgres reject sorting by a joined
+            // column.
             String[] chunks = searchText.trim().toLowerCase(Locale.ROOT).split("\\s+");
             List<Predicate> chunkPredicates = Arrays.stream(chunks)
                     .filter(chunk -> !chunk.isBlank())
