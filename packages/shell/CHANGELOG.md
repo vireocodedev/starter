@@ -1,5 +1,18 @@
 # @vireocodedev/starter-core
 
+## 2.0.0
+
+### Major Changes
+
+- dc5b42d: Milestone - collective major bump
+
+### Patch Changes
+
+- Updated dependencies [dc5b42d]
+  - @vireocodedev/starter-infrastructure@1.0.0
+  - @vireocodedev/starter-localization@1.0.0
+  - @vireocodedev/starter-ui@4.0.0
+
 ## 1.1.0
 
 ### Minor Changes

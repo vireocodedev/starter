@@ -1,5 +1,11 @@
 # @vireocodedev/starter-localization
 
+## 1.0.0
+
+### Major Changes
+
+- dc5b42d: Milestone - collective major bump
+
 ## 0.10.0
 
 ### Minor Changes
