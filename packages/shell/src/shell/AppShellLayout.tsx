@@ -37,6 +37,7 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
   const navLocked = loginMode ? true : runtimeNavLocked;
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [headerActions, setHeaderActions] = React.useState<React.ReactNode>(null);
+  const [headerActionsPathname, setHeaderActionsPathname] = React.useState(pathname);
   const viewportWidth = useShellViewportWidth();
   const windowControlsOverlay = useWindowControlsOverlay();
   const shellRootRef = React.useRef<HTMLDivElement | null>(null);
@@ -76,9 +77,12 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
     setMobileNavOpen(false);
   }, []);
 
-  React.useEffect(() => {
+  // Reset during render rather than in an effect: the incoming page registers its actions from a
+  // descendant effect, which React flushes before this component's effects would have run.
+  if (headerActionsPathname !== pathname) {
+    setHeaderActionsPathname(pathname);
     setHeaderActions(null);
-  }, [pathname]);
+  }
 
   const navLayoutContextValue = React.useMemo(
     () => ({
