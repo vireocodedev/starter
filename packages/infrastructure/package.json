@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-infrastructure",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Framework-agnostic frontend infrastructure utilities (network status, persistent signals, date/array helpers, session-expiry events, axios helpers, tanstack query client) for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": false,

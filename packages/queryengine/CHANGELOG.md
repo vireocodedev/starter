@@ -1,5 +1,11 @@
 # @vireocodedev/starter-queryengine
 
+## 3.0.0
+
+### Major Changes
+
+- dc5b42d: Milestone - collective major bump
+
 ## 2.0.0
 
 ### Major Changes

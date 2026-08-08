@@ -1,5 +1,17 @@
 # @vireocodedev/starter-ui
 
+## 4.0.0
+
+### Major Changes
+
+- dc5b42d: Milestone - collective major bump
+
+### Patch Changes
+
+- Updated dependencies [dc5b42d]
+  - @vireocodedev/starter-history@1.0.0
+  - @vireocodedev/starter-localization@1.0.0
+
 ## 3.2.0
 
 ### Minor Changes
