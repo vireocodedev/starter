@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-ui",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "MUI-based UI component library (responsive cards, mobile tables, overlays, providers, hooks, formatters) for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": [
