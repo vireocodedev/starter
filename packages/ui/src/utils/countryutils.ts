@@ -138,7 +138,7 @@ export const RGO_COUNTRY_CODES_CUSTOM_TRANSLATIONS_LOOKUP: Record<CountryCodeCus
 };
 
 export function getFlagComponent(countryCode: CountryCode) {
-  return CFIFlags[countryCode as keyof typeof CFIFlags] || null;
+  return CFIFlags[replaceDashesWithUnderscores(countryCode) as keyof typeof CFIFlags] || null;
 }
 
 export function getCountryName(countryCode: CountryCode, locale: RgoLocale): string {
@@ -159,4 +159,8 @@ export function getCountryName(countryCode: CountryCode, locale: RgoLocale): str
   }
 
   return name || upperCaseCode;
+}
+
+function replaceDashesWithUnderscores(str: string): string {
+  return str.replace(/-/g, "_");
 }

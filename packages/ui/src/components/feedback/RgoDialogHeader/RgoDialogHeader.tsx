@@ -1,7 +1,7 @@
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { composeSx } from "@/utils/muiutils";
 import { Close } from "@mui/icons-material";
-import { Box, type BoxProps, IconButton, Tooltip } from "@mui/material";
+import { Box, type BoxProps, IconButton } from "@mui/material";
 import htmlParse from "html-react-parser";
 import React from "react";
 import "./RgoDialogHeader.css";
@@ -60,17 +60,15 @@ export function RgoDialogHeader({ title, color = undefined, onClose, children, r
         {children}
       </Box>
       {onClose && (
-        <Tooltip title={t("common.close")} placement="top">
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={theme => ({
-              color: theme.palette.grey[500],
-            })}
-          >
-            <Close />
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={theme => ({
+            color: theme.palette.grey[500],
+          })}
+        >
+          <Close />
+        </IconButton>
       )}
     </Box>
   );
