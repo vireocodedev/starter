@@ -1,4 +1,3 @@
-import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { composeSx } from "@/utils/muiutils";
 import { Close } from "@mui/icons-material";
 import { Box, type BoxProps, IconButton } from "@mui/material";
@@ -19,8 +18,6 @@ export type RgoDialogHeaderProps = {
 };
 
 export function RgoDialogHeader({ title, color = undefined, onClose, children, rgoSlotProps }: RgoDialogHeaderProps) {
-  const t = useTranslationLocal();
-
   const rootProps = rgoSlotProps?.root || {};
 
   return (
