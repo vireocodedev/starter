@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-shell",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "App-shell framework for the vireocodedev starter product: config/sitemap/routing scaffolding, route guards, the responsive shell + navigation, and shell layout presets.",
   "type": "module",
   "sideEffects": false,
