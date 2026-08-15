@@ -62,6 +62,7 @@ export {
 
 export { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 export { deepMerge } from "@/toolkit/deepMerge";
+export { formatIntlNumber, type IntlNumberFormatRequest } from "@/formatters/intlNumberFormat";
 
 /** @deprecated Prefer {@link platformBaseResources} or {@link createPlatformResources}. */
 export const PLATFORM_TRANSLATION_RESOURCES = platformBaseResources;
