@@ -3,7 +3,17 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => ({
-  plugins: [tsconfigPaths(), dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" })],
+  // Per-file declarations avoid API Extractor failures on TanStack Query's
+  // private symbol graph while preserving a clean root declaration entrypoint.
+  plugins: [
+    tsconfigPaths(),
+    dts({
+      rollupTypes: false,
+      tsconfigPath: "./tsconfig.json",
+      entryRoot: "src",
+      exclude: ["tests/**", "**/*.test.ts", "**/*.test.tsx"],
+    }),
+  ],
   build: {
     emptyOutDir: mode !== "watch",
     lib: {
@@ -12,12 +22,12 @@ export default defineConfig(({ mode }) => ({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "axios", "dayjs", "@preact/signals-react", "@tanstack/react-query"],
+      external: ["react", "react-dom", "axios", "dayjs", "zod", "@preact/signals-react", "@tanstack/react-query"],
     },
     sourcemap: true,
   },
   test: {
-    environment: "node",
-    include: ["tests/**/*.{test,spec}.ts"],
+    environment: "jsdom",
+    include: ["tests/**/*.{test,spec}.{ts,tsx}"],
   },
 }));

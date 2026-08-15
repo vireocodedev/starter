@@ -4,10 +4,9 @@ Framework-agnostic **frontend infrastructure utilities** for the vireocodedev
 **starter** product. This is the dependency-light, portable core — it has **no
 UI-framework coupling**.
 
-> The UI-coupled pieces (the `AxiosHttpClient` base, the axios/query React
-> providers, and the local-storage service) live in `@vireocodedev/starter-ui`
-> or the host application, mirroring how the query engine keeps its HTTP
-> adapter app-side.
+The package owns transport-neutral and policy-injected infrastructure. Host
+applications still own configured Axios instances, endpoint naming, online and
+fallback policy, service-worker registration/UI, and backend diagnostics.
 
 ## Install
 
@@ -17,7 +16,8 @@ Published to **GitHub Packages** under the `@vireocodedev` scope:
 npm install @vireocodedev/starter-infrastructure
 ```
 
-Peers: `react`, `axios`, `dayjs`, `@preact/signals-react`, `@tanstack/react-query`.
+Peers: `react`, `axios`, `zod`, `dayjs`, `@preact/signals-react`,
+`@tanstack/react-query`.
 
 ## What's included
 
@@ -31,7 +31,18 @@ Peers: `react`, `axios`, `dayjs`, `@preact/signals-react`, `@tanstack/react-quer
   `beginManualLogout`, `cancelManualLogout`, `resetSessionExpiryNotification`,
   `APP_SESSION_EXPIRED_EVENT` (a DOM-event pub/sub; the app decides how to react).
 - **Axios helpers** — `isRequestCanceled`, `sanitizeAxiosError`,
-  `getAxiosRequestPath`, `SanitizedAxiosError`.
+  `getAxiosRequestPath`, `SanitizedAxiosError`, the injected `AxiosHttpClient`
+  base, and typed paged-search helpers.
+- **Mode-aware API dispatch** — `transactional`, `createModeAwareApi`, and
+  injected online/offline routing, fallback, guard, timing, and diagnostics
+  policy.
+- **Connectivity** — `createConnectivityState` and
+  `QueryReconnectController`, with browser/runtime/query behavior injected by
+  the host application.
+- **Query factories** — `createPagedSearchQuery` for finite and infinite
+  TanStack Query options with neutral abort requests.
+- **Service-worker checks** — `useServiceWorkerUpdateChecks` schedules checks
+  for an existing registration without owning registration or update UI.
 - **Date/array helpers** — `formatDate`, `formatDateTime`, `formatTime`,
   `formatDateUpsert`, `formatDateTimeUpsert`, `formatTimeUpsert`, `findFirstTruthy`.
 
