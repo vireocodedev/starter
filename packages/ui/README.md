@@ -22,9 +22,10 @@ npm install @vireocodedev/starter-ui
 
 Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,
-`@tanstack/react-query`, `axios`, `i18next`, `react-i18next`, `react-hook-form`,
-`zod`, `sonner`, `dayjs`. Depends on `@vireocodedev/starter-localization`, which
-owns the `platform` and `history` translation namespaces this package renders.
+`@tanstack/react-query`, `@tanstack/react-virtual`, `axios`, `i18next`,
+`react-i18next`, `react-hook-form`, `zod`, `sonner`, `dayjs`. Depends on
+`@vireocodedev/starter-localization`, which owns the `platform` and `history`
+translation namespaces this package renders.
 
 The package ships unbundled: `dist` mirrors `src` file-for-file, so subpaths can
 be imported directly (`@vireocodedev/starter-ui/utils/apiutils`) when pulling the
@@ -34,23 +35,33 @@ whole barrel — and its MUI graph — is not acceptable.
 
 - **Components** — `ResponsiveCard`, `AppCard*`, `SlidingScreenStack`,
   `MobileFormParts`, `ResponsiveMonthYearPicker`, `FormToggleButtonField`,
-  `ManagementSearchToolbar`, `AppBottomDrawer`, `DelayedRender`.
+  `ManagementSearchToolbar`, `AppBottomDrawer`, `DelayedRender`, and
+  `InputAutocomplete`.
+- **Forms** — `FormShell`, `GuardedForm`, `ResponsiveFormOverlay`, form
+  idempotency keys, and deferred success notifications.
 - **Tables** — the management/server table system: `ManagementServerTable`,
   `RgoServerTableMobile`, `MobileTable*`, `TableActionCell`, skeletons, plus the
-  infinite-scroll/table utils and `useMobileTableExpansion`.
+  infinite-scroll/table utils and `useMobileTableExpansion`; also the
+  container-aware `ResponsiveTable` and mobile accordion cell helpers.
 - **Providers** — `AppConfirmProvider`, `AppSnackbarProvider`,
   `AppMobileAttributeProvider`, `AppThemeColorMetaProvider`.
 - **Hooks** — `useResponsiveProps`, `useAppPageContentLayout`,
   `usePageOverlayModes`, `useDelayedOverlayMount`, `useSingleFlightAction`,
   `useManagementTableState`, `useMediaQueryDevice`.
-- **Layout** — `AppPageContentLayoutContext`, layout utils + shell breakpoints.
+- **Overlays** — responsive side-panel/drawer frames, page-overlay controller,
+  delayed mounting, and guarded mode switching.
+- **Layout** — `AppPageContentLayoutContext`, layout utils + shell breakpoints,
+  `PageBody`, and measured page-content mode.
+- **Unsaved changes** — scoped registration, confirmation, and route-leave
+  guard primitives for app composition roots.
 - **Utils** — currency/date formatters, `downloadFile`.
 
 ## Notes
 
 - Everything is a **named export** off the package root.
-- The app retains the composition roots that wire these into app-specific shells
-  (e.g. the history overlay, the app overlay frame).
+- The app retains only composition roots that supply app-specific policy and
+  routing; the reusable form, overlay, table, and unsaved-change behavior lives
+  in this package.
 
 ## Versioning contract
 

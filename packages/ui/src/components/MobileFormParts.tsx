@@ -5,10 +5,7 @@ export function MobileFormContent({ children }: { children: ReactNode }) {
   return (
     <Box
       sx={theme => ({
-        flex: 1,
-        minHeight: 0,
-        overflow: "auto",
-        // TODO: this padding should be configurable from the parent component, but for now we hardcode it to match the default padding of the desktop DialogContent
+        flex: "none",
         p: "1rem",
         backgroundColor: theme.palette.grey[50],
       })}
@@ -26,7 +23,9 @@ export function MobileFormActions({ children }: { children: ReactNode }) {
         display: "flex",
         justifyContent: "flex-end",
         gap: 1,
-        p: "1rem 1.5rem",
+        px: 1.5,
+        pt: 1,
+        pb: "max(1rem, env(safe-area-inset-bottom))",
         borderTop: "1px solid var(--mui-palette-grey-300)",
         backgroundColor: "background.paper",
       }}
