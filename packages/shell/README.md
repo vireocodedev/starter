@@ -11,7 +11,7 @@ npm install @vireocodedev/starter-shell
 ```
 
 Peers: `react`, `react-dom`, `react-router`, `@mui/material`,
-`@mui/icons-material`, `@tanstack/react-query`. Depends on
+`@mui/icons-material`, `@preact/signals-react`, `@tanstack/react-query`. Depends on
 `@vireocodedev/starter-ui`, `@vireocodedev/starter-localization` and
 `@vireocodedev/starter-infrastructure`.
 
@@ -30,6 +30,14 @@ Peers: `react`, `react-dom`, `react-router`, `@mui/material`,
   route/nav types), `definePages`/`defineRoutes`/`defineSections`, `appNav`,
   `routePath` helpers, route metadata.
 - **Route guards** — `AppRouteGuardLayout`, `AppRouteGuardLogin`, `authRedirect`.
+- **Navigation** — configurable route View Transitions and nested-page
+  forward/back navigation with parent state restoration.
+- **Overlay history** — `OverlayHistoryBridge` and `useOverlayBackClose`, backed
+  by a package-internal stack state machine/store that dismisses nested overlay
+  layers before routes.
+- **Unsaved changes** — the React Router adapter that composes Starter UI's
+  scoped registry with route blocking, unload protection, bypass policy, and an
+  injected prompt renderer.
 - **Shell** — `AppShellLayout` + `AppShellContext`, responsive nav (header,
   side nav, mobile bottom nav, resize), window-controls-overlay hooks, and the
   `AppBare/AppDashboard/AppPublic` shell layout presets.

@@ -2,7 +2,7 @@
 
 Framework-agnostic **query engine client** for the vireocodedev **starter**
 product: typed models + zod schemas, an injectable HTTP-port API, a react-query
-layer, and shared signals.
+layer, shared signals, and parameterized SQLite query/configuration primitives.
 
 The engine is **generic over entity keys** (opaque strings) and **transport-
 agnostic** (you inject an HTTP client). No app/domain specifics live here.
@@ -82,6 +82,13 @@ declare module "i18next" {
   `QueryEngineRequestOptions`, `CreateQueryEngineApiOptions`.
 - **Queries:** `createQueryEngineQueries`, `QueryEngineQueries`, `QueryEngineQueryKey`.
 - **Signals:** `sigQueryEngineEntityDefinitions`, `sigQueryEngineEntitySummaries`.
+- **SQLite filters/execution:** `bindSqliteSearchColumns`,
+  `compileQueryFilterWhere`, `createSqliteQueryExecutor`, and parameterized query
+  worker functions. SQL structure is caller-configured while every user value
+  remains bound separately.
+- **SQLite configuration:** `createQueryEngineConfigClient`,
+  `createQueryEngineConfigSqliteRequestHandlers`, and injected persistence,
+  runtime, transport, request-name, table-name, and fallback contracts.
 
 > **i18n moved.** `useQueryEngineTranslation`, `createQueryEngineResources`,
 > `queryEngineBaseResources`, `QUERYENGINE_TRANSLATION_NAMESPACE` and the

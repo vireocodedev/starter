@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => ({
         /^react-dom($|\/)/,
         /^react-router($|\/)/,
         /^@mui\//,
+        /^@preact\/signals-react($|\/)/,
         /^@vireocodedev\//,
         /^@tanstack\//,
         /^virtual:/,

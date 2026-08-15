@@ -1,0 +1,48 @@
+import { DESKTOP_SIDE_PANEL_WIDTH_BY_MAX_WIDTH } from "./overlay.constants";
+import { type ResponsiveOverlayFrameDesktopSidePanelWidth } from "./overlay.types";
+import { type DialogProps, type SxProps, type Theme } from "@mui/material";
+
+export function getDefaultDesktopSidePanelWidth(maxWidth: DialogProps["maxWidth"]): number {
+  if (!maxWidth) {
+    return 760;
+  }
+
+  return DESKTOP_SIDE_PANEL_WIDTH_BY_MAX_WIDTH[maxWidth];
+}
+
+export function getNumericDesktopSidePanelWidth(
+  width: ResponsiveOverlayFrameDesktopSidePanelWidth,
+  maxWidth: DialogProps["maxWidth"],
+): number {
+  if (typeof width === "number" && Number.isFinite(width)) {
+    return width;
+  }
+
+  return getDefaultDesktopSidePanelWidth(maxWidth);
+}
+
+export function clampSidePanelWidth(width: number, minWidth: number, maxWidth: number): number {
+  const effectiveMaxWidth = Math.max(minWidth, maxWidth);
+
+  return Math.max(minWidth, Math.min(width, effectiveMaxWidth));
+}
+
+export function mergeSx(baseSx: SxProps<Theme>, sx?: SxProps<Theme>): SxProps<Theme> {
+  if (!sx) {
+    return baseSx;
+  }
+
+  return (Array.isArray(sx) ? [baseSx, ...sx] : [baseSx, sx]) as SxProps<Theme>;
+}
+
+export function resolveDockedSidePanelWidth(
+  requestedWidth: ResponsiveOverlayFrameDesktopSidePanelWidth,
+  maxWidth: number,
+  minWidth: number,
+): ResponsiveOverlayFrameDesktopSidePanelWidth {
+  if (typeof requestedWidth !== "number") {
+    return requestedWidth;
+  }
+
+  return clampSidePanelWidth(requestedWidth, minWidth, maxWidth);
+}

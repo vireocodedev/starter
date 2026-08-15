@@ -16,7 +16,8 @@ string instead of restating it.
 
 This package does **not** initialize i18next, own a provider, or manage locale
 persistence — those stay in the consuming app. It contributes typed resources,
-namespace hooks, and merge utilities to a single, app-owned i18next instance.
+namespace hooks, merge utilities, and locale-neutral formatting primitives to a
+single, app-owned i18next instance.
 
 ## Install
 
@@ -138,6 +139,7 @@ declare module "i18next" {
 | `platformBaseResources`, `queryEngineBaseResources`, `historyBaseResources`                   | The shipped base resources.                                          |
 | `PLATFORM_/QUERYENGINE_/HISTORY_TRANSLATION_NAMESPACE`                                        | The namespace strings.                                               |
 | `createNamespaceResources`, `deepMerge`                                                       | Generic toolkit reused by other starter libraries.                   |
+| `formatIntlNumber(value, { locale, options?, fallback? })`                                    | Format a number with caller-owned locale and fallback policy.        |
 | `PlatformResources`, `QueryEngineResources`, `HistoryResources`, `DeepPartial`, `WidenLeaves` | Types.                                                               |
 
 ## Versioning contract

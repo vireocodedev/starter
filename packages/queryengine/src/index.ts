@@ -4,3 +4,7 @@ export * from "@/models/queryengine.models";
 export * from "@/queryengine.querykeys";
 export * from "@/signals/sigQueryEngineEntityDefinitions";
 export * from "@/signals/sigQueryEngineEntitySummaries";
+export * from "@/sqlite/compileQueryFilterWhere";
+export * from "@/sqlite/createQueryEngineConfigClient";
+export * from "@/sqlite/createSqliteQueryExecutor";
+export * from "@/sqlite/queryEngineConfigSqlite";
