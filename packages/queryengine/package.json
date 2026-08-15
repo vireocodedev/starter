@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-queryengine",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Framework-agnostic query engine client (models, api, react-query, signals) for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": false,

@@ -1,5 +1,11 @@
 # @vireocodedev/starter-queryengine
 
+## 3.1.0
+
+### Minor Changes
+
+- 6f8617f: Add parameterized SQLite filter compilation, paged execution, and query-engine configuration persistence and clients.
+
 ## 3.0.0
 
 ### Major Changes
