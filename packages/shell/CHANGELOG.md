@@ -1,5 +1,20 @@
 # @vireocodedev/starter-core
 
+## 2.2.0
+
+### Minor Changes
+
+- 9f6d150: Add nested-page transitions, overlay history, and unsaved-change routing primitives.
+
+### Patch Changes
+
+- Updated dependencies [1be3bb1]
+- Updated dependencies [56eaa3b]
+- Updated dependencies [7a07935]
+  - @vireocodedev/starter-ui@4.1.0
+  - @vireocodedev/starter-localization@1.1.0
+  - @vireocodedev/starter-infrastructure@1.1.0
+
 ## 2.1.0
 
 ### Minor Changes

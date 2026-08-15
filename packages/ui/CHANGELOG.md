@@ -1,5 +1,16 @@
 # @vireocodedev/starter-ui
 
+## 4.1.0
+
+### Minor Changes
+
+- 1be3bb1: Add guarded forms, responsive autocomplete, overlays, tables, layout, and scoped unsaved-change primitives.
+
+### Patch Changes
+
+- Updated dependencies [56eaa3b]
+  - @vireocodedev/starter-localization@1.1.0
+
 ## 4.0.1
 
 ### Patch Changes

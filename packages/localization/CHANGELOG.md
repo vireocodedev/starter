@@ -1,5 +1,11 @@
 # @vireocodedev/starter-localization
 
+## 1.1.0
+
+### Minor Changes
+
+- 56eaa3b: Add locale-neutral number formatting with caller-owned options and fallback policy.
+
 ## 1.0.0
 
 ### Major Changes

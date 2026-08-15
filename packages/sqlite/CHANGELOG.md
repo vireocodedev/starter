@@ -1,5 +1,11 @@
 # @vireocodedev/starter-sqlite
 
+## 2.1.0
+
+### Minor Changes
+
+- dfb0331: Add managed SQLite runtime, lifecycle, offline queue, hydration, and concurrency primitives.
+
 ## 2.0.0
 
 ### Major Changes

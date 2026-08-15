@@ -1,5 +1,11 @@
 # @vireocodedev/starter-infrastructure
 
+## 1.1.0
+
+### Minor Changes
+
+- 7a07935: Add mode-aware APIs, typed HTTP and paged queries, connectivity state, query reconnects, and service-worker update checks.
+
 ## 1.0.0
 
 ### Major Changes
