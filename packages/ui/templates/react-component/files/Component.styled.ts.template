@@ -1,0 +1,17 @@
+import { type StyledSlotComponent, type StyledSlotProps } from "@/utils/muiutils";
+import { Box, type BoxProps } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { {{componentConstantName}}_NAME } from "./{{componentName}}.identity";
+import { type {{componentName}}OwnerState } from "./{{componentName}}.types";
+
+type {{componentName}}StyledSlotProps = StyledSlotProps<{{componentName}}OwnerState>;
+type {{componentName}}StyledSlotComponent<TProps extends object> = StyledSlotComponent<
+  TProps,
+  {{componentName}}OwnerState
+>;
+
+export const {{componentName}}Root: {{componentName}}StyledSlotComponent<BoxProps> = styled(Box, {
+  name: {{componentConstantName}}_NAME,
+  slot: "Root",
+  overridesResolver: (_props, styles) => styles.root,
+})<{{componentName}}StyledSlotProps>({});

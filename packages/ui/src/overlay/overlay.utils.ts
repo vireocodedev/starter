@@ -1,6 +1,6 @@
 import { DESKTOP_SIDE_PANEL_WIDTH_BY_MAX_WIDTH } from "./overlay.constants";
 import { type ResponsiveOverlayFrameDesktopSidePanelWidth } from "./overlay.types";
-import { type DialogProps, type SxProps, type Theme } from "@mui/material";
+import { type DialogProps } from "@mui/material";
 
 export function getDefaultDesktopSidePanelWidth(maxWidth: DialogProps["maxWidth"]): number {
   if (!maxWidth) {
@@ -27,14 +27,7 @@ export function clampSidePanelWidth(width: number, minWidth: number, maxWidth: n
   return Math.max(minWidth, Math.min(width, effectiveMaxWidth));
 }
 
-export function mergeSx(baseSx: SxProps<Theme>, sx?: SxProps<Theme>): SxProps<Theme> {
-  if (!sx) {
-    return baseSx;
-  }
-
-  return (Array.isArray(sx) ? [baseSx, ...sx] : [baseSx, sx]) as SxProps<Theme>;
-}
-
+/** Resolves docked side panel width. */
 export function resolveDockedSidePanelWidth(
   requestedWidth: ResponsiveOverlayFrameDesktopSidePanelWidth,
   maxWidth: number,

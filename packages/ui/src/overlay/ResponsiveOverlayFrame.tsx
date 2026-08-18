@@ -12,13 +12,13 @@ import {
   clampSidePanelWidth,
   getDefaultDesktopSidePanelWidth,
   getNumericDesktopSidePanelWidth,
-  mergeSx,
   resolveDockedSidePanelWidth,
 } from "./overlay.utils";
 import { Dialog, Drawer } from "@mui/material";
 import { AppBottomDrawer } from "@/components/AppBottomDrawer";
 import { useResponsiveProps } from "@/hooks/useResponsiveProps";
 import { APP_PAGE_CONTENT_MIN_WIDTH } from "@/layout/appPageContent.constants";
+import { mergeSx } from "@/utils/muiutils";
 import React from "react";
 
 export function ResponsiveOverlayFrame({

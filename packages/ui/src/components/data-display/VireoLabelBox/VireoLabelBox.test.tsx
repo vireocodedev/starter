@@ -1,0 +1,115 @@
+import { RgoLabelBox as CompatibilityRgoLabelBox } from "@/index";
+import { ThemeProvider, createTheme } from "@mui/material";
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { describe, expect, it } from "vitest";
+import { VireoLabelBox } from "./VireoLabelBox";
+import { vireoLabelBoxClasses } from "./VireoLabelBox.classes";
+import { VIREO_LABEL_BOX_NAME } from "./VireoLabelBox.identity";
+
+describe(VIREO_LABEL_BOX_NAME, () => {
+  it("keeps the deprecated package-root component alias compatible", () => {
+    expect(CompatibilityRgoLabelBox).toBe(VireoLabelBox);
+  });
+
+  it("renders its content with only required props", () => {
+    render(
+      <VireoLabelBox>
+        <input aria-label="Account name" />
+      </VireoLabelBox>,
+    );
+
+    expect(screen.getByRole("textbox", { name: "Account name" })).toBeInTheDocument();
+  });
+
+  it("renders optional label anatomy and a decorative required indicator", () => {
+    render(
+      <VireoLabelBox label="Account" helperText="Used on invoices" required>
+        <input aria-label="Account" />
+      </VireoLabelBox>,
+    );
+
+    expect(screen.getByText("Account", { selector: `.${vireoLabelBoxClasses.label}` })).toBeInTheDocument();
+    expect(screen.getByText("Used on invoices")).toHaveClass(vireoLabelBoxClasses.helperText);
+    expect(screen.getByText("*")).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("forwards refs and merges inherited and root slot customization", () => {
+    const forwardedRef = React.createRef<HTMLDivElement>();
+    const rootSlotRef = React.createRef<HTMLDivElement>();
+
+    render(
+      <VireoLabelBox
+        ref={forwardedRef}
+        className="direct-class"
+        style={{ paddingLeft: 10 }}
+        slotProps={{
+          root: {
+            ref: rootSlotRef,
+            className: "slot-class",
+            "data-origin": "slot",
+            style: { paddingRight: 12 },
+          },
+        }}
+      >
+        Content
+      </VireoLabelBox>,
+    );
+
+    const root = screen.getByText("Content").parentElement;
+    expect(forwardedRef.current).toBe(root);
+    expect(rootSlotRef.current).toBe(root);
+    expect(root).toHaveClass(vireoLabelBoxClasses.root, "direct-class", "slot-class");
+    expect(root).toHaveAttribute("data-origin", "slot");
+    expect(root).toHaveStyle({ paddingLeft: "10px", paddingRight: "12px" });
+  });
+
+  it("supports replacement slots and owner-state slot props", () => {
+    render(
+      <VireoLabelBox
+        label="Priority"
+        helperText="Optional"
+        direction="row"
+        slots={{ root: "section", label: "strong", helperText: "small", content: "main" }}
+        slotProps={{
+          root: { "aria-label": "Priority field" },
+          label: ownerState => ({ "data-direction": ownerState.direction }),
+        }}
+      >
+        Field content
+      </VireoLabelBox>,
+    );
+
+    const root = screen.getByRole("region", { name: "Priority field" });
+    expect(root).toHaveClass(vireoLabelBoxClasses.root);
+    expect(screen.getByText("Priority").tagName).toBe("STRONG");
+    expect(screen.getByText("Priority")).toHaveAttribute("data-direction", "row");
+    expect(screen.getByText("Optional").tagName).toBe("SMALL");
+    expect(screen.getByRole("main")).toHaveClass(vireoLabelBoxClasses.content);
+  });
+
+  it("uses theme default props and per-slot style overrides", () => {
+    const theme = createTheme({
+      components: {
+        [VIREO_LABEL_BOX_NAME]: {
+          defaultProps: { label: "Theme label" },
+          styleOverrides: {
+            root: { backgroundColor: "rgb(10, 20, 30)" },
+            label: { color: "rgb(123, 45, 67)" },
+          },
+        },
+      },
+    });
+
+    render(
+      <ThemeProvider theme={theme}>
+        <VireoLabelBox>Content</VireoLabelBox>
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByText("Content").parentElement).toHaveStyle({
+      backgroundColor: "rgb(10, 20, 30)",
+    });
+    expect(screen.getByText("Theme label")).toHaveStyle({ color: "rgb(123, 45, 67)" });
+  });
+});

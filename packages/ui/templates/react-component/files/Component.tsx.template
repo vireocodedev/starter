@@ -1,0 +1,59 @@
+import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/utils/muiutils";
+import { unstable_composeClasses as composeClasses } from "@mui/material";
+import { useThemeProps } from "@mui/material/styles";
+import { useForkRef } from "@mui/material/utils";
+import React from "react";
+import { type {{componentName}}ClassKey, get{{componentName}}UtilityClass } from "./{{componentName}}.classes";
+import { {{componentConstantName}}_NAME, type {{componentName}}SlotName } from "./{{componentName}}.identity";
+import { {{componentName}}Root } from "./{{componentName}}.styled";
+import { type {{componentName}}OwnerState, type {{componentName}}Props } from "./{{componentName}}.types";
+
+function useUtilityClasses(_ownerState: {{componentName}}OwnerState, classes?: {{componentName}}Props["classes"]) {
+  return composeClasses(
+    {
+      root: ["root"],
+    } as const satisfies UtilityClassSlotMap<{{componentName}}SlotName, {{componentName}}ClassKey>,
+    get{{componentName}}UtilityClass,
+    classes,
+  );
+}
+
+/**
+ * TODO(component-author): Describe the purpose and appropriate use of {{componentName}}.
+ */
+export const {{componentName}} = React.forwardRef<HTMLDivElement, {{componentName}}Props>(
+  function {{componentName}}(inProps, forwardedRef) {
+    const props = useThemeProps({ props: inProps, name: {{componentConstantName}}_NAME });
+    const { className, classes: classesProp, slotProps = {}, slots = {}, style, sx, ...other } = props;
+
+    const ownerState: {{componentName}}OwnerState = {};
+    const classes = useUtilityClasses(ownerState, classesProp);
+
+    const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
+    const {
+      className: rootSlotClassName,
+      ref: rootSlotRef,
+      style: rootSlotStyle,
+      sx: rootSlotSx,
+      ...rootSlotOther
+    } = resolvedRootSlotProps;
+    const rootRef = useForkRef(forwardedRef, rootSlotRef);
+
+    return (
+      <{{componentName}}Root
+        {...other}
+        {...rootSlotOther}
+        as={slots.root ?? "div"}
+        ref={rootRef}
+        ownerState={ownerState}
+        className={joinClassNames(classes.root, className, rootSlotClassName)}
+        style={{ ...style, ...rootSlotStyle }}
+        sx={mergeSx(sx, rootSlotSx)}
+      >
+        {{componentName}}
+      </{{componentName}}Root>
+    );
+  },
+);
+
+{{componentName}}.displayName = {{componentConstantName}}_NAME;

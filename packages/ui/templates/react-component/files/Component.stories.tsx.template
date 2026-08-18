@@ -1,0 +1,62 @@
+import { {{componentName}} } from "./{{componentName}}";
+import { {{componentConstantName}}_NAME } from "./{{componentName}}.identity";
+import { ThemeProvider, createTheme } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+
+const meta = {
+  title: "Components/{{storybookCategory}}/{{componentName}}",
+  component: {{componentName}},
+  tags: ["autodocs"],
+  parameters: {
+    docs: {
+      description: {
+        component: "TODO(component-author): Explain what {{componentName}} represents, which problem it solves, and when to use it.",
+      },
+    },
+  },
+  argTypes: {
+    slots: { control: false },
+    slotProps: { control: false },
+    classes: { control: false },
+  },
+} satisfies Meta<typeof {{componentName}}>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+
+export const CustomizedSlots: Story = {
+  args: {
+    slots: { root: "section" },
+    slotProps: {
+      root: {
+        "aria-label": "Customized {{componentName}}",
+        sx: { border: 1, borderColor: "primary.main", p: 2 },
+      },
+    },
+  },
+};
+
+const customizedTheme = createTheme({
+  components: {
+    [{{componentConstantName}}_NAME]: {
+      styleOverrides: {
+        root: {
+          color: "#7c3aed",
+          fontWeight: 700,
+        },
+      },
+    },
+  },
+});
+
+export const ThemeCustomization: Story = {
+  decorators: [
+    Story => (
+      <ThemeProvider theme={customizedTheme}>
+        <Story />
+      </ThemeProvider>
+    ),
+  ],
+};

@@ -1,0 +1,16 @@
+.sbdocs-preview > .docs-story {
+  background-color: #080d18;
+}
+
+.sbdocs.sbdocs-preview.sb-unstyled {
+  border-color: #101828;
+  border-radius: 16px;
+}
+
+.docblock-argstable .docblock-argstable-body > tr > * {
+  background-color: #101828 !important;
+}
+
+.vireo-story-surface {
+  width: 100%;
+}

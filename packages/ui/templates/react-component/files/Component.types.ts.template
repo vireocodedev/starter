@@ -1,0 +1,57 @@
+import type { VireoDataAttributeValue } from "@/utils/muiutils";
+import type { BoxProps } from "@mui/material";
+import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
+import type React from "react";
+import { type {{componentName}}Classes, type {{componentName}}ClassKey } from "./{{componentName}}.classes";
+import type { {{componentConstantName}}_NAME, {{componentName}}SlotName } from "./{{componentName}}.identity";
+
+export type {{componentName}}OwnerState = Record<never, never>;
+
+export interface {{componentName}}RootSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
+
+/** Replaceable semantic regions exposed by {@link {{componentName}}}. */
+export type {{componentName}}Slots = {
+  [TSlotName in {{componentName}}SlotName]: React.ElementType;
+};
+
+/** Slot props exposed by {@link {{componentName}}}. */
+export type {{componentName}}SlotsAndSlotProps = CreateSlotsAndSlotProps<
+  {{componentName}}Slots,
+  {
+    /** @default 'div' */
+    root: SlotProps<"div", {{componentName}}RootSlotPropsOverrides, {{componentName}}OwnerState>;
+  }
+>;
+
+/** Props owned by {@link {{componentName}}}. */
+export type {{componentName}}OwnProps = {{componentName}}SlotsAndSlotProps & {
+  /** Override or extend the utility classes applied to each slot. */
+  classes?: Partial<{{componentName}}Classes>;
+};
+
+/** Props {{componentName}} inherits from its default root after excluding component-owned props. */
+export type {{componentName}}InheritedProps = Omit<BoxProps<"div">, "children" | "component">;
+
+/** Props accepted by {@link {{componentName}}}. */
+export type {{componentName}}Props = {{componentName}}OwnProps & {{componentName}}InheritedProps;
+
+declare module "@mui/material/styles" {
+  interface ComponentsPropsList {
+    [{{componentConstantName}}_NAME]: {{componentName}}Props;
+  }
+
+  interface ComponentNameToClassKey {
+    [{{componentConstantName}}_NAME]: {{componentName}}ClassKey;
+  }
+
+  interface Components<Theme = unknown> {
+    [{{componentConstantName}}_NAME]?: {
+      defaultProps?: ComponentsProps[typeof {{componentConstantName}}_NAME];
+      styleOverrides?: ComponentsOverrides<Theme>[typeof {{componentConstantName}}_NAME];
+      variants?: ComponentsVariants<Theme>[typeof {{componentConstantName}}_NAME];
+    };
+  }
+}

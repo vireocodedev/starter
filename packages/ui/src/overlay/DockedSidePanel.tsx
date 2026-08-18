@@ -4,8 +4,8 @@ import {
   type DockedSidePanelTransitionEventDetail,
 } from "./overlay.constants";
 import { type ResponsiveOverlayFrameDesktopSidePanelWidth } from "./overlay.types";
-import { mergeSx } from "./overlay.utils";
 import { Box, type SxProps, type Theme } from "@mui/material";
+import { mergeSx } from "@/utils/muiutils";
 import React from "react";
 
 export function DockedSidePanel({

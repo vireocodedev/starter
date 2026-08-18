@@ -1,0 +1,23 @@
+import { generateUtilityClass, generateUtilityClasses } from "@mui/material";
+import {
+  {{componentConstantName}}_NAME,
+  {{componentConstantName}}_SLOTS,
+  type {{componentName}}SlotName,
+} from "./{{componentName}}.identity";
+
+/** Utility classes available to {{componentName}}. */
+export type {{componentName}}Classes = Record<{{componentName}}SlotName, string>;
+
+/** Valid keys for {{componentName}} utility classes and theme style overrides. */
+export type {{componentName}}ClassKey = keyof {{componentName}}Classes;
+
+/** Returns the generated utility class name for a {{componentName}} slot or state. */
+export function get{{componentName}}UtilityClass(slot: string): string {
+  return generateUtilityClass({{componentConstantName}}_NAME, slot);
+}
+
+/** Generated utility class names keyed by each public {{componentName}} class key. */
+export const {{componentVariableName}}Classes: {{componentName}}Classes = generateUtilityClasses(
+  {{componentConstantName}}_NAME,
+  [...{{componentConstantName}}_SLOTS],
+);
