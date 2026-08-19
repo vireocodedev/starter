@@ -15,6 +15,7 @@
     "dev": "turbo run dev",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test && npm run surface",
+    "test:architecture": "node scripts/ui-architecture.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "api:inventory": "node scripts/api-inventory.mjs",
