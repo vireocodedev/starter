@@ -161,13 +161,14 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Root component files
 
-| Current path pattern                                                | Target owner                                              | Disposition   | Notes                                                             |
-| ------------------------------------------------------------------- | --------------------------------------------------------- | ------------- | ----------------------------------------------------------------- |
-| `components/{SlidingScreenStack.tsx,ResponsiveMonthYearPicker.tsx}` | `core/components`                                         | Split         | Classify individually as layout or inputs during Vireo migration. |
-| `components/DelayedRender.tsx`                                      | `core/components/behavior/VireoDelayedRender`             | Compatibility | Thin deprecated alias.                                            |
-| `components/{FormToggleButtonField.tsx,MobileFormParts.tsx}`        | `capabilities/forms/components/forms`                     | Planned       | Coupled to form state or form composition.                        |
-| `components/ManagementSearchToolbar.tsx`                            | `capabilities/table/management-table/components/controls` | Planned       | Management-table search workflow.                                 |
-| `components/ResponsiveCard.tsx`                                     | `capabilities/page-layout/components/surfaces`            | Planned       | Behavior depends on page-content layout mode.                     |
+| Current path pattern                                         | Target owner                                              | Disposition   | Notes                                                 |
+| ------------------------------------------------------------ | --------------------------------------------------------- | ------------- | ----------------------------------------------------- |
+| `components/ResponsiveMonthYearPicker.tsx`                   | `core/components/inputs`                                  | Planned       | Classify and migrate with the remaining date inputs.  |
+| `components/SlidingScreenStack.tsx`                          | `core/components/layout/VireoSlidingScreenStack`          | Compatibility | Thin deprecated alias for the canonical screen stack. |
+| `components/DelayedRender.tsx`                               | `core/components/behavior/VireoDelayedRender`             | Compatibility | Thin deprecated alias.                                |
+| `components/{FormToggleButtonField.tsx,MobileFormParts.tsx}` | `capabilities/forms/components/forms`                     | Planned       | Coupled to form state or form composition.            |
+| `components/ManagementSearchToolbar.tsx`                     | `capabilities/table/management-table/components/controls` | Planned       | Management-table search workflow.                     |
+| `components/ResponsiveCard.tsx`                              | `capabilities/page-layout/components/surfaces`            | Planned       | Behavior depends on page-content layout mode.         |
 
 ### Data-display components
 
@@ -200,6 +201,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `core/components/data-display/VireoTruncatedContent/**`                    | `core/components/data-display`                    | Migrated      | Accessible disclosure for overflowing rich content.                       |
 | `core/components/feedback/VireoStatusDot/**`                               | `core/components/feedback`                        | Migrated      | Theme-aware semantic status marker with a preserved `RgoStatusDot` alias. |
 | `core/components/feedback/VireoSnack/**`                                   | `core/components/feedback`                        | Migrated      | Semantic notification content with adornments and theme variants.         |
+| `core/components/layout/VireoSlidingScreenStack/**`                        | `core/components/layout`                          | Migrated      | Controlled horizontal transitions that retain adjacent screens.           |
 | `core/components/surfaces/VireoIconContainer/**`                           | `core/components/surfaces`                        | Migrated      | Canonical icon-geometry normalization surface.                            |
 | `capabilities/overlays/components/overlays/VireoOverlayHeader/**`          | `capabilities/overlays/components/overlays`       | Migrated      | Canonical overlay header anatomy.                                         |
 | `capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/**`  | `capabilities/overlays/components/overlays`       | Migrated      | Canonical pointer resize target with an unprefixed compatibility alias.   |
@@ -295,6 +297,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/data-display/RgoSnack/**`                                                                                                       | `core/components/feedback/VireoSnack`                                                                            | Added the complete Vireo contract and retained `RgoSnack` as a deprecated alias.    |
 | 2026-08-19   | `components/inputs/RgoIconButton/**`                                                                                                        | `core/components/controls/VireoLabeledIconButton`                                                                | Added the complete Vireo contract and retained a deprecated compatibility adapter.  |
 | 2026-08-19   | `components/data-display/RgoIcon/**`, `hooks/useRgoIcons/**`, `providers/RgoIconsProvider/**`, `setup/config/{RgoIconRegistry.ts,icons/**}` | `core/components/data-display/VireoIcon`, `core/hooks/useVireoIcons`, `core/providers/VireoIconRegistryProvider` | Added the complete Vireo icon contract and retained deprecated registry aliases.    |
+| 2026-08-19   | `components/SlidingScreenStack.tsx`                                                                                                         | `core/components/layout/VireoSlidingScreenStack`                                                                 | Added the complete Vireo contract and retained a deprecated compatibility alias.    |
 
 ## Automated verification
 

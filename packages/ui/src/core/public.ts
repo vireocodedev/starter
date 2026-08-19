@@ -19,6 +19,7 @@ export type { VireoStopwatchProps as RgoStopwatchProps } from "./components/data
 export * from "./components/data-display/VireoTruncatedContent";
 export * from "./components/feedback/VireoStatusDot";
 export * from "./components/feedback/VireoSnack";
+export * from "./components/layout/VireoSlidingScreenStack";
 /** @deprecated Use VireoSnack. */
 export { VireoSnack as RgoSnack } from "./components/feedback/VireoSnack";
 /** @deprecated Use VireoSnackProps and VireoSnackVariant. */
