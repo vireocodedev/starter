@@ -398,46 +398,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/RgoValueWithUnit.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/RgoValueWithUnit.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnit.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithCommonUnitsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithDecimalPrecisionDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithDifferentValueTypesDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithEmptyAndInvalidValuesDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

@@ -13,7 +13,6 @@ export * from "@/components/data-display/RgoTable";
 export * from "@/components/data-display/RgoTimeWithDateDisplay/RgoTimeWithDateDisplay";
 export * from "@/components/data-display/RgoTimeWithDateDisplayInline/RgoTimeWithDateDisplayInline";
 export * from "@/components/data-display/RgoTruncatedText/RgoTruncatedText";
-export * from "@/components/data-display/RgoValueWithUnit/RgoValueWithUnit";
 export * from "@/components/DelayedRender";
 export * from "@/components/feedback/RgoLoader/RgoLoader";
 export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/RgoLoaderSuspense";

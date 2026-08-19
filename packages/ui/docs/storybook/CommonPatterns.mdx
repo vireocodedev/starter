@@ -393,7 +393,8 @@ function WelcomeMessage() {
 Combining loader with data components:
 
 ```tsx
-import { RgoQueryErrorLoaderSuspense, RgoValueWithUnit } from "@vireocodedev/starter-ui";
+import { RgoQueryErrorLoaderSuspense } from "@vireocodedev/starter-ui";
+import { Typography } from "@mui/material";
 
 function MetricDisplay({ metricId }) {
   const { data, isLoading, error } = useQuery({
@@ -403,7 +404,7 @@ function MetricDisplay({ metricId }) {
 
   return (
     <RgoQueryErrorLoaderSuspense isLoading={isLoading} error={error}>
-      <RgoValueWithUnit value={data?.value} unit={data?.unit} decimalPlaces={2} />
+      <Typography component="span">{data?.value == null ? "—" : `${data.value.toFixed(2)} ${data.unit}`}</Typography>
     </RgoQueryErrorLoaderSuspense>
   );
 }
