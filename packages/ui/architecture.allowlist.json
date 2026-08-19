@@ -868,47 +868,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/RgoInputSlider.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoInputSlider/RgoInputSlider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/stories/RgoInputSlider.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithCustomizationDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithDisabledDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithErrorDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithFormInputDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithHelperTextDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
