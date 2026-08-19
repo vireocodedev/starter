@@ -1403,32 +1403,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/navigation/RgoTabs/RgoTabs.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/navigation/RgoTabs/RgoTabs.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/navigation/RgoTabs/stories/RgoTabs.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/navigation/RgoTabs/stories/RgoTabsWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/navigation/RgoTabs/stories/RgoTabsWithInitialTabDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/navigation/RgoTabs/stories/RgoTabsWithRichContentDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
