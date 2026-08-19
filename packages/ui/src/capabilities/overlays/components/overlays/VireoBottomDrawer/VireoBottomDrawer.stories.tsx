@@ -57,7 +57,6 @@ const meta: Meta<typeof VireoBottomDrawer> = {
   component: VireoBottomDrawer,
   tags: ["autodocs"],
   parameters: {
-    layout: "fullscreen",
     viewport: { defaultViewport: "mobile1" },
     docs: {
       description: {
@@ -82,7 +81,7 @@ const meta: Meta<typeof VireoBottomDrawer> = {
   },
   decorators: [
     Story => (
-      <Box sx={{ minHeight: "100dvh", bgcolor: "grey.100", p: 3 }}>
+      <Box sx={{ bgcolor: "grey.100", p: 3 }}>
         <Typography variant="h5">Customer workspace</Typography>
         <Typography color="text.secondary">The bottom sheet remains the subject of this mobile canvas.</Typography>
         <Story />
