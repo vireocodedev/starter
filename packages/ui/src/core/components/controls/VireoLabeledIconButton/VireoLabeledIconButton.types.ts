@@ -1,6 +1,6 @@
 import type { VireoIconName } from "@/core/providers/VireoIconRegistryProvider/VireoIconRegistryProvider";
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
-import { Box, Button, type ButtonProps, Typography } from "@mui/material";
+import type { Box, Button, ButtonProps, Typography } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";

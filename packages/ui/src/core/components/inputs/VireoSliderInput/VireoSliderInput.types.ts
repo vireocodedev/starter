@@ -1,5 +1,5 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
-import { Box, FormControl, FormHelperText, Slider, TextField, type FormControlProps } from "@mui/material";
+import type { Box, FormControl, FormControlProps, FormHelperText, Slider, TextField } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";

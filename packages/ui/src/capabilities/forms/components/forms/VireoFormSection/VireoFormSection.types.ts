@@ -1,5 +1,5 @@
 import type { VireoDataAttributeValue } from "@/core/public";
-import { Box, Typography, type BoxProps } from "@mui/material";
+import type { Box, BoxProps, Typography } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";

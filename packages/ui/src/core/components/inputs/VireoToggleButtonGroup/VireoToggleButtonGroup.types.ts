@@ -1,12 +1,12 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
-import {
+import type {
   FormControl,
   FormHelperText,
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
-  type FormControlProps,
-  type ToggleButtonProps,
+  FormControlProps,
+  ToggleButtonProps,
 } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";

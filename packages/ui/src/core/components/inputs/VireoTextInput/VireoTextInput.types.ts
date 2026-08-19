@@ -1,5 +1,5 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
-import { TextField, type TextFieldProps } from "@mui/material";
+import type { TextField, TextFieldProps } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
