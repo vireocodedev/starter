@@ -344,8 +344,6 @@
         "RgoSseStatus",
         "RgoStatusDot",
         "RgoStatusDotProps",
-        "RgoStatusText",
-        "RgoStatusTextProps",
         "RgoStopwatch",
         "RgoStopwatchProps",
         "RgoTabItem",

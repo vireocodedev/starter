@@ -213,21 +213,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoStatusText/RgoStatusText.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoStatusText/stories/RgoStatusText.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoStatusText/stories/RgoStatusTextWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoStopwatch/RgoStopwatch.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
