@@ -290,8 +290,6 @@
         "RgoInputToggleButtonGroupSlotProps",
         "RgoInputValidationProps",
         "RgoJsonViewer",
-        "RgoJsonViewerDialog",
-        "RgoJsonViewerDialogProps",
         "RgoJsonViewerProps",
         "RgoLabelBox",
         "RgoLabelBoxProps",

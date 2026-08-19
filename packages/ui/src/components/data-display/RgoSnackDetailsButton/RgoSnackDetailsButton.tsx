@@ -1,5 +1,7 @@
-import { RgoJsonViewerDialog } from "@/components/data-display/RgoJsonViewerDialog/RgoJsonViewerDialog";
-import { IconButton, Tooltip } from "@mui/material";
+import { VireoOverlayHeader } from "@/capabilities/overlays/public";
+import { RgoJsonViewer } from "@/components/data-display/RgoJsonViewer/RgoJsonViewer";
+import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
+import { Dialog, DialogContent, IconButton, Tooltip } from "@mui/material";
 import React from "react";
 
 export type RgoSnackDetailsButtonProps = {
@@ -9,11 +11,13 @@ export type RgoSnackDetailsButtonProps = {
 
 /**
  * Drop into {@link RgoSnack}'s `endAdornment` to give a toast a "details"
- * button that opens an {@link RgoJsonViewerDialog} with arbitrary data
- * (e.g. an error payload) the user can inspect and copy.
+ * button that opens arbitrary data (e.g. an error payload) in a JSON viewer
+ * the user can inspect and copy.
  */
 export function RgoSnackDetailsButton({ data, tooltip = "Show details" }: RgoSnackDetailsButtonProps) {
+  const t = useTranslationLocal();
   const [open, setOpen] = React.useState(false);
+  const handleClose = React.useCallback(() => setOpen(false), []);
 
   return (
     <>
@@ -32,7 +36,12 @@ export function RgoSnackDetailsButton({ data, tooltip = "Show details" }: RgoSna
           </svg>
         </IconButton>
       </Tooltip>
-      <RgoJsonViewerDialog open={open} onClose={() => setOpen(false)} data={data} />
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <VireoOverlayHeader title={t("common.errorDetails")} closeLabel={t("common.close")} onClose={handleClose} />
+        <DialogContent sx={{ pt: "20px" }}>
+          <RgoJsonViewer data={data} maxHeight="60vh" />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
