@@ -503,52 +503,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/RgoInputAutocompleteMultiple.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoInputAutocompleteMultiple/RgoInputAutocompleteMultiple.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultiple.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithAsyncDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithCustomizationDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithDisabledDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithErrorDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithFormInputDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithHelperTextDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
