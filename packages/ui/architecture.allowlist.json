@@ -968,52 +968,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroup.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithDisableClearableDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithDisabledDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithErrorDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithFormInputDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithHelperTextDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithMultipleDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
