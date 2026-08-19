@@ -3,7 +3,6 @@ export * from "@/capabilities/overlays/public";
 export * from "@/capabilities/unsaved-changes/public";
 export * from "@/components/data-display/RgoClientTable/RgoClientTable";
 export * from "@/components/data-display/RgoServerTable/RgoServerTable";
-export * from "@/components/data-display/RgoSnack/RgoSnack";
 export * from "@/components/data-display/RgoTable";
 export * from "@/components/data-display/RgoTimeWithDateDisplay/RgoTimeWithDateDisplay";
 export * from "@/components/data-display/RgoTimeWithDateDisplayInline/RgoTimeWithDateDisplayInline";

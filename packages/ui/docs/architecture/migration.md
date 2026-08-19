@@ -171,12 +171,13 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Data-display components
 
-| Current path pattern                                                                        | Target owner                                 | Disposition   | Notes                                                                       |
-| ------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------- | --------------------------------------------------------------------------- |
-| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                       | `capabilities/table/components/data-display` | Planned       | Parent-owned table foundations.                                             |
-| `components/data-display/RgoVideoStreamPlayer/**`                                           | Deferred OvenPlayer integration              | Deferred      | Misplaced integration component.                                            |
-| `components/data-display/{RgoSnack,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline}/**` | `core/components`                            | Split         | Classify as data-display or feedback; keep thin Rgo aliases where required. |
-| `components/data-display/RgoIcon/**`                                                        | `core/components/data-display/VireoIcon`     | Compatibility | Thin deprecated alias for the canonical registry-backed icon.               |
+| Current path pattern                                                               | Target owner                                 | Disposition   | Notes                                                                        |
+| ---------------------------------------------------------------------------------- | -------------------------------------------- | ------------- | ---------------------------------------------------------------------------- |
+| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`              | `capabilities/table/components/data-display` | Planned       | Parent-owned table foundations.                                              |
+| `components/data-display/RgoVideoStreamPlayer/**`                                  | Deferred OvenPlayer integration              | Deferred      | Misplaced integration component.                                             |
+| `components/data-display/{RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline}/**` | `core/components`                            | Split         | Classify the deferred date displays when their shared contract is revisited. |
+| `components/data-display/RgoSnack/**`                                              | `core/components/feedback/VireoSnack`        | Compatibility | Thin deprecated alias for the canonical notification content surface.        |
+| `components/data-display/RgoIcon/**`                                               | `core/components/data-display/VireoIcon`     | Compatibility | Thin deprecated alias for the canonical registry-backed icon.                |
 
 ### Feedback, input, layout, navigation, and utility components
 
@@ -197,6 +198,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `core/components/data-display/VireoStopwatch/**`                           | `core/components/data-display`                   | Migrated    | Live and completed elapsed-duration presentation with timer semantics.    |
 | `core/components/data-display/VireoTruncatedContent/**`                    | `core/components/data-display`                   | Migrated    | Accessible disclosure for overflowing rich content.                       |
 | `core/components/feedback/VireoStatusDot/**`                               | `core/components/feedback`                       | Migrated    | Theme-aware semantic status marker with a preserved `RgoStatusDot` alias. |
+| `core/components/feedback/VireoSnack/**`                                   | `core/components/feedback`                       | Migrated    | Semantic notification content with adornments and theme variants.         |
 | `core/components/surfaces/VireoIconContainer/**`                           | `core/components/surfaces`                       | Migrated    | Canonical icon-geometry normalization surface.                            |
 | `capabilities/overlays/components/overlays/VireoOverlayHeader/**`          | `capabilities/overlays/components/overlays`      | Migrated    | Canonical overlay header anatomy.                                         |
 | `capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/**`  | `capabilities/overlays/components/overlays`      | Migrated    | Canonical pointer resize target with an unprefixed compatibility alias.   |
@@ -289,6 +291,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/inputs/RgoButtonBase/**`                                                                                                        | Removed                                                                                                          | Removed an unused wrapper with ambiguous non-button default semantics.              |
 | 2026-08-19   | `components/utility/RgoShowIf/**`                                                                                                           | Removed                                                                                                          | Removed a conditional-rendering wrapper better expressed with ordinary JSX.         |
 | 2026-08-19   | `components/data-display/RgoSnackDetailsButton/**`                                                                                          | Removed                                                                                                          | Kept mutation error details private to their integration-bound consumer.            |
+| 2026-08-19   | `components/data-display/RgoSnack/**`                                                                                                       | `core/components/feedback/VireoSnack`                                                                            | Added the complete Vireo contract and retained `RgoSnack` as a deprecated alias.    |
 | 2026-08-19   | `components/data-display/RgoIcon/**`, `hooks/useRgoIcons/**`, `providers/RgoIconsProvider/**`, `setup/config/{RgoIconRegistry.ts,icons/**}` | `core/components/data-display/VireoIcon`, `core/hooks/useVireoIcons`, `core/providers/VireoIconRegistryProvider` | Added the complete Vireo icon contract and retained deprecated registry aliases.    |
 
 ## Automated verification

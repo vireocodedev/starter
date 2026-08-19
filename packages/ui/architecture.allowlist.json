@@ -128,37 +128,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnack/RgoSnack.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoSnack/RgoSnack.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnack/stories/RgoSnack.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnack/stories/RgoSnackWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnack/stories/RgoSnackWithIconDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnack/stories/RgoSnackWithLoaderAndIconDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnack/stories/RgoSnackWithLoaderDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
