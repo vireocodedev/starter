@@ -316,5 +316,5 @@ RgoThemeProvider
 
 - **One dialog at a time** — a single `<Dialog>` instance is rendered at the provider level. Calling `confirm()` again while a dialog is open replaces it.
 - **Default labels are translated** — cancel/confirm buttons use `useTranslationLocal()` internally, mapping to `common.cancel` and `common.confirm` keys.
-- **Uses `RgoDialogHeader`** — consistent dialog header styling with optional colored accent bar.
+- **Uses `VireoOverlayHeader`** — consistent overlay header styling with an optional colored title.
 - **Context value is a function** — the context does not expose open/close state, only the trigger function.

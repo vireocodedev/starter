@@ -1,12 +1,13 @@
 import {
   ResponsiveOverlayFrame,
+  VireoOverlayHeader,
   type ResponsiveOverlayFrameDesktopSidePanelWidth,
   type ResponsiveOverlayFrameProps,
 } from "@/capabilities/overlays/public";
 import { UnsavedChangesScope, useUnsavedChangesRequestDiscard } from "@/capabilities/unsaved-changes/public";
-import { Box, DialogActions, DialogContent, type DialogProps, type SxProps, type Theme } from "@mui/material";
-import { RgoDialogHeader } from "@/components/feedback/RgoDialogHeader/RgoDialogHeader";
+import { DialogActions, DialogContent, type DialogProps, type SxProps, type Theme } from "@mui/material";
 import { useResponsiveProps } from "@/hooks/useResponsiveProps";
+import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import React from "react";
 
 export type FormPartComponent = React.ComponentType<{
@@ -102,28 +103,32 @@ function ResponsiveFormOverlayContent({
   MobileActionsComponent,
   children,
 }: ResponsiveFormOverlayProps) {
+  const t = useTranslationLocal();
   const requestClose = useUnsavedChangesRequestDiscard(onClose, { disabled: closeDisabled });
   const responsive = useResponsiveProps<ResponsiveFormOverlayResolvedProps>({
     mobile: {
       header: (
-        <Box sx={{ flexShrink: 0 }}>
-          <RgoDialogHeader
-            title={title}
-            onClose={requestClose}
-            rgoSlotProps={{
-              root: {
-                sx: mergeMobileHeaderSx(mobileHeaderRootSx),
-              },
-            }}
-          />
-        </Box>
+        <VireoOverlayHeader
+          title={title}
+          closeLabel={t("common.close")}
+          closeDisabled={closeDisabled}
+          onClose={requestClose}
+          sx={mergeMobileHeaderSx(mobileHeaderRootSx)}
+        />
       ),
       ContentComponent: MobileContentComponent,
       ActionsComponent: MobileActionsComponent,
       fullHeight: true,
     },
     desktop: {
-      header: <RgoDialogHeader title={title} onClose={requestClose} />,
+      header: (
+        <VireoOverlayHeader
+          title={title}
+          closeLabel={t("common.close")}
+          closeDisabled={closeDisabled}
+          onClose={requestClose}
+        />
+      ),
       ContentComponent: DesktopFormContent,
       ActionsComponent: DesktopFormActions,
       fullHeight: false,

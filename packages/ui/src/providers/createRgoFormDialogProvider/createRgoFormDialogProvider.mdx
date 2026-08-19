@@ -54,7 +54,12 @@ Returns `{ Provider, Context, useFormDialog }`.
 ## Example
 
 ```tsx
-import { createRgoFormDialogProvider, RgoDialogHeader, RgoFormGroup, type RgoProvider } from "@vireocodedev/starter-ui";
+import {
+  createRgoFormDialogProvider,
+  RgoFormGroup,
+  VireoOverlayHeader,
+  type RgoProvider,
+} from "@vireocodedev/starter-ui";
 import { Dialog, DialogActions, DialogContent } from "@mui/material";
 import { useLmsForm } from "@/shared/hooks/useLmsForm";
 import { DEFAULT_USER, userSchema, type User } from "@/features/user/models/User";
@@ -78,7 +83,7 @@ const { Provider, useFormDialog } = createRgoFormDialogProvider<User, UserFormDi
     <Dialog fullScreen maxWidth={false} open={open} onClose={handleClose}>
       {config && (
         <>
-          <RgoDialogHeader title="Edit user" onClose={handleClose} />
+          <VireoOverlayHeader title="Edit user" closeLabel="Close user editor" onClose={handleClose} />
           <UserForm
             form={form}
             group={config.group}

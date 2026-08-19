@@ -1,5 +1,5 @@
+import { VireoOverlayHeader } from "@/capabilities/overlays/public";
 import { RgoJsonViewer } from "@/components/data-display/RgoJsonViewer/RgoJsonViewer";
-import { RgoDialogHeader } from "@/components/feedback/RgoDialogHeader/RgoDialogHeader";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Dialog, DialogContent } from "@mui/material";
 
@@ -21,9 +21,9 @@ export function RgoJsonViewerDialog({ open, onClose, data, maxWidth = "md" }: Rg
   const t = useTranslationLocal();
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth={maxWidth}>
-      <RgoDialogHeader title={t("common.errorDetails")} onClose={onClose} />
+      <VireoOverlayHeader title={t("common.errorDetails")} closeLabel={t("common.close")} onClose={onClose} />
       {/* MUI removes DialogContent's top padding when it follows a DialogTitle.
-          We're using RgoDialogHeader instead, so re-add symmetric top padding
+          We're using VireoOverlayHeader instead, so re-add symmetric top padding
           to match the default bottom padding (20px). */}
       <DialogContent sx={{ pt: "20px" }}>
         <RgoJsonViewer data={data} maxHeight="60vh" />

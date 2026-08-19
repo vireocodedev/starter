@@ -20,7 +20,6 @@ export * from "@/components/data-display/RgoTimeWithDateDisplayInline/RgoTimeWit
 export * from "@/components/data-display/RgoTruncatedText/RgoTruncatedText";
 export * from "@/components/data-display/RgoValueWithUnit/RgoValueWithUnit";
 export * from "@/components/DelayedRender";
-export * from "@/components/feedback/RgoDialogHeader/RgoDialogHeader";
 export * from "@/components/feedback/RgoLoader/RgoLoader";
 export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/RgoLoaderSuspense";
 export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/RgoQueryErrorBoundary";

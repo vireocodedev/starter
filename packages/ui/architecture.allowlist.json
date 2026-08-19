@@ -573,46 +573,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/RgoDialogHeader.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/RgoDialogHeader.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeader.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithChildrenDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithDifferentColorsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithOnCloseHandlerDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithReactNodeTitleDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/feedback/RgoLoader/RgoLoader.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

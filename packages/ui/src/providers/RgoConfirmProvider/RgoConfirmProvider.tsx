@@ -1,4 +1,4 @@
-import { RgoDialogHeader } from "@/components/feedback/RgoDialogHeader/RgoDialogHeader";
+import { VireoOverlayHeader } from "@/capabilities/overlays/public";
 import { type RgoProvider } from "@/providers/RgoProviders";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { type RgoMuiColor } from "@/utils/typeutils";
@@ -56,7 +56,13 @@ function RgoConfirmDialog({
 
   return (
     <Dialog open={open} onClose={loading ? undefined : onCancel} maxWidth={maxWidth}>
-      <RgoDialogHeader onClose={loading ? () => {} : onCancel} title={title} color={color} />
+      <VireoOverlayHeader
+        title={title}
+        closeLabel={t("common.close")}
+        closeDisabled={loading}
+        onClose={onCancel}
+        slotProps={color ? { title: { sx: { color: `${color}.main` } } } : undefined}
+      />
       <DialogContent>
         {typeof message === "string" ? (
           <DialogContentText sx={{ whiteSpace: "pre-line", color: "unset" }}>{htmlParse(message)}</DialogContentText>
