@@ -219,7 +219,6 @@
         "react-hook-form",
         "react-i18next",
         "react-router",
-        "react-timer-hook",
         "react-use",
         "sonner",
         "virtual:pwa-register/react",

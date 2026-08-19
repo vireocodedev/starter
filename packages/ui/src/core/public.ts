@@ -5,6 +5,11 @@ export { VireoLabelBox as RgoLabelBox } from "./components/data-display/VireoLab
 /** @deprecated Use VireoLabelBoxProps. */
 export type { VireoLabelBoxProps as RgoLabelBoxProps } from "./components/data-display/VireoLabelBox";
 export * from "./components/data-display/VireoJsonViewer";
+export * from "./components/data-display/VireoStopwatch";
+/** @deprecated Use VireoStopwatch. */
+export { VireoStopwatch as RgoStopwatch } from "./components/data-display/VireoStopwatch";
+/** @deprecated Use VireoStopwatchProps. */
+export type { VireoStopwatchProps as RgoStopwatchProps } from "./components/data-display/VireoStopwatch";
 export * from "./components/data-display/VireoTruncatedContent";
 export * from "./components/feedback/VireoStatusDot";
 /** @deprecated Use VireoStatusDot. */

@@ -95,7 +95,6 @@
     "jsoncrush": "^1.1.8",
     "ovenplayer": "^0.10.42",
     "react-error-boundary": "^5.0.0",
-    "react-timer-hook": "^3.0.8",
     "react-use": "^17.6.0"
   },
   "peerDependencies": {

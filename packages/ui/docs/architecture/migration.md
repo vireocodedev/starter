@@ -169,12 +169,12 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Data-display components
 
-| Current path pattern                                                                                                                                           | Target owner                                 | Disposition | Notes                                                                                  |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
-| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                                                                                          | `capabilities/table/components/data-display` | Planned     | Parent-owned table foundations.                                                        |
-| `components/data-display/RgoSnackDetailsButton/**`                                                                                                             | `capabilities/overlays/components/overlays`  | Planned     | Composition that opens a layered error-detail surface.                                 |
-| `components/data-display/RgoVideoStreamPlayer/**`                                                                                                              | Deferred OvenPlayer integration              | Deferred    | Misplaced integration component.                                                       |
-| `components/data-display/{RgoIcon,RgoPdfFrame,RgoSnack,RgoStopwatch,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline,RgoTruncatedText,RgoValueWithUnit}/**` | `core/components`                            | Split       | Classify as data-display, feedback, or surfaces; keep thin Rgo aliases where required. |
+| Current path pattern                                                                                                                              | Target owner                                 | Disposition | Notes                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
+| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                                                                             | `capabilities/table/components/data-display` | Planned     | Parent-owned table foundations.                                                        |
+| `components/data-display/RgoSnackDetailsButton/**`                                                                                                | `capabilities/overlays/components/overlays`  | Planned     | Composition that opens a layered error-detail surface.                                 |
+| `components/data-display/RgoVideoStreamPlayer/**`                                                                                                 | Deferred OvenPlayer integration              | Deferred    | Misplaced integration component.                                                       |
+| `components/data-display/{RgoIcon,RgoPdfFrame,RgoSnack,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline,RgoTruncatedText,RgoValueWithUnit}/**` | `core/components`                            | Split       | Classify as data-display, feedback, or surfaces; keep thin Rgo aliases where required. |
 
 ### Feedback, input, layout, navigation, and utility components
 
@@ -192,6 +192,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `core/components/behavior/VireoDelayedRender/**`                           | `core/components/behavior`                       | Migrated    | First complete core component migration slice.                            |
 | `core/components/data-display/VireoLabelBox/**`                            | `core/components/data-display`                   | Migrated    | Canonical labelled-content anatomy.                                       |
 | `core/components/data-display/VireoJsonViewer/**`                          | `core/components/data-display`                   | Migrated    | Resilient structured-data inspection and copy behavior.                   |
+| `core/components/data-display/VireoStopwatch/**`                           | `core/components/data-display`                   | Migrated    | Live and completed elapsed-duration presentation with timer semantics.    |
 | `core/components/data-display/VireoTruncatedContent/**`                    | `core/components/data-display`                   | Migrated    | Accessible disclosure for overflowing rich content.                       |
 | `core/components/feedback/VireoStatusDot/**`                               | `core/components/feedback`                       | Migrated    | Theme-aware semantic status marker with a preserved `RgoStatusDot` alias. |
 | `core/components/surfaces/VireoIconContainer/**`                           | `core/components/surfaces`                       | Migrated    | Canonical icon-geometry normalization surface.                            |
@@ -277,6 +278,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/data-display/RgoJsonViewer/**`                                                                      | `core/components/data-display/VireoJsonViewer`                                | Added the full Vireo contract and retained `RgoJsonViewer` as an adapter.        |
 | 2026-08-19   | `components/data-display/RgoStatusDot/**`                                                                       | `core/components/feedback/VireoStatusDot`                                     | Added the full Vireo contract and retained `RgoStatusDot` as a package alias.    |
 | 2026-08-19   | `components/data-display/RgoStatusText/**`                                                                      | Removed                                                                       | Removed an unused composition; consumers can combine `VireoStatusDot` with text. |
+| 2026-08-19   | `components/data-display/RgoStopwatch/**`                                                                       | `core/components/data-display/VireoStopwatch`                                 | Added the full Vireo contract and retained `RgoStopwatch` as a package alias.    |
 
 ## Automated verification
 
