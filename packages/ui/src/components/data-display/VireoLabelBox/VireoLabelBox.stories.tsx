@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Provides consistent label, helper-text, and content anatomy around form controls or grouped content. Use it when content needs Vireo's shared external-label layout rather than a control's built-in MUI label.",
+          "Provides consistent external label, helper-text, required-indicator, and content anatomy around controls or grouped content.\n\n### Why it exists\n\nComposite controls and grouped content cannot always use a control's built-in MUI label, which otherwise leads consumers to recreate spacing, required indicators, and helper-text placement. This component supplies that shared external-label contract. Prefer the underlying control's native label when it already provides the correct semantics and layout.",
       },
     },
   },

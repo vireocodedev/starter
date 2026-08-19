@@ -214,7 +214,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Proportionally scales and centers SVG geometry authored for an arbitrary viewBox within Vireo's standard 24×24 icon coordinate system. Use it inside an SVG when reusing paths whose source coordinates are not already 24×24.",
+          "Normalizes SVG geometry from an arbitrary source coordinate system into Vireo's standard 24×24 icon canvas.\n\n### Why it exists\n\nIcon geometry frequently comes from assets with different view boxes. Repeating manual transforms produces inconsistent scale and alignment, so this component centralizes proportional scaling and centering while preserving the source aspect ratio. Use it for geometry that was not already authored in a 24×24 coordinate system.",
       },
     },
   },

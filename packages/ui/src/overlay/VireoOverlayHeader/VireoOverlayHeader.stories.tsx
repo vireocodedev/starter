@@ -20,7 +20,7 @@ const meta: Meta<typeof VireoOverlayHeader> = {
     docs: {
       description: {
         component:
-          "The standard header anatomy for Vireo dialogs, drawers, bottom sheets, and side panels. Ordinary MUI-only dialogs can continue to use DialogTitle.",
+          "Provides the standard header anatomy for Vireo dialogs, drawers, bottom sheets, and side panels.\n\n### Why it exists\n\nOverlay headers repeatedly need the same title, action, close-control, sticky-layout, and accessibility relationships. Centralizing that anatomy prevents each overlay surface from developing subtly different ordering, labeling, and customization behavior. Use it for Vireo overlay surfaces; an ordinary MUI-only dialog can continue to use DialogTitle.",
       },
     },
   },

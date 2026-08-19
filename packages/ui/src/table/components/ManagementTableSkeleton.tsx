@@ -1,4 +1,4 @@
-import { DelayedRender } from "@/components/DelayedRender";
+import { VireoDelayedRender } from "@/components/utility/VireoDelayedRender";
 import { useAppPageContentLayout } from "@/hooks/useAppPageContentLayout";
 import { Box, Card, CardHeader, Skeleton, Stack } from "@mui/material";
 
@@ -12,7 +12,7 @@ const DESKTOP_TABLE_BODY_CELL_HEIGHT = 40;
 
 function DesktopManagementTableSkeleton() {
   return (
-    <DelayedRender>
+    <VireoDelayedRender>
       <Card
         sx={{
           flex: 1,
@@ -89,13 +89,13 @@ function DesktopManagementTableSkeleton() {
           ))}
         </Box>
       </Card>
-    </DelayedRender>
+    </VireoDelayedRender>
   );
 }
 
 function MobileManagementTableSkeleton() {
   return (
-    <DelayedRender>
+    <VireoDelayedRender>
       <Stack
         width="100%"
         height="100%"
@@ -175,7 +175,7 @@ function MobileManagementTableSkeleton() {
           </Stack>
         </Box>
       </Stack>
-    </DelayedRender>
+    </VireoDelayedRender>
   );
 }
 

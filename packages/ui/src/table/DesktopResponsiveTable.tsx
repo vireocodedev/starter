@@ -3,9 +3,9 @@ import {
   type ResponsiveTableProps,
   type ResponsiveTableState,
 } from "@/table/responsiveTableState";
+import { VireoTruncatedContent } from "@/components/data-display/VireoTruncatedContent";
 import {
   Box,
-  Button,
   Skeleton,
   Table,
   TableBody,
@@ -16,122 +16,6 @@ import {
   TableRow,
   TableSortLabel,
 } from "@mui/material";
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-
-const COLLAPSED_CELL_CONTENT_HEIGHT = 40;
-const useBrowserLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-
-type OverflowCheck = () => void;
-const overflowChecks = new Map<Element, OverflowCheck>();
-const pendingOverflowChecks = new Set<Element>();
-let sharedOverflowObserver: ResizeObserver | null = null;
-let overflowAnimationFrame: number | null = null;
-
-function observeCellContent(element: Element, checkOverflow: OverflowCheck) {
-  overflowChecks.set(element, checkOverflow);
-
-  if (!sharedOverflowObserver) {
-    sharedOverflowObserver = new ResizeObserver(entries => {
-      for (const entry of entries) pendingOverflowChecks.add(entry.target);
-      if (overflowAnimationFrame !== null) return;
-
-      overflowAnimationFrame = window.requestAnimationFrame(() => {
-        overflowAnimationFrame = null;
-        const elements = [...pendingOverflowChecks];
-        pendingOverflowChecks.clear();
-        for (const observedElement of elements) overflowChecks.get(observedElement)?.();
-      });
-    });
-  }
-
-  sharedOverflowObserver.observe(element);
-  return () => {
-    sharedOverflowObserver?.unobserve(element);
-    overflowChecks.delete(element);
-    pendingOverflowChecks.delete(element);
-    if (overflowChecks.size !== 0) return;
-
-    sharedOverflowObserver?.disconnect();
-    sharedOverflowObserver = null;
-    if (overflowAnimationFrame !== null) {
-      window.cancelAnimationFrame(overflowAnimationFrame);
-      overflowAnimationFrame = null;
-    }
-    pendingOverflowChecks.clear();
-  };
-}
-
-function ExpandableTableCellContent({
-  children,
-  showLessLabel,
-  showMoreLabel,
-}: {
-  children: ReactNode;
-  showLessLabel: string;
-  showMoreLabel: string;
-}) {
-  const contentId = useId();
-  const measuredContentRef = useRef<HTMLDivElement>(null);
-  const [canExpand, setCanExpand] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-
-  const checkOverflow = useCallback(() => {
-    const content = measuredContentRef.current;
-    if (!content) return;
-
-    const nextCanExpand =
-      content.scrollHeight > COLLAPSED_CELL_CONTENT_HEIGHT + 1 || content.scrollWidth > content.clientWidth + 1;
-    setCanExpand(current => (current === nextCanExpand ? current : nextCanExpand));
-    if (!nextCanExpand) setExpanded(false);
-  }, []);
-
-  useBrowserLayoutEffect(() => checkOverflow(), [children, checkOverflow]);
-  useBrowserLayoutEffect(() => {
-    const content = measuredContentRef.current;
-    if (content) return observeCellContent(content, checkOverflow);
-  }, [checkOverflow]);
-
-  return (
-    <Box sx={{ minWidth: 0, position: "relative" }}>
-      <Box
-        id={contentId}
-        sx={{
-          maxHeight: expanded ? "none" : COLLAPSED_CELL_CONTENT_HEIGHT,
-          minWidth: 0,
-          overflow: expanded ? "visible" : "hidden",
-        }}
-      >
-        <Box ref={measuredContentRef} sx={{ minWidth: 0, overflowWrap: "anywhere" }}>
-          {children}
-        </Box>
-      </Box>
-      {canExpand ? (
-        <Button
-          aria-controls={contentId}
-          aria-expanded={expanded}
-          size="small"
-          variant="text"
-          onClick={event => {
-            event.stopPropagation();
-            setExpanded(current => !current);
-          }}
-          sx={{
-            minWidth: 0,
-            p: 0,
-            fontSize: "0.75rem",
-            lineHeight: 1.5,
-            textTransform: "none",
-            ...(expanded
-              ? { display: "flex", ml: "auto", mt: 0.25 }
-              : { position: "absolute", right: 0, bottom: 0, px: 0.5, bgcolor: "surface.base" }),
-          }}
-        >
-          {expanded ? showLessLabel : showMoreLabel}
-        </Button>
-      ) : null}
-    </Box>
-  );
-}
 
 export function DesktopResponsiveTable<
   TItem,
@@ -281,9 +165,14 @@ export function DesktopResponsiveTable<
                           {column.id === resolvedActionsColumn?.id ? (
                             body
                           ) : (
-                            <ExpandableTableCellContent showLessLabel={labels.showLess} showMoreLabel={labels.showMore}>
+                            <VireoTruncatedContent
+                              collapseLabel={labels.showLess}
+                              expandLabel={labels.showMore}
+                              stopPropagation
+                              slotProps={{ content: { sx: { overflowWrap: "anywhere" } } }}
+                            >
                               {body}
-                            </ExpandableTableCellContent>
+                            </VireoTruncatedContent>
                           )}
                         </TableCell>
                       );

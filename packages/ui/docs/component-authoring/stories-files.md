@@ -45,7 +45,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: "A concise explanation of the component's purpose and appropriate use.",
+        component:
+          "A concise sentence explaining what the component does.\n\n### Why it exists\n\nExplain the recurring problem, why Vireo owns the abstraction, and its use-or-avoid boundary.",
       },
     },
   },
@@ -103,11 +104,13 @@ Every public component enables Storybook Autodocs:
 tags: ["autodocs"];
 ```
 
-Provide a concise component description that explains:
+Structure the main `parameters.docs.description.component` as:
 
-- What the abstraction represents.
-- Which recurring consumer problem it solves.
-- When it should be used instead of its underlying MUI primitive.
+1. One concise opening sentence explaining what the component does.
+2. The literal Markdown heading `### Why it exists`.
+3. A short paragraph explaining the recurring consumer problem, why Vireo owns the shared abstraction, and its important use-or-avoid boundary.
+
+The final paragraph should say when to prefer the component and, when useful, when to keep using the underlying MUI primitive, native element, or simpler helper. Keep the rationale focused on current consumer value rather than implementation history.
 
 Describe the public abstraction, not its internal styled slots or implementation history. TypeScript and component JSDoc remain the source of truth for individual prop types; do not manually reproduce the full API in prose.
 
@@ -241,7 +244,7 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - The literal title follows `Components/[Category]/VireoComponent` and its final segment matches the canonical identity.
 - `component` references the public component without a cast.
 - `tags: ["autodocs"]` is present.
-- The component description explains purpose and appropriate use.
+- The component description opens with a one-sentence summary and includes `### Why it exists` with the recurring problem, Vireo rationale, and use-or-avoid boundary.
 - A `Default` story demonstrates the simplest realistic normal usage.
 - The Default story does not restate optional defaults unnecessarily.
 - Args and inferred controls are preferred over custom render logic.
