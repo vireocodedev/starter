@@ -338,51 +338,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/RgoTruncatedText.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/RgoTruncatedText.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedText.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithCustomActionTextDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithDifferentRowLimitsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithDifferentWidthsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithIconsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithNoTruncationDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
