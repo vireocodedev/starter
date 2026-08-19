@@ -1,19 +1,23 @@
 # Vireo component generator
 
-The repository generator creates a complete root-only scaffold for a first-class Vireo React component from the canonical templates in `packages/ui/templates/react-component`.
+The repository generator creates a complete eight-file scaffold for a first-class Vireo React component from the canonical templates in `packages/ui/templates/react-component`.
 
-## Generate a component
+The React component command is architecture-aware. It derives the output path from a required owner and component category rather than accepting an arbitrary `--output` directory.
 
-Run the command from the repository root with an unprefixed PascalCase name and an existing output parent directory:
+## Generate a core component
+
+Run the command from the repository root with an unprefixed PascalCase name:
 
 ```bash
-npm run generate -- react-component Badge --output packages/ui/src/components
+npm run generate -- react-component Badge \
+  --owner core \
+  --category data-display
 ```
 
 This creates:
 
 ```text
-packages/ui/src/components/VireoBadge/
+packages/ui/src/core/components/data-display/VireoBadge/
 ├── VireoBadge.classes.ts
 ├── VireoBadge.identity.ts
 ├── VireoBadge.stories.tsx
@@ -24,18 +28,68 @@ packages/ui/src/components/VireoBadge/
 └── index.ts
 ```
 
-Do not include the `Vireo` prefix in the input. The generator rejects `VireoBadge`, `badge`, names containing separators, and destinations outside `packages/ui/src`.
+Do not include the `Vireo` prefix in the input. The generator rejects `VireoBadge`, `badge`, and names containing separators.
 
-## Storybook category
+## Owners
 
-The Storybook category defaults to the output directory's display name. For example, `data-display` becomes `Data Display` and `overlay` becomes `Overlay`.
+Use one of these owner forms:
 
-Override it when the directory name is not the desired navigation category:
+```text
+core
+capabilities/<top-level-capability>
+capabilities/<parent>/<child>
+```
+
+Examples:
+
+```bash
+npm run generate -- react-component TableHeader \
+  --owner capabilities/table \
+  --category data-display
+
+npm run generate -- react-component MobileToolbar \
+  --owner capabilities/table/management-table \
+  --category controls
+```
+
+Owner names use kebab-case. Capability nesting is limited to one child level. Reserved structural names such as `components`, `hooks`, and `types` cannot be used as child capability names.
+
+The owner directory must already exist. Core and the owning top-level capability must already have their required `public.ts`; generation does not invent architectural boundaries. The generator creates `components/<category>` atomically when it receives that category's first component.
+
+## Categories
+
+`--category` is required and accepts only:
+
+- `behavior`
+- `controls`
+- `data-display`
+- `feedback`
+- `forms`
+- `inputs`
+- `layout`
+- `navigation`
+- `overlays`
+- `surfaces`
+
+Choose ownership and category using the [source structure](../architecture/source-structure.md) and [component folder categories](../architecture/component-folder-categories.md) guides before running the command.
+
+## Storybook title
+
+The default Storybook hierarchy is derived from owner and category:
+
+```text
+Core/Data Display/VireoBadge
+Table/Data Display/VireoTableHeader
+Table/Management Table/Controls/VireoMobileToolbar
+```
+
+Override the hierarchy only when the documented navigation genuinely needs a different label:
 
 ```bash
 npm run generate -- react-component Badge \
-  --output packages/ui/src/components \
-  --set storybookCategory="Data Display"
+  --owner core \
+  --category data-display \
+  --set storybookCategory="Foundations/Status"
 ```
 
 ## Dry run
@@ -43,10 +97,13 @@ npm run generate -- react-component Badge \
 Inspect every destination without writing files:
 
 ```bash
-npm run generate -- react-component Badge --output packages/ui/src/components --dry-run
+npm run generate -- react-component Badge \
+  --owner core \
+  --category data-display \
+  --dry-run
 ```
 
-List registered template families:
+The React component template rejects `--output`. List registered template families with:
 
 ```bash
 npm run generate -- --list
@@ -54,11 +111,18 @@ npm run generate -- --list
 
 ## Safety and validation
 
-Before writing, the generator validates the template definition, declared inputs, every placeholder in file contents and destination paths, output-root containment, duplicate destinations, existing output, and rendered formatting.
+Before writing, the generator validates:
 
-All files are rendered and formatted before a staging directory is created. The completed staging directory is renamed into its final location only after every write succeeds. Existing component directories are never overwritten.
+- the owner form, depth, existence, and public boundary;
+- the approved component category;
+- the template definition and declared inputs;
+- every placeholder in contents and destination paths;
+- output-root containment and duplicate destinations;
+- existing output and rendered formatting.
 
-Run the generator tests with:
+All files are rendered and formatted before a staging directory is created. Missing category parents are created immediately before the completed staging directory is renamed into its destination. Failed writes clean up temporary and newly created empty directories. Existing component directories are never overwritten.
+
+Run generator tests with:
 
 ```bash
 npm run generate:test
@@ -66,15 +130,18 @@ npm run generate:test
 
 ## Generated scaffold boundary
 
-Name-only generation can create the complete structural contract, but it cannot infer the component's real semantics. The generated component therefore starts with a `div`-based MUI `Box` root and renders its full component name as text.
+Generation establishes structure only. The scaffold starts with a `div`-based MUI `Box` root and placeholder behavior.
 
-Before considering a generated component complete:
+Before considering it complete:
 
-- Replace the component and Storybook `TODO(component-author)` descriptions.
-- Decide whether the default root has the correct native semantics and props type.
-- Define the real public props, owner state, slots, accessibility contract, behavior, and styling.
-- Replace or extend the baseline tests and stories for those capabilities.
-- Add the component directory to the package-level public barrel when it is ready to publish.
-- Add the appropriate changeset.
+- Replace every `TODO(component-author)` implementation and Storybook description.
+- Keep the main story description's one-sentence summary and `### Why it exists` section.
+- Decide whether the public Vireo abstraction is justified.
+- Choose the correct native root semantics and inherited props.
+- Define the real props, owner state, slots, accessibility, behavior, and styling.
+- Replace or extend baseline tests and stories with capability-driven coverage.
+- Export the component from its owner `public.ts` only when ready to publish.
+- Re-export the owner boundary from `src/index.ts` when introducing the boundary.
+- Add the appropriate changeset for a published API change.
 
-The generated files are a compiling implementation scaffold, not evidence that the new abstraction is justified or finished.
+The generated files are a compiling implementation scaffold, not evidence that the abstraction is justified or finished.

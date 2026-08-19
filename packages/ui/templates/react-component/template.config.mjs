@@ -29,6 +29,28 @@ export default {
         }
       },
     },
+    owner: {
+      required: true,
+      validate(value) {
+        if (value === "core") return;
+
+        const match = value.match(/^capabilities\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?$/);
+        if (!match) {
+          return 'use "core", "capabilities/<name>", or "capabilities/<parent>/<child>" with kebab-case names.';
+        }
+        if (match[2] && STRUCTURAL_FOLDERS.has(match[2])) {
+          return `"${match[2]}" is a reserved structural folder, not a child-capability name.`;
+        }
+      },
+    },
+    category: {
+      required: true,
+      validate(value) {
+        if (!COMPONENT_CATEGORIES.has(value)) {
+          return `use an approved component category: ${[...COMPONENT_CATEGORIES].join(", ")}.`;
+        }
+      },
+    },
     storybookCategory: {
       required: false,
       validate(value) {
@@ -36,8 +58,8 @@ export default {
       },
     },
   },
-  allowedOutputRoots: ["packages/ui/src"],
-  outputDirectory: "{{componentName}}",
+  allowedOutputRoots: ["packages/ui/src/core", "packages/ui/src/capabilities"],
+  outputDirectory: "components/{{componentCategory}}/{{componentName}}",
   files: [
     { source: "files/Component.classes.ts.template", destination: "{{componentName}}.classes.ts" },
     { source: "files/Component.identity.ts.template", destination: "{{componentName}}.identity.ts" },
@@ -48,15 +70,61 @@ export default {
     { source: "files/Component.types.ts.template", destination: "{{componentName}}.types.ts" },
     { source: "files/index.ts.template", destination: "index.ts" },
   ],
+  resolveOutput(inputs) {
+    return `packages/ui/src/${inputs.owner}`;
+  },
   prepareData(inputs, context) {
     const componentName = `Vireo${inputs.name}`;
-    const inferredCategory = toDisplayName(context.outputBaseName);
+    const ownerSegments = inputs.owner.split("/");
+    const ownerDisplayName = inputs.owner === "core" ? "Core" : ownerSegments.slice(1).map(toDisplayName).join("/");
+    const inferredCategory = `${ownerDisplayName}/${toDisplayName(inputs.category)}`;
+    const publicBoundary =
+      inputs.owner === "core"
+        ? context.outputBase
+        : resolve(context.repoRoot, "packages/ui/src/capabilities", ownerSegments[1]);
+
+    if (!existsSync(resolve(publicBoundary, "public.ts"))) {
+      throw new Error(`Architectural owner "${inputs.owner}" requires ${publicBoundary}/public.ts before generation.`);
+    }
 
     return {
+      componentCategory: inputs.category,
       componentName,
       componentVariableName: `${componentName.charAt(0).toLowerCase()}${componentName.slice(1)}`,
       componentConstantName: `VIREO_${toScreamingSnakeCase(inputs.name)}`,
+      coreUtilitiesModule: inputs.owner === "core" ? "@/core/utils/muiutils" : "@/core/public",
       storybookCategory: inputs.storybookCategory ?? inferredCategory,
     };
   },
 };
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+
+const COMPONENT_CATEGORIES = new Set([
+  "behavior",
+  "controls",
+  "data-display",
+  "feedback",
+  "forms",
+  "inputs",
+  "layout",
+  "navigation",
+  "overlays",
+  "surfaces",
+]);
+
+const STRUCTURAL_FOLDERS = new Set([
+  "assets",
+  "components",
+  "constants",
+  "contexts",
+  "events",
+  "hooks",
+  "models",
+  "providers",
+  "services",
+  "state",
+  "styles",
+  "types",
+  "utils",
+]);

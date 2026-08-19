@@ -1,4 +1,4 @@
-import { access, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rename, rm, rmdir, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { format, resolveConfig } from "prettier";
 
@@ -91,6 +91,10 @@ export function validateTemplateDefinition(config) {
 
   if (typeof config.prepareData !== "function") {
     throw new Error(`Template "${config.id}" must provide prepareData(inputs, context).`);
+  }
+
+  if (config.resolveOutput !== undefined && typeof config.resolveOutput !== "function") {
+    throw new Error(`Template "${config.id}" resolveOutput must be a function when provided.`);
   }
 
   return config;
@@ -206,7 +210,24 @@ export async function createGenerationPlan({ config, output, rawInputs, repoRoot
   validateTemplateDefinition(config);
   validateRawInputs(config, rawInputs);
 
-  const outputBase = validateOutputBase(config, repoRoot, output);
+  if (output !== undefined && typeof config.resolveOutput === "function") {
+    throw new Error(`Template "${config.id}" derives its output from architectural inputs; do not use --output.`);
+  }
+
+  const frozenInputs = Object.freeze({ ...rawInputs });
+  const resolvedOutput =
+    output ??
+    (typeof config.resolveOutput === "function"
+      ? await config.resolveOutput(frozenInputs, {
+          repoRoot,
+        })
+      : undefined);
+
+  if (resolvedOutput === undefined) {
+    throw new Error(`Template "${config.id}" requires --output <directory>.`);
+  }
+
+  const outputBase = validateOutputBase(config, repoRoot, resolvedOutput);
   const outputStats = await stat(outputBase).catch(() => undefined);
   if (!outputStats?.isDirectory()) {
     throw new Error(`Output base "${relative(repoRoot, outputBase)}" must already exist and be a directory.`);
@@ -214,7 +235,7 @@ export async function createGenerationPlan({ config, output, rawInputs, repoRoot
 
   const sources = await readTemplateSources(config, templateDirectory);
   const placeholderUsage = collectPlaceholderUsage(config, sources);
-  const data = await config.prepareData(Object.freeze({ ...rawInputs }), {
+  const data = await config.prepareData(frozenInputs, {
     outputBase,
     outputBaseName: basename(outputBase),
     repoRoot,
@@ -272,6 +293,14 @@ export async function createGenerationPlan({ config, output, rawInputs, repoRoot
 
 export async function writeGenerationPlan(plan) {
   const stagingDirectory = await mkdtemp(join(plan.outputBase, ".vireo-generate-"));
+  const outputParent = dirname(plan.outputDirectory);
+  const missingParents = [];
+  let parent = outputParent;
+
+  while (parent !== plan.outputBase && !(await pathExists(parent))) {
+    missingParents.unshift(parent);
+    parent = dirname(parent);
+  }
 
   try {
     for (const file of plan.files) {
@@ -285,9 +314,13 @@ export async function writeGenerationPlan(plan) {
       await writeFile(stagingDestination, file.contents, { encoding: "utf8", flag: "wx" });
     }
 
+    await mkdir(outputParent, { recursive: true });
     await rename(stagingDirectory, plan.outputDirectory);
   } catch (error) {
     await rm(stagingDirectory, { force: true, recursive: true });
+    for (const createdParent of missingParents.reverse()) {
+      await rmdir(createdParent).catch(() => undefined);
+    }
     throw error;
   }
 

@@ -9,13 +9,15 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function printGeneralHelp() {
   console.log(`Usage:
+  npm run generate -- react-component <name> --owner <owner> --category <category> [--set key=value] [--dry-run]
   npm run generate -- <template-id> <primary-input> --output <directory> [--set key=value] [--dry-run]
   npm run generate -- --list
 
 Examples:
-  npm run generate -- react-component Badge --output packages/ui/src/components
-  npm run generate -- react-component Badge --output packages/ui/src/components --set storybookCategory="Data Display"
-  npm run generate -- react-component Badge --output packages/ui/src/components --dry-run`);
+  npm run generate -- react-component Badge --owner core --category data-display
+  npm run generate -- react-component TableHeader --owner capabilities/table --category data-display
+  npm run generate -- react-component MobileToolbar --owner capabilities/table/management-table --category controls
+  npm run generate -- react-component Badge --owner core --category data-display --dry-run`);
 }
 
 function parseArguments(args) {
@@ -36,6 +38,18 @@ function parseArguments(args) {
       if (result.output === undefined) throw new Error("--output requires a value.");
     } else if (argument.startsWith("--output=")) {
       result.output = argument.slice("--output=".length);
+    } else if (argument === "--owner") {
+      const owner = args[++index];
+      if (owner === undefined) throw new Error("--owner requires a value.");
+      addNamedValue(result.values, "owner", owner);
+    } else if (argument.startsWith("--owner=")) {
+      addNamedValue(result.values, "owner", argument.slice("--owner=".length));
+    } else if (argument === "--category") {
+      const category = args[++index];
+      if (category === undefined) throw new Error("--category requires a value.");
+      addNamedValue(result.values, "category", category);
+    } else if (argument.startsWith("--category=")) {
+      addNamedValue(result.values, "category", argument.slice("--category=".length));
     } else if (argument === "--set") {
       const assignment = args[++index];
       if (assignment === undefined) throw new Error("--set requires key=value.");
@@ -55,6 +69,11 @@ function parseArguments(args) {
   }
 
   return result;
+}
+
+function addNamedValue(values, key, value) {
+  if (key in values) throw new Error(`Input "${key}" was provided more than once.`);
+  values[key] = value;
 }
 
 function addAssignment(values, assignment) {
@@ -93,7 +112,7 @@ async function main() {
   if (args.primaryValue === undefined) {
     throw new Error(`Template "${config.id}" requires <${config.primaryInput}>.`);
   }
-  if (args.output === undefined) {
+  if (args.output === undefined && typeof config.resolveOutput !== "function") {
     throw new Error(`Template "${config.id}" requires --output <directory>.`);
   }
   if (config.primaryInput in args.values) {

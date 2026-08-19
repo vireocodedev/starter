@@ -4,13 +4,17 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "Components/{{storybookCategory}}/{{componentName}}",
+  title: "{{storybookCategory}}/{{componentName}}",
   component: {{componentName}},
   tags: ["autodocs"],
   parameters: {
     docs: {
       description: {
-        component: "TODO(component-author): Explain what {{componentName}} represents, which problem it solves, and when to use it.",
+        component: `TODO(component-author): Summarize what {{componentName}} represents.
+
+### Why it exists
+
+TODO(component-author): Explain the recurring problem, why Vireo owns the abstraction, and when to use or avoid it.`,
       },
     },
   },

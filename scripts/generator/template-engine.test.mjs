@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import {
@@ -11,8 +11,6 @@ import {
   writeGenerationPlan,
 } from "./template-engine.mjs";
 import { loadRegisteredTemplate } from "./template-registry.mjs";
-
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("extracts and strictly renders flat placeholders", () => {
   assert.deepEqual(
@@ -29,29 +27,33 @@ test("extracts and strictly renders flat placeholders", () => {
   assert.throws(() => renderStrictTemplate("{{missing}}", {}), /Missing template data "missing"/);
 });
 
-test("the registered React component template renders all eight component files", async () => {
+test("the registered React component template derives an architectural destination", async t => {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-component-generator-"));
+  t.after(() => rm(temporaryRoot, { force: true, recursive: true }));
+  await mkdir(join(temporaryRoot, "packages/ui/src/core"), { recursive: true });
+  await writeFile(join(temporaryRoot, "packages/ui/src/core/public.ts"), "export {};\n", "utf8");
+
   const { config, templateDirectory } = await loadRegisteredTemplate("react-component");
   const plan = await createGenerationPlan({
     config,
-    output: "packages/ui/src/overlay",
-    rawInputs: { name: "GeneratorExample" },
-    repoRoot,
+    rawInputs: { name: "GeneratorExample", owner: "core", category: "overlays" },
+    repoRoot: temporaryRoot,
     templateDirectory: fileURLToPath(templateDirectory),
   });
 
-  assert.equal(plan.relativeOutputDirectory, "packages/ui/src/overlay/VireoGeneratorExample");
+  assert.equal(plan.relativeOutputDirectory, "packages/ui/src/core/components/overlays/VireoGeneratorExample");
   assert.equal(plan.files.length, 8);
   assert.deepEqual(
     plan.files.map(file => file.relativeDestination),
     [
-      "packages/ui/src/overlay/VireoGeneratorExample/VireoGeneratorExample.classes.ts",
-      "packages/ui/src/overlay/VireoGeneratorExample/VireoGeneratorExample.identity.ts",
-      "packages/ui/src/overlay/VireoGeneratorExample/VireoGeneratorExample.stories.tsx",
-      "packages/ui/src/overlay/VireoGeneratorExample/VireoGeneratorExample.styled.ts",
-      "packages/ui/src/overlay/VireoGeneratorExample/VireoGeneratorExample.test.tsx",
-      "packages/ui/src/overlay/VireoGeneratorExample/VireoGeneratorExample.tsx",
-      "packages/ui/src/overlay/VireoGeneratorExample/VireoGeneratorExample.types.ts",
-      "packages/ui/src/overlay/VireoGeneratorExample/index.ts",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.classes.ts",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.identity.ts",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.stories.tsx",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.styled.ts",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.test.tsx",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.tsx",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.types.ts",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/index.ts",
     ],
   );
   assert.match(
@@ -60,21 +62,108 @@ test("the registered React component template renders all eight component files"
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
-    /title: "Components\/Overlay\/VireoGeneratorExample"/,
+    /title: "Core\/Overlays\/VireoGeneratorExample"/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("VireoGeneratorExample.tsx")).contents,
+    /from "@\/core\/utils\/muiutils"/,
+  );
+
+  await writeGenerationPlan(plan);
+  assert.equal(
+    await readFile(
+      join(
+        temporaryRoot,
+        "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.identity.ts",
+      ),
+      "utf8",
+    ).then(contents => contents.includes("VIREO_GENERATOR_EXAMPLE_NAME")),
+    true,
   );
 });
 
-test("the React component template rejects prefixed and non-PascalCase names", async () => {
+test("the React component template rejects invalid names, owners, categories, and output overrides", async t => {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-component-validation-"));
+  t.after(() => rm(temporaryRoot, { force: true, recursive: true }));
+  await mkdir(join(temporaryRoot, "packages/ui/src/core"), { recursive: true });
+  await writeFile(join(temporaryRoot, "packages/ui/src/core/public.ts"), "export {};\n", "utf8");
+
   const { config, templateDirectory } = await loadRegisteredTemplate("react-component");
   const common = {
     config,
-    output: "packages/ui/src/overlay",
-    repoRoot,
+    repoRoot: temporaryRoot,
     templateDirectory: fileURLToPath(templateDirectory),
   };
 
-  await assert.rejects(createGenerationPlan({ ...common, rawInputs: { name: "VireoBadge" } }), /omit the Vireo prefix/);
-  await assert.rejects(createGenerationPlan({ ...common, rawInputs: { name: "badge" } }), /PascalCase/);
+  await assert.rejects(
+    createGenerationPlan({
+      ...common,
+      rawInputs: { name: "VireoBadge", owner: "core", category: "data-display" },
+    }),
+    /omit the Vireo prefix/,
+  );
+  await assert.rejects(
+    createGenerationPlan({ ...common, rawInputs: { name: "badge", owner: "core", category: "data-display" } }),
+    /PascalCase/,
+  );
+  await assert.rejects(
+    createGenerationPlan({ ...common, rawInputs: { name: "Badge", owner: "table", category: "data-display" } }),
+    /Invalid input "owner"/,
+  );
+  await assert.rejects(
+    createGenerationPlan({
+      ...common,
+      rawInputs: { name: "Badge", owner: "capabilities/table/components", category: "data-display" },
+    }),
+    /reserved structural folder/,
+  );
+  await assert.rejects(
+    createGenerationPlan({ ...common, rawInputs: { name: "Badge", owner: "core", category: "utility" } }),
+    /approved component category/,
+  );
+  await assert.rejects(
+    createGenerationPlan({
+      ...common,
+      output: "packages/ui/src/core",
+      rawInputs: { name: "Badge", owner: "core", category: "data-display" },
+    }),
+    /do not use --output/,
+  );
+});
+
+test("the React component template supports one child-capability level and requires the parent public boundary", async t => {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-child-component-"));
+  t.after(() => rm(temporaryRoot, { force: true, recursive: true }));
+  await mkdir(join(temporaryRoot, "packages/ui/src/capabilities/table/responsive-table"), { recursive: true });
+
+  const { config, templateDirectory } = await loadRegisteredTemplate("react-component");
+  const common = {
+    config,
+    rawInputs: {
+      name: "ResponsiveHeader",
+      owner: "capabilities/table/responsive-table",
+      category: "data-display",
+    },
+    repoRoot: temporaryRoot,
+    templateDirectory: fileURLToPath(templateDirectory),
+  };
+
+  await assert.rejects(createGenerationPlan(common), /requires .*capabilities\/table\/public\.ts/);
+  await writeFile(join(temporaryRoot, "packages/ui/src/capabilities/table/public.ts"), "export {};\n", "utf8");
+
+  const plan = await createGenerationPlan(common);
+  assert.equal(
+    plan.relativeOutputDirectory,
+    "packages/ui/src/capabilities/table/responsive-table/components/data-display/VireoResponsiveHeader",
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("VireoResponsiveHeader.tsx")).contents,
+    /from "@\/core\/public"/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
+    /title: "Table\/Responsive Table\/Data Display\/VireoResponsiveHeader"/,
+  );
 });
 
 test("writes a validated template through a staging directory without overwriting output", async t => {
