@@ -783,47 +783,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/RgoInputPassword.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoInputPassword/RgoInputPassword.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/stories/RgoInputPassword.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithCustomizationDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithDisabledDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithErrorDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithFormInputDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithHelperTextDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
