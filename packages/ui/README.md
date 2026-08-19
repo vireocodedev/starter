@@ -27,9 +27,10 @@ Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@vireocodedev/starter-localization`, which owns the `platform` and `history`
 translation namespaces this package renders.
 
-The package ships unbundled: `dist` mirrors `src` file-for-file, so subpaths can
-be imported directly (`@vireocodedev/starter-ui/utils/apiutils`) when pulling the
-whole barrel — and its MUI graph — is not acceptable.
+The package ships unbundled: `dist` mirrors `src` file-for-file. Supported
+consumer entry points are nevertheless limited to the package root and the
+subpaths declared in `package.json`; undeclared implementation paths are not a
+compatibility contract.
 
 ## What's included
 
@@ -62,6 +63,18 @@ whole barrel — and its MUI graph — is not acceptable.
 - The app retains only composition roots that supply app-specific policy and
   routing; the reusable form, overlay, table, and unsaved-change behavior lives
   in this package.
+
+## Architecture and authoring
+
+The architecture guides describe the required destination for the ongoing
+source migration. Existing legacy paths are tracked explicitly; new and moved
+code must follow the target structure.
+
+- [Source structure](./docs/architecture/source-structure.md)
+- [Capability structure](./docs/architecture/capability-structure.md)
+- [Component folder categories](./docs/architecture/component-folder-categories.md)
+- [Migration and current-source inventory](./docs/architecture/migration.md)
+- [Vireo component authoring](./docs/component-authoring/component-files.md)
 
 ## Versioning contract
 

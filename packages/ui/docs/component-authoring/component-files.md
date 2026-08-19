@@ -2,6 +2,8 @@
 
 Every first-class public Vireo MUI component keeps its rendering and behavior in a colocated `VireoComponent.tsx` file. This module connects the component's public contracts, canonical identity, utility classes, styled slots, MUI theme integration, slot customization, refs, events, accessibility, and final JSX composition.
 
+The component's architectural owner and category are governed by the [source structure](../architecture/source-structure.md) and [component folder categories](../architecture/component-folder-categories.md) guides.
+
 [`VireoOverlayHeader.tsx`](../../src/overlay/VireoOverlayHeader/VireoOverlayHeader.tsx) is the reference implementation.
 
 ## Module shape
