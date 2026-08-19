@@ -169,12 +169,12 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Data-display components
 
-| Current path pattern                                                                                                             | Target owner                                 | Disposition | Notes                                                                                  |
-| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
-| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                                                            | `capabilities/table/components/data-display` | Planned     | Parent-owned table foundations.                                                        |
-| `components/data-display/RgoSnackDetailsButton/**`                                                                               | `capabilities/overlays/components/overlays`  | Planned     | Composition that opens a layered error-detail surface.                                 |
-| `components/data-display/RgoVideoStreamPlayer/**`                                                                                | Deferred OvenPlayer integration              | Deferred    | Misplaced integration component.                                                       |
-| `components/data-display/{RgoIcon,RgoPdfFrame,RgoSnack,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline,RgoTruncatedText}/**` | `core/components`                            | Split       | Classify as data-display, feedback, or surfaces; keep thin Rgo aliases where required. |
+| Current path pattern                                                                                                 | Target owner                                 | Disposition | Notes                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
+| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                                                | `capabilities/table/components/data-display` | Planned     | Parent-owned table foundations.                                                        |
+| `components/data-display/RgoSnackDetailsButton/**`                                                                   | `capabilities/overlays/components/overlays`  | Planned     | Composition that opens a layered error-detail surface.                                 |
+| `components/data-display/RgoVideoStreamPlayer/**`                                                                    | Deferred OvenPlayer integration              | Deferred    | Misplaced integration component.                                                       |
+| `components/data-display/{RgoIcon,RgoSnack,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline,RgoTruncatedText}/**` | `core/components`                            | Split       | Classify as data-display, feedback, or surfaces; keep thin Rgo aliases where required. |
 
 ### Feedback, input, layout, navigation, and utility components
 
@@ -280,6 +280,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/data-display/RgoStatusText/**`                                                                      | Removed                                                                       | Removed an unused composition; consumers can combine `VireoStatusDot` with text. |
 | 2026-08-19   | `components/data-display/RgoStopwatch/**`                                                                       | `core/components/data-display/VireoStopwatch`                                 | Added the full Vireo contract and retained `RgoStopwatch` as a package alias.    |
 | 2026-08-19   | `components/data-display/RgoValueWithUnit/**`                                                                   | Removed                                                                       | Removed a trivial value-and-unit composition better owned by consumers.          |
+| 2026-08-19   | `components/data-display/RgoPdfFrame/**`                                                                        | Removed                                                                       | Removed the unused browser-native PDF iframe and loader composition.             |
 
 ## Automated verification
 

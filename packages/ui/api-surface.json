@@ -317,8 +317,6 @@
         "RgoPageHeader",
         "RgoPageHeaderProps",
         "RgoPageProps",
-        "RgoPdfFrame",
-        "RgoPdfFrameProps",
         "RgoProvider",
         "RgoProviders",
         "RgoQueryClientProvider",
