@@ -78,27 +78,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoIcon/RgoIcon.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoIcon/RgoIcon.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoIcon/stories/RgoIcon.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoIcon/stories/RgoIconWithCustomStylingDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoIcon/stories/RgoIconWithDefaultPropsDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -2224,21 +2204,6 @@
     {
       "rule": "legacy-source-location",
       "path": "setup/config/hooks/useTranslationLocal.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/config/icons/RgoIconCheckCircle.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/config/icons/RgoIconXCircle.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/config/RgoIconRegistry.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
