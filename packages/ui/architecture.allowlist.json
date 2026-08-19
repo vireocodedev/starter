@@ -633,57 +633,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/RgoInputSelectMultiple.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoInputSelectMultiple/RgoInputSelectMultiple.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultiple.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithCustomizationDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithDisabledDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithErrorDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithFormInputDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithHelperTextDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithPlaceholderDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithRenderOptionDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

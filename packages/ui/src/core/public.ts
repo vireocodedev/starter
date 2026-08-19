@@ -32,6 +32,7 @@ export * from "./components/inputs/VireoToggleButtonGroup";
 export * from "./components/inputs/VireoTimeInput";
 export * from "./components/inputs/VireoSliderInput";
 export * from "./components/inputs/VireoSelectInput";
+export * from "./components/inputs/VireoSelectMultipleInput";
 export * from "./components/navigation/VireoTabs";
 /** @deprecated Use VireoSnack. */
 export { VireoSnack as RgoSnack } from "./components/feedback/VireoSnack";
