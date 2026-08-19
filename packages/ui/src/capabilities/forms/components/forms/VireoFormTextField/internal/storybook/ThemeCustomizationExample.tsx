@@ -5,15 +5,12 @@ import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 function createCustomizedTheme(outerTheme: Theme): Theme {
   return createTheme(outerTheme, {
     components: {
-      VireoForm: {
+      VireoFormTextField: {
+        defaultProps: { size: "small" },
         styleOverrides: {
-          root: {
-            borderInlineStart: "3px solid #a78bfa",
-            paddingInlineStart: 20,
-          },
-          dirty: {
-            borderInlineStartColor: "#f59e0b",
-          },
+          inputLabel: { color: "#c4b5fd" },
+          dirty: { borderInlineStart: "3px solid #f59e0b", paddingInlineStart: 12 },
+          errorVisible: { borderInlineStartColor: "#f87171" },
         },
       },
     },
@@ -22,20 +19,23 @@ function createCustomizedTheme(outerTheme: Theme): Theme {
 
 export default function ThemeCustomizationExample() {
   const form = useVireoForm({
-    defaultValues: { teamName: "Platform" },
+    defaultValues: { releaseName: "" },
     onSubmit: () => undefined,
   });
 
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
-        <form.Form>
+        <form.Form sx={{ maxWidth: 480 }}>
           <Stack spacing={2}>
-            <form.Field name="teamName">
-              {field => <field.TextField label="Team name" />}
+            <form.Field
+              name="releaseName"
+              validators={{ onChange: ({ value }) => (value.trim() ? undefined : "A release name is required.") }}
+            >
+              {field => <field.TextField errorDisplay="always" label="Release name" placeholder="August launch" />}
             </form.Field>
             <Button type="submit" variant="contained">
-              Save team
+              Create release
             </Button>
           </Stack>
         </form.Form>

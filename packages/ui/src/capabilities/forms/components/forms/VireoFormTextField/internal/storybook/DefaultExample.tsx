@@ -4,10 +4,10 @@ import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
 
 export default function DefaultExample() {
-  const [submittedEmail, setSubmittedEmail] = React.useState<string>();
+  const [savedName, setSavedName] = React.useState<string>();
   const form = useVireoForm({
-    defaultValues: { email: "" },
-    onSubmit: ({ value }) => setSubmittedEmail(value.email),
+    defaultValues: { projectName: "" },
+    onSubmit: ({ value }) => setSavedName(value.projectName),
   });
 
   return (
@@ -15,17 +15,18 @@ export default function DefaultExample() {
       <form.Form sx={{ maxWidth: 480 }}>
         <Stack spacing={2}>
           <form.Field
-            name="email"
+            name="projectName"
             validators={{
-              onSubmit: ({ value }) => (value.includes("@") ? undefined : "Enter a valid email address."),
+              onBlur: ({ value }) => (value.trim() ? undefined : "Enter a project name."),
+              onSubmit: ({ value }) => (value.trim() ? undefined : "Enter a project name."),
             }}
           >
-            {field => <field.TextField label="Email" />}
+            {field => <field.TextField label="Project name" placeholder="Northstar" />}
           </form.Field>
           <Button type="submit" variant="contained">
-            Save profile
+            Save project
           </Button>
-          {submittedEmail && <Typography>Saved {submittedEmail}</Typography>}
+          {savedName && <Typography color="success.main">Saved {savedName}</Typography>}
         </Stack>
       </form.Form>
     </VireoStorybookProvider>

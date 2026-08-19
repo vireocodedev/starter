@@ -1,5 +1,6 @@
 import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/VireoForm";
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
+import { VireoFormTextField } from "@/capabilities/forms/components/forms/VireoFormTextField/VireoFormTextField";
 import {
   vireoFieldContext,
   vireoTanStackFormContext,
@@ -14,7 +15,7 @@ import {
 import React from "react";
 
 const { useAppForm } = createFormHook({
-  fieldComponents: {},
+  fieldComponents: { TextField: VireoFormTextField },
   fieldContext: vireoFieldContext,
   formComponents: {},
   formContext: vireoTanStackFormContext,
@@ -46,7 +47,7 @@ type BaseVireoFormApi<
   TOnDynamicAsync,
   TOnServer,
   TSubmitMeta,
-  Record<string, never>,
+  { TextField: typeof VireoFormTextField },
   Record<string, never>
 >;
 
