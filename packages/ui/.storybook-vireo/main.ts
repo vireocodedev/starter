@@ -14,8 +14,16 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
+            find: /^@vireocodedev\/starter-ui\/storybook\/VireoDockedSidePanel$/,
+            replacement: resolve(__dirname, "../storybook/VireoDockedSidePanel/index.ts"),
+          },
+          {
             find: /^@vireocodedev\/starter-ui\/storybook\/VireoIconContainer$/,
             replacement: resolve(__dirname, "../storybook/VireoIconContainer/index.ts"),
+          },
+          {
+            find: /^@vireocodedev\/starter-ui\/storybook\/VireoResponsiveOverlayFrame$/,
+            replacement: resolve(__dirname, "../storybook/VireoResponsiveOverlayFrame/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/storybook$/,

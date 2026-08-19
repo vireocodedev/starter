@@ -1,4 +1,6 @@
 import { Box, CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import type React from "react";
 
 export type VireoStorybookProviderProps = {
@@ -37,10 +39,12 @@ const vireoStorybookReviewTheme = createTheme({
 export function VireoStorybookProvider({ children }: VireoStorybookProviderProps) {
   return (
     <ThemeProvider theme={vireoStorybookReviewTheme}>
-      <CssBaseline />
-      <Box width="100%" minWidth={0} color="text.primary">
-        {children}
-      </Box>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <CssBaseline />
+        <Box width="100%" minWidth={0} color="text.primary">
+          {children}
+        </Box>
+      </LocalizationProvider>
     </ThemeProvider>
   );
 }
