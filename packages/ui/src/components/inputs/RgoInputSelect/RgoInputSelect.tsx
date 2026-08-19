@@ -1,29 +1,14 @@
-import { type RgoInputProps } from "@/utils/formutils";
-import { composeSx } from "@/utils/muiutils";
-import { fixedForwardRef } from "@/utils/typeutils";
-import { Close } from "@mui/icons-material";
-import {
-  FormControl,
-  type FormControlProps,
-  FormHelperText,
-  type FormHelperTextProps,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  type InputLabelProps,
-  ListItemText,
-  type ListItemTextProps,
-  MenuItem,
-  type MenuItemProps,
-  OutlinedInput,
-  Select,
-  type SelectChangeEvent,
-  type SelectProps,
-  Typography,
+import { VireoSelectInput } from "@/core/public";
+import type { RgoInputProps } from "@/utils/formutils";
+import type {
+  FormControlProps,
+  FormHelperTextProps,
+  InputLabelProps,
+  ListItemTextProps,
+  MenuItemProps,
+  SelectProps,
 } from "@mui/material";
 import React from "react";
-import "./RgoInputSelect.css";
-
 export type RgoInputSelectSlotProps<V extends string | number> = {
   root: Omit<FormControlProps, "error" | "children">;
   inputLabel: InputLabelProps;
@@ -32,7 +17,6 @@ export type RgoInputSelectSlotProps<V extends string | number> = {
   selectItemText: Omit<ListItemTextProps, "primary" | "secondary">;
   formHelperText: Omit<FormHelperTextProps, "children">;
 };
-
 export type RgoInputSelectProps<T, V extends string | number> = RgoInputProps<V | null, RgoInputSelectSlotProps<V>> & {
   options: T[];
   renderOption: (option: T) => React.ReactNode;
@@ -40,109 +24,51 @@ export type RgoInputSelectProps<T, V extends string | number> = RgoInputProps<V 
   disableClearable?: boolean;
   placeholder?: string;
 };
-
 function RgoInputSelectImpl<T, V extends string | number>(
   {
-    value,
-    onChange,
-    options,
-    renderOption,
-    renderValue,
-    placeholder,
+    disabled,
+    disableClearable,
     error,
     helperText,
-    disableClearable = false,
+    name,
+    onBlur,
+    onChange,
+    options,
+    placeholder,
+    renderOption,
+    renderValue,
     rgoSlotProps,
-    ...controllerProps
+    value,
   }: RgoInputSelectProps<T, V>,
   ref: React.ForwardedRef<HTMLInputElement>,
 ) {
-  const rootProps = rgoSlotProps?.root ?? {};
-  const inputLabelProps = rgoSlotProps?.inputLabel ?? {};
-  const selectProps = rgoSlotProps?.select ?? {};
-  const selectItemProps = rgoSlotProps?.selectItem ?? {};
-  const selectItemTextProps = rgoSlotProps?.selectItemText ?? {};
-  const formHelperProps = rgoSlotProps?.formHelperText ?? {};
-
-  const handleChange = (event: SelectChangeEvent<V>) => {
-    const newValue = event.target.value;
-    onChange(newValue === "" ? null : (newValue as V));
-  };
-
-  const selectRenderValue = (selected: V) => {
-    if ((selected === null || selected === undefined || selected === "") && placeholder) {
-      return (
-        <Typography fontWeight={400} color="textDisabled">
-          {placeholder}
-        </Typography>
-      );
-    }
-
-    const option = options.find(option => renderValue(option) === selected);
-    return option !== null && option !== undefined ? renderOption(option) : "";
-  };
-
-  const handleClear = () => {
-    onChange(null);
-  };
-
-  const disabled = !!controllerProps.disabled;
-  const shouldDisplayClearButton =
-    !disabled && value !== null && value !== undefined && value !== "" && !disableClearable;
-
-  const endAdornment = shouldDisplayClearButton ? (
-    <InputAdornment sx={{ position: "absolute", right: 32 }} position="end">
-      <IconButton size="small" onClick={handleClear}>
-        <Close fontSize="small" />
-      </IconButton>
-    </InputAdornment>
-  ) : null;
-
+  const { children: label, ...labelProps } = rgoSlotProps?.inputLabel ?? {};
   return (
-    <FormControl
-      {...rootProps}
+    <VireoSelectInput
+      value={value}
+      onChange={onChange}
+      options={options}
+      getOptionValue={renderValue}
+      renderOption={renderOption}
+      disabled={disabled}
+      disableClearable={disableClearable}
       error={error}
-      sx={composeSx(rootProps.sx, {
-        width: "100%",
-      })}
-    >
-      <InputLabel {...inputLabelProps} />
-
-      <Select<V>
-        {...selectProps}
-        {...controllerProps}
-        displayEmpty
-        input={<OutlinedInput />}
-        inputRef={ref}
-        value={value ?? ("" as V)}
-        onChange={handleChange}
-        renderValue={selectRenderValue}
-        endAdornment={endAdornment}
-        sx={composeSx(selectProps.sx, {
-          "& .MuiInputBase-inputAdornedEnd": {
-            paddingRight: shouldDisplayClearButton ? "48px !important" : undefined,
-          },
-        })}
-      >
-        {options.map(option => {
-          const optionDisplay = renderOption(option);
-          const optionValue = renderValue(option);
-
-          return (
-            <MenuItem {...selectItemProps} key={optionValue} value={optionValue}>
-              {typeof optionDisplay === "string" ? (
-                <ListItemText {...selectItemTextProps} primary={optionDisplay} />
-              ) : (
-                optionDisplay
-              )}
-            </MenuItem>
-          );
-        })}
-      </Select>
-
-      <FormHelperText {...formHelperProps}>{helperText}</FormHelperText>
-    </FormControl>
+      helperText={helperText}
+      inputRef={ref}
+      label={label}
+      placeholder={placeholder}
+      slotProps={{
+        root: rgoSlotProps?.root,
+        label: labelProps,
+        select: { ...rgoSlotProps?.select, name, onBlur },
+        option: rgoSlotProps?.selectItem,
+        optionText: rgoSlotProps?.selectItemText,
+        helperText: rgoSlotProps?.formHelperText,
+      }}
+    />
   );
 }
-
-export const RgoInputSelect = fixedForwardRef(RgoInputSelectImpl);
+/** @deprecated Use VireoSelectInput. */
+export const RgoInputSelect = React.forwardRef(RgoInputSelectImpl) as <T, V extends string | number>(
+  props: RgoInputSelectProps<T, V> & React.RefAttributes<HTMLInputElement>,
+) => React.ReactElement;
