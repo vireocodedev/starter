@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoInputPassword, type RgoInputPasswordProps } from "@/components/inputs/RgoInputPassword/RgoInputPassword";
 import { Lock, LockOpen } from "@mui/icons-material";
 import React from "react";

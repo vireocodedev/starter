@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { type RgoDialogHeaderProps, RgoDialogHeader } from "@/components/feedback/RgoDialogHeader/RgoDialogHeader";
 import { Delete, Edit, Settings } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";

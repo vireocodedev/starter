@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
 import { RgoInputToggleButtonGroup } from "@/components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup";
 import { type ReactNode } from "react";

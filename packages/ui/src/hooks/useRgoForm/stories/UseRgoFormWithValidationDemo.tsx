@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoForm } from "@/components/inputs/RgoForm/RgoForm";
 import { RgoInputNumber } from "@/components/inputs/RgoInputNumber/RgoInputNumber";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
@@ -118,7 +118,7 @@ export function UseFormWithValidationDemo(props: Pick<UseFormProps<BasicFormData
 }
 
 export const UseFormWithValidationDemoCode = `
-import { RgoLabelBox, RgoForm, RgoInputNumber, useRgoForm, type UseFormProps } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox, RgoForm, RgoInputNumber, useRgoForm, type UseFormProps } from "@vireocodedev/starter-ui";
 import { Box, Paper, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
 

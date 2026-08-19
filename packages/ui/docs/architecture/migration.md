@@ -160,12 +160,12 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Data-display components
 
-| Current path pattern                                                                                                                                                                                                                                    | Target owner                                 | Disposition | Notes                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
-| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                                                                                                                                                                                   | `capabilities/table/components/data-display` | Planned     | Parent-owned table foundations.                                                        |
-| `components/data-display/{RgoJsonViewerDialog,RgoSnackDetailsButton}/**`                                                                                                                                                                                | `capabilities/overlays/components/overlays`  | Planned     | Compositions that open layered detail surfaces.                                        |
-| `components/data-display/RgoVideoStreamPlayer/**`                                                                                                                                                                                                       | Deferred OvenPlayer integration              | Deferred    | Misplaced integration component.                                                       |
-| `components/data-display/{RgoIcon,RgoJsonViewer,RgoLabelBox,RgoPdfFrame,RgoSnack,RgoStatusDot,RgoStatusText,RgoStopwatch,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline,RgoTruncatedText,RgoValueWithUnit,VireoLabelBox,VireoTruncatedContent}/**` | `core/components`                            | Split       | Classify as data-display, feedback, or surfaces; keep thin Rgo aliases where required. |
+| Current path pattern                                                                                                                                                                                                          | Target owner                                 | Disposition | Notes                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
+| `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                                                                                                                                                         | `capabilities/table/components/data-display` | Planned     | Parent-owned table foundations.                                                        |
+| `components/data-display/{RgoJsonViewerDialog,RgoSnackDetailsButton}/**`                                                                                                                                                      | `capabilities/overlays/components/overlays`  | Planned     | Compositions that open layered detail surfaces.                                        |
+| `components/data-display/RgoVideoStreamPlayer/**`                                                                                                                                                                             | Deferred OvenPlayer integration              | Deferred    | Misplaced integration component.                                                       |
+| `components/data-display/{RgoIcon,RgoJsonViewer,RgoPdfFrame,RgoSnack,RgoStatusDot,RgoStatusText,RgoStopwatch,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline,RgoTruncatedText,RgoValueWithUnit,VireoTruncatedContent}/**` | `core/components`                            | Split       | Classify as data-display, feedback, or surfaces; keep thin Rgo aliases where required. |
 
 ### Feedback, input, layout, navigation, and utility components
 
@@ -182,6 +182,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `components/navigation/RgoTabs/**`                               | `core/components/navigation`                     | Planned     | Generic design-system navigation primitive.                 |
 | `components/utility/RgoShowIf/**`                                | `core/components/behavior`                       | Planned     | Replace the legacy `utility` category with `behavior`.      |
 | `core/components/behavior/VireoDelayedRender/**`                 | `core/components/behavior`                       | Migrated    | First complete core component migration slice.              |
+| `core/components/data-display/VireoLabelBox/**`                  | `core/components/data-display`                   | Migrated    | Canonical labelled-content anatomy.                         |
 | `core/components/surfaces/VireoIconContainer/**`                 | `core/components/surfaces`                       | Migrated    | Canonical icon-geometry normalization surface.              |
 
 ## Hook inventory
@@ -242,6 +243,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `src/docs/**`                                                      | `docs/storybook`                              | Package-wide Storybook MDX now lives outside the production source tree.         |
 | 2026-08-19   | `components/utility/VireoDelayedRender/**`                         | `core/components/behavior/VireoDelayedRender` | Component, tests, story, exports, and Vireo authoring utilities moved together.  |
 | 2026-08-19   | `components/data-display/{RgoIconContainer,VireoIconContainer}/**` | `core/components/surfaces/VireoIconContainer` | Removed the duplicate Rgo implementation and preserved its package-root aliases. |
+| 2026-08-19   | `components/data-display/{RgoLabelBox,VireoLabelBox}/**`           | `core/components/data-display/VireoLabelBox`  | Removed deep legacy alias imports and preserved package-root aliases.            |
 
 ## Automated verification
 

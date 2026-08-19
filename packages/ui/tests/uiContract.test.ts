@@ -1,4 +1,11 @@
-import { DelayedRender, RgoIconContainer, VireoDelayedRender, VireoIconContainer } from "@/index";
+import {
+  DelayedRender,
+  RgoIconContainer,
+  RgoLabelBox,
+  VireoDelayedRender,
+  VireoIconContainer,
+  VireoLabelBox,
+} from "@/index";
 import { createCurrencyFormatter, formatCompactCurrency } from "@/utils/currencyFormatters";
 import { createMonthFormatter, createMonthYearFormatter } from "@/utils/dateFormatters";
 import { describe, expect, it } from "vitest";
@@ -11,6 +18,10 @@ describe("starter-ui package contract", () => {
 
   it("preserves the deprecated RgoIconContainer package alias", () => {
     expect(RgoIconContainer).toBe(VireoIconContainer);
+  });
+
+  it("preserves the deprecated RgoLabelBox package alias", () => {
+    expect(RgoLabelBox).toBe(VireoLabelBox);
   });
 
   it("builds a currency formatter for a locale", () => {

@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoInputCounter } from "@/components/inputs/RgoInputCounter/RgoInputCounter";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";

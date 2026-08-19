@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoForm, type RgoFormProps } from "@/components/inputs/RgoForm/RgoForm";
 import { RgoInputDate } from "@/components/inputs/RgoInputDate/RgoInputDate";
 import { RgoInputNumber } from "@/components/inputs/RgoInputNumber/RgoInputNumber";

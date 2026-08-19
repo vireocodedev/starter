@@ -133,11 +133,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoLabelBox/RgoLabelBox.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoPdfFrame/RgoPdfFrame.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -574,46 +569,6 @@
     {
       "rule": "legacy-source-location",
       "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithErrorHandlingDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/VireoLabelBox.classes.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/VireoLabelBox.identity.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/VireoLabelBox.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/VireoLabelBox.styled.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/VireoLabelBox.test.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/VireoLabelBox.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoLabelBox/VireoLabelBox.types.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

@@ -1,7 +1,7 @@
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, IconButton, InputAdornment, Typography } from "@mui/material";
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoInputText } from "@/components/inputs/RgoInputText/RgoInputText";
 import { useRgoDebounce } from "@/hooks/useRgoDebounce/useRgoDebounce";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";

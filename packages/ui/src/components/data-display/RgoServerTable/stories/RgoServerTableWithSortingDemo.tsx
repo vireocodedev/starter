@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoServerTable } from "@/components/data-display/RgoServerTable/RgoServerTable";
 import {
   defaultPagination,
@@ -38,7 +38,7 @@ export const RgoServerTableWithSortingDemo = () => {
   );
 };
 
-export const RgoServerTableWithSortingDemoCode = `import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+export const RgoServerTableWithSortingDemoCode = `import { RgoLabelBox } from "@/core/public";
 import { RgoServerTable } from "@/components/data-display/RgoServerTable/RgoServerTable";
 import {
   defaultPagination,

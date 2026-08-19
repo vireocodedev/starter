@@ -1,4 +1,3 @@
-import { RgoLabelBox as CompatibilityRgoLabelBox } from "@/index";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -8,10 +7,6 @@ import { vireoLabelBoxClasses } from "./VireoLabelBox.classes";
 import { VIREO_LABEL_BOX_NAME } from "./VireoLabelBox.identity";
 
 describe(VIREO_LABEL_BOX_NAME, () => {
-  it("keeps the deprecated package-root component alias compatible", () => {
-    expect(CompatibilityRgoLabelBox).toBe(VireoLabelBox);
-  });
-
   it("renders its content with only required props", () => {
     render(
       <VireoLabelBox>

@@ -8,7 +8,7 @@ const mobileHelperText = "Shown on customer-facing invoices";
 const accountInput = <OutlinedInput aria-label="Account name" placeholder="Acme Ltd." size="small" fullWidth />;
 
 const meta = {
-  title: "Components/Data Display/VireoLabelBox",
+  title: "Core/Data Display/VireoLabelBox",
   component: VireoLabelBox,
   tags: ["autodocs"],
   args: {

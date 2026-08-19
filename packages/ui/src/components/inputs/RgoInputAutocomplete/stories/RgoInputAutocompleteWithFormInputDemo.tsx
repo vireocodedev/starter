@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoForm } from "@/components/inputs/RgoForm/RgoForm";
 import {
   RgoInputAutocomplete,
@@ -120,7 +120,7 @@ function AutocompleteField({
   );
 }
 
-export const RgoInputAutocompleteWithFormInputDemoCode = `import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+export const RgoInputAutocompleteWithFormInputDemoCode = `import { RgoLabelBox } from "@/core/public";
 import { 
   RgoForm,
   RgoInputAutocomplete,

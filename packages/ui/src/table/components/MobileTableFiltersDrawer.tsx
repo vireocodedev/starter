@@ -1,5 +1,5 @@
 import { AppBottomDrawer } from "@/components/AppBottomDrawer";
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
 import { type RgoServerTableColumnWithSort, type SortDirection } from "@/table/types";
 import { renderDirectionIcon, renderHeader } from "@/table/utils/mobileTable.utils";

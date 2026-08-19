@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/utils/muiutils";
+import { type StyledSlotComponent, type StyledSlotProps } from "@/core/utils/muiutils";
 import { Box, type BoxProps } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { VIREO_LABEL_BOX_NAME } from "./VireoLabelBox.identity";

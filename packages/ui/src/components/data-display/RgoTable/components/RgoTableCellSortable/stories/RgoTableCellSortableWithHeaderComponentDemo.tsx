@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoTableCellSortable } from "@/components/data-display/RgoTable/components/RgoTableCellSortable/RgoTableCellSortable";
 import { Sort, SortByAlpha } from "@mui/icons-material";
 import { Box, Table, TableHead, TableRow, Typography } from "@mui/material";

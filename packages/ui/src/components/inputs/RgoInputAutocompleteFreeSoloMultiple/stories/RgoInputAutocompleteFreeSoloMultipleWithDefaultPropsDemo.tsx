@@ -1,4 +1,4 @@
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import { RgoInputAutocompleteFreeSoloMultiple } from "@/components/inputs/RgoInputAutocompleteFreeSoloMultiple/RgoInputAutocompleteFreeSoloMultiple";
 import { Stack, Typography } from "@mui/material";
 import React from "react";

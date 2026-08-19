@@ -30,7 +30,7 @@ import {
   Typography,
 } from "@mui/material";
 import { AppBottomDrawer } from "@/components/AppBottomDrawer";
-import { RgoLabelBox } from "@/components/data-display/RgoLabelBox/RgoLabelBox";
+import { RgoLabelBox } from "@/core/public";
 import React, { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 export function MobileResponsiveTable<

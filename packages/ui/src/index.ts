@@ -6,12 +6,7 @@ export * from "@/components/data-display/RgoClientTable/RgoClientTable";
 export * from "@/components/data-display/RgoIcon/RgoIcon";
 export * from "@/components/data-display/RgoJsonViewer/RgoJsonViewer";
 export * from "@/components/data-display/RgoJsonViewerDialog/RgoJsonViewerDialog";
-export * from "@/components/data-display/VireoLabelBox";
 export * from "@/components/data-display/VireoTruncatedContent";
-/** @deprecated Use VireoLabelBox. */
-export { VireoLabelBox as RgoLabelBox } from "@/components/data-display/VireoLabelBox";
-/** @deprecated Use VireoLabelBoxProps. */
-export type { VireoLabelBoxProps as RgoLabelBoxProps } from "@/components/data-display/VireoLabelBox";
 export * from "@/components/data-display/RgoPdfFrame/RgoPdfFrame";
 export * from "@/components/data-display/RgoServerTable/RgoServerTable";
 export * from "@/components/data-display/RgoSnack/RgoSnack";
