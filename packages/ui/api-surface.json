@@ -183,8 +183,6 @@
         "RgoDialogHeaderSlotProps",
         "RgoDraggableId",
         "RgoDraggableIdRegistry",
-        "RgoDrawer",
-        "RgoDrawerProps",
         "RgoDropZone",
         "RgoDropZoneContext",
         "RgoDropZoneDropProposal",

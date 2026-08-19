@@ -4,10 +4,6 @@ import {
   RgoPageBodyWithDefaultPropsDemoCode,
 } from "@/components/layout/RgoPageBody/stories/RgoPageBodyWithDefaultPropsDemo";
 import {
-  RgoPageBodyWithDrawerDemo,
-  RgoPageBodyWithDrawerDemoCode,
-} from "@/components/layout/RgoPageBody/stories/RgoPageBodyWithDrawerDemo";
-import {
   RgoPageBodyWithMaxWidthDemo,
   RgoPageBodyWithMaxWidthDemoCode,
 } from "@/components/layout/RgoPageBody/stories/RgoPageBodyWithMaxWidthDemo";
@@ -22,7 +18,6 @@ The main content area of a page layout. Wraps content in a MUI Container with co
 
 - [With default props](#with-default-props)
 - [With max width](#with-max-width)
-- [With drawer](#with-drawer)
 
 ## Usage
 
@@ -100,21 +95,6 @@ export const WithMaxWidth: Story = {
       },
       source: {
         code: RgoPageBodyWithMaxWidthDemoCode,
-      },
-    },
-  },
-};
-
-export const WithDrawer: Story = {
-  name: "With drawer",
-  render: () => <RgoPageBodyWithDrawerDemo />,
-  parameters: {
-    docs: {
-      description: {
-        story: "Page body with a persistent side drawer.",
-      },
-      source: {
-        code: RgoPageBodyWithDrawerDemoCode,
       },
     },
   },

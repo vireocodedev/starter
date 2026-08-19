@@ -613,36 +613,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDrawer/RgoDrawer.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDrawer/RgoDrawer.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDrawer/stories/RgoDrawer.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDrawer/stories/RgoDrawerWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDrawer/stories/RgoDrawerWithLeftAnchorDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoDrawer/stories/RgoDrawerWithTemporaryDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/feedback/RgoLoader/RgoLoader.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -1704,11 +1674,6 @@
     {
       "rule": "legacy-source-location",
       "path": "components/layout/RgoPageBody/stories/RgoPageBodyWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageBody/stories/RgoPageBodyWithDrawerDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

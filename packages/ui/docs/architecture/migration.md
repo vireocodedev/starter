@@ -180,7 +180,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 | Current path pattern                                                       | Target owner                                     | Disposition | Notes                                                                   |
 | -------------------------------------------------------------------------- | ------------------------------------------------ | ----------- | ----------------------------------------------------------------------- |
-| `components/feedback/{RgoDialogHeader,RgoDrawer}/**`                       | `capabilities/overlays/components/overlays`      | Planned     | Legacy category is incorrect.                                           |
+| `components/feedback/RgoDialogHeader/**`                                   | `capabilities/overlays/components/overlays`      | Planned     | Legacy category is incorrect.                                           |
 | `components/feedback/{RgoLoader,RgoQueryErrorLoaderSuspense}/**`           | `core/components/feedback`                       | Planned     | Generic loading, suspense, and error-boundary presentation.             |
 | `components/inputs/RgoForm/**`                                             | `capabilities/forms/components/forms`            | Planned     | Form workflow component.                                                |
 | `components/inputs/{RgoButtonBase,RgoIconButton}/**`                       | `core/components/controls`                       | Planned     | General action controls.                                                |
@@ -270,6 +270,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `overlay/DockedSidePanel.tsx`                                                                                   | `capabilities/overlays/components/overlays/VireoDockedSidePanel`              | Added the full Vireo contract and retained the former name as an adapter.        |
 | 2026-08-19   | `components/AppBottomDrawer.tsx`                                                                                | `capabilities/overlays/components/overlays/VireoBottomDrawer`                 | Added the full Vireo contract and retained the former name as an adapter.        |
 | 2026-08-19   | `overlay/ResponsiveOverlayFrame.tsx`                                                                            | `capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame`       | Added the full Vireo contract and retained the former name as an adapter.        |
+| 2026-08-19   | `components/feedback/RgoDrawer/**`                                                                              | Removed                                                                       | Removed unused legacy drawer; supported behavior lives in overlay primitives.    |
 
 ## Automated verification
 
