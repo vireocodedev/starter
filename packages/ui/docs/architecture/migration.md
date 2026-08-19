@@ -172,7 +172,6 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | Current path pattern                                                                                | Target owner                                 | Disposition | Notes                                                                                  |
 | --------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
 | `components/data-display/{RgoClientTable,RgoServerTable,RgoTable}/**`                               | `capabilities/table/components/data-display` | Planned     | Parent-owned table foundations.                                                        |
-| `components/data-display/RgoSnackDetailsButton/**`                                                  | `capabilities/overlays/components/overlays`  | Planned     | Composition that opens a layered error-detail surface.                                 |
 | `components/data-display/RgoVideoStreamPlayer/**`                                                   | Deferred OvenPlayer integration              | Deferred    | Misplaced integration component.                                                       |
 | `components/data-display/{RgoIcon,RgoSnack,RgoTimeWithDateDisplay,RgoTimeWithDateDisplayInline}/**` | `core/components`                            | Split       | Classify as data-display, feedback, or surfaces; keep thin Rgo aliases where required. |
 
@@ -285,6 +284,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/AppCardContent.tsx`                                                                                 | Removed                                                                       | Removed an unused application-styled wrapper around MUI `CardContent`.              |
 | 2026-08-19   | `components/inputs/RgoButtonBase/**`                                                                            | Removed                                                                       | Removed an unused wrapper with ambiguous non-button default semantics.              |
 | 2026-08-19   | `components/utility/RgoShowIf/**`                                                                               | Removed                                                                       | Removed a conditional-rendering wrapper better expressed with ordinary JSX.         |
+| 2026-08-19   | `components/data-display/RgoSnackDetailsButton/**`                                                              | Removed                                                                       | Kept mutation error details private to their integration-bound consumer.            |
 
 ## Automated verification
 

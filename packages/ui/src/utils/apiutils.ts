@@ -101,7 +101,7 @@ export type RgoMutationData<TMutationFn extends (...args: any) => any> = Awaited
 
 /**
  * Best-effort serialization of an unknown error into a plain object
- * suitable for {@link RgoSnackDetailsButton}. Native `Error` instances lose
+ * suitable for structured error-detail presentation. Native `Error` instances lose
  * their `name`/`message`/`stack` under `JSON.stringify`, so they are
  * unwrapped explicitly. Axios-style errors expose their HTTP context via
  * `response`, which is forwarded when present.

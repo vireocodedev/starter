@@ -327,8 +327,6 @@
         "RgoServerTableMobileProps",
         "RgoServerTableProps",
         "RgoSnack",
-        "RgoSnackDetailsButton",
-        "RgoSnackDetailsButtonProps",
         "RgoSnackProps",
         "RgoSnackVariant",
         "RgoSseStatus",

@@ -183,11 +183,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnackDetailsButton/RgoSnackDetailsButton.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoTable/components/RgoTableCellSortable/RgoTableCellSortable.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
