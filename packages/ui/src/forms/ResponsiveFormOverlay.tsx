@@ -1,5 +1,5 @@
-import { ResponsiveOverlayFrame } from "@/overlay/ResponsiveOverlayFrame";
 import {
+  ResponsiveOverlayFrame,
   type ResponsiveOverlayFrameDesktopSidePanelWidth,
   type ResponsiveOverlayFrameProps,
 } from "@/capabilities/overlays/public";

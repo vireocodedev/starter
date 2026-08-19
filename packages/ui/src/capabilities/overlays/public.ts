@@ -1,5 +1,7 @@
+export * from "./components/overlays/VireoBottomDrawer";
 export * from "./components/overlays/VireoDockedSidePanel";
 export * from "./components/overlays/VireoOverlayHeader";
+export * from "./components/overlays/VireoResponsiveOverlayFrame";
 export * from "./components/overlays/VireoSidePanelResizeHandle";
 export {
   PageOverlayControllerContext,
@@ -20,6 +22,7 @@ export { useRafViewportWidth } from "./hooks/useRafViewportWidth/useRafViewportW
 export { useSidePanelResize } from "./hooks/useSidePanelResize/useSidePanelResize";
 export {
   DEFAULT_DESKTOP_SIDE_PANEL_MIN_WIDTH,
+  DEFAULT_DESKTOP_SIDE_PANEL_MIN_CONTENT_WIDTH,
   DEFAULT_DESKTOP_SIDE_PANEL_VIEWPORT_INSET,
   DESKTOP_SIDE_PANEL_WIDTH_BY_MAX_WIDTH,
   DOCKED_SIDE_PANEL_TRANSITION_EVENT,
@@ -34,7 +37,6 @@ export {
 export type {
   ResponsiveOverlayFrameDesktopSidePanelWidth,
   ResponsiveOverlayFrameDesktopSurface,
-  ResponsiveOverlayFrameProps,
 } from "./types/overlay.types";
 export {
   clampSidePanelWidth,

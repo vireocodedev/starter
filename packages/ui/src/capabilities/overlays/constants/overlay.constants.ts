@@ -1,6 +1,7 @@
 import { type DialogProps } from "@mui/material";
 
 export const DEFAULT_DESKTOP_SIDE_PANEL_MIN_WIDTH = 360;
+export const DEFAULT_DESKTOP_SIDE_PANEL_MIN_CONTENT_WIDTH = 420;
 export const DEFAULT_DESKTOP_SIDE_PANEL_VIEWPORT_INSET = 48;
 export const DOCKED_SIDE_PANEL_TRANSITION_MS = 180;
 export const SIDE_PANEL_WIDTH_CSS_VAR = "--responsive-overlay-side-panel-width";

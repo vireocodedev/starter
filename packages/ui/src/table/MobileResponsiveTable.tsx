@@ -29,7 +29,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { AppBottomDrawer } from "@/components/AppBottomDrawer";
+import { AppBottomDrawer } from "@/capabilities/overlays/public";
 import { RgoLabelBox } from "@/core/public";
 import React, { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 

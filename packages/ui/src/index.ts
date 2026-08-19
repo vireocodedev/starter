@@ -1,7 +1,6 @@
 export * from "@/core/public";
 export * from "@/capabilities/overlays/public";
 export * from "@/capabilities/unsaved-changes/public";
-export * from "@/components/AppBottomDrawer";
 export * from "@/components/AppCardActions";
 export * from "@/components/AppCardContent";
 export * from "@/components/data-display/RgoClientTable/RgoClientTable";
@@ -108,7 +107,6 @@ export * from "@/layout/AppPageContentLayout.utils";
 export * from "@/layout/AppPageContentLayoutContext";
 export * from "@/layout/PageBody";
 export * from "@/layout/useMeasuredPageContentMode";
-export * from "@/overlay/ResponsiveOverlayFrame";
 export * from "@/providers/AppMobileAttributeProvider";
 export * from "@/providers/AppSnackbarProvider";
 export * from "@/providers/AppThemeColorMetaProvider";

@@ -91,14 +91,16 @@ The precedence resolves ambiguity; it does not override ownership. First choose 
 
 ## Classification examples
 
-| Component               | Owner    | Category       | Reason                                                                               |
-| ----------------------- | -------- | -------------- | ------------------------------------------------------------------------------------ |
-| `VireoDelayedRender`    | Core     | `behavior`     | It controls render timing without presenting a visual surface.                       |
-| `VireoIconContainer`    | Core     | `surfaces`     | Its primary purpose is visual containment around an icon.                            |
-| `VireoLabelBox`         | Core     | `data-display` | It presents a label/content relationship without owning value editing or form state. |
-| `VireoTruncatedContent` | Core     | `data-display` | It presents content with truncation and access to the complete value.                |
-| `VireoOverlayHeader`    | Overlays | `overlays`     | It is a structural part of layered overlay surfaces.                                 |
-| `VireoDockedSidePanel`  | Overlays | `overlays`     | It reserves workspace layout for an adjacent overlay surface.                        |
+| Component                     | Owner    | Category       | Reason                                                                               |
+| ----------------------------- | -------- | -------------- | ------------------------------------------------------------------------------------ |
+| `VireoDelayedRender`          | Core     | `behavior`     | It controls render timing without presenting a visual surface.                       |
+| `VireoIconContainer`          | Core     | `surfaces`     | Its primary purpose is visual containment around an icon.                            |
+| `VireoLabelBox`               | Core     | `data-display` | It presents a label/content relationship without owning value editing or form state. |
+| `VireoTruncatedContent`       | Core     | `data-display` | It presents content with truncation and access to the complete value.                |
+| `VireoOverlayHeader`          | Overlays | `overlays`     | It is a structural part of layered overlay surfaces.                                 |
+| `VireoDockedSidePanel`        | Overlays | `overlays`     | It reserves workspace layout for an adjacent overlay surface.                        |
+| `VireoBottomDrawer`           | Overlays | `overlays`     | It presents a swipeable mobile bottom-sheet surface.                                 |
+| `VireoResponsiveOverlayFrame` | Overlays | `overlays`     | It coordinates one content flow across responsive overlay surfaces.                  |
 
 Further precedence examples:
 

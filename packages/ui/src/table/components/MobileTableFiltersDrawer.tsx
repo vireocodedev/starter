@@ -1,4 +1,4 @@
-import { AppBottomDrawer } from "@/components/AppBottomDrawer";
+import { AppBottomDrawer } from "@/capabilities/overlays/public";
 import { RgoLabelBox } from "@/core/public";
 import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
 import { type RgoServerTableColumnWithSort, type SortDirection } from "@/table/types";
