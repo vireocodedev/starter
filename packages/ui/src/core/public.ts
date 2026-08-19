@@ -25,6 +25,7 @@ export * from "./components/inputs/VireoNumberInput";
 export * from "./components/inputs/VireoPasswordInput";
 export * from "./components/inputs/VireoCounterInput";
 export * from "./components/inputs/VireoDateInput";
+export * from "./components/inputs/VireoDateTimeInput";
 export * from "./components/inputs/VireoSwitchInput";
 export * from "./components/inputs/VireoToggleButtonGroup";
 export * from "./components/inputs/VireoSliderInput";
