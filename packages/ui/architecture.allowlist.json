@@ -2413,22 +2413,12 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "overlay/PageOverlayControllerContext.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "overlay/ResponsiveOverlayFrame.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
       "rule": "legacy-source-location",
       "path": "overlay/SidePanelResizeHandle.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/useGuardedOverlayModeSwitch.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -2734,11 +2724,6 @@
     {
       "rule": "legacy-source-location",
       "path": "table/utils/mobileTable.utils.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "unsaved-changes/UnsavedChangesContext.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

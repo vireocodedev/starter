@@ -1,4 +1,8 @@
-import { useUnsavedChanges, useUnsavedChangesScopeId, type UnsavedChangesScopeId } from "./UnsavedChangesContext";
+import {
+  useUnsavedChanges,
+  useUnsavedChangesScopeId,
+  type UnsavedChangesScopeId,
+} from "@/capabilities/unsaved-changes/public";
 import React from "react";
 
 export type UseUnsavedChangesRequestDiscardOptions = {

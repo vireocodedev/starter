@@ -2,7 +2,7 @@ import {
   PageOverlayControllerContext,
   type PageOverlayControllerValue,
   usePageOverlayController,
-} from "./PageOverlayControllerContext";
+} from "@/capabilities/overlays/public";
 import React from "react";
 import { createPortal } from "react-dom";
 

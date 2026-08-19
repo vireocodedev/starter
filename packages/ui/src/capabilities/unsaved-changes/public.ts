@@ -1,0 +1,15 @@
+export {
+  UnsavedChangesContext,
+  UnsavedChangesScopeContext,
+  createUnsavedChangesRegistry,
+  getUnsavedChangesStatus,
+  isUnsavedChangesRegistrationInScope,
+  useUnsavedChanges,
+  useUnsavedChangesScopeId,
+  type UnsavedChangesContextValue,
+  type UnsavedChangesDiscardRequest,
+  type UnsavedChangesRegistration,
+  type UnsavedChangesRegistry,
+  type UnsavedChangesScopeId,
+  type UnsavedChangesStatus,
+} from "./contexts/UnsavedChangesContext/UnsavedChangesContext";

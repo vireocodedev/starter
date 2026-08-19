@@ -1,9 +1,9 @@
-import { useGuardedOverlayModeSwitch } from "@/overlay/useGuardedOverlayModeSwitch";
+import { useGuardedOverlayModeSwitch } from "./useGuardedOverlayModeSwitch";
 import {
   UnsavedChangesContext,
   type UnsavedChangesContextValue,
   type UnsavedChangesDiscardRequest,
-} from "@/unsaved-changes/UnsavedChangesContext";
+} from "@/capabilities/unsaved-changes/public";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";

@@ -1,4 +1,13 @@
 export * from "./components/overlays/VireoOverlayHeader";
+export {
+  PageOverlayControllerContext,
+  usePageOverlayController,
+  type PageOverlayControllerValue,
+} from "./page-overlays/contexts/PageOverlayControllerContext/PageOverlayControllerContext";
+export {
+  useGuardedOverlayModeSwitch,
+  type GuardedOverlayModeSwitch,
+} from "./page-overlays/hooks/useGuardedOverlayModeSwitch/useGuardedOverlayModeSwitch";
 export { useRafViewportWidth } from "./hooks/useRafViewportWidth/useRafViewportWidth";
 export { useSidePanelResize } from "./hooks/useSidePanelResize/useSidePanelResize";
 export {

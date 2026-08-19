@@ -1,4 +1,4 @@
-import { createUnsavedChangesRegistry } from "@/unsaved-changes/UnsavedChangesContext";
+import { createUnsavedChangesRegistry } from "./UnsavedChangesContext";
 import { describe, expect, it, vi } from "vitest";
 
 describe("createUnsavedChangesRegistry", () => {

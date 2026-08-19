@@ -2,10 +2,10 @@ import {
   PageOverlayControllerContext,
   type PageOverlayControllerValue,
   usePageOverlayController,
-} from "@/overlay/PageOverlayControllerContext";
+} from "./PageOverlayControllerContext";
 import { renderHook } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const contextValue: PageOverlayControllerValue = {
   hostElement: null,
@@ -15,8 +15,12 @@ const contextValue: PageOverlayControllerValue = {
   requestExclusive: vi.fn(),
 };
 
+afterEach(() => vi.restoreAllMocks());
+
 describe("usePageOverlayController", () => {
   it("throws outside controller provider", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
     expect(() => renderHook(() => usePageOverlayController())).toThrow(
       /must be used within PageOverlayControllerProvider/i,
     );

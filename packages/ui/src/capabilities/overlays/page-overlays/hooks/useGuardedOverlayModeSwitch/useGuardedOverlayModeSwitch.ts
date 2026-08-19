@@ -1,4 +1,4 @@
-import { useUnsavedChanges } from "@/unsaved-changes/UnsavedChangesContext";
+import { useUnsavedChanges } from "@/capabilities/unsaved-changes/public";
 import React from "react";
 
 export type GuardedOverlayModeSwitch<TPayloadByMode extends Record<string, unknown>> = <
