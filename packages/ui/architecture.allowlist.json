@@ -478,16 +478,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteFreeSolo/stories/RgoInputAutocompleteFreeSolo.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoInputAutocompleteFreeSolo/stories/RgoInputAutocompleteFreeSoloWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoInputAutocompleteFreeSoloMultiple/RgoInputAutocompleteFreeSoloMultiple.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

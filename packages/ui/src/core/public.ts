@@ -29,6 +29,7 @@ export * from "./components/inputs/VireoAutocompleteMultiple";
 export * from "./components/inputs/VireoDateInput";
 export * from "./components/inputs/VireoDateTimeInput";
 export * from "./components/inputs/VireoDurationInput";
+export * from "./components/inputs/VireoFreeSoloAutocomplete";
 export * from "./components/inputs/VireoSwitchInput";
 export * from "./components/inputs/VireoToggleButtonGroup";
 export * from "./components/inputs/VireoTimeInput";
