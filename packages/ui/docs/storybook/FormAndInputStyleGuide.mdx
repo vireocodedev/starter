@@ -48,7 +48,7 @@ The RGO Front-UI form system is built on top of **React Hook Form** and **Zod va
 - **Mutation Integration**: Seamless React Query `useMutation` integration for form submission
 - **Standardized Props**: Consistent `RgoFormBaseProps` interface across all form components
 - **Label and Helper Text**: Rich labeling system with `RgoLabelBox` supporting helper text and actions
-- **Form Grouping**: Logical field organization with `RgoFormSection` and `RgoFormSectionGrid`
+- **Form Grouping**: Logical field organization with `VireoFormSection` and direct MUI `Grid2` composition
 - **Empty State Handling**: Built-in empty state displays for array fields with custom messaging
 - **Error Boundaries**: Array-level and field-level error message display with proper styling
 
@@ -268,8 +268,8 @@ export function DemoForm({
       <ContentComponent>
         {/* ⭐ If needed, use RgoFormSection to group related fields */}
         <RgoFormSection>
-          {/* ⭐ Use RgoFormSectionGrid for responsive layouts */}
-          <RgoFormSectionGrid>
+          {/* ⭐ Use Grid2 directly for responsive layouts */}
+          <Grid container spacing={2}>
             <Grid size={12}>
               {/* Render input at first row with full width */}
             </Grid>
@@ -279,7 +279,7 @@ export function DemoForm({
             <Grid size={6}>
               {/* Render input at second row with half width on the right */}
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </ContentComponent>
 
@@ -299,7 +299,6 @@ Use `RgoLabelBox` to wrap each input field, and `Controller` from React Hook For
 import {
   RgoForm,
   RgoFormSection,
-  RgoFormSectionGrid,
   RgoLabelBox,
   RgoInputText,
   RgoInputNumber,
@@ -337,7 +336,7 @@ export function DemoForm({
     <RgoForm form={form} onSubmit={mutate}>
       <ContentComponent>
         <RgoFormSection label="Personal information">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12}>
 
               {/* ⭐ Use RgoLabelBox for all form fields */}
@@ -399,7 +398,7 @@ export function DemoForm({
               </RgoLabelBox>
 
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </ContentComponent>
 
@@ -419,7 +418,6 @@ Use React Hook Form's `useFieldArray` to handle dynamic arrays of data.
 import {
   RgoForm,
   RgoFormSection,
-  RgoFormSectionGrid,
   RgoLabelBox,
   RgoInputText,
   type RgoFormBaseProps,
@@ -467,7 +465,7 @@ export function DemoForm({
         </RgoFormSection>
 
         <RgoFormSection label="Hobbies">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
 
             {/* ⭐ Render each hobby field dynamically */}
             {fields.map(({ id }, index) => (
@@ -530,7 +528,7 @@ export function DemoForm({
               </Grid>
             )}
 
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </ContentComponent>
 

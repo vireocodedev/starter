@@ -7,7 +7,6 @@ import { RgoInputSwitch } from "@/components/inputs/RgoInputSwitch/RgoInputSwitc
 import { RgoInputText } from "@/components/inputs/RgoInputText/RgoInputText";
 import { RgoInputToggleButtonGroup } from "@/components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { RgoFormSectionGrid } from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Alert, Button, Grid2 as Grid, Stack, Typography } from "@mui/material";
@@ -99,7 +98,7 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
 
       <RgoForm {...props} form={form} onSubmit={handleSubmit}>
         <RgoFormSection label="Personal Information">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={6}>
               <RgoLabelBox label="First Name" required>
                 <Controller
@@ -153,11 +152,11 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 />
               </RgoLabelBox>
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection label="Work Information">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={6}>
               <Controller
                 name="role"
@@ -208,11 +207,11 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 )}
               />
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection label="Account Settings">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12}>
               <Controller
                 name="isActive"
@@ -244,11 +243,11 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 )}
               />
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection>
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <Button type="button" variant="outlined" onClick={handleReset} disabled={form.formState.isSubmitting}>
                 Reset Form
@@ -257,7 +256,7 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 {form.formState.isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </RgoForm>
 
@@ -323,7 +322,6 @@ import {
   RgoInputText,
   RgoInputSwitch,
   RgoFormSection,
-  RgoFormSectionGrid,
   useRgoForm,
 } from "@vireocodedev/starter-ui";
 import { Alert, Button, Grid2 as Grid, Stack, Typography } from "@mui/material";
@@ -413,7 +411,7 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
 
       <RgoForm {...props} form={form} onSubmit={handleSubmit}>
         <RgoFormSection label="Personal Information">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={6}>
               <RgoLabelBox label="First Name" required>
                 <Controller
@@ -467,11 +465,11 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 />
               </RgoLabelBox>
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection label="Work Information">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={6}>
               <Controller
                 name="role"
@@ -522,11 +520,11 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 )}
               />
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection label="Account Settings">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12}>
               <Controller
                 name="isActive"
@@ -558,11 +556,11 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 )}
               />
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection>
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <Button type="button" variant="outlined" onClick={handleReset} disabled={form.formState.isSubmitting}>
                 Reset Form
@@ -571,7 +569,7 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
                 {form.formState.isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </RgoForm>
 

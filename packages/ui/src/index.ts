@@ -33,7 +33,6 @@ export * from "@/components/inputs/RgoInputText/RgoInputText";
 export * from "@/components/inputs/RgoInputTime/RgoInputTime";
 export * from "@/components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup";
 export * from "@/components/layout/RgoFormSection/RgoFormSection";
-export * from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 export * from "@/components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasBody/RgoInfiniteCanvasBody";
 export * from "@/components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasOverlay/RgoInfiniteCanvasOverlay";
 export * from "@/components/layout/RgoInfiniteCanvas/RgoInfiniteCanvas";

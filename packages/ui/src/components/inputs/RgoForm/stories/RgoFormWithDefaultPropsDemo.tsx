@@ -2,7 +2,6 @@ import { RgoLabelBox } from "@/core/public";
 import { RgoForm, type RgoFormProps } from "@/components/inputs/RgoForm/RgoForm";
 import { RgoInputText } from "@/components/inputs/RgoInputText/RgoInputText";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { RgoFormSectionGrid } from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Button, Grid2 as Grid } from "@mui/material";
@@ -40,7 +39,7 @@ export function RgoFormWithDefaultPropsDemo(props: RgoFormWithDefaultPropsDemoPr
   return (
     <RgoForm {...props} form={form} onSubmit={handleSubmit}>
       <RgoFormSection label="Contact Information">
-        <RgoFormSectionGrid>
+        <Grid container spacing={2}>
           <Grid size={12}>
             <Controller
               name="name"
@@ -90,24 +89,24 @@ export function RgoFormWithDefaultPropsDemo(props: RgoFormWithDefaultPropsDemoPr
               )}
             />
           </Grid>
-        </RgoFormSectionGrid>
+        </Grid>
       </RgoFormSection>
 
       <RgoFormSection>
-        <RgoFormSectionGrid>
+        <Grid container spacing={2}>
           <Grid size={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button type="submit" variant="contained" disabled={form.submitDisabled}>
               Submit
             </Button>
           </Grid>
-        </RgoFormSectionGrid>
+        </Grid>
       </RgoFormSection>
     </RgoForm>
   );
 }
 
 export const RgoFormWithDefaultPropsDemoCode = `import { RgoLabelBox, RgoForm, RgoInputText, useRgoForm, type RgoFormProps } from "@vireocodedev/starter-ui";
-import { Button, Stack } from "@mui/material";
+import { Button, Grid2 as Grid, Stack } from "@mui/material";
 import React from "react";
 import { Controller } from "react-hook-form";
 import z from "zod";

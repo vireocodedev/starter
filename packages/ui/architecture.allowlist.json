@@ -938,31 +938,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSectionGrid/RgoFormSectionGrid.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSectionGrid/RgoFormSectionGrid.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSectionGrid/stories/RgoFormSectionGrid.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSectionGrid/stories/RgoFormSectionGridWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSectionGrid/stories/RgoFormSectionGridWithFormSectionDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasBody/RgoInfiniteCanvasBody.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

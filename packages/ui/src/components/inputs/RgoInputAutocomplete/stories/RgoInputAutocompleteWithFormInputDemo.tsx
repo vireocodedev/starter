@@ -5,7 +5,6 @@ import {
   type RgoInputAutocompleteProps,
 } from "@/components/inputs/RgoInputAutocomplete/RgoInputAutocomplete";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { RgoFormSectionGrid } from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Button, Card, CardActions, CardContent, CardHeader, Grid2 as Grid } from "@mui/material";
@@ -67,7 +66,7 @@ export function RgoInputAutocompleteWithFormInputDemo(props: FormProps = {}) {
         <CardHeader title="Demo form" />
         <CardContent sx={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <RgoFormSection>
-            <RgoFormSectionGrid>
+            <Grid container spacing={2}>
               <Grid size={12}>
                 <RgoLabelBox label="Food selection" required>
                   <Controller
@@ -79,7 +78,7 @@ export function RgoInputAutocompleteWithFormInputDemo(props: FormProps = {}) {
                   />
                 </RgoLabelBox>
               </Grid>
-            </RgoFormSectionGrid>
+            </Grid>
           </RgoFormSection>
         </CardContent>
         <CardActions>
@@ -126,7 +125,6 @@ import {
   RgoInputAutocomplete,
   type RgoInputAutocompleteProps,
   RgoFormSection,
-  RgoFormSectionGrid,
   useRgoForm,
 } from "@vireocodedev/starter-ui";
 import { Button, Card, CardActions, CardContent, CardHeader, Grid2 as Grid } from "@mui/material";
@@ -186,7 +184,7 @@ export function RgoInputAutocompleteWithFormInputDemo(props: FormProps = {}) {
         <CardHeader title="Demo form" />
         <CardContent sx={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <RgoFormSection>
-            <RgoFormSectionGrid>
+            <Grid container spacing={2}>
               <Grid size={12}>
                 <RgoLabelBox label="Food selection" required>
                   <Controller
@@ -198,7 +196,7 @@ export function RgoInputAutocompleteWithFormInputDemo(props: FormProps = {}) {
                   />
                 </RgoLabelBox>
               </Grid>
-            </RgoFormSectionGrid>
+            </Grid>
           </RgoFormSection>
         </CardContent>
         <CardActions>

@@ -2,7 +2,6 @@ import { RgoLabelBox } from "@/core/public";
 import { RgoForm } from "@/components/inputs/RgoForm/RgoForm";
 import { RgoInputDateTime } from "@/components/inputs/RgoInputDateTime/RgoInputDateTime";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { RgoFormSectionGrid } from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Button, Card, CardActions, CardContent, CardHeader, Grid2 as Grid } from "@mui/material";
@@ -33,7 +32,7 @@ export function RgoInputDateTimeWithFormInputDemo() {
         <CardHeader title="Demo form" />
         <CardContent sx={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <RgoFormSection>
-            <RgoFormSectionGrid>
+            <Grid container spacing={2}>
               <Grid size={12}>
                 <RgoLabelBox label="Input field" required>
                   <Controller
@@ -45,7 +44,7 @@ export function RgoInputDateTimeWithFormInputDemo() {
                   />
                 </RgoLabelBox>
               </Grid>
-            </RgoFormSectionGrid>
+            </Grid>
           </RgoFormSection>
         </CardContent>
         <CardActions>
@@ -64,7 +63,6 @@ import {
   RgoForm,
   RgoInputDateTime,
   RgoFormSection,
-  RgoFormSectionGrid,
   useRgoForm 
 } from "@vireocodedev/starter-ui";
 import { Card, CardHeader, Grid2 as Grid } from "@mui/material";
@@ -92,7 +90,7 @@ export function RgoInputDateTimeWithFormInputDemo() {
       <CardHeader title="Demo form" />
       <RgoForm onSubmit={data => alert(JSON.stringify(data, null, 2))} form={form} hideCancelButton>
         <RgoFormSection>
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12}>
               <RgoLabelBox label="Input field" required>
                 <Controller
@@ -104,7 +102,7 @@ export function RgoInputDateTimeWithFormInputDemo() {
                 />
               </RgoLabelBox>
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </RgoForm>
     </Card>

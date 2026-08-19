@@ -2,7 +2,6 @@ import { RgoLabelBox } from "@/core/public";
 import { RgoForm, type RgoFormProps } from "@/components/inputs/RgoForm/RgoForm";
 import { RgoInputText } from "@/components/inputs/RgoInputText/RgoInputText";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { RgoFormSectionGrid } from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Alert, Button, CircularProgress, Grid2 as Grid, Stack, Typography } from "@mui/material";
@@ -89,7 +88,7 @@ export function RgoFormWithAsyncSubmissionDemo(props: RgoFormWithAsyncSubmission
 
       <RgoForm {...props} form={form} onSubmit={handleSubmit}>
         <RgoFormSection label="Personal Information">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={6}>
               <Controller
                 name="firstName"
@@ -160,11 +159,11 @@ export function RgoFormWithAsyncSubmissionDemo(props: RgoFormWithAsyncSubmission
                 )}
               />
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection>
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12} sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               <Button
                 type="submit"
@@ -182,7 +181,7 @@ export function RgoFormWithAsyncSubmissionDemo(props: RgoFormWithAsyncSubmission
                 </Button>
               )}
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </RgoForm>
 
@@ -237,7 +236,7 @@ export function RgoFormWithAsyncSubmissionDemo(props: RgoFormWithAsyncSubmission
 }
 
 export const RgoFormWithAsyncSubmissionDemoCode = `import { RgoLabelBox, RgoForm, RgoInputText, useRgoForm } from "@vireocodedev/starter-ui";
-import { Alert, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { Alert, Button, CircularProgress, Grid2 as Grid, Stack, Typography } from "@mui/material";
 import React from "react";
 import { Controller } from "react-hook-form";
 import z from "zod";

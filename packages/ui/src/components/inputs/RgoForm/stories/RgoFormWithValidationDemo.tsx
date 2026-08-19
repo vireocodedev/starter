@@ -3,7 +3,6 @@ import { RgoForm, type RgoFormProps } from "@/components/inputs/RgoForm/RgoForm"
 import { RgoInputNumber } from "@/components/inputs/RgoInputNumber/RgoInputNumber";
 import { RgoInputText } from "@/components/inputs/RgoInputText/RgoInputText";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { RgoFormSectionGrid } from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Alert, Button, Grid2 as Grid, Stack, Typography } from "@mui/material";
@@ -73,7 +72,7 @@ export function RgoFormWithValidationDemo(props: RgoFormWithValidationDemoProps 
 
       <RgoForm {...props} form={form} onSubmit={handleSubmit}>
         <RgoFormSection label="Account Information">
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12}>
               <Controller
                 name="username"
@@ -149,17 +148,17 @@ export function RgoFormWithValidationDemo(props: RgoFormWithValidationDemoProps 
                 )}
               />
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
 
         <RgoFormSection>
-          <RgoFormSectionGrid>
+          <Grid container spacing={2}>
             <Grid size={12}>
               <Button type="submit" variant="contained" disabled={form.submitDisabled} fullWidth>
                 {form.formState.isSubmitting ? "Validating..." : "Create Account"}
               </Button>
             </Grid>
-          </RgoFormSectionGrid>
+          </Grid>
         </RgoFormSection>
       </RgoForm>
 
@@ -202,7 +201,7 @@ export function RgoFormWithValidationDemo(props: RgoFormWithValidationDemoProps 
 }
 
 export const RgoFormWithValidationDemoCode = `import { RgoLabelBox, RgoForm, RgoInputText, RgoInputNumber, useRgoForm } from "@vireocodedev/starter-ui";
-import { Alert, Button, Stack, Typography } from "@mui/material";
+import { Alert, Button, Grid2 as Grid, Stack, Typography } from "@mui/material";
 import React from "react";
 import { Controller } from "react-hook-form";
 import z from "zod";

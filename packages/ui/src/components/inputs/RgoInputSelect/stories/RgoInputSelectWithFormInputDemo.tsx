@@ -2,7 +2,6 @@ import { RgoLabelBox } from "@/core/public";
 import { RgoForm } from "@/components/inputs/RgoForm/RgoForm";
 import { RgoInputSelect, type RgoInputSelectProps } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
 import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { RgoFormSectionGrid } from "@/components/layout/RgoFormSectionGrid/RgoFormSectionGrid";
 import { useRgoForm } from "@/hooks/useRgoForm/useRgoForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Button, Card, CardActions, CardContent, CardHeader, Grid2 as Grid } from "@mui/material";
@@ -50,7 +49,7 @@ export function RgoInputSelectWithFormInputDemo(props: FormProps = {}) {
         <CardHeader title="Demo form" />
         <CardContent sx={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <RgoFormSection>
-            <RgoFormSectionGrid>
+            <Grid container spacing={2}>
               <Grid size={12}>
                 <RgoLabelBox label="Input field" required>
                   <Controller
@@ -70,7 +69,7 @@ export function RgoInputSelectWithFormInputDemo(props: FormProps = {}) {
                   />
                 </RgoLabelBox>
               </Grid>
-            </RgoFormSectionGrid>
+            </Grid>
           </RgoFormSection>
         </CardContent>
         <CardActions>
@@ -87,7 +86,7 @@ export function RgoInputSelectWithFormInputDemo(props: FormProps = {}) {
 }
 
 export const RgoInputSelectWithFormInputDemoCode = `
-import { RgoLabelBox, RgoForm, RgoInputSelect, RgoFormSection, RgoFormSectionGrid, type RgoInputSelectProps } from "@vireocodedev/starter-ui";
+import { RgoLabelBox, RgoForm, RgoInputSelect, RgoFormSection, type RgoInputSelectProps } from "@vireocodedev/starter-ui";
 import { useRgoForm } from "@vireocodedev/starter-ui";
 import { Button, Card, CardActions, CardContent, CardHeader, Grid2 as Grid } from "@mui/material";
 import { Controller } from "react-hook-form";
@@ -130,7 +129,7 @@ export function RgoInputSelectWithFormInputDemo(props: FormProps = {}) {
         <CardHeader title="Demo form" />
         <CardContent sx={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <RgoFormSection>
-            <RgoFormSectionGrid>
+            <Grid container spacing={2}>
               <Grid size={12}>
                 <RgoLabelBox label="Input field" required>
                   <Controller
@@ -150,7 +149,7 @@ export function RgoInputSelectWithFormInputDemo(props: FormProps = {}) {
                   />
                 </RgoLabelBox>
               </Grid>
-            </RgoFormSectionGrid>
+            </Grid>
           </RgoFormSection>
         </CardContent>
         <CardActions>
