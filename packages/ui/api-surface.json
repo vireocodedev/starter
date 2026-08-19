@@ -1118,6 +1118,52 @@
       ],
       "workerSafe": false
     },
+    "./forms": {
+      "exports": [
+        "VireoFormApi",
+        "VireoFormClassKey",
+        "VireoFormClasses",
+        "VireoFormErrorDisplay",
+        "VireoFormErrorDisplayPredicate",
+        "VireoFormErrorFormatter",
+        "VireoFormInheritedProps",
+        "VireoFormOwnProps",
+        "VireoFormOwnerState",
+        "VireoFormProps",
+        "VireoFormRootSlotPropsOverrides",
+        "VireoFormSection",
+        "VireoFormSectionClassKey",
+        "VireoFormSectionClasses",
+        "VireoFormSectionContentSlotPropsOverrides",
+        "VireoFormSectionInheritedProps",
+        "VireoFormSectionLabelSlotPropsOverrides",
+        "VireoFormSectionOwnProps",
+        "VireoFormSectionOwnerState",
+        "VireoFormSectionProps",
+        "VireoFormSectionRootSlotPropsOverrides",
+        "VireoFormSectionSlots",
+        "VireoFormSectionSlotsAndSlotProps",
+        "VireoFormSlots",
+        "VireoFormSlotsAndSlotProps",
+        "getVireoFormSectionUtilityClass",
+        "getVireoFormUtilityClass",
+        "useVireoForm",
+        "vireoFormClasses",
+        "vireoFormSectionClasses"
+      ],
+      "dependencies": [
+        "@mui/icons-material",
+        "@mui/icons-material/Close",
+        "@mui/material",
+        "@mui/material/styles",
+        "@mui/material/utils",
+        "@mui/x-date-pickers",
+        "@tanstack/react-form",
+        "dayjs",
+        "react"
+      ],
+      "workerSafe": false
+    },
     "./video": {
       "exports": [
         "RgoVideoStreamPlayer",

@@ -132,6 +132,7 @@ describe("package entry points", () => {
       ".",
       "./api",
       "./country",
+      "./forms",
       "./video",
       "./storybook",
       "./storybook/VireoIconContainer",

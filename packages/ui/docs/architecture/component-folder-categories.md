@@ -53,6 +53,12 @@ The [component-authoring guides](../component-authoring/component-files.md) are 
 
 Temporary deprecated `Rgo*` aliases may remain as thin compatibility exceptions during migration. A private component promoted to the public API must first adopt the complete Vireo contract.
 
+### Bound public components
+
+A component may be public only through a capability-owned façade when direct rendering would bypass required state or context. These bound components still receive the complete eight-file Vireo contract, local `index.ts`, utility classes, public props, theme augmentation, tests, and stories. The capability `public.ts` exports their props and classes but deliberately withholds the raw component function. Consumers obtain the component from the documented façade, such as `form.Form`, so there is one valid runtime path.
+
+This is a narrow API-shape exception, not a reduced component contract. The raw component remains available through its colocated `index.ts` for implementation code inside its owner, and it must not be deep-imported by consumers.
+
 ## Approved categories
 
 | Category       | Responsibility                                                                          | Typical examples                                                                 |

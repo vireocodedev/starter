@@ -77,6 +77,18 @@ package consumers
 
 Consumers should import from the package's supported entry point, not from internal source or distribution paths.
 
+### Capability-bound runtime exception
+
+When a component can only work correctly when bound to capability state, the capability entry point may selectively export the component's props and classes while withholding its raw runtime function. The colocated `index.ts` remains standard and continues to export the component for implementation code inside the owning capability. The capability `public.ts` is the stricter package-facing boundary:
+
+```ts
+export * from "./components/forms/VireoBoundComponent/VireoBoundComponent.classes";
+export type * from "./components/forms/VireoBoundComponent/VireoBoundComponent.types";
+export * from "./hooks/useCapabilityFacade/useCapabilityFacade";
+```
+
+The façade must expose the bound component through its supported API, such as `form.Form`. Use this exception only when rendering the raw component would bypass required context or state; ordinary Vireo components continue to be re-exported through their directory barrel.
+
 ## Export style
 
 Use extensionless relative module specifiers in source and named exports from the underlying modules. Vireo components do not use default exports.
