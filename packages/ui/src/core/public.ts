@@ -29,6 +29,7 @@ export * from "./components/inputs/VireoDateTimeInput";
 export * from "./components/inputs/VireoDurationInput";
 export * from "./components/inputs/VireoSwitchInput";
 export * from "./components/inputs/VireoToggleButtonGroup";
+export * from "./components/inputs/VireoTimeInput";
 export * from "./components/inputs/VireoSliderInput";
 export * from "./components/navigation/VireoTabs";
 /** @deprecated Use VireoSnack. */
