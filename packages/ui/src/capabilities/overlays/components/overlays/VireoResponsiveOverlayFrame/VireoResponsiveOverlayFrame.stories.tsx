@@ -1,129 +1,34 @@
-import { VireoResponsiveOverlayFrame } from "./VireoResponsiveOverlayFrame";
-import { VIREO_RESPONSIVE_OVERLAY_FRAME_NAME } from "./VireoResponsiveOverlayFrame.identity";
-import type { VireoResponsiveOverlayFrameProps } from "./VireoResponsiveOverlayFrame.types";
-import { SIDE_PANEL_WIDTH_CSS_VAR } from "@/capabilities/overlays/constants/overlay.constants";
-import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/VireoOverlayHeader";
-import { Box, Button, Chip, Divider, Stack, ThemeProvider, Typography, createTheme, type Theme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fireEvent, fn, userEvent, waitFor, within } from "storybook/test";
-import React from "react";
+import { SIDE_PANEL_WIDTH_CSS_VAR } from "@/capabilities/overlays/constants/overlay.constants";
+import ClosableExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ClosableExample";
+import closableExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ClosableExample.tsx?raw";
+import CustomizedRootSlotExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/CustomizedRootSlotExample";
+import customizedRootSlotExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/CustomizedRootSlotExample.tsx?raw";
+import DefaultExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DefaultExample.tsx?raw";
+import DockedSidePanelExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DockedSidePanelExample";
+import dockedSidePanelExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DockedSidePanelExample.tsx?raw";
+import MobileBottomSheetExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/MobileBottomSheetExample";
+import mobileBottomSheetExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/MobileBottomSheetExample.tsx?raw";
+import OverlaySidePanelExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/OverlaySidePanelExample";
+import overlaySidePanelExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/OverlaySidePanelExample.tsx?raw";
+import ResizableDockedSidePanelExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ResizableDockedSidePanelExample";
+import resizableDockedSidePanelExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ResizableDockedSidePanelExample.tsx?raw";
+import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import { VireoResponsiveOverlayFrame } from "./VireoResponsiveOverlayFrame";
 
-function Workspace({ onOpen }: { onOpen: () => void }) {
-  return (
-    <Box component="main" sx={{ flex: 1, minWidth: 0, overflow: "auto", p: 3, bgcolor: "background.default" }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Typography variant="overline" color="primary.main">
-            Operations
-          </Typography>
-          <Typography variant="h4">Customer accounts</Typography>
-        </Box>
-        <Button variant="contained" onClick={onOpen}>
-          View customer details
-        </Button>
-      </Stack>
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(140px, 1fr))", gap: 2, mt: 3 }}>
-        {[
-          ["Active", "248", "success.main"],
-          ["Review", "18", "warning.main"],
-          ["At risk", "7", "error.main"],
-        ].map(([label, value, color]) => (
-          <Box
-            key={label}
-            sx={{ p: 2, border: 1, borderColor: "divider", borderRadius: 2, bgcolor: "background.paper" }}
-          >
-            <Box sx={{ width: 28, height: 4, borderRadius: 2, bgcolor: color, mb: 1.5 }} />
-            <Typography variant="caption" color="text.secondary">
-              {label}
-            </Typography>
-            <Typography variant="h5">{value}</Typography>
-          </Box>
-        ))}
-      </Box>
-      <Box sx={{ mt: 3, border: 1, borderColor: "divider", borderRadius: 2, bgcolor: "background.paper" }}>
-        <Typography sx={{ p: 2, fontWeight: 700 }}>Recent customers</Typography>
-        <Divider />
-        {["Northstar Analytics", "Acme Studio", "Harbor Logistics", "Juniper Labs"].map((customer, index) => (
-          <Stack key={customer} direction="row" justifyContent="space-between" sx={{ px: 2, py: 1.5 }}>
-            <Typography>{customer}</Typography>
-            <Chip label={index === 2 ? "Review" : "Active"} size="small" color={index === 2 ? "warning" : "success"} />
-          </Stack>
-        ))}
-      </Box>
-    </Box>
-  );
-}
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
-function OverlayContent({ onClose }: { onClose: () => void }) {
-  return (
-    <>
-      <VireoOverlayHeader title="Customer details" closeLabel="Close customer details" onClose={onClose} />
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", p: 3 }}>
-        <Stack spacing={2.5}>
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              CUS-10482
-            </Typography>
-            <Typography variant="h5">Northstar Analytics</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
-              Enterprise analytics platform · Zagreb, Croatia
-            </Typography>
-          </Box>
-          <Divider />
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary">Account status</Typography>
-            <Chip label="Active" size="small" color="success" />
-          </Stack>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary">Annual value</Typography>
-            <Typography fontWeight={700}>$48,600</Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary">Owner</Typography>
-            <Typography fontWeight={600}>Maya Chen</Typography>
-          </Stack>
-          <Box sx={{ p: 2, borderRadius: 2, bgcolor: "action.hover" }}>
-            <Typography variant="body2">
-              This neutral fixture lets each story focus on how the same content moves between responsive overlay
-              surfaces.
-            </Typography>
-          </Box>
-        </Stack>
-      </Box>
-      <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained">Edit customer</Button>
-      </Stack>
-    </>
-  );
-}
-
-function FrameDemo(args: VireoResponsiveOverlayFrameProps) {
-  const [open, setOpen] = React.useState(args.open);
-
-  React.useEffect(() => setOpen(args.open), [args.open]);
-
-  const handleClose = React.useCallback(() => {
-    setOpen(false);
-    args.onClose();
-  }, [args]);
-
-  return (
-    <Box sx={{ display: "flex", width: "100%", minWidth: { xs: 0, md: 720 }, height: 560, overflow: "hidden" }}>
-      <Workspace onOpen={() => setOpen(true)} />
-      <VireoResponsiveOverlayFrame {...args} open={open} onClose={handleClose}>
-        <OverlayContent onClose={handleClose} />
-      </VireoResponsiveOverlayFrame>
-    </Box>
-  );
-}
-
-const meta: Meta<typeof VireoResponsiveOverlayFrame> = {
+const meta = {
   title: "Overlays/Overlays/VireoResponsiveOverlayFrame",
   component: VireoResponsiveOverlayFrame,
   tags: ["autodocs"],
+  args: { open: false, onClose: fn(), children: null },
   parameters: {
     layout: "fullscreen",
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -131,75 +36,49 @@ const meta: Meta<typeof VireoResponsiveOverlayFrame> = {
       },
     },
   },
-  args: {
-    open: false,
-    onClose: fn(),
-    onExited: fn(),
-    children: <span>Customer details</span>,
-  },
-  argTypes: {
-    onClose: { control: false },
-    onExited: { control: false },
-    children: { control: false },
-    desktopPaperSx: { control: false },
-    desktopSidePanelSx: { control: false },
-    desktopSidePanelWidth: { control: false },
-    slots: { control: false },
-    slotProps: { control: false },
-    classes: { control: false },
-  },
-  render: args => <FrameDemo {...args} />,
-};
+} satisfies Meta<typeof VireoResponsiveOverlayFrame>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
 
 export const MobileBottomSheet: Story = {
-  args: { mobileMaxHeight: "88dvh" },
-  parameters: { viewport: { defaultViewport: "mobile1" } },
+  render: () => <MobileBottomSheetExample />,
+  parameters: { ...source(mobileBottomSheetExampleSource), viewport: { defaultViewport: "mobile1" } },
 };
 
 export const OverlaySidePanel: Story = {
-  args: {
-    desktopSurface: "overlaySidePanel",
-    desktopSidePanelWidth: 440,
-  },
+  render: () => <OverlaySidePanelExample />,
+  parameters: source(overlaySidePanelExampleSource),
 };
 
 export const DockedSidePanel: Story = {
-  args: {
-    desktopSurface: "dockedSidePanel",
-    desktopSidePanelWidth: 420,
-    desktopSidePanelMinContentWidth: 360,
-  },
+  render: () => <DockedSidePanelExample />,
+  parameters: source(dockedSidePanelExampleSource),
 };
 
 export const ResizableDockedSidePanel: Story = {
-  args: {
-    allowSidePanelResize: true,
-    desktopSurface: "dockedSidePanel",
-    desktopSidePanelWidth: 420,
-    desktopSidePanelMinContentWidth: 360,
-  },
+  render: () => <ResizableDockedSidePanelExample />,
+  parameters: source(resizableDockedSidePanelExampleSource),
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole("button", { name: "View customer details" }));
     const overlayCanvas = within(canvasElement.ownerDocument.body);
     const handle = overlayCanvas.getByRole("presentation");
     const surface = overlayCanvas.getByRole("complementary");
-
     fireEvent.mouseDown(handle, { clientX: 800, detail: 1 });
     fireEvent.mouseMove(window, { clientX: 700 });
     fireEvent.mouseUp(window);
     await waitFor(() => expect(surface.parentElement?.style.getPropertyValue(SIDE_PANEL_WIDTH_CSS_VAR)).toBe("520px"));
-
     fireEvent.doubleClick(handle);
     await waitFor(() => expect(surface.parentElement?.style.getPropertyValue(SIDE_PANEL_WIDTH_CSS_VAR)).toBe("420px"));
   },
 };
 
 export const Closable: Story = {
+  args: { onClose: fn() },
+  render: ({ onClose }) => <ClosableExample onClose={onClose} />,
+  parameters: source(closableExampleSource),
   play: async ({ args, canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole("button", { name: "View customer details" }));
     await userEvent.click(
@@ -210,45 +89,11 @@ export const Closable: Story = {
 };
 
 export const CustomizedRootSlot: Story = {
-  args: {
-    desktopSurface: "dockedSidePanel",
-    desktopSidePanelWidth: 420,
-    desktopSidePanelMinContentWidth: 360,
-    slots: { root: "section" },
-    slotProps: {
-      root: ownerState => ({
-        "aria-label": "Customized responsive overlay frame",
-        "data-surface": ownerState.effectiveDesktopSurface,
-      }),
-    },
-  },
+  render: () => <CustomizedRootSlotExample />,
+  parameters: source(customizedRootSlotExampleSource),
 };
 
-function createCustomizedTheme(outerTheme: Theme): Theme {
-  return createTheme(outerTheme, {
-    palette: { primary: { main: "#a78bfa" } },
-    components: {
-      [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]: {
-        defaultProps: {
-          desktopSurface: "overlaySidePanel",
-          desktopSidePanelWidth: 460,
-          desktopSidePanelSx: {
-            borderLeftColor: "#a78bfa",
-            borderLeftWidth: 3,
-            boxShadow: "-12px 0 32px rgba(0, 0, 0, 0.38)",
-          },
-        },
-      },
-    },
-  });
-}
-
 export const ThemeCustomization: Story = {
-  decorators: [
-    Story => (
-      <ThemeProvider theme={createCustomizedTheme}>
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };

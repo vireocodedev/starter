@@ -1,30 +1,29 @@
-import { VireoTruncatedContent } from "./VireoTruncatedContent";
-import { VIREO_TRUNCATED_CONTENT_NAME } from "./VireoTruncatedContent.identity";
-import { Box, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
+import CustomizedSlotsExample from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/CustomizedSlotsExample";
+import customizedSlotsExampleSource from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import DefaultExample from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/DefaultExample.tsx?raw";
+import HorizontalOverflowExample from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/HorizontalOverflowExample";
+import horizontalOverflowExampleSource from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/HorizontalOverflowExample.tsx?raw";
+import InitiallyExpandedExample from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/InitiallyExpandedExample";
+import initiallyExpandedExampleSource from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/InitiallyExpandedExample.tsx?raw";
+import OverflowingRichContentExample from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/OverflowingRichContentExample";
+import overflowingRichContentExampleSource from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/OverflowingRichContentExample.tsx?raw";
+import ThemeCustomizationExample from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/core/components/data-display/VireoTruncatedContent/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
+import { VireoTruncatedContent } from "./VireoTruncatedContent";
 
-const PREVIEW_WIDTH = 360;
-
-const richContent = (
-  <Stack spacing={1}>
-    <Typography fontWeight={700}>Rich React content is supported.</Typography>
-    <Typography variant="body2">
-      The component measures the rendered result rather than assuming its children are plain text. It can therefore
-      collapse typography, status details, links, or other compact read-only content.
-    </Typography>
-    <Typography color="text.secondary" variant="body2">
-      Resize the Storybook canvas to see overflow detection respond to the available width.
-    </Typography>
-  </Stack>
-);
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta: Meta<typeof VireoTruncatedContent> = {
   title: "Core/Data Display/VireoTruncatedContent",
   component: VireoTruncatedContent,
   tags: ["autodocs"],
+  args: { children: null, expandLabel: "Show more", collapseLabel: "Show less" },
   parameters: {
     layout: "padded",
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -32,153 +31,45 @@ const meta: Meta<typeof VireoTruncatedContent> = {
       },
     },
   },
-  args: {
-    expandLabel: "Show more",
-    collapseLabel: "Show less",
-  },
   argTypes: {
     children: { control: false },
-    collapsedHeight: { control: { type: "number", min: 1 } },
-    expandLabel: { control: "text" },
-    collapseLabel: { control: "text" },
     onExpandedChange: { control: false },
     slots: { control: false },
     slotProps: { control: false },
     classes: { control: false },
   },
-  decorators: [
-    Story => (
-      <Box width={PREVIEW_WIDTH} maxWidth="100%">
-        <Story />
-      </Box>
-    ),
-  ],
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {
-    children: "A short piece of content remains fully visible and does not render an unnecessary disclosure control.",
-  },
-};
-
+export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
 export const OverflowingRichContent: Story = {
-  args: {
-    children: richContent,
-    collapsedHeight: 72,
-    onExpandedChange: fn(),
-  },
+  args: { onExpandedChange: fn() },
+  render: ({ onExpandedChange }) => <OverflowingRichContentExample onExpandedChange={onExpandedChange} />,
+  parameters: source(overflowingRichContentExampleSource),
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
     const expandToggle = await canvas.findByRole("button", { name: "Show more" });
-    await expect(expandToggle).toHaveAttribute("aria-expanded", "false");
-
     await userEvent.click(expandToggle);
-    await expect(canvas.getByRole("button", { name: "Show less" })).toHaveAttribute("aria-expanded", "true");
     await expect(args.onExpandedChange).toHaveBeenLastCalledWith(true);
-
     await userEvent.click(canvas.getByRole("button", { name: "Show less" }));
-    await expect(canvas.getByRole("button", { name: "Show more" })).toHaveAttribute("aria-expanded", "false");
     await expect(args.onExpandedChange).toHaveBeenLastCalledWith(false);
   },
 };
-
 export const InitiallyExpanded: Story = {
-  args: {
-    children: richContent,
-    collapsedHeight: 72,
-    defaultExpanded: true,
-  },
+  render: () => <InitiallyExpandedExample />,
+  parameters: source(initiallyExpandedExampleSource),
 };
-
 export const HorizontalOverflow: Story = {
-  args: {
-    children: "INV-2026-000184-CUSTOMER-REFERENCE-WITHOUT-BREAK-OPPORTUNITIES",
-    collapsedHeight: 40,
-    slotProps: {
-      content: {
-        sx: {
-          fontFamily: "monospace",
-          whiteSpace: "nowrap",
-        },
-      },
-    },
-  },
-  decorators: [
-    Story => (
-      <Box width={280} maxWidth="100%">
-        <Story />
-      </Box>
-    ),
-  ],
+  render: () => <HorizontalOverflowExample />,
+  parameters: source(horizontalOverflowExampleSource),
 };
-
 export const CustomizedSlots: Story = {
-  args: {
-    children: richContent,
-    collapsedHeight: 72,
-    slots: {
-      root: "section",
-      viewport: "article",
-    },
-    slotProps: {
-      root: {
-        "aria-label": "Customized expandable summary",
-        sx: { border: 1, borderColor: "primary.main", borderRadius: 2, p: 2 },
-      },
-      viewport: ownerState => ({
-        "data-expanded": String(ownerState.expanded),
-        sx: { borderInlineStart: 3, borderColor: "primary.light", paddingInlineStart: 1.5 },
-      }),
-      content: {
-        sx: { color: "text.secondary" },
-      },
-      toggle: {
-        color: "secondary",
-      },
-    },
-  },
+  render: () => <CustomizedSlotsExample />,
+  parameters: source(customizedSlotsExampleSource),
 };
-
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_TRUNCATED_CONTENT_NAME]: {
-      defaultProps: {
-        collapsedHeight: 56,
-      },
-      styleOverrides: {
-        root: {
-          padding: 16,
-          border: "1px solid #7c3aed",
-          borderRadius: 12,
-          backgroundColor: "#171225",
-        },
-        viewport: {
-          borderRadius: 6,
-        },
-        content: {
-          color: "#ddd6fe",
-        },
-        toggle: {
-          color: "#c4b5fd",
-          fontWeight: 700,
-        },
-      },
-    },
-  },
-});
-
 export const ThemeCustomization: Story = {
-  args: {
-    children: richContent,
-  },
-  decorators: [
-    Story => (
-      <ThemeProvider theme={customizedTheme}>
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };

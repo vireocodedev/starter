@@ -1,15 +1,27 @@
-import { VireoSidePanelResizeHandle } from "./VireoSidePanelResizeHandle";
-import { VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME } from "./VireoSidePanelResizeHandle.identity";
-import { Box, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import CustomizedSlotsExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/CustomizedSlotsExample";
+import customizedSlotsExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import DefaultExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/DefaultExample.tsx?raw";
+import PointerInteractionsExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/PointerInteractionsExample";
+import pointerInteractionsExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/PointerInteractionsExample.tsx?raw";
+import ResizingExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ResizingExample";
+import resizingExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ResizingExample.tsx?raw";
+import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
+import { VireoSidePanelResizeHandle } from "./VireoSidePanelResizeHandle";
 
-const meta: Meta<typeof VireoSidePanelResizeHandle> = {
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
+
+const meta = {
   title: "Overlays/Overlays/VireoSidePanelResizeHandle",
   component: VireoSidePanelResizeHandle,
   tags: ["autodocs"],
+  args: { onResizeStart: fn(), onResizeDoubleClick: fn() },
   parameters: {
     layout: "centered",
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -17,86 +29,31 @@ const meta: Meta<typeof VireoSidePanelResizeHandle> = {
       },
     },
   },
-  args: {
-    onResizeStart: fn(),
-    onResizeDoubleClick: fn(),
-  },
-  argTypes: {
-    slots: { control: false },
-    slotProps: { control: false },
-    classes: { control: false },
-    onResizeStart: { control: false },
-    onResizeDoubleClick: { control: false },
-  },
-  decorators: [
-    Story => (
-      <Box
-        sx={{
-          position: "relative",
-          width: 360,
-          height: 240,
-          border: 1,
-          borderColor: "divider",
-          bgcolor: "background.paper",
-        }}
-      >
-        <Story />
-        <Box sx={{ p: 3, color: "text.secondary" }}>Side-panel content</Box>
-      </Box>
-    ),
-  ],
-};
+} satisfies Meta<typeof VireoSidePanelResizeHandle>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-export const Resizing: Story = { args: { isResizing: true } };
-
+export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
+export const Resizing: Story = { render: () => <ResizingExample />, parameters: source(resizingExampleSource) };
 export const PointerInteractions: Story = {
+  render: ({ onResizeDoubleClick, onResizeStart }) => (
+    <PointerInteractionsExample onResizeStart={onResizeStart} onResizeDoubleClick={onResizeDoubleClick} />
+  ),
+  parameters: source(pointerInteractionsExampleSource),
   play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    const handle = canvas.getByRole("presentation");
+    const handle = within(canvasElement).getByRole("presentation");
     await userEvent.pointer({ keys: "[MouseLeft]", target: handle });
     await expect(args.onResizeStart).toHaveBeenCalledOnce();
     await userEvent.dblClick(handle);
     await expect(args.onResizeDoubleClick).toHaveBeenCalledOnce();
   },
 };
-
 export const CustomizedSlots: Story = {
-  args: {
-    slots: { root: "section" },
-    slotProps: {
-      root: ownerState => ({
-        "data-resizing": String(ownerState.isResizing),
-        sx: { width: 20, "&::after": { width: 10 } },
-      }),
-    },
-  },
+  render: () => <CustomizedSlotsExample />,
+  parameters: source(customizedSlotsExampleSource),
 };
-
-function createCustomizedTheme(outerTheme: Theme): Theme {
-  return createTheme(outerTheme, {
-    components: {
-      [VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME]: {
-        styleOverrides: {
-          root: { "&::after": { backgroundColor: "#a78bfa", opacity: 0.65 } },
-          resizing: { "&::after": { backgroundColor: "#f472b6", opacity: 1 } },
-        },
-      },
-    },
-  });
-}
-
 export const ThemeCustomization: Story = {
-  args: { isResizing: true },
-  decorators: [
-    Story => (
-      <ThemeProvider theme={createCustomizedTheme}>
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };

@@ -1,63 +1,29 @@
-import { VireoBottomDrawer } from "./VireoBottomDrawer";
-import { VIREO_BOTTOM_DRAWER_NAME } from "./VireoBottomDrawer.identity";
-import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/VireoOverlayHeader";
-import { Box, Button, Chip, Stack, ThemeProvider, Typography, createTheme, type Theme } from "@mui/material";
+import CloseInteractionExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CloseInteractionExample";
+import closeInteractionExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CloseInteractionExample.tsx?raw";
+import CustomizedPullerExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CustomizedPullerExample";
+import customizedPullerExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CustomizedPullerExample.tsx?raw";
+import DefaultExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/DefaultExample.tsx?raw";
+import FixedHeightExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/FixedHeightExample";
+import fixedHeightExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/FixedHeightExample.tsx?raw";
+import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import WithoutBackdropExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/WithoutBackdropExample";
+import withoutBackdropExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/WithoutBackdropExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
-import React from "react";
+import { VireoBottomDrawer } from "./VireoBottomDrawer";
 
-function DrawerContent({ onClose }: { onClose: () => void }) {
-  return (
-    <>
-      <VireoOverlayHeader title="Filter customers" closeLabel="Close filters" onClose={onClose} />
-      <Stack spacing={2} sx={{ p: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          Choose the customer states shown in the workspace.
-        </Typography>
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-          <Chip label="Active" color="success" />
-          <Chip label="Needs review" color="warning" />
-          <Chip label="At risk" color="error" />
-        </Stack>
-        <Button variant="contained">Apply filters</Button>
-      </Stack>
-    </>
-  );
-}
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
-function BottomDrawerDemo(args: React.ComponentProps<typeof VireoBottomDrawer>) {
-  const [open, setOpen] = React.useState(args.open);
-
-  React.useEffect(() => setOpen(args.open), [args.open]);
-
-  const handleClose = React.useCallback(() => {
-    setOpen(false);
-    args.onClose();
-  }, [args]);
-
-  const handleOpen = React.useCallback(() => {
-    setOpen(true);
-    args.onOpen?.();
-  }, [args]);
-
-  return (
-    <>
-      <Button variant="contained" onClick={() => setOpen(true)}>
-        Open customer filters
-      </Button>
-      <VireoBottomDrawer {...args} open={open} onClose={handleClose} onOpen={handleOpen}>
-        <DrawerContent onClose={handleClose} />
-      </VireoBottomDrawer>
-    </>
-  );
-}
-
-const meta: Meta<typeof VireoBottomDrawer> = {
+const meta = {
   title: "Overlays/Overlays/VireoBottomDrawer",
   component: VireoBottomDrawer,
   tags: ["autodocs"],
+  args: { open: false, onClose: fn(), children: null },
   parameters: {
     viewport: { defaultViewport: "mobile1" },
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -65,42 +31,23 @@ const meta: Meta<typeof VireoBottomDrawer> = {
       },
     },
   },
-  args: {
-    open: false,
-    onClose: fn(),
-    onExited: fn(),
-  },
-  argTypes: {
-    onClose: { control: false },
-    onOpen: { control: false },
-    onExited: { control: false },
-    children: { control: false },
-    slots: { control: false },
-    slotProps: { control: false },
-    classes: { control: false },
-  },
-  decorators: [
-    Story => (
-      <Box sx={{ bgcolor: "background.paper", p: 3 }}>
-        <Typography variant="h5">Customer workspace</Typography>
-        <Typography color="text.secondary">The bottom sheet remains the subject of this mobile canvas.</Typography>
-        <Story />
-      </Box>
-    ),
-  ],
-  render: args => <BottomDrawerDemo {...args} />,
-};
+} satisfies Meta<typeof VireoBottomDrawer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-export const FixedHeight: Story = { args: { height: "72dvh" } };
-
-export const WithoutBackdrop: Story = { args: { useBackdrop: false } };
-
+export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
+export const FixedHeight: Story = {
+  render: () => <FixedHeightExample />,
+  parameters: source(fixedHeightExampleSource),
+};
+export const WithoutBackdrop: Story = {
+  render: () => <WithoutBackdropExample />,
+  parameters: source(withoutBackdropExampleSource),
+};
 export const CloseInteraction: Story = {
+  render: ({ onClose }) => <CloseInteractionExample onClose={onClose} />,
+  parameters: source(closeInteractionExampleSource),
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: "Open customer filters" }));
@@ -109,31 +56,11 @@ export const CloseInteraction: Story = {
     await expect(args.onClose).toHaveBeenCalledOnce();
   },
 };
-
 export const CustomizedPuller: Story = {
-  args: {
-    slots: { puller: "header" },
-    slotProps: { puller: { "aria-label": "Customized sheet handle", sx: { py: 1.5, "&::after": { width: 56 } } } },
-  },
+  render: () => <CustomizedPullerExample />,
+  parameters: source(customizedPullerExampleSource),
 };
-
-function createCustomizedTheme(outerTheme: Theme): Theme {
-  return createTheme(outerTheme, {
-    components: {
-      [VIREO_BOTTOM_DRAWER_NAME]: {
-        defaultProps: { useBackdrop: false },
-        styleOverrides: { puller: { backgroundColor: "#2e1065", "&::after": { backgroundColor: "#a78bfa" } } },
-      },
-    },
-  });
-}
-
 export const ThemeCustomization: Story = {
-  decorators: [
-    Story => (
-      <ThemeProvider theme={createCustomizedTheme}>
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };

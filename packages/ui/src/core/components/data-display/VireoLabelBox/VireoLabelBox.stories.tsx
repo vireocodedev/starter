@@ -1,21 +1,33 @@
-import { Box, OutlinedInput, ThemeProvider, createTheme } from "@mui/material";
+import CustomizedSlotsExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/CustomizedSlotsExample";
+import customizedSlotsExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import DefaultExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/DefaultExample.tsx?raw";
+import MobileWidthRowWithHelperTextExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/MobileWidthRowWithHelperTextExample";
+import mobileWidthRowWithHelperTextExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/MobileWidthRowWithHelperTextExample.tsx?raw";
+import MobileWidthWithHelperTextExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/MobileWidthWithHelperTextExample";
+import mobileWidthWithHelperTextExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/MobileWidthWithHelperTextExample.tsx?raw";
+import RequiredExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/RequiredExample";
+import requiredExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/RequiredExample.tsx?raw";
+import RowDirectionExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/RowDirectionExample";
+import rowDirectionExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/RowDirectionExample.tsx?raw";
+import ThemeAwareColorExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/ThemeAwareColorExample";
+import themeAwareColorExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/ThemeAwareColorExample.tsx?raw";
+import ThemeCustomizationExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import WithHelperTextExample from "@/core/components/data-display/VireoLabelBox/internal/storybook/WithHelperTextExample";
+import withHelperTextExampleSource from "@/core/components/data-display/VireoLabelBox/internal/storybook/WithHelperTextExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoLabelBox } from "./VireoLabelBox";
-import { VIREO_LABEL_BOX_NAME } from "./VireoLabelBox.identity";
 
-const MOBILE_PREVIEW_WIDTH = 360;
-const mobileHelperText = "Shown on customer-facing invoices";
-const accountInput = <OutlinedInput aria-label="Account name" placeholder="Acme Ltd." size="small" fullWidth />;
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
   title: "Core/Data Display/VireoLabelBox",
   component: VireoLabelBox,
   tags: ["autodocs"],
-  args: {
-    label: "Account name",
-    children: accountInput,
-  },
+  args: { label: "Account name", children: null },
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -24,8 +36,6 @@ const meta = {
     },
   },
   argTypes: {
-    label: { control: "text" },
-    helperText: { control: "text" },
     children: { control: false },
     color: { control: false },
     fontWeight: { control: false },
@@ -38,113 +48,33 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
+export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
 export const WithHelperText: Story = {
-  args: {
-    helperText: mobileHelperText,
-  },
+  render: () => <WithHelperTextExample />,
+  parameters: source(withHelperTextExampleSource),
 };
-
 export const MobileWidthWithHelperText: Story = {
-  args: {
-    helperText: mobileHelperText,
-  },
-  decorators: [
-    Story => (
-      <Box width={MOBILE_PREVIEW_WIDTH} maxWidth="100%">
-        <Story />
-      </Box>
-    ),
-  ],
+  render: () => <MobileWidthWithHelperTextExample />,
+  parameters: source(mobileWidthWithHelperTextExampleSource),
 };
-
-export const Required: Story = {
-  args: {
-    required: true,
-  },
-};
-
+export const Required: Story = { render: () => <RequiredExample />, parameters: source(requiredExampleSource) };
 export const RowDirection: Story = {
-  args: {
-    direction: "row",
-    helperText: "Optional",
-  },
+  render: () => <RowDirectionExample />,
+  parameters: source(rowDirectionExampleSource),
 };
-
 export const MobileWidthRowWithHelperText: Story = {
-  args: {
-    direction: "row",
-    helperText: mobileHelperText,
-  },
-  decorators: [
-    Story => (
-      <Box width={MOBILE_PREVIEW_WIDTH} maxWidth="100%">
-        <Story />
-      </Box>
-    ),
-  ],
+  render: () => <MobileWidthRowWithHelperTextExample />,
+  parameters: source(mobileWidthRowWithHelperTextExampleSource),
 };
-
 export const ThemeAwareColor: Story = {
-  args: {
-    color: theme => theme.palette.warning.main,
-    required: true,
-  },
+  render: () => <ThemeAwareColorExample />,
+  parameters: source(themeAwareColorExampleSource),
 };
-
 export const CustomizedSlots: Story = {
-  args: {
-    helperText: "Customized anatomy",
-    slots: { root: "section", label: "strong", helperText: "small" },
-    slotProps: {
-      root: {
-        "aria-label": "Customized account field",
-        sx: { border: 1, borderColor: "primary.main", borderRadius: 2, p: 2 },
-      },
-      label: { sx: { letterSpacing: "0.08em", textTransform: "uppercase" } },
-      helperText: { sx: { color: "primary.light" } },
-    },
-  },
+  render: () => <CustomizedSlotsExample />,
+  parameters: source(customizedSlotsExampleSource),
 };
-
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_LABEL_BOX_NAME]: {
-      defaultProps: {
-        fontWeight: 700,
-        required: true,
-      },
-      styleOverrides: {
-        root: {
-          padding: 16,
-          border: "1px solid #7c3aed",
-          borderRadius: 12,
-          backgroundColor: "#171225",
-        },
-        label: {
-          color: "#c4b5fd",
-        },
-        helperText: {
-          color: "#a78bfa",
-        },
-        content: {
-          paddingTop: 4,
-        },
-      },
-    },
-  },
-});
-
 export const ThemeCustomization: Story = {
-  args: {
-    helperText: "Theme defaults and per-slot overrides",
-  },
-  decorators: [
-    Story => (
-      <ThemeProvider theme={customizedTheme}>
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };

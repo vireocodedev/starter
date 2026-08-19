@@ -1,46 +1,25 @@
-import { Button, Card, CardContent, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
+import CustomizedSlotExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/CustomizedSlotExample";
+import customizedSlotExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/CustomizedSlotExample.tsx?raw";
+import DefaultExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/DefaultExample.tsx?raw";
+import ImmediateExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ImmediateExample";
+import immediateExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ImmediateExample.tsx?raw";
+import MultipleChildrenExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/MultipleChildrenExample";
+import multipleChildrenExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/MultipleChildrenExample.tsx?raw";
+import RestartableExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/RestartableExample";
+import restartableExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/RestartableExample.tsx?raw";
+import ThemeCustomizationExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import React from "react";
 import { VireoDelayedRender } from "./VireoDelayedRender";
-import { VIREO_DELAYED_RENDER_NAME } from "./VireoDelayedRender.identity";
 
-type RestartableDelayProps = React.ComponentPropsWithoutRef<typeof VireoDelayedRender>;
-
-const delayedContent = (
-  <Card variant="outlined">
-    <CardContent>
-      <Typography fontWeight={700}>Fallback content mounted</Typography>
-      <Typography color="text.secondary" variant="body2">
-        Fast operations can finish before this content enters the DOM.
-      </Typography>
-    </CardContent>
-  </Card>
-);
-
-function RestartableDelay(props: RestartableDelayProps) {
-  const { delay = 200 } = props;
-  const [attempt, setAttempt] = React.useState(0);
-
-  return (
-    <Stack alignItems="flex-start" gap={2}>
-      <Button variant="contained" onClick={() => setAttempt(current => current + 1)}>
-        Restart delay
-      </Button>
-      <Typography color="text.secondary" variant="body2">
-        The content below mounts {delay} ms after each restart.
-      </Typography>
-      <VireoDelayedRender {...props} key={attempt} />
-    </Stack>
-  );
-}
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
   title: "Core/Behavior/VireoDelayedRender",
   component: VireoDelayedRender,
   tags: ["autodocs"],
-  args: {
-    children: delayedContent,
-  },
+  args: { children: null },
   parameters: {
     docs: {
       description: {
@@ -60,80 +39,34 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  render: ({ delay }) => <DefaultExample delay={delay} />,
+  parameters: source(defaultExampleSource),
+};
 
 export const Immediate: Story = {
-  args: {
-    delay: 0,
-  },
+  args: { delay: 0 },
+  render: () => <ImmediateExample />,
+  parameters: source(immediateExampleSource),
 };
 
 export const Restartable: Story = {
-  args: {
-    delay: 1200,
-  },
-  render: ({ ref, ...args }) => {
-    void ref;
-    return <RestartableDelay {...args} />;
-  },
+  args: { delay: 1200 },
+  render: ({ delay }) => <RestartableExample delay={delay} />,
+  parameters: source(restartableExampleSource),
 };
 
 export const MultipleChildren: Story = {
-  args: {
-    children: (
-      <>
-        <Typography fontWeight={700}>First layout participant</Typography>
-        <Typography color="text.secondary">Second layout participant</Typography>
-      </>
-    ),
-  },
-  decorators: [
-    Story => (
-      <Stack gap={1}>
-        <Story />
-      </Stack>
-    ),
-  ],
+  render: ({ delay }) => <MultipleChildrenExample delay={delay} />,
+  parameters: source(multipleChildrenExampleSource),
 };
 
 export const CustomizedSlot: Story = {
-  args: {
-    slots: { root: "section" },
-    slotProps: {
-      root: ownerState => ({
-        "aria-label": "Customized delayed content",
-        "data-delay": ownerState.delay,
-        sx: { display: "block", border: 1, borderColor: "primary.main", borderRadius: 2, p: 2 },
-      }),
-    },
-  },
+  render: ({ delay }) => <CustomizedSlotExample delay={delay} />,
+  parameters: source(customizedSlotExampleSource),
 };
 
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_DELAYED_RENDER_NAME]: {
-      defaultProps: {
-        delay: 400,
-      },
-      styleOverrides: {
-        root: {
-          display: "block",
-          padding: 16,
-          border: "2px dashed #7c3aed",
-          borderRadius: 12,
-          color: "#6d28d9",
-        },
-      },
-    },
-  },
-});
-
 export const ThemeCustomization: Story = {
-  decorators: [
-    Story => (
-      <ThemeProvider theme={customizedTheme}>
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };

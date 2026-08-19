@@ -1,22 +1,37 @@
-import { VireoOverlayHeader } from "./VireoOverlayHeader";
-import { VIREO_OVERLAY_HEADER_NAME } from "./VireoOverlayHeader.identity";
-import type { VireoOverlayHeaderCloseProps, VireoOverlayHeaderOwnProps } from "./VireoOverlayHeader.types";
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import MoreVert from "@mui/icons-material/MoreVert";
-import { Box, Button, Chip, IconButton, ThemeProvider, createTheme } from "@mui/material";
+import CompleteAnatomyExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CompleteAnatomyExample";
+import completeAnatomyExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CompleteAnatomyExample.tsx?raw";
+import ClosableExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ClosableExample";
+import closableExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ClosableExample.tsx?raw";
+import CustomizedSlotsExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CustomizedSlotsExample";
+import customizedSlotsExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import DefaultExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DefaultExample.tsx?raw";
+import DisabledCloseExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DisabledCloseExample";
+import disabledCloseExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DisabledCloseExample.tsx?raw";
+import LongTitleExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/LongTitleExample";
+import longTitleExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/LongTitleExample.tsx?raw";
+import NonStickyExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/NonStickyExample";
+import nonStickyExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/NonStickyExample.tsx?raw";
+import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
+import { VireoOverlayHeader } from "./VireoOverlayHeader";
+import type { VireoOverlayHeaderCloseProps, VireoOverlayHeaderOwnProps } from "./VireoOverlayHeader.types";
 
-type VireoOverlayHeaderStoryArgs = VireoOverlayHeaderOwnProps & {
+type StoryArgs = VireoOverlayHeaderOwnProps & {
   [TPropName in keyof VireoOverlayHeaderCloseProps]?: VireoOverlayHeaderCloseProps[TPropName];
 };
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta: Meta<typeof VireoOverlayHeader> = {
   title: "Overlays/Overlays/VireoOverlayHeader",
   component: VireoOverlayHeader,
   tags: ["autodocs"],
+  args: { title: "Edit invoice" },
   parameters: {
     layout: "padded",
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -24,152 +39,37 @@ const meta: Meta<typeof VireoOverlayHeader> = {
       },
     },
   },
-  args: {
-    title: "Edit invoice",
-  },
-  argTypes: {
-    title: { control: "text" },
-    titleId: { control: "text" },
-    leadingAction: { control: false },
-    actions: { control: false },
-    onClose: { control: false },
-    closeLabel: { control: "text" },
-    slots: { control: false },
-    slotProps: { control: false },
-    classes: { control: false },
-  },
-  decorators: [
-    Story => (
-      <Box sx={{ width: "100%", border: 1, borderColor: "divider", bgcolor: "background.paper" }}>
-        <Story />
-        <Box sx={{ minHeight: 160, p: 3, color: "text.secondary" }}>Overlay content starts here.</Box>
-      </Box>
-    ),
-  ],
 };
 
 export default meta;
-type Story = StoryObj<VireoOverlayHeaderStoryArgs>;
+type Story = StoryObj<StoryArgs>;
 
-export const Default: Story = {};
-
+export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
 export const CompleteAnatomy: Story = {
-  args: {
-    leadingAction: (
-      <IconButton aria-label="Back">
-        <ArrowBack />
-      </IconButton>
-    ),
-    actions: (
-      <>
-        <Chip label="Draft" size="small" />
-        <Button size="small">Save</Button>
-      </>
-    ),
-    closeLabel: "Close invoice editor",
-    onClose: fn(),
-  },
+  args: { onClose: fn(), closeLabel: "Close invoice editor" },
+  render: ({ onClose }) => <CompleteAnatomyExample onClose={onClose ?? (() => undefined)} />,
+  parameters: source(completeAnatomyExampleSource),
 };
-
 export const Closable: Story = {
-  args: {
-    closeLabel: "Close invoice editor",
-    onClose: fn(),
-  },
+  args: { onClose: fn(), closeLabel: "Close invoice editor" },
+  render: ({ onClose }) => <ClosableExample onClose={onClose ?? (() => undefined)} />,
+  parameters: source(closableExampleSource),
   play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Close invoice editor" }));
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "Close invoice editor" }));
     await expect(args.onClose).toHaveBeenCalledOnce();
   },
 };
-
 export const DisabledClose: Story = {
-  args: {
-    closeDisabled: true,
-    closeLabel: "Close while saving",
-    onClose: fn(),
-  },
+  render: () => <DisabledCloseExample />,
+  parameters: source(disabledCloseExampleSource),
 };
-
-export const NonSticky: Story = {
-  args: {
-    sticky: false,
-  },
-  decorators: [
-    Story => (
-      <Box sx={{ height: 160, overflowY: "auto" }}>
-        <Story />
-      </Box>
-    ),
-  ],
-};
-
-export const LongTitle: Story = {
-  args: {
-    title: "Edit invoice INV-2026-000184 for a customer whose company name is deliberately long enough to wrap",
-    actions: <Chip label="Unsaved changes" size="small" color="warning" />,
-    closeLabel: "Close invoice editor",
-    onClose: fn(),
-  },
-};
-
+export const NonSticky: Story = { render: () => <NonStickyExample />, parameters: source(nonStickyExampleSource) };
+export const LongTitle: Story = { render: () => <LongTitleExample />, parameters: source(longTitleExampleSource) };
 export const CustomizedSlots: Story = {
-  args: {
-    actions: <Chip label="Customized" size="small" />,
-    closeLabel: "Close customized overlay",
-    onClose: fn(),
-    slots: {
-      root: "section",
-      closeIcon: MoreVert,
-    },
-    slotProps: {
-      root: {
-        "aria-label": "Customized overlay header",
-        sx: { borderBottomStyle: "dashed" },
-      },
-      title: {
-        sx: { color: "primary.main", fontWeight: 700 },
-      },
-      closeButton: {
-        color: "primary",
-      },
-    },
-  },
+  render: () => <CustomizedSlotsExample />,
+  parameters: source(customizedSlotsExampleSource),
 };
-
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_OVERLAY_HEADER_NAME]: {
-      defaultProps: {
-        sticky: false,
-      },
-      styleOverrides: {
-        root: {
-          borderBottomWidth: 3,
-          borderBottomColor: "#7c3aed",
-        },
-        title: {
-          color: "#7c3aed",
-          fontWeight: 700,
-        },
-        closeButton: {
-          borderRadius: 4,
-        },
-      },
-    },
-  },
-});
-
 export const ThemeCustomization: Story = {
-  args: {
-    closeLabel: "Close themed overlay",
-    onClose: fn(),
-  },
-  decorators: [
-    Story => (
-      <ThemeProvider theme={customizedTheme}>
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };

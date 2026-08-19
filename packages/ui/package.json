@@ -49,6 +49,16 @@
       "types": "./dist/storybook/VireoIconContainer/index.d.ts",
       "import": "./dist/storybook/VireoIconContainer/index.js",
       "default": "./dist/storybook/VireoIconContainer/index.js"
+    },
+    "./storybook/VireoDockedSidePanel": {
+      "types": "./dist/storybook/VireoDockedSidePanel/index.d.ts",
+      "import": "./dist/storybook/VireoDockedSidePanel/index.js",
+      "default": "./dist/storybook/VireoDockedSidePanel/index.js"
+    },
+    "./storybook/VireoResponsiveOverlayFrame": {
+      "types": "./dist/storybook/VireoResponsiveOverlayFrame/index.d.ts",
+      "import": "./dist/storybook/VireoResponsiveOverlayFrame/index.js",
+      "default": "./dist/storybook/VireoResponsiveOverlayFrame/index.js"
     }
   },
   "main": "./dist/index.js",

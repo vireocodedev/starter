@@ -128,7 +128,16 @@ describe("package entry points", () => {
   it("declares every entry point explicitly", () => {
     const subpaths = Object.keys(manifest.exports);
 
-    expect(subpaths).toEqual([".", "./api", "./country", "./video", "./storybook", "./storybook/VireoIconContainer"]);
+    expect(subpaths).toEqual([
+      ".",
+      "./api",
+      "./country",
+      "./video",
+      "./storybook",
+      "./storybook/VireoIconContainer",
+      "./storybook/VireoDockedSidePanel",
+      "./storybook/VireoResponsiveOverlayFrame",
+    ]);
   });
 
   it("exposes no wildcard subpath", () => {
@@ -153,7 +162,12 @@ describe("package entry points", () => {
   });
 
   it("keeps published Storybook helpers independent from Storybook runtimes", () => {
-    const entries = [join(storybookRoot, "index.ts"), join(storybookRoot, "VireoIconContainer", "index.ts")];
+    const entries = [
+      join(storybookRoot, "index.ts"),
+      join(storybookRoot, "VireoIconContainer", "index.ts"),
+      join(storybookRoot, "VireoDockedSidePanel", "index.ts"),
+      join(storybookRoot, "VireoResponsiveOverlayFrame", "index.ts"),
+    ];
     const offenders = entries.flatMap(entry =>
       [...runtimeGraph(entry).external.entries()]
         .filter(

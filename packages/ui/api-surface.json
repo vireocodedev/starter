@@ -827,6 +827,28 @@
         "@mui/material/styles"
       ],
       "workerSafe": false
+    },
+    "./storybook/VireoDockedSidePanel": {
+      "exports": [
+        "VireoDockedSidePanelWorkspaceFrame",
+        "VireoDockedSidePanelWorkspaceFrameProps"
+      ],
+      "dependencies": [
+        "@mui/material"
+      ],
+      "workerSafe": false
+    },
+    "./storybook/VireoResponsiveOverlayFrame": {
+      "exports": [
+        "VireoResponsiveOverlayFrameCustomerDetails",
+        "VireoResponsiveOverlayFrameCustomerDetailsProps",
+        "VireoResponsiveOverlayFrameWorkspace",
+        "VireoResponsiveOverlayFrameWorkspaceProps"
+      ],
+      "dependencies": [
+        "@mui/material"
+      ],
+      "workerSafe": false
     }
   }
 }

@@ -1,29 +1,28 @@
-import { CodeRounded } from "@mui/icons-material";
-import { Box, ThemeProvider, createTheme } from "@mui/material";
+import ConstrainedHeightExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/ConstrainedHeightExample";
+import constrainedHeightExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/ConstrainedHeightExample.tsx?raw";
+import CopyInteractionExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CopyInteractionExample";
+import copyInteractionExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CopyInteractionExample.tsx?raw";
+import CustomizedSlotsExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CustomizedSlotsExample";
+import customizedSlotsExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import DefaultExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/DefaultExample.tsx?raw";
+import NonJsonValuesExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/NonJsonValuesExample";
+import nonJsonValuesExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/NonJsonValuesExample.tsx?raw";
+import ThemeCustomizationExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { VireoJsonViewer } from "./VireoJsonViewer";
-import { VIREO_JSON_VIEWER_NAME } from "./VireoJsonViewer.identity";
 
-const diagnosticData = {
-  requestId: "req_01J5V8JH28X7K3P1",
-  status: "failed",
-  durationMs: 842,
-  error: {
-    code: "UPSTREAM_TIMEOUT",
-    message: "The upstream service did not respond in time.",
-  },
-  attempts: [
-    { number: 1, outcome: "timeout" },
-    { number: 2, outcome: "timeout" },
-  ],
-};
+const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
   title: "Core/Data Display/VireoJsonViewer",
   component: VireoJsonViewer,
   tags: ["autodocs"],
+  args: { data: null, copyLabel: "Copy JSON to clipboard", copiedLabel: "JSON copied" },
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoJsonViewer presents arbitrary structured values as readable, copyable JSON.
@@ -34,14 +33,7 @@ Diagnostic payloads, configuration snapshots, and API responses recur across Vir
       },
     },
   },
-  args: {
-    data: diagnosticData,
-    copyLabel: "Copy JSON to clipboard",
-    copiedLabel: "JSON copied",
-  },
   argTypes: {
-    data: { control: "object" },
-    maxHeight: { control: "text" },
     slots: { control: false },
     slotProps: { control: false },
     classes: { control: false },
@@ -51,141 +43,35 @@ Diagnostic payloads, configuration snapshots, and API responses recur across Vir
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
+export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
 export const ConstrainedHeight: Story = {
-  args: {
-    data: {
-      event: "batch.completed",
-      records: Array.from({ length: 18 }, (_, index) => ({
-        id: `record-${String(index + 1).padStart(2, "0")}`,
-        state: index % 4 === 0 ? "warning" : "processed",
-        durationMs: 120 + index * 17,
-      })),
-    },
-    maxHeight: 220,
-  },
+  render: () => <ConstrainedHeightExample />,
   parameters: {
+    ...source(constrainedHeightExampleSource),
     docs: {
-      description: {
-        story: "A bounded content region keeps large payloads scrollable without taking over the surrounding layout.",
-      },
+      ...source(constrainedHeightExampleSource).docs,
+      description: { story: "A bounded region keeps large payloads scrollable without taking over the layout." },
     },
   },
 };
-
 export const NonJsonValues: Story = {
-  render: args => {
-    const circular: Record<string, unknown> = { id: "circular-reference" };
-    circular.self = circular;
-
-    return (
-      <VireoJsonViewer
-        {...args}
-        data={{
-          error: new Error("Connection refused"),
-          bigint: 9_007_199_254_740_993n,
-          missing: undefined,
-          transform: function normalizePayload() {},
-          token: Symbol("private"),
-          circular,
-        }}
-      />
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: "Values that native JSON serialization cannot represent remain visible instead of breaking the viewer.",
-      },
-    },
-  },
+  render: () => <NonJsonValuesExample />,
+  parameters: source(nonJsonValuesExampleSource),
 };
-
 export const CopyInteraction: Story = {
+  render: () => <CopyInteractionExample />,
+  parameters: source(copyInteractionExampleSource),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const copyButton = canvas.getByRole("button", { name: "Copy JSON to clipboard" });
-
-    await userEvent.click(copyButton);
+    await userEvent.click(canvas.getByRole("button", { name: "Copy JSON to clipboard" }));
     await expect(canvas.getByRole("button", { name: "JSON copied" })).toBeInTheDocument();
   },
-  parameters: {
-    docs: {
-      description: {
-        story: "Activate the copy action to see the temporary accessible success feedback.",
-      },
-    },
-  },
 };
-
 export const CustomizedSlots: Story = {
-  args: {
-    slots: { root: "section", copyIcon: CodeRounded },
-    slotProps: {
-      root: {
-        "aria-label": "Customized diagnostic payload",
-        sx: { borderColor: "primary.main", borderWidth: 2, boxShadow: 3 },
-      },
-      toolbar: { sx: { top: 8, right: 8 } },
-      copyButton: { color: "primary" },
-      content: { sx: { pt: 5, backgroundColor: "action.hover" } },
-    },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Every semantic region can be replaced or styled while the viewer retains its behavior and accessibility.",
-      },
-    },
-  },
+  render: () => <CustomizedSlotsExample />,
+  parameters: source(customizedSlotsExampleSource),
 };
-
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_JSON_VIEWER_NAME]: {
-      defaultProps: {
-        maxHeight: 280,
-      },
-      styleOverrides: {
-        root: {
-          borderColor: "#7c3aed",
-          borderRadius: 12,
-          boxShadow: "0 12px 32px rgb(76 29 149 / 18%)",
-        },
-        toolbar: {
-          padding: 4,
-          borderRadius: 8,
-          backgroundColor: "rgb(245 243 255 / 90%)",
-        },
-        copyButton: {
-          color: "#6d28d9",
-        },
-        content: {
-          color: "#4c1d95",
-          backgroundColor: "#faf5ff",
-        },
-      },
-    },
-  },
-});
-
 export const ThemeCustomization: Story = {
-  decorators: [
-    Story => (
-      <ThemeProvider theme={customizedTheme}>
-        <Box sx={{ maxWidth: 720 }}>
-          <Story />
-        </Box>
-      </ThemeProvider>
-    ),
-  ],
-  parameters: {
-    docs: {
-      description: {
-        story: "Theme defaults and slot-level overrides can establish a product-wide JSON inspection treatment.",
-      },
-    },
-  },
+  render: () => <ThemeCustomizationExample />,
+  parameters: source(themeCustomizationExampleSource),
 };
