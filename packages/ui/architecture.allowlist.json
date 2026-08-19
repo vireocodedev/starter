@@ -23,11 +23,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/AppCardContent.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoClientTable/RgoClientTable.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
