@@ -3,8 +3,7 @@ import {
   type ResponsiveOverlayFrameDesktopSidePanelWidth,
   type ResponsiveOverlayFrameProps,
 } from "@/capabilities/overlays/public";
-import { UnsavedChangesScope } from "@/unsaved-changes/UnsavedChangesScope";
-import { useUnsavedChangesRequestDiscard } from "@/unsaved-changes/useUnsavedChangesRequestDiscard";
+import { UnsavedChangesScope, useUnsavedChangesRequestDiscard } from "@/capabilities/unsaved-changes/public";
 import { Box, DialogActions, DialogContent, type DialogProps, type SxProps, type Theme } from "@mui/material";
 import { RgoDialogHeader } from "@/components/feedback/RgoDialogHeader/RgoDialogHeader";
 import { useResponsiveProps } from "@/hooks/useResponsiveProps";

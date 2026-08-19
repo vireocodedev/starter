@@ -2,7 +2,7 @@ import {
   useUnsavedChanges,
   useUnsavedChangesScopeId,
   type UnsavedChangesScopeId,
-} from "@/capabilities/unsaved-changes/public";
+} from "@/capabilities/unsaved-changes/contexts/UnsavedChangesContext/UnsavedChangesContext";
 import React from "react";
 
 export type UseUnsavedChangesRequestDiscardOptions = {

@@ -1,4 +1,7 @@
-import { useUnsavedChanges, useUnsavedChangesScopeId } from "@/capabilities/unsaved-changes/public";
+import {
+  useUnsavedChanges,
+  useUnsavedChangesScopeId,
+} from "@/capabilities/unsaved-changes/contexts/UnsavedChangesContext/UnsavedChangesContext";
 import React from "react";
 
 export type UseUnsavedChangesRegistrationProps = {

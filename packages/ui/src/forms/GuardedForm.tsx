@@ -1,4 +1,4 @@
-import { useUnsavedChangesRegistration } from "@/unsaved-changes/useUnsavedChangesRegistration";
+import { useUnsavedChangesRegistration } from "@/capabilities/unsaved-changes/public";
 import { Box, type BoxProps, type SxProps, type Theme } from "@mui/material";
 import React from "react";
 import { type FieldErrors, type FieldValues, type Path, useFormState, type UseFormReturn } from "react-hook-form";

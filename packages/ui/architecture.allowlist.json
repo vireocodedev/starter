@@ -2723,21 +2723,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "unsaved-changes/UnsavedChangesScope.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "unsaved-changes/useUnsavedChangesRegistration.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "unsaved-changes/useUnsavedChangesRequestDiscard.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "utils/apiutils.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

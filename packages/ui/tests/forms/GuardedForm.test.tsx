@@ -4,7 +4,7 @@ import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/unsaved-changes/useUnsavedChangesRegistration", () => ({
+vi.mock("@/capabilities/unsaved-changes/public", () => ({
   useUnsavedChangesRegistration: () => undefined,
 }));
 
