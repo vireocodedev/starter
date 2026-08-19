@@ -9,7 +9,6 @@ export * from "@/components/data-display/RgoPdfFrame/RgoPdfFrame";
 export * from "@/components/data-display/RgoServerTable/RgoServerTable";
 export * from "@/components/data-display/RgoSnack/RgoSnack";
 export * from "@/components/data-display/RgoSnackDetailsButton/RgoSnackDetailsButton";
-export * from "@/components/data-display/RgoStatusDot/RgoStatusDot";
 export * from "@/components/data-display/RgoStatusText/RgoStatusText";
 export * from "@/components/data-display/RgoStopwatch/RgoStopwatch";
 export * from "@/components/data-display/RgoTable";

@@ -1,0 +1,26 @@
+import { VireoStatusDot, type VireoStatusDotColor } from "@vireocodedev/starter-ui";
+import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { Stack, Typography } from "@mui/material";
+
+const statuses: Array<{ color: VireoStatusDotColor; label: string }> = [
+  { color: "success", label: "Operational" },
+  { color: "warning", label: "Needs review" },
+  { color: "error", label: "Unavailable" },
+  { color: "info", label: "In progress" },
+  { color: "standard", label: "Not started" },
+];
+
+export default function SemanticColorsExample() {
+  return (
+    <VireoStorybookProvider>
+      <Stack spacing={1.5}>
+        {statuses.map(status => (
+          <Stack key={status.color} direction="row" spacing={1} alignItems="center">
+            <VireoStatusDot color={status.color} />
+            <Typography>{status.label}</Typography>
+          </Stack>
+        ))}
+      </Stack>
+    </VireoStorybookProvider>
+  );
+}

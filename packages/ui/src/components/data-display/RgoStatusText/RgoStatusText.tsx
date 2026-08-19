@@ -1,4 +1,7 @@
-import { RgoStatusDot, type RgoStatusDotProps } from "@/components/data-display/RgoStatusDot/RgoStatusDot";
+import {
+  VireoStatusDot as RgoStatusDot,
+  type VireoStatusDotProps as RgoStatusDotProps,
+} from "@/core/components/feedback/VireoStatusDot";
 import { Box, Popover, Typography } from "@mui/material";
 import React from "react";
 

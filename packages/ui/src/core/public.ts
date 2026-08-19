@@ -6,6 +6,11 @@ export { VireoLabelBox as RgoLabelBox } from "./components/data-display/VireoLab
 export type { VireoLabelBoxProps as RgoLabelBoxProps } from "./components/data-display/VireoLabelBox";
 export * from "./components/data-display/VireoJsonViewer";
 export * from "./components/data-display/VireoTruncatedContent";
+export * from "./components/feedback/VireoStatusDot";
+/** @deprecated Use VireoStatusDot. */
+export { VireoStatusDot as RgoStatusDot } from "./components/feedback/VireoStatusDot";
+/** @deprecated Use VireoStatusDotProps. */
+export type { VireoStatusDotProps as RgoStatusDotProps } from "./components/feedback/VireoStatusDot";
 export * from "./components/surfaces/VireoIconContainer";
 /** @deprecated Use VireoIconContainer. */
 export { VireoIconContainer as RgoIconContainer } from "./components/surfaces/VireoIconContainer";
