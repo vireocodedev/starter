@@ -468,16 +468,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoIconButton/stories/RgoIconButton.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoIconButton/stories/RgoIconButtonWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoInputAutocomplete/RgoInputAutocomplete.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
