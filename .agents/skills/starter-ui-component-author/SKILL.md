@@ -56,6 +56,7 @@ Generation establishes structure only. Before treating the component as complete
 - Keep default CSS in `*.styled.ts`; expose only styling regions that are genuine public slots or state classes.
 - Replace baseline tests with capability-driven coverage for behavior, events, accessibility, refs, slots, classes, theme integration, and regressions actually owned by the component.
 - Replace baseline stories with useful default, state, edge-case, interaction, slot, and theme examples as supported by the component. Start the main component description with a one-sentence summary, then add `### Why it exists` covering the recurring problem, why Vireo owns the abstraction, and its use-or-avoid boundary. A story build is not a substitute for behavior tests.
+- Keep every story compatible with the shared dark Vireo Storybook theme. Use semantic palette tokens for neutral fixture surfaces and text, and make local `ThemeProvider` customization extend the outer theme instead of replacing it with a default light theme.
 - Export only the component, classes, and types from the local barrel unless another API is intentionally public. Add the component directory to `packages/ui/src/index.ts` only when ready to publish.
 - Add an appropriate changeset for a published API change. Preserve compatibility aliases when the migration requires them.
 

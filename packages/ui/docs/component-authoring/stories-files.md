@@ -172,6 +172,47 @@ Use decorators for shared visual context such as a constrained surface, provider
 
 Story-only fixtures must be deterministic, product-neutral, and local to the story unless several components genuinely share them. Stories must not depend on a consuming application, network data, current time, or mutable external state.
 
+## Shared dark Storybook theme
+
+The Vireo review Storybook supplies one shared dark MUI theme. Every story, including its fixtures, decorators, portals, and theme-customization example, must remain visually coherent with that outer theme.
+
+- Use semantic palette tokens such as `background.default`, `background.paper`, `text.primary`, `text.secondary`, `divider`, and `action.hover` for neutral story surfaces and text.
+- Do not hardcode `white`, light grey palette values, or other light-only neutral colors in story fixtures.
+- Deliberate brand or state accents may use explicit colors, but they must retain suitable contrast on the shared dark surfaces.
+- A theme-customization story must extend the outer theme. Do not pass a standalone `createTheme({ ... })` result to `ThemeProvider`, because that silently resets the story to MUI's default light mode.
+
+Use an outer-theme callback when demonstrating component theme customization:
+
+```tsx
+import { ThemeProvider, createTheme, type Theme } from "@mui/material";
+
+function createCustomizedTheme(outerTheme: Theme): Theme {
+  return createTheme(outerTheme, {
+    components: {
+      VireoComponent: {
+        styleOverrides: {
+          root: {
+            borderColor: "#a78bfa",
+          },
+        },
+      },
+    },
+  });
+}
+
+export const ThemeCustomization: Story = {
+  decorators: [
+    Story => (
+      <ThemeProvider theme={createCustomizedTheme}>
+        <Story />
+      </ThemeProvider>
+    ),
+  ],
+};
+```
+
+The dark review theme is the baseline, but semantic tokens are still preferred so fixtures remain correct if the shared theme evolves.
+
 ## Capability-driven stories
 
 The Default story is the minimum, not the complete documentation for every component. Add stories only for public distinctions a consumer needs to see or exercise.
@@ -254,6 +295,8 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - Complex or misleading controls are configured deliberately.
 - Any story-only args adapter is derived from public types and relaxes only a Storybook-incompatible correlated contract.
 - Fixtures and decorators are deterministic, minimal, and product-neutral.
+- Fixtures use semantic theme tokens and remain coherent with the shared dark Storybook theme.
+- Theme-customization decorators extend the outer theme instead of replacing it with a standalone light theme.
 - Additional stories correspond to meaningful public states or customization contracts.
 - Interactive stories use accessible canvas queries.
 - Slot and theme stories use only supported public customization APIs.

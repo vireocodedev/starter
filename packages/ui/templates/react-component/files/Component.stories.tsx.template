@@ -1,6 +1,6 @@
 import { {{componentName}} } from "./{{componentName}}";
 import { {{componentConstantName}}_NAME } from "./{{componentName}}.identity";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider, createTheme, type Theme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
@@ -42,23 +42,25 @@ export const CustomizedSlots: Story = {
   },
 };
 
-const customizedTheme = createTheme({
-  components: {
-    [{{componentConstantName}}_NAME]: {
-      styleOverrides: {
-        root: {
-          color: "#7c3aed",
-          fontWeight: 700,
+function createCustomizedTheme(outerTheme: Theme): Theme {
+  return createTheme(outerTheme, {
+    components: {
+      [{{componentConstantName}}_NAME]: {
+        styleOverrides: {
+          root: {
+            color: "#a78bfa",
+            fontWeight: 700,
+          },
         },
       },
     },
-  },
-});
+  });
+}
 
 export const ThemeCustomization: Story = {
   decorators: [
     Story => (
-      <ThemeProvider theme={customizedTheme}>
+      <ThemeProvider theme={createCustomizedTheme}>
         <Story />
       </ThemeProvider>
     ),
