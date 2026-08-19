@@ -3,14 +3,14 @@ import { VIREO_RESPONSIVE_OVERLAY_FRAME_NAME } from "./VireoResponsiveOverlayFra
 import type { VireoResponsiveOverlayFrameProps } from "./VireoResponsiveOverlayFrame.types";
 import { SIDE_PANEL_WIDTH_CSS_VAR } from "@/capabilities/overlays/constants/overlay.constants";
 import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/VireoOverlayHeader";
-import { Box, Button, Chip, Divider, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, Button, Chip, Divider, Stack, ThemeProvider, Typography, createTheme, type Theme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fireEvent, fn, userEvent, waitFor, within } from "storybook/test";
 import React from "react";
 
 function Workspace({ onOpen }: { onOpen: () => void }) {
   return (
-    <Box component="main" sx={{ flex: 1, minWidth: 0, overflow: "auto", p: 3, bgcolor: "grey.50" }}>
+    <Box component="main" sx={{ flex: 1, minWidth: 0, overflow: "auto", p: 3, bgcolor: "background.default" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="overline" color="primary.main">
@@ -224,27 +224,29 @@ export const CustomizedRootSlot: Story = {
   },
 };
 
-const customizedTheme = createTheme({
-  palette: { primary: { main: "#7c3aed" } },
-  components: {
-    [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]: {
-      defaultProps: {
-        desktopSurface: "overlaySidePanel",
-        desktopSidePanelWidth: 460,
-        desktopSidePanelSx: {
-          borderLeftColor: "#7c3aed",
-          borderLeftWidth: 3,
-          boxShadow: "-12px 0 32px rgba(76, 29, 149, 0.18)",
+function createCustomizedTheme(outerTheme: Theme): Theme {
+  return createTheme(outerTheme, {
+    palette: { primary: { main: "#a78bfa" } },
+    components: {
+      [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]: {
+        defaultProps: {
+          desktopSurface: "overlaySidePanel",
+          desktopSidePanelWidth: 460,
+          desktopSidePanelSx: {
+            borderLeftColor: "#a78bfa",
+            borderLeftWidth: 3,
+            boxShadow: "-12px 0 32px rgba(0, 0, 0, 0.38)",
+          },
         },
       },
     },
-  },
-});
+  });
+}
 
 export const ThemeCustomization: Story = {
   decorators: [
     Story => (
-      <ThemeProvider theme={customizedTheme}>
+      <ThemeProvider theme={createCustomizedTheme}>
         <Story />
       </ThemeProvider>
     ),

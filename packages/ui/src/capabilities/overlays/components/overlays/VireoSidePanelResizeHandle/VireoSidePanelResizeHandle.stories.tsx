@@ -1,6 +1,6 @@
 import { VireoSidePanelResizeHandle } from "./VireoSidePanelResizeHandle";
 import { VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME } from "./VireoSidePanelResizeHandle.identity";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { Box, ThemeProvider, createTheme, type Theme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
 
@@ -30,18 +30,19 @@ const meta: Meta<typeof VireoSidePanelResizeHandle> = {
   },
   decorators: [
     Story => (
-      <div
-        style={{
+      <Box
+        sx={{
           position: "relative",
           width: 360,
           height: 240,
-          border: "1px solid #bdbdbd",
-          background: "white",
+          border: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
         }}
       >
         <Story />
-        <div style={{ padding: 24, color: "#616161" }}>Side-panel content</div>
-      </div>
+        <Box sx={{ p: 3, color: "text.secondary" }}>Side-panel content</Box>
+      </Box>
     ),
   ],
 };
@@ -76,22 +77,24 @@ export const CustomizedSlots: Story = {
   },
 };
 
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME]: {
-      styleOverrides: {
-        root: { "&::after": { backgroundColor: "#7c3aed", opacity: 0.5 } },
-        resizing: { "&::after": { backgroundColor: "#db2777", opacity: 1 } },
+function createCustomizedTheme(outerTheme: Theme): Theme {
+  return createTheme(outerTheme, {
+    components: {
+      [VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME]: {
+        styleOverrides: {
+          root: { "&::after": { backgroundColor: "#a78bfa", opacity: 0.65 } },
+          resizing: { "&::after": { backgroundColor: "#f472b6", opacity: 1 } },
+        },
       },
     },
-  },
-});
+  });
+}
 
 export const ThemeCustomization: Story = {
   args: { isResizing: true },
   decorators: [
     Story => (
-      <ThemeProvider theme={customizedTheme}>
+      <ThemeProvider theme={createCustomizedTheme}>
         <Story />
       </ThemeProvider>
     ),

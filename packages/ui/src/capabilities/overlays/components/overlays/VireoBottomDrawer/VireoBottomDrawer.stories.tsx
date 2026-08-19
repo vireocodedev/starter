@@ -1,7 +1,7 @@
 import { VireoBottomDrawer } from "./VireoBottomDrawer";
 import { VIREO_BOTTOM_DRAWER_NAME } from "./VireoBottomDrawer.identity";
 import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/VireoOverlayHeader";
-import { Box, Button, Chip, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, Button, Chip, Stack, ThemeProvider, Typography, createTheme, type Theme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
 import React from "react";
@@ -81,7 +81,7 @@ const meta: Meta<typeof VireoBottomDrawer> = {
   },
   decorators: [
     Story => (
-      <Box sx={{ bgcolor: "grey.100", p: 3 }}>
+      <Box sx={{ bgcolor: "background.paper", p: 3 }}>
         <Typography variant="h5">Customer workspace</Typography>
         <Typography color="text.secondary">The bottom sheet remains the subject of this mobile canvas.</Typography>
         <Story />
@@ -117,19 +117,21 @@ export const CustomizedPuller: Story = {
   },
 };
 
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_BOTTOM_DRAWER_NAME]: {
-      defaultProps: { useBackdrop: false },
-      styleOverrides: { puller: { backgroundColor: "#ede9fe", "&::after": { backgroundColor: "#7c3aed" } } },
+function createCustomizedTheme(outerTheme: Theme): Theme {
+  return createTheme(outerTheme, {
+    components: {
+      [VIREO_BOTTOM_DRAWER_NAME]: {
+        defaultProps: { useBackdrop: false },
+        styleOverrides: { puller: { backgroundColor: "#2e1065", "&::after": { backgroundColor: "#a78bfa" } } },
+      },
     },
-  },
-});
+  });
+}
 
 export const ThemeCustomization: Story = {
   decorators: [
     Story => (
-      <ThemeProvider theme={customizedTheme}>
+      <ThemeProvider theme={createCustomizedTheme}>
         <Story />
       </ThemeProvider>
     ),

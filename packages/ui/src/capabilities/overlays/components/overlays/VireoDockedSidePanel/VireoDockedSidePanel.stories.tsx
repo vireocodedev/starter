@@ -5,7 +5,7 @@ import { SIDE_PANEL_WIDTH_CSS_VAR } from "@/capabilities/overlays/constants/over
 import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/VireoOverlayHeader";
 import { VireoSidePanelResizeHandle } from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle";
 import { useSidePanelResize } from "@/capabilities/overlays/hooks/useSidePanelResize/useSidePanelResize";
-import { Box, Button, Chip, Divider, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, Button, Chip, Divider, Stack, ThemeProvider, Typography, createTheme, type Theme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
 
@@ -47,7 +47,7 @@ function DockedSidePanelDemo(args: VireoDockedSidePanelProps) {
         minWidth: 720,
         height: 520,
         overflow: "hidden",
-        bgcolor: "grey.50",
+        bgcolor: "background.default",
         border: 1,
         borderColor: "divider",
         borderRadius: 2,
@@ -238,21 +238,27 @@ export const CustomizedSlots: Story = {
   },
 };
 
-const customizedTheme = createTheme({
-  components: {
-    [VIREO_DOCKED_SIDE_PANEL_NAME]: {
-      styleOverrides: {
-        root: { paddingLeft: 6, backgroundColor: "#ede9fe" },
-        surface: { borderLeftColor: "#7c3aed", borderLeftWidth: 3, boxShadow: "-10px 0 30px rgba(76, 29, 149, 0.14)" },
+function createCustomizedTheme(outerTheme: Theme): Theme {
+  return createTheme(outerTheme, {
+    components: {
+      [VIREO_DOCKED_SIDE_PANEL_NAME]: {
+        styleOverrides: {
+          root: { paddingLeft: 6, backgroundColor: "#2e1065" },
+          surface: {
+            borderLeftColor: "#a78bfa",
+            borderLeftWidth: 3,
+            boxShadow: "-10px 0 30px rgba(0, 0, 0, 0.38)",
+          },
+        },
       },
     },
-  },
-});
+  });
+}
 
 export const ThemeCustomization: Story = {
   decorators: [
     Story => (
-      <ThemeProvider theme={customizedTheme}>
+      <ThemeProvider theme={createCustomizedTheme}>
         <Story />
       </ThemeProvider>
     ),
