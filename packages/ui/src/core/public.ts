@@ -24,6 +24,7 @@ export * from "./components/inputs/VireoTextInput";
 export * from "./components/inputs/VireoNumberInput";
 export * from "./components/inputs/VireoPasswordInput";
 export * from "./components/inputs/VireoCounterInput";
+export * from "./components/inputs/VireoSwitchInput";
 export * from "./components/navigation/VireoTabs";
 /** @deprecated Use VireoSnack. */
 export { VireoSnack as RgoSnack } from "./components/feedback/VireoSnack";
