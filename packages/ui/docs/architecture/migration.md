@@ -130,7 +130,6 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `@types/rgo.d.ts`               | Package-wide root declaration          | Planned       | Retain only the global CSS import declaration.                                                                                         |
 | `api/**`                        | Compatibility entry                    | Compatibility | Preserve `./api`; remap symbols after `apiutils` is split.                                                                             |
 | `country/**`                    | `capabilities/country`                 | Planned       | Preserve the declared `./country` subpath.                                                                                             |
-| `docs/**`                       | `docs/storybook`                       | Planned       | Package-wide Storybook MDX leaves `src`.                                                                                               |
 | `enums/**`                      | `core/models`                          | Planned       | `RgoMonth` is a runtime Zod model, not a folder category.                                                                              |
 | `events/RgoEventBus.ts`         | `core/events`                          | Planned       | Provisional migration of the in-process bus.                                                                                           |
 | `events/useRgoEventListener.ts` | `core/hooks/useRgoEventListener`       | Planned       | Provisional consumer hook.                                                                                                             |
@@ -231,6 +230,12 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 - Generic inputs, navigation, feedback, icons, theming, responsive helpers, browser services, and pure utilities are core-owned.
 - `layout`, `navigation`, `feedback`, `inputs`, `providers`, `api`, `video`, and `events` are not initial top-level capabilities.
 - Integrations are migrated last and require their own architecture design.
+
+## Completed migration slices
+
+| Completed on | Source        | Destination      | Notes                                                                    |
+| ------------ | ------------- | ---------------- | ------------------------------------------------------------------------ |
+| 2026-08-19   | `src/docs/**` | `docs/storybook` | Package-wide Storybook MDX now lives outside the production source tree. |
 
 ## Automated verification
 
