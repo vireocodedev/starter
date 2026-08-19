@@ -8,6 +8,12 @@ export {
   useGuardedOverlayModeSwitch,
   type GuardedOverlayModeSwitch,
 } from "./page-overlays/hooks/useGuardedOverlayModeSwitch/useGuardedOverlayModeSwitch";
+export {
+  PageOverlay,
+  PageOverlayControllerProvider,
+  PageOverlayOutlet,
+  type PageOverlayProps,
+} from "./page-overlays/providers/PageOverlayControllerProvider/PageOverlayControllerProvider";
 export { useRafViewportWidth } from "./hooks/useRafViewportWidth/useRafViewportWidth";
 export { useSidePanelResize } from "./hooks/useSidePanelResize/useSidePanelResize";
 export {
