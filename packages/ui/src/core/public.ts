@@ -4,6 +4,7 @@ export * from "./components/data-display/VireoLabelBox";
 export { VireoLabelBox as RgoLabelBox } from "./components/data-display/VireoLabelBox";
 /** @deprecated Use VireoLabelBoxProps. */
 export type { VireoLabelBoxProps as RgoLabelBoxProps } from "./components/data-display/VireoLabelBox";
+export * from "./components/data-display/VireoJsonViewer";
 export * from "./components/data-display/VireoTruncatedContent";
 export * from "./components/surfaces/VireoIconContainer";
 /** @deprecated Use VireoIconContainer. */

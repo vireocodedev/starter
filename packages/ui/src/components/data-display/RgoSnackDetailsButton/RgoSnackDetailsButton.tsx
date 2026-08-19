@@ -1,5 +1,5 @@
 import { VireoOverlayHeader } from "@/capabilities/overlays/public";
-import { RgoJsonViewer } from "@/components/data-display/RgoJsonViewer/RgoJsonViewer";
+import { VireoJsonViewer } from "@/core/public";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { Dialog, DialogContent, IconButton, Tooltip } from "@mui/material";
 import React from "react";
@@ -39,7 +39,7 @@ export function RgoSnackDetailsButton({ data, tooltip = "Show details" }: RgoSna
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <VireoOverlayHeader title={t("common.errorDetails")} closeLabel={t("common.close")} onClose={handleClose} />
         <DialogContent sx={{ pt: "20px" }}>
-          <RgoJsonViewer data={data} maxHeight="60vh" />
+          <VireoJsonViewer data={data} maxHeight="60vh" copyLabel="Copy JSON to clipboard" copiedLabel="JSON copied" />
         </DialogContent>
       </Dialog>
     </>
