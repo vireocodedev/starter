@@ -1,4 +1,4 @@
-import type { VireoDataAttributeValue } from "@/utils/muiutils";
+import type { VireoDataAttributeValue } from "@/core/public";
 import type { Close } from "@mui/icons-material";
 import type { BoxProps, IconButton, Typography } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";

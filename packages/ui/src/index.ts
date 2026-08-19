@@ -1,4 +1,5 @@
 export * from "@/core/public";
+export * from "@/capabilities/overlays/public";
 export * from "@/components/AppBottomDrawer";
 export * from "@/components/AppCardActions";
 export * from "@/components/AppCardContent";
@@ -114,7 +115,6 @@ export * from "@/overlay/PageOverlayController";
 export * from "@/overlay/PageOverlayControllerContext";
 export * from "@/overlay/ResponsiveOverlayFrame";
 export * from "@/overlay/SidePanelResizeHandle";
-export * from "@/overlay/VireoOverlayHeader";
 export * from "@/overlay/useGuardedOverlayModeSwitch";
 export * from "@/overlay/useRafViewportWidth";
 export * from "@/overlay/useSidePanelResize";

@@ -2458,46 +2458,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.classes.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.identity.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.styled.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.test.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.types.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "providers/AppMobileAttributeProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

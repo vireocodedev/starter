@@ -1,4 +1,4 @@
-import type { VireoSlotNameTuple } from "@/utils/muiutils";
+import type { VireoSlotNameTuple } from "@/core/public";
 
 /** Stable component name shared by every VireoOverlayHeader integration point. */
 export const VIREO_OVERLAY_HEADER_NAME = "VireoOverlayHeader";

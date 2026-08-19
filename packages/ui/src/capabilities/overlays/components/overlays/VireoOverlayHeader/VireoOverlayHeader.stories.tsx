@@ -12,7 +12,7 @@ type VireoOverlayHeaderStoryArgs = VireoOverlayHeaderOwnProps & {
 };
 
 const meta: Meta<typeof VireoOverlayHeader> = {
-  title: "Components/Overlay/VireoOverlayHeader",
+  title: "Overlays/Overlays/VireoOverlayHeader",
   component: VireoOverlayHeader,
   tags: ["autodocs"],
   parameters: {

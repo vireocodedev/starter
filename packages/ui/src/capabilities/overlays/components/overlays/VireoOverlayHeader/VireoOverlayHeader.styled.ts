@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/utils/muiutils";
+import { type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
 import { Close } from "@mui/icons-material";
 import {
   Box,
