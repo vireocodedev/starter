@@ -20,7 +20,7 @@ const richContent = (
 );
 
 const meta: Meta<typeof VireoTruncatedContent> = {
-  title: "Components/Data Display/VireoTruncatedContent",
+  title: "Core/Data Display/VireoTruncatedContent",
   component: VireoTruncatedContent,
   tags: ["autodocs"],
   parameters: {

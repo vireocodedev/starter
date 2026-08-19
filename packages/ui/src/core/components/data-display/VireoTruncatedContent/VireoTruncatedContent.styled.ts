@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/utils/muiutils";
+import { type StyledSlotComponent, type StyledSlotProps } from "@/core/utils/muiutils";
 import { Box, Button, type BoxProps, type ButtonProps } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { VIREO_TRUNCATED_CONTENT_NAME } from "./VireoTruncatedContent.identity";

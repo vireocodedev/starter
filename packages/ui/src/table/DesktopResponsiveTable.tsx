@@ -3,7 +3,7 @@ import {
   type ResponsiveTableProps,
   type ResponsiveTableState,
 } from "@/table/responsiveTableState";
-import { VireoTruncatedContent } from "@/components/data-display/VireoTruncatedContent";
+import { VireoTruncatedContent } from "@/core/public";
 import {
   Box,
   Skeleton,

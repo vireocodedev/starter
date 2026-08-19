@@ -573,46 +573,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.classes.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.identity.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.styled.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.test.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.types.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/DelayedRender.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

@@ -6,7 +6,6 @@ export * from "@/components/data-display/RgoClientTable/RgoClientTable";
 export * from "@/components/data-display/RgoIcon/RgoIcon";
 export * from "@/components/data-display/RgoJsonViewer/RgoJsonViewer";
 export * from "@/components/data-display/RgoJsonViewerDialog/RgoJsonViewerDialog";
-export * from "@/components/data-display/VireoTruncatedContent";
 export * from "@/components/data-display/RgoPdfFrame/RgoPdfFrame";
 export * from "@/components/data-display/RgoServerTable/RgoServerTable";
 export * from "@/components/data-display/RgoSnack/RgoSnack";

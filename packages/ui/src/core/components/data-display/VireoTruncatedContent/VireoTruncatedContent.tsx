@@ -1,4 +1,4 @@
-import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/utils/muiutils";
+import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/utils/muiutils";
 import { unstable_composeClasses as composeClasses, type ButtonProps } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
