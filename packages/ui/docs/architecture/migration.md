@@ -159,13 +159,13 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Root component files
 
-| Current path pattern                                                                                      | Target owner                                              | Disposition   | Notes                                                                        |
-| --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------- |
-| `components/{AppCardActions.tsx,AppCardContent.tsx,SlidingScreenStack.tsx,ResponsiveMonthYearPicker.tsx}` | `core/components`                                         | Split         | Classify individually as surfaces, layout, or inputs during Vireo migration. |
-| `components/DelayedRender.tsx`                                                                            | `core/components/behavior/VireoDelayedRender`             | Compatibility | Thin deprecated alias.                                                       |
-| `components/{FormToggleButtonField.tsx,MobileFormParts.tsx}`                                              | `capabilities/forms/components/forms`                     | Planned       | Coupled to form state or form composition.                                   |
-| `components/ManagementSearchToolbar.tsx`                                                                  | `capabilities/table/management-table/components/controls` | Planned       | Management-table search workflow.                                            |
-| `components/ResponsiveCard.tsx`                                                                           | `capabilities/page-layout/components/surfaces`            | Planned       | Behavior depends on page-content layout mode.                                |
+| Current path pattern                                                                   | Target owner                                              | Disposition   | Notes                                                                        |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------- |
+| `components/{AppCardContent.tsx,SlidingScreenStack.tsx,ResponsiveMonthYearPicker.tsx}` | `core/components`                                         | Split         | Classify individually as surfaces, layout, or inputs during Vireo migration. |
+| `components/DelayedRender.tsx`                                                         | `core/components/behavior/VireoDelayedRender`             | Compatibility | Thin deprecated alias.                                                       |
+| `components/{FormToggleButtonField.tsx,MobileFormParts.tsx}`                           | `capabilities/forms/components/forms`                     | Planned       | Coupled to form state or form composition.                                   |
+| `components/ManagementSearchToolbar.tsx`                                               | `capabilities/table/management-table/components/controls` | Planned       | Management-table search workflow.                                            |
+| `components/ResponsiveCard.tsx`                                                        | `capabilities/page-layout/components/surfaces`            | Planned       | Behavior depends on page-content layout mode.                                |
 
 ### Data-display components
 
@@ -282,6 +282,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/data-display/RgoValueWithUnit/**`                                                                   | Removed                                                                       | Removed a trivial value-and-unit composition better owned by consumers.             |
 | 2026-08-19   | `components/data-display/RgoPdfFrame/**`                                                                        | Removed                                                                       | Removed the unused browser-native PDF iframe and loader composition.                |
 | 2026-08-19   | `components/data-display/RgoTruncatedText/**`                                                                   | Removed                                                                       | Removed the superseded text-only truncation component; use `VireoTruncatedContent`. |
+| 2026-08-19   | `components/AppCardActions.tsx`                                                                                 | Removed                                                                       | Removed an unused application-styled wrapper around MUI `CardActions`.              |
 
 ## Automated verification
 
