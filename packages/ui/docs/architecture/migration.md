@@ -232,9 +232,9 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 - `layout`, `navigation`, `feedback`, `inputs`, `providers`, `api`, `video`, and `events` are not initial top-level capabilities.
 - Integrations are migrated last and require their own architecture design.
 
-## Verification target
+## Automated verification
 
-The tooling phase must add a coverage check that:
+`npm run test:architecture` now checks that:
 
 1. expands inventory brace sets;
 2. enumerates every file under `packages/ui/src`;
@@ -242,4 +242,6 @@ The tooling phase must add a coverage check that:
 4. fails when a file matches more than one row;
 5. reports stale patterns that match nothing.
 
-Until that check exists, reviewers must update and audit this ledger manually whenever the current source tree changes.
+It also enforces the target source root, capability depth, structural folders, component categories, Vireo root contract, barrel placement, import boundaries, sibling isolation, and acyclic capability dependencies wherever target-architecture code exists.
+
+Legacy source-location violations are recorded as exact file paths in `packages/ui/architecture.allowlist.json`. Adding another file beneath an existing legacy module therefore fails rather than silently expanding a broad directory exception. Inventory, target-structure, Vireo, and dependency violations cannot be allowlisted.

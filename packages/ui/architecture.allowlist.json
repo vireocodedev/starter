@@ -1,4 +1,3155 @@
 {
   "version": 1,
-  "exceptions": []
+  "exceptions": [
+    {
+      "rule": "legacy-source-location",
+      "path": "@types/i18n.d.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "@types/mui.d.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "@types/rgo.d.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "api/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/AppBottomDrawer.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/AppCardActions.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/AppCardContent.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/RgoClientTable.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/RgoClientTable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTable.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTable.stories.utils.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTableWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTableWithExpandableRowsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTableWithPaginationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTableWithRowHighlightingDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTableWithSmallSizeDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTableWithSortingDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoClientTable/stories/RgoClientTableWithStickyHeaderDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoIcon/RgoIcon.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoIcon/RgoIcon.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoIcon/stories/RgoIcon.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoIcon/stories/RgoIconWithCustomStylingDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoIcon/stories/RgoIconWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoIconContainer/RgoIconContainer.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoJsonViewer/RgoJsonViewer.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoJsonViewer/RgoJsonViewer.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoJsonViewerDialog/RgoJsonViewerDialog.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoLabelBox/RgoLabelBox.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoPdfFrame/RgoPdfFrame.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoPdfFrame/stories/RgoPdfFrame.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoPdfFrame/stories/RgoPdfFrameWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/RgoServerTable.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/RgoServerTable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/stories/RgoServerTable.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/stories/RgoServerTable.stories.utils.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/stories/RgoServerTableWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/stories/RgoServerTableWithExpandableRowsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/stories/RgoServerTableWithHighlightingDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/stories/RgoServerTableWithSortingDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoServerTable/stories/RgoServerTableWithStickyHeaderDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnack/RgoSnack.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnack/RgoSnack.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnack/stories/RgoSnack.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnack/stories/RgoSnackWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnack/stories/RgoSnackWithIconDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnack/stories/RgoSnackWithLoaderAndIconDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnack/stories/RgoSnackWithLoaderDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoSnackDetailsButton/RgoSnackDetailsButton.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStatusDot/RgoStatusDot.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStatusDot/stories/RgoStatusDot.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStatusDot/stories/RgoStatusDotWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStatusText/RgoStatusText.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStatusText/stories/RgoStatusText.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStatusText/stories/RgoStatusTextWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/RgoStopwatch.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/RgoStopwatch.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/stories/RgoStopwatch.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/stories/RgoStopwatchWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/stories/RgoStopwatchWithLongDurationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/stories/RgoStopwatchWithMediumDurationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/stories/RgoStopwatchWithShortDurationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/stories/RgoStopwatchWithVariationsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoStopwatch/stories/RgoStopwatchWithVeryLongDurationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableCellSortable/RgoTableCellSortable.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableCellSortable/RgoTableCellSortable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableCellSortable/stories/RgoTableCellSortable.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableCellSortable/stories/RgoTableCellSortableWithAlignmentsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableCellSortable/stories/RgoTableCellSortableWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableCellSortable/stories/RgoTableCellSortableWithHeaderComponentDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableCellSortable/stories/RgoTableCellWithMultiColumnSortDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTablePagination/RgoTablePagination.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTablePagination/RgoTablePagination.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTablePagination/stories/RgoTablePagination.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTablePagination/stories/RgoTablePaginationWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/RgoTableRowExpandable.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/RgoTableRowExpandable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/stories/RgoTableRowExpandable.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/stories/RgoTableRowExpandable.stories.utils.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/stories/RgoTableRowExpandableWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/stories/RgoTableRowExpandableWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/stories/RgoTableRowExpandableWithHighlightedDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/components/RgoTableRowExpandable/stories/RgoTableRowExpandableWithMultipleRowsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/stories/RgoTable.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTable/stories/RgoTableOverviewDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTimeWithDateDisplay/RgoTimeWithDateDisplay.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTimeWithDateDisplay/stories/RgoTimeWithDateDisplay.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTimeWithDateDisplay/stories/RgoTimeWithDateDisplayWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTimeWithDateDisplayInline/RgoTimeWithDateDisplayInline.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTimeWithDateDisplayInline/stories/RgoTimeWithDateDisplayInline.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTimeWithDateDisplayInline/stories/RgoTimeWithDateDisplayInlineWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/RgoTruncatedText.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/RgoTruncatedText.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedText.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithCustomActionTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithDifferentRowLimitsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithDifferentWidthsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithIconsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoTruncatedText/stories/RgoTruncatedTextWithNoTruncationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/RgoValueWithUnit.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/RgoValueWithUnit.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnit.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithCommonUnitsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithDecimalPrecisionDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithDifferentValueTypesDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoValueWithUnit/stories/RgoValueWithUnitWithEmptyAndInvalidValuesDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayer.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithAutoStartControlDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithCustomStylesDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithDifferentSizesDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithErrorHandlingDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/VireoIconContainer.classes.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/VireoIconContainer.identity.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/VireoIconContainer.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/VireoIconContainer.styled.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/VireoIconContainer.test.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/VireoIconContainer.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoIconContainer/VireoIconContainer.types.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/VireoLabelBox.classes.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/VireoLabelBox.identity.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/VireoLabelBox.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/VireoLabelBox.styled.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/VireoLabelBox.test.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/VireoLabelBox.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoLabelBox/VireoLabelBox.types.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.classes.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.identity.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.styled.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.test.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/data-display/VireoTruncatedContent/VireoTruncatedContent.types.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/DelayedRender.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/RgoDialogHeader.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/RgoDialogHeader.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeader.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithChildrenDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithDifferentColorsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithOnCloseHandlerDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDialogHeader/stories/RgoDialogHeaderWithReactNodeTitleDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDrawer/RgoDrawer.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDrawer/RgoDrawer.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDrawer/stories/RgoDrawer.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDrawer/stories/RgoDrawerWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDrawer/stories/RgoDrawerWithLeftAnchorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoDrawer/stories/RgoDrawerWithTemporaryDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoLoader/RgoLoader.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoLoader/RgoLoader.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoLoader/stories/RgoLoader.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoLoader/stories/RgoLoaderWithContainerSizeDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoLoader/stories/RgoLoaderWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoLoader/stories/RgoLoaderWithLoaderSizeDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/RgoLoaderSuspense.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/RgoLoaderSuspense.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/stories/RgoLoaderSuspense.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/stories/RgoLoaderSuspenseWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/RgoQueryErrorBoundary.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/RgoQueryErrorBoundary.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/stories/RgoQueryErrorBoundary.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/stories/RgoQueryErrorBoundaryWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/stories/RgoQueryErrorBoundaryWithFallbackDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/RgoQueryErrorLoaderSuspense.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/RgoQueryErrorLoaderSuspense.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspense.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspenseWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspenseWithErrorComponentDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspenseWithLoaderComponentDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/FormToggleButtonField.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoButtonBase/RgoButtonBase.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoButtonBase/stories/RgoButtonBase.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoButtonBase/stories/RgoButtonBaseWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoForm/RgoForm.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoForm/RgoForm.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoForm/stories/RgoForm.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoForm/stories/RgoFormWithAsyncSubmissionDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoForm/stories/RgoFormWithComprehensiveDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoForm/stories/RgoFormWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoForm/stories/RgoFormWithValidationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoIconButton/RgoIconButton.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoIconButton/stories/RgoIconButton.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoIconButton/stories/RgoIconButtonWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/RgoInputAutocomplete.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/RgoInputAutocomplete.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocomplete.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocompleteWithAsyncDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocompleteWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocompleteWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocompleteWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocompleteWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocompleteWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocomplete/stories/RgoInputAutocompleteWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteFreeSolo/RgoInputAutocompleteFreeSolo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteFreeSolo/stories/RgoInputAutocompleteFreeSolo.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteFreeSolo/stories/RgoInputAutocompleteFreeSoloWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteFreeSoloMultiple/RgoInputAutocompleteFreeSoloMultiple.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteFreeSoloMultiple/stories/RgoInputAutocompleteFreeSoloMultiple.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteFreeSoloMultiple/stories/RgoInputAutocompleteFreeSoloMultipleWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/RgoInputAutocompleteMultiple.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/RgoInputAutocompleteMultiple.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultiple.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithAsyncDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputAutocompleteMultiple/stories/RgoInputAutocompleteMultipleWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/RgoInputCounter.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/RgoInputCounter.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/stories/RgoInputCounter.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/stories/RgoInputCounterWithCustomRangeDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/stories/RgoInputCounterWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/stories/RgoInputCounterWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/stories/RgoInputCounterWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/stories/RgoInputCounterWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputCounter/stories/RgoInputCounterWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/RgoInputDate.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/RgoInputDate.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/stories/RgoInputDate.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/stories/RgoInputDateWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/stories/RgoInputDateWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/stories/RgoInputDateWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/stories/RgoInputDateWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/stories/RgoInputDateWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDate/stories/RgoInputDateWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/RgoInputDateTime.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/RgoInputDateTime.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/stories/RgoInputDateTime.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/stories/RgoInputDateTimeWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/stories/RgoInputDateTimeWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/stories/RgoInputDateTimeWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/stories/RgoInputDateTimeWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/stories/RgoInputDateTimeWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDateTime/stories/RgoInputDateTimeWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/RgoInputDuration.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/RgoInputDuration.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/stories/RgoInputDuration.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/stories/RgoInputDurationWithCustomViewsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/stories/RgoInputDurationWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/stories/RgoInputDurationWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/stories/RgoInputDurationWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/stories/RgoInputDurationWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputDuration/stories/RgoInputDurationWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/RgoInputNumber.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/RgoInputNumber.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/stories/RgoInputNumber.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/stories/RgoInputNumberWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/stories/RgoInputNumberWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/stories/RgoInputNumberWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/stories/RgoInputNumberWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/stories/RgoInputNumberWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputNumber/stories/RgoInputNumberWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/RgoInputPassword.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/RgoInputPassword.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/stories/RgoInputPassword.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputPassword/stories/RgoInputPasswordWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/RgoInputSelect.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/RgoInputSelect.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelect.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithDropdownCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithNoClearDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithPlaceholderDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelect/stories/RgoInputSelectWithRenderOptionDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/RgoInputSelectMultiple.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/RgoInputSelectMultiple.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultiple.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithPlaceholderDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSelectMultiple/stories/RgoInputSelectMultipleWithRenderOptionDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/RgoInputSlider.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/RgoInputSlider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/stories/RgoInputSlider.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSlider/stories/RgoInputSliderWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/RgoInputSwitch.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/RgoInputSwitch.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/stories/RgoInputSwitch.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/stories/RgoInputSwitchWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/stories/RgoInputSwitchWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/stories/RgoInputSwitchWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/stories/RgoInputSwitchWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/stories/RgoInputSwitchWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputSwitch/stories/RgoInputSwitchWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/RgoInputText.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/RgoInputText.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/stories/RgoInputText.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/stories/RgoInputTextWithCustomizationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/stories/RgoInputTextWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/stories/RgoInputTextWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/stories/RgoInputTextWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/stories/RgoInputTextWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputText/stories/RgoInputTextWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/RgoInputTime.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/RgoInputTime.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/stories/RgoInputTime.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/stories/RgoInputTimeWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/stories/RgoInputTimeWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/stories/RgoInputTimeWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/stories/RgoInputTimeWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/stories/RgoInputTimeWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputTime/stories/RgoInputTimeWithRefDateConstraintsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroup.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithDisableClearableDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithDisabledDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithErrorDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithFormInputDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithHelperTextDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/inputs/RgoInputToggleButtonGroup/stories/RgoInputToggleButtonGroupWithMultipleDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSection/RgoFormSection.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSection/RgoFormSection.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSection/stories/RgoFormSection.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSection/stories/RgoFormSectionWithCustomStylingDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSection/stories/RgoFormSectionWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSection/stories/RgoFormSectionWithLabelDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSectionGrid/RgoFormSectionGrid.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSectionGrid/RgoFormSectionGrid.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSectionGrid/stories/RgoFormSectionGrid.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSectionGrid/stories/RgoFormSectionGridWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoFormSectionGrid/stories/RgoFormSectionGridWithFormSectionDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasBody/RgoInfiniteCanvasBody.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasBody/RgoInfiniteCanvasBody.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasOverlay/RgoInfiniteCanvasOverlay.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasOverlay/RgoInfiniteCanvasOverlay.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/RgoInfiniteCanvas.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/RgoInfiniteCanvas.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/stories/RgoInfiniteCanvas.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoInfiniteCanvas/stories/RgoInfiniteCanvasWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPage/RgoPage.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPage/RgoPage.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPage/stories/RgoPage.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPage/stories/RgoPageWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPage/stories/RgoPageWithFullLayoutDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageBody/RgoPageBody.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageBody/RgoPageBody.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageBody/stories/RgoPageBody.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageBody/stories/RgoPageBodyWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageBody/stories/RgoPageBodyWithDrawerDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageBody/stories/RgoPageBodyWithMaxWidthDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageHeader/RgoPageHeader.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageHeader/RgoPageHeader.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageHeader/stories/RgoPageHeader.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageHeader/stories/RgoPageHeaderWithBackButtonDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageHeader/stories/RgoPageHeaderWithChildrenDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/layout/RgoPageHeader/stories/RgoPageHeaderWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/ManagementSearchToolbar.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/MobileFormParts.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/navigation/RgoTabs/RgoTabs.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/navigation/RgoTabs/RgoTabs.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/navigation/RgoTabs/stories/RgoTabs.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/navigation/RgoTabs/stories/RgoTabsWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/navigation/RgoTabs/stories/RgoTabsWithInitialTabDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/navigation/RgoTabs/stories/RgoTabsWithRichContentDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/ResponsiveCard.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/ResponsiveMonthYearPicker.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/SlidingScreenStack.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/RgoShowIf/RgoShowIf.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/RgoShowIf/stories/RgoShowIf.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/RgoShowIf/stories/RgoShowIfWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/VireoDelayedRender.classes.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/VireoDelayedRender.identity.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/VireoDelayedRender.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/VireoDelayedRender.styled.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/VireoDelayedRender.test.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/VireoDelayedRender.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "components/utility/VireoDelayedRender/VireoDelayedRender.types.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "country/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/AugmentableInterfaces.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/CommonPatterns.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/FormAndInputStyleGuide.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/Installation.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/Overview.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/ProvidersGuide.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/ServicesAndUtilities.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/TablePatternsGuide.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "docs/ThemingGuide.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "enums/RgoMonth.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "events/RgoEventBus.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "events/useRgoEventListener.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/components/RgoDropZone/RgoDropZone.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/components/RgoDropZone/RgoDropZone.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/components/RgoDropZoneItem/RgoDropZoneItem.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/components/RgoDropZoneItem/RgoDropZoneItem.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/hooks/useDropZone.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/models/RgoDraggableId.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/models/RgoDroppableId.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@hello-pangea/dnd/providers/RgoDropZoneProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@tanstack/react-query/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/@tanstack/react-query/lib.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/axios/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/axios/lib.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/i18next/components/data-display/RgoNationalityFlag/RgoNationalityFlag.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/i18next/components/data-display/RgoNationalityFlag/RgoNationalityFlag.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/i18next/components/inputs/RgoNationalityInput/RgoNationalityInput.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/i18next/components/inputs/RgoNationalityInput/RgoNationalityInput.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/i18next/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/i18next/lib.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "features/i18next/models/RgoNationality.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "forms/FormShell.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "forms/GuardedForm.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "forms/ResponsiveFormOverlay.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "forms/useDeferredSuccessNotification.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "forms/useFormIdempotencyKey.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/components/HistoryEntryCard.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/components/HistoryFieldRowView.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/components/HistoryGroupView.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/components/HistoryHoverableTableRow.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/components/HistoryNodeView.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/components/HistoryTableColGroup.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/components/HistoryValueContent.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "history/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useAppPageContentLayout.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useDelayedOverlayMount.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useManagementTableState.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useMediaQueryDevice.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/usePageOverlayModes.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useResponsiveProps.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoAutoDismiss/stories/useRgoAutoDismiss.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoAutoDismiss/stories/UseRgoAutoDismissWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoAutoDismiss/useRgoAutoDismiss.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoConfirm/stories/useRgoConfirm.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithColorsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithHtmlStringMessageDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithReactJsxMessageDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithSizesDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoConfirm/useRgoConfirm.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoContainerSize/stories/useRgoContainerSize.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoContainerSize/stories/UseRgoContainerSizeWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoContainerSize/useRgoContainerSize.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDebounce/stories/useRgoDebounce.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDebounce/stories/UseRgoDebounceWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDebounce/useRgoDebounce.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDependentFieldValidation/stories/useRgoDependentFieldValidation.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDependentFieldValidation/stories/UseRgoDependentFieldValidationWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDependentFieldValidation/useRgoDependentFieldValidation.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDownloadFn/stories/useRgoDownloadFn.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDownloadFn/stories/UseRgoDownloadFnWithCsvStringDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDownloadFn/stories/UseRgoDownloadFnWithCustomPresetDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDownloadFn/stories/UseRgoDownloadFnWithXlsxBlobDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoDownloadFn/useRgoDownloadFn.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoFadePresence/stories/useRgoFadePresence.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoFadePresence/stories/UseRgoFadePresenceWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoFadePresence/useRgoFadePresence.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoForm/stories/useRgoForm.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoForm/stories/UseRgoFormWithAdvancedValidationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoForm/stories/UseRgoFormWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoForm/stories/UseRgoFormWithPrefilledDataDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoForm/stories/UseRgoFormWithValidationDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoForm/useRgoForm.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoFullscreenListener/stories/useRgoFullscreenListener.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoFullscreenListener/stories/UseRgoFullscreenListenerWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoFullscreenListener/useRgoFullscreenListener.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoIcons/stories/useRgoIcons.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoIcons/stories/UseRgoIconsWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoIcons/useRgoIcons.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoInfiniteCanvas/stories/useRgoInfiniteCanvas.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoInfiniteCanvas/stories/UseRgoInfiniteCanvasWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoInfiniteCanvas/useRgoInfiniteCanvas.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoMultiStepForm/stories/useRgoMultiStepForm.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoMultiStepForm/stories/UseRgoMultiStepFormWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoMultiStepForm/useRgoMultiStepForm.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoMutation/stories/useRgoMutation.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoMutation/stories/UseRgoMutationWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoMutation/useRgoMutation.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoResizeListener/stories/useRgoResizeListener.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoResizeListener/stories/UseRgoResizeListenerWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoResizeListener/useRgoResizeListener.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoSseEmitter/stories/useRgoSseEmitter.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoSseEmitter/stories/UseRgoSseEmitterWithDefaultPropsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoSseEmitter/useRgoSseEmitter.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoTabs/stories/useRgoTabs.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoTabs/stories/UseRgoTabsWithDefaultsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoTabs/stories/UseRgoTabsWithIconsDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoTabs/stories/UseRgoTabsWithUrlStateDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoTabs/useRgoTabs.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoTypedFieldArray/useRgoTypedFieldArray.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoTypedForm/useRgoTypedForm.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoUrlState/stories/RgoBrowserMock.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoUrlState/stories/useRgoSearchParamsHistory.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoUrlState/stories/UseRgoUrlState.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoUrlState/stories/UseRgoUrlStateWithTableDemo.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useRgoUrlState/useRgoUrlState.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "hooks/useSingleFlightAction.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "inputs/InputAutocomplete.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "layout/appPageContent.constants.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "layout/AppPageContentLayout.utils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "layout/AppPageContentLayoutContext.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "layout/PageBody.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "layout/useMeasuredPageContentMode.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/DockedSidePanel.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/overlay.constants.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/overlay.types.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/overlay.utils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/PageOverlayController.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/PageOverlayControllerContext.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/ResponsiveOverlayFrame.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/SidePanelResizeHandle.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/useGuardedOverlayModeSwitch.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/useRafViewportWidth.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/useSidePanelResize.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.classes.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.identity.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.stories.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.styled.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.test.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "overlay/VireoOverlayHeader/VireoOverlayHeader.types.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/AppMobileAttributeProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/AppSnackbarProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/AppThemeColorMetaProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/createRgoFormDialogProvider/createRgoFormDialogProvider.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/createRgoFormDialogProvider/createRgoFormDialogProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoConfirmProvider/RgoConfirmProvider.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoConfirmProvider/RgoConfirmProvider.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoConfirmProvider/RgoConfirmProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoIconsProvider/RgoIconsProvider.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoIconsProvider/RgoIconsProvider.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoIconsProvider/RgoIconsProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoInitializeProvider/RgoInitializeProvider.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoInitializeProvider/RgoInitializeProvider.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoInitializeProvider/RgoInitializeProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoProviders.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoProviders.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoThemeProvider/RgoThemeProvider.css",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoThemeProvider/RgoThemeProvider.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "providers/RgoThemeProvider/RgoThemeProvider.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "services/RgoLocalStorageService/RgoLocalStorageService.mdx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "services/RgoLocalStorageService/RgoLocalStorageService.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/config/hooks/useTranslationLocal.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/config/icons/RgoIconCheckCircle.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/config/icons/RgoIconXCircle.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/config/RgoIconRegistry.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/config/RgoLocale.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.bs.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.cnr.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.de.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.en.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.hr.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.it.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.pt.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "setup/translations/translation.sl.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/ManagementServerTable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/ManagementTableSkeleton.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/MobileTableAccordionRow.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/MobileTableFiltersDrawer.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/MobileTableToolbar.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/MobileTableViewport.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/RgoServerTableMobile.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/components/TableActionCell.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/DesktopResponsiveTable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/hooks/useMobileTableExpansion.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/MobileAccordionCells.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/mobileAccordionSlot.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/MobileResponsiveTable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/ResponsiveTable.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/responsiveTableState.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/TableHeaderLabel.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/types.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/utils/infiniteTable.utils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/utils/mobileInfiniteScroll.utils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "table/utils/mobileTable.utils.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "unsaved-changes/UnsavedChangesContext.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "unsaved-changes/UnsavedChangesScope.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "unsaved-changes/useUnsavedChangesRegistration.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "unsaved-changes/useUnsavedChangesRequestDiscard.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/apiutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/arrayutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/consoleutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/countryutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/createApiMessageResolver.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/currencyFormatters.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/date.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/dateFormatters.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/debounce.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/downloadFile.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/formutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/iconutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/markdownutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/mathutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/muiutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/objectutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/storybookutils.tsx",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/strings.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/themeutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/tsutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/typeutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "utils/zodutils.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    },
+    {
+      "rule": "legacy-source-location",
+      "path": "video/index.ts",
+      "reason": "Pre-architecture source file tracked by the migration inventory."
+    }
+  ]
 }
