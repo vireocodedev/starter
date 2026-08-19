@@ -2,7 +2,7 @@ import { ResponsiveOverlayFrame } from "@/overlay/ResponsiveOverlayFrame";
 import {
   type ResponsiveOverlayFrameDesktopSidePanelWidth,
   type ResponsiveOverlayFrameProps,
-} from "@/overlay/overlay.types";
+} from "@/capabilities/overlays/public";
 import { UnsavedChangesScope } from "@/unsaved-changes/UnsavedChangesScope";
 import { useUnsavedChangesRequestDiscard } from "@/unsaved-changes/useUnsavedChangesRequestDiscard";
 import { Box, DialogActions, DialogContent, type DialogProps, type SxProps, type Theme } from "@mui/material";

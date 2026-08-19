@@ -3,7 +3,7 @@ import {
   SIDE_PANEL_RESIZE_HANDLE_WIDTH,
   SIDE_PANEL_RESIZE_HITBOX_WIDTH,
   SIDE_PANEL_RESIZE_HOVER_OPACITY,
-} from "./overlay.constants";
+} from "@/capabilities/overlays/public";
 import { Box } from "@mui/material";
 import React from "react";
 

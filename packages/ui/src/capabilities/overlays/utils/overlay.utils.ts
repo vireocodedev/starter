@@ -1,5 +1,5 @@
-import { DESKTOP_SIDE_PANEL_WIDTH_BY_MAX_WIDTH } from "./overlay.constants";
-import { type ResponsiveOverlayFrameDesktopSidePanelWidth } from "./overlay.types";
+import { DESKTOP_SIDE_PANEL_WIDTH_BY_MAX_WIDTH } from "@/capabilities/overlays/constants/overlay.constants";
+import { type ResponsiveOverlayFrameDesktopSidePanelWidth } from "@/capabilities/overlays/types/overlay.types";
 import { type DialogProps } from "@mui/material";
 
 export function getDefaultDesktopSidePanelWidth(maxWidth: DialogProps["maxWidth"]): number {

@@ -14,11 +14,16 @@ vi.mock("@/components/AppBottomDrawer", () => ({
   ),
 }));
 
-vi.mock("@/overlay/useRafViewportWidth", () => ({
+vi.mock("@/capabilities/overlays/public", () => ({
+  DEFAULT_DESKTOP_SIDE_PANEL_MIN_WIDTH: 360,
+  DEFAULT_DESKTOP_SIDE_PANEL_VIEWPORT_INSET: 48,
+  SIDE_PANEL_WIDTH_CSS_VAR: "--responsive-overlay-side-panel-width",
+  clampSidePanelWidth: (width: number, minWidth: number, maxWidth: number) =>
+    Math.max(minWidth, Math.min(width, Math.max(minWidth, maxWidth))),
+  getDefaultDesktopSidePanelWidth: () => 560,
+  getNumericDesktopSidePanelWidth: (width: number | string) => (typeof width === "number" ? width : 560),
+  resolveDockedSidePanelWidth: (width: number | string) => width,
   useRafViewportWidth: () => 1440,
-}));
-
-vi.mock("@/overlay/useSidePanelResize", () => ({
   useSidePanelResize: () => ({
     isResizing: false,
     onResizeDoubleClick: vi.fn(),

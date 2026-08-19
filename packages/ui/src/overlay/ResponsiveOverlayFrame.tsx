@@ -1,19 +1,17 @@
 import { DockedSidePanel } from "./DockedSidePanel";
 import { SidePanelResizeHandle } from "./SidePanelResizeHandle";
-import { useRafViewportWidth } from "./useRafViewportWidth";
-import { useSidePanelResize } from "./useSidePanelResize";
 import {
   DEFAULT_DESKTOP_SIDE_PANEL_MIN_WIDTH,
   DEFAULT_DESKTOP_SIDE_PANEL_VIEWPORT_INSET,
   SIDE_PANEL_WIDTH_CSS_VAR,
-} from "./overlay.constants";
-import { type ResponsiveOverlayFrameProps } from "./overlay.types";
-import {
+  type ResponsiveOverlayFrameProps,
   clampSidePanelWidth,
   getDefaultDesktopSidePanelWidth,
   getNumericDesktopSidePanelWidth,
   resolveDockedSidePanelWidth,
-} from "./overlay.utils";
+  useRafViewportWidth,
+  useSidePanelResize,
+} from "@/capabilities/overlays/public";
 import { Dialog, Drawer } from "@mui/material";
 import { AppBottomDrawer } from "@/components/AppBottomDrawer";
 import { useResponsiveProps } from "@/hooks/useResponsiveProps";

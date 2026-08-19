@@ -1,5 +1,5 @@
-import { SIDE_PANEL_WIDTH_CSS_VAR } from "./overlay.constants";
-import { clampSidePanelWidth } from "./overlay.utils";
+import { SIDE_PANEL_WIDTH_CSS_VAR } from "@/capabilities/overlays/constants/overlay.constants";
+import { clampSidePanelWidth } from "@/capabilities/overlays/utils/overlay.utils";
 import React from "react";
 
 export function useSidePanelResize({

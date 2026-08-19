@@ -2408,21 +2408,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "overlay/overlay.constants.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/overlay.types.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/overlay.utils.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "overlay/PageOverlayController.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -2444,16 +2429,6 @@
     {
       "rule": "legacy-source-location",
       "path": "overlay/useGuardedOverlayModeSwitch.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/useRafViewportWidth.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "overlay/useSidePanelResize.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
