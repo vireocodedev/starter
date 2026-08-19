@@ -31,13 +31,10 @@ vi.mock("@/capabilities/overlays/public", () => ({
     rootRef: { current: null },
     width: 560,
   }),
-  VireoSidePanelResizeHandle: () => null,
-}));
-
-vi.mock("@/overlay/DockedSidePanel", () => ({
-  DockedSidePanel: ({ children }: { children: React.ReactNode }) => (
+  VireoDockedSidePanel: ({ children }: { children: React.ReactNode }) => (
     <section data-testid="docked-side-panel">{children}</section>
   ),
+  VireoSidePanelResizeHandle: () => null,
 }));
 
 vi.mock("@mui/material", () => ({

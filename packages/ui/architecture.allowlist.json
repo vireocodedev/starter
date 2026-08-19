@@ -2403,11 +2403,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "overlay/DockedSidePanel.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "overlay/ResponsiveOverlayFrame.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

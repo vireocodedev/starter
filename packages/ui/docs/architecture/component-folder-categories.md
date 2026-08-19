@@ -98,6 +98,7 @@ The precedence resolves ambiguity; it does not override ownership. First choose 
 | `VireoLabelBox`         | Core     | `data-display` | It presents a label/content relationship without owning value editing or form state. |
 | `VireoTruncatedContent` | Core     | `data-display` | It presents content with truncation and access to the complete value.                |
 | `VireoOverlayHeader`    | Overlays | `overlays`     | It is a structural part of layered overlay surfaces.                                 |
+| `VireoDockedSidePanel`  | Overlays | `overlays`     | It reserves workspace layout for an adjacent overlay surface.                        |
 
 Further precedence examples:
 

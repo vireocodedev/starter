@@ -152,7 +152,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `history/**`                                                                                                        | `capabilities/history`                 | Planned       | History rendering capability.                                                                                                          |
 | `inputs/**`                                                                                                         | `core/components/inputs`               | Planned       | Standalone value-level input behavior.                                                                                                 |
 | `layout/**`                                                                                                         | `capabilities/page-layout`             | Planned       | Page-content layout, not a generic layout capability.                                                                                  |
-| `overlay/{DockedSidePanel.tsx,ResponsiveOverlayFrame.tsx}`                                                          | `capabilities/overlays`                | Planned       | Parent-owned overlay frame components awaiting Vireo migration.                                                                        |
+| `overlay/ResponsiveOverlayFrame.tsx`                                                                                | `capabilities/overlays`                | Planned       | Parent-owned responsive overlay frame awaiting Vireo migration.                                                                        |
 | `table/**`                                                                                                          | `capabilities/table`                   | Split         | Parent table foundations plus `responsive-table` and `management-table`.                                                               |
 | `video/**`                                                                                                          | Declared `./video` compatibility entry | Compatibility | Will map to the deferred OvenPlayer integration.                                                                                       |
 
@@ -198,6 +198,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `core/components/surfaces/VireoIconContainer/**`                          | `core/components/surfaces`                       | Migrated    | Canonical icon-geometry normalization surface.                          |
 | `capabilities/overlays/components/overlays/VireoOverlayHeader/**`         | `capabilities/overlays/components/overlays`      | Migrated    | Canonical overlay header anatomy.                                       |
 | `capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/**` | `capabilities/overlays/components/overlays`      | Migrated    | Canonical pointer resize target with an unprefixed compatibility alias. |
+| `capabilities/overlays/components/overlays/VireoDockedSidePanel/**`       | `capabilities/overlays/components/overlays`      | Migrated    | Canonical docked panel layout and transition surface.                   |
 
 ## Hook inventory
 
@@ -266,6 +267,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `overlay/PageOverlayController.tsx`                                                                             | `capabilities/overlays/page-overlays/providers/PageOverlayControllerProvider` | Kept the tightly coupled nonvisual companion APIs with their provider.           |
 | 2026-08-19   | `unsaved-changes/{UnsavedChangesScope.tsx,useUnsavedChangesRegistration.ts,useUnsavedChangesRequestDiscard.ts}` | `capabilities/unsaved-changes/{providers,hooks}`                              | Completed the capability, its public boundary, and focused behavior tests.       |
 | 2026-08-19   | `overlay/SidePanelResizeHandle.tsx`                                                                             | `capabilities/overlays/components/overlays/VireoSidePanelResizeHandle`        | Added the full Vireo contract and retained the former name as an alias.          |
+| 2026-08-19   | `overlay/DockedSidePanel.tsx`                                                                                   | `capabilities/overlays/components/overlays/VireoDockedSidePanel`              | Added the full Vireo contract and retained the former name as an adapter.        |
 
 ## Automated verification
 

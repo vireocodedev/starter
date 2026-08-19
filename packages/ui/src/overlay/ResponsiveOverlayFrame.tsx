@@ -1,4 +1,3 @@
-import { DockedSidePanel } from "./DockedSidePanel";
 import {
   DEFAULT_DESKTOP_SIDE_PANEL_MIN_WIDTH,
   DEFAULT_DESKTOP_SIDE_PANEL_VIEWPORT_INSET,
@@ -10,6 +9,7 @@ import {
   resolveDockedSidePanelWidth,
   useRafViewportWidth,
   useSidePanelResize,
+  VireoDockedSidePanel,
   VireoSidePanelResizeHandle,
 } from "@/capabilities/overlays/public";
 import { Dialog, Drawer } from "@mui/material";
@@ -124,20 +124,20 @@ export function ResponsiveOverlayFrame({
     );
   } else if (effectiveDesktopSurfaceDisplay === "dockedSidePanel") {
     desktopFrame = (
-      <DockedSidePanel
+      <VireoDockedSidePanel
         open={open}
         width={dockedSidePanelWidth}
         minWidth={desktopSidePanelMinWidth}
         maxWidth={maxDockedSidePanelWidth}
         isResizing={sidePanelResize.isResizing}
-        rootRef={sidePanelResizeEnabled ? sidePanelResize.rootRef : undefined}
+        ref={sidePanelResizeEnabled ? sidePanelResize.rootRef : undefined}
         style={sidePanelResizeStyle}
-        sx={desktopSidePanelSx}
+        slotProps={desktopSidePanelSx ? { surface: { sx: desktopSidePanelSx } } : undefined}
         resizeHandle={sidePanelResizeHandle}
         onExited={handleExited}
       >
         {content}
-      </DockedSidePanel>
+      </VireoDockedSidePanel>
     );
   } else {
     desktopFrame = (

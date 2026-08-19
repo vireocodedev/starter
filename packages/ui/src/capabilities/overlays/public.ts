@@ -1,3 +1,4 @@
+export * from "./components/overlays/VireoDockedSidePanel";
 export * from "./components/overlays/VireoOverlayHeader";
 export * from "./components/overlays/VireoSidePanelResizeHandle";
 export {
