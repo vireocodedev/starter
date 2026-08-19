@@ -208,6 +208,8 @@ The executable example is the sole source of truth. Never maintain a second hand
 
 The story file itself follows the source architecture and reaches the nested example through the `@/` alias. The executable example deliberately imports the public package entry points because its contents are consumer code; the architecture checker permits that exception only below a component's `internal/storybook/` directory.
 
+`tests/storySourceContract.test.ts` enforces this connection for every Vireo story. It requires a matching `StoryNameExample.tsx`, verifies that the story renders its normal import and displays its `?raw` import, rejects orphan example modules, and prevents the displayed module from depending on repository-private or Storybook-runtime imports.
+
 The generator initially gives each example a `TODO(component-author)` repository-alias import so the unfinished, not-yet-exported scaffold continues to type-check. Once the component is complete and exported from its owner boundary, replace that temporary import with `@vireocodedev/starter-ui`. A component is not finished while any executable example retains the repository alias or its TODO.
 
 Presentation infrastructure that is genuinely reusable across components may be published from `@vireocodedev/starter-ui/storybook`. A helper created specifically for one component uses a PascalCase component subpath, for example:
