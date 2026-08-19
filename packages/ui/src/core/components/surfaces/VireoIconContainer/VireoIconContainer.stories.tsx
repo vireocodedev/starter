@@ -201,7 +201,7 @@ function IconComparison(props: VireoIconContainerProps) {
 }
 
 const meta = {
-  title: "Components/Data Display/VireoIconContainer",
+  title: "Core/Surfaces/VireoIconContainer",
   component: VireoIconContainer,
   tags: ["autodocs"],
   render: args => <IconComparison {...args} />,

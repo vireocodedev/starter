@@ -118,11 +118,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoIconContainer/RgoIconContainer.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoJsonViewer/RgoJsonViewer.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -579,46 +574,6 @@
     {
       "rule": "legacy-source-location",
       "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithErrorHandlingDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/VireoIconContainer.classes.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/VireoIconContainer.identity.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/VireoIconContainer.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/VireoIconContainer.styled.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/VireoIconContainer.test.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/VireoIconContainer.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/VireoIconContainer/VireoIconContainer.types.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

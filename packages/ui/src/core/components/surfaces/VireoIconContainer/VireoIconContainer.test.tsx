@@ -1,4 +1,3 @@
-import { RgoIconContainer as CompatibilityRgoIconContainer } from "@/index";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -8,10 +7,6 @@ import { vireoIconContainerClasses } from "./VireoIconContainer.classes";
 import { VIREO_ICON_CONTAINER_NAME } from "./VireoIconContainer.identity";
 
 describe(VIREO_ICON_CONTAINER_NAME, () => {
-  it("keeps the deprecated package-root component alias compatible", () => {
-    expect(CompatibilityRgoIconContainer).toBe(VireoIconContainer);
-  });
-
   it("renders its essential default output with only required props", () => {
     const { container } = render(
       <svg>

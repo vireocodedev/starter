@@ -1,4 +1,4 @@
-import { VireoIconContainer } from "@/components/data-display/VireoIconContainer";
+import { VireoIconContainer } from "@/core/public";
 
 export const RgoIconCheckCircle = () => (
   <VireoIconContainer viewBoxWidth={24} viewBoxHeight={24}>

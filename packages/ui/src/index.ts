@@ -4,11 +4,6 @@ export * from "@/components/AppCardActions";
 export * from "@/components/AppCardContent";
 export * from "@/components/data-display/RgoClientTable/RgoClientTable";
 export * from "@/components/data-display/RgoIcon/RgoIcon";
-export * from "@/components/data-display/VireoIconContainer";
-/** @deprecated Use VireoIconContainer. */
-export { VireoIconContainer as RgoIconContainer } from "@/components/data-display/VireoIconContainer";
-/** @deprecated Use VireoIconContainerProps. */
-export type { VireoIconContainerProps as RgoIconContainerProps } from "@/components/data-display/VireoIconContainer";
 export * from "@/components/data-display/RgoJsonViewer/RgoJsonViewer";
 export * from "@/components/data-display/RgoJsonViewerDialog/RgoJsonViewerDialog";
 export * from "@/components/data-display/VireoLabelBox";

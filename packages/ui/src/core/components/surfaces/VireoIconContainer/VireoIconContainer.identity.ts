@@ -1,4 +1,4 @@
-import type { VireoSlotNameTuple } from "@/utils/muiutils";
+import type { VireoSlotNameTuple } from "@/core/utils/muiutils";
 
 /** Stable component name shared by every VireoIconContainer integration point. */
 export const VIREO_ICON_CONTAINER_NAME = "VireoIconContainer";

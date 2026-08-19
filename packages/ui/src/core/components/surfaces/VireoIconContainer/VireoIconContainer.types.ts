@@ -1,4 +1,4 @@
-import type { VireoDataAttributeValue } from "@/utils/muiutils";
+import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { SxProps, Theme } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";

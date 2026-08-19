@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/utils/muiutils";
+import { type StyledSlotComponent, type StyledSlotProps } from "@/core/utils/muiutils";
 import { type SxProps, type Theme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type React from "react";

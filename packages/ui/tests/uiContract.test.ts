@@ -1,16 +1,16 @@
-import { DelayedRender, VireoDelayedRender } from "@/index";
+import { DelayedRender, RgoIconContainer, VireoDelayedRender, VireoIconContainer } from "@/index";
 import { createCurrencyFormatter, formatCompactCurrency } from "@/utils/currencyFormatters";
 import { createMonthFormatter, createMonthYearFormatter } from "@/utils/dateFormatters";
 import { describe, expect, it } from "vitest";
 
-/**
- * Contract guard for the headless `@vireocodedev/starter-ui` utilities. The MUI
- * components are validated by consuming apps; these pure formatters are the
- * dependency-light surface worth pinning here.
- */
-describe("starter-ui utils contract", () => {
+/** Guards package-root compatibility aliases and dependency-light utility behavior. */
+describe("starter-ui package contract", () => {
   it("preserves the deprecated DelayedRender package alias", () => {
     expect(DelayedRender).toBe(VireoDelayedRender);
+  });
+
+  it("preserves the deprecated RgoIconContainer package alias", () => {
+    expect(RgoIconContainer).toBe(VireoIconContainer);
   });
 
   it("builds a currency formatter for a locale", () => {
