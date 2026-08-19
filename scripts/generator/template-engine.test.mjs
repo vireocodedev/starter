@@ -42,7 +42,7 @@ test("the registered React component template derives an architectural destinati
   });
 
   assert.equal(plan.relativeOutputDirectory, "packages/ui/src/core/components/overlays/VireoGeneratorExample");
-  assert.equal(plan.files.length, 8);
+  assert.equal(plan.files.length, 11);
   assert.deepEqual(
     plan.files.map(file => file.relativeDestination),
     [
@@ -54,6 +54,9 @@ test("the registered React component template derives an architectural destinati
       "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.tsx",
       "packages/ui/src/core/components/overlays/VireoGeneratorExample/VireoGeneratorExample.types.ts",
       "packages/ui/src/core/components/overlays/VireoGeneratorExample/index.ts",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/internal/storybook/DefaultExample.tsx",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/internal/storybook/CustomizedSlotsExample.tsx",
+      "packages/ui/src/core/components/overlays/VireoGeneratorExample/internal/storybook/ThemeCustomizationExample.tsx",
     ],
   );
   assert.match(
@@ -63,6 +66,18 @@ test("the registered React component template derives an architectural destinati
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
     /title: "Core\/Overlays\/VireoGeneratorExample"/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
+    /DefaultExample\.tsx\?raw/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("DefaultExample.tsx")).contents,
+    /from "@\/core\/components\/overlays\/VireoGeneratorExample"/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("DefaultExample.tsx")).contents,
+    /VireoStorybookProvider/,
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("VireoGeneratorExample.tsx")).contents,

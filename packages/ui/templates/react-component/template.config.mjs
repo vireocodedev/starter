@@ -69,6 +69,18 @@ export default {
     { source: "files/Component.tsx.template", destination: "{{componentName}}.tsx" },
     { source: "files/Component.types.ts.template", destination: "{{componentName}}.types.ts" },
     { source: "files/index.ts.template", destination: "index.ts" },
+    {
+      source: "files/DefaultExample.tsx.template",
+      destination: "internal/storybook/DefaultExample.tsx",
+    },
+    {
+      source: "files/CustomizedSlotsExample.tsx.template",
+      destination: "internal/storybook/CustomizedSlotsExample.tsx",
+    },
+    {
+      source: "files/ThemeCustomizationExample.tsx.template",
+      destination: "internal/storybook/ThemeCustomizationExample.tsx",
+    },
   ],
   resolveOutput(inputs) {
     return `packages/ui/src/${inputs.owner}`;
@@ -90,6 +102,7 @@ export default {
     return {
       componentCategory: inputs.category,
       componentName,
+      componentSourceModule: `@/${inputs.owner}/components/${inputs.category}/${componentName}`,
       componentVariableName: `${componentName.charAt(0).toLowerCase()}${componentName.slice(1)}`,
       componentConstantName: `VIREO_${toScreamingSnakeCase(inputs.name)}`,
       coreUtilitiesModule: inputs.owner === "core" ? "@/core/utils/muiutils" : "@/core/public",

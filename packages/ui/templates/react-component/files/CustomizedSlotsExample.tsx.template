@@ -1,0 +1,19 @@
+import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+// TODO(component-author): After publishing the component boundary, import {{componentName}} from "@vireocodedev/starter-ui".
+import { {{componentName}} } from "{{componentSourceModule}}";
+
+export default function CustomizedSlotsExample() {
+  return (
+    <VireoStorybookProvider>
+      <{{componentName}}
+        slots={{ root: "section" }}
+        slotProps={{
+          root: {
+            "aria-label": "Customized {{componentName}}",
+            sx: { border: 1, borderColor: "primary.main", p: 2 },
+          },
+        }}
+      />
+    </VireoStorybookProvider>
+  );
+}

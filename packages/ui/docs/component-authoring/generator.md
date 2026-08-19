@@ -1,6 +1,6 @@
 # Vireo component generator
 
-The repository generator creates a complete eight-file scaffold for a first-class Vireo React component from the canonical templates in `packages/ui/templates/react-component`.
+The repository generator creates the required eight-file top-level component scaffold plus private executable Storybook examples from the canonical templates in `packages/ui/templates/react-component`.
 
 The React component command is architecture-aware. It derives the output path from a required owner and component category rather than accepting an arbitrary `--output` directory.
 
@@ -25,7 +25,12 @@ packages/ui/src/core/components/data-display/VireoBadge/
 ├── VireoBadge.test.tsx
 ├── VireoBadge.tsx
 ├── VireoBadge.types.ts
-└── index.ts
+├── index.ts
+└── internal/
+    └── storybook/
+        ├── CustomizedSlotsExample.tsx
+        ├── DefaultExample.tsx
+        └── ThemeCustomizationExample.tsx
 ```
 
 Do not include the `Vireo` prefix in the input. The generator rejects `VireoBadge`, `badge`, and names containing separators.
@@ -136,6 +141,8 @@ Before considering it complete:
 
 - Replace every `TODO(component-author)` implementation and Storybook description.
 - Keep the main story description's one-sentence summary and `### Why it exists` section.
+- Replace each generated example's temporary `@/` component import with the public `@vireocodedev/starter-ui` import after adding the completed component to its owner boundary. The temporary import keeps the unfinished scaffold type-checkable; it is not valid final code-panel output.
+- Keep each executable example as the single source for both its story render and `docs.source.code`; do not introduce duplicate source strings.
 - Decide whether the public Vireo abstraction is justified.
 - Choose the correct native root semantics and inherited props.
 - Define the real props, owner state, slots, accessibility, behavior, and styling.
