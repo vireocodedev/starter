@@ -483,21 +483,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoButtonBase/RgoButtonBase.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoButtonBase/stories/RgoButtonBase.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoButtonBase/stories/RgoButtonBaseWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoForm/RgoForm.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

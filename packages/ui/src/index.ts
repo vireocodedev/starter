@@ -15,7 +15,6 @@ export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/components/RgoL
 export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/RgoQueryErrorBoundary";
 export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/RgoQueryErrorLoaderSuspense";
 export * from "@/components/FormToggleButtonField";
-export * from "@/components/inputs/RgoButtonBase/RgoButtonBase";
 export * from "@/components/inputs/RgoForm/RgoForm";
 export * from "@/components/inputs/RgoIconButton/RgoIconButton";
 export * from "@/components/inputs/RgoInputAutocomplete/RgoInputAutocomplete";

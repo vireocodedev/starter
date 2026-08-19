@@ -182,7 +182,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | -------------------------------------------------------------------------- | ------------------------------------------------ | ----------- | ------------------------------------------------------------------------- |
 | `components/feedback/{RgoLoader,RgoQueryErrorLoaderSuspense}/**`           | `core/components/feedback`                       | Planned     | Generic loading, suspense, and error-boundary presentation.               |
 | `components/inputs/RgoForm/**`                                             | `capabilities/forms/components/forms`            | Planned     | Form workflow component.                                                  |
-| `components/inputs/{RgoButtonBase,RgoIconButton}/**`                       | `core/components/controls`                       | Planned     | General action controls.                                                  |
+| `components/inputs/RgoIconButton/**`                                       | `core/components/controls`                       | Planned     | General labelled icon action control.                                     |
 | `components/inputs/RgoInput*/**`                                           | `core/components/inputs`                         | Planned     | Controlled value-level inputs; excludes `RgoForm`.                        |
 | `components/layout/{RgoFormSection,RgoFormSectionGrid}/**`                 | `capabilities/forms/components/forms`            | Planned     | Form-owned structure.                                                     |
 | `components/layout/RgoInfiniteCanvas/**`                                   | `capabilities/infinite-canvas/components/layout` | Planned     | Canvas capability and its private pieces.                                 |
@@ -284,6 +284,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/data-display/RgoTruncatedText/**`                                                                   | Removed                                                                       | Removed the superseded text-only truncation component; use `VireoTruncatedContent`. |
 | 2026-08-19   | `components/AppCardActions.tsx`                                                                                 | Removed                                                                       | Removed an unused application-styled wrapper around MUI `CardActions`.              |
 | 2026-08-19   | `components/AppCardContent.tsx`                                                                                 | Removed                                                                       | Removed an unused application-styled wrapper around MUI `CardContent`.              |
+| 2026-08-19   | `components/inputs/RgoButtonBase/**`                                                                            | Removed                                                                       | Removed an unused wrapper with ambiguous non-button default semantics.              |
 
 ## Automated verification
 
