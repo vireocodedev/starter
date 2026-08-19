@@ -39,7 +39,7 @@ Connect Storybook directly to the public component type:
 
 ```tsx
 const meta = {
-  title: "Components/Category/VireoComponent",
+  title: "Core/Data Display/VireoComponent",
   component: VireoComponent,
   tags: ["autodocs"],
   parameters: {
@@ -80,21 +80,24 @@ Use a named `Meta<typeof VireoComponent>` annotation in this exception when the 
 
 The adapter may relax only the correlated contract that Storybook must edit independently. Derive its fields from public types; do not manually copy the complete component prop surface. Every predefined story must still supply a valid runtime combination. Introduce a typed story-only render wrapper only when controls can otherwise produce an invalid runtime or accessibility state.
 
-## Stable navigation title
+## Stable architecture-aware navigation title
 
-Use an explicit title with this hierarchy:
+Use the explicit hierarchy derived from the component's architectural owner and approved category:
 
 ```text
-Components/[Category]/VireoComponent
+Core/[Category]/VireoComponent
+[Top-level capability]/[Category]/VireoComponent
+[Top-level capability]/[Child capability]/[Category]/VireoComponent
 ```
 
-Choose a stable functional category such as `Overlay`, `Navigation`, `Input`, or `Layout`. Storybook 9 statically indexes CSF files and requires `meta.title` to be a string literal:
+For example:
 
 ```ts
-title: "Components/Overlay/VireoComponent";
+title: "Core/Behavior/VireoDelayedRender";
+title: "Table/Management Table/Controls/VireoMobileToolbar";
 ```
 
-An explicit title prevents Storybook navigation from changing when a source file moves. This literal is the deliberate exception to importing the canonical identity everywhere the component name is used. Keep its final segment identical to `VIREO_COMPONENT_NAME`; a template generator should derive both values from the same component-name input.
+The owner and category must match the source architecture rather than an invented Storybook-only grouping. Storybook 9 statically indexes CSF files and requires `meta.title` to be a string literal. This literal is the deliberate exception to importing the canonical identity everywhere the component name is used. Keep its final segment identical to `VIREO_COMPONENT_NAME`; the generator derives the initial title and identity from the same inputs.
 
 ## Autodocs and component description
 
@@ -241,7 +244,7 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - The file is named `VireoComponent.stories.tsx` and is colocated with the component.
 - It is excluded from the published build and absent from public barrels.
 - Metadata directly satisfies or is explicitly annotated as `Meta<typeof VireoComponent>`.
-- The literal title follows `Components/[Category]/VireoComponent` and its final segment matches the canonical identity.
+- The literal title follows the owner/category hierarchy, matches the component's source ownership, and ends with the canonical identity.
 - `component` references the public component without a cast.
 - `tags: ["autodocs"]` is present.
 - The component description opens with a one-sentence summary and includes `### Why it exists` with the recurring problem, Vireo rationale, and use-or-avoid boundary.

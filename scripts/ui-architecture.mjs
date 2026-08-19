@@ -718,6 +718,9 @@ function collectImportViolations(files) {
       }
 
       if (specifier.startsWith(".")) {
+        const isPublicEntry = file === "core/public.ts" || /^capabilities\/[^/]+\/public\.ts$/u.test(file);
+        if (isPublicEntry) continue;
+
         const importerDirectory = file.slice(0, file.lastIndexOf("/"));
         const resolved = resolve(`/${importerDirectory}`, specifier).slice(1);
         const resolvedDirectory = resolved.includes("/") ? resolved.slice(0, resolved.lastIndexOf("/")) : "";

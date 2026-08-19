@@ -9,7 +9,7 @@ Every first-class public Vireo MUI component has one colocated `VireoComponent.i
 An identity file contains the component name, its public slot tuple, and the slot-name union derived from that tuple:
 
 ```ts
-import type { VireoSlotNameTuple } from "@/utils/muiutils";
+import type { VireoSlotNameTuple } from "@/core/utils/muiutils";
 
 /** Stable component name shared by every VireoComponent integration point. */
 export const VIREO_COMPONENT_NAME = "VireoComponent";
@@ -134,7 +134,7 @@ Consumers configure the component through its supported props, slots, classes, a
 A component generator initially creates the mandatory root-only tuple:
 
 ```ts
-import type { VireoSlotNameTuple } from "@/utils/muiutils";
+import type { VireoSlotNameTuple } from "@/core/utils/muiutils";
 
 export const VIREO_COMPONENT_SLOTS = ["root"] as const satisfies VireoSlotNameTuple;
 ```

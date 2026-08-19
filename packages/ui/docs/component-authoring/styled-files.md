@@ -18,7 +18,7 @@ import { type VireoComponentOwnerState } from "./VireoComponent.types";
 import { VIREO_COMPONENT_NAME } from "./VireoComponent.identity";
 import { Box, type BoxProps } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { type StyledSlotComponent, type StyledSlotProps } from "@/utils/muiutils";
+import { type StyledSlotComponent, type StyledSlotProps } from "@/core/utils/muiutils";
 
 type VireoComponentStyledSlotProps = StyledSlotProps<VireoComponentOwnerState>;
 type VireoComponentStyledSlotComponent<TProps extends object> = StyledSlotComponent<TProps, VireoComponentOwnerState>;

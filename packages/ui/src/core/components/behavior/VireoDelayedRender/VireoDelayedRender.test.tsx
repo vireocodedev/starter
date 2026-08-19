@@ -1,4 +1,3 @@
-import { DelayedRender as CompatibilityDelayedRender } from "@/index";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
@@ -10,10 +9,6 @@ import { VIREO_DELAYED_RENDER_NAME } from "./VireoDelayedRender.identity";
 describe(VIREO_DELAYED_RENDER_NAME, () => {
   afterEach(() => {
     vi.useRealTimers();
-  });
-
-  it("keeps the deprecated package-root component alias compatible", () => {
-    expect(CompatibilityDelayedRender).toBe(VireoDelayedRender);
   });
 
   it("mounts its children after the default 200ms delay", () => {

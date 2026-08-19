@@ -1,4 +1,4 @@
-import { VireoDelayedRender } from "@/components/utility/VireoDelayedRender";
+import { VireoDelayedRender } from "@/core/public";
 import { useAppPageContentLayout } from "@/hooks/useAppPageContentLayout";
 import { Box, Card, CardHeader, Skeleton, Stack } from "@mui/material";
 

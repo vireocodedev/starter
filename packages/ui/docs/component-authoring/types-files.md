@@ -162,7 +162,7 @@ Ordinary MUI props and `sx` customization do not require augmentation. Use an ov
 
 Augmentation makes the additional prop legal even when the replacement slot is omitted. Consumers must not pass custom-only props to the default slot because unknown props may reach its DOM output. Each Vireo package must expose and consumer-type-test the documented module augmentation path; a barrel re-export alone must not be assumed to prove declaration merging works.
 
-Use the shared [`VireoDataAttributeValue`](../../src/utils/muiutils.ts) for arbitrary `data-*` slot attributes instead of declaring a component-local value type.
+Use the shared [`VireoDataAttributeValue`](../../src/core/utils/muiutils.ts) for arbitrary `data-*` slot attributes instead of declaring a component-local value type.
 
 ## Slots
 

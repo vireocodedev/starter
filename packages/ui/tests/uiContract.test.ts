@@ -1,3 +1,4 @@
+import { DelayedRender, VireoDelayedRender } from "@/index";
 import { createCurrencyFormatter, formatCompactCurrency } from "@/utils/currencyFormatters";
 import { createMonthFormatter, createMonthYearFormatter } from "@/utils/dateFormatters";
 import { describe, expect, it } from "vitest";
@@ -8,6 +9,10 @@ import { describe, expect, it } from "vitest";
  * dependency-light surface worth pinning here.
  */
 describe("starter-ui utils contract", () => {
+  it("preserves the deprecated DelayedRender package alias", () => {
+    expect(DelayedRender).toBe(VireoDelayedRender);
+  });
+
   it("builds a currency formatter for a locale", () => {
     const formatter = createCurrencyFormatter("en-US", "EUR");
     expect(formatter.format(1234.5)).toContain("€");

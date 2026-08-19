@@ -1,4 +1,4 @@
-import type { VireoSlotNameTuple } from "@/utils/muiutils";
+import type { VireoSlotNameTuple } from "@/core/utils/muiutils";
 
 /** Stable component name shared by every VireoDelayedRender integration point. */
 export const VIREO_DELAYED_RENDER_NAME = "VireoDelayedRender";

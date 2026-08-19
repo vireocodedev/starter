@@ -129,6 +129,8 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `@types/mui.d.ts`               | `core/types`                           | Planned       | Theme-system augmentation.                                                                                                             |
 | `@types/rgo.d.ts`               | Package-wide root declaration          | Planned       | Retain only the global CSS import declaration.                                                                                         |
 | `api/**`                        | Compatibility entry                    | Compatibility | Preserve `./api`; remap symbols after `apiutils` is split.                                                                             |
+| `core/public.ts`                | `core` public boundary                 | Migrated      | Re-exports completed core-owned public modules.                                                                                        |
+| `core/utils/muiutils.ts`        | `core/utils`                           | Migrated      | Shared Vireo authoring helpers and the preserved package-root utility API.                                                             |
 | `country/**`                    | `capabilities/country`                 | Planned       | Preserve the declared `./country` subpath.                                                                                             |
 | `enums/**`                      | `core/models`                          | Planned       | `RgoMonth` is a runtime Zod model, not a folder category.                                                                              |
 | `events/RgoEventBus.ts`         | `core/events`                          | Planned       | Provisional migration of the in-process bus.                                                                                           |
@@ -178,7 +180,8 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `components/layout/RgoInfiniteCanvas/**`                         | `capabilities/infinite-canvas/components/layout` | Planned     | Canvas capability and its private pieces.                   |
 | `components/layout/RgoPage*/**`                                  | `capabilities/page-layout/components/layout`     | Planned     | Page shell, body, and header.                               |
 | `components/navigation/RgoTabs/**`                               | `core/components/navigation`                     | Planned     | Generic design-system navigation primitive.                 |
-| `components/utility/{RgoShowIf,VireoDelayedRender}/**`           | `core/components/behavior`                       | Split       | Replace the legacy `utility` category with `behavior`.      |
+| `components/utility/RgoShowIf/**`                                | `core/components/behavior`                       | Planned     | Replace the legacy `utility` category with `behavior`.      |
+| `core/components/behavior/VireoDelayedRender/**`                 | `core/components/behavior`                       | Migrated    | First complete core component migration slice.              |
 
 ## Hook inventory
 
@@ -233,9 +236,10 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ## Completed migration slices
 
-| Completed on | Source        | Destination      | Notes                                                                    |
-| ------------ | ------------- | ---------------- | ------------------------------------------------------------------------ |
-| 2026-08-19   | `src/docs/**` | `docs/storybook` | Package-wide Storybook MDX now lives outside the production source tree. |
+| Completed on | Source                                     | Destination                                   | Notes                                                                           |
+| ------------ | ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------- |
+| 2026-08-19   | `src/docs/**`                              | `docs/storybook`                              | Package-wide Storybook MDX now lives outside the production source tree.        |
+| 2026-08-19   | `components/utility/VireoDelayedRender/**` | `core/components/behavior/VireoDelayedRender` | Component, tests, story, exports, and Vireo authoring utilities moved together. |
 
 ## Automated verification
 

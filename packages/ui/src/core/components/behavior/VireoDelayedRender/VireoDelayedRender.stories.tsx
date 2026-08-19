@@ -35,7 +35,7 @@ function RestartableDelay(props: RestartableDelayProps) {
 }
 
 const meta = {
-  title: "Components/Utility/VireoDelayedRender",
+  title: "Core/Behavior/VireoDelayedRender",
   component: VireoDelayedRender,
   tags: ["autodocs"],
   args: {
