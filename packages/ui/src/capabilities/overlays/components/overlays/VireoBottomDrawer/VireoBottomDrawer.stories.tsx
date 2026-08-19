@@ -4,6 +4,53 @@ import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/
 import { Box, Button, Chip, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
+import React from "react";
+
+function DrawerContent({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <VireoOverlayHeader title="Filter customers" closeLabel="Close filters" onClose={onClose} />
+      <Stack spacing={2} sx={{ p: 3 }}>
+        <Typography variant="body2" color="text.secondary">
+          Choose the customer states shown in the workspace.
+        </Typography>
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+          <Chip label="Active" color="success" />
+          <Chip label="Needs review" color="warning" />
+          <Chip label="At risk" color="error" />
+        </Stack>
+        <Button variant="contained">Apply filters</Button>
+      </Stack>
+    </>
+  );
+}
+
+function BottomDrawerDemo(args: React.ComponentProps<typeof VireoBottomDrawer>) {
+  const [open, setOpen] = React.useState(args.open);
+
+  React.useEffect(() => setOpen(args.open), [args.open]);
+
+  const handleClose = React.useCallback(() => {
+    setOpen(false);
+    args.onClose();
+  }, [args]);
+
+  const handleOpen = React.useCallback(() => {
+    setOpen(true);
+    args.onOpen?.();
+  }, [args]);
+
+  return (
+    <>
+      <Button variant="contained" onClick={() => setOpen(true)}>
+        Open customer filters
+      </Button>
+      <VireoBottomDrawer {...args} open={open} onClose={handleClose} onOpen={handleOpen}>
+        <DrawerContent onClose={handleClose} />
+      </VireoBottomDrawer>
+    </>
+  );
+}
 
 const meta: Meta<typeof VireoBottomDrawer> = {
   title: "Overlays/Overlays/VireoBottomDrawer",
@@ -20,25 +67,9 @@ const meta: Meta<typeof VireoBottomDrawer> = {
     },
   },
   args: {
-    open: true,
+    open: false,
     onClose: fn(),
     onExited: fn(),
-    children: (
-      <>
-        <VireoOverlayHeader title="Filter customers" closeLabel="Close filters" onClose={fn()} />
-        <Stack spacing={2} sx={{ p: 3 }}>
-          <Typography variant="body2" color="text.secondary">
-            Choose the customer states shown in the workspace.
-          </Typography>
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-            <Chip label="Active" color="success" />
-            <Chip label="Needs review" color="warning" />
-            <Chip label="At risk" color="error" />
-          </Stack>
-          <Button variant="contained">Apply filters</Button>
-        </Stack>
-      </>
-    ),
   },
   argTypes: {
     onClose: { control: false },
@@ -58,6 +89,7 @@ const meta: Meta<typeof VireoBottomDrawer> = {
       </Box>
     ),
   ],
+  render: args => <BottomDrawerDemo {...args} />,
 };
 
 export default meta;
@@ -71,8 +103,9 @@ export const WithoutBackdrop: Story = { args: { useBackdrop: false } };
 
 export const CloseInteraction: Story = {
   play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement.ownerDocument.body);
-    await expect(canvas.getByText("Filter customers")).toBeInTheDocument();
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "Open customer filters" }));
+    await expect(within(canvasElement.ownerDocument.body).getByText("Filter customers")).toBeInTheDocument();
     await userEvent.keyboard("{Escape}");
     await expect(args.onClose).toHaveBeenCalledOnce();
   },

@@ -6,8 +6,9 @@ import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/
 import { Box, Button, Chip, Divider, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fireEvent, fn, userEvent, waitFor, within } from "storybook/test";
+import React from "react";
 
-function Workspace() {
+function Workspace({ onOpen }: { onOpen: () => void }) {
   return (
     <Box component="main" sx={{ flex: 1, minWidth: 0, overflow: "auto", p: 3, bgcolor: "grey.50" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -17,7 +18,9 @@ function Workspace() {
           </Typography>
           <Typography variant="h4">Customer accounts</Typography>
         </Box>
-        <Button variant="contained">Add customer</Button>
+        <Button variant="contained" onClick={onOpen}>
+          View customer details
+        </Button>
       </Stack>
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(140px, 1fr))", gap: 2, mt: 3 }}>
         {[
@@ -96,11 +99,20 @@ function OverlayContent({ onClose }: { onClose: () => void }) {
 }
 
 function FrameDemo(args: VireoResponsiveOverlayFrameProps) {
+  const [open, setOpen] = React.useState(args.open);
+
+  React.useEffect(() => setOpen(args.open), [args.open]);
+
+  const handleClose = React.useCallback(() => {
+    setOpen(false);
+    args.onClose();
+  }, [args]);
+
   return (
-    <Box sx={{ display: "flex", width: "100%", minWidth: 720, height: 560, overflow: "hidden" }}>
-      <Workspace />
-      <VireoResponsiveOverlayFrame {...args}>
-        <OverlayContent onClose={args.onClose} />
+    <Box sx={{ display: "flex", width: "100%", minWidth: { xs: 0, md: 720 }, height: 560, overflow: "hidden" }}>
+      <Workspace onOpen={() => setOpen(true)} />
+      <VireoResponsiveOverlayFrame {...args} open={open} onClose={handleClose}>
+        <OverlayContent onClose={handleClose} />
       </VireoResponsiveOverlayFrame>
     </Box>
   );
@@ -120,7 +132,7 @@ const meta: Meta<typeof VireoResponsiveOverlayFrame> = {
     },
   },
   args: {
-    open: true,
+    open: false,
     onClose: fn(),
     onExited: fn(),
     children: <span>Customer details</span>,
@@ -172,9 +184,10 @@ export const ResizableDockedSidePanel: Story = {
     desktopSidePanelMinContentWidth: 360,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const handle = canvas.getByRole("presentation");
-    const surface = canvas.getByRole("complementary");
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "View customer details" }));
+    const overlayCanvas = within(canvasElement.ownerDocument.body);
+    const handle = overlayCanvas.getByRole("presentation");
+    const surface = overlayCanvas.getByRole("complementary");
 
     fireEvent.mouseDown(handle, { clientX: 800, detail: 1 });
     fireEvent.mouseMove(window, { clientX: 700 });
@@ -188,8 +201,10 @@ export const ResizableDockedSidePanel: Story = {
 
 export const Closable: Story = {
   play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Close customer details" }));
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "View customer details" }));
+    await userEvent.click(
+      within(canvasElement.ownerDocument.body).getByRole("button", { name: "Close customer details" }),
+    );
     await expect(args.onClose).toHaveBeenCalledOnce();
   },
 };
