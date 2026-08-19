@@ -21,6 +21,7 @@ export * from "./components/feedback/VireoStatusDot";
 export * from "./components/feedback/VireoSnack";
 export * from "./components/layout/VireoSlidingScreenStack";
 export * from "./components/inputs/VireoTextInput";
+export * from "./components/inputs/VireoNumberInput";
 export * from "./components/navigation/VireoTabs";
 /** @deprecated Use VireoSnack. */
 export { VireoSnack as RgoSnack } from "./components/feedback/VireoSnack";
