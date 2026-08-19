@@ -110,7 +110,6 @@ export * from "@/layout/PageBody";
 export * from "@/layout/useMeasuredPageContentMode";
 export * from "@/overlay/DockedSidePanel";
 export * from "@/overlay/ResponsiveOverlayFrame";
-export * from "@/overlay/SidePanelResizeHandle";
 export * from "@/providers/AppMobileAttributeProvider";
 export * from "@/providers/AppSnackbarProvider";
 export * from "@/providers/AppThemeColorMetaProvider";

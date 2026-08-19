@@ -1,4 +1,5 @@
 export * from "./components/overlays/VireoOverlayHeader";
+export * from "./components/overlays/VireoSidePanelResizeHandle";
 export {
   PageOverlayControllerContext,
   usePageOverlayController,

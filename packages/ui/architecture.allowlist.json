@@ -2413,11 +2413,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "overlay/SidePanelResizeHandle.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "providers/AppMobileAttributeProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

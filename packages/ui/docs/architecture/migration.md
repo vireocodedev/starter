@@ -152,7 +152,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `history/**`                                                                                                        | `capabilities/history`                 | Planned       | History rendering capability.                                                                                                          |
 | `inputs/**`                                                                                                         | `core/components/inputs`               | Planned       | Standalone value-level input behavior.                                                                                                 |
 | `layout/**`                                                                                                         | `capabilities/page-layout`             | Planned       | Page-content layout, not a generic layout capability.                                                                                  |
-| `overlay/{DockedSidePanel.tsx,ResponsiveOverlayFrame.tsx,SidePanelResizeHandle.tsx}`                                | `capabilities/overlays`                | Planned       | Parent-owned overlay frame components awaiting Vireo migration.                                                                        |
+| `overlay/{DockedSidePanel.tsx,ResponsiveOverlayFrame.tsx}`                                                          | `capabilities/overlays`                | Planned       | Parent-owned overlay frame components awaiting Vireo migration.                                                                        |
 | `table/**`                                                                                                          | `capabilities/table`                   | Split         | Parent table foundations plus `responsive-table` and `management-table`.                                                               |
 | `video/**`                                                                                                          | Declared `./video` compatibility entry | Compatibility | Will map to the deferred OvenPlayer integration.                                                                                       |
 
@@ -180,23 +180,24 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Feedback, input, layout, navigation, and utility components
 
-| Current path pattern                                              | Target owner                                     | Disposition | Notes                                                       |
-| ----------------------------------------------------------------- | ------------------------------------------------ | ----------- | ----------------------------------------------------------- |
-| `components/feedback/{RgoDialogHeader,RgoDrawer}/**`              | `capabilities/overlays/components/overlays`      | Planned     | Legacy category is incorrect.                               |
-| `components/feedback/{RgoLoader,RgoQueryErrorLoaderSuspense}/**`  | `core/components/feedback`                       | Planned     | Generic loading, suspense, and error-boundary presentation. |
-| `components/inputs/RgoForm/**`                                    | `capabilities/forms/components/forms`            | Planned     | Form workflow component.                                    |
-| `components/inputs/{RgoButtonBase,RgoIconButton}/**`              | `core/components/controls`                       | Planned     | General action controls.                                    |
-| `components/inputs/RgoInput*/**`                                  | `core/components/inputs`                         | Planned     | Controlled value-level inputs; excludes `RgoForm`.          |
-| `components/layout/{RgoFormSection,RgoFormSectionGrid}/**`        | `capabilities/forms/components/forms`            | Planned     | Form-owned structure.                                       |
-| `components/layout/RgoInfiniteCanvas/**`                          | `capabilities/infinite-canvas/components/layout` | Planned     | Canvas capability and its private pieces.                   |
-| `components/layout/RgoPage*/**`                                   | `capabilities/page-layout/components/layout`     | Planned     | Page shell, body, and header.                               |
-| `components/navigation/RgoTabs/**`                                | `core/components/navigation`                     | Planned     | Generic design-system navigation primitive.                 |
-| `components/utility/RgoShowIf/**`                                 | `core/components/behavior`                       | Planned     | Replace the legacy `utility` category with `behavior`.      |
-| `core/components/behavior/VireoDelayedRender/**`                  | `core/components/behavior`                       | Migrated    | First complete core component migration slice.              |
-| `core/components/data-display/VireoLabelBox/**`                   | `core/components/data-display`                   | Migrated    | Canonical labelled-content anatomy.                         |
-| `core/components/data-display/VireoTruncatedContent/**`           | `core/components/data-display`                   | Migrated    | Accessible disclosure for overflowing rich content.         |
-| `core/components/surfaces/VireoIconContainer/**`                  | `core/components/surfaces`                       | Migrated    | Canonical icon-geometry normalization surface.              |
-| `capabilities/overlays/components/overlays/VireoOverlayHeader/**` | `capabilities/overlays/components/overlays`      | Migrated    | Canonical overlay header anatomy.                           |
+| Current path pattern                                                      | Target owner                                     | Disposition | Notes                                                                   |
+| ------------------------------------------------------------------------- | ------------------------------------------------ | ----------- | ----------------------------------------------------------------------- |
+| `components/feedback/{RgoDialogHeader,RgoDrawer}/**`                      | `capabilities/overlays/components/overlays`      | Planned     | Legacy category is incorrect.                                           |
+| `components/feedback/{RgoLoader,RgoQueryErrorLoaderSuspense}/**`          | `core/components/feedback`                       | Planned     | Generic loading, suspense, and error-boundary presentation.             |
+| `components/inputs/RgoForm/**`                                            | `capabilities/forms/components/forms`            | Planned     | Form workflow component.                                                |
+| `components/inputs/{RgoButtonBase,RgoIconButton}/**`                      | `core/components/controls`                       | Planned     | General action controls.                                                |
+| `components/inputs/RgoInput*/**`                                          | `core/components/inputs`                         | Planned     | Controlled value-level inputs; excludes `RgoForm`.                      |
+| `components/layout/{RgoFormSection,RgoFormSectionGrid}/**`                | `capabilities/forms/components/forms`            | Planned     | Form-owned structure.                                                   |
+| `components/layout/RgoInfiniteCanvas/**`                                  | `capabilities/infinite-canvas/components/layout` | Planned     | Canvas capability and its private pieces.                               |
+| `components/layout/RgoPage*/**`                                           | `capabilities/page-layout/components/layout`     | Planned     | Page shell, body, and header.                                           |
+| `components/navigation/RgoTabs/**`                                        | `core/components/navigation`                     | Planned     | Generic design-system navigation primitive.                             |
+| `components/utility/RgoShowIf/**`                                         | `core/components/behavior`                       | Planned     | Replace the legacy `utility` category with `behavior`.                  |
+| `core/components/behavior/VireoDelayedRender/**`                          | `core/components/behavior`                       | Migrated    | First complete core component migration slice.                          |
+| `core/components/data-display/VireoLabelBox/**`                           | `core/components/data-display`                   | Migrated    | Canonical labelled-content anatomy.                                     |
+| `core/components/data-display/VireoTruncatedContent/**`                   | `core/components/data-display`                   | Migrated    | Accessible disclosure for overflowing rich content.                     |
+| `core/components/surfaces/VireoIconContainer/**`                          | `core/components/surfaces`                       | Migrated    | Canonical icon-geometry normalization surface.                          |
+| `capabilities/overlays/components/overlays/VireoOverlayHeader/**`         | `capabilities/overlays/components/overlays`      | Migrated    | Canonical overlay header anatomy.                                       |
+| `capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/**` | `capabilities/overlays/components/overlays`      | Migrated    | Canonical pointer resize target with an unprefixed compatibility alias. |
 
 ## Hook inventory
 
@@ -264,6 +265,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `unsaved-changes/UnsavedChangesContext.ts`                                                                      | `capabilities/unsaved-changes/contexts/UnsavedChangesContext`                 | Established the dependency boundary and moved its registry tests.                |
 | 2026-08-19   | `overlay/PageOverlayController.tsx`                                                                             | `capabilities/overlays/page-overlays/providers/PageOverlayControllerProvider` | Kept the tightly coupled nonvisual companion APIs with their provider.           |
 | 2026-08-19   | `unsaved-changes/{UnsavedChangesScope.tsx,useUnsavedChangesRegistration.ts,useUnsavedChangesRequestDiscard.ts}` | `capabilities/unsaved-changes/{providers,hooks}`                              | Completed the capability, its public boundary, and focused behavior tests.       |
+| 2026-08-19   | `overlay/SidePanelResizeHandle.tsx`                                                                             | `capabilities/overlays/components/overlays/VireoSidePanelResizeHandle`        | Added the full Vireo contract and retained the former name as an alias.          |
 
 ## Automated verification
 

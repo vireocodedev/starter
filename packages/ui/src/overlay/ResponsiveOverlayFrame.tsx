@@ -1,5 +1,4 @@
 import { DockedSidePanel } from "./DockedSidePanel";
-import { SidePanelResizeHandle } from "./SidePanelResizeHandle";
 import {
   DEFAULT_DESKTOP_SIDE_PANEL_MIN_WIDTH,
   DEFAULT_DESKTOP_SIDE_PANEL_VIEWPORT_INSET,
@@ -11,6 +10,7 @@ import {
   resolveDockedSidePanelWidth,
   useRafViewportWidth,
   useSidePanelResize,
+  VireoSidePanelResizeHandle,
 } from "@/capabilities/overlays/public";
 import { Dialog, Drawer } from "@mui/material";
 import { AppBottomDrawer } from "@/components/AppBottomDrawer";
@@ -80,7 +80,7 @@ export function ResponsiveOverlayFrame({
     ? resizedSidePanelWidth
     : resolveDockedSidePanelWidth(requestedDesktopSidePanelWidth, maxDockedSidePanelWidth, desktopSidePanelMinWidth);
   const sidePanelResizeHandle = (
-    <SidePanelResizeHandle
+    <VireoSidePanelResizeHandle
       enabled={sidePanelResizeEnabled}
       isResizing={sidePanelResize.isResizing}
       onResizeStart={sidePanelResize.onResizeStart}
