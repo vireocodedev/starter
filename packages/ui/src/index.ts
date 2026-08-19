@@ -1,6 +1,7 @@
 export * from "@/core/public";
 export * from "@/capabilities/overlays/public";
 export * from "@/capabilities/unsaved-changes/public";
+export * from "@/capabilities/forms/public";
 export * from "@/components/data-display/RgoClientTable/RgoClientTable";
 export * from "@/components/data-display/RgoServerTable/RgoServerTable";
 export * from "@/components/data-display/RgoTable";

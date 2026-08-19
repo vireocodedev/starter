@@ -933,32 +933,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSection/RgoFormSection.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/layout/RgoFormSection/RgoFormSection.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSection/stories/RgoFormSection.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSection/stories/RgoFormSectionWithCustomStylingDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSection/stories/RgoFormSectionWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSection/stories/RgoFormSectionWithLabelDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
