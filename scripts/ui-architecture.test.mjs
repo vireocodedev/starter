@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { expandBraces, globToRegExp, matchesGlob } from "./ui-architecture.mjs";
+import { expandBraces, globToRegExp, isExecutableStoryExample, matchesGlob } from "./ui-architecture.mjs";
 
 describe("UI architecture path matching", () => {
   it("expands each explicit brace alternative", () => {
@@ -28,5 +28,20 @@ describe("UI architecture path matching", () => {
     const expression = globToRegExp("features/@tanstack/react-query/**");
     assert.equal(expression.test("features/@tanstack/react-query/index.ts"), true);
     assert.equal(expression.test("features/@tanstack/reactXquery/index.ts"), false);
+  });
+
+  it("recognizes only colocated executable story example modules", () => {
+    assert.equal(
+      isExecutableStoryExample("core/components/surfaces/VireoIconContainer/internal/storybook/DefaultExample.tsx"),
+      true,
+    );
+    assert.equal(
+      isExecutableStoryExample("core/components/surfaces/VireoIconContainer/VireoIconContainer.stories.tsx"),
+      false,
+    );
+    assert.equal(
+      isExecutableStoryExample("core/components/surfaces/VireoIconContainer/internal/storybook/fixtures.tsx"),
+      false,
+    );
   });
 });

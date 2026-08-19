@@ -28,6 +28,20 @@ Do not recreate root artifact buckets such as `components`, `hooks`, `providers`
 
 Package-wide Storybook MDX pages live in `docs/storybook`, not `src`. Colocated source stories remain with their owning modules.
 
+Published Storybook developer tooling lives in the package-level `storybook/` directory, also outside `src`. It is built to a separate `dist/storybook/` tree and exposed only through explicit package subpaths; it is not part of the production package-root API.
+
+```text
+storybook/
+  index.ts
+  VireoComponent/
+    index.ts
+    ...component-specific presentation helpers
+```
+
+The `@vireocodedev/starter-ui/storybook` entry point owns genuinely reusable Storybook providers and presentation utilities. Component-specific helpers use an exact PascalCase subpath matching the public component, such as `@vireocodedev/starter-ui/storybook/VireoIconContainer`. Do not collect component-specific helpers into the shared entry point or hide them behind a wildcard export.
+
+Although these helpers are published so copied examples compile in consumer projects, they remain developer tooling: production modules must not import them, package-root barrels must not re-export them, and their runtime graph must not depend on `@storybook/*` or `storybook/*` packages.
+
 ## Boundary responsibilities
 
 ### Core

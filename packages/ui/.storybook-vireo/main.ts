@@ -13,6 +13,18 @@ const config: StorybookConfig = {
     return mergeConfig(viteConfig, {
       resolve: {
         alias: [
+          {
+            find: /^@vireocodedev\/starter-ui\/storybook\/VireoIconContainer$/,
+            replacement: resolve(__dirname, "../storybook/VireoIconContainer/index.ts"),
+          },
+          {
+            find: /^@vireocodedev\/starter-ui\/storybook$/,
+            replacement: resolve(__dirname, "../storybook/index.ts"),
+          },
+          {
+            find: /^@vireocodedev\/starter-ui$/,
+            replacement: resolve(__dirname, "./starter-ui-entry.ts"),
+          },
           { find: "@", replacement: resolve(__dirname, "../src") },
           {
             find: /^@mui\/icons-material$/,

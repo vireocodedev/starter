@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./storybook",
+    "outDir": "./dist/storybook"
+  },
+  "include": ["storybook"],
+  "exclude": ["**/*.test.*", "**/*.spec.*"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}

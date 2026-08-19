@@ -806,6 +806,27 @@
         "react-i18next"
       ],
       "workerSafe": false
+    },
+    "./storybook": {
+      "exports": [
+        "VireoStorybookProvider",
+        "VireoStorybookProviderProps"
+      ],
+      "dependencies": [
+        "@mui/material"
+      ],
+      "workerSafe": false
+    },
+    "./storybook/VireoIconContainer": {
+      "exports": [
+        "VireoIconContainerComparisonFrame",
+        "VireoIconContainerComparisonFrameProps"
+      ],
+      "dependencies": [
+        "@mui/material",
+        "@mui/material/styles"
+      ],
+      "workerSafe": false
     }
   }
 }

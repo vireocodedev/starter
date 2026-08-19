@@ -181,7 +181,7 @@ export function distTargetForEntry(target) {
   return typeof target === "string" ? target : (target?.import ?? target?.default);
 }
 
-/** Maps a declared entry's dist target back to its source file. */
+/** Maps a declared entry's dist target back to production or package-level tooling source. */
 export function sourceForEntry(packageDirectory, target) {
   const distPath = distTargetForEntry(target);
   if (!distPath) return undefined;
@@ -189,6 +189,8 @@ export function sourceForEntry(packageDirectory, target) {
   const candidates = [
     join(packageDirectory, "src", `${withoutDist}.ts`),
     join(packageDirectory, "src", `${withoutDist}.tsx`),
+    join(packageDirectory, `${withoutDist}.ts`),
+    join(packageDirectory, `${withoutDist}.tsx`),
   ];
   return candidates.find(candidate => existsSync(candidate));
 }

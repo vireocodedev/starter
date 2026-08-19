@@ -4,8 +4,11 @@
     "baseUrl": ".",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@vireocodedev/starter-ui": ["./src/index.ts"],
+      "@vireocodedev/starter-ui/storybook": ["./storybook/index.ts"],
+      "@vireocodedev/starter-ui/storybook/VireoIconContainer": ["./storybook/VireoIconContainer/index.ts"]
     }
   },
-  "include": ["src", "tests"]
+  "include": [".storybook-vireo/vite-env.d.ts", "src", "storybook", "tests"]
 }

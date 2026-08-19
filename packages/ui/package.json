@@ -39,6 +39,16 @@
       "types": "./dist/video/index.d.ts",
       "import": "./dist/video/index.js",
       "default": "./dist/video/index.js"
+    },
+    "./storybook": {
+      "types": "./dist/storybook/index.d.ts",
+      "import": "./dist/storybook/index.js",
+      "default": "./dist/storybook/index.js"
+    },
+    "./storybook/VireoIconContainer": {
+      "types": "./dist/storybook/VireoIconContainer/index.d.ts",
+      "import": "./dist/storybook/VireoIconContainer/index.js",
+      "default": "./dist/storybook/VireoIconContainer/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -50,7 +60,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "build:css": "copyfiles -u 1 \"src/**/*.css\" dist",
-    "build": "npm run clean && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && npm run build:css",
+    "build": "npm run clean && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && npm run build:storybook-exports && npm run build:css",
+    "build:storybook-exports": "tsc -p tsconfig.storybook.build.json && tsc-alias -p tsconfig.storybook.build.json",
     "dev": "concurrently -k -n tsc,aliases,css \"npm run dev:tsc\" \"npm run dev:aliases\" \"npm run dev:css\"",
     "dev:tsc": "tsc -w -p tsconfig.build.json",
     "dev:aliases": "chokidar \"dist/**/*.js\" --debounce 150 --silent -c \"tsc-alias -p tsconfig.build.json\" --initial",

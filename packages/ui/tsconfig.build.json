@@ -10,7 +10,15 @@
   // `storybook/internal/csf`, a devDependency that consumers cannot resolve.
   // Tests may live beside their source files, but are type-checked only and
   // must never be emitted into the published package.
-  "exclude": ["tests", "**/*.test.*", "**/*.spec.*", "**/*.stories.*", "**/stories/**", "**/storybookutils.*"],
+  "exclude": [
+    "tests",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/*.stories.*",
+    "**/internal/storybook/**",
+    "**/stories/**",
+    "**/storybookutils.*"
+  ],
   // Emit extensioned relative specifiers so dist is resolvable by Node's ESM
   // loader, not just by bundlers.
   "tsc-alias": {

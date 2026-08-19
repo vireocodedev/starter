@@ -18,6 +18,7 @@ import { describe, expect, it } from "vitest";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const srcRoot = join(packageRoot, "src");
+const storybookRoot = join(packageRoot, "storybook");
 const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8")) as {
   exports: Record<string, { import?: string; types?: string }>;
 };
@@ -127,7 +128,7 @@ describe("package entry points", () => {
   it("declares every entry point explicitly", () => {
     const subpaths = Object.keys(manifest.exports);
 
-    expect(subpaths).toEqual([".", "./api", "./country", "./video"]);
+    expect(subpaths).toEqual([".", "./api", "./country", "./video", "./storybook", "./storybook/VireoIconContainer"]);
   });
 
   it("exposes no wildcard subpath", () => {
@@ -143,9 +144,26 @@ describe("package entry points", () => {
       const entry = target.import;
       expect(entry, `${subpath} declares no import target`).toBeDefined();
 
-      const sourceFile = join(srcRoot, entry!.replace(/^\.\/dist\//, "").replace(/\.js$/, ".ts"));
+      const sourceTarget = entry!.replace(/^\.\/dist\//, "").replace(/\.js$/, ".ts");
+      const sourceFile = sourceTarget.startsWith("storybook/")
+        ? join(storybookRoot, sourceTarget.replace(/^storybook\//, ""))
+        : join(srcRoot, sourceTarget);
       expect(existsSync(sourceFile), `${subpath} -> ${sourceFile} does not exist`).toBe(true);
     }
+  });
+
+  it("keeps published Storybook helpers independent from Storybook runtimes", () => {
+    const entries = [join(storybookRoot, "index.ts"), join(storybookRoot, "VireoIconContainer", "index.ts")];
+    const offenders = entries.flatMap(entry =>
+      [...runtimeGraph(entry).external.entries()]
+        .filter(
+          ([specifier]) =>
+            specifier === "storybook" || specifier.startsWith("storybook/") || specifier.startsWith("@storybook/"),
+        )
+        .map(([specifier, importer]) => `${specifier} (imported by ${importer})`),
+    );
+
+    expect(offenders).toEqual([]);
   });
 });
 

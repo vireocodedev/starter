@@ -172,6 +172,50 @@ Use decorators for shared visual context such as a constrained surface, provider
 
 Story-only fixtures must be deterministic, product-neutral, and local to the story unless several components genuinely share them. Stories must not depend on a consuming application, network data, current time, or mutable external state.
 
+## Executable displayed source
+
+The code panel is consumer documentation, not a serialization of Storybook's private render tree. Its displayed source must be a complete TSX module that a consumer can copy into a project with `@vireocodedev/starter-ui` installed, compile without private imports, and render to reproduce the story's initial canvas.
+
+For a direct args-only story, generated source may be retained only when it already meets that complete-module standard. When a story uses a render wrapper, coordinated fixture, local state, or presentation chrome, create one executable example file and import that same file both normally and through Vite's `?raw` query:
+
+```text
+VireoComponent/
+  internal/
+    storybook/
+      DefaultExample.tsx
+  VireoComponent.stories.tsx
+```
+
+```tsx
+import DefaultExample from "@/core/components/data-display/VireoComponent/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/core/components/data-display/VireoComponent/internal/storybook/DefaultExample.tsx?raw";
+
+export const Default: Story = {
+  render: () => <DefaultExample />,
+  parameters: {
+    docs: {
+      source: {
+        code: defaultExampleSource,
+        language: "tsx",
+        type: "code",
+      },
+    },
+  },
+};
+```
+
+The executable example is the sole source of truth. Never maintain a second handwritten template string containing the same JSX. Keep the file product-neutral and include all of its consumer imports; it must not import the story file, `internal` production modules, private styled slots, Storybook packages, or repository-only aliases.
+
+The story file itself follows the source architecture and reaches the nested example through the `@/` alias. The executable example deliberately imports the public package entry points because its contents are consumer code; the architecture checker permits that exception only below a component's `internal/storybook/` directory.
+
+Presentation infrastructure that is genuinely reusable across components may be published from `@vireocodedev/starter-ui/storybook`. A helper created specifically for one component uses a PascalCase component subpath, for example:
+
+```tsx
+import { VireoIconContainerComparisonFrame } from "@vireocodedev/starter-ui/storybook/VireoIconContainer";
+```
+
+Published Storybook helpers may own comparison layout, review surfaces, labels, or providers, but must leave the documented Vireo invocation visible in the executable example. They are explicit developer-tooling APIs, are never re-exported from the package root, and must have no runtime dependency on Storybook itself.
+
 ## Shared dark Storybook theme
 
 The Vireo review Storybook supplies one shared dark MUI theme. Every story, including its fixtures, decorators, portals, and theme-customization example, must remain visually coherent with that outer theme.
@@ -295,6 +339,10 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - Complex or misleading controls are configured deliberately.
 - Any story-only args adapter is derived from public types and relaxes only a Storybook-incompatible correlated contract.
 - Fixtures and decorators are deterministic, minimal, and product-neutral.
+- Every code panel shows a complete, copy-pastable TSX module rather than private render wrappers or serialized React fragments.
+- Complex examples import one executable example normally and with `?raw`; no duplicate handwritten source string exists.
+- Executable examples use only consumer-resolvable imports and keep the documented Vireo invocation visible.
+- Published Storybook helpers use explicit shared or PascalCase component subpaths and have no Storybook runtime dependency.
 - Fixtures use semantic theme tokens and remain coherent with the shared dark Storybook theme.
 - Theme-customization decorators extend the outer theme instead of replacing it with a standalone light theme.
 - Additional stories correspond to meaningful public states or customization contracts.

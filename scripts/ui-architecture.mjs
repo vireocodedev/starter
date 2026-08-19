@@ -698,6 +698,10 @@ function capabilityLocation(path) {
   };
 }
 
+export function isExecutableStoryExample(path) {
+  return path.includes("/internal/storybook/") && /Example\.tsx?$/u.test(path);
+}
+
 function collectImportViolations(files) {
   const violations = [];
   const capabilityEdges = new Map();
@@ -708,12 +712,22 @@ function collectImportViolations(files) {
 
   for (const file of targetFiles) {
     const owner = capabilityLocation(file);
+    const executableStoryExample = isExecutableStoryExample(file);
 
     for (const specifier of sourceSpecifiers(file)) {
-      if (specifier === "@/index" || specifier === "@/index.ts" || specifier === "@vireocodedev/starter-ui") {
+      if (specifier === "@/index" || specifier === "@/index.ts") {
         violations.push(
           violation("internal-package-entry-import", file, `imports the package entry point through "${specifier}"`),
         );
+        continue;
+      }
+
+      if (specifier === "@vireocodedev/starter-ui" || specifier.startsWith("@vireocodedev/starter-ui/")) {
+        if (!executableStoryExample) {
+          violations.push(
+            violation("internal-package-entry-import", file, `imports the package entry point through "${specifier}"`),
+          );
+        }
         continue;
       }
 
