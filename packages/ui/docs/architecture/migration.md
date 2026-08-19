@@ -188,7 +188,6 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `components/layout/RgoInfiniteCanvas/**`                                   | `capabilities/infinite-canvas/components/layout` | Planned     | Canvas capability and its private pieces.                                 |
 | `components/layout/RgoPage*/**`                                            | `capabilities/page-layout/components/layout`     | Planned     | Page shell, body, and header.                                             |
 | `components/navigation/RgoTabs/**`                                         | `core/components/navigation`                     | Planned     | Generic design-system navigation primitive.                               |
-| `components/utility/RgoShowIf/**`                                          | `core/components/behavior`                       | Planned     | Replace the legacy `utility` category with `behavior`.                    |
 | `core/components/behavior/VireoDelayedRender/**`                           | `core/components/behavior`                       | Migrated    | First complete core component migration slice.                            |
 | `core/components/data-display/VireoLabelBox/**`                            | `core/components/data-display`                   | Migrated    | Canonical labelled-content anatomy.                                       |
 | `core/components/data-display/VireoJsonViewer/**`                          | `core/components/data-display`                   | Migrated    | Resilient structured-data inspection and copy behavior.                   |
@@ -285,6 +284,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/AppCardActions.tsx`                                                                                 | Removed                                                                       | Removed an unused application-styled wrapper around MUI `CardActions`.              |
 | 2026-08-19   | `components/AppCardContent.tsx`                                                                                 | Removed                                                                       | Removed an unused application-styled wrapper around MUI `CardContent`.              |
 | 2026-08-19   | `components/inputs/RgoButtonBase/**`                                                                            | Removed                                                                       | Removed an unused wrapper with ambiguous non-button default semantics.              |
+| 2026-08-19   | `components/utility/RgoShowIf/**`                                                                               | Removed                                                                       | Removed a conditional-rendering wrapper better expressed with ordinary JSX.         |
 
 ## Automated verification
 

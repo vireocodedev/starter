@@ -326,8 +326,6 @@
         "RgoServerTableMobile",
         "RgoServerTableMobileProps",
         "RgoServerTableProps",
-        "RgoShowIf",
-        "RgoShowIfProps",
         "RgoSnack",
         "RgoSnackDetailsButton",
         "RgoSnackDetailsButtonProps",

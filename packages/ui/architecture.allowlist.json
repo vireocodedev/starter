@@ -1513,21 +1513,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/utility/RgoShowIf/RgoShowIf.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/utility/RgoShowIf/stories/RgoShowIf.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/utility/RgoShowIf/stories/RgoShowIfWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "country/index.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

@@ -48,7 +48,6 @@ export * from "@/components/navigation/RgoTabs/RgoTabs";
 export * from "@/components/ResponsiveCard";
 export * from "@/components/ResponsiveMonthYearPicker";
 export * from "@/components/SlidingScreenStack";
-export * from "@/components/utility/RgoShowIf/RgoShowIf";
 export * from "@/enums/RgoMonth";
 export * from "@/events/RgoEventBus";
 export * from "@/events/useRgoEventListener";
