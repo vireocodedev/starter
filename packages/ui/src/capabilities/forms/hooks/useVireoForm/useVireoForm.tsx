@@ -1,5 +1,6 @@
 import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/VireoForm";
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
+import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
 import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
 import { VireoFormSelectField } from "@/capabilities/forms/components/forms/VireoFormSelectField/VireoFormSelectField";
@@ -21,6 +22,7 @@ import React from "react";
 
 const { useAppForm } = createFormHook({
   fieldComponents: {
+    CheckboxField: VireoFormCheckboxField,
     NumberField: VireoFormNumberField,
     SelectField: VireoFormSelectField,
     SwitchField: VireoFormSwitchField,
@@ -58,6 +60,7 @@ type BaseVireoFormApi<
   TOnServer,
   TSubmitMeta,
   {
+    CheckboxField: typeof VireoFormCheckboxField;
     NumberField: typeof VireoFormNumberField;
     SelectField: typeof VireoFormSelectField;
     SwitchField: typeof VireoFormSwitchField;

@@ -290,7 +290,7 @@ Every executable story for an input-like `field.*` component composes the input 
 
 Mirror visible required state on `VireoLabelBox` when the field is required. Keep validation errors and field-specific helper text on the bound input unless a story is explicitly demonstrating `VireoLabelBox` helper anatomy.
 
-Exceptions must be explicit and narrowly justified by control anatomy. The current whitelist contains only `field.SwitchField`: its visible label is integral to MUI's switch/control-label composition, so its stories retain the field label and do not add `VireoLabelBox`. Add future exceptions to this list before using them.
+Exceptions must be explicit and narrowly justified by control anatomy. The current whitelist contains `field.SwitchField` and `field.CheckboxField`: their visible labels are integral to MUI's switch or checkbox control-label composition, so their stories retain the field label and do not add `VireoLabelBox`. Add future exceptions to this list before using them.
 
 ### Common states
 
@@ -379,7 +379,7 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - Additional stories correspond to meaningful public states or customization contracts.
 - Every bound `field.*` input includes executable `ZodFieldValidation` and `ZodFormValidation` stories.
 - Every non-whitelisted input-like `field.*` story composes the control inside `VireoLabelBox`, puts its visible label there, suppresses the MUI input label, and preserves an accessible control name.
-- The bound-field story whitelist is explicit; currently only `field.SwitchField` is exempt from `VireoLabelBox` composition.
+- The bound-field story whitelist is explicit; currently only `field.SwitchField` and `field.CheckboxField` are exempt from `VireoLabelBox` composition.
 - Interactive stories use accessible canvas queries.
 - Slot and theme stories use only supported public customization APIs.
 - Stories are ordered from fundamental usage toward advanced customization.

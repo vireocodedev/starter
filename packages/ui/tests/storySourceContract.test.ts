@@ -20,7 +20,7 @@ const srcRoot = join(packageRoot, "src");
 const VIREO_STORY_FILE_PATTERN = /^Vireo[A-Z]\w*\.stories\.tsx$/u;
 const EXAMPLE_FILE_PATTERN = /^[A-Z]\w*Example\.tsx$/u;
 const FORM_STORY_EXAMPLE_PATTERN = /\/capabilities\/forms\/components\/forms\/[^/]+\/internal\/storybook\//u;
-const BOUND_FORM_FIELD_STORY_WHITELIST = new Set(["field.SwitchField"]);
+const BOUND_FORM_FIELD_STORY_WHITELIST = new Set(["field.CheckboxField", "field.SwitchField"]);
 
 function findFiles(directory: string, predicate: (file: string) => boolean): string[] {
   return readdirSync(directory).flatMap(entry => {

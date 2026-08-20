@@ -234,6 +234,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/forms/components/forms/VireoFormNumberField/**`              | `capabilities/forms/components/forms`                  | Migrated      | Number-or-null field with numeric draft and validation wiring.            |
 | `capabilities/forms/components/forms/VireoFormSelectField/**`              | `capabilities/forms/components/forms`                  | Migrated      | Nullable scalar select field with typed options and validation wiring.    |
 | `capabilities/forms/components/forms/VireoFormSwitchField/**`              | `capabilities/forms/components/forms`                  | Migrated      | Boolean switch field with validation and accessible label wiring.         |
+| `capabilities/forms/components/forms/VireoFormCheckboxField/**`            | `capabilities/forms/components/forms`                  | Migrated      | Boolean checkbox field with validation and accessible label wiring.       |
 | `capabilities/forms/components/forms/VireoFormSubmitButton/**`             | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound submit action with automatic async loading state.        |
 | `capabilities/forms/components/forms/VireoFormResetButton/**`              | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound reset action with automatic pristine-state disabling.    |
 
@@ -354,6 +355,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-20   | New TanStack-bound number-field contract                                                                                                    | `capabilities/forms/components/forms/VireoFormNumberField`                                                       | Added `field.NumberField`, typed numeric editing, tests, and Zod stories.           |
 | 2026-08-20   | New TanStack-bound switch-field contract                                                                                                    | `capabilities/forms/components/forms/VireoFormSwitchField`                                                       | Added `field.SwitchField`, boolean lifecycle wiring, tests, and Zod stories.        |
 | 2026-08-20   | New TanStack-bound select-field contract                                                                                                    | `capabilities/forms/components/forms/VireoFormSelectField`                                                       | Added `field.SelectField`, typed scalar options, clear behavior, and Zod stories.   |
+| 2026-08-20   | New TanStack-bound checkbox-field contract                                                                                                  | `capabilities/forms/components/forms/VireoFormCheckboxField`                                                     | Added `field.CheckboxField`, boolean lifecycle wiring, tests, and Zod stories.      |
 
 ## Automated verification
 
