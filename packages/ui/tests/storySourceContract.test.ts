@@ -124,6 +124,10 @@ function hasVisibleMuiInputLabel(node: ts.JsxOpeningLikeElement): boolean {
   );
 }
 
+function hasAccessibleControlName(node: ts.JsxOpeningLikeElement, source: ts.SourceFile): boolean {
+  return /(?:"aria-label(?:ledby)?"|aria-label(?:ledby)?\s*=)/u.test(node.getText(source));
+}
+
 function storyInputElements(source: ts.SourceFile, includeMuiTextField: boolean): ts.JsxOpeningLikeElement[] {
   const inputs: ts.JsxOpeningLikeElement[] = [];
   const visit = (node: ts.Node): void => {
@@ -265,10 +269,6 @@ describe("Vireo executable story-source contract", () => {
       );
 
       if (!importsLabelBox) errors.push(`${location}: missing public VireoLabelBox import`);
-      if ((source.text.match(/"aria-label"/gu) ?? []).length < inputs.length) {
-        errors.push(`${location}: every bound input must retain an accessible control name`);
-      }
-
       for (const input of inputs) {
         const tagName = jsxTagName(input.tagName, source);
         if (!isInsideVireoLabelBox(input, source)) {
@@ -276,6 +276,9 @@ describe("Vireo executable story-source contract", () => {
         }
         if (hasVisibleMuiInputLabel(input)) {
           errors.push(`${location}: ${tagName} uses a visible MUI input label`);
+        }
+        if (!hasAccessibleControlName(input, source)) {
+          errors.push(`${location}: ${tagName} must retain an accessible control name`);
         }
       }
 
