@@ -73,6 +73,10 @@ export const VireoFormSubmitButton = React.forwardRef<HTMLButtonElement, VireoFo
       sx: rootSlotSx,
       ...rootSlotOther
     } = resolvedRootSlotProps;
+    void _rootSlotComponent;
+    void _rootSlotDisabled;
+    void _rootSlotHref;
+    void _rootSlotLoading;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
 
     return (

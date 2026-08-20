@@ -231,6 +231,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/forms/components/forms/VireoFormSection/**`                  | `capabilities/forms/components/forms`                  | Migrated      | Accessible labelled grouping and surface for related form controls.       |
 | `capabilities/forms/components/forms/VireoForm/**`                         | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound semantic form root, lifecycle wiring, and documentation. |
 | `capabilities/forms/components/forms/VireoFormTextField/**`                | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound MUI text field with validation and lifecycle wiring.     |
+| `capabilities/forms/components/forms/VireoFormNumberField/**`              | `capabilities/forms/components/forms`                  | Migrated      | Number-or-null field with numeric draft and validation wiring.            |
 | `capabilities/forms/components/forms/VireoFormSubmitButton/**`             | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound submit action with automatic async loading state.        |
 | `capabilities/forms/components/forms/VireoFormResetButton/**`              | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound reset action with automatic pristine-state disabling.    |
 
@@ -348,6 +349,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | New TanStack-bound text-field contract                                                                                                      | `capabilities/forms/components/forms/VireoFormTextField`                                                         | Added `field.TextField`, six slots, validation policy, tests, and stories.          |
 | 2026-08-20   | New TanStack-bound submit-button contract                                                                                                   | `capabilities/forms/components/forms/VireoFormSubmitButton`                                                      | Added `form.SubmitButton`, async loading behavior, tests, and stories.              |
 | 2026-08-20   | New TanStack-bound reset-button contract                                                                                                    | `capabilities/forms/components/forms/VireoFormResetButton`                                                       | Added `form.ResetButton`, pristine disabling behavior, tests, and stories.          |
+| 2026-08-20   | New TanStack-bound number-field contract                                                                                                    | `capabilities/forms/components/forms/VireoFormNumberField`                                                       | Added `field.NumberField`, typed numeric editing, tests, and Zod stories.           |
 
 ## Automated verification
 

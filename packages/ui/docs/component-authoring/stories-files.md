@@ -265,6 +265,15 @@ The dark review theme is the baseline, but semantic tokens are still preferred s
 
 The Default story is the minimum, not the complete documentation for every component. Add stories only for public distinctions a consumer needs to see or exercise.
 
+### Bound form-field validation
+
+Every form input exposed through a `useVireoForm` field façade, such as `field.TextField` or `field.NumberField`, includes both of these executable stories:
+
+1. `ZodFieldValidation` passes a Zod schema through that field's `validators` prop.
+2. `ZodFormValidation` passes one Zod object schema through `useVireoForm` and leaves the individual fields without validators.
+
+Use realistic invalid and valid values, render the corresponding bound `field.*` component, and retain the form's actual validation timing. Together the stories must show both supported schema scopes and prove that form-level path-aware issues reach the matching fields without repeated schemas.
+
 ### Common states
 
 Show meaningful normal variants and conditional anatomy, such as closable, selected, expanded, loading, empty, or disabled states. Do not create one story for every boolean combination.
@@ -350,6 +359,7 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - Fixtures use semantic theme tokens and remain coherent with the shared dark Storybook theme.
 - Theme-customization decorators extend the outer theme instead of replacing it with a standalone light theme.
 - Additional stories correspond to meaningful public states or customization contracts.
+- Every bound `field.*` input includes executable `ZodFieldValidation` and `ZodFormValidation` stories.
 - Interactive stories use accessible canvas queries.
 - Slot and theme stories use only supported public customization APIs.
 - Stories are ordered from fundamental usage toward advanced customization.

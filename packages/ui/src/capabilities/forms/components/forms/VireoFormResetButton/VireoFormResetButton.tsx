@@ -60,6 +60,9 @@ export const VireoFormResetButton = React.forwardRef<HTMLButtonElement, VireoFor
       sx: rootSlotSx,
       ...rootSlotOther
     } = resolvedRootSlotProps;
+    void _rootSlotComponent;
+    void _rootSlotDisabled;
+    void _rootSlotHref;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
 
     return (

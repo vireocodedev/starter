@@ -1,4 +1,6 @@
 export * from "./components/forms/VireoFormSection";
+export * from "./components/forms/VireoFormNumberField/VireoFormNumberField.classes";
+export type * from "./components/forms/VireoFormNumberField/VireoFormNumberField.types";
 export * from "./components/forms/VireoFormResetButton/VireoFormResetButton.classes";
 export type * from "./components/forms/VireoFormResetButton/VireoFormResetButton.types";
 export * from "./components/forms/VireoFormSubmitButton/VireoFormSubmitButton.classes";

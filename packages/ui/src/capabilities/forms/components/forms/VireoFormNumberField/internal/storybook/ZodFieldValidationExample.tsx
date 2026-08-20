@@ -1,0 +1,37 @@
+import { Stack, Typography } from "@mui/material";
+import { revalidateLogic } from "@tanstack/react-form";
+import { useVireoForm } from "@vireocodedev/starter-ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import React from "react";
+import { z } from "zod";
+
+const quantitySchema = z
+  .number()
+  .int("Enter a whole number.")
+  .min(1, "Enter at least one item.")
+  .max(100, "Enter no more than 100 items.")
+  .nullable()
+  .refine(value => value !== null, "Enter a quantity.");
+
+export default function ZodFieldValidationExample() {
+  const [savedQuantity, setSavedQuantity] = React.useState<number | null>();
+  const form = useVireoForm({
+    defaultValues: { quantity: null as number | null },
+    onSubmit: ({ value }) => setSavedQuantity(value.quantity),
+    validationLogic: revalidateLogic(),
+  });
+
+  return (
+    <VireoStorybookProvider>
+      <form.Form sx={{ maxWidth: 480 }}>
+        <Stack spacing={2}>
+          <form.Field name="quantity" validators={{ onDynamic: quantitySchema }}>
+            {field => <field.NumberField label="Quantity" max={100} min={1} placeholder="12" />}
+          </form.Field>
+          <form.SubmitButton variant="contained">Save quantity</form.SubmitButton>
+          {savedQuantity !== undefined && <Typography color="success.main">Saved quantity: {savedQuantity}</Typography>}
+        </Stack>
+      </form.Form>
+    </VireoStorybookProvider>
+  );
+}
