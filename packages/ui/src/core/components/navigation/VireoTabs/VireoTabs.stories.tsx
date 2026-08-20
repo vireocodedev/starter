@@ -1,10 +1,11 @@
-import CustomizedSlotsExample from "@/core/components/navigation/VireoTabs/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/core/components/navigation/VireoTabs/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import ControlledSelectionExample from "@/core/components/navigation/VireoTabs/internal/storybook/ControlledSelectionExample";
+import controlledSelectionExampleSource from "@/core/components/navigation/VireoTabs/internal/storybook/ControlledSelectionExample.tsx?raw";
 import DefaultExample from "@/core/components/navigation/VireoTabs/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/navigation/VireoTabs/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/core/components/navigation/VireoTabs/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/core/components/navigation/VireoTabs/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import DisabledTabExample from "@/core/components/navigation/VireoTabs/internal/storybook/DisabledTabExample";
+import disabledTabExampleSource from "@/core/components/navigation/VireoTabs/internal/storybook/DisabledTabExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, fn, userEvent, within } from "storybook/test";
 import { VireoTabs } from "./VireoTabs";
 
 function createSourceParameters(code: string) {
@@ -24,6 +25,7 @@ const meta = {
   component: VireoTabs,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `Presents a labelled set of mutually exclusive content panels with accessible keyboard navigation.
@@ -46,16 +48,27 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => <DefaultExample />,
+  args: { onChange: fn() },
+  render: ({ onChange }) => <DefaultExample onChange={onChange} />,
   parameters: createSourceParameters(defaultExampleSource),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("tab", { name: "Security" }));
+    await expect(args.onChange).toHaveBeenLastCalledWith("security", expect.anything());
+    await expect(canvas.getByRole("tabpanel")).toHaveTextContent("Password and authentication settings");
+  },
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
+export const DisabledTab: Story = {
+  render: () => <DisabledTabExample />,
+  parameters: createSourceParameters(disabledTabExampleSource),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("tab", { name: "Audit log" })).toBeDisabled();
+  },
 };
 
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const ControlledSelection: Story = {
+  render: () => <ControlledSelectionExample />,
+  parameters: createSourceParameters(controlledSelectionExampleSource),
 };

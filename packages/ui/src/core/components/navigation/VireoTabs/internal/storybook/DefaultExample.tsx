@@ -1,7 +1,7 @@
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { VireoTabs } from "@vireocodedev/starter-ui";
+import { VireoTabs, type VireoTabsProps } from "@vireocodedev/starter-ui";
 
-export default function DefaultExample() {
+export default function DefaultExample({ onChange }: Pick<VireoTabsProps, "onChange">) {
   return (
     <VireoStorybookProvider>
       <VireoTabs
@@ -10,6 +10,7 @@ export default function DefaultExample() {
           { value: "security", label: "Security", content: "Password and authentication settings." },
           { value: "billing", label: "Billing", content: "Invoices and payment methods." },
         ]}
+        onChange={onChange}
       />
     </VireoStorybookProvider>
   );
