@@ -1,21 +1,15 @@
 import CompleteAnatomyExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CompleteAnatomyExample";
 import completeAnatomyExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CompleteAnatomyExample.tsx?raw";
-import ClosableExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ClosableExample";
-import closableExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ClosableExample.tsx?raw";
-import CustomizedSlotsExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DefaultExample.tsx?raw";
 import DisabledCloseExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DisabledCloseExample";
 import disabledCloseExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/DisabledCloseExample.tsx?raw";
 import LongTitleExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/LongTitleExample";
 import longTitleExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/LongTitleExample.tsx?raw";
-import NonStickyExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/NonStickyExample";
-import nonStickyExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/NonStickyExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import StickyBehaviorExample from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/StickyBehaviorExample";
+import stickyBehaviorExampleSource from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/internal/storybook/StickyBehaviorExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, userEvent, within } from "storybook/test";
+import { expect, fireEvent, fn, userEvent, within } from "storybook/test";
 import { VireoOverlayHeader } from "./VireoOverlayHeader";
 import type { VireoOverlayHeaderCloseProps, VireoOverlayHeaderOwnProps } from "./VireoOverlayHeader.types";
 
@@ -49,11 +43,6 @@ export const CompleteAnatomy: Story = {
   args: { onClose: fn(), closeLabel: "Close invoice editor" },
   render: ({ onClose }) => <CompleteAnatomyExample onClose={onClose ?? (() => undefined)} />,
   parameters: source(completeAnatomyExampleSource),
-};
-export const Closable: Story = {
-  args: { onClose: fn(), closeLabel: "Close invoice editor" },
-  render: ({ onClose }) => <ClosableExample onClose={onClose ?? (() => undefined)} />,
-  parameters: source(closableExampleSource),
   play: async ({ args, canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole("button", { name: "Close invoice editor" }));
     await expect(args.onClose).toHaveBeenCalledOnce();
@@ -63,13 +52,19 @@ export const DisabledClose: Story = {
   render: () => <DisabledCloseExample />,
   parameters: source(disabledCloseExampleSource),
 };
-export const NonSticky: Story = { render: () => <NonStickyExample />, parameters: source(nonStickyExampleSource) };
 export const LongTitle: Story = { render: () => <LongTitleExample />, parameters: source(longTitleExampleSource) };
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: source(customizedSlotsExampleSource),
-};
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
+export const StickyBehavior: Story = {
+  render: () => <StickyBehaviorExample />,
+  parameters: source(stickyBehaviorExampleSource),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const stickySurface = canvas.getByRole("region", { name: "Sticky header example" });
+    const nonStickySurface = canvas.getByRole("region", { name: "Non-sticky header example" });
+    stickySurface.scrollTop = 96;
+    nonStickySurface.scrollTop = 96;
+    fireEvent.scroll(stickySurface);
+    fireEvent.scroll(nonStickySurface);
+    await expect(stickySurface).toHaveProperty("scrollTop", 96);
+    await expect(nonStickySurface).toHaveProperty("scrollTop", 96);
+  },
 };
