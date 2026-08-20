@@ -1,17 +1,11 @@
-import AccessibleLabelExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/AccessibleLabelExample";
-import accessibleLabelExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/AccessibleLabelExample.tsx?raw";
-import CustomizedSlotsExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/DefaultExample.tsx?raw";
-import InvertedExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/InvertedExample";
-import invertedExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/InvertedExample.tsx?raw";
-import SemanticColorsExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/SemanticColorsExample";
-import semanticColorsExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/SemanticColorsExample.tsx?raw";
-import SizesExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/SizesExample";
-import sizesExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/SizesExample.tsx?raw";
-import ThemeCustomizationExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import SelectedSurfaceExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/SelectedSurfaceExample";
+import selectedSurfaceExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/SelectedSurfaceExample.tsx?raw";
+import SemanticStatusesExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/SemanticStatusesExample";
+import semanticStatusesExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/SemanticStatusesExample.tsx?raw";
+import StandaloneAccessibleStatusExample from "@/core/components/feedback/VireoStatusDot/internal/storybook/StandaloneAccessibleStatusExample";
+import standaloneAccessibleStatusExampleSource from "@/core/components/feedback/VireoStatusDot/internal/storybook/StandaloneAccessibleStatusExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoStatusDot } from "./VireoStatusDot";
 
@@ -45,21 +39,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
-export const SemanticColors: Story = {
-  render: () => <SemanticColorsExample />,
-  parameters: source(semanticColorsExampleSource),
+export const SemanticStatuses: Story = {
+  render: () => <SemanticStatusesExample />,
+  parameters: source(semanticStatusesExampleSource),
 };
-export const Inverted: Story = { render: () => <InvertedExample />, parameters: source(invertedExampleSource) };
-export const Sizes: Story = { render: () => <SizesExample />, parameters: source(sizesExampleSource) };
-export const AccessibleLabel: Story = {
-  render: () => <AccessibleLabelExample />,
-  parameters: source(accessibleLabelExampleSource),
+export const SelectedSurface: Story = {
+  render: () => <SelectedSurfaceExample />,
+  parameters: source(selectedSurfaceExampleSource),
 };
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: source(customizedSlotsExampleSource),
-};
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
+export const StandaloneAccessibleStatus: Story = {
+  render: () => <StandaloneAccessibleStatusExample />,
+  parameters: source(standaloneAccessibleStatusExampleSource),
 };
