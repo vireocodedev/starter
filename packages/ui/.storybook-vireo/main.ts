@@ -14,6 +14,10 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
+            find: /^@vireocodedev\/starter-ui\/forms$/,
+            replacement: resolve(__dirname, "../src/capabilities/forms/public.ts"),
+          },
+          {
             find: /^@vireocodedev\/starter-ui\/storybook\/VireoDockedSidePanel$/,
             replacement: resolve(__dirname, "../storybook/VireoDockedSidePanel/index.ts"),
           },
