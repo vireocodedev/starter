@@ -1,9 +1,7 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import ContainerResponsiveLayoutExample from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/ContainerResponsiveLayoutExample";
+import containerResponsiveLayoutExampleSource from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/ContainerResponsiveLayoutExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormActions } from "./VireoFormActions";
 
@@ -24,6 +22,7 @@ const meta = {
   component: VireoFormActions,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormActions arranges secondary and primary form actions according to the width of their containing surface.
@@ -50,12 +49,7 @@ export const Default: Story = {
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const ContainerResponsiveLayout: Story = {
+  render: () => <ContainerResponsiveLayoutExample />,
+  parameters: createSourceParameters(containerResponsiveLayoutExampleSource),
 };
