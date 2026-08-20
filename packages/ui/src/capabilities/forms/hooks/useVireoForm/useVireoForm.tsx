@@ -1,5 +1,6 @@
 import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/VireoForm";
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
+import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
 import { VireoFormSubmitButton } from "@/capabilities/forms/components/forms/VireoFormSubmitButton/VireoFormSubmitButton";
 import { VireoFormTextField } from "@/capabilities/forms/components/forms/VireoFormTextField/VireoFormTextField";
 import {
@@ -18,7 +19,7 @@ import React from "react";
 const { useAppForm } = createFormHook({
   fieldComponents: { TextField: VireoFormTextField },
   fieldContext: vireoFieldContext,
-  formComponents: { SubmitButton: VireoFormSubmitButton },
+  formComponents: { ResetButton: VireoFormResetButton, SubmitButton: VireoFormSubmitButton },
   formContext: vireoTanStackFormContext,
 });
 
@@ -49,7 +50,7 @@ type BaseVireoFormApi<
   TOnServer,
   TSubmitMeta,
   { TextField: typeof VireoFormTextField },
-  { SubmitButton: typeof VireoFormSubmitButton }
+  { ResetButton: typeof VireoFormResetButton; SubmitButton: typeof VireoFormSubmitButton }
 >;
 
 export type VireoFormApi<
