@@ -2,6 +2,8 @@ import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoFo
 import { defaultVireoFormErrorFormatter } from "@/capabilities/forms/utils/vireoFormErrors";
 import { Button, FormControl, MenuItem, ThemeProvider, createTheme, type FormControlProps } from "@mui/material";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { revalidateLogic } from "@tanstack/react-form";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { vireoFormTextFieldClasses } from "./VireoFormTextField.classes";
@@ -132,6 +134,45 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => expect(screen.getByText("Name is required.")).toBeInTheDocument());
+  });
+
+  it("submits on the first attempt after correcting a submitted error without blurring first", async () => {
+    const onSubmit = vi.fn();
+
+    function CorrectedSubmissionForm() {
+      const form = useVireoForm({
+        defaultValues: { name: "" },
+        onSubmit,
+        validationLogic: revalidateLogic(),
+      });
+
+      return (
+        <form.Form>
+          <form.Field
+            name="name"
+            validators={{
+              onDynamic: ({ value }) => (value.trim() ? undefined : "Name is required."),
+            }}
+          >
+            {field => <field.TextField label="Name" />}
+          </form.Field>
+          <form.SubmitButton>Submit</form.SubmitButton>
+        </form.Form>
+      );
+    }
+
+    const user = userEvent.setup();
+    render(<CorrectedSubmissionForm />);
+
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+    expect(await screen.findByText("Name is required.")).toBeInTheDocument();
+
+    await user.type(screen.getByRole("textbox", { name: "Name" }), "TEST");
+    await waitFor(() => expect(screen.queryByText("Name is required.")).not.toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: { name: "TEST" } }));
   });
 
   it("supports field error-display and formatter overrides", async () => {

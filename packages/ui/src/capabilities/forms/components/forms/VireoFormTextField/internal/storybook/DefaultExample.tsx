@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import { revalidateLogic } from "@tanstack/react-form";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -8,6 +9,7 @@ export default function DefaultExample() {
   const form = useVireoForm({
     defaultValues: { projectName: "" },
     onSubmit: ({ value }) => setSavedName(value.projectName),
+    validationLogic: revalidateLogic(),
   });
 
   return (
@@ -17,8 +19,7 @@ export default function DefaultExample() {
           <form.Field
             name="projectName"
             validators={{
-              onBlur: ({ value }) => (value.trim() ? undefined : "Enter a project name."),
-              onSubmit: ({ value }) => (value.trim() ? undefined : "Enter a project name."),
+              onDynamic: ({ value }) => (value.trim() ? undefined : "Enter a project name."),
             }}
           >
             {field => <field.TextField label="Project name" placeholder="Northstar" />}
