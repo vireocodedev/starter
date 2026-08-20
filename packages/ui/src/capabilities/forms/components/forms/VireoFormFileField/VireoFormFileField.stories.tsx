@@ -1,5 +1,3 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/DefaultExample.tsx?raw";
 import DisabledAndReadOnlyExample from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/DisabledAndReadOnlyExample";
@@ -10,8 +8,6 @@ import ImagePreviewExample from "@/capabilities/forms/components/forms/VireoForm
 import imagePreviewExampleSource from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/ImagePreviewExample.tsx?raw";
 import LongFilenameTruncationExample from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/LongFilenameTruncationExample";
 import longFilenameTruncationExampleSource from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/LongFilenameTruncationExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import TypeAndSizeRejectionsExample from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/TypeAndSizeRejectionsExample";
 import typeAndSizeRejectionsExampleSource from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/TypeAndSizeRejectionsExample.tsx?raw";
 import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormFileField/internal/storybook/ZodFieldValidationExample";
@@ -35,6 +31,7 @@ const meta = {
   component: VireoFormFileField,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormFileField binds a single browser \`File | null\` value to the current TanStack Form field through \`field.FileField\`.
@@ -110,14 +107,4 @@ export const ZodFormValidation: Story = {
     zodFormValidationExampleSource,
     "Routes text and file issues from one Zod object schema attached to useVireoForm.",
   ),
-};
-
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
 };
