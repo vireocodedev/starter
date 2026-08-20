@@ -1,16 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import CustomizedSlotsExample from "@/core/components/surfaces/VireoIconContainer/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/core/components/surfaces/VireoIconContainer/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import AspectRatioPreservationExample from "@/core/components/surfaces/VireoIconContainer/internal/storybook/AspectRatioPreservationExample";
+import aspectRatioPreservationExampleSource from "@/core/components/surfaces/VireoIconContainer/internal/storybook/AspectRatioPreservationExample.tsx?raw";
 import DefaultExample from "@/core/components/surfaces/VireoIconContainer/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/surfaces/VireoIconContainer/internal/storybook/DefaultExample.tsx?raw";
-import LargeSquareSourceExample from "@/core/components/surfaces/VireoIconContainer/internal/storybook/LargeSquareSourceExample";
-import largeSquareSourceExampleSource from "@/core/components/surfaces/VireoIconContainer/internal/storybook/LargeSquareSourceExample.tsx?raw";
-import NonSquareSourceExample from "@/core/components/surfaces/VireoIconContainer/internal/storybook/NonSquareSourceExample";
-import nonSquareSourceExampleSource from "@/core/components/surfaces/VireoIconContainer/internal/storybook/NonSquareSourceExample.tsx?raw";
-import PortraitSourceExample from "@/core/components/surfaces/VireoIconContainer/internal/storybook/PortraitSourceExample";
-import portraitSourceExampleSource from "@/core/components/surfaces/VireoIconContainer/internal/storybook/PortraitSourceExample.tsx?raw";
-import ThemeCustomizationExample from "@/core/components/surfaces/VireoIconContainer/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/core/components/surfaces/VireoIconContainer/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import { VireoIconContainer } from "./VireoIconContainer";
 
 function createSourceParameters(code: string) {
@@ -35,6 +27,7 @@ const meta = {
     children: null,
   },
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -43,8 +36,6 @@ const meta = {
     },
   },
   argTypes: {
-    viewBoxWidth: { control: { type: "number", min: 1 } },
-    viewBoxHeight: { control: { type: "number", min: 1 } },
     children: { control: false },
     slots: { control: false },
     slotProps: { control: false },
@@ -56,55 +47,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: ({ viewBoxHeight, viewBoxWidth }) => (
-    <DefaultExample viewBoxHeight={viewBoxHeight} viewBoxWidth={viewBoxWidth} />
-  ),
+  render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const LargeSquareSource: Story = {
-  args: {
-    viewBoxWidth: 32,
-    viewBoxHeight: 32,
-  },
-  render: ({ viewBoxHeight, viewBoxWidth }) => (
-    <LargeSquareSourceExample viewBoxHeight={viewBoxHeight} viewBoxWidth={viewBoxWidth} />
-  ),
-  parameters: createSourceParameters(largeSquareSourceExampleSource),
-};
-
-export const NonSquareSource: Story = {
-  args: {
-    viewBoxWidth: 32,
-    viewBoxHeight: 16,
-  },
-  render: ({ viewBoxHeight, viewBoxWidth }) => (
-    <NonSquareSourceExample viewBoxHeight={viewBoxHeight} viewBoxWidth={viewBoxWidth} />
-  ),
-  parameters: createSourceParameters(nonSquareSourceExampleSource),
-};
-
-export const PortraitSource: Story = {
-  args: {
-    viewBoxWidth: 16,
-    viewBoxHeight: 32,
-  },
-  render: ({ viewBoxHeight, viewBoxWidth }) => (
-    <PortraitSourceExample viewBoxHeight={viewBoxHeight} viewBoxWidth={viewBoxWidth} />
-  ),
-  parameters: createSourceParameters(portraitSourceExampleSource),
-};
-
-export const CustomizedSlots: Story = {
-  render: ({ viewBoxHeight, viewBoxWidth }) => (
-    <CustomizedSlotsExample viewBoxHeight={viewBoxHeight} viewBoxWidth={viewBoxWidth} />
-  ),
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: ({ viewBoxHeight, viewBoxWidth }) => (
-    <ThemeCustomizationExample viewBoxHeight={viewBoxHeight} viewBoxWidth={viewBoxWidth} />
-  ),
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const AspectRatioPreservation: Story = {
+  render: () => <AspectRatioPreservationExample />,
+  parameters: createSourceParameters(aspectRatioPreservationExampleSource),
 };
