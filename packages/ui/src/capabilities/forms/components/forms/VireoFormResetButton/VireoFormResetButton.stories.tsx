@@ -1,10 +1,7 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormResetButton/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormResetButton/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormResetButton/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormResetButton/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormResetButton/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormResetButton/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { VireoFormResetButton } from "./VireoFormResetButton";
 
 function createSourceParameters(code: string) {
@@ -24,6 +21,7 @@ const meta = {
   component: VireoFormResetButton,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `Resets a Vireo form to its default values and stays unavailable while the form is pristine.
@@ -47,14 +45,17 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),
-};
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole("textbox", { name: "Project name" });
+    const reset = canvas.getByRole("button", { name: "Reset changes" });
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+    await expect(reset).toBeDisabled();
+    await userEvent.clear(input);
+    await userEvent.type(input, "Atlas");
+    await expect(reset).toBeEnabled();
+    await userEvent.click(reset);
+    await expect(input).toHaveValue("Northstar");
+    await expect(reset).toBeDisabled();
+  },
 };
