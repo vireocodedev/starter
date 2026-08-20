@@ -1,4 +1,5 @@
 import { Button, Stack, type ButtonProps } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -14,7 +15,13 @@ export default function CustomizedSlotsExample() {
     <VireoStorybookProvider>
       <form.Form sx={{ maxWidth: 480 }}>
         <Stack spacing={2}>
-          <form.Field name="workspace">{field => <field.TextField label="Workspace" />}</form.Field>
+          <form.Field name="workspace">
+            {field => (
+              <VireoLabelBox label="Workspace">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Workspace" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
           <form.ResetButton
             slots={{ root: RoundedButton }}
             slotProps={{

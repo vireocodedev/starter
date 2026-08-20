@@ -1,7 +1,6 @@
-import { ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { TextField, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { VireoFormSection, VireoLabelBox } from "@vireocodedev/starter-ui";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { TextField } from "@mui/material";
-import { VireoFormSection } from "@vireocodedev/starter-ui";
 
 function createCustomizedTheme(outerTheme: Theme): Theme {
   return createTheme(outerTheme, {
@@ -27,7 +26,9 @@ export default function ThemeCustomizationExample() {
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
         <VireoFormSection label="Security">
-          <TextField label="Recovery email" fullWidth />
+          <VireoLabelBox label="Recovery email">
+            <TextField fullWidth slotProps={{ htmlInput: { "aria-label": "Recovery email" } }} />
+          </VireoLabelBox>
         </VireoFormSection>
       </ThemeProvider>
     </VireoStorybookProvider>

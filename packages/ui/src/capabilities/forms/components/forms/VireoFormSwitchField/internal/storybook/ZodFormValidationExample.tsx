@@ -1,5 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -23,7 +24,13 @@ export default function ZodFormValidationExample() {
     <VireoStorybookProvider>
       <form.Form sx={{ maxWidth: 480 }}>
         <Stack spacing={2}>
-          <form.Field name="displayName">{field => <field.TextField label="Display name" />}</form.Field>
+          <form.Field name="displayName">
+            {field => (
+              <VireoLabelBox label="Display name">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Display name" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
           <form.Field name="productUpdates">
             {field => <field.SwitchField label="Receive product updates" />}
           </form.Field>

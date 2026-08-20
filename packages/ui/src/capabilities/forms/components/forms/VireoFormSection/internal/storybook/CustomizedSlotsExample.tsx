@@ -1,6 +1,6 @@
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import { TextField } from "@mui/material";
-import { VireoFormSection } from "@vireocodedev/starter-ui";
+import { VireoFormSection, VireoLabelBox } from "@vireocodedev/starter-ui";
 
 export default function CustomizedSlotsExample() {
   return (
@@ -15,7 +15,9 @@ export default function CustomizedSlotsExample() {
           content: { sx: { borderLeft: 4, borderLeftColor: "primary.main" } },
         }}
       >
-        <TextField label="Street and number" fullWidth />
+        <VireoLabelBox label="Street and number">
+          <TextField fullWidth slotProps={{ htmlInput: { "aria-label": "Street and number" } }} />
+        </VireoLabelBox>
       </VireoFormSection>
     </VireoStorybookProvider>
   );

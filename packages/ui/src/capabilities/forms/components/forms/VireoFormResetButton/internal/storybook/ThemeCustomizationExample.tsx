@@ -1,4 +1,5 @@
 import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
@@ -24,7 +25,13 @@ export default function ThemeCustomizationExample() {
       <ThemeProvider theme={createCustomizedTheme}>
         <form.Form sx={{ maxWidth: 480 }}>
           <Stack spacing={2}>
-            <form.Field name="releaseName">{field => <field.TextField label="Release name" />}</form.Field>
+            <form.Field name="releaseName">
+              {field => (
+                <VireoLabelBox label="Release name">
+                  <field.TextField slotProps={{ htmlInput: { "aria-label": "Release name" } }} />
+                </VireoLabelBox>
+              )}
+            </form.Field>
             <form.ResetButton>Discard edits</form.ResetButton>
           </Stack>
         </form.Form>

@@ -1,4 +1,5 @@
-import { Stack, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
@@ -14,12 +15,9 @@ export default function DefaultExample() {
         <Stack spacing={2}>
           <form.Field name="projectName">
             {field => (
-              <TextField
-                fullWidth
-                label="Project name"
-                value={field.state.value}
-                onChange={event => field.handleChange(event.target.value)}
-              />
+              <VireoLabelBox label="Project name">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Project name" } }} />
+              </VireoLabelBox>
             )}
           </form.Field>
           <form.SubmitButton variant="contained">Save project</form.SubmitButton>

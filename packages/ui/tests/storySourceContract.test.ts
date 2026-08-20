@@ -19,8 +19,8 @@ const srcRoot = join(packageRoot, "src");
 
 const VIREO_STORY_FILE_PATTERN = /^Vireo[A-Z]\w*\.stories\.tsx$/u;
 const EXAMPLE_FILE_PATTERN = /^[A-Z]\w*Example\.tsx$/u;
-const BOUND_FORM_FIELD_EXAMPLE_PATTERN = /\/VireoForm[A-Z]\w*Field\/internal\/storybook\/[^/]+Example\.tsx$/u;
-const BOUND_FORM_FIELD_STORY_WHITELIST = new Set(["VireoFormSwitchField"]);
+const FORM_STORY_EXAMPLE_PATTERN = /\/capabilities\/forms\/components\/forms\/[^/]+\/internal\/storybook\//u;
+const BOUND_FORM_FIELD_STORY_WHITELIST = new Set(["field.SwitchField"]);
 
 function findFiles(directory: string, predicate: (file: string) => boolean): string[] {
   return readdirSync(directory).flatMap(entry => {
@@ -124,17 +124,22 @@ function hasVisibleMuiInputLabel(node: ts.JsxOpeningLikeElement): boolean {
   );
 }
 
-function boundFieldElements(source: ts.SourceFile): ts.JsxOpeningLikeElement[] {
-  const fields: ts.JsxOpeningLikeElement[] = [];
+function storyInputElements(source: ts.SourceFile, includeMuiTextField: boolean): ts.JsxOpeningLikeElement[] {
+  const inputs: ts.JsxOpeningLikeElement[] = [];
   const visit = (node: ts.Node): void => {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tagName = jsxTagName(node.tagName, source);
-      if (/^field\.[A-Z]\w*Field$/u.test(tagName)) fields.push(node);
+      if (
+        (/^field\.[A-Z]\w*Field$/u.test(tagName) && !BOUND_FORM_FIELD_STORY_WHITELIST.has(tagName)) ||
+        (includeMuiTextField && tagName === "TextField")
+      ) {
+        inputs.push(node);
+      }
     }
     ts.forEachChild(node, visit);
   };
   visit(source);
-  return fields;
+  return inputs;
 }
 
 const storyFiles = findFiles(srcRoot, file => VIREO_STORY_FILE_PATTERN.test(basename(file))).sort();
@@ -239,14 +244,16 @@ describe("Vireo executable story-source contract", () => {
     expect(violations).toEqual([]);
   });
 
-  it("composes non-whitelisted bound inputs with VireoLabelBox", () => {
-    const exampleFiles = findFiles(srcRoot, file => BOUND_FORM_FIELD_EXAMPLE_PATTERN.test(file));
+  it("composes non-whitelisted form story inputs with VireoLabelBox", () => {
+    const exampleFiles = findFiles(
+      srcRoot,
+      file => EXAMPLE_FILE_PATTERN.test(basename(file)) && file.includes("/internal/storybook/"),
+    );
     const violations = exampleFiles.flatMap(exampleFile => {
-      const componentName = basename(resolve(exampleFile, "../../.."));
-      if (BOUND_FORM_FIELD_STORY_WHITELIST.has(componentName)) return [];
-
       const source = parse(exampleFile);
-      const fields = boundFieldElements(source);
+      const inputs = storyInputElements(source, FORM_STORY_EXAMPLE_PATTERN.test(exampleFile));
+      if (inputs.length === 0) return [];
+
       const location = relative(packageRoot, exampleFile);
       const errors: string[] = [];
       const importsLabelBox = source.statements.some(
@@ -258,17 +265,16 @@ describe("Vireo executable story-source contract", () => {
       );
 
       if (!importsLabelBox) errors.push(`${location}: missing public VireoLabelBox import`);
-      if (fields.length === 0) errors.push(`${location}: does not render a bound field input`);
-      if ((source.text.match(/"aria-label"/gu) ?? []).length < fields.length) {
+      if ((source.text.match(/"aria-label"/gu) ?? []).length < inputs.length) {
         errors.push(`${location}: every bound input must retain an accessible control name`);
       }
 
-      for (const field of fields) {
-        const tagName = jsxTagName(field.tagName, source);
-        if (!isInsideVireoLabelBox(field, source)) {
+      for (const input of inputs) {
+        const tagName = jsxTagName(input.tagName, source);
+        if (!isInsideVireoLabelBox(input, source)) {
           errors.push(`${location}: ${tagName} is not inside VireoLabelBox`);
         }
-        if (hasVisibleMuiInputLabel(field)) {
+        if (hasVisibleMuiInputLabel(input)) {
           errors.push(`${location}: ${tagName} uses a visible MUI input label`);
         }
       }

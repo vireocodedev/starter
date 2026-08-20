@@ -1,4 +1,5 @@
 import { Stack } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm, type VireoFormOwnerState } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -37,7 +38,13 @@ export default function CustomizedSlotsExample() {
         }}
       >
         <Stack spacing={2}>
-          <form.Field name="projectName">{field => <field.TextField label="Project name" />}</form.Field>
+          <form.Field name="projectName">
+            {field => (
+              <VireoLabelBox label="Project name">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Project name" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
           <form.SubmitButton variant="contained">Save project</form.SubmitButton>
         </Stack>
       </form.Form>

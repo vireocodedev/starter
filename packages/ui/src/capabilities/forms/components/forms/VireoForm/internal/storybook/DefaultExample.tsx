@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -20,7 +21,11 @@ export default function DefaultExample() {
               onSubmit: ({ value }) => (value.includes("@") ? undefined : "Enter a valid email address."),
             }}
           >
-            {field => <field.TextField label="Email" />}
+            {field => (
+              <VireoLabelBox label="Email">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Email" } }} />
+              </VireoLabelBox>
+            )}
           </form.Field>
           <form.SubmitButton variant="contained">Save profile</form.SubmitButton>
           {submittedEmail && <Typography>Saved {submittedEmail}</Typography>}
