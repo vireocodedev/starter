@@ -1,0 +1,31 @@
+import { Stack, Typography } from "@mui/material";
+import { revalidateLogic } from "@tanstack/react-form";
+import { useVireoForm } from "@vireocodedev/starter-ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import React from "react";
+import { z } from "zod";
+
+const emailSchema = z.string().trim().min(1, "Enter an email address.").email("Enter a valid email address.");
+
+export default function ZodValidationExample() {
+  const [savedEmail, setSavedEmail] = React.useState<string>();
+  const form = useVireoForm({
+    defaultValues: { email: "" },
+    onSubmit: ({ value }) => setSavedEmail(value.email),
+    validationLogic: revalidateLogic(),
+  });
+
+  return (
+    <VireoStorybookProvider>
+      <form.Form sx={{ maxWidth: 480 }}>
+        <Stack spacing={2}>
+          <form.Field name="email" validators={{ onDynamic: emailSchema }}>
+            {field => <field.TextField autoComplete="email" label="Email" placeholder="developer@example.com" />}
+          </form.Field>
+          <form.SubmitButton variant="contained">Save email</form.SubmitButton>
+          {savedEmail && <Typography color="success.main">Saved {savedEmail}</Typography>}
+        </Stack>
+      </form.Form>
+    </VireoStorybookProvider>
+  );
+}

@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import { revalidateLogic } from "@tanstack/react-form";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 import { vireoFormTextFieldClasses } from "./VireoFormTextField.classes";
 import { VIREO_FORM_TEXT_FIELD_NAME } from "./VireoFormTextField.identity";
 import type { VireoFormTextFieldProps } from "./VireoFormTextField.types";
@@ -173,6 +174,33 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: { name: "TEST" } }));
+  });
+
+  it("presents Standard Schema validation issues from Zod", async () => {
+    function ZodForm() {
+      const form = useVireoForm({
+        defaultValues: { email: "" },
+        validationLogic: revalidateLogic(),
+      });
+
+      return (
+        <form.Form>
+          <form.Field name="email" validators={{ onDynamic: z.string().email("Enter a valid email address.") }}>
+            {field => <field.TextField label="Email" />}
+          </form.Field>
+          <form.SubmitButton>Submit</form.SubmitButton>
+        </form.Form>
+      );
+    }
+
+    const user = userEvent.setup();
+    render(<ZodForm />);
+
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+    expect(await screen.findByText("Enter a valid email address.")).toBeInTheDocument();
+
+    await user.type(screen.getByRole("textbox", { name: "Email" }), "developer@example.com");
+    await waitFor(() => expect(screen.queryByText("Enter a valid email address.")).not.toBeInTheDocument());
   });
 
   it("supports field error-display and formatter overrides", async () => {

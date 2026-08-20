@@ -4,12 +4,15 @@ import DefaultExample from "@/capabilities/forms/components/forms/VireoFormTextF
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/DefaultExample.tsx?raw";
 import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ThemeCustomizationExample";
 import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import ZodValidationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodValidationExample";
+import zodValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodValidationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormTextField } from "./VireoFormTextField";
 
-function createSourceParameters(code: string) {
+function createSourceParameters(code: string, description?: string) {
   return {
     docs: {
+      ...(description && { description: { story: description } }),
       source: {
         code,
         language: "tsx",
@@ -47,6 +50,14 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),
+};
+
+export const ZodValidation: Story = {
+  render: () => <ZodValidationExample />,
+  parameters: createSourceParameters(
+    zodValidationExampleSource,
+    "Passes a Zod schema directly to TanStack Form's dynamic field validator, validating first on submit and then on change.",
+  ),
 };
 
 export const CustomizedSlots: Story = {
