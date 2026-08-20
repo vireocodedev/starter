@@ -1,9 +1,5 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/ZodFieldValidationExample";
 import zodFieldValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/ZodFieldValidationExample.tsx?raw";
 import ZodFormValidationExample from "@/capabilities/forms/components/forms/VireoFormSwitchField/internal/storybook/ZodFormValidationExample";
@@ -30,6 +26,7 @@ const meta = {
   tags: ["autodocs"],
   args: { label: "Preference" },
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormSwitchField binds a labelled MUI Switch to the current TanStack Form boolean field through \`field.SwitchField\`.
@@ -69,14 +66,4 @@ export const ZodFormValidation: Story = {
     zodFormValidationExampleSource,
     "Passes one Zod object schema to useVireoForm so text and boolean issues reach their matching fields without repeated field schemas.",
   ),
-};
-
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
 };
