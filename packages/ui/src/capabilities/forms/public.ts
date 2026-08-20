@@ -3,6 +3,8 @@ export * from "./components/forms/VireoFormNumberField/VireoFormNumberField.clas
 export type * from "./components/forms/VireoFormNumberField/VireoFormNumberField.types";
 export * from "./components/forms/VireoFormResetButton/VireoFormResetButton.classes";
 export type * from "./components/forms/VireoFormResetButton/VireoFormResetButton.types";
+export * from "./components/forms/VireoFormSelectField/VireoFormSelectField.classes";
+export type * from "./components/forms/VireoFormSelectField/VireoFormSelectField.types";
 export * from "./components/forms/VireoFormSubmitButton/VireoFormSubmitButton.classes";
 export type * from "./components/forms/VireoFormSubmitButton/VireoFormSubmitButton.types";
 export * from "./components/forms/VireoFormSwitchField/VireoFormSwitchField.classes";

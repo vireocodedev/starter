@@ -2,6 +2,7 @@ import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/Vireo
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
 import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
+import { VireoFormSelectField } from "@/capabilities/forms/components/forms/VireoFormSelectField/VireoFormSelectField";
 import { VireoFormSwitchField } from "@/capabilities/forms/components/forms/VireoFormSwitchField/VireoFormSwitchField";
 import { VireoFormSubmitButton } from "@/capabilities/forms/components/forms/VireoFormSubmitButton/VireoFormSubmitButton";
 import { VireoFormTextField } from "@/capabilities/forms/components/forms/VireoFormTextField/VireoFormTextField";
@@ -21,6 +22,7 @@ import React from "react";
 const { useAppForm } = createFormHook({
   fieldComponents: {
     NumberField: VireoFormNumberField,
+    SelectField: VireoFormSelectField,
     SwitchField: VireoFormSwitchField,
     TextField: VireoFormTextField,
   },
@@ -57,6 +59,7 @@ type BaseVireoFormApi<
   TSubmitMeta,
   {
     NumberField: typeof VireoFormNumberField;
+    SelectField: typeof VireoFormSelectField;
     SwitchField: typeof VireoFormSwitchField;
     TextField: typeof VireoFormTextField;
   },
