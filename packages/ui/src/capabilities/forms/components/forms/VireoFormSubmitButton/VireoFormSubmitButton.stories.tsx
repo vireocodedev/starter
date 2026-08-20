@@ -1,10 +1,9 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import ConsumerLoadingExample from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/ConsumerLoadingExample";
+import consumerLoadingExampleSource from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/ConsumerLoadingExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { VireoFormSubmitButton } from "./VireoFormSubmitButton";
 
 function createSourceParameters(code: string) {
@@ -24,6 +23,7 @@ const meta = {
   component: VireoFormSubmitButton,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `Submits a Vireo form and reflects its asynchronous submission lifecycle as a loading button.
@@ -47,14 +47,16 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),
+  play: async ({ canvasElement }) => {
+    const save = within(canvasElement).getByRole("button", { name: "Save project" });
+
+    await userEvent.click(save);
+    await expect(save).toBeDisabled();
+    await waitFor(() => expect(save).toBeEnabled(), { timeout: 2000 });
+  },
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const ConsumerLoading: Story = {
+  render: () => <ConsumerLoadingExample />,
+  parameters: createSourceParameters(consumerLoadingExampleSource),
 };
