@@ -1,17 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fireEvent, waitFor, within } from "storybook/test";
 import ActiveResizeFeedbackExample from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/ActiveResizeFeedbackExample";
 import activeResizeFeedbackExampleSource from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/ActiveResizeFeedbackExample.tsx?raw";
-import CustomizedSlotsExample from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/DefaultExample.tsx?raw";
-import LongContentExample from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/LongContentExample";
-import longContentExampleSource from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/LongContentExample.tsx?raw";
-import PointerResizeAndResetExample from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/PointerResizeAndResetExample";
-import pointerResizeAndResetExampleSource from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/PointerResizeAndResetExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import OpenCloseLifecycleExample from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/OpenCloseLifecycleExample";
+import openCloseLifecycleExampleSource from "@/capabilities/overlays/components/overlays/VireoDockedSidePanel/internal/storybook/OpenCloseLifecycleExample.tsx?raw";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test";
 import { VireoDockedSidePanel } from "./VireoDockedSidePanel";
 
 const source = (code: string) => ({
@@ -38,21 +32,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
-
-export const ActiveResizeFeedback: Story = {
-  render: () => <ActiveResizeFeedbackExample />,
-  parameters: source(activeResizeFeedbackExampleSource),
-};
-
-export const LongContent: Story = {
-  render: () => <LongContentExample />,
-  parameters: source(longContentExampleSource),
-};
-
-export const PointerResizeAndReset: Story = {
-  render: () => <PointerResizeAndResetExample />,
-  parameters: source(pointerResizeAndResetExampleSource),
+export const Default: Story = {
+  render: () => <DefaultExample />,
+  parameters: source(defaultExampleSource),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const handle = canvas.getByRole("presentation");
@@ -65,12 +47,19 @@ export const PointerResizeAndReset: Story = {
   },
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: source(customizedSlotsExampleSource),
+export const OpenCloseLifecycle: Story = {
+  render: () => <OpenCloseLifecycleExample />,
+  parameters: source(openCloseLifecycleExampleSource),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "Close invoice details" }));
+    await waitFor(() => expect(canvas.queryByRole("complementary")).not.toBeInTheDocument());
+    await userEvent.click(canvas.getByRole("button", { name: "Open panel" }));
+    await waitFor(() => expect(canvas.getByRole("complementary")).toBeInTheDocument());
+  },
 };
 
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
+export const ActiveResizeFeedback: Story = {
+  render: () => <ActiveResizeFeedbackExample />,
+  parameters: source(activeResizeFeedbackExampleSource),
 };

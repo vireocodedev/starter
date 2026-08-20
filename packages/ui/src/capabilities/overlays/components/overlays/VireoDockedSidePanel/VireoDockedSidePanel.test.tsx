@@ -16,7 +16,7 @@ const requiredProps = {
   maxWidth: 620,
   children: <span>Panel content</span>,
 } as const;
-const { PointerResizeAndReset } = composeStories(dockedSidePanelStories);
+const { Default } = composeStories(dockedSidePanelStories);
 
 function fireSurfaceTransitionEnd(element: Element, propertyName: string) {
   const event = new Event("transitionend", { bubbles: true });
@@ -209,9 +209,9 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
   });
 
   it("keeps the composed pointer-resize story functional", async () => {
-    const { container } = render(<PointerResizeAndReset />);
+    const { container } = render(<Default />);
 
-    await PointerResizeAndReset.play?.({ canvasElement: container });
+    await Default.play?.({ canvasElement: container });
 
     expect(screen.getByText("420px wide")).toBeInTheDocument();
   });
