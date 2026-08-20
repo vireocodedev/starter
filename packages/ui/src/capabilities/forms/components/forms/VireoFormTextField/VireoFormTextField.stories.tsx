@@ -4,8 +4,10 @@ import DefaultExample from "@/capabilities/forms/components/forms/VireoFormTextF
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/DefaultExample.tsx?raw";
 import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ThemeCustomizationExample";
 import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ThemeCustomizationExample.tsx?raw";
-import ZodValidationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodValidationExample";
-import zodValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodValidationExample.tsx?raw";
+import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodFieldValidationExample";
+import zodFieldValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodFieldValidationExample.tsx?raw";
+import ZodFormValidationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodFormValidationExample";
+import zodFormValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodFormValidationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormTextField } from "./VireoFormTextField";
 
@@ -52,11 +54,19 @@ export const Default: Story = {
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const ZodValidation: Story = {
-  render: () => <ZodValidationExample />,
+export const ZodFieldValidation: Story = {
+  render: () => <ZodFieldValidationExample />,
   parameters: createSourceParameters(
-    zodValidationExampleSource,
+    zodFieldValidationExampleSource,
     "Passes a Zod schema directly to TanStack Form's dynamic field validator, validating first on submit and then on change.",
+  ),
+};
+
+export const ZodFormValidation: Story = {
+  render: () => <ZodFormValidationExample />,
+  parameters: createSourceParameters(
+    zodFormValidationExampleSource,
+    "Passes one Zod object schema to useVireoForm so its path-aware issues reach the matching fields without repeated field-level schemas.",
   ),
 };
 

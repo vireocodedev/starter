@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const emailSchema = z.string().trim().min(1, "Enter an email address.").email("Enter a valid email address.");
 
-export default function ZodValidationExample() {
+export default function ZodFieldValidationExample() {
   const [savedEmail, setSavedEmail] = React.useState<string>();
   const form = useVireoForm({
     defaultValues: { email: "" },

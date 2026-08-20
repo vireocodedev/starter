@@ -176,7 +176,7 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: { name: "TEST" } }));
   });
 
-  it("presents Standard Schema validation issues from Zod", async () => {
+  it("presents field-level Standard Schema validation issues from Zod", async () => {
     function ZodForm() {
       const form = useVireoForm({
         defaultValues: { email: "" },
@@ -201,6 +201,44 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
 
     await user.type(screen.getByRole("textbox", { name: "Email" }), "developer@example.com");
     await waitFor(() => expect(screen.queryByText("Enter a valid email address.")).not.toBeInTheDocument());
+  });
+
+  it("routes form-level Zod object issues to fields without field validators", async () => {
+    function ZodObjectForm() {
+      const form = useVireoForm({
+        defaultValues: { displayName: "", email: "" },
+        validationLogic: revalidateLogic(),
+        validators: {
+          onDynamic: z.object({
+            displayName: z.string().min(2, "Enter at least two characters."),
+            email: z.string().email("Enter a valid email address."),
+          }),
+        },
+      });
+
+      return (
+        <form.Form>
+          <form.Field name="displayName">{field => <field.TextField label="Display name" />}</form.Field>
+          <form.Field name="email">{field => <field.TextField label="Email" />}</form.Field>
+          <form.SubmitButton>Submit</form.SubmitButton>
+        </form.Form>
+      );
+    }
+
+    const user = userEvent.setup();
+    render(<ZodObjectForm />);
+
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+    expect(await screen.findByText("Enter at least two characters.")).toBeInTheDocument();
+    expect(screen.getByText("Enter a valid email address.")).toBeInTheDocument();
+
+    await user.type(screen.getByRole("textbox", { name: "Display name" }), "Ada");
+    await user.type(screen.getByRole("textbox", { name: "Email" }), "ada@example.com");
+
+    await waitFor(() => {
+      expect(screen.queryByText("Enter at least two characters.")).not.toBeInTheDocument();
+      expect(screen.queryByText("Enter a valid email address.")).not.toBeInTheDocument();
+    });
   });
 
   it("supports field error-display and formatter overrides", async () => {
