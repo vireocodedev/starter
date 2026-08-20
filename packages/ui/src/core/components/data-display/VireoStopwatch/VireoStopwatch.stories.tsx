@@ -1,13 +1,9 @@
-import CustomizedSlotsExample from "@/core/components/data-display/VireoStopwatch/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/core/components/data-display/VireoStopwatch/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/core/components/data-display/VireoStopwatch/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/data-display/VireoStopwatch/internal/storybook/DefaultExample.tsx?raw";
 import DurationFormatsExample from "@/core/components/data-display/VireoStopwatch/internal/storybook/DurationFormatsExample";
 import durationFormatsExampleSource from "@/core/components/data-display/VireoStopwatch/internal/storybook/DurationFormatsExample.tsx?raw";
 import StoppedDurationExample from "@/core/components/data-display/VireoStopwatch/internal/storybook/StoppedDurationExample";
 import stoppedDurationExampleSource from "@/core/components/data-display/VireoStopwatch/internal/storybook/StoppedDurationExample.tsx?raw";
-import ThemeCustomizationExample from "@/core/components/data-display/VireoStopwatch/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/core/components/data-display/VireoStopwatch/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoStopwatch } from "./VireoStopwatch";
 
@@ -47,12 +43,4 @@ export const StoppedDuration: Story = {
 export const DurationFormats: Story = {
   render: () => <DurationFormatsExample />,
   parameters: source(durationFormatsExampleSource),
-};
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: source(customizedSlotsExampleSource),
-};
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
 };
