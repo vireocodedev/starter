@@ -105,7 +105,7 @@ Components exposed through the `useVireoForm` `field.*` facade intentionally use
 title: "Forms/Forms/Fields/VireoFormTextField";
 ```
 
-This grouping currently contains `VireoFormCheckboxField`, `VireoFormNumberField`, `VireoFormRadioGroupField`, `VireoFormSelectField`, `VireoFormSelectMultipleField`, `VireoFormSwitchField`, and `VireoFormTextField`. Form-level components such as `VireoForm`, `VireoFormResetButton`, `VireoFormSection`, and `VireoFormSubmitButton` remain directly under `Forms/Forms`.
+This grouping currently contains `VireoFormCheckboxField`, `VireoFormNumberField`, `VireoFormRadioGroupField`, `VireoFormSelectField`, `VireoFormSelectMultipleField`, `VireoFormSwitchField`, `VireoFormTemporalField`, and `VireoFormTextField`. Form-level components such as `VireoForm`, `VireoFormResetButton`, `VireoFormSection`, and `VireoFormSubmitButton` remain directly under `Forms/Forms`.
 
 The Vireo Storybook navigation sorts component files before child directories at every level. Within those two groups, entries remain alphabetical. Consequently, `Forms/Forms` lists its four form-level components first and the `Fields` directory afterward.
 

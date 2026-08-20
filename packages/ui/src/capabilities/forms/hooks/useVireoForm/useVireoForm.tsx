@@ -8,6 +8,7 @@ import { VireoFormSelectField } from "@/capabilities/forms/components/forms/Vire
 import { VireoFormSelectMultipleField } from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/VireoFormSelectMultipleField";
 import { VireoFormSwitchField } from "@/capabilities/forms/components/forms/VireoFormSwitchField/VireoFormSwitchField";
 import { VireoFormSubmitButton } from "@/capabilities/forms/components/forms/VireoFormSubmitButton/VireoFormSubmitButton";
+import { VireoFormTemporalField } from "@/capabilities/forms/components/forms/VireoFormTemporalField/VireoFormTemporalField";
 import { VireoFormTextField } from "@/capabilities/forms/components/forms/VireoFormTextField/VireoFormTextField";
 import {
   vireoFieldContext,
@@ -30,6 +31,7 @@ const { useAppForm } = createFormHook({
     SelectField: VireoFormSelectField,
     SelectMultipleField: VireoFormSelectMultipleField,
     SwitchField: VireoFormSwitchField,
+    TemporalField: VireoFormTemporalField,
     TextField: VireoFormTextField,
   },
   fieldContext: vireoFieldContext,
@@ -70,6 +72,7 @@ type BaseVireoFormApi<
     SelectField: typeof VireoFormSelectField;
     SelectMultipleField: typeof VireoFormSelectMultipleField;
     SwitchField: typeof VireoFormSwitchField;
+    TemporalField: typeof VireoFormTemporalField;
     TextField: typeof VireoFormTextField;
   },
   { ResetButton: typeof VireoFormResetButton; SubmitButton: typeof VireoFormSubmitButton }

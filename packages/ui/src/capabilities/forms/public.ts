@@ -15,6 +15,8 @@ export * from "./components/forms/VireoFormSubmitButton/VireoFormSubmitButton.cl
 export type * from "./components/forms/VireoFormSubmitButton/VireoFormSubmitButton.types";
 export * from "./components/forms/VireoFormSwitchField/VireoFormSwitchField.classes";
 export type * from "./components/forms/VireoFormSwitchField/VireoFormSwitchField.types";
+export * from "./components/forms/VireoFormTemporalField/VireoFormTemporalField.classes";
+export type * from "./components/forms/VireoFormTemporalField/VireoFormTemporalField.types";
 export * from "./components/forms/VireoForm/VireoForm.classes";
 export type * from "./components/forms/VireoForm/VireoForm.types";
 export * from "./components/forms/VireoFormTextField/VireoFormTextField.classes";
