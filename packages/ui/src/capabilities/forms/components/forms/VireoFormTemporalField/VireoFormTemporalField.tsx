@@ -381,6 +381,8 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
     const { slotProps: advancedSlotProps = {}, slots: advancedSlots = {}, ...advancedPickerProps } = pickerProps;
     const advancedTextFieldSlotProps = advancedSlotProps.textField;
     const advancedFieldSlotProps = advancedSlotProps.field;
+    const advancedCalendarHeaderSlotProps =
+      "calendarHeader" in advancedSlotProps ? advancedSlotProps.calendarHeader : undefined;
     const advancedOpenPickerButtonSlotProps = advancedSlotProps.openPickerButton;
     const advancedOpenPickerIconSlotProps = advancedSlotProps.openPickerIcon;
     const advancedClearButtonSlotProps = advancedSlotProps.clearButton;
@@ -413,6 +415,13 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
 
     const createPickerSlotProps = () => ({
       ...advancedSlotProps,
+      ...(mode !== "time" && {
+        calendarHeader: (pickerOwnerState: unknown) => ({
+          ...(resolveExternalSlotProps(advancedCalendarHeaderSlotProps as never, pickerOwnerState) as
+            object | undefined),
+          ...(mode === "month" && { format: "MMMM" }),
+        }),
+      }),
       field: (pickerOwnerState: unknown) => ({
         ...(resolveExternalSlotProps(advancedFieldSlotProps as never, pickerOwnerState) as object | undefined),
         clearable,

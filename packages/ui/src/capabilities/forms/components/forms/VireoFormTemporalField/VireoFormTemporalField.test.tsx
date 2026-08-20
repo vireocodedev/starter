@@ -56,6 +56,13 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
     expect((screen.getByLabelText("Temporal value") as HTMLInputElement).value).not.toBe("");
   });
 
+  it("keeps the month picker year-independent", async () => {
+    render(<Harness mode="month" defaultValue="08" />);
+    fireEvent.click(screen.getByRole("button", { name: /choose date/i }));
+    expect(await screen.findByText("August")).toBeInTheDocument();
+    expect(screen.queryByText(/2000/)).not.toBeInTheDocument();
+  });
+
   it("commits null through the clear action", async () => {
     const onSubmit = vi.fn();
     render(<Harness defaultValue="2026-08-25" onSubmit={onSubmit} />);
