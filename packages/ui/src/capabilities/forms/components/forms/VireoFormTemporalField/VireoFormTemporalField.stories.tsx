@@ -1,13 +1,9 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DateTimeModeExample from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/DateTimeModeExample";
 import dateTimeModeExampleSource from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/DateTimeModeExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/DefaultExample.tsx?raw";
 import MonthModeExample from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/MonthModeExample";
 import monthModeExampleSource from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/MonthModeExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import TimeModeExample from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/TimeModeExample";
 import timeModeExampleSource from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/TimeModeExample.tsx?raw";
 import YearModeExample from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/storybook/YearModeExample";
@@ -36,6 +32,7 @@ const meta = {
   tags: ["autodocs"],
   args: { mode: "date" },
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormTemporalField binds six localized temporal picker modes to canonical timezone-free \`string | null\` values through \`field.TemporalField\`.
@@ -108,14 +105,4 @@ export const ZodFormValidation: Story = {
     zodFormValidationExampleSource,
     "Validates all six temporal modes with one path-aware Zod object schema attached to useVireoForm.",
   ),
-};
-
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
 };
