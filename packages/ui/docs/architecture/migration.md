@@ -231,6 +231,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/forms/components/forms/VireoFormSection/**`                  | `capabilities/forms/components/forms`                  | Migrated      | Accessible labelled grouping and surface for related form controls.       |
 | `capabilities/forms/components/forms/VireoForm/**`                         | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound semantic form root, lifecycle wiring, and documentation. |
 | `capabilities/forms/components/forms/VireoFormTextField/**`                | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound MUI text field with validation and lifecycle wiring.     |
+| `capabilities/forms/components/forms/VireoFormSubmitButton/**`             | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound submit action with automatic async loading state.        |
 
 ## Hook inventory
 
@@ -344,6 +345,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-19   | `components/inputs/RgoInputAutocompleteFreeSolo/**`                                                                                         | `core/components/inputs/VireoFreeSoloAutocomplete`                                                               | Added the complete Vireo contract and retained a deprecated compatibility adapter.  |
 | 2026-08-19   | `components/inputs/RgoInputAutocompleteFreeSoloMultiple/**`                                                                                 | `core/components/inputs/VireoFreeSoloAutocompleteMultiple`                                                       | Added the complete Vireo contract and retained a deprecated compatibility adapter.  |
 | 2026-08-19   | New TanStack-bound text-field contract                                                                                                      | `capabilities/forms/components/forms/VireoFormTextField`                                                         | Added `field.TextField`, six slots, validation policy, tests, and stories.          |
+| 2026-08-20   | New TanStack-bound submit-button contract                                                                                                   | `capabilities/forms/components/forms/VireoFormSubmitButton`                                                      | Added `form.SubmitButton`, async loading behavior, tests, and stories.              |
 
 ## Automated verification
 

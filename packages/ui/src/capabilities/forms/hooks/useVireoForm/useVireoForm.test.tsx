@@ -9,6 +9,7 @@ describe("useVireoForm", () => {
 
     expect(form.Field).toBeTypeOf("function");
     expect(form.Form).toBeTypeOf("object");
+    expect(form.SubmitButton).toBeTypeOf("object");
     expect(form.handleSubmit).toBeTypeOf("function");
     expect("AppField" in form).toBe(false);
     expect("AppForm" in form).toBe(false);
