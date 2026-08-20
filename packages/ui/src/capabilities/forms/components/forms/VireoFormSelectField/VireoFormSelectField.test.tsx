@@ -67,6 +67,23 @@ describe(VIREO_FORM_SELECT_FIELD_NAME, () => {
     expect(root?.querySelector(`.${vireoFormSelectFieldClasses.select}`)).toBeInTheDocument();
   });
 
+  it("keeps a selected value clear of its floating label when no placeholder is present", () => {
+    render(<TestForm initialValue="alpha" fieldProps={{ placeholder: undefined }} />);
+
+    const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
+    expect(root?.querySelector("label")).toHaveClass("MuiInputLabel-shrink");
+    expect(screen.getByRole("combobox", { name: "Team" })).toHaveTextContent("Alpha");
+  });
+
+  it("reserves space between the clear action and select caret", () => {
+    render(<TestForm initialValue="alpha" />);
+
+    const clearButton = screen.getByRole("button", { name: "Clear selection" });
+    const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
+    expect(clearButton).toHaveStyle({ marginInlineEnd: "20px" });
+    expect(root?.querySelector(".MuiSelect-icon")).toBeInTheDocument();
+  });
+
   it("selects and submits a string option value", async () => {
     const onSubmit = vi.fn();
     render(<TestForm onSubmit={onSubmit} />);

@@ -105,7 +105,7 @@ export const VireoFormSelectFieldClearButton: VireoFormSelectFieldStyledSlotComp
     slot: "ClearButton",
     overridesResolver: (_props, styles) => styles.clearButton,
   },
-)<VireoFormSelectFieldStyledSlotProps>({ marginInlineEnd: -4 });
+)<VireoFormSelectFieldStyledSlotProps>({ marginInlineEnd: 20 });
 
 export const VireoFormSelectFieldFormHelperText: VireoFormSelectFieldStyledSlotComponent<FormHelperTextProps> = styled(
   FormHelperText,

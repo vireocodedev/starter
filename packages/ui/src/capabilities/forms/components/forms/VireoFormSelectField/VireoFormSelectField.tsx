@@ -322,7 +322,7 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
           inputLabel: {
             ...inputLabelSlotOther,
             className: joinClassNames(classes.inputLabel, inputLabelSlotClassName),
-            shrink: inputLabelSlotShrink ?? placeholder !== undefined,
+            shrink: inputLabelSlotShrink ?? (ownerState.hasValue || placeholder !== undefined),
           },
           input: {
             ...inputSlotOther,
