@@ -5,6 +5,7 @@ import { VireoFormNumberField } from "@/capabilities/forms/components/forms/Vire
 import { VireoFormRadioGroupField } from "@/capabilities/forms/components/forms/VireoFormRadioGroupField/VireoFormRadioGroupField";
 import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
 import { VireoFormSelectField } from "@/capabilities/forms/components/forms/VireoFormSelectField/VireoFormSelectField";
+import { VireoFormSelectMultipleField } from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/VireoFormSelectMultipleField";
 import { VireoFormSwitchField } from "@/capabilities/forms/components/forms/VireoFormSwitchField/VireoFormSwitchField";
 import { VireoFormSubmitButton } from "@/capabilities/forms/components/forms/VireoFormSubmitButton/VireoFormSubmitButton";
 import { VireoFormTextField } from "@/capabilities/forms/components/forms/VireoFormTextField/VireoFormTextField";
@@ -27,6 +28,7 @@ const { useAppForm } = createFormHook({
     NumberField: VireoFormNumberField,
     RadioGroupField: VireoFormRadioGroupField,
     SelectField: VireoFormSelectField,
+    SelectMultipleField: VireoFormSelectMultipleField,
     SwitchField: VireoFormSwitchField,
     TextField: VireoFormTextField,
   },
@@ -66,6 +68,7 @@ type BaseVireoFormApi<
     NumberField: typeof VireoFormNumberField;
     RadioGroupField: typeof VireoFormRadioGroupField;
     SelectField: typeof VireoFormSelectField;
+    SelectMultipleField: typeof VireoFormSelectMultipleField;
     SwitchField: typeof VireoFormSwitchField;
     TextField: typeof VireoFormTextField;
   },
