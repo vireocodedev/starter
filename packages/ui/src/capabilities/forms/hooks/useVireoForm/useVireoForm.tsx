@@ -2,6 +2,7 @@ import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/Vireo
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
 import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
+import { VireoFormSwitchField } from "@/capabilities/forms/components/forms/VireoFormSwitchField/VireoFormSwitchField";
 import { VireoFormSubmitButton } from "@/capabilities/forms/components/forms/VireoFormSubmitButton/VireoFormSubmitButton";
 import { VireoFormTextField } from "@/capabilities/forms/components/forms/VireoFormTextField/VireoFormTextField";
 import {
@@ -18,7 +19,11 @@ import {
 import React from "react";
 
 const { useAppForm } = createFormHook({
-  fieldComponents: { NumberField: VireoFormNumberField, TextField: VireoFormTextField },
+  fieldComponents: {
+    NumberField: VireoFormNumberField,
+    SwitchField: VireoFormSwitchField,
+    TextField: VireoFormTextField,
+  },
   fieldContext: vireoFieldContext,
   formComponents: { ResetButton: VireoFormResetButton, SubmitButton: VireoFormSubmitButton },
   formContext: vireoTanStackFormContext,
@@ -50,7 +55,11 @@ type BaseVireoFormApi<
   TOnDynamicAsync,
   TOnServer,
   TSubmitMeta,
-  { NumberField: typeof VireoFormNumberField; TextField: typeof VireoFormTextField },
+  {
+    NumberField: typeof VireoFormNumberField;
+    SwitchField: typeof VireoFormSwitchField;
+    TextField: typeof VireoFormTextField;
+  },
   { ResetButton: typeof VireoFormResetButton; SubmitButton: typeof VireoFormSubmitButton }
 >;
 
