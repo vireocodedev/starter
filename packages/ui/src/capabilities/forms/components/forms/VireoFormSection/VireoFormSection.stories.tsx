@@ -1,9 +1,9 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import ContainerResponsiveColumnsExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/ContainerResponsiveColumnsExample";
+import containerResponsiveColumnsExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/ContainerResponsiveColumnsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import PlainStackExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/PlainStackExample";
+import plainStackExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/PlainStackExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormSection } from "./VireoFormSection";
 
@@ -24,6 +24,7 @@ const meta = {
   component: VireoFormSection,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `Groups related form controls under a required accessible heading and a container-responsive layout.
@@ -50,12 +51,12 @@ export const Default: Story = {
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
+export const PlainStack: Story = {
+  render: () => <PlainStackExample />,
+  parameters: createSourceParameters(plainStackExampleSource),
 };
 
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const ContainerResponsiveColumns: Story = {
+  render: () => <ContainerResponsiveColumnsExample />,
+  parameters: createSourceParameters(containerResponsiveColumnsExampleSource),
 };
