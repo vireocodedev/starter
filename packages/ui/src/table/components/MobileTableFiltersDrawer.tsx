@@ -1,10 +1,19 @@
 import { AppBottomDrawer } from "@/capabilities/overlays/public";
 import { RgoLabelBox } from "@/core/public";
-import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
 import { type RgoServerTableColumnWithSort, type SortDirection } from "@/table/types";
 import { renderDirectionIcon, renderHeader } from "@/table/utils/mobileTable.utils";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { Box, Button, IconButton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  MenuItem,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
 import React from "react";
 
@@ -68,14 +77,19 @@ export function MobileTableFiltersDrawer<TElement>({
         {sortableColumns.length > 0 ? (
           <Stack spacing={2}>
             <RgoLabelBox label={t("common.column")}>
-              <RgoInputSelect
-                disableClearable
-                options={sortableColumns}
+              <TextField
+                select
+                fullWidth
                 value={activeSortValue}
-                onChange={onSortColumnChange}
-                renderOption={o => renderHeader(o)}
-                renderValue={o => o.sort}
-              />
+                onChange={event => onSortColumnChange(event.target.value || null)}
+                slotProps={{ htmlInput: { "aria-label": t("common.column") } }}
+              >
+                {sortableColumns.map(column => (
+                  <MenuItem key={column.sort} value={column.sort}>
+                    {renderHeader(column)}
+                  </MenuItem>
+                ))}
+              </TextField>
             </RgoLabelBox>
 
             <RgoLabelBox label={t("common.direction")}>

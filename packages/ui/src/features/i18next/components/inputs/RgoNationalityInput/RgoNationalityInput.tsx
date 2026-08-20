@@ -1,5 +1,5 @@
-import { RgoInputAutocomplete } from "@/components/inputs/RgoInputAutocomplete/RgoInputAutocomplete";
 import { RgoNationalityFlag } from "@/features/i18next/components/data-display/RgoNationalityFlag/RgoNationalityFlag";
+import { InputAutocomplete } from "@/inputs/InputAutocomplete";
 import { type RgoNationality } from "@/features/i18next/models/RgoNationality";
 import { type RgoLocale } from "@/setup/config/RgoLocale";
 import { RGO_COUNTRY_CODES, getCountryName } from "@/utils/countryutils";
@@ -49,20 +49,15 @@ function RgoNationalityInputImpl(
   );
 
   return (
-    <RgoInputAutocomplete
+    <InputAutocomplete
       {...controllerProps}
-      ref={ref}
+      inputRef={ref}
       startAdornment={startAdornment}
       options={RGO_COUNTRY_CODES}
       getOptionLabel={option => getCountryName(option, locale)}
       isOptionEqualToValue={(option, value) => option === value}
       renderOption={renderOption}
-      rgoSlotProps={{
-        root: {
-          slotProps: {
-            listbox: { sx: { maxHeight: 280 } },
-          },
-        },
+      slotProps={{
         textField: {
           ...textFieldProps,
           sx: {

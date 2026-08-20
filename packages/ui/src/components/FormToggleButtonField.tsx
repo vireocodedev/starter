@@ -1,6 +1,5 @@
 import { RgoLabelBox } from "@/core/public";
-import { RgoInputSelect } from "@/components/inputs/RgoInputSelect/RgoInputSelect";
-import { RgoInputToggleButtonGroup } from "@/components/inputs/RgoInputToggleButtonGroup/RgoInputToggleButtonGroup";
+import { Autocomplete, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { type ReactNode } from "react";
 import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
 
@@ -43,35 +42,37 @@ export function FormToggleButtonField<TFieldValues extends FieldValues, TValue e
         render={({ field }) => (
           <>
             {optionsLength > 2 ? (
-              <RgoInputSelect
-                {...field}
+              <Autocomplete<TValue, false, boolean, false>
+                value={field.value as TValue}
+                onChange={(_event, value) => field.onChange(value)}
+                onBlur={field.onBlur}
                 disableClearable={disableClearable}
-                renderOption={renderOption}
-                renderValue={o => o}
                 options={options}
+                getOptionLabel={renderKey}
+                isOptionEqualToValue={(option, value) => renderKey(option) === renderKey(value)}
+                renderOption={(props, option) => <li {...props}>{renderOption(option)}</li>}
+                renderInput={params => <TextField {...params} name={field.name} />}
               />
             ) : (
-              <RgoInputToggleButtonGroup<TValue>
-                {...field}
-                disableClearable={disableClearable}
-                options={options}
-                renderKey={renderKey}
-                renderOption={renderOption}
-                rgoSlotProps={{
-                  ...rgoSlotProps,
-                  toggleButtonGroup: {
-                    ...rgoSlotProps?.toggleButtonGroup,
-                    sx: {
-                      width: "100%",
-                      "& .MuiToggleButton-root": {
-                        flex: 1,
-                        minWidth: 0,
-                      },
-                      ...(rgoSlotProps?.toggleButtonGroup?.sx ?? {}),
-                    },
-                  },
+              <ToggleButtonGroup
+                exclusive
+                value={field.value}
+                onBlur={field.onBlur}
+                onChange={(_event, value: TValue | null) => {
+                  if (value !== null || !disableClearable) field.onChange(value);
                 }}
-              />
+                sx={{
+                  width: "100%",
+                  "& .MuiToggleButton-root": { flex: 1, minWidth: 0 },
+                  ...(rgoSlotProps?.toggleButtonGroup?.sx ?? {}),
+                }}
+              >
+                {options.map(option => (
+                  <ToggleButton key={renderKey(option)} value={option}>
+                    {renderOption(option)}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
             )}
           </>
         )}
