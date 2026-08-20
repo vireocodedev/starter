@@ -58,6 +58,19 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
     expect(root).toHaveClass(vireoFormTextFieldClasses.dirty);
   });
 
+  it("preserves MUI's native-input reset when the html-input slot is not replaced", () => {
+    render(<TestForm initialValue="Northstar" />);
+
+    const input = screen.getByRole("textbox", { name: "Name" });
+    expect(input).toHaveStyle({
+      background: "none",
+      border: "0px",
+      boxSizing: "content-box",
+      display: "block",
+      width: "100%",
+    });
+  });
+
   it("adds stable utility classes to every rendered MUI slot", () => {
     const onSelectChange = vi.fn();
     render(
@@ -277,6 +290,7 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
           defaultProps: { size: "small" },
           styleOverrides: {
             root: { marginTop: 11 },
+            htmlInput: { letterSpacing: "3px" },
             inputLabel: { color: "rgb(123, 45, 67)" },
             readOnly: { opacity: 0.75 },
           },
@@ -294,6 +308,7 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
     const root = input.closest(".MuiFormControl-root");
     expect(root).toHaveClass("MuiTextField-root", vireoFormTextFieldClasses.readOnly);
     expect(root).toHaveStyle({ marginTop: "11px", opacity: "0.75" });
+    expect(input).toHaveStyle({ letterSpacing: "3px" });
     expect(root?.querySelector("label")).toHaveStyle({ color: "rgb(123, 45, 67)" });
     expect(root?.querySelector(".MuiInputBase-sizeSmall")).toBeInTheDocument();
   });

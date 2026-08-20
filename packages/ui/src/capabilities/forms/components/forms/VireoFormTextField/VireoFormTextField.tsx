@@ -2,8 +2,8 @@ import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormCont
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
-import { unstable_composeClasses as composeClasses, type TextFieldProps } from "@mui/material";
-import { useThemeProps } from "@mui/material/styles";
+import { unstable_composeClasses as composeClasses, type SxProps, type TextFieldProps } from "@mui/material";
+import { type Theme, useTheme, useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
 import { useStore } from "@tanstack/react-form";
 import React from "react";
@@ -12,7 +12,6 @@ import { VIREO_FORM_TEXT_FIELD_NAME, type VireoFormTextFieldSlotName } from "./V
 import {
   VireoFormTextFieldFilledInput,
   VireoFormTextFieldFormHelperText,
-  VireoFormTextFieldHtmlInput,
   VireoFormTextFieldInputLabel,
   VireoFormTextFieldOutlinedInput,
   VireoFormTextFieldRoot,
@@ -53,6 +52,20 @@ function isAriaInvalid(value: unknown): boolean {
   return value === true || value === "true";
 }
 
+function resolveHtmlInputThemeSx(
+  theme: Theme,
+  props: VireoFormTextFieldProps,
+  ownerState: VireoFormTextFieldOwnerState,
+): SxProps<Theme> | undefined {
+  const styleOverride = theme.components?.[VIREO_FORM_TEXT_FIELD_NAME]?.styleOverrides?.htmlInput;
+
+  if (typeof styleOverride === "function") {
+    return styleOverride({ ...props, ownerState, theme }) as SxProps<Theme>;
+  }
+
+  return styleOverride as SxProps<Theme> | undefined;
+}
+
 /**
  * Binds MUI TextField anatomy and customization to the current `form.Field` string value.
  *
@@ -61,6 +74,7 @@ function isAriaInvalid(value: unknown): boolean {
 export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormTextFieldProps>(
   function VireoFormTextField(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_FORM_TEXT_FIELD_NAME });
+    const theme = useTheme();
     const {
       className,
       classes: classesProp,
@@ -115,6 +129,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
       validating: fieldState.validating,
     };
     const classes = useUtilityClasses(ownerState, classesProp);
+    const htmlInputThemeSx = resolveHtmlInputThemeSx(theme, props, ownerState);
 
     const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
     const {
@@ -141,6 +156,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
       onBlur: htmlInputSlotOnBlur,
       onChange: htmlInputSlotOnChange,
       ref: htmlInputSlotRef,
+      sx: htmlInputSlotSx,
       ...htmlInputSlotOther
     } = resolvedHtmlInputSlotProps;
     const resolvedFormHelperTextSlotProps = resolveSlotProps(slotProps.formHelperText, ownerState);
@@ -209,7 +225,9 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
                 : variant === "standard"
                   ? VireoFormTextFieldStandardInput
                   : VireoFormTextFieldOutlinedInput),
-            htmlInput: slots.htmlInput ?? VireoFormTextFieldHtmlInput,
+            // Keep MUI's internal InputBaseInput when the consumer does not replace this slot.
+            // It owns the native-input reset that makes TextField variants render correctly.
+            htmlInput: slots.htmlInput,
             formHelperText: slots.formHelperText ?? VireoFormTextFieldFormHelperText,
             select: slots.select ?? VireoFormTextFieldSelect,
           } as TextFieldProps["slots"]
@@ -234,6 +252,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
               ...htmlInputSlotOther,
               "aria-invalid": effectiveError || isAriaInvalid(htmlInputAriaInvalid) || undefined,
               className: joinClassNames(classes.htmlInput, htmlInputSlotClassName),
+              sx: mergeSx(htmlInputThemeSx, htmlInputSlotSx),
             },
             formHelperText: {
               ...formHelperTextSlotOther,

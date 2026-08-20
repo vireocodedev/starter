@@ -59,12 +59,6 @@ export const VireoFormTextFieldStandardInput: React.ElementType = styled(Input, 
   overridesResolver: (_props, styles) => styles.input,
 })({});
 
-export const VireoFormTextFieldHtmlInput: React.ElementType = styled("input", {
-  name: VIREO_FORM_TEXT_FIELD_NAME,
-  slot: "HtmlInput",
-  overridesResolver: (_props, styles) => styles.htmlInput,
-})({});
-
 export const VireoFormTextFieldFormHelperText: React.ElementType = styled(FormHelperText, {
   name: VIREO_FORM_TEXT_FIELD_NAME,
   slot: "FormHelperText",
