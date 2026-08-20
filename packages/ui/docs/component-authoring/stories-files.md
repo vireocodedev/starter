@@ -97,6 +97,18 @@ title: "Core/Behavior/VireoDelayedRender";
 title: "Table/Management Table/Controls/VireoMobileToolbar";
 ```
 
+### Bound form-field grouping
+
+Components exposed through the `useVireoForm` `field.*` facade intentionally use one additional `Fields` navigation directory beneath the forms component category:
+
+```ts
+title: "Forms/Forms/Fields/VireoFormTextField";
+```
+
+This grouping currently contains `VireoFormCheckboxField`, `VireoFormNumberField`, `VireoFormRadioGroupField`, `VireoFormSelectField`, `VireoFormSwitchField`, and `VireoFormTextField`. Form-level components such as `VireoForm`, `VireoFormResetButton`, `VireoFormSection`, and `VireoFormSubmitButton` remain directly under `Forms/Forms`.
+
+The Vireo Storybook navigation sorts component files before child directories at every level. Within those two groups, entries remain alphabetical. Consequently, `Forms/Forms` lists its four form-level components first and the `Fields` directory afterward.
+
 The owner and category must match the source architecture rather than an invented Storybook-only grouping. Storybook 9 statically indexes CSF files and requires `meta.title` to be a string literal. This literal is the deliberate exception to importing the canonical identity everywhere the component name is used. Keep its final segment identical to `VIREO_COMPONENT_NAME`; the generator derives the initial title and identity from the same inputs.
 
 ## Autodocs and component description

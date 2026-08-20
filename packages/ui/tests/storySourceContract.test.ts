@@ -20,6 +20,8 @@ const srcRoot = join(packageRoot, "src");
 const VIREO_STORY_FILE_PATTERN = /^Vireo[A-Z]\w*\.stories\.tsx$/u;
 const EXAMPLE_FILE_PATTERN = /^[A-Z]\w*Example\.tsx$/u;
 const FORM_STORY_EXAMPLE_PATTERN = /\/capabilities\/forms\/components\/forms\/[^/]+\/internal\/storybook\//u;
+const FORM_FIELD_STORY_FILE_PATTERN =
+  /\/capabilities\/forms\/components\/forms\/VireoForm[A-Z]\w*Field\/VireoForm[A-Z]\w*Field\.stories\.tsx$/u;
 const BOUND_FORM_FIELD_STORY_WHITELIST = new Set(["field.CheckboxField", "field.SwitchField"]);
 
 function findFiles(directory: string, predicate: (file: string) => boolean): string[] {
@@ -154,6 +156,15 @@ describe("Vireo executable story-source contract", () => {
 
     expect(storyFiles.length).toBeGreaterThanOrEqual(10);
     expect(storyCount).toBeGreaterThan(50);
+  });
+
+  it("groups bound form-field components under Forms/Forms/Fields", () => {
+    const violations = storyFiles
+      .filter(file => FORM_FIELD_STORY_FILE_PATTERN.test(file))
+      .filter(file => !/title:\s*"Forms\/Forms\/Fields\/VireoForm[A-Z]\w*Field"/u.test(readFileSync(file, "utf8")))
+      .map(file => `${relative(packageRoot, file)}: expected a Forms/Forms/Fields story title`);
+
+    expect(violations).toEqual([]);
   });
 
   it("renders and displays one matching executable module per story", () => {
