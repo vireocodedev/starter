@@ -1,13 +1,9 @@
-import CloseInteractionExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CloseInteractionExample";
-import closeInteractionExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CloseInteractionExample.tsx?raw";
 import CustomizedPullerExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CustomizedPullerExample";
 import customizedPullerExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/CustomizedPullerExample.tsx?raw";
 import DefaultExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/DefaultExample.tsx?raw";
 import FixedHeightExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/FixedHeightExample";
 import fixedHeightExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/FixedHeightExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import WithoutBackdropExample from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/WithoutBackdropExample";
 import withoutBackdropExampleSource from "@/capabilities/overlays/components/overlays/VireoBottomDrawer/internal/storybook/WithoutBackdropExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -36,18 +32,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
-export const FixedHeight: Story = {
-  render: () => <FixedHeightExample />,
-  parameters: source(fixedHeightExampleSource),
-};
-export const WithoutBackdrop: Story = {
-  render: () => <WithoutBackdropExample />,
-  parameters: source(withoutBackdropExampleSource),
-};
-export const CloseInteraction: Story = {
-  render: ({ onClose }) => <CloseInteractionExample onClose={onClose} />,
-  parameters: source(closeInteractionExampleSource),
+export const Default: Story = {
+  render: ({ onClose }) => <DefaultExample onClose={onClose} />,
+  parameters: source(defaultExampleSource),
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: "Open customer filters" }));
@@ -56,11 +43,15 @@ export const CloseInteraction: Story = {
     await expect(args.onClose).toHaveBeenCalledOnce();
   },
 };
+export const FixedHeight: Story = {
+  render: () => <FixedHeightExample />,
+  parameters: source(fixedHeightExampleSource),
+};
+export const WithoutBackdrop: Story = {
+  render: () => <WithoutBackdropExample />,
+  parameters: source(withoutBackdropExampleSource),
+};
 export const CustomizedPuller: Story = {
   render: () => <CustomizedPullerExample />,
   parameters: source(customizedPullerExampleSource),
-};
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
 };
