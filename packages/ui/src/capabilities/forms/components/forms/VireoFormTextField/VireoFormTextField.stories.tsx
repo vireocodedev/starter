@@ -1,9 +1,5 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodFieldValidationExample";
 import zodFieldValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodFieldValidationExample.tsx?raw";
 import ZodFormValidationExample from "@/capabilities/forms/components/forms/VireoFormTextField/internal/storybook/ZodFormValidationExample";
@@ -29,6 +25,7 @@ const meta = {
   component: VireoFormTextField,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormTextField binds MUI TextField anatomy to the current TanStack Form string field through \`field.TextField\`.
@@ -68,14 +65,4 @@ export const ZodFormValidation: Story = {
     zodFormValidationExampleSource,
     "Passes one Zod object schema to useVireoForm so its path-aware issues reach the matching fields without repeated field-level schemas.",
   ),
-};
-
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
 };
