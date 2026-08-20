@@ -1,10 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fireEvent, fn, userEvent, waitFor, within } from "storybook/test";
 import { SIDE_PANEL_WIDTH_CSS_VAR } from "@/capabilities/overlays/constants/overlay.constants";
-import ClosableExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ClosableExample";
-import closableExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ClosableExample.tsx?raw";
-import CustomizedRootSlotExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/CustomizedRootSlotExample";
-import customizedRootSlotExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/CustomizedRootSlotExample.tsx?raw";
 import DefaultExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DefaultExample.tsx?raw";
 import DockedSidePanelExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DockedSidePanelExample";
@@ -15,8 +11,6 @@ import OverlaySidePanelExample from "@/capabilities/overlays/components/overlays
 import overlaySidePanelExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/OverlaySidePanelExample.tsx?raw";
 import ResizableDockedSidePanelExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ResizableDockedSidePanelExample";
 import resizableDockedSidePanelExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ResizableDockedSidePanelExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import { VireoResponsiveOverlayFrame } from "./VireoResponsiveOverlayFrame";
 
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
@@ -41,7 +35,17 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultExampleSource) };
+export const Default: Story = {
+  render: ({ onClose }) => <DefaultExample onClose={onClose} />,
+  parameters: source(defaultExampleSource),
+  play: async ({ args, canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "View customer details" }));
+    await userEvent.click(
+      within(canvasElement.ownerDocument.body).getByRole("button", { name: "Close customer details" }),
+    );
+    await expect(args.onClose).toHaveBeenCalledOnce();
+  },
+};
 
 export const MobileBottomSheet: Story = {
   render: () => <MobileBottomSheetExample />,
@@ -73,27 +77,4 @@ export const ResizableDockedSidePanel: Story = {
     fireEvent.doubleClick(handle);
     await waitFor(() => expect(surface.parentElement?.style.getPropertyValue(SIDE_PANEL_WIDTH_CSS_VAR)).toBe("420px"));
   },
-};
-
-export const Closable: Story = {
-  args: { onClose: fn() },
-  render: ({ onClose }) => <ClosableExample onClose={onClose} />,
-  parameters: source(closableExampleSource),
-  play: async ({ args, canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "View customer details" }));
-    await userEvent.click(
-      within(canvasElement.ownerDocument.body).getByRole("button", { name: "Close customer details" }),
-    );
-    await expect(args.onClose).toHaveBeenCalledOnce();
-  },
-};
-
-export const CustomizedRootSlot: Story = {
-  render: () => <CustomizedRootSlotExample />,
-  parameters: source(customizedRootSlotExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
 };

@@ -1,4 +1,8 @@
-import { VireoOverlayHeader, VireoResponsiveOverlayFrame } from "@vireocodedev/starter-ui";
+import {
+  VireoOverlayHeader,
+  VireoResponsiveOverlayFrame,
+  type VireoResponsiveOverlayFrameProps,
+} from "@vireocodedev/starter-ui";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import {
   VireoResponsiveOverlayFrameCustomerDetails,
@@ -6,9 +10,12 @@ import {
 } from "@vireocodedev/starter-ui/storybook/VireoResponsiveOverlayFrame";
 import { useState } from "react";
 
-export default function DefaultExample() {
+export default function DefaultExample({ onClose }: Pick<VireoResponsiveOverlayFrameProps, "onClose">) {
   const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  const close = () => {
+    setOpen(false);
+    onClose();
+  };
 
   return (
     <VireoStorybookProvider>
