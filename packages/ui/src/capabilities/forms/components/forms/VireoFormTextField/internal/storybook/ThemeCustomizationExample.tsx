@@ -9,8 +9,19 @@ function createCustomizedTheme(outerTheme: Theme): Theme {
         defaultProps: { size: "small" },
         styleOverrides: {
           inputLabel: { color: "#c4b5fd" },
-          dirty: { borderInlineStart: "3px solid #f59e0b", paddingInlineStart: 12 },
-          errorVisible: { borderInlineStartColor: "#f87171" },
+          dirty: {
+            position: "relative",
+            "&::before": {
+              borderInlineStart: "3px solid",
+              borderColor: "#f59e0b",
+              borderRadius: 4,
+              content: '""',
+              insetBlock: 4,
+              insetInlineStart: -10,
+              position: "absolute",
+            },
+          },
+          errorVisible: { "&::before": { borderColor: "#f87171" } },
         },
       },
     },

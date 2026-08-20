@@ -42,7 +42,6 @@ export default function CustomizedSlotsExample() {
                     },
                   }),
                   htmlInput: { "data-analytics-field": "workspace" },
-                  inputLabel: { shrink: true },
                 }}
               />
             )}
