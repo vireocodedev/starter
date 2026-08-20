@@ -1,9 +1,7 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import LayoutWidthsExample from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/LayoutWidthsExample";
+import layoutWidthsExampleSource from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/LayoutWidthsExample.tsx?raw";
 import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoForm";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { VireoFormProps } from "./VireoForm.types";
@@ -30,6 +28,7 @@ const meta = {
   component: VireoFormStory,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `Provides Vireo's semantic form boundary, native lifecycle wiring, shared field presentation policy, and unsaved-change integration.
@@ -55,12 +54,7 @@ export const Default: Story = {
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const LayoutWidths: Story = {
+  render: () => <LayoutWidthsExample />,
+  parameters: createSourceParameters(layoutWidthsExampleSource),
 };
