@@ -1,4 +1,4 @@
-import { Button, Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
@@ -45,9 +45,7 @@ export default function ThemeCustomizationExample() {
             >
               {field => <field.TextField errorDisplay="always" label="Release name" placeholder="August launch" />}
             </form.Field>
-            <Button type="submit" variant="contained">
-              Create release
-            </Button>
+            <form.SubmitButton variant="contained">Create release</form.SubmitButton>
           </Stack>
         </form.Form>
       </ThemeProvider>

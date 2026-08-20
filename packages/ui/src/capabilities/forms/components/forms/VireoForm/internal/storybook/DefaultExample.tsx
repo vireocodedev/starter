@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -22,9 +22,7 @@ export default function DefaultExample() {
           >
             {field => <field.TextField label="Email" />}
           </form.Field>
-          <Button type="submit" variant="contained">
-            Save profile
-          </Button>
+          <form.SubmitButton variant="contained">Save profile</form.SubmitButton>
           {submittedEmail && <Typography>Saved {submittedEmail}</Typography>}
         </Stack>
       </form.Form>

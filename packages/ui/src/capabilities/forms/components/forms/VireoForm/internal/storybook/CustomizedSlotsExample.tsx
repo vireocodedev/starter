@@ -1,4 +1,4 @@
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useVireoForm, type VireoFormOwnerState } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -37,12 +37,8 @@ export default function CustomizedSlotsExample() {
         }}
       >
         <Stack spacing={2}>
-          <form.Field name="projectName">
-            {field => <field.TextField label="Project name" />}
-          </form.Field>
-          <Button type="submit" variant="contained">
-            Save project
-          </Button>
+          <form.Field name="projectName">{field => <field.TextField label="Project name" />}</form.Field>
+          <form.SubmitButton variant="contained">Save project</form.SubmitButton>
         </Stack>
       </form.Form>
     </VireoStorybookProvider>

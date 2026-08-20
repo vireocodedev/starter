@@ -1,4 +1,4 @@
-import { Button, FormControl, Stack, type FormControlProps } from "@mui/material";
+import { FormControl, Stack, type FormControlProps } from "@mui/material";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -46,9 +46,7 @@ export default function CustomizedSlotsExample() {
               />
             )}
           </form.Field>
-          <Button type="reset" variant="outlined">
-            Reset
-          </Button>
+          <form.ResetButton variant="outlined">Reset</form.ResetButton>
         </Stack>
       </form.Form>
     </VireoStorybookProvider>

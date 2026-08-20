@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -23,9 +23,7 @@ export default function DefaultExample() {
           >
             {field => <field.TextField label="Project name" placeholder="Northstar" />}
           </form.Field>
-          <Button type="submit" variant="contained">
-            Save project
-          </Button>
+          <form.SubmitButton variant="contained">Save project</form.SubmitButton>
           {savedName && <Typography color="success.main">Saved {savedName}</Typography>}
         </Stack>
       </form.Form>
