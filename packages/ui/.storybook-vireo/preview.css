@@ -14,3 +14,11 @@
 .vireo-story-surface {
   width: 100%;
 }
+
+.docblock-argstable .docblock-argstable-head th:nth-child(4) {
+  display: none !important;
+}
+
+.docblock-argstable .docblock-argstable-body td:nth-child(4) {
+  display: none !important;
+}
