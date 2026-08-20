@@ -2,14 +2,10 @@ import ConstrainedHeightExample from "@/core/components/data-display/VireoJsonVi
 import constrainedHeightExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/ConstrainedHeightExample.tsx?raw";
 import CopyInteractionExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CopyInteractionExample";
 import copyInteractionExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CopyInteractionExample.tsx?raw";
-import CustomizedSlotsExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/DefaultExample.tsx?raw";
 import NonJsonValuesExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/NonJsonValuesExample";
 import nonJsonValuesExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/NonJsonValuesExample.tsx?raw";
-import ThemeCustomizationExample from "@/core/components/data-display/VireoJsonViewer/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/core/components/data-display/VireoJsonViewer/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { VireoJsonViewer } from "./VireoJsonViewer";
@@ -66,12 +62,4 @@ export const CopyInteraction: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "Copy JSON to clipboard" }));
     await expect(canvas.getByRole("button", { name: "JSON copied" })).toBeInTheDocument();
   },
-};
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: source(customizedSlotsExampleSource),
-};
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
 };
