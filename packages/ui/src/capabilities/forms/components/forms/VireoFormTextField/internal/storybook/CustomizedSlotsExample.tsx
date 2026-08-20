@@ -22,15 +22,23 @@ export default function CustomizedSlotsExample() {
           <form.Field name="workspace">
             {field => (
               <field.TextField
+                helperText="Edit the value to see the root-slot accent change."
                 label="Workspace"
                 slots={{ root: BorderedFormControl }}
                 slotProps={{
                   root: ownerState => ({
                     "data-dirty": ownerState.dirty,
                     sx: {
-                      borderInlineStart: 3,
-                      borderColor: ownerState.dirty ? "warning.main" : "primary.main",
-                      pl: 2,
+                      position: "relative",
+                      "&::before": {
+                        borderInlineStart: "3px solid",
+                        borderColor: ownerState.dirty ? "warning.main" : "primary.main",
+                        borderRadius: 1,
+                        content: '""',
+                        insetBlock: 4,
+                        insetInlineStart: -10,
+                        position: "absolute",
+                      },
                     },
                   }),
                   htmlInput: { "data-analytics-field": "workspace" },
