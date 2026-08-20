@@ -37,9 +37,16 @@ export default function CustomizedSlotsExample() {
                   root: ownerState => ({
                     "data-dirty": ownerState.dirty,
                     sx: {
-                      borderInlineStart: 3,
-                      borderColor: ownerState.dirty ? "warning.main" : "primary.main",
-                      pl: 1,
+                      position: "relative",
+                      "&::before": {
+                        borderInlineStart: "3px solid",
+                        borderColor: ownerState.dirty ? "warning.main" : "primary.main",
+                        borderRadius: 1,
+                        content: '""',
+                        insetBlock: 4,
+                        insetInlineStart: -10,
+                        position: "absolute",
+                      },
                     },
                   }),
                   clearButton: { color: "warning", size: "small" },
