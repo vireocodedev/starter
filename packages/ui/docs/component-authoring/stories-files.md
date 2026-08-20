@@ -2,7 +2,9 @@
 
 Every first-class public Vireo component has a colocated `VireoComponent.stories.tsx` file. The file is the component's live visual documentation: it presents the default usage and the meaningful public states, behavior, edge cases, and customization contracts a consumer needs to understand.
 
-[`VireoOverlayHeader.stories.tsx`](../../src/overlay/VireoOverlayHeader/VireoOverlayHeader.stories.tsx) is the reference story file.
+This guide defines how story files are authored. Use the [Vireo story coverage rulebook](./story-coverage-rulebook.md) to audit the component and decide which stories belong in its minimum sufficient set.
+
+[`VireoOverlayHeader.stories.tsx`](../../src/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader.stories.tsx) is the reference story file.
 
 ## File placement
 
@@ -78,7 +80,7 @@ type Story = StoryObj<VireoComponentStoryArgs>;
 
 Use a named `Meta<typeof VireoComponent>` annotation in this exception when the inferred metadata type would otherwise trigger TypeScript's non-portable declaration error for nested MUI types. Keep `component` pointed directly at the real component without a cast.
 
-The adapter may relax only the correlated contract that Storybook must edit independently. Derive its fields from public types; do not manually copy the complete component prop surface. Every predefined story must still supply a valid runtime combination. Introduce a typed story-only render wrapper only when controls can otherwise produce an invalid runtime or accessibility state.
+The adapter may relax only the correlated contract that Storybook must represent as partial story args. Derive its fields from public types; do not manually copy the complete component prop surface. Every predefined story must still supply a valid runtime combination. Introduce a typed story-only render wrapper only when Storybook's partial args would otherwise produce an invalid runtime or accessibility state.
 
 ## Stable architecture-aware navigation title
 
@@ -156,11 +158,19 @@ export const Default: Story = {};
 
 Do not set an optional prop merely to restate its component default. The Default story should visibly exercise the real default behavior, without replacement slots, custom theme values, or advanced styling.
 
-## Args and controls
+## Fixed args without Controls
 
-Prefer serializable `args` over a custom `render` function. Args keep controls, generated source, URL state, and story reuse working naturally.
+Vireo stories intentionally do not expose Storybook Controls. A mutable Controls state can diverge from the exact executable module displayed in the code panel, so copy-pastable source fidelity takes precedence. Disable Controls in component metadata:
 
-Allow Storybook to infer ordinary controls from the component's public types. Configure `argTypes` only when inference needs help or a value cannot be represented meaningfully:
+```tsx
+parameters: {
+  controls: { disable: true },
+}
+```
+
+Fixed `args` remain useful for type-safe baseline values, Storybook callback spies, play-function assertions, and story reuse. They are documentation inputs, not user-editable Controls.
+
+Use `argTypes` only when Storybook's documentation metadata needs an explicit exclusion or clarification for complex values:
 
 ```ts
 argTypes: {
@@ -172,7 +182,7 @@ argTypes: {
 }
 ```
 
-React nodes, callbacks, slot components, and complex slot-prop objects commonly need disabled controls or a deliberately simpler control. Do not duplicate accurate TypeScript descriptions and defaults manually in `argTypes`.
+Do not add control definitions for ordinary props, and do not duplicate accurate TypeScript descriptions and defaults manually in `argTypes`.
 
 Use Storybook action spies such as `fn()` for callback args. Do not trigger real application side effects.
 
@@ -275,7 +285,7 @@ The dark review theme is the baseline, but semantic tokens are still preferred s
 
 ## Capability-driven stories
 
-The Default story is the minimum, not the complete documentation for every component. Add stories only for public distinctions a consumer needs to see or exercise.
+The Default story is the minimum, not the complete documentation for every component. Audit all twelve questions in the [story coverage rulebook](./story-coverage-rulebook.md), then add only the public distinctions a consumer needs to see or exercise.
 
 ### Bound form-field validation
 
@@ -337,11 +347,11 @@ Query the canvas through accessible roles and names. A play function is required
 
 ### Slots and slot props
 
-For a component with a meaningful slot API, include a representative customization story showing replacement slots and `slotProps` together. Demonstrate the supported public extension mechanism without importing private styled slots.
+Include a slot-customization story only when a meaningful non-root replacement or owner-state-aware slot prop demonstrates a credible consumer extension. Generic root replacement, borders, spacing, colors, and data attributes are insufficient. Demonstrate the supported public extension mechanism without importing private styled slots.
 
 ### Theme customization
 
-For a MUI theme-integrated component, include a representative theme story demonstrating `defaultProps` or per-slot `styleOverrides`. Keep the theme local and make the customization visually obvious without turning the story into a product-specific design.
+Include a theme-customization story only when component-specific `defaultProps`, variants, or per-slot overrides reveal a meaningful global theming contract. Generic root decoration is insufficient. Keep the theme local and make the customization visually obvious without turning the story into a product-specific design.
 
 ## Story naming and order
 
@@ -384,8 +394,8 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - The component description opens with a one-sentence summary and includes `### Why it exists` with the recurring problem, Vireo rationale, and use-or-avoid boundary.
 - A `Default` story demonstrates the simplest realistic normal usage.
 - The Default story does not restate optional defaults unnecessarily.
-- Args and inferred controls are preferred over custom render logic.
-- Complex or misleading controls are configured deliberately.
+- Storybook Controls are disabled at component metadata level.
+- Fixed args are used only for baseline values, callback spies, assertions, or story reuse; they are not exposed as mutable Controls.
 - Any story-only args adapter is derived from public types and relaxes only a Storybook-incompatible correlated contract.
 - Fixtures and decorators are deterministic, minimal, and product-neutral.
 - Every code panel shows a complete, copy-pastable TSX module rather than private render wrappers or serialized React fragments.
@@ -394,7 +404,9 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - Published Storybook helpers use explicit shared or PascalCase component subpaths and have no Storybook runtime dependency.
 - Fixtures use semantic theme tokens and remain coherent with the shared dark Storybook theme.
 - Theme-customization decorators extend the outer theme instead of replacing it with a standalone light theme.
-- Additional stories correspond to meaningful public states or customization contracts.
+- The twelve coverage questions have been audited with Covered, Needs improvement, Missing, or N/A statuses.
+- The final stories form a minimum sufficient set with one distinct consumer-facing purpose per story.
+- Slot and theme stories exist only when their component-specific extension contracts justify them.
 - Every bound `field.*` input includes executable `ZodFieldValidation` and `ZodFormValidation` stories.
 - Every non-whitelisted input-like `field.*` story composes the control inside `VireoLabelBox`, puts its visible label there, suppresses the MUI input label, and preserves an accessible control name.
 - The bound-field story whitelist is explicit; currently only `field.SwitchField` and `field.CheckboxField` are exempt from `VireoLabelBox` composition.

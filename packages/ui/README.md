@@ -75,6 +75,7 @@ code must follow the target structure.
 - [Component folder categories](./docs/architecture/component-folder-categories.md)
 - [Migration and current-source inventory](./docs/architecture/migration.md)
 - [Vireo component authoring](./docs/component-authoring/component-files.md)
+- [Vireo story coverage rulebook](./docs/component-authoring/story-coverage-rulebook.md)
 
 ## Versioning contract
 
