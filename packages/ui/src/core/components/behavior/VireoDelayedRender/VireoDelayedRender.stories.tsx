@@ -1,16 +1,9 @@
-import CustomizedSlotExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/CustomizedSlotExample";
-import customizedSlotExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/CustomizedSlotExample.tsx?raw";
 import DefaultExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/DefaultExample.tsx?raw";
-import ImmediateExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ImmediateExample";
-import immediateExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ImmediateExample.tsx?raw";
-import MultipleChildrenExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/MultipleChildrenExample";
-import multipleChildrenExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/MultipleChildrenExample.tsx?raw";
-import RestartableExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/RestartableExample";
-import restartableExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/RestartableExample.tsx?raw";
-import ThemeCustomizationExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import FastAndSlowOperationsExample from "@/core/components/behavior/VireoDelayedRender/internal/storybook/FastAndSlowOperationsExample";
+import fastAndSlowOperationsExampleSource from "@/core/components/behavior/VireoDelayedRender/internal/storybook/FastAndSlowOperationsExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { VireoDelayedRender } from "./VireoDelayedRender";
 
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
@@ -21,6 +14,7 @@ const meta = {
   tags: ["autodocs"],
   args: { children: null },
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -40,33 +34,18 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: ({ delay }) => <DefaultExample delay={delay} />,
+  render: () => <DefaultExample />,
   parameters: source(defaultExampleSource),
 };
 
-export const Immediate: Story = {
-  args: { delay: 0 },
-  render: () => <ImmediateExample />,
-  parameters: source(immediateExampleSource),
-};
-
-export const Restartable: Story = {
-  args: { delay: 1200 },
-  render: ({ delay }) => <RestartableExample delay={delay} />,
-  parameters: source(restartableExampleSource),
-};
-
-export const MultipleChildren: Story = {
-  render: ({ delay }) => <MultipleChildrenExample delay={delay} />,
-  parameters: source(multipleChildrenExampleSource),
-};
-
-export const CustomizedSlot: Story = {
-  render: ({ delay }) => <CustomizedSlotExample delay={delay} />,
-  parameters: source(customizedSlotExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
+export const FastAndSlowOperations: Story = {
+  render: () => <FastAndSlowOperationsExample />,
+  parameters: source(fastAndSlowOperationsExampleSource),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "Run fast operation" }));
+    await waitFor(() => expect(canvas.getByText("Completed before fallback mounted")).toBeVisible());
+    await expect(canvas.queryByText("Still loading…")).not.toBeInTheDocument();
+    await userEvent.click(canvas.getByRole("button", { name: "Reset demonstration" }));
+  },
 };
