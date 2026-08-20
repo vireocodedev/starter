@@ -240,6 +240,8 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/forms/components/forms/VireoFormRadioGroupField/**`          | `capabilities/forms/components/forms`                  | Migrated      | Nullable scalar radio group with typed options and validation wiring.     |
 | `capabilities/forms/components/forms/VireoFormSwitchField/**`              | `capabilities/forms/components/forms`                  | Migrated      | Boolean switch field with validation and accessible label wiring.         |
 | `capabilities/forms/components/forms/VireoFormCheckboxField/**`            | `capabilities/forms/components/forms`                  | Migrated      | Boolean checkbox field with validation and accessible label wiring.       |
+| `capabilities/forms/components/forms/VireoFormFileField/**`                | `capabilities/forms/components/forms`                  | Migrated      | Single-file picker, drop, rejection, metadata, and preview binding.       |
+| `capabilities/forms/components/data-display/VireoFileImagePreview/**`      | `capabilities/forms/components/data-display`           | Migrated      | Opt-in object-URL-backed image-file preview presentation.                 |
 | `capabilities/forms/components/forms/VireoFormSubmitButton/**`             | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound submit action with automatic async loading state.        |
 | `capabilities/forms/components/forms/VireoFormResetButton/**`              | `capabilities/forms/components/forms`                  | Migrated      | Capability-bound reset action with automatic pristine-state disabling.    |
 
@@ -365,6 +367,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-20   | New TanStack-bound multiple-select-field contract                                                                                           | `capabilities/forms/components/forms/VireoFormSelectMultipleField`                                               | Added ordered array values, compact summaries, checkbox rows, and Zod stories.      |
 | 2026-08-20   | New TanStack-bound temporal-field contract                                                                                                  | `capabilities/forms/components/forms/VireoFormTemporalField`                                                     | Added six canonical temporal modes, draft validation, tests, and Zod stories.       |
 | 2026-08-20   | New form layout contracts                                                                                                                   | `capabilities/forms/components/forms/{VireoFormActions,VireoFormSectionItem}`                                    | Added container-responsive actions and section-cell composition.                    |
+| 2026-08-20   | New file-field contracts                                                                                                                    | `capabilities/forms/components/{forms/VireoFormFileField,data-display/VireoFileImagePreview}`                    | Added single-file form binding and opt-in image previews.                           |
 
 ## Automated verification
 
