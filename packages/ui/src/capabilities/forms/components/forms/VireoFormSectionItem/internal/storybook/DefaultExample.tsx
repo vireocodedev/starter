@@ -1,20 +1,24 @@
-import { Alert, TextField } from "@mui/material";
+import { Stack, TextField, Typography } from "@mui/material";
 import { VireoFormSection, VireoFormSectionItem, VireoLabelBox } from "@vireocodedev/starter-ui";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
 export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
-      <VireoFormSection label="Billing details" maxColumns={2}>
-        <VireoLabelBox label="Purchase order">
-          <TextField aria-label="Purchase order" fullWidth />
-        </VireoLabelBox>
-        <VireoLabelBox label="Cost center">
-          <TextField aria-label="Cost center" fullWidth />
-        </VireoLabelBox>
-        <VireoFormSectionItem span="full">
-          <Alert severity="info">Invoices will use the billing profile selected for this customer.</Alert>
+      <VireoFormSection label="Shipping details" maxColumns={2}>
+        <VireoFormSectionItem>
+          <Stack spacing={1}>
+            <VireoLabelBox label="Delivery instructions">
+              <TextField fullWidth slotProps={{ htmlInput: { "aria-label": "Delivery instructions" } }} />
+            </VireoLabelBox>
+            <Typography color="text.secondary" variant="caption">
+              Gate codes and arrival notes stay grouped in this one grid cell.
+            </Typography>
+          </Stack>
         </VireoFormSectionItem>
+        <VireoLabelBox label="Contact phone">
+          <TextField fullWidth slotProps={{ htmlInput: { "aria-label": "Contact phone" } }} />
+        </VireoLabelBox>
       </VireoFormSection>
     </VireoStorybookProvider>
   );

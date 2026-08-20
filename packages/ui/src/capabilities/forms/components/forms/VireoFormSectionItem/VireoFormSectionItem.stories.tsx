@@ -1,9 +1,7 @@
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import FullRowExample from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/FullRowExample";
+import fullRowExampleSource from "@/capabilities/forms/components/forms/VireoFormSectionItem/internal/storybook/FullRowExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormSectionItem } from "./VireoFormSectionItem";
 
@@ -24,6 +22,7 @@ const meta = {
   component: VireoFormSectionItem,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormSectionItem groups one or more elements into a single responsive form-section cell and can span the complete current row.
@@ -50,12 +49,7 @@ export const Default: Story = {
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const FullRow: Story = {
+  render: () => <FullRowExample />,
+  parameters: createSourceParameters(fullRowExampleSource),
 };
