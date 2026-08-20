@@ -77,6 +77,30 @@ describe(VIREO_FORM_FILE_FIELD_NAME, () => {
     expect(screen.getByText("No file selected")).toBeInTheDocument();
   });
 
+  it("measures the stable metadata column instead of repeatedly shrinking the displayed filename", () => {
+    const file = new File(["brand guide"], "brand-guide.pdf", { type: "application/pdf" });
+    const clientWidth = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.classList.contains(vireoFormFileFieldClasses.metadata)) return 500;
+      if (this.classList.contains(vireoFormFileFieldClasses.fileSize)) return 40;
+      if (this.classList.contains(vireoFormFileFieldClasses.fileName)) return 60;
+      return 0;
+    });
+    const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      font: "",
+      measureText: value => ({ width: value.length * 8 }) as TextMetrics,
+    } as CanvasRenderingContext2D);
+
+    try {
+      render(<TestForm initialValue={file} />);
+      expect(screen.getByText("brand-guide.pdf")).toBeInTheDocument();
+    } finally {
+      clientWidth.mockRestore();
+      getContext.mockRestore();
+    }
+  });
+
   it("rejects unsupported types before size and preserves the current value", () => {
     const existing = new File(["existing"], "existing.png", { type: "image/png" });
     const rejected = new File(["far too large"], "payload.txt", { type: "text/plain" });

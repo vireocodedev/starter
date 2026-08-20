@@ -75,19 +75,26 @@ function resolveMessage<TArgs extends unknown[]>(
 function useDisplayedFileName(
   fileName: string | undefined,
   mode: NonNullable<VireoFormFileFieldProps["fileNameTruncation"]>,
+  hasTrailingMetadata: boolean,
 ) {
   const elementRef = React.useRef<HTMLElement | null>(null);
+  const containerRef = React.useRef<HTMLElement | null>(null);
+  const trailingMetadataRef = React.useRef<HTMLElement | null>(null);
   const [displayed, setDisplayed] = React.useState(fileName ?? "");
 
   React.useLayoutEffect(() => {
     const element = elementRef.current;
-    if (!element || !fileName) {
+    const container = containerRef.current;
+    if (!element || !container || !fileName) {
       setDisplayed(fileName ?? "");
       return;
     }
 
     const update = () => {
-      const width = element.clientWidth;
+      const trailingMetadata = trailingMetadataRef.current;
+      const containerStyle = window.getComputedStyle(container);
+      const gap = trailingMetadata ? Number.parseFloat(containerStyle.columnGap || containerStyle.gap) || 0 : 0;
+      const width = Math.max(0, container.clientWidth - (trailingMetadata?.clientWidth ?? 0) - gap);
       if (width <= 0) {
         setDisplayed(fileName);
         return;
@@ -106,11 +113,13 @@ function useDisplayedFileName(
     update();
     if (typeof ResizeObserver !== "function") return;
     const observer = new ResizeObserver(update);
+    observer.observe(container);
     observer.observe(element);
+    if (trailingMetadataRef.current) observer.observe(trailingMetadataRef.current);
     return () => observer.disconnect();
-  }, [fileName, mode]);
+  }, [fileName, hasTrailingMetadata, mode]);
 
-  return { displayed, elementRef };
+  return { containerRef, displayed, elementRef, trailingMetadataRef };
 }
 
 /** Binds single-file picker, drop, rejection, metadata, and optional preview behavior to `form.Field`. */
@@ -200,10 +209,12 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
       validating: fieldState.validating,
     };
     const classes = useUtilityClasses(ownerState, classesProp);
-    const { displayed: displayedFileName, elementRef: fileNameRef } = useDisplayedFileName(
-      value?.name,
-      fileNameTruncation,
-    );
+    const {
+      containerRef: metadataRef,
+      displayed: displayedFileName,
+      elementRef: fileNameRef,
+      trailingMetadataRef: fileSizeRef,
+    } = useDisplayedFileName(value?.name, fileNameTruncation, value !== null && !hideFileSize);
 
     const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
     const {
@@ -231,11 +242,11 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
       ...selectButtonSlotOther
     } = resolvedSelectButtonSlotProps;
     const resolvedMetadataSlotProps = resolveSlotProps(slotProps.metadata, ownerState);
-    const { className: metadataSlotClassName, ...metadataSlotOther } = resolvedMetadataSlotProps;
+    const { className: metadataSlotClassName, ref: metadataSlotRef, ...metadataSlotOther } = resolvedMetadataSlotProps;
     const resolvedFileNameSlotProps = resolveSlotProps(slotProps.fileName, ownerState);
     const { className: fileNameSlotClassName, ref: fileNameSlotRef, ...fileNameSlotOther } = resolvedFileNameSlotProps;
     const resolvedFileSizeSlotProps = resolveSlotProps(slotProps.fileSize, ownerState);
-    const { className: fileSizeSlotClassName, ...fileSizeSlotOther } = resolvedFileSizeSlotProps;
+    const { className: fileSizeSlotClassName, ref: fileSizeSlotRef, ...fileSizeSlotOther } = resolvedFileSizeSlotProps;
     const resolvedClearButtonSlotProps = resolveSlotProps(slotProps.clearButton, ownerState);
     const {
       className: clearButtonSlotClassName,
@@ -255,7 +266,9 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
     } = resolvedHelperTextSlotProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
     const mergedInputRef = useForkRef(nativeInput, inputRef, inputSlotRef);
+    const mergedMetadataRef = useForkRef(metadataRef, metadataSlotRef);
     const mergedFileNameRef = useForkRef(fileNameRef, fileNameSlotRef);
+    const mergedFileSizeRef = useForkRef(fileSizeRef, fileSizeSlotRef);
     const inputId = inputSlotId ?? generatedInputId;
     const helperId = helperTextSlotId ?? generatedHelperId;
     const interactive = !disabled && !readOnly;
@@ -398,6 +411,7 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
           <VireoFormFileFieldMetadata
             {...metadataSlotOther}
             as={slots.metadata}
+            ref={mergedMetadataRef}
             ownerState={ownerState}
             className={joinClassNames(classes.metadata, metadataSlotClassName)}
           >
@@ -417,6 +431,7 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
               <VireoFormFileFieldFileSize
                 {...fileSizeSlotOther}
                 as={slots.fileSize}
+                ref={mergedFileSizeRef}
                 ownerState={ownerState}
                 className={joinClassNames(classes.fileSize, fileSizeSlotClassName)}
                 variant="caption"
