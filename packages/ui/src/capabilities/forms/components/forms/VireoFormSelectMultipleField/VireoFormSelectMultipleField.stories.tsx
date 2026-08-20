@@ -1,11 +1,7 @@
 import CompactSummaryExample from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/CompactSummaryExample";
 import compactSummaryExampleSource from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/CompactSummaryExample.tsx?raw";
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/ZodFieldValidationExample";
 import zodFieldValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/ZodFieldValidationExample.tsx?raw";
 import ZodFormValidationExample from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/internal/storybook/ZodFormValidationExample";
@@ -27,6 +23,7 @@ const meta = {
   component: VireoFormSelectMultipleField,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormSelectMultipleField binds an ordered array of typed option values to the current TanStack Form field through \`field.SelectMultipleField\`.
@@ -76,14 +73,4 @@ export const ZodFormValidation: Story = {
     zodFormValidationExampleSource,
     "Passes one Zod object schema to useVireoForm so text and multiple-select issues reach their fields without repeated schemas.",
   ),
-};
-
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
 };
