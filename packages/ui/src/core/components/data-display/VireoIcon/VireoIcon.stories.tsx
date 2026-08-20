@@ -1,9 +1,9 @@
-import CustomizedSlotsExample from "@/core/components/data-display/VireoIcon/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/core/components/data-display/VireoIcon/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import CustomRegistryIconExample from "@/core/components/data-display/VireoIcon/internal/storybook/CustomRegistryIconExample";
+import customRegistryIconExampleSource from "@/core/components/data-display/VireoIcon/internal/storybook/CustomRegistryIconExample.tsx?raw";
+import DecorativeWithTextExample from "@/core/components/data-display/VireoIcon/internal/storybook/DecorativeWithTextExample";
+import decorativeWithTextExampleSource from "@/core/components/data-display/VireoIcon/internal/storybook/DecorativeWithTextExample.tsx?raw";
 import DefaultExample from "@/core/components/data-display/VireoIcon/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/data-display/VireoIcon/internal/storybook/DefaultExample.tsx?raw";
-import ThemeCustomizationExample from "@/core/components/data-display/VireoIcon/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/core/components/data-display/VireoIcon/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoIcon } from "./VireoIcon";
 
@@ -16,6 +16,7 @@ const meta = {
   component: VireoIcon,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `Renders a type-safe icon selected from Vireo's application icon registry.
@@ -42,12 +43,12 @@ export const Default: Story = {
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
+export const DecorativeWithText: Story = {
+  render: () => <DecorativeWithTextExample />,
+  parameters: createSourceParameters(decorativeWithTextExampleSource),
 };
 
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
+export const CustomRegistryIcon: Story = {
+  render: () => <CustomRegistryIconExample />,
+  parameters: createSourceParameters(customRegistryIconExampleSource),
 };
