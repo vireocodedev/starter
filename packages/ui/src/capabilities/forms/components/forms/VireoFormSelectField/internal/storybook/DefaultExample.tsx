@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -19,8 +19,8 @@ export default function DefaultExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 520 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Assignment" variant="plain" layout="stack">
           <form.Field name="teamId">
             {field => (
               <VireoLabelBox label="Owning team">
@@ -35,12 +35,12 @@ export default function DefaultExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <Stack direction="row" spacing={1}>
-            <form.SubmitButton>Save assignment</form.SubmitButton>
+          <form.Actions>
             <form.ResetButton>Reset</form.ResetButton>
-          </Stack>
+            <form.SubmitButton>Save assignment</form.SubmitButton>
+          </form.Actions>
           {savedTeam && <Typography color="success.main">Saved {savedTeam}</Typography>}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

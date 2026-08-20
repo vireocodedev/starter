@@ -44,7 +44,7 @@ export function UseDependentFieldValidationWithDefaultsDemo() {
 
   return (
     <RgoForm form={form} onSubmit={onSubmit}>
-      <RgoFormSection>
+      <RgoFormSection label="Date range">
         <Typography variant="body2" color="text.secondary">
           Click Submit, set the start date to a value after the end date, and observe how the end date is validated once
           the start date changes.

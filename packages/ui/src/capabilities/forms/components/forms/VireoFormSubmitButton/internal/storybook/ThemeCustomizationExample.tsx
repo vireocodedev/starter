@@ -25,8 +25,10 @@ export default function ThemeCustomizationExample() {
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
-        <form.Form sx={{ maxWidth: 480 }}>
-          <form.SubmitButton fullWidth>Deploy application</form.SubmitButton>
+        <form.Form>
+          <form.Actions>
+            <form.SubmitButton>Deploy application</form.SubmitButton>
+          </form.Actions>
         </form.Form>
       </ThemeProvider>
     </VireoStorybookProvider>

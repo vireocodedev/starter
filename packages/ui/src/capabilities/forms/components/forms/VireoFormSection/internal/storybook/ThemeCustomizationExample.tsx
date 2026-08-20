@@ -12,8 +12,10 @@ function createCustomizedTheme(outerTheme: Theme): Theme {
           },
           content: {
             border: "1px solid #64748b",
-            outline: "none",
             borderRadius: 12,
+          },
+          layout: {
+            rowGap: 24,
           },
         },
       },
@@ -25,9 +27,12 @@ export default function ThemeCustomizationExample() {
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
-        <VireoFormSection label="Security">
+        <VireoFormSection label="Security" description="Recovery settings for account access.">
           <VireoLabelBox label="Recovery email">
             <TextField fullWidth slotProps={{ htmlInput: { "aria-label": "Recovery email" } }} />
+          </VireoLabelBox>
+          <VireoLabelBox label="Backup phone">
+            <TextField fullWidth slotProps={{ htmlInput: { "aria-label": "Backup phone" } }} />
           </VireoLabelBox>
         </VireoFormSection>
       </ThemeProvider>

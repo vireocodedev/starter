@@ -1,4 +1,4 @@
-import { Radio, Stack, type RadioProps } from "@mui/material";
+import { Radio, type RadioProps } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -19,8 +19,8 @@ export default function CustomizedSlotsExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 520 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Environment" variant="plain" layout="stack">
           <form.Field name="environment">
             {field => (
               <VireoLabelBox label="Environment">
@@ -49,8 +49,10 @@ export default function CustomizedSlotsExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.ResetButton variant="outlined">Reset environment</form.ResetButton>
-        </Stack>
+          <form.Actions>
+            <form.ResetButton variant="outlined">Reset environment</form.ResetButton>
+          </form.Actions>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

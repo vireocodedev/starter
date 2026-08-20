@@ -92,7 +92,7 @@ export function RgoFormWithDefaultPropsDemo(props: RgoFormWithDefaultPropsDemoPr
         </Grid>
       </RgoFormSection>
 
-      <RgoFormSection>
+      <RgoFormSection label="Form actions">
         <Grid container spacing={2}>
           <Grid size={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button type="submit" variant="contained" disabled={form.submitDisabled}>

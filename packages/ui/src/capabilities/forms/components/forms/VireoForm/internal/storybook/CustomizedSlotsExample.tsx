@@ -1,4 +1,3 @@
-import { Stack } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm, type VireoFormOwnerState } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -37,7 +36,7 @@ export default function CustomizedSlotsExample() {
           }),
         }}
       >
-        <Stack spacing={2}>
+        <form.Section label="Project" variant="plain" layout="stack">
           <form.Field name="projectName">
             {field => (
               <VireoLabelBox label="Project name">
@@ -45,8 +44,10 @@ export default function CustomizedSlotsExample() {
               </VireoLabelBox>
             )}
           </form.Field>
+        </form.Section>
+        <form.Actions>
           <form.SubmitButton variant="contained">Save project</form.SubmitButton>
-        </Stack>
+        </form.Actions>
       </form.Form>
     </VireoStorybookProvider>
   );

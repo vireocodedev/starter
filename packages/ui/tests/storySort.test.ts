@@ -10,8 +10,10 @@ describe("vireoStorySort", () => {
       "Forms/Forms/VireoFormSubmitButton",
       "Forms/Forms/Fields/VireoFormTextField",
       "Forms/Forms/VireoForm",
+      "Forms/Forms/VireoFormActions",
       "Forms/Forms/Fields/VireoFormCheckboxField",
       "Forms/Forms/VireoFormSection",
+      "Forms/Forms/VireoFormSectionItem",
       "Forms/Forms/VireoFormResetButton",
     ];
 
@@ -22,8 +24,10 @@ describe("vireoStorySort", () => {
         .map(entry => entry.title),
     ).toEqual([
       "Forms/Forms/VireoForm",
+      "Forms/Forms/VireoFormActions",
       "Forms/Forms/VireoFormResetButton",
       "Forms/Forms/VireoFormSection",
+      "Forms/Forms/VireoFormSectionItem",
       "Forms/Forms/VireoFormSubmitButton",
       "Forms/Forms/Fields/VireoFormCheckboxField",
       "Forms/Forms/Fields/VireoFormTextField",

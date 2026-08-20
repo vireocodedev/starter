@@ -162,7 +162,7 @@ export function RgoFormWithAsyncSubmissionDemo(props: RgoFormWithAsyncSubmission
           </Grid>
         </RgoFormSection>
 
-        <RgoFormSection>
+        <RgoFormSection label="Form actions">
           <Grid container spacing={2}>
             <Grid size={12} sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               <Button

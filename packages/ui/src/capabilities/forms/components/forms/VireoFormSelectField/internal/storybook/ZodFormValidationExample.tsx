@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -31,8 +31,8 @@ export default function ZodFormValidationExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 520 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Workspace" variant="plain" layout="stack">
           <form.Field name="workspaceName">
             {field => (
               <VireoLabelBox label="Workspace name">
@@ -54,9 +54,11 @@ export default function ZodFormValidationExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.SubmitButton>Create workspace</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton>Create workspace</form.SubmitButton>
+          </form.Actions>
           {savedWorkspace && <Typography color="success.main">Created {savedWorkspace}</Typography>}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

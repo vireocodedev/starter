@@ -15,19 +15,21 @@ export default function CustomizedSlotsExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <form.SubmitButton
-          variant="outlined"
-          slots={{ root: RoundedButton }}
-          slotProps={{
-            root: ownerState => ({
-              "data-submitting": ownerState.submitting,
-              sx: { borderRadius: 999, letterSpacing: "0.08em" },
-            }),
-          }}
-        >
-          Publish release
-        </form.SubmitButton>
+      <form.Form>
+        <form.Actions>
+          <form.SubmitButton
+            variant="outlined"
+            slots={{ root: RoundedButton }}
+            slotProps={{
+              root: ownerState => ({
+                "data-submitting": ownerState.submitting,
+                sx: { borderRadius: 999, letterSpacing: "0.08em" },
+              }),
+            }}
+          >
+            Publish release
+          </form.SubmitButton>
+        </form.Actions>
       </form.Form>
     </VireoStorybookProvider>
   );

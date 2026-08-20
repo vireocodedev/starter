@@ -75,6 +75,23 @@ describe(VIREO_FORM_NAME, () => {
     expect(root).toHaveStyle({ paddingLeft: "10px", paddingRight: "12px" });
   });
 
+  it("exposes the normalized layout-width preset to root customization", () => {
+    function LayoutHarness() {
+      const form = useVireoForm({ defaultValues: {} });
+      return (
+        <form.Form
+          aria-label="Wide form"
+          layoutWidth="wide"
+          slotProps={{ root: ownerState => ({ "data-layout-width": ownerState.layoutWidth }) }}
+        />
+      );
+    }
+
+    render(<LayoutHarness />);
+
+    expect(screen.getByRole("form", { name: "Wide form" })).toHaveAttribute("data-layout-width", "wide");
+  });
+
   it("submits through TanStack Form after the consumer event and respects cancellation", async () => {
     const onSubmit = vi.fn();
     const consumerSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());

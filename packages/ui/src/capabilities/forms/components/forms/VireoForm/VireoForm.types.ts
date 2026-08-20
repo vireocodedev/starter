@@ -14,9 +14,13 @@ export type VireoFormErrorDisplay = "always" | "never" | "touched-or-submitted" 
 /** Converts a validation error into consumer-facing helper text. */
 export type VireoFormErrorFormatter = (error: unknown) => string | undefined;
 
+/** Standard content-width presets owned by {@link VireoForm}. */
+export type VireoFormLayoutWidth = "standard" | "wide" | "full";
+
 export type VireoFormOwnerState = {
   dirty: boolean;
   invalid: boolean;
+  layoutWidth: VireoFormLayoutWidth;
   submitting: boolean;
   validating: boolean;
 };
@@ -50,6 +54,8 @@ export type VireoFormOwnProps = VireoFormSlotsAndSlotProps & {
   formatError?: VireoFormErrorFormatter;
   /** Focuses the first focusable invalid field after a rejected submit. @default true */
   focusInvalidFieldOnSubmit?: boolean;
+  /** Constrains and centers the form using Vireo's standard content-width presets. @default 'standard' */
+  layoutWidth?: VireoFormLayoutWidth;
   /** Registers this form with the unsaved-changes capability while it is dirty. @default false */
   unsavedChangesGuard?: boolean;
   /** Adds non-form busy work to the unsaved-changes registration. @default false */

@@ -1,5 +1,5 @@
 import StarRounded from "@mui/icons-material/StarRounded";
-import { Checkbox, Stack, type CheckboxProps } from "@mui/material";
+import { Checkbox, type CheckboxProps } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -22,8 +22,8 @@ export default function CustomizedSlotsExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 560 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Environments" variant="plain" layout="stack">
           <form.Field name="environments">
             {field => (
               <VireoLabelBox label="Deployment environments">
@@ -47,8 +47,10 @@ export default function CustomizedSlotsExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.ResetButton variant="outlined">Reset environments</form.ResetButton>
-        </Stack>
+          <form.Actions>
+            <form.ResetButton variant="outlined">Reset environments</form.ResetButton>
+          </form.Actions>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

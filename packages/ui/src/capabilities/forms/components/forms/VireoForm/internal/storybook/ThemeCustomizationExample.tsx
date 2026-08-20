@@ -1,4 +1,4 @@
-import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { ThemeProvider, createTheme, type Theme } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -31,7 +31,7 @@ export default function ThemeCustomizationExample() {
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
         <form.Form>
-          <Stack spacing={2}>
+          <form.Section label="Team" variant="plain" layout="stack">
             <form.Field name="teamName">
               {field => (
                 <VireoLabelBox label="Team name">
@@ -39,8 +39,10 @@ export default function ThemeCustomizationExample() {
                 </VireoLabelBox>
               )}
             </form.Field>
+          </form.Section>
+          <form.Actions>
             <form.SubmitButton variant="contained">Save team</form.SubmitButton>
-          </Stack>
+          </form.Actions>
         </form.Form>
       </ThemeProvider>
     </VireoStorybookProvider>

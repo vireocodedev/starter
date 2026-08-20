@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -24,8 +24,8 @@ export default function ZodFieldValidationExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 560 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Notification channels" variant="plain" layout="stack">
           <form.Field name="channels" validators={{ onDynamic: channelSchema }}>
             {field => (
               <VireoLabelBox label="Notification channels" required>
@@ -41,9 +41,11 @@ export default function ZodFieldValidationExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.SubmitButton variant="contained">Save channels</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Save channels</form.SubmitButton>
+          </form.Actions>
           {saved.length > 0 && <Typography color="success.main">Saved {saved.join(", ")}</Typography>}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

@@ -151,7 +151,7 @@ export function RgoFormWithValidationDemo(props: RgoFormWithValidationDemoProps 
           </Grid>
         </RgoFormSection>
 
-        <RgoFormSection>
+        <RgoFormSection label="Form actions">
           <Grid container spacing={2}>
             <Grid size={12}>
               <Button type="submit" variant="contained" disabled={form.submitDisabled} fullWidth>

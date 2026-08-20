@@ -62,6 +62,7 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
       focusInvalidFieldOnSubmit = true,
       form,
       formatError,
+      layoutWidth = "standard",
       noValidate = true,
       onReset,
       onSubmit,
@@ -85,6 +86,7 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
     const ownerState: VireoFormOwnerState = {
       dirty: state.dirty,
       invalid: state.invalid,
+      layoutWidth,
       submitting: state.submitting,
       validating: state.validating,
     };

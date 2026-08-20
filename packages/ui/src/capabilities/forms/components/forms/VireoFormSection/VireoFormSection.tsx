@@ -5,66 +5,146 @@ import { useForkRef } from "@mui/material/utils";
 import React from "react";
 import { getVireoFormSectionUtilityClass, type VireoFormSectionClassKey } from "./VireoFormSection.classes";
 import { VIREO_FORM_SECTION_NAME, type VireoFormSectionSlotName } from "./VireoFormSection.identity";
-import { VireoFormSectionContent, VireoFormSectionLabel, VireoFormSectionRoot } from "./VireoFormSection.styled";
-import type { VireoFormSectionProps } from "./VireoFormSection.types";
-function useUtilityClasses(classes?: VireoFormSectionProps["classes"]) {
+import {
+  VireoFormSectionContent,
+  VireoFormSectionDescription,
+  VireoFormSectionHeader,
+  VireoFormSectionLabel,
+  VireoFormSectionLayout,
+  VireoFormSectionRoot,
+} from "./VireoFormSection.styled";
+import type { VireoFormSectionOwnerState, VireoFormSectionProps } from "./VireoFormSection.types";
+
+function useUtilityClasses(_ownerState: VireoFormSectionOwnerState, classes?: VireoFormSectionProps["classes"]) {
   return composeClasses(
-    { root: ["root"], label: ["label"], content: ["content"] } as const satisfies UtilityClassSlotMap<
-      VireoFormSectionSlotName,
-      VireoFormSectionClassKey
-    >,
+    {
+      root: ["root"],
+      header: ["header"],
+      label: ["label"],
+      description: ["description"],
+      content: ["content"],
+      layout: ["layout"],
+    } as const satisfies UtilityClassSlotMap<VireoFormSectionSlotName, VireoFormSectionClassKey>,
     getVireoFormSectionUtilityClass,
     classes,
   );
 }
-/** Groups related form controls under an optional accessible heading and consistent surface. */
+
+/** Groups related form content under an accessible heading and a container-responsive layout. */
 export const VireoFormSection = React.forwardRef<HTMLElement, VireoFormSectionProps>(
   function VireoFormSection(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_FORM_SECTION_NAME });
-    const { children, className, classes: classesProp, label, slotProps = {}, slots = {}, style, sx, ...other } = props;
-    const labelled = label !== undefined && !(typeof label === "string" && label.trim() === "");
-    const ownerState = { labelled };
-    const classes = useUtilityClasses(classesProp);
-    const id = React.useId();
-    const root = resolveSlotProps(slotProps.root, ownerState);
-    const labelProps = resolveSlotProps(slotProps.label, ownerState);
-    const content = resolveSlotProps(slotProps.content, ownerState);
-    const { className: rootClassName, ref: rootRef, style: rootStyle, sx: rootSx, ...rootOther } = root;
-    const { className: labelClassName, ...labelOther } = labelProps;
-    const { className: contentClassName, ...contentOther } = content;
-    const ref = useForkRef(forwardedRef, rootRef);
-    const Label = slots.label ?? VireoFormSectionLabel;
-    const Content = slots.content ?? VireoFormSectionContent;
+    const {
+      children,
+      className,
+      classes: classesProp,
+      description,
+      headingLevel = 2,
+      label,
+      layout = "grid",
+      maxColumns = 2,
+      slotProps = {},
+      slots = {},
+      style,
+      sx,
+      variant = "outlined",
+      ...other
+    } = props;
+    const ownerState: VireoFormSectionOwnerState = {
+      hasDescription: description !== undefined && description !== null,
+      headingLevel,
+      layout,
+      maxColumns,
+      variant,
+    };
+    const classes = useUtilityClasses(ownerState, classesProp);
+    const generatedId = React.useId();
+    const generatedHeadingId = `${generatedId}-heading`;
+    const generatedDescriptionId = `${generatedId}-description`;
+
+    const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
+    const resolvedHeaderSlotProps = resolveSlotProps(slotProps.header, ownerState);
+    const resolvedLabelSlotProps = resolveSlotProps(slotProps.label, ownerState);
+    const resolvedDescriptionSlotProps = resolveSlotProps(slotProps.description, ownerState);
+    const resolvedContentSlotProps = resolveSlotProps(slotProps.content, ownerState);
+    const resolvedLayoutSlotProps = resolveSlotProps(slotProps.layout, ownerState);
+    const {
+      className: rootSlotClassName,
+      ref: rootSlotRef,
+      style: rootSlotStyle,
+      sx: rootSlotSx,
+      ...rootSlotOther
+    } = resolvedRootSlotProps;
+    const { className: headerSlotClassName, ...headerSlotOther } = resolvedHeaderSlotProps;
+    const { className: labelSlotClassName, id: labelSlotId, ...labelSlotOther } = resolvedLabelSlotProps;
+    const {
+      className: descriptionSlotClassName,
+      id: descriptionSlotId,
+      ...descriptionSlotOther
+    } = resolvedDescriptionSlotProps;
+    const { className: contentSlotClassName, ...contentSlotOther } = resolvedContentSlotProps;
+    const { className: layoutSlotClassName, ...layoutSlotOther } = resolvedLayoutSlotProps;
+    const rootRef = useForkRef(forwardedRef, rootSlotRef);
+    const headingId = labelSlotId ?? generatedHeadingId;
+    const descriptionId = descriptionSlotId ?? generatedDescriptionId;
+    const headingTag = `h${headingLevel}` as `h${VireoFormSectionOwnerState["headingLevel"]}`;
+
     return (
       <VireoFormSectionRoot
         {...other}
-        {...rootOther}
+        {...rootSlotOther}
         as={slots.root ?? "section"}
-        ref={ref}
+        ref={rootRef}
         ownerState={ownerState}
-        className={joinClassNames(classes.root, className, rootClassName)}
-        style={{ ...style, ...rootStyle }}
-        sx={mergeSx(sx, rootSx)}
+        aria-labelledby={headingId}
+        aria-describedby={ownerState.hasDescription ? descriptionId : undefined}
+        className={joinClassNames(classes.root, className, rootSlotClassName)}
+        style={{ ...style, ...rootSlotStyle }}
+        sx={mergeSx(sx, rootSlotSx)}
       >
-        {labelled && (
-          <Label
-            {...labelOther}
+        <VireoFormSectionHeader
+          {...headerSlotOther}
+          as={slots.header}
+          ownerState={ownerState}
+          className={joinClassNames(classes.header, headerSlotClassName)}
+        >
+          <VireoFormSectionLabel
+            {...labelSlotOther}
+            as={slots.label ?? headingTag}
             ownerState={ownerState}
-            id={id}
-            className={joinClassNames(classes.label, labelClassName)}
+            id={headingId}
+            className={joinClassNames(classes.label, labelSlotClassName)}
           >
             {label}
-          </Label>
-        )}
-        <Content
-          {...contentOther}
+          </VireoFormSectionLabel>
+          {ownerState.hasDescription && (
+            <VireoFormSectionDescription
+              {...descriptionSlotOther}
+              as={slots.description}
+              component="p"
+              ownerState={ownerState}
+              id={descriptionId}
+              className={joinClassNames(classes.description, descriptionSlotClassName)}
+            >
+              {description}
+            </VireoFormSectionDescription>
+          )}
+        </VireoFormSectionHeader>
+        <VireoFormSectionContent
+          {...contentSlotOther}
+          as={slots.content}
           ownerState={ownerState}
-          role="group"
-          aria-labelledby={labelled ? id : undefined}
-          className={joinClassNames(classes.content, contentClassName)}
+          className={joinClassNames(classes.content, contentSlotClassName)}
         >
-          {children}
-        </Content>
+          <VireoFormSectionLayout
+            {...layoutSlotOther}
+            as={slots.layout}
+            ownerState={ownerState}
+            className={joinClassNames(classes.layout, layoutSlotClassName)}
+          >
+            {children}
+          </VireoFormSectionLayout>
+        </VireoFormSectionContent>
       </VireoFormSectionRoot>
     );
   },

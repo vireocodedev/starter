@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
@@ -22,8 +22,8 @@ export default function ZodFormValidationExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Checkbox example" variant="plain" layout="stack">
           <form.Field name="displayName">
             {field => (
               <VireoLabelBox label="Display name">
@@ -34,11 +34,13 @@ export default function ZodFormValidationExample() {
           <form.Field name="productUpdates">
             {field => <field.CheckboxField label="Receive product updates" />}
           </form.Field>
-          <form.SubmitButton variant="contained">Save profile</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Save profile</form.SubmitButton>
+          </form.Actions>
           {savedProfile && (
             <Typography color="success.main">Saved {savedProfile.displayName} with product updates enabled</Typography>
           )}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

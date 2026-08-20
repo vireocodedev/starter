@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -13,8 +13,8 @@ export default function DefaultExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Profile" description="Contact details used for account notifications." layout="stack">
           <form.Field
             name="email"
             validators={{
@@ -27,9 +27,11 @@ export default function DefaultExample() {
               </VireoLabelBox>
             )}
           </form.Field>
+        </form.Section>
+        <form.Actions>
           <form.SubmitButton variant="contained">Save profile</form.SubmitButton>
-          {submittedEmail && <Typography>Saved {submittedEmail}</Typography>}
-        </Stack>
+        </form.Actions>
+        {submittedEmail && <Typography color="success.main">Saved {submittedEmail}</Typography>}
       </form.Form>
     </VireoStorybookProvider>
   );

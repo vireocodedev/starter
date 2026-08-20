@@ -1,4 +1,3 @@
-import { Stack } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -8,8 +7,8 @@ export default function DefaultExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Project" variant="plain" layout="stack">
           <form.Field name="projectName">
             {field => (
               <VireoLabelBox label="Project name">
@@ -17,8 +16,10 @@ export default function DefaultExample() {
               </VireoLabelBox>
             )}
           </form.Field>
+        </form.Section>
+        <form.Actions>
           <form.ResetButton variant="outlined">Reset changes</form.ResetButton>
-        </Stack>
+        </form.Actions>
       </form.Form>
     </VireoStorybookProvider>
   );

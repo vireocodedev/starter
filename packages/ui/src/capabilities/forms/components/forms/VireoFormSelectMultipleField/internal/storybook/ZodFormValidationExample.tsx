@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -28,8 +28,8 @@ export default function ZodFormValidationExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 560 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Release" variant="plain" layout="stack">
           <form.Field name="releaseName">
             {field => (
               <VireoLabelBox label="Release name" required>
@@ -56,9 +56,11 @@ export default function ZodFormValidationExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.SubmitButton variant="contained">Create release</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Create release</form.SubmitButton>
+          </form.Actions>
           {savedRelease && <Typography color="success.main">Created {savedRelease}</Typography>}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

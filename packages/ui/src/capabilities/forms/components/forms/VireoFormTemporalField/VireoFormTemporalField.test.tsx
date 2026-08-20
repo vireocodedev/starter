@@ -1,4 +1,8 @@
 import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoForm";
+import {
+  formatTemporalValue,
+  parseTemporalValue,
+} from "@/capabilities/forms/components/forms/VireoFormTemporalField/internal/temporalValue";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -7,7 +11,6 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { vireoFormTemporalFieldClasses } from "./VireoFormTemporalField.classes";
 import { VIREO_FORM_TEMPORAL_FIELD_NAME } from "./VireoFormTemporalField.identity";
-import { formatTemporalValue, parseTemporalValue } from "./internal/temporalValue";
 import type { VireoFormTemporalFieldMode, VireoFormTemporalFieldProps } from "./VireoFormTemporalField.types";
 
 type HarnessProps = {

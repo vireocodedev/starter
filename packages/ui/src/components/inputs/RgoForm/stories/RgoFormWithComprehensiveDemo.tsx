@@ -246,7 +246,7 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
           </Grid>
         </RgoFormSection>
 
-        <RgoFormSection>
+        <RgoFormSection label="Form actions">
           <Grid container spacing={2}>
             <Grid size={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <Button type="button" variant="outlined" onClick={handleReset} disabled={form.formState.isSubmitting}>
@@ -559,7 +559,7 @@ export function RgoFormWithComprehensiveDemo(props: RgoFormWithComprehensiveDemo
           </Grid>
         </RgoFormSection>
 
-        <RgoFormSection>
+        <RgoFormSection label="Form actions">
           <Grid container spacing={2}>
             <Grid size={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <Button type="button" variant="outlined" onClick={handleReset} disabled={form.formState.isSubmitting}>

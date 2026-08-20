@@ -1,4 +1,4 @@
-import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { ThemeProvider, createTheme, type Theme } from "@mui/material";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
@@ -36,13 +36,15 @@ export default function ThemeCustomizationExample() {
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
-        <form.Form sx={{ maxWidth: 480 }}>
-          <Stack spacing={2}>
+        <form.Form>
+          <form.Section label="Checkbox example" variant="plain" layout="stack">
             <form.Field name="priorityReview">
               {field => <field.CheckboxField label="Mark for priority review" />}
             </form.Field>
-            <form.SubmitButton variant="contained">Save review preference</form.SubmitButton>
-          </Stack>
+            <form.Actions>
+              <form.SubmitButton variant="contained">Save review preference</form.SubmitButton>
+            </form.Actions>
+          </form.Section>
         </form.Form>
       </ThemeProvider>
     </VireoStorybookProvider>

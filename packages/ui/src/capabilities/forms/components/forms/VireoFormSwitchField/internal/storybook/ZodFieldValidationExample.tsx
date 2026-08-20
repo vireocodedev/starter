@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -17,14 +17,16 @@ export default function ZodFieldValidationExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Switch example" variant="plain" layout="stack">
           <form.Field name="termsAccepted" validators={{ onDynamic: termsSchema }}>
             {field => <field.SwitchField label="I accept the terms" />}
           </form.Field>
-          <form.SubmitButton variant="contained">Continue</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Continue</form.SubmitButton>
+          </form.Actions>
           {saved && <Typography color="success.main">Terms accepted</Typography>}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

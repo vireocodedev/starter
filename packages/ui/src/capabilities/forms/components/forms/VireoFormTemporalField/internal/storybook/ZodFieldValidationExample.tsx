@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
@@ -46,22 +46,28 @@ export default function ZodFieldValidationExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 760 }}>
-        <Stack spacing={2}>
-          <Box display="grid" gridTemplateColumns={{ xs: "1fr", md: "1fr 1fr" }} gap={2}>
-            {fields.map(([name, label, mode, schema]) => (
-              <form.Field key={name} name={name} validators={{ onDynamic: schema }}>
-                {field => (
-                  <VireoLabelBox label={label} required>
-                    <field.TemporalField mode={mode} required slotProps={{ htmlInput: { "aria-label": label } }} />
-                  </VireoLabelBox>
-                )}
-              </form.Field>
-            ))}
-          </Box>
-          <form.SubmitButton variant="contained">Save schedule</form.SubmitButton>
-          {saved && <Typography color="success.main">Saved all six canonical temporal values.</Typography>}
-        </Stack>
+      <form.Form>
+        <form.Section label="Schedule" variant="plain" maxColumns={2}>
+          {fields.map(([name, label, mode, schema]) => (
+            <form.Field key={name} name={name} validators={{ onDynamic: schema }}>
+              {field => (
+                <VireoLabelBox label={label} required>
+                  <field.TemporalField mode={mode} required slotProps={{ htmlInput: { "aria-label": label } }} />
+                </VireoLabelBox>
+              )}
+            </form.Field>
+          ))}
+          <form.SectionItem span="full">
+            <form.Actions>
+              <form.SubmitButton variant="contained">Save schedule</form.SubmitButton>
+            </form.Actions>
+          </form.SectionItem>
+          {saved && (
+            <form.SectionItem span="full">
+              <Typography color="success.main">Saved all six canonical temporal values.</Typography>
+            </form.SectionItem>
+          )}
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

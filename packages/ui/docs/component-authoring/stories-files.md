@@ -105,7 +105,7 @@ Components exposed through the `useVireoForm` `field.*` facade intentionally use
 title: "Forms/Forms/Fields/VireoFormTextField";
 ```
 
-This grouping currently contains `VireoFormCheckboxField`, `VireoFormNumberField`, `VireoFormRadioGroupField`, `VireoFormSelectField`, `VireoFormSelectMultipleField`, `VireoFormSwitchField`, `VireoFormTemporalField`, and `VireoFormTextField`. Form-level components such as `VireoForm`, `VireoFormResetButton`, `VireoFormSection`, and `VireoFormSubmitButton` remain directly under `Forms/Forms`.
+This grouping currently contains `VireoFormCheckboxField`, `VireoFormNumberField`, `VireoFormRadioGroupField`, `VireoFormSelectField`, `VireoFormSelectMultipleField`, `VireoFormSwitchField`, `VireoFormTemporalField`, and `VireoFormTextField`. Form-level components such as `VireoForm`, `VireoFormActions`, `VireoFormResetButton`, `VireoFormSection`, `VireoFormSectionItem`, and `VireoFormSubmitButton` remain directly under `Forms/Forms`.
 
 The Vireo Storybook navigation sorts component files before child directories at every level. Within those two groups, entries remain alphabetical. Consequently, `Forms/Forms` lists its four form-level components first and the `Fields` directory afterward.
 
@@ -303,6 +303,12 @@ Every executable story for an input-like `field.*` component composes the input 
 Mirror visible required state on `VireoLabelBox` when the field is required. Keep validation errors and field-specific helper text on the bound input unless a story is explicitly demonstrating `VireoLabelBox` helper anatomy.
 
 Exceptions must be explicit and narrowly justified by control anatomy. The current whitelist contains `field.SwitchField` and `field.CheckboxField`: their visible labels are integral to MUI's switch or checkbox control-label composition, so their stories retain the field label and do not add `VireoLabelBox`. Add future exceptions to this list before using them.
+
+### Standard form layout
+
+Executable form and bound-field stories follow the [Vireo form layout](./form-layout.md) contract. Compose examples with `form.Form`, `form.Section`, optional `form.SectionItem`, and `form.Actions`; do not rebuild their spacing, grid, responsive breakpoints, or action layout with MUI `Stack`, `Grid`, grid-oriented `Box`, viewport media queries, or resize observers.
+
+Keep ordinary fields as direct section children. Use `form.SectionItem` only for one-cell compositions or full-row content. Keep action children ordered from least prominent to most prominent so mobile and desktop reading order remain consistent.
 
 ### Common states
 

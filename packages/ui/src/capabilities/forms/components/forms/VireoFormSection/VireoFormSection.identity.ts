@@ -4,7 +4,14 @@ import type { VireoSlotNameTuple } from "@/core/public";
 export const VIREO_FORM_SECTION_NAME = "VireoFormSection";
 
 /** Canonical public slots exposed by VireoFormSection, in rendered DOM order. */
-export const VIREO_FORM_SECTION_SLOTS = ["root", "label", "content"] as const satisfies VireoSlotNameTuple;
+export const VIREO_FORM_SECTION_SLOTS = [
+  "root",
+  "header",
+  "label",
+  "description",
+  "content",
+  "layout",
+] as const satisfies VireoSlotNameTuple;
 
 /** Public slot names exposed by VireoFormSection. */
 export type VireoFormSectionSlotName = (typeof VIREO_FORM_SECTION_SLOTS)[number];

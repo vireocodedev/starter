@@ -23,4 +23,14 @@ export const VireoFormRoot: VireoFormStyledSlotComponent<VireoFormRootProps> = s
     ownerState.validating && styles.validating,
     ownerState.invalid && styles.invalid,
   ],
-})<VireoFormStyledSlotProps & VireoFormRootProps>({});
+})<VireoFormStyledSlotProps & VireoFormRootProps>(({ theme, ownerState }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(3),
+  marginInline: "auto",
+  minWidth: 0,
+  width: "100%",
+  ...(ownerState.layoutWidth === "standard" && { maxWidth: "48rem" }),
+  ...(ownerState.layoutWidth === "wide" && { maxWidth: "72rem" }),
+  ...(ownerState.layoutWidth === "full" && { maxWidth: "none" }),
+}));

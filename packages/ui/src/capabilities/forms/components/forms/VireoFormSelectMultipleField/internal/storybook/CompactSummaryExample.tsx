@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -19,8 +19,8 @@ export default function CompactSummaryExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={1.5} sx={{ maxWidth: 560 }}>
-        <form.Form>
+      <form.Form>
+        <form.Section label="Compact selection summary" variant="plain" layout="stack">
           <form.Field name="regions">
             {field => (
               <VireoLabelBox label="Service regions">
@@ -35,11 +35,11 @@ export default function CompactSummaryExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-        </form.Form>
-        <Typography color="text.secondary" variant="body2">
-          The closed field stays one line tall while the open menu shows every selected option.
-        </Typography>
-      </Stack>
+          <Typography color="text.secondary" variant="body2">
+            The closed field stays one line tall while the open menu shows every selected option.
+          </Typography>
+        </form.Section>
+      </form.Form>
     </VireoStorybookProvider>
   );
 }

@@ -1,4 +1,3 @@
-import { Stack } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -10,8 +9,8 @@ export default function TimeModeExample() {
   });
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Time" variant="plain" layout="stack">
           <form.Field name="dailyReminder">
             {field => (
               <VireoLabelBox label="Daily reminder">
@@ -23,8 +22,10 @@ export default function TimeModeExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.ResetButton variant="outlined">Reset time</form.ResetButton>
-        </Stack>
+          <form.Actions>
+            <form.ResetButton variant="outlined">Reset time</form.ResetButton>
+          </form.Actions>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

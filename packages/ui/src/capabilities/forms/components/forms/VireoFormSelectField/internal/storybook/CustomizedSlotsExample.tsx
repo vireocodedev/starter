@@ -19,8 +19,8 @@ export default function CustomizedSlotsExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 520 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Environment" variant="plain" layout="stack">
           <form.Field name="environmentId">
             {field => (
               <VireoLabelBox label="Environment">
@@ -59,8 +59,10 @@ export default function CustomizedSlotsExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.ResetButton variant="outlined">Reset selection</form.ResetButton>
-        </Stack>
+          <form.Actions>
+            <form.ResetButton variant="outlined">Reset selection</form.ResetButton>
+          </form.Actions>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

@@ -1,4 +1,4 @@
-import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { ThemeProvider, createTheme, type Theme } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -38,8 +38,8 @@ export default function ThemeCustomizationExample() {
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
-        <form.Form sx={{ maxWidth: 480 }}>
-          <Stack spacing={2}>
+        <form.Form>
+          <form.Section label="Release" variant="plain" layout="stack">
             <form.Field
               name="releaseName"
               validators={{ onChange: ({ value }) => (value.trim() ? undefined : "A release name is required.") }}
@@ -54,8 +54,10 @@ export default function ThemeCustomizationExample() {
                 </VireoLabelBox>
               )}
             </form.Field>
-            <form.SubmitButton variant="contained">Create release</form.SubmitButton>
-          </Stack>
+            <form.Actions>
+              <form.SubmitButton variant="contained">Create release</form.SubmitButton>
+            </form.Actions>
+          </form.Section>
         </form.Form>
       </ThemeProvider>
     </VireoStorybookProvider>

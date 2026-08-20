@@ -52,7 +52,7 @@ const FormDemo = ({
       </Typography>
 
       <RgoForm form={form} onSubmit={onSubmit}>
-        <RgoFormSection>
+        <RgoFormSection label="Profile">
           <RgoLabelBox label="Name" required>
             <Controller
               name="name"

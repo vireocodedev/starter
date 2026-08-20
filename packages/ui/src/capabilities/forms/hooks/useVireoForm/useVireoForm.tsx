@@ -1,9 +1,12 @@
 import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/VireoForm";
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
+import { VireoFormActions } from "@/capabilities/forms/components/forms/VireoFormActions/VireoFormActions";
 import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
 import { VireoFormRadioGroupField } from "@/capabilities/forms/components/forms/VireoFormRadioGroupField/VireoFormRadioGroupField";
 import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
+import { VireoFormSection } from "@/capabilities/forms/components/forms/VireoFormSection/VireoFormSection";
+import { VireoFormSectionItem } from "@/capabilities/forms/components/forms/VireoFormSectionItem/VireoFormSectionItem";
 import { VireoFormSelectField } from "@/capabilities/forms/components/forms/VireoFormSelectField/VireoFormSelectField";
 import { VireoFormSelectMultipleField } from "@/capabilities/forms/components/forms/VireoFormSelectMultipleField/VireoFormSelectMultipleField";
 import { VireoFormSwitchField } from "@/capabilities/forms/components/forms/VireoFormSwitchField/VireoFormSwitchField";
@@ -35,7 +38,13 @@ const { useAppForm } = createFormHook({
     TextField: VireoFormTextField,
   },
   fieldContext: vireoFieldContext,
-  formComponents: { ResetButton: VireoFormResetButton, SubmitButton: VireoFormSubmitButton },
+  formComponents: {
+    Actions: VireoFormActions,
+    ResetButton: VireoFormResetButton,
+    Section: VireoFormSection,
+    SectionItem: VireoFormSectionItem,
+    SubmitButton: VireoFormSubmitButton,
+  },
   formContext: vireoTanStackFormContext,
 });
 
@@ -75,7 +84,13 @@ type BaseVireoFormApi<
     TemporalField: typeof VireoFormTemporalField;
     TextField: typeof VireoFormTextField;
   },
-  { ResetButton: typeof VireoFormResetButton; SubmitButton: typeof VireoFormSubmitButton }
+  {
+    Actions: typeof VireoFormActions;
+    ResetButton: typeof VireoFormResetButton;
+    Section: typeof VireoFormSection;
+    SectionItem: typeof VireoFormSectionItem;
+    SubmitButton: typeof VireoFormSubmitButton;
+  }
 >;
 
 export type VireoFormApi<

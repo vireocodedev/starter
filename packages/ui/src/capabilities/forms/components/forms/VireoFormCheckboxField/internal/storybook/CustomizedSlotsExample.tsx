@@ -1,4 +1,4 @@
-import { FormControl, Stack, Typography, type FormControlProps, type TypographyProps } from "@mui/material";
+import { FormControl, Typography, type FormControlProps, type TypographyProps } from "@mui/material";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -21,8 +21,8 @@ export default function CustomizedSlotsExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Checkbox example" variant="plain" layout="stack">
           <form.Field name="includeAttachments">
             {field => (
               <field.CheckboxField
@@ -50,8 +50,10 @@ export default function CustomizedSlotsExample() {
               />
             )}
           </form.Field>
-          <form.ResetButton variant="outlined">Reset</form.ResetButton>
-        </Stack>
+          <form.Actions>
+            <form.ResetButton variant="outlined">Reset</form.ResetButton>
+          </form.Actions>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

@@ -26,7 +26,7 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: `Groups related form controls under an optional accessible heading and consistent surface.
+        component: `Groups related form controls under a required accessible heading and a container-responsive layout.
 
 ### Why it exists
 
@@ -34,7 +34,7 @@ Complex forms repeatedly need a clear hierarchy, a labelled group relationship, 
       },
     },
   },
-  args: { children: "Form controls" },
+  args: { children: "Form controls", label: "Form section" },
   argTypes: {
     slots: { control: false },
     slotProps: { control: false },

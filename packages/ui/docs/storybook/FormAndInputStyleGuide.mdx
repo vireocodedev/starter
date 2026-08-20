@@ -8,6 +8,8 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 A comprehensive guide to form handling, input components, validation patterns, and best practices in the RGO Front-UI library.
 
+> **Legacy migration reference:** This page documents the inherited React Hook Form system. New Vireo and TanStack Form work follows the canonical [Vireo form layout](../component-authoring/form-layout.md) contract and must use `form.Form`, `form.Section`, `form.SectionItem`, and `form.Actions` instead of direct Grid2 layout.
+
 <h2>Table of Contents</h2>
 
 - [Overview](#overview)
@@ -48,7 +50,7 @@ The RGO Front-UI form system is built on top of **React Hook Form** and **Zod va
 - **Mutation Integration**: Seamless React Query `useMutation` integration for form submission
 - **Standardized Props**: Consistent `RgoFormBaseProps` interface across all form components
 - **Label and Helper Text**: Rich labeling system with `RgoLabelBox` supporting helper text and actions
-- **Form Grouping**: Logical field organization with `VireoFormSection` and direct MUI `Grid2` composition
+- **Form Grouping**: Legacy examples below use Grid2; new Vireo forms use the container-aware form layout contract
 - **Empty State Handling**: Built-in empty state displays for array fields with custom messaging
 - **Error Boundaries**: Array-level and field-level error message display with proper styling
 

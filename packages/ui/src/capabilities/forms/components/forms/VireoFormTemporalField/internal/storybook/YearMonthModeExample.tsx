@@ -1,4 +1,3 @@
-import { Stack } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -10,8 +9,8 @@ export default function YearMonthModeExample() {
   });
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Year and month" variant="plain" layout="stack">
           <form.Field name="billingPeriod">
             {field => (
               <VireoLabelBox label="Billing period">
@@ -19,8 +18,10 @@ export default function YearMonthModeExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.ResetButton variant="outlined">Reset period</form.ResetButton>
-        </Stack>
+          <form.Actions>
+            <form.ResetButton variant="outlined">Reset period</form.ResetButton>
+          </form.Actions>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

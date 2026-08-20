@@ -62,7 +62,7 @@ const AdvancedFormDemo = () => {
       </Typography>
 
       <RgoForm form={form} onSubmit={onSubmit}>
-        <RgoFormSection>
+        <RgoFormSection label="Account details">
           <RgoLabelBox label="Username" required>
             <Controller
               name="username"

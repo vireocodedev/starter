@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
@@ -15,8 +15,8 @@ export default function DefaultExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Amount" variant="plain" layout="stack">
           <form.Field
             name="amount"
             validators={{ onDynamic: ({ value }) => (value === null ? "Enter an amount." : undefined) }}
@@ -33,11 +33,13 @@ export default function DefaultExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.SubmitButton variant="contained">Save amount</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Save amount</form.SubmitButton>
+          </form.Actions>
           {savedAmount !== undefined && (
             <Typography color="success.main">Saved {savedAmount ?? "an empty value"}</Typography>
           )}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

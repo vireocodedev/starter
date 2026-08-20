@@ -1,4 +1,3 @@
-import { Stack } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -7,8 +6,8 @@ export default function YearModeExample() {
   const form = useVireoForm({ defaultValues: { reportingYear: "2026" as string | null }, onSubmit: () => undefined });
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Year" variant="plain" layout="stack">
           <form.Field name="reportingYear">
             {field => (
               <VireoLabelBox label="Reporting year">
@@ -16,8 +15,10 @@ export default function YearModeExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.ResetButton variant="outlined">Reset year</form.ResetButton>
-        </Stack>
+          <form.Actions>
+            <form.ResetButton variant="outlined">Reset year</form.ResetButton>
+          </form.Actions>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

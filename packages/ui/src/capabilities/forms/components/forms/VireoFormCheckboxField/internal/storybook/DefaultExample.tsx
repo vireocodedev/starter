@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -12,8 +12,8 @@ export default function DefaultExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Checkbox example" variant="plain" layout="stack">
           <form.Field name="includeArchived">
             {field => (
               <field.CheckboxField
@@ -22,11 +22,13 @@ export default function DefaultExample() {
               />
             )}
           </form.Field>
-          <form.SubmitButton variant="contained">Save preference</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Save preference</form.SubmitButton>
+          </form.Actions>
           {savedPreference !== undefined && (
             <Typography color="success.main">Archived projects {savedPreference ? "included" : "excluded"}</Typography>
           )}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

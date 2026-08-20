@@ -300,7 +300,7 @@ export function UseMultiStepFormWithDefaultsDemo() {
       </Box>
 
       <RgoForm form={form} onSubmit={onSubmit}>
-        <RgoFormSection>
+        <RgoFormSection label="Current step">
           <Box sx={{ minHeight: 400, display: "flex", flexDirection: "column" }}>
             <Box sx={{ flex: 1, mb: 3 }}>
               <CurrentStepComponent />

@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
@@ -24,8 +24,8 @@ export default function ZodFieldValidationExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Quantity" variant="plain" layout="stack">
           <form.Field name="quantity" validators={{ onDynamic: quantitySchema }}>
             {field => (
               <VireoLabelBox label="Quantity">
@@ -38,9 +38,11 @@ export default function ZodFieldValidationExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.SubmitButton variant="contained">Save quantity</form.SubmitButton>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Save quantity</form.SubmitButton>
+          </form.Actions>
           {savedQuantity !== undefined && <Typography color="success.main">Saved quantity: {savedQuantity}</Typography>}
-        </Stack>
+        </form.Section>
       </form.Form>
     </VireoStorybookProvider>
   );

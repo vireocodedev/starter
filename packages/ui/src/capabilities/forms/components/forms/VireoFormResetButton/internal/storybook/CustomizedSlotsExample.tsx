@@ -1,4 +1,4 @@
-import { Button, Stack, type ButtonProps } from "@mui/material";
+import { Button, type ButtonProps } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
@@ -13,8 +13,8 @@ export default function CustomizedSlotsExample() {
 
   return (
     <VireoStorybookProvider>
-      <form.Form sx={{ maxWidth: 480 }}>
-        <Stack spacing={2}>
+      <form.Form>
+        <form.Section label="Workspace" variant="plain" layout="stack">
           <form.Field name="workspace">
             {field => (
               <VireoLabelBox label="Workspace">
@@ -22,6 +22,8 @@ export default function CustomizedSlotsExample() {
               </VireoLabelBox>
             )}
           </form.Field>
+        </form.Section>
+        <form.Actions>
           <form.ResetButton
             slots={{ root: RoundedButton }}
             slotProps={{
@@ -34,7 +36,7 @@ export default function CustomizedSlotsExample() {
           >
             Restore defaults
           </form.ResetButton>
-        </Stack>
+        </form.Actions>
       </form.Form>
     </VireoStorybookProvider>
   );

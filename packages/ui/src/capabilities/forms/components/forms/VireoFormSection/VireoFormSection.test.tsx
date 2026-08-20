@@ -6,21 +6,49 @@ import { VireoFormSection } from "./VireoFormSection";
 import { vireoFormSectionClasses } from "./VireoFormSection.classes";
 import { VIREO_FORM_SECTION_NAME } from "./VireoFormSection.identity";
 describe(VIREO_FORM_SECTION_NAME, () => {
-  it("associates labelled content and forwards its section ref", () => {
+  it("renders a named section with its default heading and forwards its root ref", () => {
     const ref = React.createRef<HTMLElement>();
     render(
       <VireoFormSection ref={ref} label="Billing">
         <input aria-label="Tax ID" />
       </VireoFormSection>,
     );
-    const group = screen.getByRole("group", { name: "Billing" });
+    const section = screen.getByRole("region", { name: "Billing" });
     expect(ref.current?.tagName).toBe("SECTION");
-    expect(group).toContainElement(screen.getByRole("textbox", { name: "Tax ID" }));
+    expect(screen.getByRole("heading", { level: 2, name: "Billing" })).toBeInTheDocument();
+    expect(section).toContainElement(screen.getByRole("textbox", { name: "Tax ID" }));
   });
-  it("omits blank labels", () => {
-    render(<VireoFormSection label="   ">Content</VireoFormSection>);
-    expect(screen.queryByText(/^\s+$/)).not.toBeInTheDocument();
-    expect(screen.getByRole("group")).not.toHaveAttribute("aria-labelledby");
+
+  it("associates a description and honors the selected heading level", () => {
+    render(
+      <VireoFormSection label="Security" description="Recovery settings" headingLevel={3}>
+        Content
+      </VireoFormSection>,
+    );
+    const section = screen.getByRole("region", { name: "Security" });
+    const description = screen.getByText("Recovery settings");
+    expect(screen.getByRole("heading", { level: 3, name: "Security" })).toBeInTheDocument();
+    expect(section).toHaveAttribute("aria-describedby", description.id);
+  });
+
+  it("exposes normalized layout state to every slot", () => {
+    render(
+      <VireoFormSection
+        label="Contract"
+        layout="stack"
+        maxColumns={3}
+        variant="plain"
+        slotProps={{
+          layout: ownerState => ({ "data-layout": ownerState.layout, "data-columns": ownerState.maxColumns }),
+        }}
+      >
+        Content
+      </VireoFormSection>,
+    );
+    const layout = screen.getByText("Content");
+    expect(layout).toHaveAttribute("data-layout", "stack");
+    expect(layout).toHaveAttribute("data-columns", "3");
+    expect(layout).toHaveClass(vireoFormSectionClasses.layout);
   });
   it("supports theme slot overrides", () => {
     const theme = createTheme({
@@ -28,10 +56,12 @@ describe(VIREO_FORM_SECTION_NAME, () => {
     });
     render(
       <ThemeProvider theme={theme}>
-        <VireoFormSection>Content</VireoFormSection>
+        <VireoFormSection label="Billing">Content</VireoFormSection>
       </ThemeProvider>,
     );
-    expect(screen.getByRole("group")).toHaveClass(vireoFormSectionClasses.content);
-    expect(screen.getByRole("group")).toHaveStyle({ padding: "12px" });
+    const section = screen.getByRole("region", { name: "Billing" });
+    const content = section.querySelector(`.${vireoFormSectionClasses.content}`);
+    expect(content).toHaveClass(vireoFormSectionClasses.content);
+    expect(content).toHaveStyle({ padding: "12px" });
   });
 });
