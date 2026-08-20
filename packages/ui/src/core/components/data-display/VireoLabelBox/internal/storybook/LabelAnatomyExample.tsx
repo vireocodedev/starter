@@ -2,11 +2,11 @@ import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import { OutlinedInput } from "@mui/material";
 
-export default function ThemeAwareColorExample() {
+export default function LabelAnatomyExample() {
   return (
     <VireoStorybookProvider>
-      <VireoLabelBox label="Account name" color={theme => theme.palette.warning.main} required>
-        <OutlinedInput aria-label="Account name" placeholder="Acme Ltd." size="small" fullWidth />
+      <VireoLabelBox label="Billing contact" helperText="Used on invoices" required>
+        <OutlinedInput aria-label="Billing contact" placeholder="billing@example.com" size="small" fullWidth />
       </VireoLabelBox>
     </VireoStorybookProvider>
   );
