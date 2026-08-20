@@ -1,13 +1,9 @@
-import CustomizedSlotsExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/DefaultExample.tsx?raw";
 import PointerInteractionsExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/PointerInteractionsExample";
 import pointerInteractionsExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/PointerInteractionsExample.tsx?raw";
 import ResizingExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ResizingExample";
 import resizingExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ResizingExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
 import { VireoSidePanelResizeHandle } from "./VireoSidePanelResizeHandle";
@@ -48,12 +44,4 @@ export const PointerInteractions: Story = {
     await userEvent.dblClick(handle);
     await expect(args.onResizeDoubleClick).toHaveBeenCalledOnce();
   },
-};
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: source(customizedSlotsExampleSource),
-};
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: source(themeCustomizationExampleSource),
 };
