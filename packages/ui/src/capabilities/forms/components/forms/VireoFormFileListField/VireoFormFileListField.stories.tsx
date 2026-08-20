@@ -2,8 +2,6 @@ import AppendingFilesExample from "@/capabilities/forms/components/forms/VireoFo
 import appendingFilesExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/AppendingFilesExample.tsx?raw";
 import CapacityReachedExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/CapacityReachedExample";
 import capacityReachedExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/CapacityReachedExample.tsx?raw";
-import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/CustomizedSlotsExample";
-import customizedSlotsExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/DefaultExample.tsx?raw";
 import DisabledAndReadOnlyExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/DisabledAndReadOnlyExample";
@@ -18,8 +16,6 @@ import PartialAcceptanceAndRejectionsExample from "@/capabilities/forms/componen
 import partialAcceptanceAndRejectionsExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/PartialAcceptanceAndRejectionsExample.tsx?raw";
 import ReorderingExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/ReorderingExample";
 import reorderingExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/ReorderingExample.tsx?raw";
-import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/ThemeCustomizationExample";
-import themeCustomizationExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/ZodFieldValidationExample";
 import zodFieldValidationExampleSource from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/ZodFieldValidationExample.tsx?raw";
 import ZodFormValidationExample from "@/capabilities/forms/components/forms/VireoFormFileListField/internal/storybook/ZodFormValidationExample";
@@ -36,6 +32,7 @@ const meta = {
   component: VireoFormFileListField,
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `VireoFormFileListField binds an ordered browser \`File[]\` collection to the current TanStack Form field through \`field.FileListField\`.
@@ -95,12 +92,4 @@ export const ZodFieldValidation: Story = {
 export const ZodFormValidation: Story = {
   render: () => <ZodFormValidationExample />,
   parameters: createSourceParameters(zodFormValidationExampleSource),
-};
-export const CustomizedSlots: Story = {
-  render: () => <CustomizedSlotsExample />,
-  parameters: createSourceParameters(customizedSlotsExampleSource),
-};
-export const ThemeCustomization: Story = {
-  render: () => <ThemeCustomizationExample />,
-  parameters: createSourceParameters(themeCustomizationExampleSource),
 };
