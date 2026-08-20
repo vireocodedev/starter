@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -22,13 +23,16 @@ export default function DefaultExample() {
         <Stack spacing={2}>
           <form.Field name="teamId">
             {field => (
-              <field.SelectField
-                label="Owning team"
-                placeholder="Choose a team"
-                options={teams}
-                getOptionValue={team => team.id}
-                renderOption={team => team.name}
-              />
+              <VireoLabelBox label="Owning team">
+                <field.SelectField
+                  label={null}
+                  placeholder="Choose a team"
+                  options={teams}
+                  getOptionValue={team => team.id}
+                  renderOption={team => team.name}
+                  slotProps={{ select: { SelectDisplayProps: { "aria-label": "Owning team" } } }}
+                />
+              </VireoLabelBox>
             )}
           </form.Field>
           <Stack direction="row" spacing={1}>

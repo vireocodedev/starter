@@ -1,4 +1,5 @@
 import { Avatar, MenuItem, Stack, type MenuItemProps } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -22,37 +23,40 @@ export default function CustomizedSlotsExample() {
         <Stack spacing={2}>
           <form.Field name="environmentId">
             {field => (
-              <field.SelectField
-                label="Environment"
-                options={environments}
-                getOptionValue={environment => environment.id}
-                renderOption={environment => (
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Avatar sx={{ bgcolor: environment.color, height: 18, width: 18 }} />
-                    <span>{environment.label}</span>
-                  </Stack>
-                )}
-                slots={{ option: DenseOption }}
-                slotProps={{
-                  root: ownerState => ({
-                    "data-dirty": ownerState.dirty,
-                    sx: {
-                      position: "relative",
-                      "&::before": {
-                        borderInlineStart: "3px solid",
-                        borderColor: ownerState.dirty ? "warning.main" : "primary.main",
-                        borderRadius: 1,
-                        content: '""',
-                        insetBlock: 4,
-                        insetInlineStart: -10,
-                        position: "absolute",
+              <VireoLabelBox label="Environment">
+                <field.SelectField
+                  label={null}
+                  options={environments}
+                  getOptionValue={environment => environment.id}
+                  renderOption={environment => (
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Avatar sx={{ bgcolor: environment.color, height: 18, width: 18 }} />
+                      <span>{environment.label}</span>
+                    </Stack>
+                  )}
+                  slots={{ option: DenseOption }}
+                  slotProps={{
+                    root: ownerState => ({
+                      "data-dirty": ownerState.dirty,
+                      sx: {
+                        position: "relative",
+                        "&::before": {
+                          borderInlineStart: "3px solid",
+                          borderColor: ownerState.dirty ? "warning.main" : "primary.main",
+                          borderRadius: 1,
+                          content: '""',
+                          insetBlock: 4,
+                          insetInlineStart: -10,
+                          position: "absolute",
+                        },
                       },
-                    },
-                  }),
-                  clearButton: { color: "warning", size: "small" },
-                  option: { divider: true },
-                }}
-              />
+                    }),
+                    clearButton: { color: "warning", size: "small" },
+                    option: { divider: true },
+                    select: { SelectDisplayProps: { "aria-label": "Environment" } },
+                  }}
+                />
+              </VireoLabelBox>
             )}
           </form.Field>
           <form.ResetButton variant="outlined">Reset selection</form.ResetButton>

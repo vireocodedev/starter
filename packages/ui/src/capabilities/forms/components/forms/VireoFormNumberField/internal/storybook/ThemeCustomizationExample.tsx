@@ -1,4 +1,5 @@
 import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
@@ -8,8 +9,7 @@ function createCustomizedTheme(outerTheme: Theme): Theme {
       VireoFormNumberField: {
         defaultProps: { size: "small" },
         styleOverrides: {
-          inputLabel: { color: "#c4b5fd" },
-          htmlInput: { fontVariantNumeric: "tabular-nums" },
+          htmlInput: { color: "#c4b5fd", fontVariantNumeric: "tabular-nums" },
           dirty: {
             position: "relative",
             "&::before": {
@@ -40,7 +40,14 @@ export default function ThemeCustomizationExample() {
         <form.Form sx={{ maxWidth: 480 }}>
           <Stack spacing={2}>
             <form.Field name="target">
-              {field => <field.NumberField helperText="Theme-owned compact numeric field." label="Target score" />}
+              {field => (
+                <VireoLabelBox label="Target score">
+                  <field.NumberField
+                    helperText="Theme-owned compact numeric field."
+                    slotProps={{ htmlInput: { "aria-label": "Target score" } }}
+                  />
+                </VireoLabelBox>
+              )}
             </form.Field>
             <form.SubmitButton variant="contained">Save target</form.SubmitButton>
           </Stack>

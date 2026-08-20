@@ -1,5 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -32,9 +33,19 @@ export default function ZodFormValidationExample() {
     <VireoStorybookProvider>
       <form.Form sx={{ maxWidth: 480 }}>
         <Stack spacing={2}>
-          <form.Field name="productName">{field => <field.TextField label="Product name" />}</form.Field>
+          <form.Field name="productName">
+            {field => (
+              <VireoLabelBox label="Product name">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Product name" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
           <form.Field name="units">
-            {field => <field.NumberField label="Available units" max={500} min={1} />}
+            {field => (
+              <VireoLabelBox label="Available units">
+                <field.NumberField max={500} min={1} slotProps={{ htmlInput: { "aria-label": "Available units" } }} />
+              </VireoLabelBox>
+            )}
           </form.Field>
           <form.SubmitButton variant="contained">Save inventory</form.SubmitButton>
           {savedInventory && (

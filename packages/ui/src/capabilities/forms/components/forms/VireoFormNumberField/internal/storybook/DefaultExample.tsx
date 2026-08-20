@@ -1,5 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -21,13 +22,15 @@ export default function DefaultExample() {
             validators={{ onDynamic: ({ value }) => (value === null ? "Enter an amount." : undefined) }}
           >
             {field => (
-              <field.NumberField
-                helperText="Decimal commas are normalized; values stay between 0 and 1,000."
-                label="Amount"
-                max={1000}
-                min={0}
-                placeholder="125.50"
-              />
+              <VireoLabelBox label="Amount">
+                <field.NumberField
+                  helperText="Decimal commas are normalized; values stay between 0 and 1,000."
+                  max={1000}
+                  min={0}
+                  placeholder="125.50"
+                  slotProps={{ htmlInput: { "aria-label": "Amount" } }}
+                />
+              </VireoLabelBox>
             )}
           </form.Field>
           <form.SubmitButton variant="contained">Save amount</form.SubmitButton>

@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import { revalidateLogic } from "@tanstack/react-form";
@@ -32,16 +33,25 @@ export default function ZodFormValidationExample() {
     <VireoStorybookProvider>
       <form.Form sx={{ maxWidth: 520 }}>
         <Stack spacing={2}>
-          <form.Field name="workspaceName">{field => <field.TextField label="Workspace name" />}</form.Field>
+          <form.Field name="workspaceName">
+            {field => (
+              <VireoLabelBox label="Workspace name">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Workspace name" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
           <form.Field name="region">
             {field => (
-              <field.SelectField
-                label="Data region"
-                placeholder="Choose a region"
-                options={regions}
-                getOptionValue={region => region.code}
-                renderOption={region => region.name}
-              />
+              <VireoLabelBox label="Data region">
+                <field.SelectField
+                  label={null}
+                  placeholder="Choose a region"
+                  options={regions}
+                  getOptionValue={region => region.code}
+                  renderOption={region => region.name}
+                  slotProps={{ select: { SelectDisplayProps: { "aria-label": "Data region" } } }}
+                />
+              </VireoLabelBox>
             )}
           </form.Field>
           <form.SubmitButton>Create workspace</form.SubmitButton>

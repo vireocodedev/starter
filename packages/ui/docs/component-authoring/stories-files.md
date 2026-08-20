@@ -274,6 +274,24 @@ Every form input exposed through a `useVireoForm` field façade, such as `field.
 
 Use realistic invalid and valid values, render the corresponding bound `field.*` component, and retain the form's actual validation timing. Together the stories must show both supported schema scopes and prove that form-level path-aware issues reach the matching fields without repeated schemas.
 
+### Bound form-field composition
+
+Every executable story for an input-like `field.*` component composes the input inside `VireoLabelBox`. Put the visible field label on `VireoLabelBox`, not on the underlying MUI input label. Suppress that internal label and retain an accessible name on the actual control through its supported slot props.
+
+```tsx
+<form.Field name="projectName">
+  {field => (
+    <VireoLabelBox label="Project name">
+      <field.TextField placeholder="Northstar" slotProps={{ htmlInput: { "aria-label": "Project name" } }} />
+    </VireoLabelBox>
+  )}
+</form.Field>
+```
+
+Mirror visible required state on `VireoLabelBox` when the field is required. Keep validation errors and field-specific helper text on the bound input unless a story is explicitly demonstrating `VireoLabelBox` helper anatomy.
+
+Exceptions must be explicit and narrowly justified by control anatomy. The current whitelist contains only `field.SwitchField`: its visible label is integral to MUI's switch/control-label composition, so its stories retain the field label and do not add `VireoLabelBox`. Add future exceptions to this list before using them.
+
 ### Common states
 
 Show meaningful normal variants and conditional anatomy, such as closable, selected, expanded, loading, empty, or disabled states. Do not create one story for every boolean combination.
@@ -360,6 +378,8 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - Theme-customization decorators extend the outer theme instead of replacing it with a standalone light theme.
 - Additional stories correspond to meaningful public states or customization contracts.
 - Every bound `field.*` input includes executable `ZodFieldValidation` and `ZodFormValidation` stories.
+- Every non-whitelisted input-like `field.*` story composes the control inside `VireoLabelBox`, puts its visible label there, suppresses the MUI input label, and preserves an accessible control name.
+- The bound-field story whitelist is explicit; currently only `field.SwitchField` is exempt from `VireoLabelBox` composition.
 - Interactive stories use accessible canvas queries.
 - Slot and theme stories use only supported public customization APIs.
 - Stories are ordered from fundamental usage toward advanced customization.

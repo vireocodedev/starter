@@ -1,4 +1,5 @@
 import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
@@ -8,7 +9,7 @@ function createCustomizedTheme(outerTheme: Theme): Theme {
       VireoFormTextField: {
         defaultProps: { size: "small" },
         styleOverrides: {
-          inputLabel: { color: "#c4b5fd" },
+          htmlInput: { color: "#c4b5fd" },
           dirty: {
             position: "relative",
             "&::before": {
@@ -43,7 +44,15 @@ export default function ThemeCustomizationExample() {
               name="releaseName"
               validators={{ onChange: ({ value }) => (value.trim() ? undefined : "A release name is required.") }}
             >
-              {field => <field.TextField errorDisplay="always" label="Release name" placeholder="August launch" />}
+              {field => (
+                <VireoLabelBox label="Release name">
+                  <field.TextField
+                    errorDisplay="always"
+                    placeholder="August launch"
+                    slotProps={{ htmlInput: { "aria-label": "Release name" } }}
+                  />
+                </VireoLabelBox>
+              )}
             </form.Field>
             <form.SubmitButton variant="contained">Create release</form.SubmitButton>
           </Stack>

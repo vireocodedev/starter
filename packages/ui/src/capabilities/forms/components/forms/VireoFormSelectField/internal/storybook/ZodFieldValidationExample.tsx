@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import { revalidateLogic } from "@tanstack/react-form";
@@ -30,13 +31,16 @@ export default function ZodFieldValidationExample() {
         <Stack spacing={2}>
           <form.Field name="role" validators={{ onDynamic: roleSchema }}>
             {field => (
-              <field.SelectField
-                label="Access role"
-                placeholder="Choose a role"
-                options={roles}
-                getOptionValue={role => role.id}
-                renderOption={role => role.label}
-              />
+              <VireoLabelBox label="Access role">
+                <field.SelectField
+                  label={null}
+                  placeholder="Choose a role"
+                  options={roles}
+                  getOptionValue={role => role.id}
+                  renderOption={role => role.label}
+                  slotProps={{ select: { SelectDisplayProps: { "aria-label": "Access role" } } }}
+                />
+              </VireoLabelBox>
             )}
           </form.Field>
           <form.SubmitButton>Save access</form.SubmitButton>

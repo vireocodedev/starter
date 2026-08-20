@@ -1,5 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -20,7 +21,15 @@ export default function ZodFieldValidationExample() {
       <form.Form sx={{ maxWidth: 480 }}>
         <Stack spacing={2}>
           <form.Field name="email" validators={{ onDynamic: emailSchema }}>
-            {field => <field.TextField autoComplete="email" label="Email" placeholder="developer@example.com" />}
+            {field => (
+              <VireoLabelBox label="Email">
+                <field.TextField
+                  autoComplete="email"
+                  placeholder="developer@example.com"
+                  slotProps={{ htmlInput: { "aria-label": "Email" } }}
+                />
+              </VireoLabelBox>
+            )}
           </form.Field>
           <form.SubmitButton variant="contained">Save email</form.SubmitButton>
           {savedEmail && <Typography color="success.main">Saved {savedEmail}</Typography>}

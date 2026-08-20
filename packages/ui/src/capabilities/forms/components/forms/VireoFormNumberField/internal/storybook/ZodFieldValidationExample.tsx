@@ -1,5 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
@@ -26,7 +27,16 @@ export default function ZodFieldValidationExample() {
       <form.Form sx={{ maxWidth: 480 }}>
         <Stack spacing={2}>
           <form.Field name="quantity" validators={{ onDynamic: quantitySchema }}>
-            {field => <field.NumberField label="Quantity" max={100} min={1} placeholder="12" />}
+            {field => (
+              <VireoLabelBox label="Quantity">
+                <field.NumberField
+                  max={100}
+                  min={1}
+                  placeholder="12"
+                  slotProps={{ htmlInput: { "aria-label": "Quantity" } }}
+                />
+              </VireoLabelBox>
+            )}
           </form.Field>
           <form.SubmitButton variant="contained">Save quantity</form.SubmitButton>
           {savedQuantity !== undefined && <Typography color="success.main">Saved quantity: {savedQuantity}</Typography>}

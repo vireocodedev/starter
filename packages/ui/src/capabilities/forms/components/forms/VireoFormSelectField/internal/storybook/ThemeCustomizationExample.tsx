@@ -1,4 +1,5 @@
 import { Stack, ThemeProvider, createTheme, type Theme } from "@mui/material";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 
@@ -15,8 +16,7 @@ function createCustomizedTheme(outerTheme: Theme): Theme {
         defaultProps: { size: "small" },
         styleOverrides: {
           root: { maxWidth: 520 },
-          inputLabel: { color: "#c4b5fd" },
-          select: { backgroundColor: "rgba(139, 92, 246, 0.08)" },
+          select: { backgroundColor: "rgba(139, 92, 246, 0.08)", color: "#c4b5fd" },
           clearButton: { color: "#fbbf24" },
           option: { minHeight: 44 },
         },
@@ -35,12 +35,15 @@ export default function ThemeCustomizationExample() {
           <Stack spacing={2}>
             <form.Field name="priority">
               {field => (
-                <field.SelectField
-                  label="Priority"
-                  options={priorities}
-                  getOptionValue={priority => priority.id}
-                  renderOption={priority => priority.label}
-                />
+                <VireoLabelBox label="Priority">
+                  <field.SelectField
+                    label={null}
+                    options={priorities}
+                    getOptionValue={priority => priority.id}
+                    renderOption={priority => priority.label}
+                    slotProps={{ select: { SelectDisplayProps: { "aria-label": "Priority" } } }}
+                  />
+                </VireoLabelBox>
               )}
             </form.Field>
             <form.ResetButton>Reset priority</form.ResetButton>
