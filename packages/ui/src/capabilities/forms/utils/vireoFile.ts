@@ -1,4 +1,4 @@
-import type { VireoFormFileNameTruncation } from "@/capabilities/forms/components/forms/VireoFormFileField/VireoFormFileField.types";
+import type { VireoFormFileNameTruncation } from "@/capabilities/forms/types/vireoFile.types";
 
 export function formatVireoFileSize(bytes: number): string {
   if (bytes < 1000) return `${bytes} B`;

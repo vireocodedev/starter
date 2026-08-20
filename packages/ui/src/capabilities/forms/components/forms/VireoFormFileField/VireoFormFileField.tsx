@@ -1,12 +1,12 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
+import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import {
   acceptsVireoDragType,
   acceptsVireoFile,
   formatVireoFileSize,
   truncateVireoFileName,
-} from "@/capabilities/forms/components/forms/VireoFormFileField/internal/fileField.utils";
-import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
+} from "@/capabilities/forms/utils/vireoFile";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
 import CloseIcon from "@mui/icons-material/Close";
 import { unstable_composeClasses as composeClasses, type ButtonProps, type IconButtonProps } from "@mui/material";

@@ -3,6 +3,7 @@ import type { VireoFormProps } from "@/capabilities/forms/components/forms/Vireo
 import { VireoFormActions } from "@/capabilities/forms/components/forms/VireoFormActions/VireoFormActions";
 import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
 import { VireoFormFileField } from "@/capabilities/forms/components/forms/VireoFormFileField/VireoFormFileField";
+import { VireoFormFileListField } from "@/capabilities/forms/components/forms/VireoFormFileListField/VireoFormFileListField";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
 import { VireoFormRadioGroupField } from "@/capabilities/forms/components/forms/VireoFormRadioGroupField/VireoFormRadioGroupField";
 import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
@@ -31,6 +32,7 @@ const { useAppForm } = createFormHook({
   fieldComponents: {
     CheckboxField: VireoFormCheckboxField,
     FileField: VireoFormFileField,
+    FileListField: VireoFormFileListField,
     NumberField: VireoFormNumberField,
     RadioGroupField: VireoFormRadioGroupField,
     SelectField: VireoFormSelectField,
@@ -79,6 +81,7 @@ type BaseVireoFormApi<
   {
     CheckboxField: typeof VireoFormCheckboxField;
     FileField: typeof VireoFormFileField;
+    FileListField: typeof VireoFormFileListField;
     NumberField: typeof VireoFormNumberField;
     RadioGroupField: typeof VireoFormRadioGroupField;
     SelectField: typeof VireoFormSelectField;

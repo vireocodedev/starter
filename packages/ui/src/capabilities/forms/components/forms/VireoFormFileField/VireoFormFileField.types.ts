@@ -2,6 +2,7 @@ import type {
   VireoFormErrorDisplay,
   VireoFormErrorFormatter,
 } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
+import type { VireoFilePreviewRenderer, VireoFormFileNameTruncation } from "@/capabilities/forms/types/vireoFile.types";
 import type { VireoDataAttributeValue } from "@/core/public";
 import type { Box, BoxProps, Button, FormHelperText, IconButton, Typography } from "@mui/material";
 import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
@@ -10,11 +11,13 @@ import type React from "react";
 import { type VireoFormFileFieldClasses, type VireoFormFileFieldClassKey } from "./VireoFormFileField.classes";
 import type { VIREO_FORM_FILE_FIELD_NAME, VireoFormFileFieldSlotName } from "./VireoFormFileField.identity";
 
-export type VireoFormFileNameTruncation = "middle" | "end" | "none";
+export type {
+  VireoFilePreviewRenderer,
+  VireoFilePreviewRendererProps,
+  VireoFormFileNameTruncation,
+} from "@/capabilities/forms/types/vireoFile.types";
 export type VireoFileRejectionReason = "type" | "size";
 export type VireoFileRejection = { file: File; reason: VireoFileRejectionReason };
-export type VireoFilePreviewRendererProps = { file: File };
-export type VireoFilePreviewRenderer = React.ElementType<VireoFilePreviewRendererProps>;
 
 export type VireoFormFileFieldOwnerState = {
   disabled: boolean;
