@@ -688,16 +688,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "forms/ResponsiveFormOverlay.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "forms/useDeferredSuccessNotification.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "history/components/HistoryEntryCard.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
