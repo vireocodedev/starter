@@ -7,6 +7,7 @@ import { VireoFormFreeSoloAutocompleteField } from "@/capabilities/forms/compone
 import { VireoFormFreeSoloAutocompleteMultipleField } from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/VireoFormFreeSoloAutocompleteMultipleField";
 import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
 import { VireoFormCounterField } from "@/capabilities/forms/components/forms/VireoFormCounterField/VireoFormCounterField";
+import { VireoFormErrorSummary } from "@/capabilities/forms/components/forms/VireoFormErrorSummary/VireoFormErrorSummary";
 import { VireoFormFileField } from "@/capabilities/forms/components/forms/VireoFormFileField/VireoFormFileField";
 import { VireoFormFileListField } from "@/capabilities/forms/components/forms/VireoFormFileListField/VireoFormFileListField";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
@@ -56,6 +57,7 @@ const { useAppForm } = createFormHook({
   fieldContext: vireoFieldContext,
   formComponents: {
     Actions: VireoFormActions,
+    ErrorSummary: VireoFormErrorSummary,
     ResetButton: VireoFormResetButton,
     Section: VireoFormSection,
     SectionItem: VireoFormSectionItem,
@@ -120,6 +122,7 @@ type BaseVireoFormApi<
   },
   {
     Actions: typeof VireoFormActions;
+    ErrorSummary: typeof VireoFormErrorSummary;
     ResetButton: typeof VireoFormResetButton;
     Section: typeof VireoFormSection;
     SectionItem: typeof VireoFormSectionItem;

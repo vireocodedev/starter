@@ -35,6 +35,7 @@ export class VireoMultiStepStore {
   private completed = new Set<string>();
   private errored = new Set<string>();
   private registeredSteps = new Map<string, HTMLElement>();
+  private errorSummaryElement?: HTMLElement;
   private currentStepId: string;
   private initialStepId: string;
   private transitioning = false;
@@ -134,6 +135,13 @@ export class VireoMultiStepStore {
     };
   }
 
+  registerErrorSummary(element: HTMLElement | null): () => void {
+    this.errorSummaryElement = element ?? undefined;
+    return () => {
+      if (this.errorSummaryElement === element) this.errorSummaryElement = undefined;
+    };
+  }
+
   focusStep(id: string, retry = true): void {
     const step = this.registeredSteps.get(id);
     if (!step) {
@@ -195,11 +203,17 @@ export class VireoMultiStepStore {
 
   async handleInvalidSubmit(): Promise<void> {
     const firstErrorPath = this.collectErrorPaths()[0];
-    if (!firstErrorPath) return;
+    if (!firstErrorPath) {
+      this.focusErrorSummary();
+      return;
+    }
     const owner = this.getActiveDescriptors().find(step =>
       (step.fields ?? []).some(field => ownsPath(field, firstErrorPath)),
     );
-    if (!owner) return;
+    if (!owner) {
+      this.focusErrorSummary();
+      return;
+    }
     const previous = this.currentStepId;
     if (owner.id !== previous) {
       this.setCurrent(owner.id);
@@ -211,6 +225,13 @@ export class VireoMultiStepStore {
         '[aria-invalid="true"] [data-vireo-field-focus-target="true"], [aria-invalid="true"]:not([disabled]), [aria-invalid="true"] input:not([disabled])',
       );
       (target ?? root)?.focus();
+    });
+  }
+
+  private focusErrorSummary(): void {
+    window.requestAnimationFrame(() => {
+      this.errorSummaryElement?.focus();
+      this.errorSummaryElement?.scrollIntoView?.({ block: "nearest" });
     });
   }
 

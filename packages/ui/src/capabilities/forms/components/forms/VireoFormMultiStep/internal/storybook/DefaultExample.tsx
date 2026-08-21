@@ -14,6 +14,8 @@ export default function DefaultExample() {
   return (
     <form.Form>
       <form.MultiStep aria-label="Account setup">
+        <form.StepProgress />
+        <form.ErrorSummary scope="all" />
         <form.Step id="profile">
           <form.Section label="Profile">
             <form.Field name="name">

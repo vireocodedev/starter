@@ -45,7 +45,12 @@ function focusFirstInvalidField(root: HTMLFormElement | null): void {
       '[aria-invalid="true"]:not([disabled]), [aria-invalid="true"] input:not([disabled]), [aria-invalid="true"] textarea:not([disabled]), [aria-invalid="true"] select:not([disabled]), [aria-invalid="true"] button:not([disabled])',
     );
 
-  if (!candidate) return;
+  if (!candidate) {
+    const summary = root?.querySelector<HTMLElement>('[data-vireo-error-summary="true"]');
+    summary?.focus();
+    summary?.scrollIntoView?.({ block: "nearest" });
+    return;
+  }
 
   candidate.focus();
   candidate.scrollIntoView?.({ block: "nearest" });
