@@ -15,7 +15,7 @@ import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { NAV_MIN_EXPANDED_WIDTH, NAV_WIDTH_CSS_VAR } from "@/shell/layout/layoutNav.constants";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
-import { APP_PAGE_CONTENT_MIN_WIDTH } from "@vireocodedev/starter-ui";
+import { VIREO_PAGE_LAYOUT_MIN_WIDTH } from "@vireocodedev/starter-ui";
 import React from "react";
 import { Outlet, useLocation } from "react-router";
 
@@ -43,7 +43,7 @@ export function AppShellLayout({ config, runtime }: AppShellLayoutProps) {
   const shellRootRef = React.useRef<HTMLDivElement | null>(null);
 
   const maxDesktopNavWidth = React.useMemo(() => {
-    return Math.max(NAV_MIN_EXPANDED_WIDTH, viewportWidth - APP_PAGE_CONTENT_MIN_WIDTH);
+    return Math.max(NAV_MIN_EXPANDED_WIDTH, viewportWidth - VIREO_PAGE_LAYOUT_MIN_WIDTH);
   }, [viewportWidth]);
 
   const { desktopCollapsed, desktopNavWidth, desktopResizing, onResizeDoubleClick, onResizeStart, onToggleCollapsed } =

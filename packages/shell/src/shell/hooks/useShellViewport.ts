@@ -1,10 +1,10 @@
 import { NAV_DEFAULT_EXPANDED_WIDTH } from "@/shell/layout/layoutNav.constants";
-import { APP_PAGE_CONTENT_MIN_WIDTH } from "@vireocodedev/starter-ui";
+import { VIREO_PAGE_LAYOUT_MIN_WIDTH } from "@vireocodedev/starter-ui";
 import React from "react";
 
 export function useShellViewportWidth(): number {
   const [viewportWidth, setViewportWidth] = React.useState(() =>
-    typeof window === "undefined" ? APP_PAGE_CONTENT_MIN_WIDTH + NAV_DEFAULT_EXPANDED_WIDTH : window.innerWidth,
+    typeof window === "undefined" ? VIREO_PAGE_LAYOUT_MIN_WIDTH + NAV_DEFAULT_EXPANDED_WIDTH : window.innerWidth,
   );
   const viewportResizeRafRef = React.useRef<number | null>(null);
 
