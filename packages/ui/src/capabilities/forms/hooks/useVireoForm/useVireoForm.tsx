@@ -3,6 +3,7 @@ import type { VireoFormProps } from "@/capabilities/forms/components/forms/Vireo
 import { VireoFormActions } from "@/capabilities/forms/components/forms/VireoFormActions/VireoFormActions";
 import { VireoFormAutocompleteField } from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField";
 import { VireoFormAutocompleteMultipleField } from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/VireoFormAutocompleteMultipleField";
+import { VireoFormFreeSoloAutocompleteField } from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/VireoFormFreeSoloAutocompleteField";
 import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
 import { VireoFormCounterField } from "@/capabilities/forms/components/forms/VireoFormCounterField/VireoFormCounterField";
 import { VireoFormFileField } from "@/capabilities/forms/components/forms/VireoFormFileField/VireoFormFileField";
@@ -36,6 +37,7 @@ const { useAppForm } = createFormHook({
   fieldComponents: {
     AutocompleteField: VireoFormAutocompleteField,
     AutocompleteMultipleField: VireoFormAutocompleteMultipleField,
+    FreeSoloAutocompleteField: VireoFormFreeSoloAutocompleteField,
     CheckboxField: VireoFormCheckboxField,
     CounterField: VireoFormCounterField,
     FileField: VireoFormFileField,
@@ -89,6 +91,7 @@ type BaseVireoFormApi<
   {
     AutocompleteField: typeof VireoFormAutocompleteField;
     AutocompleteMultipleField: typeof VireoFormAutocompleteMultipleField;
+    FreeSoloAutocompleteField: typeof VireoFormFreeSoloAutocompleteField;
     CheckboxField: typeof VireoFormCheckboxField;
     CounterField: typeof VireoFormCounterField;
     FileField: typeof VireoFormFileField;
