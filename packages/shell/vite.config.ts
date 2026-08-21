@@ -39,9 +39,36 @@ export default defineConfig(({ mode }) => ({
     },
     sourcemap: true,
   },
+  // Keep source aliases test-only so unit tests do not require prebuilt
+  // workspaces while production builds retain package-boundary resolution.
+  resolve:
+    mode === "test"
+      ? {
+          alias: [
+            {
+              find: /^@vireocodedev\/starter-history$/,
+              replacement: resolve(__dirname, "../history/src/index.ts"),
+            },
+            {
+              find: /^@vireocodedev\/starter-infrastructure$/,
+              replacement: resolve(__dirname, "../infrastructure/src/index.ts"),
+            },
+            {
+              find: /^@vireocodedev\/starter-localization$/,
+              replacement: resolve(__dirname, "../localization/src/index.ts"),
+            },
+            {
+              find: /^@vireocodedev\/starter-ui$/,
+              replacement: resolve(__dirname, "../ui/src/index.ts"),
+            },
+          ],
+        }
+      : undefined,
   test: {
     environment: "jsdom",
     include: ["tests/**/*.{test,spec}.{ts,tsx}"],
+    maxWorkers: 8,
+    pool: "threads",
     setupFiles: ["tests/setup.ts"],
   },
 }));
