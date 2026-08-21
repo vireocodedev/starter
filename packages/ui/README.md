@@ -23,7 +23,7 @@ npm install @vireocodedev/starter-ui
 Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,
 `@tanstack/react-query`, `@tanstack/react-virtual`, `axios`, `i18next`,
-`react-i18next`, `react-hook-form`, `zod`, `sonner`, `dayjs`. Depends on
+`react-i18next`, `zod`, `sonner`, `dayjs`. Depends on
 `@vireocodedev/starter-localization`, which owns the `platform` and `history`
 translation namespaces this package renders.
 

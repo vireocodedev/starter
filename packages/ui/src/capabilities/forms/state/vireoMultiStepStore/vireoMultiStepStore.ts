@@ -62,7 +62,7 @@ export class VireoMultiStepStore {
     const requestedInitial = active.find(step => step.id === initialStepId);
     if (initialStepId && !requestedInitial && process.env.NODE_ENV !== "production") {
       console.warn(
-        `Vireo multi-step form initialStepId \"${initialStepId}\" is unavailable; using the first active step.`,
+        `Vireo multi-step form initialStepId "${initialStepId}" is unavailable; using the first active step.`,
       );
     }
     this.currentStepId = requestedInitial?.id ?? active[0].id;
@@ -123,7 +123,7 @@ export class VireoMultiStepStore {
         this.registeredSteps.get(id) !== element &&
         process.env.NODE_ENV !== "production"
       ) {
-        console.warn(`Vireo multi-step form rendered more than one form.Step for \"${id}\".`);
+        console.warn(`Vireo multi-step form rendered more than one form.Step for "${id}".`);
       }
       this.registeredSteps.set(id, element);
       if (this.pendingFocusStepId === id) {
@@ -150,7 +150,7 @@ export class VireoMultiStepStore {
           if (this.pendingFocusStepId === id) this.focusStep(id, false);
         });
       } else if (this.pendingFocusStepId === id && process.env.NODE_ENV !== "production") {
-        console.warn(`Vireo multi-step form step \"${id}\" has no rendered form.Step content.`);
+        console.warn(`Vireo multi-step form step "${id}" has no rendered form.Step content.`);
       }
       return;
     }
@@ -465,7 +465,7 @@ export class VireoMultiStepStore {
     const ids = new Set<string>();
     const owners: { stepId: string; field: string }[] = [];
     for (const step of this.descriptors) {
-      if (ids.has(step.id)) throw new Error(`Vireo multi-step form step id \"${step.id}\" is duplicated.`);
+      if (ids.has(step.id)) throw new Error(`Vireo multi-step form step id "${step.id}" is duplicated.`);
       ids.add(step.id);
       for (const field of step.fields ?? []) {
         const conflict = owners.find(
@@ -473,7 +473,7 @@ export class VireoMultiStepStore {
         );
         if (conflict)
           throw new Error(
-            `Vireo multi-step field ownership overlaps between \"${conflict.stepId}\" and \"${step.id}\" at \"${field}\".`,
+            `Vireo multi-step field ownership overlaps between "${conflict.stepId}" and "${step.id}" at "${field}".`,
           );
         owners.push({ stepId: step.id, field });
       }

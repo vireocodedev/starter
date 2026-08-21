@@ -116,6 +116,41 @@ Below `30rem` of container width, actions stack vertically at full width. At `30
 
 The action component does not assign button types, inspect children, or add landmark roles. Bound submit and reset buttons continue to own their form-state behavior.
 
+## Multi-step forms
+
+Use `useVireoMultiStepForm` when one typed form, schema, and submission are presented across several steps. Step descriptors own stable IDs, labels, optional field ownership, and optional value-driven availability. Keep the descriptor order and field ownership stable for the lifetime of the mounted form.
+
+```tsx
+const form = useVireoMultiStepForm({
+  defaultValues: { name: "", email: "" },
+  steps: [
+    { id: "profile", label: "Profile", fields: ["name"] },
+    { id: "contact", label: "Contact", fields: ["email"] },
+  ],
+  onSubmit: ({ value }) => saveAccount(value),
+});
+
+return (
+  <form.Form>
+    <form.MultiStep>
+      <form.StepProgress />
+      <form.ErrorSummary scope="all" />
+      <form.Step id="profile">{/* profile sections */}</form.Step>
+      <form.Step id="contact">{/* contact sections */}</form.Step>
+      <form.Actions>
+        <form.PreviousStepButton />
+        <form.NextStepButton />
+        <form.SubmitButton>Save account</form.SubmitButton>
+      </form.Actions>
+    </form.MultiStep>
+  </form.Form>
+);
+```
+
+Forward navigation validates the fields owned by the current step. Backward navigation does not revalidate. `NextStepButton` and `PreviousStepButton` hide automatically at their unavailable boundaries; `SubmitButton` appears only on the final step. Set `visibility="always"` only when a stable action footprint is required, in which case the unavailable action remains disabled.
+
+Progress uses visited-step navigation by default and switches between horizontal and compact presentations according to its container width. Use `navigation="none"` for strictly linear workflows or `navigation="all"` only when direct forward navigation is intentional; intermediate incomplete steps are still validation-gated. `keepMounted` preserves inactive step subtrees while hiding them and should be reserved for integrations whose local UI state cannot be reconstructed from form values.
+
 ## Direct exports and customization
 
 `VireoFormSection`, `VireoFormSectionItem`, and `VireoFormActions` are also direct public exports for native-form compositions. Their bound `form.*` properties use those same implementations.

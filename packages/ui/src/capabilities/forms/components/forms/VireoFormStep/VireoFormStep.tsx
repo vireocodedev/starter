@@ -29,7 +29,7 @@ export const VireoFormStep = React.forwardRef<HTMLElement, VireoFormStepProps>(
     const state = React.useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
     const step = state.steps.find(item => item.id === id);
     if (!step && process.env.NODE_ENV !== "production") {
-      console.warn(`Vireo form.Step received unknown step id \"${id}\".`);
+      console.warn(`Vireo form.Step received unknown step id "${id}".`);
     }
 
     const ownerState: VireoFormStepOwnerState = {

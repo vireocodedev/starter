@@ -933,21 +933,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoMultiStepForm/stories/useRgoMultiStepForm.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoMultiStepForm/stories/UseRgoMultiStepFormWithDefaultsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoMultiStepForm/useRgoMultiStepForm.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoMutation/stories/useRgoMutation.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

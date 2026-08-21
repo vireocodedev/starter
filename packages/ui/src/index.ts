@@ -47,7 +47,6 @@ export * from "@/hooks/useRgoDownloadFn/useRgoDownloadFn";
 export * from "@/hooks/useRgoFadePresence/useRgoFadePresence";
 export * from "@/hooks/useRgoFullscreenListener/useRgoFullscreenListener";
 export * from "@/hooks/useRgoInfiniteCanvas/useRgoInfiniteCanvas";
-export * from "@/hooks/useRgoMultiStepForm/useRgoMultiStepForm";
 export * from "@/hooks/useRgoMutation/useRgoMutation";
 export * from "@/hooks/useRgoResizeListener/useRgoResizeListener";
 export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";

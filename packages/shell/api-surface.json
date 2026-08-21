@@ -159,7 +159,6 @@
       ],
       "dependencies": [
         "@hello-pangea/dnd",
-        "@hookform/resolvers/zod",
         "@mui/icons-material",
         "@mui/icons-material/ArrowBackRounded",
         "@mui/icons-material/ArrowDownward",
@@ -212,7 +211,6 @@
         "react",
         "react-dom",
         "react-error-boundary",
-        "react-hook-form",
         "react-i18next",
         "react-router",
         "react-use",
