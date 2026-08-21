@@ -1,6 +1,7 @@
 import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/VireoForm";
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
 import { VireoFormActions } from "@/capabilities/forms/components/forms/VireoFormActions/VireoFormActions";
+import { VireoFormAutocompleteField } from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField";
 import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
 import { VireoFormCounterField } from "@/capabilities/forms/components/forms/VireoFormCounterField/VireoFormCounterField";
 import { VireoFormFileField } from "@/capabilities/forms/components/forms/VireoFormFileField/VireoFormFileField";
@@ -32,6 +33,7 @@ import React from "react";
 
 const { useAppForm } = createFormHook({
   fieldComponents: {
+    AutocompleteField: VireoFormAutocompleteField,
     CheckboxField: VireoFormCheckboxField,
     CounterField: VireoFormCounterField,
     FileField: VireoFormFileField,
@@ -83,6 +85,7 @@ type BaseVireoFormApi<
   TOnServer,
   TSubmitMeta,
   {
+    AutocompleteField: typeof VireoFormAutocompleteField;
     CheckboxField: typeof VireoFormCheckboxField;
     CounterField: typeof VireoFormCounterField;
     FileField: typeof VireoFormFileField;
