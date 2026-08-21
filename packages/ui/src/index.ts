@@ -16,7 +16,6 @@ export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/components/RgoL
 export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/RgoQueryErrorBoundary";
 export * from "@/components/feedback/RgoQueryErrorLoaderSuspense/RgoQueryErrorLoaderSuspense";
 export * from "@/components/inputs/RgoIconButton/RgoIconButton";
-export * from "@/components/ManagementSearchToolbar";
 export * from "@/components/navigation/RgoTabs/RgoTabs";
 export * from "@/components/SlidingScreenStack";
 export * from "@/enums/RgoMonth";

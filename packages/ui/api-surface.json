@@ -50,8 +50,6 @@
         "InputAutocompleteMultiple",
         "InputAutocompleteMultipleProps",
         "InputAutocompleteProps",
-        "ManagementSearchToolbar",
-        "ManagementSearchToolbarProps",
         "MobilePageLoader",
         "OmitNever",
         "OverlayPayloadMap",

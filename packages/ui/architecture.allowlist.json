@@ -218,11 +218,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/ManagementSearchToolbar.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/navigation/RgoTabs/RgoTabs.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
