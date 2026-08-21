@@ -1,8 +1,10 @@
+import { VireoFormSection } from "@/capabilities/forms/public";
 import { RgoLabelBox } from "@/core/public";
-import { RgoForm } from "@/components/inputs/RgoForm/RgoForm";
-import { RgoFormSection } from "@/components/layout/RgoFormSection/RgoFormSection";
-import { type UseFormReturn } from "@/hooks/useRgoForm/useRgoForm";
-import { type StepConfigFn, useRgoMultiStepForm } from "@/hooks/useRgoMultiStepForm/useRgoMultiStepForm";
+import {
+  type StepComponentProps,
+  type StepConfigFn,
+  useRgoMultiStepForm,
+} from "@/hooks/useRgoMultiStepForm/useRgoMultiStepForm";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { type RgoTranslationFn } from "@/setup/config/RgoLocale";
 import { Box, Paper, TextField, Typography } from "@mui/material";
@@ -45,7 +47,7 @@ const registrationSchema = (_t: RgoTranslationFn) =>
   });
 
 // Step Components
-const PersonalInfoStep: React.FC<{ form: UseFormReturn<UserRegistrationData> }> = ({ form }) => (
+const PersonalInfoStep: React.FC<StepComponentProps<UserRegistrationData>> = ({ form }) => (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <Typography variant="h6" gutterBottom>
       Personal Information
@@ -102,7 +104,7 @@ const PersonalInfoStep: React.FC<{ form: UseFormReturn<UserRegistrationData> }> 
   </Box>
 );
 
-const AddressStep: React.FC<{ form: UseFormReturn<UserRegistrationData> }> = ({ form }) => (
+const AddressStep: React.FC<StepComponentProps<UserRegistrationData>> = ({ form }) => (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <Typography variant="h6" gutterBottom>
       Address Information
@@ -188,7 +190,7 @@ const AddressStep: React.FC<{ form: UseFormReturn<UserRegistrationData> }> = ({ 
   </Box>
 );
 
-const PreferencesStep: React.FC<{ form: UseFormReturn<UserRegistrationData> }> = ({ form }) => (
+const PreferencesStep: React.FC<StepComponentProps<UserRegistrationData>> = ({ form }) => (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <Typography variant="h6" gutterBottom>
       Preferences
@@ -299,8 +301,8 @@ export function UseMultiStepFormWithDefaultsDemo() {
         <StepperComponent />
       </Box>
 
-      <RgoForm form={form} onSubmit={onSubmit}>
-        <RgoFormSection label="Current step">
+      <Box component="form" noValidate onSubmit={form.handleSubmit(onSubmit)}>
+        <VireoFormSection label="Current step">
           <Box sx={{ minHeight: 400, display: "flex", flexDirection: "column" }}>
             <Box sx={{ flex: 1, mb: 3 }}>
               <CurrentStepComponent />
@@ -308,15 +310,14 @@ export function UseMultiStepFormWithDefaultsDemo() {
 
             <NavigationButtonsComponent />
           </Box>
-        </RgoFormSection>
-      </RgoForm>
+        </VireoFormSection>
+      </Box>
     </Paper>
   );
 }
 
 export const UseMultiStepFormWithDefaultsDemoCode = `
-import { useRgoMultiStepForm } from "@vireocodedev/starter-ui";
-import { RgoLabelBox, RgoForm } from "@vireocodedev/starter-ui";
+import { RgoLabelBox, VireoFormSection, useRgoMultiStepForm } from "@vireocodedev/starter-ui";
 import { Box, Paper, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
 import z from "zod";
@@ -402,10 +403,12 @@ export function MyMultiStepForm() {
     <Paper elevation={1} sx={{ p: 4, maxWidth: 600, mx: "auto" }}>
       <StepperComponent />
       
-      <RgoForm form={form} onSubmit={onSubmit} hideCancelButton hideSubmitButton>
-        <CurrentStepComponent />
-        <NavigationButtonsComponent />
-      </RgoForm>
+      <Box component="form" noValidate onSubmit={form.handleSubmit(onSubmit)}>
+        <VireoFormSection label="Current step">
+          <CurrentStepComponent />
+          <NavigationButtonsComponent />
+        </VireoFormSection>
+      </Box>
     </Paper>
   );
 }`;

@@ -423,27 +423,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/FormToggleButtonField.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoForm/RgoForm.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/inputs/RgoForm/RgoForm.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/inputs/RgoIconButton/RgoIconButton.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoFormSection/RgoFormSection.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -573,22 +553,12 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/MobileFormParts.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/navigation/RgoTabs/RgoTabs.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
       "rule": "legacy-source-location",
       "path": "components/ResponsiveCard.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/ResponsiveMonthYearPicker.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -718,27 +688,12 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "forms/FormShell.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "forms/GuardedForm.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "forms/ResponsiveFormOverlay.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
       "rule": "legacy-source-location",
       "path": "forms/useDeferredSuccessNotification.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "forms/useFormIdempotencyKey.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -893,11 +848,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoDependentFieldValidation/useRgoDependentFieldValidation.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoDownloadFn/stories/useRgoDownloadFn.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -934,11 +884,6 @@
     {
       "rule": "legacy-source-location",
       "path": "hooks/useRgoFadePresence/useRgoFadePresence.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoForm/useRgoForm.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -1073,16 +1018,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoTypedFieldArray/useRgoTypedFieldArray.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoTypedForm/useRgoTypedForm.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoUrlState/stories/RgoBrowserMock.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -1154,16 +1089,6 @@
     {
       "rule": "legacy-source-location",
       "path": "providers/AppThemeColorMetaProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/createRgoFormDialogProvider/createRgoFormDialogProvider.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/createRgoFormDialogProvider/createRgoFormDialogProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -1479,11 +1404,6 @@
     {
       "rule": "legacy-source-location",
       "path": "utils/downloadFile.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "utils/formutils.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

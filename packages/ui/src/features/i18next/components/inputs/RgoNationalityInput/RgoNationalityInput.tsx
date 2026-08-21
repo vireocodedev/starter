@@ -3,7 +3,6 @@ import { InputAutocomplete } from "@/inputs/InputAutocomplete";
 import { type RgoNationality } from "@/features/i18next/models/RgoNationality";
 import { type RgoLocale } from "@/setup/config/RgoLocale";
 import { RGO_COUNTRY_CODES, getCountryName } from "@/utils/countryutils";
-import { type RgoInputProps } from "@/utils/formutils";
 import { fixedForwardRef } from "@/utils/typeutils";
 import { InputAdornment, ListItemIcon, ListItemText, MenuItem, type TextFieldProps } from "@mui/material";
 import React from "react";
@@ -13,7 +12,15 @@ export type RgoNationalityInputSlotProps = {
   textField: TextFieldProps;
 };
 
-export type RgoNationalityInputProps = RgoInputProps<RgoNationality | null, RgoNationalityInputSlotProps> & {
+export type RgoNationalityInputProps = {
+  value: RgoNationality | null;
+  onChange: (value: RgoNationality | null) => void;
+  onBlur?: () => void;
+  name?: string;
+  disabled?: boolean;
+  error?: boolean;
+  helperText?: string;
+  rgoSlotProps?: Partial<RgoNationalityInputSlotProps>;
   locale: RgoLocale;
 };
 

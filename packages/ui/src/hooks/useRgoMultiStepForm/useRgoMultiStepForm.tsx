@@ -1,12 +1,19 @@
-import { useRgoForm, type UseFormReturn, type UseFormSchema } from "@/hooks/useRgoForm/useRgoForm";
 import { type RgoTranslationFn } from "@/setup/config/RgoLocale";
 import { type ReactStateSetter, type TODO } from "@/utils/typeutils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, CardActions, Step as MuiStep, StepButton, StepLabel, Stepper } from "@mui/material";
 import React, { useCallback, useState } from "react";
-import { type DefaultValues, type FieldValues, type Path } from "react-hook-form";
+import { useForm, type DefaultValues, type FieldValues, type Path, type UseFormReturn } from "react-hook-form";
+import { type z } from "zod";
+
+type LegacyMultiStepFormReturn<FormData extends FieldValues> = UseFormReturn<FormData> & {
+  submitDisabled: boolean;
+};
+
+type MultiStepFormSchema<FormData extends FieldValues, TTranslationFn> = (t: TTranslationFn) => z.ZodType<FormData>;
 
 export type StepComponentProps<FormData extends FieldValues> = {
-  form: UseFormReturn<FormData>;
+  form: LegacyMultiStepFormReturn<FormData>;
 };
 
 export type StepComponent<FormData extends FieldValues> = React.FC<StepComponentProps<FormData>>;
@@ -23,7 +30,7 @@ export type StepConfigFn<FormData extends FieldValues, TTranslationFn = RgoTrans
 
 export type UseMultiStepFormProps<FormData extends FieldValues, TTranslationFn = RgoTranslationFn> = {
   steps: StepConfigFn<FormData, TTranslationFn>;
-  schema: UseFormSchema<FormData, TTranslationFn>;
+  schema: MultiStepFormSchema<FormData, TTranslationFn>;
   initialValues: DefaultValues<FormData>;
   t: TTranslationFn;
 };
@@ -41,13 +48,14 @@ export function useRgoMultiStepForm<FormData extends FieldValues, TTranslationFn
   const [currentStepIndex, setCurrentStepIndexLocal] = useState<number>(0);
   const [touched, setTouched] = useState<boolean[]>(() => Array(steps.length).fill(false));
 
-  const form = useRgoForm<FormData, TTranslationFn>({
-    schema,
+  const resolver = React.useMemo(() => zodResolver(schema(t)), [schema, t]);
+  const rhfForm = useForm<FormData>({
+    resolver,
     defaultValues: initialValues,
-    t,
   });
-
-  const submitDisabled = form.submitDisabled;
+  const submitDisabled =
+    rhfForm.formState.isSubmitting || (rhfForm.formState.isSubmitted && !rhfForm.formState.isValid);
+  const form = Object.assign(rhfForm, { submitDisabled }) as LegacyMultiStepFormReturn<FormData>;
 
   const {
     trigger,

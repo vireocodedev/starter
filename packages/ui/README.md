@@ -34,12 +34,10 @@ compatibility contract.
 
 ## What's included
 
-- **Components** — `ResponsiveCard`, `AppCard*`, `SlidingScreenStack`,
-  `MobileFormParts`, `ResponsiveMonthYearPicker`, `FormToggleButtonField`,
-  `ManagementSearchToolbar`, `AppBottomDrawer`, `DelayedRender`, and
-  `InputAutocomplete`.
-- **Forms** — `FormShell`, `GuardedForm`, `ResponsiveFormOverlay`, form
-  idempotency keys, and deferred success notifications.
+- **Components** — Vireo form fields and layout primitives, responsive cards,
+  tables, overlays, navigation, feedback, and data-display components.
+- **Forms** — `useVireoForm`, its bound `form.*` and `field.*` APIs,
+  `ResponsiveFormOverlay`, and deferred success notifications.
 - **Tables** — the management/server table system: `ManagementServerTable`,
   `RgoServerTableMobile`, `MobileTable*`, `TableActionCell`, skeletons, plus the
   infinite-scroll/table utils and `useMobileTableExpansion`; also the

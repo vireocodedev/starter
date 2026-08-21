@@ -120,10 +120,10 @@ function MyForm() {
   return (
     <div>
       <StepperComponent />
-      <RgoForm form={form} onSubmit={handleSubmit}>
+      <Box component="form" noValidate onSubmit={form.handleSubmit(handleSubmit)}>
         <CurrentStepComponent />
         <NavigationButtonsComponent />
-      </RgoForm>
+      </Box>
     </div>
   );
 }
