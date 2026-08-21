@@ -2,6 +2,7 @@ import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/Vireo
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
 import { VireoFormActions } from "@/capabilities/forms/components/forms/VireoFormActions/VireoFormActions";
 import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
+import { VireoFormCounterField } from "@/capabilities/forms/components/forms/VireoFormCounterField/VireoFormCounterField";
 import { VireoFormFileField } from "@/capabilities/forms/components/forms/VireoFormFileField/VireoFormFileField";
 import { VireoFormFileListField } from "@/capabilities/forms/components/forms/VireoFormFileListField/VireoFormFileListField";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
@@ -32,6 +33,7 @@ import React from "react";
 const { useAppForm } = createFormHook({
   fieldComponents: {
     CheckboxField: VireoFormCheckboxField,
+    CounterField: VireoFormCounterField,
     FileField: VireoFormFileField,
     FileListField: VireoFormFileListField,
     NumberField: VireoFormNumberField,
@@ -82,6 +84,7 @@ type BaseVireoFormApi<
   TSubmitMeta,
   {
     CheckboxField: typeof VireoFormCheckboxField;
+    CounterField: typeof VireoFormCounterField;
     FileField: typeof VireoFormFileField;
     FileListField: typeof VireoFormFileListField;
     NumberField: typeof VireoFormNumberField;

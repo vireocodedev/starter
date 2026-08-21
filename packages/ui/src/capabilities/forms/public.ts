@@ -3,6 +3,8 @@ export * from "./components/forms/VireoFormSection";
 export * from "./components/forms/VireoFormSectionItem";
 export * from "./components/forms/VireoFormCheckboxField/VireoFormCheckboxField.classes";
 export type * from "./components/forms/VireoFormCheckboxField/VireoFormCheckboxField.types";
+export * from "./components/forms/VireoFormCounterField/VireoFormCounterField.classes";
+export type * from "./components/forms/VireoFormCounterField/VireoFormCounterField.types";
 export * from "./components/forms/VireoFormFileField/VireoFormFileField.classes";
 export type * from "./components/forms/VireoFormFileField/VireoFormFileField.types";
 export * from "./components/forms/VireoFormFileListField/VireoFormFileListField.classes";
