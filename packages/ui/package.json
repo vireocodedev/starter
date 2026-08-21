@@ -31,9 +31,9 @@
       "default": "./dist/api/index.js"
     },
     "./country": {
-      "types": "./dist/country/index.d.ts",
-      "import": "./dist/country/index.js",
-      "default": "./dist/country/index.js"
+      "types": "./dist/capabilities/country/public.d.ts",
+      "import": "./dist/capabilities/country/public.js",
+      "default": "./dist/capabilities/country/public.js"
     },
     "./forms": {
       "types": "./dist/capabilities/forms/public.d.ts",

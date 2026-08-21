@@ -36,6 +36,10 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
+            find: /^@vireocodedev\/starter-ui\/country$/,
+            replacement: resolve(__dirname, "../src/capabilities/country/public.ts"),
+          },
+          {
             find: /^@vireocodedev\/starter-ui\/forms$/,
             replacement: resolve(__dirname, "../src/capabilities/forms/public.ts"),
           },
