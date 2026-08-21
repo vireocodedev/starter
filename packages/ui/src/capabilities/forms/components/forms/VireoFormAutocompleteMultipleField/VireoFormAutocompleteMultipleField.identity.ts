@@ -1,0 +1,50 @@
+import type { VireoSlotNameTuple } from "@/core/public";
+export const VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_NAME = "VireoFormAutocompleteMultipleField";
+export const VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_SLOTS = [
+  "root",
+  "textField",
+  "inputLabel",
+  "input",
+  "htmlInput",
+  "loadingIndicator",
+  "clearButton",
+  "clearIcon",
+  "popupButton",
+  "popupIcon",
+  "formHelperText",
+  "popper",
+  "paper",
+  "loadingText",
+  "noOptionsText",
+  "listbox",
+  "option",
+  "group",
+  "groupLabel",
+  "groupList",
+  "selectedOptions",
+  "selectedOption",
+  "selectedOptionDeleteIcon",
+  "hiddenOptionsButton",
+  "optionCheckbox",
+] as const satisfies VireoSlotNameTuple;
+export const VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_STATES = [
+  "disabled",
+  "readOnly",
+  "required",
+  "error",
+  "focused",
+  "dirty",
+  "touched",
+  "submitting",
+  "validating",
+  "open",
+  "loading",
+  "hasValue",
+  "hasInputValue",
+  "hasUnresolvedValue",
+  "atSelectionLimit",
+  "hasHiddenOptions",
+] as const;
+export type VireoFormAutocompleteMultipleFieldSlotName = (typeof VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_SLOTS)[number];
+export type VireoFormAutocompleteMultipleFieldStateName =
+  (typeof VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_STATES)[number];

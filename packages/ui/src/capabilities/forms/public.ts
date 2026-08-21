@@ -1,6 +1,8 @@
 export * from "./components/forms/VireoFormActions";
 export * from "./components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField.classes";
 export type * from "./components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField.types";
+export * from "./components/forms/VireoFormAutocompleteMultipleField/VireoFormAutocompleteMultipleField.classes";
+export type * from "./components/forms/VireoFormAutocompleteMultipleField/VireoFormAutocompleteMultipleField.types";
 export * from "./components/forms/VireoFormSection";
 export * from "./components/forms/VireoFormSectionItem";
 export * from "./components/forms/VireoFormCheckboxField/VireoFormCheckboxField.classes";
