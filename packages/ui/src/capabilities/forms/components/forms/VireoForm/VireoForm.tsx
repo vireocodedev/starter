@@ -10,6 +10,7 @@ import { type VireoFormClassKey, getVireoFormUtilityClass } from "./VireoForm.cl
 import { VIREO_FORM_NAME, type VireoFormSlotName } from "./VireoForm.identity";
 import { VireoFormRoot } from "./VireoForm.styled";
 import { type VireoFormOwnerState, type VireoFormProps } from "./VireoForm.types";
+import type { VireoMultiStepStore } from "@/capabilities/forms/state/vireoMultiStepStore/vireoMultiStepStore";
 
 type VireoFormRuntimeApi = AnyFormApi & {
   AppForm: React.ComponentType<React.PropsWithChildren>;
@@ -17,6 +18,7 @@ type VireoFormRuntimeApi = AnyFormApi & {
 
 type VireoFormRuntimeProps = VireoFormProps & {
   form: VireoFormRuntimeApi;
+  multiStepController?: VireoMultiStepStore;
 };
 
 function useUtilityClasses(ownerState: VireoFormOwnerState, classes?: VireoFormProps["classes"]) {
@@ -66,6 +68,7 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
       form,
       formatError,
       layoutWidth = "standard",
+      multiStepController,
       noValidate = true,
       onReset,
       onSubmit,
@@ -123,9 +126,18 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
       if (event.defaultPrevented) return;
 
       event.preventDefault();
+      if (multiStepController && !multiStepController.getSnapshot().isLastStep) {
+        void multiStepController.goToNextStep();
+        return;
+      }
       void form.handleSubmit().then(() => {
-        if (!focusInvalidFieldOnSubmit || form.state.isValid) return;
-        window.requestAnimationFrame(() => focusFirstInvalidField(rootElementRef.current));
+        if (form.state.isValid) return;
+        if (multiStepController) {
+          void multiStepController.handleInvalidSubmit();
+          return;
+        }
+        if (focusInvalidFieldOnSubmit)
+          window.requestAnimationFrame(() => focusFirstInvalidField(rootElementRef.current));
       });
     };
 

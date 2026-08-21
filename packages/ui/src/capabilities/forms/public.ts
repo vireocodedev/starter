@@ -1,4 +1,8 @@
 export * from "./components/forms/VireoFormActions";
+export * from "./components/forms/VireoFormMultiStep/VireoFormMultiStep.classes";
+export type * from "./components/forms/VireoFormMultiStep/VireoFormMultiStep.types";
+export * from "./components/forms/VireoFormStep/VireoFormStep.classes";
+export type * from "./components/forms/VireoFormStep/VireoFormStep.types";
 export * from "./components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField.classes";
 export type * from "./components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField.types";
 export * from "./components/forms/VireoFormAutocompleteMultipleField/VireoFormAutocompleteMultipleField.classes";
@@ -37,5 +41,8 @@ export * from "./components/forms/VireoFormTextField/VireoFormTextField.classes"
 export type * from "./components/forms/VireoFormTextField/VireoFormTextField.types";
 export * from "./components/forms/VireoFormToggleButtonGroupField/VireoFormToggleButtonGroupField.classes";
 export type * from "./components/forms/VireoFormToggleButtonGroupField/VireoFormToggleButtonGroupField.types";
-export * from "./hooks/useVireoForm/useVireoForm";
+export { useVireoForm } from "./hooks/useVireoForm/useVireoForm";
+export type { VireoFormApi } from "./hooks/useVireoForm/useVireoForm";
+export * from "./hooks/useVireoMultiStepForm/useVireoMultiStepForm";
+export type * from "./types/vireoMultiStep.types";
 export * from "./components/data-display/VireoFileImagePreview";

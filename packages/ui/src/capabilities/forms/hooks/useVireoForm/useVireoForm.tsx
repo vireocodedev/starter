@@ -25,7 +25,7 @@ import {
   vireoFieldContext,
   vireoTanStackFormContext,
 } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
-import type { AppFieldExtendedReactFormApi } from "@tanstack/react-form";
+import type { AnyFormApi, AppFieldExtendedReactFormApi } from "@tanstack/react-form";
 import {
   createFormHook,
   type FormAsyncValidateOrFn,
@@ -63,6 +63,16 @@ const { useAppForm } = createFormHook({
   },
   formContext: vireoTanStackFormContext,
 });
+
+type VireoFormRuntimeApi = AnyFormApi & { AppForm: React.ComponentType<React.PropsWithChildren> };
+const vireoFormRuntimeApis = new WeakMap<object, VireoFormRuntimeApi>();
+
+/** @internal Returns the TanStack runtime hidden by the consumer-facing Vireo façade. */
+export function getVireoFormRuntimeApi(form: object): VireoFormRuntimeApi {
+  const runtime = vireoFormRuntimeApis.get(form);
+  if (!runtime) throw new Error("The supplied form was not created by useVireoForm.");
+  return runtime;
+}
 
 type BaseVireoFormApi<
   TFormData,
@@ -244,6 +254,7 @@ export function useVireoForm<
       },
     });
 
+    vireoFormRuntimeApis.set(facade, appForm as unknown as VireoFormRuntimeApi);
     return facade as unknown as VireoFormApi<
       TFormData,
       TOnMount,
