@@ -428,46 +428,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasBody/RgoInfiniteCanvasBody.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasBody/RgoInfiniteCanvasBody.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasOverlay/RgoInfiniteCanvasOverlay.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/components/RgoInfiniteCanvasOverlay/RgoInfiniteCanvasOverlay.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/RgoInfiniteCanvas.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/RgoInfiniteCanvas.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/stories/RgoInfiniteCanvas.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoInfiniteCanvas/stories/RgoInfiniteCanvasWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/ManagementSearchToolbar.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -779,21 +739,6 @@
     {
       "rule": "legacy-source-location",
       "path": "hooks/useRgoIcons/useRgoIcons.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoInfiniteCanvas/stories/useRgoInfiniteCanvas.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoInfiniteCanvas/stories/UseRgoInfiniteCanvasWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoInfiniteCanvas/useRgoInfiniteCanvas.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
