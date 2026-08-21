@@ -15,6 +15,7 @@ import { VireoFormSwitchField } from "@/capabilities/forms/components/forms/Vire
 import { VireoFormSubmitButton } from "@/capabilities/forms/components/forms/VireoFormSubmitButton/VireoFormSubmitButton";
 import { VireoFormTemporalField } from "@/capabilities/forms/components/forms/VireoFormTemporalField/VireoFormTemporalField";
 import { VireoFormTextField } from "@/capabilities/forms/components/forms/VireoFormTextField/VireoFormTextField";
+import { VireoFormToggleButtonGroupField } from "@/capabilities/forms/components/forms/VireoFormToggleButtonGroupField/VireoFormToggleButtonGroupField";
 import {
   vireoFieldContext,
   vireoTanStackFormContext,
@@ -40,6 +41,7 @@ const { useAppForm } = createFormHook({
     SwitchField: VireoFormSwitchField,
     TemporalField: VireoFormTemporalField,
     TextField: VireoFormTextField,
+    ToggleButtonGroupField: VireoFormToggleButtonGroupField,
   },
   fieldContext: vireoFieldContext,
   formComponents: {
@@ -89,6 +91,7 @@ type BaseVireoFormApi<
     SwitchField: typeof VireoFormSwitchField;
     TemporalField: typeof VireoFormTemporalField;
     TextField: typeof VireoFormTextField;
+    ToggleButtonGroupField: typeof VireoFormToggleButtonGroupField;
   },
   {
     Actions: typeof VireoFormActions;
