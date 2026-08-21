@@ -468,97 +468,12 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/layout/RgoPage/RgoPage.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPage/RgoPage.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPage/stories/RgoPage.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPage/stories/RgoPageWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPage/stories/RgoPageWithFullLayoutDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageBody/RgoPageBody.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageBody/RgoPageBody.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageBody/stories/RgoPageBody.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageBody/stories/RgoPageBodyWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageBody/stories/RgoPageBodyWithMaxWidthDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageHeader/RgoPageHeader.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageHeader/RgoPageHeader.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageHeader/stories/RgoPageHeader.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageHeader/stories/RgoPageHeaderWithBackButtonDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageHeader/stories/RgoPageHeaderWithChildrenDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/layout/RgoPageHeader/stories/RgoPageHeaderWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/ManagementSearchToolbar.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
       "rule": "legacy-source-location",
       "path": "components/navigation/RgoTabs/RgoTabs.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/ResponsiveCard.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -724,11 +639,6 @@
     {
       "rule": "legacy-source-location",
       "path": "history/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useAppPageContentLayout.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -989,31 +899,6 @@
     {
       "rule": "legacy-source-location",
       "path": "inputs/InputAutocomplete.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "layout/appPageContent.constants.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "layout/AppPageContentLayout.utils.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "layout/AppPageContentLayoutContext.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "layout/PageBody.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "layout/useMeasuredPageContentMode.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

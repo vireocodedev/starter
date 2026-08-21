@@ -1,6 +1,6 @@
 import { RgoServerTable } from "@/components/data-display/RgoServerTable/RgoServerTable";
-import { ResponsiveCard } from "@/components/ResponsiveCard";
-import { useAppPageContentLayout } from "@/hooks/useAppPageContentLayout";
+import { VireoResponsiveCard } from "@/capabilities/page-layout/components/surfaces/VireoResponsiveCard/VireoResponsiveCard";
+import { useVireoPageLayout } from "@/capabilities/page-layout/hooks/useVireoPageLayout/useVireoPageLayout";
 import { RgoServerTableMobile } from "@/table/components/RgoServerTableMobile";
 import { type PageableParams, type PageableResponse } from "@/utils/apiutils";
 import { type ReactStateSetter } from "@/utils/typeutils";
@@ -52,12 +52,12 @@ export function ManagementServerTable<TElement>({
   titleEndAdornmentFn,
   rowsPerPageOptions = DEFAULT_ROWS_PER_PAGE_OPTIONS,
 }: ManagementServerTableProps<TElement>) {
-  const { isCompact } = useAppPageContentLayout();
+  const { isCompact } = useVireoPageLayout();
   const filtersNode = isCompact ? renderMobileFilters?.() : renderFilters();
   const mobileSearchNode = isCompact ? renderMobileSearch?.() : undefined;
 
   return (
-    <ResponsiveCard sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+    <VireoResponsiveCard sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!isCompact && (
         <CardHeader
           sx={{
@@ -104,6 +104,6 @@ export function ManagementServerTable<TElement>({
           titleEndAdornmentFn={titleEndAdornmentFn}
         />
       )}
-    </ResponsiveCard>
+    </VireoResponsiveCard>
   );
 }

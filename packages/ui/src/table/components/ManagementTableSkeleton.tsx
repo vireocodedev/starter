@@ -1,5 +1,5 @@
 import { VireoDelayedRender } from "@/core/public";
-import { useAppPageContentLayout } from "@/hooks/useAppPageContentLayout";
+import { useVireoPageLayout } from "@/capabilities/page-layout/hooks/useVireoPageLayout/useVireoPageLayout";
 import { Box, Card, CardHeader, Skeleton, Stack } from "@mui/material";
 
 const DESKTOP_ROWS = 16;
@@ -180,7 +180,7 @@ function MobileManagementTableSkeleton() {
 }
 
 export function ManagementTableSkeleton() {
-  const { isCompact } = useAppPageContentLayout();
+  const { isCompact } = useVireoPageLayout();
 
   if (isCompact) {
     return <MobileManagementTableSkeleton />;
