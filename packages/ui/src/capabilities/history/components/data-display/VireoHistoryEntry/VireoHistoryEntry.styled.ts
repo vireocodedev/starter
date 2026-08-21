@@ -125,6 +125,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     display: "flex",
     alignItems: "center",
     minHeight: 22,
+    paddingInlineStart: `calc(var(--VireoHistoryEntry-treeItemDepth, 0) * ${theme.spacing(2)})`,
   },
   "& .VireoHistoryEntry-statusBadge": {
     display: "inline-flex",
@@ -224,6 +225,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
   },
   "& .VireoHistoryEntry-fieldRow[data-expanded] .VireoHistoryEntry-arrow": { display: "none" },
   "& .VireoHistoryEntry-nestedGroup": {
+    position: "relative",
     minWidth: 0,
     borderTop: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
     backgroundColor: theme.palette.action.hover,
@@ -241,7 +243,47 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     color: theme.palette.text.secondary,
     fontSize: theme.typography.pxToRem(12.5),
   },
-  "& .VireoHistoryEntry-groupChildren": { minWidth: 0 },
+  "& .VireoHistoryEntry-groupChildren": {
+    position: "relative",
+    minWidth: 0,
+  },
+  "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-fieldRow, & .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-nestedGroup":
+    {
+      position: "relative",
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        zIndex: 1,
+        insetBlock: 0,
+        insetInlineStart: `calc(${theme.spacing(1.5)} + var(--VireoHistoryEntry-connectorDepth, 0) * ${theme.spacing(2)})`,
+        borderInlineStart: `1px solid ${alpha(theme.palette.text.secondary, 0.38)}`,
+        pointerEvents: "none",
+      },
+      "&:last-child::before": {
+        insetBlockEnd: "auto",
+      },
+      "&::after": {
+        content: '""',
+        position: "absolute",
+        zIndex: 1,
+        insetInlineStart: `calc(${theme.spacing(1.5)} + var(--VireoHistoryEntry-connectorDepth, 0) * ${theme.spacing(2)})`,
+        borderBlockStart: `1px solid ${alpha(theme.palette.text.secondary, 0.38)}`,
+        pointerEvents: "none",
+      },
+    },
+  "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-fieldRow": {
+    "&:last-child::before": { blockSize: 18 },
+    "&::after": { insetBlockStart: 18, inlineSize: 7 },
+  },
+  "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-nestedGroup": {
+    "&:last-child::before": { blockSize: 21 },
+    "&::after": { insetBlockStart: 21, inlineSize: 28 },
+  },
+  "& .VireoHistoryEntry-groupChildren .VireoHistoryEntry-statusBadge, & .VireoHistoryEntry-groupChildren .VireoHistoryEntry-summaryChevron":
+    {
+      position: "relative",
+      zIndex: 2,
+    },
 
   "@container (max-width: 679px)": {
     "& .VireoHistoryEntry-rootHeader": { display: "grid", minHeight: 56 },
@@ -257,11 +299,14 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
       gap: theme.spacing(0.5, 1),
       padding: theme.spacing(1.25, 1.5),
     },
-    "& .VireoHistoryEntry-statusCell": { gridColumn: 1 },
+    "& .VireoHistoryEntry-statusCell": {
+      gridColumn: 1,
+      paddingInlineStart: `calc(var(--VireoHistoryEntry-treeItemDepth, 0) * ${theme.spacing(1.5)})`,
+    },
     "& .VireoHistoryEntry-fieldLabel": {
       gridColumn: 2,
       alignSelf: "center",
-      paddingInlineStart: 0,
+      paddingInlineStart: `calc(var(--VireoHistoryEntry-treeItemDepth, 0) * ${theme.spacing(1.5)})`,
       color: theme.palette.text.primary,
       fontWeight: theme.typography.fontWeightMedium,
     },
@@ -269,7 +314,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
       gridColumn: "1 / -1",
       display: "grid",
       gap: theme.spacing(0.25),
-      paddingInlineStart: theme.spacing(5),
+      paddingInlineStart: `calc(${theme.spacing(5)} + var(--VireoHistoryEntry-treeItemDepth, 0) * ${theme.spacing(1.5)})`,
     },
     "& .VireoHistoryEntry-fieldRow[data-status] .VireoHistoryEntry-valueBlock[data-placement]": {
       gridColumn: "1 / -1",
@@ -292,15 +337,25 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
       gridColumn: "1 / -1",
       display: "grid",
       gridTemplateColumns: "1fr",
-      paddingInlineStart: theme.spacing(5),
+      paddingInlineStart: `calc(${theme.spacing(5)} + var(--VireoHistoryEntry-treeItemDepth, 0) * ${theme.spacing(1.5)})`,
     },
     "& .VireoHistoryEntry-groupSummary": {
       minHeight: 48,
       paddingInlineStart: `calc(${theme.spacing(1)} + min(var(--VireoHistoryEntry-depth, 0), 2) * ${theme.spacing(1.5)})`,
     },
-    "& .VireoHistoryEntry-groupChildren": {
-      marginInlineStart: theme.spacing(1.5),
-      borderInlineStart: `2px solid ${theme.palette.divider}`,
+    "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-fieldRow, & .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-nestedGroup":
+      {
+        "&::before, &::after": {
+          insetInlineStart: `calc(${theme.spacing(1.75)} + var(--VireoHistoryEntry-connectorDepth, 0) * ${theme.spacing(1.5)})`,
+        },
+      },
+    "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-fieldRow": {
+      "&:last-child::before": { blockSize: 24 },
+      "&::after": { insetBlockStart: 24, inlineSize: 9 },
+    },
+    "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-nestedGroup": {
+      "&:last-child::before": { blockSize: 24 },
+      "&::after": { insetBlockStart: 24, inlineSize: 18 },
     },
   },
 

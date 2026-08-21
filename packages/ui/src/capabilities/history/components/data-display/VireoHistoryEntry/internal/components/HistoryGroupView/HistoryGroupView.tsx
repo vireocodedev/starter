@@ -111,7 +111,16 @@ export function HistoryGroupView({
         ) : null}
       </div>
       <Collapse in={expanded} timeout={150} unmountOnExit>
-        <div className={isRoot ? "VireoHistoryEntry-expandedBody" : "VireoHistoryEntry-groupChildren"}>
+        <div
+          className={isRoot ? "VireoHistoryEntry-expandedBody" : "VireoHistoryEntry-groupChildren"}
+          style={
+            isRoot
+              ? undefined
+              : ({
+                  "--VireoHistoryEntry-connectorDepth": Math.min(Math.max(depth - 2, 0), 3),
+                } as React.CSSProperties)
+          }
+        >
           {isRoot ? (
             <div className="VireoHistoryEntry-columnHeadings" aria-hidden="true">
               <span>{disclosure.labels.field}</span>
