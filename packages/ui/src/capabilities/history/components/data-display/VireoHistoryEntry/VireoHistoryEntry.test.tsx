@@ -119,6 +119,26 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(screen.getByText("Samobor")).toBeInTheDocument();
   });
 
+  it("keeps nested change counts stable when unchanged fields are shown", () => {
+    render(
+      <VireoHistoryEntry
+        definition={nestedProfileHistoryDefinition}
+        previous={{ id: "profile-1", address: { city: "Zagreb", country: "Croatia" } }}
+        current={{ id: "profile-1", address: { city: "Samobor", country: "Croatia" } }}
+        defaultExpandedDepth={2}
+      />,
+    );
+
+    const addressSummary = screen.getByRole("button", { name: "Collapse section Address" });
+    expect(within(addressSummary).getByText("1 change")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Show unchanged" }));
+
+    expect(screen.getByText("Country")).toBeInTheDocument();
+    expect(within(addressSummary).getByText("1 change")).toBeInTheDocument();
+    expect(within(addressSummary).queryByText("2 changes")).not.toBeInTheDocument();
+  });
+
   it("preserves nested disclosure choices when the root closes and reopens", async () => {
     render(
       <VireoHistoryEntry

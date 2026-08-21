@@ -13,15 +13,10 @@ function isVisible(node: HistoryNode, showUnchanged: boolean): boolean {
   return showUnchanged || node.type !== "unchanged";
 }
 
-function countVisibleFields(nodes: readonly HistoryNode[], showUnchanged: boolean): number {
+function countChangedFields(nodes: readonly HistoryNode[]): number {
   return nodes.reduce(
     (count, node) =>
-      count +
-      (node.type === "group"
-        ? countVisibleFields(node.children, showUnchanged)
-        : isVisible(node, showUnchanged)
-          ? 1
-          : 0),
+      count + (node.type === "group" ? countChangedFields(node.children) : node.type === "unchanged" ? 0 : 1),
     0,
   );
 }
@@ -64,7 +59,7 @@ export function HistoryGroupView({
   const expanded = disclosure.isExpanded(group.path, depth);
   const visibleChildren = group.children.filter(child => isVisible(child, disclosure.showUnchanged));
   const status = getGroupStatus(group);
-  const count = countVisibleFields(group.children, disclosure.showUnchanged);
+  const count = countChangedFields(group.children);
 
   if (!isRoot && visibleChildren.length === 0) return null;
 
