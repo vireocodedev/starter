@@ -233,8 +233,9 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
   "& .VireoHistoryEntry-groupSummary": {
     width: "100%",
     minHeight: 42,
+    gap: theme.spacing(0.5),
     padding: theme.spacing(0.75, 1),
-    paddingInlineStart: `calc(-5px + min(var(--VireoHistoryEntry-depth, 0), 4) * 29px)`,
+    paddingInlineStart: `calc(-13px + min(var(--VireoHistoryEntry-depth, 0), 4) * 25px)`,
   },
   "& .VireoHistoryEntry-groupCount": {
     flex: "0 0 auto",
@@ -254,7 +255,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
         position: "absolute",
         zIndex: 1,
         insetBlock: 0,
-        insetInlineStart: `calc(34px + var(--VireoHistoryEntry-connectorDepth, 0) * 29px)`,
+        insetInlineStart: `calc(22px + var(--VireoHistoryEntry-connectorDepth, 0) * 25px)`,
         borderInlineStart: `1px solid ${alpha(theme.palette.text.secondary, 0.38)}`,
         pointerEvents: "none",
       },
@@ -265,26 +266,28 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
         content: '""',
         position: "absolute",
         zIndex: 1,
-        insetInlineStart: `calc(34px + var(--VireoHistoryEntry-connectorDepth, 0) * 29px)`,
+        insetInlineStart: `calc(22px + var(--VireoHistoryEntry-connectorDepth, 0) * 25px)`,
         borderBlockStart: `1px solid ${alpha(theme.palette.text.secondary, 0.38)}`,
         pointerEvents: "none",
       },
     },
   "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-fieldRow": {
     "&:first-of-type::before": { insetBlockStart: -12 },
-    "&:last-child::before": { blockSize: 30 },
-    "&::after": { insetBlockStart: 18, inlineSize: 14 },
+    "&:last-child::before": { blockSize: 18 },
+    "&:first-of-type:last-child::before": { blockSize: 30 },
+    "&::after": { insetBlockStart: 18, inlineSize: 10 },
     "& .VireoHistoryEntry-statusCell": {
-      paddingInlineStart: `calc(15px + var(--VireoHistoryEntry-depth, 0) * 29px)`,
+      paddingInlineStart: `calc(3px + var(--VireoHistoryEntry-depth, 0) * 25px)`,
     },
     "& .VireoHistoryEntry-fieldLabel": {
-      paddingInlineStart: `calc(13px + var(--VireoHistoryEntry-depth, 0) * 29px)`,
+      paddingInlineStart: `calc(1px + var(--VireoHistoryEntry-depth, 0) * 25px)`,
     },
   },
   "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-nestedGroup": {
     "&:first-of-type::before": { insetBlockStart: -12 },
-    "&:last-child::before": { blockSize: 33 },
-    "&::after": { insetBlockStart: 21, inlineSize: 14 },
+    "&:last-child::before": { blockSize: 21 },
+    "&:first-of-type:last-child::before": { blockSize: 33 },
+    "&::after": { insetBlockStart: 21, inlineSize: 10 },
   },
   "& .VireoHistoryEntry-groupChildren .VireoHistoryEntry-statusBadge, & .VireoHistoryEntry-groupChildren .VireoHistoryEntry-summaryChevron":
     {
@@ -348,35 +351,37 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     },
     "& .VireoHistoryEntry-groupSummary": {
       minHeight: 48,
-      paddingInlineStart: `calc(-9px + min(var(--VireoHistoryEntry-depth, 0), 4) * 29px)`,
+      paddingInlineStart: `calc(-13px + min(var(--VireoHistoryEntry-depth, 0), 4) * 25px)`,
     },
     "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-fieldRow, & .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-nestedGroup":
       {
         "&::before, &::after": {
-          insetInlineStart: `calc(30px + var(--VireoHistoryEntry-connectorDepth, 0) * 29px)`,
+          insetInlineStart: `calc(22px + var(--VireoHistoryEntry-connectorDepth, 0) * 25px)`,
         },
       },
     "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-fieldRow": {
       "&:first-of-type::before": { insetBlockStart: -14 },
-      "&:last-child::before": { blockSize: 38 },
-      "&::after": { insetBlockStart: 24, inlineSize: 14 },
+      "&:last-child::before": { blockSize: 24 },
+      "&:first-of-type:last-child::before": { blockSize: 38 },
+      "&::after": { insetBlockStart: 24, inlineSize: 10 },
       "& .VireoHistoryEntry-statusCell": {
-        paddingInlineStart: `calc(7px + var(--VireoHistoryEntry-depth, 0) * 29px)`,
+        paddingInlineStart: `calc(-1px + var(--VireoHistoryEntry-depth, 0) * 25px)`,
       },
       "& .VireoHistoryEntry-fieldLabel": {
-        paddingInlineStart: `calc(-3px + var(--VireoHistoryEntry-depth, 0) * 29px)`,
+        paddingInlineStart: `calc(-11px + var(--VireoHistoryEntry-depth, 0) * 25px)`,
       },
       "& .VireoHistoryEntry-valueBlock": {
-        paddingInlineStart: `calc(37px + var(--VireoHistoryEntry-depth, 0) * 29px)`,
+        paddingInlineStart: `calc(29px + var(--VireoHistoryEntry-depth, 0) * 25px)`,
       },
       "& .VireoHistoryEntry-valueToggle": {
-        marginInlineStart: `calc(29px + var(--VireoHistoryEntry-depth, 0) * 29px)`,
+        marginInlineStart: `calc(29px + var(--VireoHistoryEntry-depth, 0) * 25px)`,
       },
     },
     "& .VireoHistoryEntry-groupChildren > .VireoHistoryEntry-nestedGroup": {
       "&:first-of-type::before": { insetBlockStart: -14 },
-      "&:last-child::before": { blockSize: 38 },
-      "&::after": { insetBlockStart: 24, inlineSize: 14 },
+      "&:last-child::before": { blockSize: 24 },
+      "&:first-of-type:last-child::before": { blockSize: 38 },
+      "&::after": { insetBlockStart: 24, inlineSize: 10 },
     },
   },
 
