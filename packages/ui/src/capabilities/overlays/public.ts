@@ -20,6 +20,19 @@ export {
   type GuardedOverlayModeSwitch,
 } from "./page-overlays/hooks/useGuardedOverlayModeSwitch/useGuardedOverlayModeSwitch";
 export {
+  useDelayedOverlayMount,
+  type DelayedOverlayRenderProps,
+  type UseDelayedOverlayMountReturn,
+} from "./page-overlays/hooks/useDelayedOverlayMount/useDelayedOverlayMount";
+export {
+  usePageOverlayModes,
+  type OverlayPayloadMap,
+  type OverlayRendererProps,
+  type OverlayRenderers,
+  type OverlayState,
+  type UsePageOverlayModesReturn,
+} from "./page-overlays/hooks/usePageOverlayModes/usePageOverlayModes";
+export {
   PageOverlay,
   PageOverlayControllerProvider,
   PageOverlayOutlet,

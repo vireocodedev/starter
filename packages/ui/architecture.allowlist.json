@@ -23,46 +23,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoIcon/RgoIcon.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoSnack/RgoSnack.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTimeWithDateDisplay/RgoTimeWithDateDisplay.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTimeWithDateDisplay/stories/RgoTimeWithDateDisplay.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTimeWithDateDisplay/stories/RgoTimeWithDateDisplayWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTimeWithDateDisplayInline/RgoTimeWithDateDisplayInline.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTimeWithDateDisplayInline/stories/RgoTimeWithDateDisplayInline.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoTimeWithDateDisplayInline/stories/RgoTimeWithDateDisplayInlineWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -99,41 +59,6 @@
     {
       "rule": "legacy-source-location",
       "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithErrorHandlingDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/DelayedRender.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoLoader/RgoLoader.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoLoader/RgoLoader.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoLoader/stories/RgoLoader.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoLoader/stories/RgoLoaderWithContainerSizeDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoLoader/stories/RgoLoaderWithDefaultsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoLoader/stories/RgoLoaderWithLoaderSizeDemo.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -213,36 +138,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/inputs/RgoIconButton/RgoIconButton.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/navigation/RgoTabs/RgoTabs.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/SlidingScreenStack.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "enums/RgoMonth.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "events/RgoEventBus.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "events/useRgoEventListener.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "features/@hello-pangea/dnd/components/RgoDropZone/RgoDropZone.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -318,17 +213,7 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useDelayedOverlayMount.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useMediaQueryDevice.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/usePageOverlayModes.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -438,21 +323,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoIcons/stories/useRgoIcons.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoIcons/stories/UseRgoIconsWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoIcons/useRgoIcons.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoMutation/stories/useRgoMutation.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -554,21 +424,6 @@
     {
       "rule": "legacy-source-location",
       "path": "providers/AppThemeColorMetaProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoIconsProvider/RgoIconsProvider.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoIconsProvider/RgoIconsProvider.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoIconsProvider/RgoIconsProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

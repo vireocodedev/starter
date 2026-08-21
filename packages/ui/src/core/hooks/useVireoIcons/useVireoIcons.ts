@@ -7,6 +7,3 @@ export function useVireoIcons() {
   if (!context) throw new Error("useVireoIcons must be used within VireoIconRegistryProvider");
   return context;
 }
-
-/** @deprecated Use useVireoIcons. */
-export const useRgoIcons = useVireoIcons;

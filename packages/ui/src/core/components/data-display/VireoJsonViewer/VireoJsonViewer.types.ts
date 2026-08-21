@@ -70,14 +70,6 @@ export type VireoJsonViewerInheritedProps = Omit<BoxProps<"div">, "children" | "
 /** Props accepted by {@link VireoJsonViewer}. */
 export type VireoJsonViewerProps = VireoJsonViewerOwnProps & VireoJsonViewerInheritedProps;
 
-/** @deprecated Props accepted by RgoJsonViewer. Use VireoJsonViewerProps. */
-export type RgoJsonViewerProps = {
-  data: unknown;
-  maxHeight?: string;
-  copyTooltip?: string;
-  copiedTooltip?: string;
-};
-
 declare module "@mui/material/styles" {
   interface Components<Theme = unknown> {
     [VIREO_JSON_VIEWER_NAME]?: VireoThemeComponent<

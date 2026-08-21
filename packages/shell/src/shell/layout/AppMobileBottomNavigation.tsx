@@ -3,7 +3,7 @@ import { useAppNavLayout } from "@/shell/layout/AppNavLayoutContext";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
-import { RgoIcon } from "@vireocodedev/starter-ui";
+import { VireoIcon } from "@vireocodedev/starter-ui";
 import React from "react";
 import { flushSync } from "react-dom";
 import { useLocation, useNavigate } from "react-router";
@@ -213,14 +213,14 @@ function AppMobileBottomNavigationBar({
             key={item.value}
             value={item.value}
             label={item.label(t)}
-            icon={<RgoIcon icon={item.icon} width={18} height={18} />}
+            icon={<VireoIcon icon={item.icon} width={18} height={18} />}
             onPointerDown={() => setOptimisticNavValue(item.value)}
           />
         ))}
         <BottomNavigationAction
           value={moreItem.value}
           label={moreItem.label(t)}
-          icon={<RgoIcon icon={moreItem.icon} width={18} height={18} />}
+          icon={<VireoIcon icon={moreItem.icon} width={18} height={18} />}
         />
       </BottomNavigation>
     </Paper>

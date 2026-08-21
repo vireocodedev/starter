@@ -26,7 +26,7 @@ vi.mock("react-router", () => ({
 }));
 
 vi.mock("@vireocodedev/starter-ui", () => ({
-  RgoIcon: () => null,
+  VireoIcon: () => null,
 }));
 
 vi.mock("@/shell/layout/nav/AppNavHeader", () => ({ AppNavHeader: () => null }));

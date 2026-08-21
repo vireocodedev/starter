@@ -263,16 +263,16 @@ function MetricDisplay({ metricId }) {
 
 ### Form Fields with Labels
 
-Using RgoLabelBox for consistent form field styling:
+Using VireoLabelBox for consistent form field styling:
 
 ```tsx
-import { RgoLabelBox } from "@vireocodedev/starter-ui";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
 
 function FormField({ label, required, helperText, children }) {
   return (
-    <RgoLabelBox label={label} required={required} helperText={helperText}>
+    <VireoLabelBox label={label} required={required} helperText={helperText}>
       {children}
-    </RgoLabelBox>
+    </VireoLabelBox>
   );
 }
 

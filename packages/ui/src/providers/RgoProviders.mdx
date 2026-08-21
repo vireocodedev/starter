@@ -93,7 +93,7 @@ Providers that require props (like `theme` or `client`) must be wrapped in a clo
 import {
   RgoProviders,
   RgoThemeProvider,
-  RgoIconsProvider,
+  VireoIconRegistryProvider,
   RgoLocalizationProvider,
   VireoConfirmationProvider,
   AppSnackbarProvider,
@@ -104,7 +104,9 @@ import {
 // Pre-configure providers that need props
 const AppThemeProvider: RgoProvider = ({ children }) => <RgoThemeProvider theme={myTheme}>{children}</RgoThemeProvider>;
 
-const AppIconsProvider: RgoProvider = ({ children }) => <RgoIconsProvider icons={myIcons}>{children}</RgoIconsProvider>;
+const AppIconsProvider: RgoProvider = ({ children }) => (
+  <VireoIconRegistryProvider icons={myIcons}>{children}</VireoIconRegistryProvider>
+);
 
 const AppQueryProvider: RgoProvider = ({ children }) => (
   <RgoQueryClientProvider client={myQueryClient}>{children}</RgoQueryClientProvider>
@@ -191,7 +193,7 @@ Order matters because inner providers may depend on context from outer ones:
     <tr>
       <td>2</td>
       <td>
-        <code>RgoIconsProvider</code>
+        <code>VireoIconRegistryProvider</code>
       </td>
       <td>
         Icons use <code>createSvgIcon</code> (needs theme)

@@ -2,7 +2,7 @@ import { type NavEntry } from "@/shell/layout/nav/nav.types";
 import { compactNavEntries } from "@/shell/layout/nav/nav.utils";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@vireocodedev/starter-ui", () => ({ RgoIcon: () => null }));
+vi.mock("@vireocodedev/starter-ui", () => ({ VireoIcon: () => null }));
 
 /**
  * `compactNavEntries` is what stops a permission-filtered nav from rendering

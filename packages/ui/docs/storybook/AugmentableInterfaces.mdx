@@ -15,7 +15,7 @@ RGO Front UI exposes several empty interfaces that consumer apps can extend via 
 - [How it works](#how-it-works)
 - [Setup](#setup)
 - [Registry reference](#registry-reference)
-  - [RgoIconRegistry](#rgoiconregistry)
+  - [VireoIconRegistry](#rgoiconregistry)
   - [RgoEventSchema](#rgoeventschema)
   - [RgoDraggableIdRegistry](#rgodraggableidregistry)
   - [RgoDroppableIdRegistry](#rgodroppableidregistry)
@@ -54,7 +54,7 @@ declare module "@vireocodedev/starter-ui" {
 
 ## Registry reference
 
-### RgoIconRegistry
+### VireoIconRegistry
 
 <table>
   <thead>
@@ -69,7 +69,7 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Location</strong>
       </td>
       <td>
-        <code>RgoIconsProvider</code>
+        <code>VireoIconRegistryProvider</code>
       </td>
     </tr>
     <tr>
@@ -77,8 +77,8 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Purpose</strong>
       </td>
       <td>
-        Maps icon names to React component types. Every key becomes a valid <code>RgoIconName</code> usable with{" "}
-        <code>{'<RgoIcon icon="..." />'}</code> and the <code>useIcons</code> hook.
+        Maps icon names to React component types. Every key becomes a valid <code>VireoIconName</code> usable with{" "}
+        <code>{'<VireoIcon icon="..." />'}</code> and the <code>useIcons</code> hook.
       </td>
     </tr>
     <tr>
@@ -86,7 +86,7 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Consumed by</strong>
       </td>
       <td>
-        <code>RgoIcon</code>, <code>useIcons</code>, <code>RgoIconsProvider</code>
+        <code>VireoIcon</code>, <code>useIcons</code>, <code>VireoIconRegistryProvider</code>
       </td>
     </tr>
   </tbody>
@@ -97,7 +97,7 @@ import { MY_ICON_REGISTRY } from "@/setup/icons/icons.registry";
 import type React from "react";
 
 declare module "@vireocodedev/starter-ui" {
-  interface RgoIconRegistry extends Record<keyof typeof MY_ICON_REGISTRY, React.ComponentType> {}
+  interface VireoIconRegistry extends Record<keyof typeof MY_ICON_REGISTRY, React.ComponentType> {}
 }
 ```
 
@@ -238,7 +238,7 @@ import { type APP_ICON_REGISTRY } from "@/setup/icons/icons.registry";
 import type React from "react";
 
 declare module "@vireocodedev/starter-ui" {
-  interface RgoIconRegistry extends Record<keyof typeof APP_ICON_REGISTRY, React.ComponentType> {}
+  interface VireoIconRegistry extends Record<keyof typeof APP_ICON_REGISTRY, React.ComponentType> {}
 
   interface RgoEventSchema {
     "app:ready": undefined;

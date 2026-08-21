@@ -11,7 +11,7 @@ const defaultMobileBottomNavigation = {
 let mobileBottomNavigation: typeof defaultMobileBottomNavigation | undefined;
 
 vi.mock("@vireocodedev/starter-ui", () => ({
-  RgoIcon: () => null,
+  VireoIcon: () => null,
 }));
 
 vi.mock("@/shell/layout/AppNavLayoutContext", () => ({

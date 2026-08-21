@@ -26,13 +26,7 @@ export type VireoBuiltInIconName = keyof typeof BUILT_IN_ICON_REGISTRY;
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface VireoIconRegistry extends Record<VireoBuiltInIconName, React.ComponentType> {}
 
-/** @deprecated Augment VireoIconRegistry instead. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface RgoIconRegistry extends VireoIconRegistry {}
-
-export type VireoIconName = keyof RgoIconRegistry;
-/** @deprecated Use VireoIconName. */
-export type RgoIconName = VireoIconName;
+export type VireoIconName = keyof VireoIconRegistry;
 
 type IconsFromRegistry = {
   [TIconName in VireoIconName]: React.ComponentType;
@@ -63,12 +57,3 @@ export function VireoIconRegistryProvider({ children, icons = {} }: VireoIconReg
 
   return <VireoIconRegistryContext.Provider value={{ muiIconsMap }}>{children}</VireoIconRegistryContext.Provider>;
 }
-
-/** @deprecated Use VireoIconRegistryContextValue. */
-export type RgoIconsContext = VireoIconRegistryContextValue;
-/** @deprecated Use VireoIconRegistryContext. */
-export const RgoIconsContext = VireoIconRegistryContext;
-/** @deprecated Use VireoIconRegistryProviderProps. */
-export type RgoIconsProviderProps = VireoIconRegistryProviderProps;
-/** @deprecated Use VireoIconRegistryProvider. */
-export const RgoIconsProvider = VireoIconRegistryProvider;

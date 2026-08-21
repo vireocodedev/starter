@@ -46,16 +46,16 @@ a sharper question with a more uncomfortable answer.
 
 Present in `front-ui`, absent from every starter package:
 
-| Primitive                | front-ui files | starter | Status after 2.4                                                                     |
-| ------------------------ | -------------- | ------- | ------------------------------------------------------------------------------------ |
-| `tseep` (event bus)      | 6              | 0       | **Closed** — `RgoEventBus` / `useRgoEventListener` published from `starter-ui` (W4). |
-| `RgoWebWorkerService`    | 6              | 0       | Fix later — no starter consumer yet, so the API would be guessed.                    |
-| `RgoSnackbarProvider`    | 8              | 0       | Fix later — the starter deliberately chose `sonner`; this is a decision, not a loss. |
-| `RgoOfflineCacheService` | 4              | 0       | Accepted — superseded by `starter-sqlite`'s offline layer.                           |
+| Primitive                | front-ui files | starter | Status after 2.4                                                                             |
+| ------------------------ | -------------- | ------- | -------------------------------------------------------------------------------------------- |
+| `tseep` (event bus)      | 6              | 0       | Accepted — starter-ui deliberately removed the generic event bus during its Vireo migration. |
+| `RgoWebWorkerService`    | 6              | 0       | Fix later — no starter consumer yet, so the API would be guessed.                            |
+| `RgoSnackbarProvider`    | 8              | 0       | Fix later — the starter deliberately chose `sonner`; this is a decision, not a loss.         |
+| `RgoOfflineCacheService` | 4              | 0       | Accepted — superseded by `starter-sqlite`'s offline layer.                                   |
 
 Moving LMS onto the starter still costs work, but it is a **migration with two
-known gaps**, not a regression. The one primitive with no substitute at all — the
-event bus — now exists.
+known gaps**, not a regression. Event-driven application behavior must now be
+owned explicitly by the consuming capability rather than a generic starter-ui bus.
 
 This remains the most important finding in this document, and it was invisible
 from inside leather-production.

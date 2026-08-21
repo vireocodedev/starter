@@ -12,11 +12,7 @@ import {
   VireoJsonViewerRoot,
   VireoJsonViewerToolbar,
 } from "./VireoJsonViewer.styled";
-import {
-  type RgoJsonViewerProps,
-  type VireoJsonViewerOwnerState,
-  type VireoJsonViewerProps,
-} from "./VireoJsonViewer.types";
+import { type VireoJsonViewerOwnerState, type VireoJsonViewerProps } from "./VireoJsonViewer.types";
 
 const COPY_FEEDBACK_DURATION_MS = 1500;
 
@@ -196,12 +192,3 @@ export const VireoJsonViewer = React.forwardRef<HTMLDivElement, VireoJsonViewerP
 );
 
 VireoJsonViewer.displayName = VIREO_JSON_VIEWER_NAME;
-
-/** @deprecated Use {@link VireoJsonViewer}. */
-export function RgoJsonViewer({
-  copyTooltip = "Copy to clipboard",
-  copiedTooltip = "Copied!",
-  ...props
-}: RgoJsonViewerProps) {
-  return <VireoJsonViewer {...props} copyLabel={copyTooltip} copiedLabel={copiedTooltip} />;
-}

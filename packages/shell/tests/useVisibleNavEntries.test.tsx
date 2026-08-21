@@ -4,7 +4,7 @@ import { useVisibleNavEntries } from "@/shell/layout/nav/useVisibleNavEntries";
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@vireocodedev/starter-ui", () => ({ RgoIcon: () => null }));
+vi.mock("@vireocodedev/starter-ui", () => ({ VireoIcon: () => null }));
 
 /**
  * `useVisibleNavEntries` is the only thing standing between a permission the

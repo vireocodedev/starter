@@ -3,7 +3,7 @@ import { validateAppConfig } from "@/config/app.config.validation";
 import { definePages } from "@/sitemap/definePages";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@vireocodedev/starter-ui", () => ({ RgoIcon: () => null }));
+vi.mock("@vireocodedev/starter-ui", () => ({ VireoIcon: () => null }));
 
 /**
  * `validateAppConfig` is the boot-time gate that turns config mistakes into a

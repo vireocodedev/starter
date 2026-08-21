@@ -8,7 +8,7 @@ import { type Meta, type StoryObj } from "@storybook/react-vite";
 const DESCRIPTION = `
 ![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
 
-A wrapper component that provides a loading state while the children are being resolved. It uses React's \`Suspense\` to handle the loading state and can accept a custom fallback component or use the default \`RgoLoader\`.
+A wrapper component that provides a loading state while the children are being resolved. It uses React's \`Suspense\` to handle the loading state and accepts either a custom fallback component or its built-in centered progress indicator.
 
 ## Stories
 

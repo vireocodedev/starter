@@ -19,7 +19,7 @@ RGO Front UI uses a provider-based architecture to deliver optional functionalit
 - [RgoLocalizationProvider](#rgolocalizationprovider)
 - [VireoConfirmationProvider](#vireoconfirmationprovider)
 - [AppSnackbarProvider](#appsnackbarprovider)
-- [RgoIconsProvider](#rgoiconsprovider)
+- [VireoIconRegistryProvider](#rgoiconsprovider)
 - [RgoSseProvider](#rgosseprovider)
 - [RgoProviders Utility](#rgoproviders-utility)
 
@@ -93,14 +93,14 @@ RGO Front UI uses a provider-based architecture to deliver optional functionalit
     </tr>
     <tr>
       <td>
-        <code>RgoIconsProvider</code>
+        <code>VireoIconRegistryProvider</code>
       </td>
       <td>Icon registry</td>
       <td>
         <code>@mui/icons-material</code>
       </td>
       <td>
-        <code>useRgoIcons</code>
+        <code>useVireoIcons</code>
       </td>
     </tr>
     <tr>
@@ -123,7 +123,7 @@ import {
   RgoThemeProvider,
   RgoQueryClientProvider,
   RgoLocalizationProvider,
-  RgoIconsProvider,
+  VireoIconRegistryProvider,
   VireoConfirmationProvider,
   AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
@@ -133,13 +133,13 @@ function App() {
     <RgoThemeProvider theme={theme}>
       <RgoQueryClientProvider client={queryClient}>
         <RgoLocalizationProvider>
-          <RgoIconsProvider icons={icons}>
+          <VireoIconRegistryProvider icons={icons}>
             <VireoConfirmationProvider>
               <AppSnackbarProvider>
                 <YourApp />
               </AppSnackbarProvider>
             </VireoConfirmationProvider>
-          </RgoIconsProvider>
+          </VireoIconRegistryProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
     </RgoThemeProvider>
@@ -359,7 +359,7 @@ The provider takes no props — placement, duration and theme are derived from
 the viewport and theme. Import `toast` from `@vireocodedev/starter-ui` rather
 than from `sonner` directly so the library owns the toast implementation.
 
-## RgoIconsProvider
+## VireoIconRegistryProvider
 
 Provides a type-safe icon registry. Icons are registered by the consumer app through TypeScript interface augmentation.
 
@@ -370,7 +370,7 @@ Provides a type-safe icon registry. Icons are registered by the consumer app thr
 import type { SvgIconComponent } from "@mui/icons-material";
 
 declare module "@vireocodedev/starter-ui" {
-  interface RgoIconRegistry {
+  interface VireoIconRegistry {
     home: SvgIconComponent;
     settings: SvgIconComponent;
     delete: SvgIconComponent;
@@ -381,32 +381,32 @@ declare module "@vireocodedev/starter-ui" {
 ### Step 2: Provide the Icons
 
 ```tsx
-import { RgoIconsProvider } from "@vireocodedev/starter-ui";
+import { VireoIconRegistryProvider } from "@vireocodedev/starter-ui";
 import HomeIcon from "@mui/icons-material/Home";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 const icons = { home: HomeIcon, settings: SettingsIcon, delete: DeleteIcon };
 
-<RgoIconsProvider icons={icons}>
+<VireoIconRegistryProvider icons={icons}>
   <App />
-</RgoIconsProvider>;
+</VireoIconRegistryProvider>;
 ```
 
 ### Step 3: Use Icons
 
 ```tsx
-import { useRgoIcons, RgoIcon } from "@vireocodedev/starter-ui";
+import { useVireoIcons, VireoIcon } from "@vireocodedev/starter-ui";
 
 // Via hook
 function MyComponent() {
-  const { muiIconsMap } = useRgoIcons();
+  const { muiIconsMap } = useVireoIcons();
   const HomeIcon = muiIconsMap.home;
   return <HomeIcon />;
 }
 
 // Via component
-<RgoIcon name="home" fontSize="large" color="primary" />;
+<VireoIcon name="home" fontSize="large" color="primary" />;
 ```
 
 ## useRgoSseEmitter

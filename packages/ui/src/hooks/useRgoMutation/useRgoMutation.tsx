@@ -1,6 +1,5 @@
 import { VireoOverlayHeader } from "@/capabilities/overlays/public";
-import { RgoIcon } from "@/components/data-display/RgoIcon/RgoIcon";
-import { RgoSnack } from "@/components/data-display/RgoSnack/RgoSnack";
+import { VireoIcon, VireoSnack } from "@/core/public";
 import { VireoJsonViewer } from "@/core/public";
 import { useTranslationLocal } from "@/setup/config/hooks/useTranslationLocal";
 import { serializeError, type RgoMutationData, type RgoMutationVariables } from "@/utils/apiutils";
@@ -72,7 +71,7 @@ export function useRgoMutation<TData = unknown, TVariables = void, TError = Defa
         const message = typeof messageSuccess === "function" ? messageSuccess(data) : messageSuccess;
         if (message) {
           toast.custom(() => (
-            <RgoSnack variant="success" startAdornment={<RgoIcon icon="check-circle" />} message={message} />
+            <VireoSnack variant="success" startAdornment={<VireoIcon icon="check-circle" />} message={message} />
           ));
         }
       }
@@ -84,9 +83,9 @@ export function useRgoMutation<TData = unknown, TVariables = void, TError = Defa
         const message = typeof messageError === "function" ? messageError(error) : messageError;
         if (message) {
           toast.custom(() => (
-            <RgoSnack
+            <VireoSnack
               variant="error"
-              startAdornment={<RgoIcon icon="x-circle" />}
+              startAdornment={<VireoIcon icon="x-circle" />}
               message={message}
               endAdornment={<MutationErrorDetailsButton data={serializeError(error)} />}
             />

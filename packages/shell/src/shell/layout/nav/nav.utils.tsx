@@ -1,9 +1,9 @@
 import { type NavEntry, type NavIconName } from "@/shell/layout/nav/nav.types";
-import { RgoIcon } from "@vireocodedev/starter-ui";
+import { VireoIcon } from "@vireocodedev/starter-ui";
 import React from "react";
 
 export function navIcon(icon: NavIconName): React.ReactNode {
-  return <RgoIcon icon={icon} width={20} height={20} />;
+  return <VireoIcon icon={icon} width={20} height={20} />;
 }
 
 function isRenderableNavEntry(entry: NavEntry): boolean {

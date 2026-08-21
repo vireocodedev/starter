@@ -1,4 +1,7 @@
-import { useDelayedOverlayMount, type DelayedOverlayRenderProps } from "@/hooks/useDelayedOverlayMount";
+import {
+  useDelayedOverlayMount,
+  type DelayedOverlayRenderProps,
+} from "@/capabilities/overlays/page-overlays/hooks/useDelayedOverlayMount/useDelayedOverlayMount";
 import React from "react";
 
 export type OverlayPayloadMap = Record<string, unknown>;

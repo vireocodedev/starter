@@ -15,7 +15,7 @@ import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { getLayoutBorderColor } from "@/shell/layout/layout.tokens";
 import { Box, Button, Container, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { usePlatformTranslation } from "@vireocodedev/starter-localization";
-import { RgoIcon } from "@vireocodedev/starter-ui";
+import { VireoIcon } from "@vireocodedev/starter-ui";
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 
@@ -124,7 +124,7 @@ export function AppPublicShellLayout({ config, runtime }: AppPublicShellLayoutPr
                         size="small"
                         disabled={item.disabled}
                         color={selected ? "primary" : "inherit"}
-                        startIcon={<RgoIcon icon={item.icon} width={16} height={16} />}
+                        startIcon={<VireoIcon icon={item.icon} width={16} height={16} />}
                         onClick={() => {
                           if (!itemPath || item.disabled) {
                             return;

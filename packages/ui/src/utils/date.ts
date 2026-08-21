@@ -1,5 +1,19 @@
-import { RgoMonth } from "@/enums/RgoMonth";
 import dayjs from "dayjs";
+
+const MONTH_NAMES = [
+  "JANUARY",
+  "FEBRUARY",
+  "MARCH",
+  "APRIL",
+  "MAY",
+  "JUNE",
+  "JULY",
+  "AUGUST",
+  "SEPTEMBER",
+  "OCTOBER",
+  "NOVEMBER",
+  "DECEMBER",
+] as const;
 
 export const DateFormat = {
   API_DATE_TIME: "YYYY-MM-DDTHH:mm",
@@ -49,6 +63,6 @@ export function getElapsedMilliseconds(start: number): number {
  */
 export function formatMonth(month: string | null): string {
   if (month === null) return "-";
-  const index = RgoMonth.options.indexOf(month as (typeof RgoMonth.options)[number]);
+  const index = MONTH_NAMES.indexOf(month as (typeof MONTH_NAMES)[number]);
   return index === -1 ? month : dayjs().month(index).format("MMMM");
 }

@@ -2,7 +2,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RgoJsonViewer, VireoJsonViewer } from "./VireoJsonViewer";
+import { VireoJsonViewer } from "./VireoJsonViewer";
 import { vireoJsonViewerClasses } from "./VireoJsonViewer.classes";
 import { VIREO_JSON_VIEWER_NAME } from "./VireoJsonViewer.identity";
 
@@ -188,12 +188,5 @@ describe(VIREO_JSON_VIEWER_NAME, () => {
     expect(content.parentElement).toHaveClass("theme-default-class");
     expect(content.parentElement).toHaveStyle({ borderColor: "rgb(123, 45, 67)" });
     expect(content).toHaveStyle({ color: "rgb(76, 29, 149)", maxHeight: "180px" });
-  });
-
-  it("preserves the legacy RgoJsonViewer defaults through a compatibility adapter", () => {
-    render(<RgoJsonViewer data={{ legacy: true }} />);
-
-    expect(screen.getByRole("button", { name: "Copy to clipboard" })).toBeInTheDocument();
-    expect(screen.getByText(/"legacy": true/)).toHaveStyle({ maxHeight: "24rem" });
   });
 });

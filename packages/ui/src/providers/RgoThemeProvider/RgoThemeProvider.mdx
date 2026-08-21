@@ -131,12 +131,12 @@ Other MUI hooks that depend on this provider:
 `RgoThemeProvider` must be the **outermost** provider (or among the outermost) because:
 
 1. `VireoConfirmationProvider` renders MUI `Dialog`, `Button`, `DialogActions` — all need a theme.
-2. `RgoIconsProvider` uses `createSvgIcon` which inherits theme color tokens.
+2. `VireoIconRegistryProvider` uses `createSvgIcon` which inherits theme color tokens.
 3. `RgoLocalizationProvider` wraps MUI X `LocalizationProvider` — date pickers need theme styling.
 
 ```
 RgoThemeProvider        ← outermost
-  └─ RgoIconsProvider
+  └─ VireoIconRegistryProvider
        └─ RgoLocalizationProvider
             └─ VireoConfirmationProvider
                  └─ ...
