@@ -8,6 +8,7 @@ import { VIREO_HISTORY_ENTRY_NAME, type VireoHistoryEntrySlotName } from "./Vire
 import { VireoHistoryEntryRoot } from "./VireoHistoryEntry.styled";
 import { type VireoHistoryEntryOwnerState, type VireoHistoryEntryProps } from "./VireoHistoryEntry.types";
 import { HistoryNodeView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryNodeView/HistoryNodeView";
+import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
 import { createHistoryNodes, type AnyHistoryDefinition, type HistoryNode } from "@vireocodedev/starter-history";
 
 const DEFAULT_LABELS = {
@@ -17,11 +18,30 @@ const DEFAULT_LABELS = {
   hideUnchanged: "Hide unchanged",
   showMore: "Show more",
   showLess: "Show less",
+  added: "Added",
+  removed: "Removed",
+  updated: "Updated",
+  moved: "Moved",
+  unchanged: "Unchanged",
+  field: "Field",
+  previous: "Previous",
+  current: "Current",
+  value: "Value",
+  changes: (count: number) => `${count} ${count === 1 ? "change" : "changes"}`,
 } as const;
 
 function containsChangedHistoryNode(node: HistoryNode): boolean {
   if (node.type === "group") return node.children.some(containsChangedHistoryNode);
   return node.type !== "unchanged";
+}
+
+function containsUnchangedHistoryNode(node: HistoryNode): boolean {
+  if (node.type === "group") return node.children.some(containsUnchangedHistoryNode);
+  return node.type === "unchanged";
+}
+
+function getPathKey(path: readonly string[]): string {
+  return path.length === 0 ? "$root" : path.join(".");
 }
 
 function useUtilityClasses(_ownerState: VireoHistoryEntryOwnerState, classes?: VireoHistoryEntryProps["classes"]) {
@@ -50,7 +70,7 @@ function VireoHistoryEntryImpl<TDefinition extends AnyHistoryDefinition>(
     labels: labelsProp,
     previous,
     rootMeta,
-    showRootEntityLabel = false,
+    showRootEntityLabel = true,
     slotProps = {},
     slots = {},
     style,
@@ -65,10 +85,50 @@ function VireoHistoryEntryImpl<TDefinition extends AnyHistoryDefinition>(
   );
 
   const hasChanges = nodes.some(containsChangedHistoryNode);
+  const hasUnchanged = nodes.some(containsUnchangedHistoryNode);
+  const entryIdentity = React.useMemo(() => {
+    const snapshot = current ?? previous;
+    if (snapshot == null) return `${definition.options.label}:empty`;
+    return `${definition.options.label}:${String(definition.options.key(snapshot))}`;
+  }, [current, definition, previous]);
+  const [expandedByPath, setExpandedByPath] = React.useState<Record<string, boolean>>({});
+  const [showUnchanged, setShowUnchanged] = React.useState(defaultShowUnchanged);
+
+  React.useEffect(() => {
+    setExpandedByPath({});
+    setShowUnchanged(defaultShowUnchanged);
+  }, [defaultShowUnchanged, entryIdentity]);
+
+  const isExpanded = React.useCallback(
+    (path: readonly string[], depth: number) => expandedByPath[getPathKey(path)] ?? depth <= defaultExpandedDepth,
+    [defaultExpandedDepth, expandedByPath],
+  );
+  const onToggleExpanded = React.useCallback(
+    (path: readonly string[], depth: number) => {
+      const key = getPathKey(path);
+      setExpandedByPath(currentState => ({
+        ...currentState,
+        [key]: !(currentState[key] ?? depth <= defaultExpandedDepth),
+      }));
+    },
+    [defaultExpandedDepth],
+  );
+  const rootNode = nodes[0];
+  const expanded = rootNode?.type === "group" ? isExpanded(rootNode.path, 1) : true;
+  const disclosure: HistoryEntryDisclosure = {
+    defaultExpandedDepth,
+    isExpanded,
+    labels,
+    onToggleExpanded,
+    onToggleShowUnchanged: () => setShowUnchanged(currentValue => !currentValue),
+    showUnchanged,
+  };
 
   const ownerState: VireoHistoryEntryOwnerState = {
     defaultExpandedDepth,
     defaultShowUnchanged,
+    expanded,
+    hasUnchanged,
     hasRootMeta: rootMeta != null,
     showRootEntityLabel,
   };
@@ -100,12 +160,11 @@ function VireoHistoryEntryImpl<TDefinition extends AnyHistoryDefinition>(
       {nodes.map(node => (
         <HistoryNodeView
           key={node.path.join(".") || "$root"}
+          disclosure={disclosure}
+          hasUnchanged={hasUnchanged}
           node={node}
           rootMeta={rootMeta}
           showRootEntityLabel={showRootEntityLabel}
-          defaultExpandedDepth={defaultExpandedDepth}
-          defaultShowUnchanged={defaultShowUnchanged}
-          labels={labels}
         />
       ))}
     </VireoHistoryEntryRoot>

@@ -1,173 +1,128 @@
-import { HistoryHoverableTableRow } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryHoverableTableRow/HistoryHoverableTableRow";
+import {
+  HistoryStatusBadge,
+  type HistoryStatus,
+} from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryStatusBadge";
 import { HistoryValueContent } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryValueContent/HistoryValueContent";
 import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
-import { type HistoryFieldRow, type HistoryGroupChangeType } from "@vireocodedev/starter-history";
+import { Button } from "@mui/material";
+import type { HistoryFieldRow } from "@vireocodedev/starter-history";
+import React from "react";
 
-const CELL_PADDING = "2px 8px";
+function getHistoryStatus(row: HistoryFieldRow): HistoryStatus {
+  return row.type;
+}
 
-const COLOR_ERROR = "var(--mui-palette-error-main)";
-const COLOR_WARN = "var(--mui-palette-warning-main)";
-const COLOR_INFO = "var(--mui-palette-info-main)";
-const COLOR_SUCCESS = "var(--mui-palette-success-main)";
-
-const HISTORY_ROW_GRID_STYLE: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "30px minmax(110px, 28%) minmax(0, 1fr) 18px minmax(0, 1fr)",
-  alignItems: "start",
-  width: "100%",
-  minWidth: 0,
-};
-
-const HISTORY_DOT_CELL_STYLE: React.CSSProperties = {
-  padding: CELL_PADDING,
-  textAlign: "center",
-  whiteSpace: "nowrap",
-  verticalAlign: "top",
-};
-
-const HISTORY_LABEL_CELL_STYLE: React.CSSProperties = {
-  padding: CELL_PADDING,
-  minWidth: 0,
-  opacity: 0.8,
-};
-
-const HISTORY_VALUE_CELL_STYLE: React.CSSProperties = {
-  padding: CELL_PADDING,
-  minWidth: 0,
-  wordBreak: "break-word",
-};
-
-const HISTORY_CURRENT_VALUE_CELL_STYLE: React.CSSProperties = {
-  ...HISTORY_VALUE_CELL_STYLE,
-  textAlign: "right",
-};
-
-const HISTORY_FULL_VALUE_CELL_STYLE: React.CSSProperties = {
-  ...HISTORY_VALUE_CELL_STYLE,
-  gridColumn: "3 / 6",
-};
-
-const HISTORY_REMOVED_VALUE_CELL_STYLE: React.CSSProperties = {
-  ...HISTORY_FULL_VALUE_CELL_STYLE,
-  color: "var(--mui-palette-text-disabled)",
-};
-
-const HISTORY_REMOVED_GROUP_VALUE_CELL_STYLE: React.CSSProperties = {
-  ...HISTORY_FULL_VALUE_CELL_STYLE,
-  color: COLOR_ERROR,
-};
-
-const HISTORY_ARROW_CELL_STYLE: React.CSSProperties = {
-  padding: CELL_PADDING,
-  textAlign: "center",
-  alignSelf: "center",
-  opacity: 0.6,
-};
-
-const HISTORY_UNCHANGED_VALUE_CELL_STYLE: React.CSSProperties = {
-  ...HISTORY_FULL_VALUE_CELL_STYLE,
-  color: "var(--mui-palette-text-disabled)",
-};
+function HistoryValueBlock({
+  children,
+  empty = false,
+  expanded,
+  label,
+  onOverflowChange,
+  placement,
+  removed = false,
+}: {
+  children?: React.ReactNode;
+  empty?: boolean;
+  expanded: boolean;
+  label: string;
+  onOverflowChange: (overflowing: boolean) => void;
+  placement: "previous" | "current";
+  removed?: boolean;
+}): React.ReactElement {
+  return (
+    <div
+      className="VireoHistoryEntry-valueBlock"
+      data-empty={empty || undefined}
+      data-placement={placement}
+      data-removed={removed || undefined}
+    >
+      <span className="VireoHistoryEntry-mobileValueLabel">{label}</span>
+      {empty ? (
+        <span className="VireoHistoryEntry-emptyValue" aria-hidden="true">
+          —
+        </span>
+      ) : (
+        <HistoryValueContent expanded={expanded} onOverflowChange={onOverflowChange} removed={removed}>
+          {children}
+        </HistoryValueContent>
+      )}
+    </div>
+  );
+}
 
 export function HistoryFieldRowView({
-  row,
-  parentGroupChangeType,
+  depth,
   labels,
+  row,
 }: {
-  row: HistoryFieldRow;
-  parentGroupChangeType?: HistoryGroupChangeType;
+  depth: number;
   labels: VireoHistoryEntryLabels;
+  row: HistoryFieldRow;
 }): React.ReactElement {
-  const isRemovedBecauseParentGroupWasRemoved = parentGroupChangeType === "removed";
+  const [expanded, setExpanded] = React.useState(false);
+  const [previousOverflowing, setPreviousOverflowing] = React.useState(false);
+  const [currentOverflowing, setCurrentOverflowing] = React.useState(false);
+  const rowKey = `${row.path.join(".")}:${row.type}`;
 
-  if (row.type === "removed") {
-    const removedValueCellStyle = isRemovedBecauseParentGroupWasRemoved
-      ? HISTORY_REMOVED_GROUP_VALUE_CELL_STYLE
-      : HISTORY_REMOVED_VALUE_CELL_STYLE;
+  React.useEffect(() => {
+    setExpanded(false);
+    setPreviousOverflowing(false);
+    setCurrentOverflowing(false);
+  }, [rowKey]);
 
-    return (
-      <HistoryHoverableTableRow>
-        <div style={HISTORY_ROW_GRID_STYLE}>
-          <div style={{ ...HISTORY_DOT_CELL_STYLE, color: COLOR_ERROR }}>●</div>
-          <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
-
-          <div style={removedValueCellStyle}>
-            <HistoryValueContent
-              removed
-              removedColor={isRemovedBecauseParentGroupWasRemoved ? COLOR_ERROR : undefined}
-              showMoreLabel={labels.showMore}
-              showLessLabel={labels.showLess}
-            >
-              {row.previous}
-            </HistoryValueContent>
-          </div>
-        </div>
-      </HistoryHoverableTableRow>
-    );
-  }
-
-  if (row.type === "added") {
-    return (
-      <HistoryHoverableTableRow>
-        <div style={HISTORY_ROW_GRID_STYLE}>
-          <div style={{ ...HISTORY_DOT_CELL_STYLE, color: COLOR_SUCCESS }}>●</div>
-          <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
-
-          <div style={HISTORY_FULL_VALUE_CELL_STYLE}>
-            <HistoryValueContent showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
-              {row.current}
-            </HistoryValueContent>
-          </div>
-        </div>
-      </HistoryHoverableTableRow>
-    );
-  }
-
-  if (row.type === "unchanged") {
-    return (
-      <HistoryHoverableTableRow>
-        <div style={HISTORY_ROW_GRID_STYLE}>
-          <div style={{ ...HISTORY_DOT_CELL_STYLE, color: "var(--mui-palette-text-disabled)" }}>●</div>
-          <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
-
-          <div style={HISTORY_UNCHANGED_VALUE_CELL_STYLE}>
-            <HistoryValueContent showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
-              {row.current}
-            </HistoryValueContent>
-          </div>
-        </div>
-      </HistoryHoverableTableRow>
-    );
-  }
+  const status = getHistoryStatus(row);
+  const hasPrevious = row.type === "removed" || row.type === "updated" || row.type === "moved";
+  const hasCurrent = row.type !== "removed";
+  const currentLabel = row.type === "unchanged" ? labels.value : labels.current;
+  const expandable = previousOverflowing || currentOverflowing;
+  const depthStyle = { "--VireoHistoryEntry-depth": Math.min(depth, 4) } as React.CSSProperties;
 
   return (
-    <HistoryHoverableTableRow>
-      <div style={HISTORY_ROW_GRID_STYLE}>
-        <div
-          style={{
-            ...HISTORY_DOT_CELL_STYLE,
-            color: row.type === "moved" ? COLOR_INFO : COLOR_WARN,
-          }}
-        >
-          ●
-        </div>
-
-        <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
-
-        <div style={HISTORY_VALUE_CELL_STYLE}>
-          <HistoryValueContent showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
-            {row.previous}
-          </HistoryValueContent>
-        </div>
-
-        <div style={HISTORY_ARROW_CELL_STYLE}>→</div>
-
-        <div style={HISTORY_CURRENT_VALUE_CELL_STYLE}>
-          <HistoryValueContent alignRight showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
-            {row.current}
-          </HistoryValueContent>
-        </div>
+    <div
+      className="VireoHistoryEntry-fieldRow"
+      data-expanded={expanded || undefined}
+      data-status={status}
+      role="group"
+      aria-label={`${row.label}: ${labels[status]}`}
+      style={depthStyle}
+    >
+      <div className="VireoHistoryEntry-statusCell">
+        <HistoryStatusBadge status={status} labels={labels} />
       </div>
-    </HistoryHoverableTableRow>
+      <div className="VireoHistoryEntry-fieldLabel">{row.label}</div>
+      <HistoryValueBlock
+        empty={!hasPrevious}
+        expanded={expanded}
+        label={labels.previous}
+        onOverflowChange={setPreviousOverflowing}
+        placement="previous"
+        removed={row.type === "removed"}
+      >
+        {hasPrevious ? row.previous : null}
+      </HistoryValueBlock>
+      <span className="VireoHistoryEntry-arrow" aria-hidden="true">
+        →
+      </span>
+      <HistoryValueBlock
+        empty={!hasCurrent}
+        expanded={expanded}
+        label={currentLabel}
+        onOverflowChange={setCurrentOverflowing}
+        placement="current"
+      >
+        {hasCurrent ? row.current : null}
+      </HistoryValueBlock>
+      {expandable || expanded ? (
+        <Button
+          className="VireoHistoryEntry-valueToggle"
+          type="button"
+          size="small"
+          aria-expanded={expanded}
+          onClick={() => setExpanded(current => !current)}
+        >
+          {expanded ? labels.showLess : labels.showMore}
+        </Button>
+      ) : null}
+    </div>
   );
 }

@@ -6,6 +6,8 @@ import LongValuesExample from "@/capabilities/history/components/data-display/Vi
 import longValuesExampleSource from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/storybook/LongValuesExample.tsx?raw";
 import NestedExpansionExample from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/storybook/NestedExpansionExample";
 import nestedExpansionExampleSource from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/storybook/NestedExpansionExample.tsx?raw";
+import MobileLayoutExample from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/storybook/MobileLayoutExample";
+import mobileLayoutExampleSource from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/storybook/MobileLayoutExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoHistoryEntry } from "./VireoHistoryEntry";
 import type { VireoHistoryEntryProps } from "./VireoHistoryEntry.types";
@@ -34,7 +36,7 @@ const meta: Meta<typeof VireoHistoryEntry> = {
 
 ### Why it exists
 
-History screens otherwise repeat diff creation, nested-group disclosure, change-state styling, long-value expansion, and unchanged-field visibility. Vireo owns that presentation contract on top of the headless starter-history engine so consumers supply definitions and snapshots instead of rebuilding a history viewer; use a custom renderer when the product needs a fundamentally different audit-log visualization.`,
+History screens otherwise repeat diff creation, nested-group disclosure, change-state styling, long-value expansion, unchanged-field visibility, and responsive restructuring. Vireo owns that container-aware presentation contract on top of the headless starter-history engine so consumers supply definitions and snapshots instead of rebuilding a history viewer; use a custom renderer when the product needs a fundamentally different audit-log visualization.`,
       },
     },
   },
@@ -72,4 +74,9 @@ export const NestedExpansion: Story = {
 export const LongValues: Story = {
   render: () => <LongValuesExample />,
   parameters: createSourceParameters(longValuesExampleSource),
+};
+
+export const MobileLayout: Story = {
+  render: () => <MobileLayoutExample />,
+  parameters: createSourceParameters(mobileLayoutExampleSource),
 };

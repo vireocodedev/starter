@@ -1,46 +1,33 @@
 import { HistoryFieldRowView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryFieldRowView/HistoryFieldRowView";
 import { HistoryGroupView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryGroupView/HistoryGroupView";
-import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
-import { type HistoryNode } from "@vireocodedev/starter-history";
-
-const HISTORY_TABLE_STYLE: React.CSSProperties = {
-  width: "100%",
-  fontFamily: "monospace",
-  lineHeight: 1.125,
-};
+import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
+import type { HistoryNode } from "@vireocodedev/starter-history";
 
 export function HistoryNodeView({
+  disclosure,
+  hasUnchanged,
   node,
   rootMeta,
-  showRootEntityLabel = false,
-  defaultExpandedDepth = 3,
-  defaultShowUnchanged = false,
-  labels,
+  showRootEntityLabel,
 }: {
+  disclosure: HistoryEntryDisclosure;
+  hasUnchanged: boolean;
   node: HistoryNode;
   rootMeta?: React.ReactNode;
-  showRootEntityLabel?: boolean;
-  defaultExpandedDepth?: number;
-  defaultShowUnchanged?: boolean;
-  labels: VireoHistoryEntryLabels;
+  showRootEntityLabel: boolean;
 }): React.ReactElement {
   if (node.type === "group") {
     return (
       <HistoryGroupView
+        depth={1}
+        disclosure={disclosure}
         group={node}
+        hasUnchanged={hasUnchanged}
         rootMeta={rootMeta}
         showRootEntityLabel={showRootEntityLabel}
-        depth={1}
-        defaultExpandedDepth={defaultExpandedDepth}
-        defaultShowUnchanged={defaultShowUnchanged}
-        labels={labels}
       />
     );
   }
 
-  return (
-    <div style={HISTORY_TABLE_STYLE}>
-      <HistoryFieldRowView row={node} labels={labels} />
-    </div>
-  );
+  return <HistoryFieldRowView depth={0} labels={disclosure.labels} row={node} />;
 }

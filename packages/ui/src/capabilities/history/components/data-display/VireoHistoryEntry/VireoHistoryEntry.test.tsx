@@ -3,7 +3,7 @@ import { vireoHistoryEntryClasses } from "./VireoHistoryEntry.classes";
 import { VIREO_HISTORY_ENTRY_NAME } from "./VireoHistoryEntry.identity";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -49,6 +49,8 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(screen.getByText("Prospect")).toBeInTheDocument();
     expect(screen.getByText("Active")).toBeInTheDocument();
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Collapse section Profile" })).toBeInTheDocument();
+    expect(screen.getAllByRole("img", { name: "Updated" }).length).toBeGreaterThan(0);
   });
 
   it("shows unchanged fields on demand from the root group even without root metadata", () => {
@@ -85,9 +87,37 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     );
 
     expect(screen.queryByText("Zagreb")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Expand section" }));
+    fireEvent.click(screen.getByRole("button", { name: "Expand section Address" }));
     expect(screen.getByText("Zagreb")).toBeInTheDocument();
     expect(screen.getByText("Samobor")).toBeInTheDocument();
+  });
+
+  it("preserves nested disclosure choices when the root closes and reopens", async () => {
+    render(
+      <VireoHistoryEntry
+        definition={nestedProfileHistoryDefinition}
+        previous={{ id: "profile-1", address: { city: "Zagreb", country: "Croatia" } }}
+        current={{ id: "profile-1", address: { city: "Samobor", country: "Croatia" } }}
+        defaultExpandedDepth={1}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand section Address" }));
+    expect(screen.getByText("Zagreb")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Collapse section Profile" }));
+    await waitFor(() => expect(screen.queryByText("Zagreb")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Expand section Profile" }));
+    expect(await screen.findByText("Zagreb")).toBeInTheDocument();
+  });
+
+  it("hides the unchanged action while the root is collapsed", () => {
+    render(
+      <VireoHistoryEntry definition={profileHistoryDefinition} previous={previousProfile} current={currentProfile} />,
+    );
+
+    expect(screen.getByRole("button", { name: "Show unchanged" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Collapse section Profile" }));
+    expect(screen.queryByRole("button", { name: "Show unchanged" })).not.toBeInTheDocument();
   });
 
   it("omits unchanged-only entries unless unchanged values are requested initially", () => {
@@ -138,6 +168,8 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
             ref: rootSlotRef,
             className: "slot-class",
             "data-depth": ownerState.defaultExpandedDepth,
+            "data-expanded": ownerState.expanded,
+            "data-has-unchanged": ownerState.hasUnchanged,
           }),
         }}
       />,
@@ -146,6 +178,8 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(forwardedRef.current).toBe(rootSlotRef.current);
     expect(forwardedRef.current).toHaveClass(vireoHistoryEntryClasses.root, "direct-class", "slot-class");
     expect(forwardedRef.current).toHaveAttribute("data-depth", "3");
+    expect(forwardedRef.current).toHaveAttribute("data-expanded", "true");
+    expect(forwardedRef.current).toHaveAttribute("data-has-unchanged", "true");
   });
 
   it("supports a replacement root and MUI theme configuration", () => {

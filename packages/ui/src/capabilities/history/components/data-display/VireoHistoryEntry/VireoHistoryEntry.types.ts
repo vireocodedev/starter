@@ -13,11 +13,23 @@ export type VireoHistoryEntryLabels = {
   hideUnchanged: string;
   showMore: string;
   showLess: string;
+  added: string;
+  removed: string;
+  updated: string;
+  moved: string;
+  unchanged: string;
+  field: string;
+  previous: string;
+  current: string;
+  value: string;
+  changes: (count: number) => React.ReactNode;
 };
 
 export type VireoHistoryEntryOwnerState = {
   defaultExpandedDepth: number;
   defaultShowUnchanged: boolean;
+  expanded: boolean;
+  hasUnchanged: boolean;
   hasRootMeta: boolean;
   showRootEntityLabel: boolean;
 };
@@ -56,7 +68,7 @@ export type VireoHistoryEntryOwnProps<TDefinition extends AnyHistoryDefinition =
     emptyValue?: React.ReactNode;
     /** Metadata displayed beside the root expansion control. */
     rootMeta?: React.ReactNode;
-    /** Displays the root definition label and rendered entity identity. @default false */
+    /** Displays the root definition label and rendered entity identity. @default true */
     showRootEntityLabel?: boolean;
     /** Initially includes unchanged fields in the rendered entry. @default false */
     defaultShowUnchanged?: boolean;

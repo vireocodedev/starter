@@ -17,6 +17,7 @@ export { default as CardContent } from "@mui/material/CardContent";
 export { default as Checkbox } from "@mui/material/Checkbox";
 export { default as Chip } from "@mui/material/Chip";
 export { default as CircularProgress } from "@mui/material/CircularProgress";
+export { default as Collapse } from "@mui/material/Collapse";
 export { default as CssBaseline } from "@mui/material/CssBaseline";
 export { default as Container } from "@mui/material/Container";
 export { default as Dialog } from "@mui/material/Dialog";
