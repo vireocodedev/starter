@@ -78,10 +78,7 @@ export function HistoryFieldRowView({
   const showsComparison = row.type === "updated" || row.type === "moved";
   const currentLabel = row.type === "unchanged" ? labels.value : labels.current;
   const expandable = previousOverflowing || currentOverflowing;
-  const depthStyle = {
-    "--VireoHistoryEntry-depth": Math.min(depth, 4),
-    "--VireoHistoryEntry-treeItemDepth": Math.min(Math.max(depth - 1, 0), 3),
-  } as React.CSSProperties;
+  const depthStyle = { "--VireoHistoryEntry-depth": Math.min(depth, 4) } as React.CSSProperties;
 
   return (
     <div
