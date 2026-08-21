@@ -1,5 +1,6 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
-import type { ButtonProps, DialogProps } from "@mui/material";
+import type { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader";
+import type { Button, ButtonProps, Dialog, DialogActions, DialogContent, DialogProps } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import type {
@@ -17,15 +18,24 @@ export type VireoConfirmationDialogOwnerState = {
   confirmColor: ButtonProps["color"];
 };
 
-interface DataAttributes {
+export interface VireoConfirmationDialogRootSlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;
 }
-export interface VireoConfirmationDialogRootSlotPropsOverrides extends DataAttributes {}
-export interface VireoConfirmationDialogHeaderSlotPropsOverrides extends DataAttributes {}
-export interface VireoConfirmationDialogContentSlotPropsOverrides extends DataAttributes {}
-export interface VireoConfirmationDialogActionsSlotPropsOverrides extends DataAttributes {}
-export interface VireoConfirmationDialogCancelButtonSlotPropsOverrides extends DataAttributes {}
-export interface VireoConfirmationDialogConfirmButtonSlotPropsOverrides extends DataAttributes {}
+export interface VireoConfirmationDialogHeaderSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
+export interface VireoConfirmationDialogContentSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
+export interface VireoConfirmationDialogActionsSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
+export interface VireoConfirmationDialogCancelButtonSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
+export interface VireoConfirmationDialogConfirmButtonSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
 
 /** Replaceable semantic regions exposed by {@link VireoConfirmationDialog}. */
 export type VireoConfirmationDialogSlots = { [TSlotName in VireoConfirmationDialogSlotName]: React.ElementType };
@@ -34,33 +44,29 @@ export type VireoConfirmationDialogSlots = { [TSlotName in VireoConfirmationDial
 export type VireoConfirmationDialogSlotsAndSlotProps = CreateSlotsAndSlotProps<
   VireoConfirmationDialogSlots,
   {
-    root: SlotProps<
-      typeof import("@mui/material").Dialog,
-      VireoConfirmationDialogRootSlotPropsOverrides,
-      VireoConfirmationDialogOwnerState
-    >;
+    root: SlotProps<typeof Dialog, VireoConfirmationDialogRootSlotPropsOverrides, VireoConfirmationDialogOwnerState>;
     header: SlotProps<
-      typeof import("@/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader").VireoOverlayHeader,
+      typeof VireoOverlayHeader,
       VireoConfirmationDialogHeaderSlotPropsOverrides,
       VireoConfirmationDialogOwnerState
     >;
     content: SlotProps<
-      typeof import("@mui/material").DialogContent,
+      typeof DialogContent,
       VireoConfirmationDialogContentSlotPropsOverrides,
       VireoConfirmationDialogOwnerState
     >;
     actions: SlotProps<
-      typeof import("@mui/material").DialogActions,
+      typeof DialogActions,
       VireoConfirmationDialogActionsSlotPropsOverrides,
       VireoConfirmationDialogOwnerState
     >;
     cancelButton: SlotProps<
-      typeof import("@mui/material").Button,
+      typeof Button,
       VireoConfirmationDialogCancelButtonSlotPropsOverrides,
       VireoConfirmationDialogOwnerState
     >;
     confirmButton: SlotProps<
-      typeof import("@mui/material").Button,
+      typeof Button,
       VireoConfirmationDialogConfirmButtonSlotPropsOverrides,
       VireoConfirmationDialogOwnerState
     >;
