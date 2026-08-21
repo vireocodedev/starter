@@ -65,34 +65,37 @@ export const VireoCountryFlag = React.forwardRef<HTMLSpanElement, VireoCountryFl
     const accessibleLabel = label || (enableTooltip ? tooltipLabel : undefined);
 
     const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
-    const {
-      "aria-hidden": _rootAriaHidden,
-      "aria-label": _rootAriaLabel,
-      children: _rootChildren,
-      className: rootSlotClassName,
-      dangerouslySetInnerHTML: _rootDangerouslySetInnerHTML,
-      ref: rootSlotRef,
-      role: _rootRole,
-      style: rootSlotStyle,
-      sx: rootSlotSx,
-      title: _rootTitle,
-      ...rootSlotOther
-    } = resolvedRootSlotProps;
+    const rootSlotClassName = resolvedRootSlotProps.className;
+    const rootSlotRef = resolvedRootSlotProps.ref;
+    const rootSlotStyle = resolvedRootSlotProps.style;
+    const rootSlotSx = resolvedRootSlotProps.sx;
+    const rootSlotOther = { ...resolvedRootSlotProps };
+    delete rootSlotOther["aria-hidden"];
+    delete rootSlotOther["aria-label"];
+    delete rootSlotOther.children;
+    delete rootSlotOther.className;
+    delete rootSlotOther.dangerouslySetInnerHTML;
+    delete rootSlotOther.ref;
+    delete rootSlotOther.role;
+    delete rootSlotOther.style;
+    delete rootSlotOther.sx;
+    delete rootSlotOther.title;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
 
     const resolvedFlagSlotProps = resolveSlotProps(slotProps.flag, ownerState);
-    const {
-      "aria-hidden": _flagAriaHidden,
-      children: _flagChildren,
-      className: flagSlotClassName,
-      focusable: _flagFocusable,
-      height: _flagHeight,
-      ref: flagSlotRef,
-      style: flagSlotStyle,
-      viewBox: _flagViewBox,
-      width: _flagWidth,
-      ...flagSlotOther
-    } = resolvedFlagSlotProps;
+    const flagSlotClassName = resolvedFlagSlotProps.className;
+    const flagSlotRef = resolvedFlagSlotProps.ref;
+    const flagSlotStyle = resolvedFlagSlotProps.style;
+    const flagSlotOther = { ...resolvedFlagSlotProps };
+    delete flagSlotOther["aria-hidden"];
+    delete flagSlotOther.children;
+    delete flagSlotOther.className;
+    delete flagSlotOther.focusable;
+    delete flagSlotOther.height;
+    delete flagSlotOther.ref;
+    delete flagSlotOther.style;
+    delete flagSlotOther.viewBox;
+    delete flagSlotOther.width;
 
     const flag = (
       <VireoCountryFlagRoot
@@ -128,14 +131,15 @@ export const VireoCountryFlag = React.forwardRef<HTMLSpanElement, VireoCountryFl
 
     const TooltipSlot = slots.tooltip ?? Tooltip;
     const resolvedTooltipSlotProps = resolveSlotProps(slotProps.tooltip, ownerState);
-    const {
-      children: _tooltipChildren,
-      classes: tooltipSlotClasses,
-      disableInteractive = true,
-      placement = "top",
-      title: _tooltipTitle,
-      ...tooltipSlotOther
-    } = resolvedTooltipSlotProps;
+    const tooltipSlotClasses = resolvedTooltipSlotProps.classes;
+    const disableInteractive = resolvedTooltipSlotProps.disableInteractive ?? true;
+    const placement = resolvedTooltipSlotProps.placement ?? "top";
+    const tooltipSlotOther = { ...resolvedTooltipSlotProps };
+    delete tooltipSlotOther.children;
+    delete tooltipSlotOther.classes;
+    delete tooltipSlotOther.disableInteractive;
+    delete tooltipSlotOther.placement;
+    delete tooltipSlotOther.title;
 
     return (
       <TooltipSlot

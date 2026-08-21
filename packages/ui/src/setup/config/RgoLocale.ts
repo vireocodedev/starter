@@ -1,4 +1,3 @@
-import { type RgoNationality } from "@/features/i18next";
 import { type Namespace, type TFunction } from "i18next";
 import { z } from "zod";
 
@@ -55,21 +54,6 @@ export const RGO_LOCALE_TO_TRANSLATED_LABEL = {
   sl: "Slovenščina",
   de: "Deutsch",
 } as const satisfies Record<RgoLocale, string>;
-
-/**
- * RGO_LOCALE_TO_NATIONALITY_CODE maps each supported locale to its corresponding nationality code, which can be used for displaying flags or other locale-specific icons.
- * This mapping is essential for providing a visual representation of the selected language in the user interface.
- */
-export const RGO_LOCALE_TO_NATIONALITY_CODE = {
-  en: "US",
-  hr: "HR",
-  bs: "BA",
-  cnr: "ME",
-  it: "IT",
-  pt: "PT",
-  sl: "SI",
-  de: "DE",
-} as const satisfies Record<RgoLocale, RgoNationality>;
 
 /**
  * RGO_LOCALE_TO_DAYJS_LOCALE maps each supported RGO locale to the corresponding locale code used by the Day.js library for date and time formatting.

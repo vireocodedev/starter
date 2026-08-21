@@ -17,17 +17,24 @@ function resolveLocale(locale: string): { canonicalLocale: string; catalogLocale
 
   try {
     const [canonicalLocale] = Intl.getCanonicalLocales(locale);
-    if (!canonicalLocale || Intl.DisplayNames.supportedLocalesOf([canonicalLocale]).length === 0) {
+    if (!canonicalLocale) {
       return { canonicalLocale: "en", catalogLocale: "en" };
     }
 
     const baseLocale = canonicalLocale.split("-")[0]?.toLowerCase();
+    const catalogLocale =
+      baseLocale && COUNTRY_NAME_CATALOG_LOCALE_SET.has(baseLocale)
+        ? (baseLocale as CountryNameCatalogLocale)
+        : undefined;
+
+    if (typeof Intl.DisplayNames !== "function") return { canonicalLocale, catalogLocale };
+    if (Intl.DisplayNames.supportedLocalesOf([canonicalLocale]).length === 0) {
+      return { canonicalLocale: "en", catalogLocale: "en" };
+    }
+
     return {
       canonicalLocale,
-      catalogLocale:
-        baseLocale && COUNTRY_NAME_CATALOG_LOCALE_SET.has(baseLocale)
-          ? (baseLocale as CountryNameCatalogLocale)
-          : undefined,
+      catalogLocale,
     };
   } catch {
     return { canonicalLocale: "en", catalogLocale: "en" };

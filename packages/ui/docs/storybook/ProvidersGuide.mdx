@@ -227,7 +227,7 @@ const queryClient = new QueryClient();
 
 ## RgoLocalizationProvider
 
-Sets up MUI date/time localization with `dayjs` adapter and registers `i18n-iso-countries` locales (bs, de, en, hr, it, pt, sl). Waits for i18next to be ready before rendering children.
+Sets up MUI date/time localization with the `dayjs` adapter and waits for i18next to be ready before rendering children. Country display names are resolved independently through `getCountryName` from `@vireocodedev/starter-ui/country`.
 
 ```tsx
 import { RgoLocalizationProvider } from "@vireocodedev/starter-ui";

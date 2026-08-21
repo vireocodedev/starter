@@ -228,11 +228,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "country/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "enums/RgoMonth.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -313,37 +308,12 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "features/i18next/components/data-display/RgoNationalityFlag/RgoNationalityFlag.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/i18next/components/data-display/RgoNationalityFlag/RgoNationalityFlag.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/i18next/components/inputs/RgoNationalityInput/RgoNationalityInput.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/i18next/components/inputs/RgoNationalityInput/RgoNationalityInput.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "features/i18next/index.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
       "rule": "legacy-source-location",
       "path": "features/i18next/lib.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/i18next/models/RgoNationality.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -573,11 +543,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "inputs/InputAutocomplete.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "providers/AppMobileAttributeProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -754,11 +719,6 @@
     {
       "rule": "legacy-source-location",
       "path": "utils/consoleutils.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "utils/countryutils.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

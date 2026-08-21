@@ -23,6 +23,18 @@ describe("getCountryName", () => {
     expect(getCountryName("HR", "not_a_locale")).toBe("Croatia");
   });
 
+  it("retains deterministic and catalog fallbacks when Intl.DisplayNames is unavailable", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(Intl, "DisplayNames");
+    Object.defineProperty(Intl, "DisplayNames", { configurable: true, value: undefined });
+
+    try {
+      expect(getCountryName("HR", "hr")).toBe("Croatia");
+      expect(getCountryName("GB-SCT", "hr")).toBe("Škotska");
+    } finally {
+      if (descriptor) Object.defineProperty(Intl, "DisplayNames", descriptor);
+    }
+  });
+
   it("has a nonempty English fallback for every supported identifier", () => {
     for (const countryCode of COUNTRY_CODES) {
       expect(getCountryName(countryCode, "en")).not.toBe("");

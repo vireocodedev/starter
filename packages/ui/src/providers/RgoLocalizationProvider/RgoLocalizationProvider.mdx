@@ -6,19 +6,17 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 ![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
 
-Orchestrates date/time localization for MUI X Date Pickers (via `dayjs`) and registers country name translations (via `i18n-iso-countries`). Blocks rendering until `i18next` is ready, ensuring downstream components always have access to locale data.
+Orchestrates date/time localization for MUI X Date Pickers through `dayjs`. Blocks rendering until `i18next` is ready, ensuring downstream components always have access to locale data.
 
 ---
 
 ## Why it exists
 
-Internationalized applications need three i18n layers working together:
+Internationalized applications need two i18n layers working together:
 
 1. **Text translations** — handled by `react-i18next` (configured separately).
 2. **Date/time formatting** — MUI X Date Pickers need a locale-aware `dayjs` adapter.
-3. **Country names** — forms with country pickers need localized country name resolution.
-
-`RgoLocalizationProvider` wires up layers 2 and 3 and synchronizes them with the current `i18next` language. It also acts as a rendering gate — children don't mount until translations are loaded.
+   `RgoLocalizationProvider` wires up the date/time layer and synchronizes it with the current `i18next` language. It also acts as a rendering gate — children don't mount until translations are loaded. Country display names are resolved independently through `getCountryName` from `@vireocodedev/starter-ui/country`.
 
 ---
 
@@ -77,11 +75,9 @@ No configuration props. The provider reads the current language from `i18n.langu
 <></>   // empty fragment — children are not mounted
 
 // If i18next IS ready:
-<RgoInitializeProvider onInit={registerCountryLocales}>
-  <LocalizationProvider adapterLocale={dayjsLocale} dateAdapter={AdapterDayjs}>
-    {children}
-  </LocalizationProvider>
-</RgoInitializeProvider>
+<LocalizationProvider adapterLocale={dayjsLocale} dateAdapter={AdapterDayjs}>
+  {children}
+</LocalizationProvider>
 ```
 
 ---
@@ -93,7 +89,6 @@ No configuration props. The provider reads the current language from `i18n.langu
     <tr>
       <th>App Locale</th>
       <th>dayjs Locale</th>
-      <th>Country Names</th>
     </tr>
   </thead>
   <tbody>
@@ -104,7 +99,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>en</code>
       </td>
-      <td>✅</td>
     </tr>
     <tr>
       <td>
@@ -113,7 +107,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>hr</code>
       </td>
-      <td>✅</td>
     </tr>
     <tr>
       <td>
@@ -122,7 +115,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>bs</code>
       </td>
-      <td>✅</td>
     </tr>
     <tr>
       <td>
@@ -131,9 +123,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>me</code>
       </td>
-      <td>
-        via <code>me</code> dayjs locale (no separate country JSON)
-      </td>
     </tr>
     <tr>
       <td>
@@ -142,7 +131,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>it</code>
       </td>
-      <td>✅</td>
     </tr>
     <tr>
       <td>
@@ -151,7 +139,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>pt</code>
       </td>
-      <td>✅</td>
     </tr>
     <tr>
       <td>
@@ -160,7 +147,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>sl</code>
       </td>
-      <td>✅</td>
     </tr>
     <tr>
       <td>
@@ -169,7 +155,6 @@ No configuration props. The provider reads the current language from `i18n.langu
       <td>
         <code>de</code>
       </td>
-      <td>✅</td>
     </tr>
   </tbody>
 </table>
@@ -187,23 +172,6 @@ This means:
 - No layout shift from untranslated content.
 - No "flash of English" while resources load.
 - Date pickers won't mount until the correct locale adapter is resolved.
-
----
-
-## Country name registration
-
-On first mount, `RgoInitializeProvider` runs the `onInit` function once, which registers country locale data:
-
-```tsx
-import countries from "i18n-iso-countries";
-
-// After registration, you can use:
-countries.getName("HR", "en"); // → "Croatia"
-countries.getName("HR", "hr"); // → "Hrvatska"
-countries.getName("HR", "de"); // → "Kroatien"
-```
-
-This is used by any component that needs to display country names in the user's language (e.g., country select dropdowns, address forms).
 
 ---
 

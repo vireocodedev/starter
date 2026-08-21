@@ -1,6 +1,6 @@
 import type { CountryCode } from "@/capabilities/country/models/countryCode.models";
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
-import { Tooltip, type BoxProps } from "@mui/material";
+import type { BoxProps, Tooltip } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoCountryFlagClasses, type VireoCountryFlagClassKey } from "./VireoCountryFlag.classes";
