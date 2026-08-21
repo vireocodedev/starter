@@ -3,6 +3,13 @@ export * from "./components/overlays/VireoDockedSidePanel";
 export * from "./components/overlays/VireoOverlayHeader";
 export * from "./components/overlays/VireoResponsiveOverlayFrame";
 export * from "./components/overlays/VireoSidePanelResizeHandle";
+export * from "./confirmation/components/overlays/VireoConfirmationDialog";
+export type {
+  VireoConfirm,
+  VireoConfirmationOptions,
+} from "./confirmation/contexts/VireoConfirmationContext/VireoConfirmationContext";
+export * from "./confirmation/hooks/useVireoConfirmation/useVireoConfirmation";
+export * from "./confirmation/providers/VireoConfirmationProvider/VireoConfirmationProvider";
 export {
   PageOverlayControllerContext,
   usePageOverlayController,

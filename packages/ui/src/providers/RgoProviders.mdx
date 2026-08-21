@@ -64,7 +64,7 @@ All providers in the `@vireocodedev/starter-ui` ecosystem conform to a common ge
 type RgoProvider<T extends Record<string, any> = {}> = React.FC<{ children: React.ReactNode } & T>;
 ```
 
-- When `T = {}` (no extra props): the provider only takes `children` (e.g., `RgoConfirmProvider`).
+- When `T = {}` (no extra props): the provider only takes `children` (e.g., `VireoConfirmationProvider`).
 - When `T` has properties: the provider requires those props in addition to `children` (e.g., `RgoThemeProvider` needs `theme`).
 
 Providers with extra props must be **pre-configured** before being added to the list (see below).
@@ -76,9 +76,9 @@ Providers with extra props must be **pre-configured** before being added to the 
 ### Basic — providers with no extra props
 
 ```tsx
-import { RgoProviders, RgoConfirmProvider, RgoLocalizationProvider } from "@vireocodedev/starter-ui";
+import { RgoProviders, VireoConfirmationProvider, RgoLocalizationProvider } from "@vireocodedev/starter-ui";
 
-const providers = [RgoConfirmProvider, RgoLocalizationProvider];
+const providers = [VireoConfirmationProvider, RgoLocalizationProvider];
 
 <RgoProviders list={providers}>
   <App />
@@ -95,7 +95,7 @@ import {
   RgoThemeProvider,
   RgoIconsProvider,
   RgoLocalizationProvider,
-  RgoConfirmProvider,
+  VireoConfirmationProvider,
   AppSnackbarProvider,
   RgoQueryClientProvider,
   type RgoProvider,
@@ -115,7 +115,7 @@ const APP_PROVIDERS: RgoProvider[] = [
   AppThemeProvider, // 1st = outermost
   AppIconsProvider,
   RgoLocalizationProvider,
-  RgoConfirmProvider,
+  VireoConfirmationProvider,
   AppSnackbarProvider,
   AppQueryProvider, // last = innermost
 ];
@@ -207,7 +207,7 @@ Order matters because inner providers may depend on context from outer ones:
     <tr>
       <td>4</td>
       <td>
-        <code>RgoConfirmProvider</code>
+        <code>VireoConfirmationProvider</code>
       </td>
       <td>Dialog uses MUI components + translated labels</td>
     </tr>
@@ -242,7 +242,7 @@ Order matters because inner providers may depend on context from outer ones:
 ```tsx
 const CORE_PROVIDERS: RgoProvider[] = [AppThemeProvider, AppIconsProvider, RgoLocalizationProvider];
 
-const FEEDBACK_PROVIDERS: RgoProvider[] = [RgoConfirmProvider, AppSnackbarProvider];
+const FEEDBACK_PROVIDERS: RgoProvider[] = [VireoConfirmationProvider, AppSnackbarProvider];
 
 const DATA_PROVIDERS: RgoProvider[] = [AppQueryProvider, AppSseProvider];
 
@@ -257,7 +257,11 @@ const ALL_PROVIDERS = [...CORE_PROVIDERS, ...FEEDBACK_PROVIDERS, ...DATA_PROVIDE
 ### Conditional providers
 
 ```tsx
-const providers: RgoProvider[] = [AppThemeProvider, RgoConfirmProvider, ...(enableRealtime ? [AppSseProvider] : [])];
+const providers: RgoProvider[] = [
+  AppThemeProvider,
+  VireoConfirmationProvider,
+  ...(enableRealtime ? [AppSseProvider] : []),
+];
 
 <RgoProviders list={providers}>
   <App />

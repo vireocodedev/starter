@@ -773,41 +773,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoConfirm/stories/useRgoConfirm.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithColorsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithDefaultsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithHtmlStringMessageDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithReactJsxMessageDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoConfirm/stories/UseRgoConfirmWithSizesDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoConfirm/useRgoConfirm.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoContainerSize/stories/useRgoContainerSize.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -1064,21 +1029,6 @@
     {
       "rule": "legacy-source-location",
       "path": "providers/AppThemeColorMetaProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoConfirmProvider/RgoConfirmProvider.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoConfirmProvider/RgoConfirmProvider.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoConfirmProvider/RgoConfirmProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

@@ -1,6 +1,6 @@
 import { Box, IconButton, Tooltip, type IconButtonProps } from "@mui/material";
 import { RgoIcon } from "@/components/data-display/RgoIcon/RgoIcon";
-import { useRgoConfirm } from "@/hooks/useRgoConfirm/useRgoConfirm";
+import { useVireoConfirmation } from "@/capabilities/overlays/confirmation/hooks/useVireoConfirmation/useVireoConfirmation";
 import React from "react";
 
 export type TableActionCellProps = {
@@ -19,7 +19,7 @@ export type ConfirmTableActionIconButtonProps = Omit<TableActionIconButtonProps,
   confirmMessage: string;
   confirmText: string;
   confirmColor?: "error" | "warning";
-  onConfirm: () => void;
+  onConfirm: () => Promise<void> | void;
 };
 
 export function TableActionCell({ children }: TableActionCellProps) {
@@ -64,19 +64,19 @@ export function ConfirmTableActionIconButton({
   onConfirm,
   ...actionButtonProps
 }: ConfirmTableActionIconButtonProps) {
-  const confirm = useRgoConfirm();
+  const confirm = useVireoConfirmation();
 
   return (
     <TableActionIconButton
       {...actionButtonProps}
-      onClick={() => {
-        confirm({
+      onClick={async () => {
+        const confirmed = await confirm({
           title: confirmTitle,
           message: confirmMessage,
-          confirmText,
-          color: confirmColor,
-          onConfirm,
+          confirmLabel: confirmText,
+          confirmColor,
         });
+        if (confirmed) await onConfirm();
       }}
     />
   );
