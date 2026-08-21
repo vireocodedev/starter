@@ -6,6 +6,7 @@ import { type VireoFormSubmitButtonClasses, type VireoFormSubmitButtonClassKey }
 import type { VIREO_FORM_SUBMIT_BUTTON_NAME, VireoFormSubmitButtonSlotName } from "./VireoFormSubmitButton.identity";
 
 export type VireoFormSubmitButtonOwnerState = {
+  available: boolean;
   disabled: boolean;
   loading: boolean;
   submitting: boolean;
@@ -35,6 +36,8 @@ export type VireoFormSubmitButtonOwnProps = VireoFormSubmitButtonSlotsAndSlotPro
   classes?: Partial<VireoFormSubmitButtonClasses>;
   /** Adds a consumer-owned loading condition to the form's submission state. @default false */
   loading?: boolean | null;
+  /** Controls whether a multi-step submit action is rendered only on the final step. @default 'auto' */
+  visibility?: "auto" | "always";
 };
 
 /** Props VireoFormSubmitButton inherits from its default root after excluding component-owned props. */

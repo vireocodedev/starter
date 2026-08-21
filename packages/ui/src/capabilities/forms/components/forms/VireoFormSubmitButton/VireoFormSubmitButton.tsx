@@ -1,10 +1,14 @@
 import { useVireoTanStackFormContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
+import { useOptionalVireoMultiStepContext } from "@/capabilities/forms/contexts/VireoMultiStepContext/VireoMultiStepContext";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
 import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
 import { useStore } from "@tanstack/react-form";
 import React from "react";
+
+const subscribeToNothing = () => () => undefined;
+const getNoMultiStepState = () => undefined;
 import {
   type VireoFormSubmitButtonClassKey,
   getVireoFormSubmitButtonUtilityClass,
@@ -49,13 +53,22 @@ export const VireoFormSubmitButton = React.forwardRef<HTMLButtonElement, VireoFo
       slots = {},
       style,
       sx,
+      visibility = "auto",
       ...other
     } = props;
     const form = useVireoTanStackFormContext();
     const submitting = useStore(form.store, current => current.isSubmitting);
+    const multiStep = useOptionalVireoMultiStepContext();
+    const multiStepState = React.useSyncExternalStore(
+      multiStep?.controller.subscribe ?? subscribeToNothing,
+      multiStep?.controller.getSnapshot ?? getNoMultiStepState,
+      multiStep?.controller.getSnapshot ?? getNoMultiStepState,
+    );
+    const available = !multiStepState || multiStepState.isLastStep;
 
     const ownerState: VireoFormSubmitButtonOwnerState = {
-      disabled,
+      available,
+      disabled: disabled || (!available && visibility === "always"),
       loading: submitting || loading === true,
       submitting,
     };
@@ -78,6 +91,7 @@ export const VireoFormSubmitButton = React.forwardRef<HTMLButtonElement, VireoFo
     void _rootSlotHref;
     void _rootSlotLoading;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
+    if (!available && visibility === "auto") return null;
 
     return (
       <VireoFormSubmitButtonRoot

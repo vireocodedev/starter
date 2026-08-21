@@ -1,6 +1,10 @@
 export * from "./components/forms/VireoFormActions";
 export * from "./components/forms/VireoFormMultiStep/VireoFormMultiStep.classes";
 export type * from "./components/forms/VireoFormMultiStep/VireoFormMultiStep.types";
+export * from "./components/forms/VireoFormNextStepButton/VireoFormNextStepButton.classes";
+export type * from "./components/forms/VireoFormNextStepButton/VireoFormNextStepButton.types";
+export * from "./components/forms/VireoFormPreviousStepButton/VireoFormPreviousStepButton.classes";
+export type * from "./components/forms/VireoFormPreviousStepButton/VireoFormPreviousStepButton.types";
 export * from "./components/forms/VireoFormStep/VireoFormStep.classes";
 export type * from "./components/forms/VireoFormStep/VireoFormStep.types";
 export * from "./components/forms/VireoFormStepProgress/VireoFormStepProgress.classes";

@@ -36,6 +36,11 @@ export default function DefaultExample() {
             </form.Field>
           </form.Section>
         </form.Step>
+        <form.Actions>
+          <form.PreviousStepButton />
+          <form.NextStepButton />
+          <form.SubmitButton>Save account</form.SubmitButton>
+        </form.Actions>
       </form.MultiStep>
     </form.Form>
   );

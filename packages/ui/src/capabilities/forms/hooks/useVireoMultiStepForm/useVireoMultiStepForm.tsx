@@ -2,6 +2,10 @@ import { VireoForm } from "@/capabilities/forms/components/forms/VireoForm/Vireo
 import type { VireoFormProps } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
 import { VireoFormMultiStep } from "@/capabilities/forms/components/forms/VireoFormMultiStep/VireoFormMultiStep";
 import type { VireoFormMultiStepProps } from "@/capabilities/forms/components/forms/VireoFormMultiStep/VireoFormMultiStep.types";
+import { VireoFormNextStepButton } from "@/capabilities/forms/components/forms/VireoFormNextStepButton/VireoFormNextStepButton";
+import type { VireoFormNextStepButtonProps } from "@/capabilities/forms/components/forms/VireoFormNextStepButton/VireoFormNextStepButton.types";
+import { VireoFormPreviousStepButton } from "@/capabilities/forms/components/forms/VireoFormPreviousStepButton/VireoFormPreviousStepButton";
+import type { VireoFormPreviousStepButtonProps } from "@/capabilities/forms/components/forms/VireoFormPreviousStepButton/VireoFormPreviousStepButton.types";
 import { VireoFormStep } from "@/capabilities/forms/components/forms/VireoFormStep/VireoFormStep";
 import type { VireoFormStepProps } from "@/capabilities/forms/components/forms/VireoFormStep/VireoFormStep.types";
 import { VireoFormStepProgress } from "@/capabilities/forms/components/forms/VireoFormStepProgress/VireoFormStepProgress";
@@ -96,6 +100,12 @@ export type VireoMultiStepFormApi<
     Omit<VireoFormStepProps, "id" | "ref"> & { id: TStepId } & React.RefAttributes<HTMLElement>
   >;
   StepProgress: React.ForwardRefExoticComponent<VireoFormStepProgressProps & React.RefAttributes<HTMLDivElement>>;
+  PreviousStepButton: React.ForwardRefExoticComponent<
+    VireoFormPreviousStepButtonProps & React.RefAttributes<HTMLButtonElement>
+  >;
+  NextStepButton: React.ForwardRefExoticComponent<
+    VireoFormNextStepButtonProps & React.RefAttributes<HTMLButtonElement>
+  >;
   MultiStepSubscribe: <TSelected = VireoMultiStepState<TStepId>>(
     props: VireoMultiStepSubscribeProps<TStepId, TSelected>,
   ) => React.ReactNode;
@@ -225,6 +235,8 @@ export function useVireoMultiStepForm<
         if (property === "MultiStep") return BoundMultiStep;
         if (property === "Step") return VireoFormStep;
         if (property === "StepProgress") return VireoFormStepProgress;
+        if (property === "PreviousStepButton") return VireoFormPreviousStepButton;
+        if (property === "NextStepButton") return VireoFormNextStepButton;
         if (property === "MultiStepSubscribe") return MultiStepSubscribe;
         if (property === "multiStepState") return state;
         if (property === "getStepState") return controller.getStepState;
