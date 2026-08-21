@@ -11,6 +11,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "verify": "sh scripts/verify.sh",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "typecheck": "turbo run typecheck --concurrency=5",
