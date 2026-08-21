@@ -4,4 +4,5 @@ export * from "../src/capabilities/forms/public";
 export * from "../src/capabilities/infinite-canvas/public";
 export * from "../src/capabilities/overlays/public";
 export * from "../src/capabilities/page-layout/public";
+export * from "../src/capabilities/table/public";
 export * from "../src/core/public";

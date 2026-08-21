@@ -2,6 +2,9 @@
 // barrel. Add an explicit re-export here when Vireo production or story code
 // imports another runtime symbol from `@mui/material`.
 export { default as Alert } from "@mui/material/Alert";
+export { default as Accordion } from "@mui/material/Accordion";
+export { default as AccordionDetails } from "@mui/material/AccordionDetails";
+export { default as AccordionSummary } from "@mui/material/AccordionSummary";
 export { default as Autocomplete, createFilterOptions } from "@mui/material/Autocomplete";
 export { default as Avatar } from "@mui/material/Avatar";
 export { default as Badge } from "@mui/material/Badge";
@@ -43,6 +46,7 @@ export { default as Popper } from "@mui/material/Popper";
 export { default as Radio } from "@mui/material/Radio";
 export { default as RadioGroup } from "@mui/material/RadioGroup";
 export { default as Select } from "@mui/material/Select";
+export { default as Skeleton } from "@mui/material/Skeleton";
 export { default as Stack } from "@mui/material/Stack";
 export { default as SvgIcon } from "@mui/material/SvgIcon";
 export { default as SwipeableDrawer } from "@mui/material/SwipeableDrawer";
@@ -51,7 +55,11 @@ export { default as Tab } from "@mui/material/Tab";
 export { default as Table } from "@mui/material/Table";
 export { default as TableBody } from "@mui/material/TableBody";
 export { default as TableCell } from "@mui/material/TableCell";
+export { default as TableContainer } from "@mui/material/TableContainer";
+export { default as TableHead } from "@mui/material/TableHead";
+export { default as TablePagination } from "@mui/material/TablePagination";
 export { default as TableRow } from "@mui/material/TableRow";
+export { default as TableSortLabel } from "@mui/material/TableSortLabel";
 export { default as Tabs } from "@mui/material/Tabs";
 export { default as TextField } from "@mui/material/TextField";
 export { default as ToggleButton } from "@mui/material/ToggleButton";

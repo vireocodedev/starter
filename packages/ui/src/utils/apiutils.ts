@@ -1,4 +1,3 @@
-import { type DtSortDirection } from "@/components/data-display/RgoTable";
 import { type TODO } from "@/utils/typeutils";
 import axios, { type AxiosError } from "axios";
 
@@ -27,11 +26,13 @@ export const EMPTY_PAGEABLE_PARAMS: PageableParams = {
   sortDirection: "asc",
 };
 
+export type PageableSortDirection = "asc" | "desc";
+
 export type PageableParams = {
   page: number;
   rowsPerPage: number;
   sortBy: string;
-  sortDirection: DtSortDirection;
+  sortDirection: PageableSortDirection;
 };
 
 export type PageableResponse<T> = {

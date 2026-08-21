@@ -38,15 +38,14 @@ compatibility contract.
   tables, overlays, navigation, feedback, and data-display components.
 - **Forms** — `useVireoForm`, its bound `form.*` and `field.*` APIs,
   `ResponsiveFormOverlay`, and deferred success notifications.
-- **Tables** — the management/server table system: `ManagementServerTable`,
-  `RgoServerTableMobile`, `MobileTable*`, `TableActionCell`, skeletons, plus the
-  infinite-scroll/table utils and `useMobileTableExpansion`; also the
-  container-aware `ResponsiveTable` and mobile accordion cell helpers.
+- **Tables** — `VireoResponsiveTable`, the typed container-aware desktop table
+  and mobile accordion contract with controlled sorting, pagination, loading,
+  filtering surfaces, virtualization, and scroll restoration.
 - **Providers** — `AppConfirmProvider`, `AppSnackbarProvider`,
   `AppMobileAttributeProvider`, `AppThemeColorMetaProvider`.
 - **Hooks** — `useResponsiveProps`, `useAppPageContentLayout`,
   `usePageOverlayModes`, `useDelayedOverlayMount`, `useSingleFlightAction`,
-  `useManagementTableState`, `useMediaQueryDevice`.
+  `useMediaQueryDevice`.
 - **Overlays** — responsive side-panel/drawer frames, page-overlay controller,
   delayed mounting, and guarded mode switching.
 - **Layout** — `AppPageContentLayoutContext`, layout utils + shell breakpoints,

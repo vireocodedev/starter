@@ -17,8 +17,7 @@ Best practices and common usage patterns for RGO Front UI components and hooks.
   - [Full Provider Stack](#full-provider-stack)
   - [Conditional Providers](#conditional-providers)
 - [Table Patterns](#table-patterns)
-  - [Client-Side Table with Features](#client-side-table-with-features)
-  - [Server-Side Table](#server-side-table)
+  - [Container-aware controlled table](#container-aware-controlled-table)
 - [Hook Usage Patterns](#hook-usage-patterns)
   - [Confirmation Dialogs](#confirmation-dialogs)
   - [Notifications](#notifications)
@@ -116,64 +115,42 @@ function AppWithConfirmations() {
 
 ## Table Patterns
 
-### Client-Side Table with Features
+### Container-aware controlled table
 
-Full-featured data table with pagination and sorting:
+Keep fetching and filters in application code and pass one typed column model to the responsive surface:
 
 ```tsx
-import { RgoClientTable } from "@vireocodedev/starter-ui";
+import { VireoResponsiveTable } from "@vireocodedev/starter-ui";
 
 const columns = [
-  { field: "name", headerName: "Name", sortable: true },
-  { field: "email", headerName: "Email", sortable: true },
-  { field: "role", headerName: "Role", sortable: false },
   {
-    field: "actions",
-    headerName: "Actions",
-    sortable: false,
-    renderCell: user => (
-      <IconButton onClick={() => editUser(user.id)}>
-        <EditIcon />
-      </IconButton>
-    ),
+    id: "name",
+    sort: "name",
+    renderHeader: () => "Name",
+    renderBody: user => user.name,
   },
-];
+  { id: "email", renderHeader: () => "Email", renderBody: user => user.email },
+] as const;
 
-function UserTable({ users }) {
-  return (
-    <RgoClientTable data={users} columns={columns} enablePagination enableSorting initialPageSize={10} stickyHeader />
-  );
-}
-```
-
-### Server-Side Table
-
-Table with server-side pagination and sorting:
-
-```tsx
-import { RgoServerTable } from "@vireocodedev/starter-ui";
-
-function ServerUserTable() {
-  const [pagination, setPagination] = useState({
+function UserTable({ users, totalCount }) {
+  const [filters, setFilters] = React.useState({
     page: 0,
-    rowsPerPage: 10,
-    sortBy: null,
+    rowsPerPage: 20,
+    sortBy: "name",
     sortDirection: "asc",
   });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["users", pagination],
-    queryFn: () => fetchUsers(pagination),
-  });
-
   return (
-    <RgoServerTable
-      data={data?.users || []}
+    <VireoResponsiveTable
       columns={columns}
-      loading={isLoading}
-      totalCount={data?.total || 0}
-      pagination={pagination}
-      onPaginationChange={setPagination}
+      data={users}
+      totalCount={totalCount}
+      filters={filters}
+      onFiltersChange={setFilters}
+      labels={tableLabels}
+      layers={{ stickyToolbar: 4, stickyRowHeader: 3 }}
+      titleColumn="name"
+      getRowKey={user => user.id}
     />
   );
 }
