@@ -167,7 +167,23 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     overflowWrap: "anywhere",
   },
   "& .VireoHistoryEntry-valueBlock": { minWidth: 0 },
+  '& .VireoHistoryEntry-valueBlock[data-placement="previous"]': { gridColumn: 3 },
+  '& .VireoHistoryEntry-valueBlock[data-placement="current"]': { gridColumn: 5 },
+  '& .VireoHistoryEntry-fieldRow[data-status="unchanged"] .VireoHistoryEntry-valueBlock[data-placement="current"]': {
+    gridColumn: "3 / 6",
+  },
   "& .VireoHistoryEntry-mobileValueLabel": { display: "none" },
+  "& .VireoHistoryEntry-visuallyHidden": {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: "hidden",
+    clip: "rect(0 0 0 0)",
+    whiteSpace: "nowrap",
+    border: 0,
+  },
   "& .VireoHistoryEntry-valueContent": {
     display: "-webkit-box",
     minWidth: 0,
@@ -186,8 +202,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     color: theme.palette.text.secondary,
     textDecoration: "line-through",
   },
-  "& .VireoHistoryEntry-emptyValue, & .VireoHistoryEntry-arrow": { color: theme.palette.text.disabled },
-  "& .VireoHistoryEntry-arrow": { textAlign: "center" },
+  "& .VireoHistoryEntry-arrow": { color: theme.palette.text.disabled, textAlign: "center" },
   "& .VireoHistoryEntry-valueToggle": {
     gridColumn: "3 / 6",
     justifySelf: "start",
@@ -201,6 +216,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     gap: theme.spacing(1),
     paddingBlock: theme.spacing(0.5),
   },
+  "& .VireoHistoryEntry-fieldRow[data-expanded] .VireoHistoryEntry-valueBlock[data-empty]": { display: "none" },
   "& .VireoHistoryEntry-fieldRow[data-expanded] .VireoHistoryEntry-mobileValueLabel": {
     display: "block",
     color: theme.palette.text.secondary,
@@ -254,6 +270,9 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
       display: "grid",
       gap: theme.spacing(0.25),
       paddingInlineStart: theme.spacing(5),
+    },
+    "& .VireoHistoryEntry-fieldRow[data-status] .VireoHistoryEntry-valueBlock[data-placement]": {
+      gridColumn: "1 / -1",
     },
     "& .VireoHistoryEntry-valueBlock[data-empty]": { display: "none" },
     "& .VireoHistoryEntry-mobileValueLabel": {

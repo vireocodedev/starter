@@ -27,6 +27,7 @@ const DEFAULT_LABELS = {
   previous: "Previous",
   current: "Current",
   value: "Value",
+  notPresent: "Not present",
   changes: (count: number) => `${count} ${count === 1 ? "change" : "changes"}`,
 } as const;
 

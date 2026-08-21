@@ -17,6 +17,7 @@ function HistoryValueBlock({
   empty = false,
   expanded,
   label,
+  notPresentLabel,
   onOverflowChange,
   placement,
   removed = false,
@@ -25,6 +26,7 @@ function HistoryValueBlock({
   empty?: boolean;
   expanded: boolean;
   label: string;
+  notPresentLabel: string;
   onOverflowChange: (overflowing: boolean) => void;
   placement: "previous" | "current";
   removed?: boolean;
@@ -38,8 +40,8 @@ function HistoryValueBlock({
     >
       <span className="VireoHistoryEntry-mobileValueLabel">{label}</span>
       {empty ? (
-        <span className="VireoHistoryEntry-emptyValue" aria-hidden="true">
-          —
+        <span className="VireoHistoryEntry-visuallyHidden">
+          {label}: {notPresentLabel}
         </span>
       ) : (
         <HistoryValueContent expanded={expanded} onOverflowChange={onOverflowChange} removed={removed}>
@@ -73,6 +75,7 @@ export function HistoryFieldRowView({
   const status = getHistoryStatus(row);
   const hasPrevious = row.type === "removed" || row.type === "updated" || row.type === "moved";
   const hasCurrent = row.type !== "removed";
+  const showsComparison = row.type === "updated" || row.type === "moved";
   const currentLabel = row.type === "unchanged" ? labels.value : labels.current;
   const expandable = previousOverflowing || currentOverflowing;
   const depthStyle = { "--VireoHistoryEntry-depth": Math.min(depth, 4) } as React.CSSProperties;
@@ -90,23 +93,29 @@ export function HistoryFieldRowView({
         <HistoryStatusBadge status={status} labels={labels} />
       </div>
       <div className="VireoHistoryEntry-fieldLabel">{row.label}</div>
-      <HistoryValueBlock
-        empty={!hasPrevious}
-        expanded={expanded}
-        label={labels.previous}
-        onOverflowChange={setPreviousOverflowing}
-        placement="previous"
-        removed={row.type === "removed"}
-      >
-        {hasPrevious ? row.previous : null}
-      </HistoryValueBlock>
-      <span className="VireoHistoryEntry-arrow" aria-hidden="true">
-        →
-      </span>
+      {row.type === "unchanged" ? null : (
+        <HistoryValueBlock
+          empty={!hasPrevious}
+          expanded={expanded}
+          label={labels.previous}
+          notPresentLabel={labels.notPresent}
+          onOverflowChange={setPreviousOverflowing}
+          placement="previous"
+          removed={row.type === "removed"}
+        >
+          {hasPrevious ? row.previous : null}
+        </HistoryValueBlock>
+      )}
+      {showsComparison ? (
+        <span className="VireoHistoryEntry-arrow" aria-hidden="true">
+          →
+        </span>
+      ) : null}
       <HistoryValueBlock
         empty={!hasCurrent}
         expanded={expanded}
         label={currentLabel}
+        notPresentLabel={labels.notPresent}
         onOverflowChange={setCurrentOverflowing}
         placement="current"
       >

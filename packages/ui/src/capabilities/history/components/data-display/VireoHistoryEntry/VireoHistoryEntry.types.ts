@@ -22,6 +22,7 @@ export type VireoHistoryEntryLabels = {
   previous: string;
   current: string;
   value: string;
+  notPresent: string;
   changes: (count: number) => React.ReactNode;
 };
 

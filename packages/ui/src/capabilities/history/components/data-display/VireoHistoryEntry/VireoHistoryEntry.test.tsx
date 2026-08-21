@@ -48,6 +48,7 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(screen.getByText("Status")).toBeInTheDocument();
     expect(screen.getByText("Prospect")).toBeInTheDocument();
     expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.getAllByText("→").length).toBeGreaterThan(0);
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Collapse section Profile" })).toBeInTheDocument();
     expect(screen.getAllByRole("img", { name: "Updated" }).length).toBeGreaterThan(0);
@@ -73,6 +74,8 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(
       within(screen.getByRole("button", { name: "Collapse section Profile" })).getByRole("img", { name: "Added" }),
     ).toBeInTheDocument();
+    expect(screen.queryByText("→")).not.toBeInTheDocument();
+    expect(screen.queryByText("—")).not.toBeInTheDocument();
 
     rerender(<VireoHistoryEntry definition={profileHistoryDefinition} previous={previousProfile} current={null} />);
 
@@ -80,6 +83,24 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(
       within(screen.getByRole("button", { name: "Collapse section Profile" })).getByRole("img", { name: "Removed" }),
     ).toBeInTheDocument();
+    expect(screen.queryByText("→")).not.toBeInTheDocument();
+    expect(screen.queryByText("—")).not.toBeInTheDocument();
+  });
+
+  it("renders unchanged values once without comparison punctuation", () => {
+    render(
+      <VireoHistoryEntry
+        definition={profileHistoryDefinition}
+        previous={previousProfile}
+        current={currentProfile}
+        defaultShowUnchanged
+      />,
+    );
+
+    const ownerRow = screen.getByRole("group", { name: "Owner: Unchanged" });
+    expect(within(ownerRow).getByText("Maya")).toBeInTheDocument();
+    expect(within(ownerRow).queryByText("→")).not.toBeInTheDocument();
+    expect(within(ownerRow).queryByText("—")).not.toBeInTheDocument();
   });
 
   it("expands nested groups independently from the root", () => {
