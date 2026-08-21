@@ -3,7 +3,7 @@ import { vireoHistoryEntryClasses } from "./VireoHistoryEntry.classes";
 import { VIREO_HISTORY_ENTRY_NAME } from "./VireoHistoryEntry.identity";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -70,10 +70,16 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     );
 
     expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("button", { name: "Collapse section Profile" })).getByRole("img", { name: "Added" }),
+    ).toBeInTheDocument();
 
     rerender(<VireoHistoryEntry definition={profileHistoryDefinition} previous={previousProfile} current={null} />);
 
     expect(screen.getByText("Prospect")).toHaveStyle({ textDecoration: "line-through" });
+    expect(
+      within(screen.getByRole("button", { name: "Collapse section Profile" })).getByRole("img", { name: "Removed" }),
+    ).toBeInTheDocument();
   });
 
   it("expands nested groups independently from the root", () => {

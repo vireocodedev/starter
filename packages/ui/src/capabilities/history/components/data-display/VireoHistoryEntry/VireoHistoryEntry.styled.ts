@@ -31,7 +31,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     display: "flex",
     alignItems: "stretch",
     minHeight: 64,
-    backgroundColor: alpha(theme.palette.action.hover, 0.7),
+    backgroundColor: theme.palette.action.hover,
     borderBottom: `1px solid transparent`,
   },
   "& .VireoHistoryEntry-rootGroup[data-expanded] > .VireoHistoryEntry-rootHeader": {
@@ -72,7 +72,9 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     minWidth: 0,
     overflow: "hidden",
     color: theme.palette.text.primary,
+    fontSize: theme.typography.pxToRem(14),
     fontWeight: theme.typography.fontWeightMedium,
+    lineHeight: 1.35,
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
@@ -84,6 +86,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     overflow: "hidden",
     color: theme.palette.text.secondary,
     fontSize: theme.typography.pxToRem(13),
+    lineHeight: 1.35,
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
@@ -91,6 +94,9 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     flex: "0 0 auto",
     alignSelf: "center",
     marginRight: theme.spacing(1),
+    fontSize: theme.typography.pxToRem(12.5),
+    fontWeight: theme.typography.fontWeightMedium,
+    textTransform: "none",
     whiteSpace: "nowrap",
   },
   "& .VireoHistoryEntry-columnHeadings": {
@@ -102,7 +108,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     color: theme.palette.text.secondary,
     fontSize: theme.typography.pxToRem(12),
     fontWeight: theme.typography.fontWeightMedium,
-    backgroundColor: alpha(theme.palette.action.hover, 0.25),
+    backgroundColor: alpha(theme.palette.text.primary, 0.04),
     "& > :first-of-type": { gridColumn: 2 },
     "& > :nth-of-type(2)": { gridColumn: 3 },
     "& > :nth-of-type(3)": { gridColumn: 5 },
@@ -204,7 +210,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
   "& .VireoHistoryEntry-nestedGroup": {
     minWidth: 0,
     borderTop: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
-    backgroundColor: alpha(theme.palette.action.hover, 0.18),
+    backgroundColor: theme.palette.action.hover,
   },
   "& .VireoHistoryEntry-nestedHeader": { minWidth: 0 },
   "& .VireoHistoryEntry-groupSummary": {
@@ -217,7 +223,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     flex: "0 0 auto",
     marginInlineStart: "auto",
     color: theme.palette.text.secondary,
-    fontSize: theme.typography.pxToRem(12),
+    fontSize: theme.typography.pxToRem(12.5),
   },
   "& .VireoHistoryEntry-groupChildren": { minWidth: 0 },
 
@@ -253,7 +259,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     "& .VireoHistoryEntry-mobileValueLabel": {
       display: "block",
       color: theme.palette.text.secondary,
-      fontSize: theme.typography.pxToRem(12),
+      fontSize: theme.typography.pxToRem(12.5),
     },
     "& .VireoHistoryEntry-valueContent": { WebkitLineClamp: 4 },
     "& .VireoHistoryEntry-arrow": { display: "none" },

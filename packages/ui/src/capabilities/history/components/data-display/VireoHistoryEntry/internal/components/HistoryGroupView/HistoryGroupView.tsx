@@ -27,7 +27,22 @@ function countVisibleFields(nodes: readonly HistoryNode[], showUnchanged: boolea
 }
 
 function getGroupStatus(group: HistoryGroupNode): HistoryStatus {
-  return group.changeType ?? "updated";
+  const statuses = new Set<HistoryStatus>();
+
+  const collectStatuses = (nodes: readonly HistoryNode[]) => {
+    nodes.forEach(node => {
+      if (node.type === "group") {
+        collectStatuses(node.children);
+      } else {
+        statuses.add(node.type);
+      }
+    });
+  };
+
+  collectStatuses(group.children);
+
+  if (statuses.size === 1) return statuses.values().next().value ?? "updated";
+  return "updated";
 }
 
 export function HistoryGroupView({

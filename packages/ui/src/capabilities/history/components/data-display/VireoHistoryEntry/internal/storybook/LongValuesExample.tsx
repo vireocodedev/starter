@@ -21,7 +21,7 @@ const currentSummary =
 
 export default function LongValuesExample() {
   return (
-    <Box sx={{ maxWidth: 620 }}>
+    <Box sx={{ maxWidth: 760 }}>
       <VireoHistoryEntry
         definition={noteHistoryDefinition}
         previous={{ id: "note-18", category: "Investigation", summary: previousSummary }}
