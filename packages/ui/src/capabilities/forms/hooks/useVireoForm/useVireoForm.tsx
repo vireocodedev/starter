@@ -4,6 +4,7 @@ import { VireoFormActions } from "@/capabilities/forms/components/forms/VireoFor
 import { VireoFormAutocompleteField } from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField";
 import { VireoFormAutocompleteMultipleField } from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/VireoFormAutocompleteMultipleField";
 import { VireoFormFreeSoloAutocompleteField } from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/VireoFormFreeSoloAutocompleteField";
+import { VireoFormFreeSoloAutocompleteMultipleField } from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/VireoFormFreeSoloAutocompleteMultipleField";
 import { VireoFormCheckboxField } from "@/capabilities/forms/components/forms/VireoFormCheckboxField/VireoFormCheckboxField";
 import { VireoFormCounterField } from "@/capabilities/forms/components/forms/VireoFormCounterField/VireoFormCounterField";
 import { VireoFormFileField } from "@/capabilities/forms/components/forms/VireoFormFileField/VireoFormFileField";
@@ -38,6 +39,7 @@ const { useAppForm } = createFormHook({
     AutocompleteField: VireoFormAutocompleteField,
     AutocompleteMultipleField: VireoFormAutocompleteMultipleField,
     FreeSoloAutocompleteField: VireoFormFreeSoloAutocompleteField,
+    FreeSoloAutocompleteMultipleField: VireoFormFreeSoloAutocompleteMultipleField,
     CheckboxField: VireoFormCheckboxField,
     CounterField: VireoFormCounterField,
     FileField: VireoFormFileField,
@@ -92,6 +94,7 @@ type BaseVireoFormApi<
     AutocompleteField: typeof VireoFormAutocompleteField;
     AutocompleteMultipleField: typeof VireoFormAutocompleteMultipleField;
     FreeSoloAutocompleteField: typeof VireoFormFreeSoloAutocompleteField;
+    FreeSoloAutocompleteMultipleField: typeof VireoFormFreeSoloAutocompleteMultipleField;
     CheckboxField: typeof VireoFormCheckboxField;
     CounterField: typeof VireoFormCounterField;
     FileField: typeof VireoFormFileField;
