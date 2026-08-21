@@ -196,7 +196,6 @@
         "dayjs/locale/me",
         "dayjs/locale/pt",
         "dayjs/locale/sl",
-        "html-react-parser",
         "i18n-iso-countries",
         "i18n-iso-countries/langs/bs.json",
         "i18n-iso-countries/langs/de.json",
