@@ -11,7 +11,7 @@ const SHOW_MODE_BUTTON_STYLE: React.CSSProperties = {
   border: 0,
   padding: 0,
   background: "transparent",
-  color: "var(--mui-palette-primary-600)",
+  color: "var(--mui-palette-primary-main)",
   cursor: "pointer",
   font: "inherit",
   fontSize: 12,
@@ -23,11 +23,15 @@ export function HistoryValueContent({
   removed = false,
   alignRight = false,
   removedColor,
+  showMoreLabel,
+  showLessLabel,
 }: {
   children: React.ReactNode;
   removed?: boolean;
   alignRight?: boolean;
   removedColor?: string;
+  showMoreLabel: string;
+  showLessLabel: string;
 }) {
   const [expanded, setExpanded] = React.useState(false);
   const [canExpand, setCanExpand] = React.useState(false);
@@ -79,7 +83,7 @@ export function HistoryValueContent({
 
       {canExpand ? (
         <button type="button" onClick={() => setExpanded(current => !current)} style={SHOW_MODE_BUTTON_STYLE}>
-          {expanded ? "Show less" : "Show more"}
+          {expanded ? showLessLabel : showMoreLabel}
         </button>
       ) : null}
     </div>

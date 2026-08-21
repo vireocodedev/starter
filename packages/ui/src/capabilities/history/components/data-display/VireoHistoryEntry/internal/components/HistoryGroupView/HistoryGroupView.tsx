@@ -1,13 +1,13 @@
-import { HistoryFieldRowView } from "@/history/components/HistoryFieldRowView";
+import { HistoryFieldRowView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryFieldRowView/HistoryFieldRowView";
+import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Button } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { type HistoryGroupChangeType, type HistoryGroupNode, type HistoryNode } from "@vireocodedev/starter-history";
-import { useHistoryTranslation } from "@vireocodedev/starter-localization";
 import { useEffect, useState } from "react";
 
-const TABLE_BORDER_COLOR = "var(--mui-palette-grey-300)";
+const TABLE_BORDER_COLOR = "var(--mui-palette-divider)";
 
 const CELL_GROUP_HEADER_FONT_COLOR = "var(--mui-palette-text-secondary)";
 
@@ -46,7 +46,7 @@ const HISTORY_HEADER_STYLE: React.CSSProperties = {
   textAlign: "left",
   padding: "6px 8px",
   fontWeight: 600,
-  backgroundColor: "var(--mui-palette-grey-200)",
+  backgroundColor: "var(--mui-palette-action-hover)",
   color: CELL_GROUP_HEADER_FONT_COLOR,
   display: "flex",
 };
@@ -96,17 +96,11 @@ const HISTORY_GROUP_HEADER_LEFT_STYLE: React.CSSProperties = {
   flexWrap: "wrap",
 };
 
-const HISTORY_GROUP_HEADER_LEFT_CLICKABLE_STYLE: React.CSSProperties = {
-  ...HISTORY_GROUP_HEADER_LEFT_STYLE,
-  cursor: "pointer",
-  userSelect: "none",
-};
-
 const HISTORY_GROUP_HEADER_BUTTON_STYLE: React.CSSProperties = {
   textTransform: "none",
   minWidth: "fit-content",
   marginLeft: "auto",
-  color: "var(--mui-palette-primary-400)",
+  color: "var(--mui-palette-primary-main)",
   fontSize: "0.75em",
 };
 
@@ -161,15 +155,17 @@ function HistoryGroupStatusDot({
 function HistoryGroupToggleButton({
   expanded,
   onToggle,
+  labels,
 }: {
   expanded: boolean;
   onToggle: () => void;
+  labels: VireoHistoryEntryLabels;
 }): React.ReactElement {
   return (
     <IconButton
       type="button"
       size="small"
-      aria-label={expanded ? "Collapse section" : "Expand section"}
+      aria-label={expanded ? labels.collapseSection : labels.expandSection}
       aria-expanded={expanded}
       onClick={event => {
         event.stopPropagation();
@@ -218,6 +214,7 @@ export function HistoryGroupView({
   defaultExpandedDepth = DEFAULT_EXPANDED_DEPTH,
   defaultShowUnchanged = false,
   inheritedShowUnchanged,
+  labels,
 }: {
   group: HistoryGroupNode;
   rootMeta?: React.ReactNode;
@@ -226,9 +223,9 @@ export function HistoryGroupView({
   defaultExpandedDepth?: number;
   defaultShowUnchanged?: boolean;
   inheritedShowUnchanged?: boolean;
+  labels: VireoHistoryEntryLabels;
 }): React.ReactElement | null {
-  const { t } = useHistoryTranslation();
-  const isRootGroup = rootMeta != null;
+  const isRootGroup = depth === 1;
   const groupKey = group.path.join(".") || "$root";
 
   const [expanded, setExpanded] = useState(() => depth <= defaultExpandedDepth);
@@ -247,12 +244,8 @@ export function HistoryGroupView({
   const showUnchanged = isRootGroup ? rootShowUnchanged : (inheritedShowUnchanged ?? defaultShowUnchanged);
 
   const toggleButton = (
-    <HistoryGroupToggleButton expanded={expanded} onToggle={() => setExpanded(current => !current)} />
+    <HistoryGroupToggleButton expanded={expanded} onToggle={() => setExpanded(current => !current)} labels={labels} />
   );
-
-  const toggleExpanded = () => {
-    setExpanded(current => !current);
-  };
 
   const visibleChildren = group.children.filter(child => hasVisibleHistoryNodeChanges(child, showUnchanged));
 
@@ -264,22 +257,9 @@ export function HistoryGroupView({
     <div style={HISTORY_NESTED_TABLE_STYLE}>
       <div style={HISTORY_HEADER_STYLE}>
         <div style={HISTORY_HEADER_CONTENT_STYLE}>
-          <span
-            role="button"
-            tabIndex={0}
-            aria-expanded={expanded}
-            aria-label={expanded ? "Collapse section" : "Expand section"}
-            onClick={toggleExpanded}
-            onKeyDown={event => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                toggleExpanded();
-              }
-            }}
-            style={HISTORY_GROUP_HEADER_LEFT_CLICKABLE_STYLE}
-          >
+          <span style={HISTORY_GROUP_HEADER_LEFT_STYLE}>
             {toggleButton}
-            {isRootGroup ? <span style={HISTORY_ROOT_META_STYLE}>{rootMeta}</span> : null}
+            {isRootGroup && rootMeta != null ? <span style={HISTORY_ROOT_META_STYLE}>{rootMeta}</span> : null}
             {isRootGroup ? (
               showRootEntityLabel ? (
                 <HistoryGroupTitle group={group} />
@@ -296,7 +276,7 @@ export function HistoryGroupView({
               onClick={() => setRootShowUnchanged(current => !current)}
               style={HISTORY_GROUP_HEADER_BUTTON_STYLE}
             >
-              {showUnchanged ? t("hideUnchanged") : t("showUnchanged")}
+              {showUnchanged ? labels.hideUnchanged : labels.showUnchanged}
             </Button>
           ) : null}
         </div>
@@ -325,6 +305,7 @@ export function HistoryGroupView({
                     defaultExpandedDepth={defaultExpandedDepth}
                     defaultShowUnchanged={defaultShowUnchanged}
                     inheritedShowUnchanged={showUnchanged}
+                    labels={labels}
                   />
                 </div>
               );
@@ -335,6 +316,7 @@ export function HistoryGroupView({
                 key={child.path.join(".") || "$row"}
                 row={child}
                 parentGroupChangeType={group.changeType}
+                labels={labels}
               />
             );
           })}

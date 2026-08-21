@@ -1,5 +1,6 @@
-import { HistoryHoverableTableRow } from "@/history/components/HistoryHoverableTableRow";
-import { HistoryValueContent } from "@/history/components/HistoryValueContent";
+import { HistoryHoverableTableRow } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryHoverableTableRow/HistoryHoverableTableRow";
+import { HistoryValueContent } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryValueContent/HistoryValueContent";
+import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
 import { type HistoryFieldRow, type HistoryGroupChangeType } from "@vireocodedev/starter-history";
 
 const CELL_PADDING = "2px 8px";
@@ -65,15 +66,17 @@ const HISTORY_ARROW_CELL_STYLE: React.CSSProperties = {
 
 const HISTORY_UNCHANGED_VALUE_CELL_STYLE: React.CSSProperties = {
   ...HISTORY_FULL_VALUE_CELL_STYLE,
-  color: "var(--mui-palette-grey-400)",
+  color: "var(--mui-palette-text-disabled)",
 };
 
 export function HistoryFieldRowView({
   row,
   parentGroupChangeType,
+  labels,
 }: {
   row: HistoryFieldRow;
   parentGroupChangeType?: HistoryGroupChangeType;
+  labels: VireoHistoryEntryLabels;
 }): React.ReactElement {
   const isRemovedBecauseParentGroupWasRemoved = parentGroupChangeType === "removed";
 
@@ -89,7 +92,12 @@ export function HistoryFieldRowView({
           <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
 
           <div style={removedValueCellStyle}>
-            <HistoryValueContent removed removedColor={isRemovedBecauseParentGroupWasRemoved ? COLOR_ERROR : undefined}>
+            <HistoryValueContent
+              removed
+              removedColor={isRemovedBecauseParentGroupWasRemoved ? COLOR_ERROR : undefined}
+              showMoreLabel={labels.showMore}
+              showLessLabel={labels.showLess}
+            >
               {row.previous}
             </HistoryValueContent>
           </div>
@@ -106,7 +114,9 @@ export function HistoryFieldRowView({
           <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
 
           <div style={HISTORY_FULL_VALUE_CELL_STYLE}>
-            <HistoryValueContent>{row.current}</HistoryValueContent>
+            <HistoryValueContent showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
+              {row.current}
+            </HistoryValueContent>
           </div>
         </div>
       </HistoryHoverableTableRow>
@@ -117,11 +127,13 @@ export function HistoryFieldRowView({
     return (
       <HistoryHoverableTableRow>
         <div style={HISTORY_ROW_GRID_STYLE}>
-          <div style={{ ...HISTORY_DOT_CELL_STYLE, color: "var(--mui-palette-grey-500)" }}>●</div>
+          <div style={{ ...HISTORY_DOT_CELL_STYLE, color: "var(--mui-palette-text-disabled)" }}>●</div>
           <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
 
           <div style={HISTORY_UNCHANGED_VALUE_CELL_STYLE}>
-            <HistoryValueContent>{row.current}</HistoryValueContent>
+            <HistoryValueContent showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
+              {row.current}
+            </HistoryValueContent>
           </div>
         </div>
       </HistoryHoverableTableRow>
@@ -143,13 +155,17 @@ export function HistoryFieldRowView({
         <div style={HISTORY_LABEL_CELL_STYLE}>{row.label}</div>
 
         <div style={HISTORY_VALUE_CELL_STYLE}>
-          <HistoryValueContent>{row.previous}</HistoryValueContent>
+          <HistoryValueContent showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
+            {row.previous}
+          </HistoryValueContent>
         </div>
 
         <div style={HISTORY_ARROW_CELL_STYLE}>→</div>
 
         <div style={HISTORY_CURRENT_VALUE_CELL_STYLE}>
-          <HistoryValueContent alignRight>{row.current}</HistoryValueContent>
+          <HistoryValueContent alignRight showMoreLabel={labels.showMore} showLessLabel={labels.showLess}>
+            {row.current}
+          </HistoryValueContent>
         </div>
       </div>
     </HistoryHoverableTableRow>

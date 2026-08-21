@@ -154,7 +154,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `events/useRgoEventListener.ts`                                                                                     | `core/hooks/useRgoEventListener`       | Planned       | Provisional consumer hook.                                                                                                             |
 | `features/**`                                                                                                       | Deferred integration audit             | Deferred      | Most modules are adapters; extract capability-owned UI such as country/nationality components before designing integration boundaries. |
 | `capabilities/forms/form-overlays/components/overlays/VireoResponsiveFormOverlay/**`                                | `capabilities/forms/form-overlays`     | Migrated      | Responsive form surface coordination, actions, and unsaved-change scoping.                                                             |
-| `history/**`                                                                                                        | `capabilities/history`                 | Planned       | History rendering capability.                                                                                                          |
+| `capabilities/history/**`                                                                                           | `capabilities/history`                 | Migrated      | Public history-entry contract with private nested diff renderers.                                                                      |
 | `inputs/**`                                                                                                         | `core/components/inputs`               | Planned       | Standalone value-level input behavior.                                                                                                 |
 | `capabilities/page-layout/**`                                                                                       | `capabilities/page-layout`             | Migrated      | Container-measured page frame, body, header, responsive surface, context, and hooks.                                                   |
 | `capabilities/table/**`                                                                                             | `capabilities/table`                   | Migrated      | Canonical responsive table contract with private desktop and mobile renderers.                                                         |
@@ -164,10 +164,10 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ### Root component files
 
-| Current path pattern                     | Target owner                                              | Disposition   | Notes                                                 |
-| ---------------------------------------- | --------------------------------------------------------- | ------------- | ----------------------------------------------------- |
-| `components/SlidingScreenStack.tsx`      | `core/components/layout/VireoSlidingScreenStack`          | Compatibility | Thin deprecated alias for the canonical screen stack. |
-| `components/DelayedRender.tsx`           | `core/components/behavior/VireoDelayedRender`             | Compatibility | Thin deprecated alias.                                |
+| Current path pattern                | Target owner                                     | Disposition   | Notes                                                 |
+| ----------------------------------- | ------------------------------------------------ | ------------- | ----------------------------------------------------- |
+| `components/SlidingScreenStack.tsx` | `core/components/layout/VireoSlidingScreenStack` | Compatibility | Thin deprecated alias for the canonical screen stack. |
+| `components/DelayedRender.tsx`      | `core/components/behavior/VireoDelayedRender`    | Compatibility | Thin deprecated alias.                                |
 
 ### Data-display components
 
@@ -365,7 +365,8 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-21   | `hooks/useRgoConfirm/**` and `providers/RgoConfirmProvider/**`                                                                              | `capabilities/overlays/confirmation`                                                                             | Added a safe dialog and promise-based provider API; removed legacy HTML parsing and callback-owned execution.   |
 | 2026-08-21   | `components/layout/RgoPage*/**`, `ResponsiveCard`, and legacy page-layout modules                                                           | `capabilities/page-layout`                                                                                       | Added container-measured Vireo page contracts and migrated table consumers to the stable responsive surface.    |
 | 2026-08-21   | `components/layout/RgoInfiniteCanvas/**` and `hooks/useRgoInfiniteCanvas/**`                                                                | `capabilities/infinite-canvas`                                                                                   | Added controlled pan/zoom, coordinate helpers, transformed body, fixed overlays, tests, and executable stories. |
-| 2026-08-21   | `components/ManagementSearchToolbar.tsx`                                                                                                   | Removed                                                                                                          | Removed an application-specific search/title/create composition rather than promoting it into the table API.     |
+| 2026-08-21   | `components/ManagementSearchToolbar.tsx`                                                                                                    | Removed                                                                                                          | Removed an application-specific search/title/create composition rather than promoting it into the table API.    |
+| 2026-08-21   | `history/**`                                                                                                                                | `capabilities/history/components/data-display/VireoHistoryEntry`                                                 | Replaced seven public rendering internals with one typed Vireo entry contract and private nested renderers.     |
 
 ## Automated verification
 

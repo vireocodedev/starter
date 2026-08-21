@@ -1,0 +1,1 @@
+export { HistoryValueContent } from "./HistoryValueContent";
