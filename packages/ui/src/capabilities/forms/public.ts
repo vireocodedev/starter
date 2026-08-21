@@ -3,6 +3,8 @@ export * from "./components/forms/VireoFormMultiStep/VireoFormMultiStep.classes"
 export type * from "./components/forms/VireoFormMultiStep/VireoFormMultiStep.types";
 export * from "./components/forms/VireoFormStep/VireoFormStep.classes";
 export type * from "./components/forms/VireoFormStep/VireoFormStep.types";
+export * from "./components/forms/VireoFormStepProgress/VireoFormStepProgress.classes";
+export type * from "./components/forms/VireoFormStepProgress/VireoFormStepProgress.types";
 export * from "./components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField.classes";
 export type * from "./components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField.types";
 export * from "./components/forms/VireoFormAutocompleteMultipleField/VireoFormAutocompleteMultipleField.classes";

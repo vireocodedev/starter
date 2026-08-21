@@ -4,6 +4,8 @@ import { VireoFormMultiStep } from "@/capabilities/forms/components/forms/VireoF
 import type { VireoFormMultiStepProps } from "@/capabilities/forms/components/forms/VireoFormMultiStep/VireoFormMultiStep.types";
 import { VireoFormStep } from "@/capabilities/forms/components/forms/VireoFormStep/VireoFormStep";
 import type { VireoFormStepProps } from "@/capabilities/forms/components/forms/VireoFormStep/VireoFormStep.types";
+import { VireoFormStepProgress } from "@/capabilities/forms/components/forms/VireoFormStepProgress/VireoFormStepProgress";
+import type { VireoFormStepProgressProps } from "@/capabilities/forms/components/forms/VireoFormStepProgress/VireoFormStepProgress.types";
 import { VireoMultiStepStore } from "@/capabilities/forms/state/vireoMultiStepStore/vireoMultiStepStore";
 import type {
   VireoMultiStepChangeEvent,
@@ -93,6 +95,7 @@ export type VireoMultiStepFormApi<
   Step: React.ForwardRefExoticComponent<
     Omit<VireoFormStepProps, "id" | "ref"> & { id: TStepId } & React.RefAttributes<HTMLElement>
   >;
+  StepProgress: React.ForwardRefExoticComponent<VireoFormStepProgressProps & React.RefAttributes<HTMLDivElement>>;
   MultiStepSubscribe: <TSelected = VireoMultiStepState<TStepId>>(
     props: VireoMultiStepSubscribeProps<TStepId, TSelected>,
   ) => React.ReactNode;
@@ -221,6 +224,7 @@ export function useVireoMultiStepForm<
         if (property === "Form") return BoundForm;
         if (property === "MultiStep") return BoundMultiStep;
         if (property === "Step") return VireoFormStep;
+        if (property === "StepProgress") return VireoFormStepProgress;
         if (property === "MultiStepSubscribe") return MultiStepSubscribe;
         if (property === "multiStepState") return state;
         if (property === "getStepState") return controller.getStepState;
