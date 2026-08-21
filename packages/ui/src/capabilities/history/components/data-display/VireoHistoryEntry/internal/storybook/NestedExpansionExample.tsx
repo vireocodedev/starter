@@ -5,7 +5,13 @@ import { z } from "zod";
 
 const RegionSchema = z.object({ county: z.string(), country: z.string() });
 const AddressSchema = z.object({ city: z.string(), postalCode: z.string(), region: RegionSchema });
-const CustomerSchema = z.object({ id: z.string(), name: z.string(), address: AddressSchema });
+const ContactSchema = z.object({ email: z.string(), phone: z.string() });
+const CustomerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  address: AddressSchema,
+  contact: ContactSchema,
+});
 
 const buildRegionHistory = createHistoryDefinitionBuilderFn(RegionSchema);
 const regionHistoryDefinition = buildRegionHistory(
@@ -24,6 +30,14 @@ const addressHistoryDefinition = buildAddressHistory(
     region: { kind: "object", definition: regionHistoryDefinition },
   },
 );
+const buildContactHistory = createHistoryDefinitionBuilderFn(ContactSchema);
+const contactHistoryDefinition = buildContactHistory(
+  { label: "Contact", key: contact => contact.phone, render: contact => contact.email },
+  {
+    email: { kind: "field", label: "Email" },
+    phone: { kind: "field", label: "Phone" },
+  },
+);
 
 const buildCustomerHistory = createHistoryDefinitionBuilderFn(CustomerSchema);
 const customerHistoryDefinition = buildCustomerHistory(
@@ -32,6 +46,7 @@ const customerHistoryDefinition = buildCustomerHistory(
     id: false,
     name: { kind: "field", label: "Name" },
     address: { kind: "object", definition: addressHistoryDefinition },
+    contact: { kind: "object", definition: contactHistoryDefinition },
   },
 );
 
@@ -49,6 +64,7 @@ export default function NestedExpansionExample() {
             postalCode: "10000",
             region: { county: "City of Zagreb", country: "Croatia" },
           },
+          contact: { email: "operations@northstar.example", phone: "+385 1 555 0142" },
         }}
         current={{
           id: "CUS-10482",
@@ -58,8 +74,9 @@ export default function NestedExpansionExample() {
             postalCode: "10430",
             region: { county: "Zagreb County", country: "Croatia" },
           },
+          contact: { email: "support@northstar.example", phone: "+385 1 555 0142" },
         }}
-        rootMeta="Address correction"
+        rootMeta="Customer profile update"
         defaultExpandedDepth={3}
       />
     </Box>
