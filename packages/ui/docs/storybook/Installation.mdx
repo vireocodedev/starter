@@ -22,7 +22,7 @@ Complete setup guide for RGO Front UI in your React application.
   - [RgoThemeProvider (Required)](#rgothemeprovider-required)
   - [RgoQueryClientProvider (Optional)](#rgoqueryclientprovider-optional)
   - [RgoLocalizationProvider (Optional)](#rgolocalizationprovider-optional)
-  - [RgoConfirmProvider (Optional)](#rgoconfirmprovider-optional)
+  - [VireoConfirmationProvider (Optional)](#vireoconfirmationprovider-optional)
   - [AppSnackbarProvider (Optional)](#appsnackbarprovider-optional)
 - [5. Complete Setup Example](#5-complete-setup-example)
 - [6. Special Components](#6-special-components)
@@ -135,16 +135,16 @@ import { RgoLocalizationProvider } from "@vireocodedev/starter-ui";
 </RgoLocalizationProvider>;
 ```
 
-### RgoConfirmProvider (Optional)
+### VireoConfirmationProvider (Optional)
 
-Add if using the `useRgoConfirm` hook:
+Add if using the `useVireoConfirmation` hook:
 
 ```tsx
-import { RgoConfirmProvider } from "@vireocodedev/starter-ui";
+import { VireoConfirmationProvider } from "@vireocodedev/starter-ui";
 
-<RgoConfirmProvider>
+<VireoConfirmationProvider>
   <App />
-</RgoConfirmProvider>;
+</VireoConfirmationProvider>;
 ```
 
 ### AppSnackbarProvider (Optional)
@@ -170,7 +170,7 @@ import {
   RgoThemeProvider,
   RgoQueryClientProvider,
   RgoLocalizationProvider,
-  RgoConfirmProvider,
+  VireoConfirmationProvider,
   AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
 
@@ -186,11 +186,11 @@ function App() {
     <RgoThemeProvider theme={theme}>
       <RgoQueryClientProvider>
         <RgoLocalizationProvider>
-          <RgoConfirmProvider>
+          <VireoConfirmationProvider>
             <AppSnackbarProvider>
               <YourAppContent />
             </AppSnackbarProvider>
-          </RgoConfirmProvider>
+          </VireoConfirmationProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
     </RgoThemeProvider>

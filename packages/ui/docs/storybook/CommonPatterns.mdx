@@ -65,7 +65,7 @@ import {
   RgoThemeProvider,
   RgoQueryClientProvider,
   RgoLocalizationProvider,
-  RgoConfirmProvider,
+  VireoConfirmationProvider,
   AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
 
@@ -74,11 +74,11 @@ function App() {
     <RgoThemeProvider theme={theme}>
       <RgoQueryClientProvider>
         <RgoLocalizationProvider>
-          <RgoConfirmProvider>
+          <VireoConfirmationProvider>
             <AppSnackbarProvider>
               <YourAppContent />
             </AppSnackbarProvider>
-          </RgoConfirmProvider>
+          </VireoConfirmationProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
     </RgoThemeProvider>
@@ -106,9 +106,9 @@ function AppWithNotifications() {
 function AppWithConfirmations() {
   return (
     <RgoThemeProvider theme={theme}>
-      <RgoConfirmProvider>
+      <VireoConfirmationProvider>
         <YourAppContent />
-      </RgoConfirmProvider>
+      </VireoConfirmationProvider>
     </RgoThemeProvider>
   );
 }
@@ -183,21 +183,21 @@ function ServerUserTable() {
 
 ### Confirmation Dialogs
 
-Using useRgoConfirm for user confirmations:
+Using useVireoConfirmation for user confirmations:
 
 ```tsx
-import { useRgoConfirm } from "@vireocodedev/starter-ui";
+import { useVireoConfirmation } from "@vireocodedev/starter-ui";
 
 function DeleteButton({ userId }) {
-  const confirm = useRgoConfirm();
+  const confirm = useVireoConfirmation();
 
   const handleDelete = async () => {
     const confirmed = await confirm({
       title: "Delete User",
       message: "Are you sure you want to delete this user? This action cannot be undone.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      color: "error",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      confirmColor: "error",
     });
 
     if (confirmed) {

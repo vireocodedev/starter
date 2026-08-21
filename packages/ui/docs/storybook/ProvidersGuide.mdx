@@ -17,7 +17,7 @@ RGO Front UI uses a provider-based architecture to deliver optional functionalit
 - [RgoThemeProvider](#rgothemeprovider)
 - [RgoQueryClientProvider](#rgoqueryclientprovider)
 - [RgoLocalizationProvider](#rgolocalizationprovider)
-- [RgoConfirmProvider](#rgoconfirmprovider)
+- [VireoConfirmationProvider](#vireoconfirmationprovider)
 - [AppSnackbarProvider](#appsnackbarprovider)
 - [RgoIconsProvider](#rgoiconsprovider)
 - [RgoSseProvider](#rgosseprovider)
@@ -71,12 +71,12 @@ RGO Front UI uses a provider-based architecture to deliver optional functionalit
     </tr>
     <tr>
       <td>
-        <code>RgoConfirmProvider</code>
+        <code>VireoConfirmationProvider</code>
       </td>
       <td>Confirmation dialogs</td>
       <td>—</td>
       <td>
-        <code>useRgoConfirm</code>
+        <code>useVireoConfirmation</code>
       </td>
     </tr>
     <tr>
@@ -124,7 +124,7 @@ import {
   RgoQueryClientProvider,
   RgoLocalizationProvider,
   RgoIconsProvider,
-  RgoConfirmProvider,
+  VireoConfirmationProvider,
   AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
 
@@ -134,11 +134,11 @@ function App() {
       <RgoQueryClientProvider client={queryClient}>
         <RgoLocalizationProvider>
           <RgoIconsProvider icons={icons}>
-            <RgoConfirmProvider>
+            <VireoConfirmationProvider>
               <AppSnackbarProvider>
                 <YourApp />
               </AppSnackbarProvider>
-            </RgoConfirmProvider>
+            </VireoConfirmationProvider>
           </RgoIconsProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
@@ -239,29 +239,29 @@ import { RgoLocalizationProvider } from "@vireocodedev/starter-ui";
 
 No props required. Uses the i18n instance configured elsewhere.
 
-## RgoConfirmProvider
+## VireoConfirmationProvider
 
-Provides imperative confirmation dialogs via the `useRgoConfirm` hook.
+Provides promise-based confirmation decisions via the `useVireoConfirmation` hook.
 
 ```tsx
-import { RgoConfirmProvider, useRgoConfirm } from "@vireocodedev/starter-ui";
+import { VireoConfirmationProvider, useVireoConfirmation } from "@vireocodedev/starter-ui";
 
 // In your provider tree
-<RgoConfirmProvider>
+<VireoConfirmationProvider>
   <App />
-</RgoConfirmProvider>;
+</VireoConfirmationProvider>;
 
 // In any component
 function DeleteButton() {
-  const confirm = useRgoConfirm();
+  const confirm = useVireoConfirmation();
 
   const handleDelete = async () => {
     const confirmed = await confirm({
       title: "Delete Item",
       message: "This action cannot be undone.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      color: "error",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      confirmColor: "error",
     });
 
     if (confirmed) {
@@ -287,7 +287,7 @@ function DeleteButton() {
         <code>title</code>
       </td>
       <td>
-        <code>string</code>
+        <code>ReactNode</code>
       </td>
       <td>Dialog title</td>
     </tr>
@@ -296,13 +296,13 @@ function DeleteButton() {
         <code>message</code>
       </td>
       <td>
-        <code>string</code>
+        <code>ReactNode</code>
       </td>
       <td>Dialog message body</td>
     </tr>
     <tr>
       <td>
-        <code>confirmText</code>
+        <code>confirmLabel</code>
       </td>
       <td>
         <code>string</code>
@@ -311,7 +311,7 @@ function DeleteButton() {
     </tr>
     <tr>
       <td>
-        <code>cancelText</code>
+        <code>cancelLabel</code>
       </td>
       <td>
         <code>string</code>
@@ -320,7 +320,7 @@ function DeleteButton() {
     </tr>
     <tr>
       <td>
-        <code>color</code>
+        <code>confirmColor</code>
       </td>
       <td>
         <code>string</code>
@@ -511,11 +511,16 @@ function AppEvents() {
 A utility component that reduces provider nesting boilerplate by composing multiple providers:
 
 ```tsx
-import { RgoProviders, RgoThemeProvider, RgoConfirmProvider, AppSnackbarProvider } from "@vireocodedev/starter-ui";
+import {
+  RgoProviders,
+  RgoThemeProvider,
+  VireoConfirmationProvider,
+  AppSnackbarProvider,
+} from "@vireocodedev/starter-ui";
 
 const providers = [
   props => <RgoThemeProvider theme={theme} {...props} />,
-  props => <RgoConfirmProvider {...props} />,
+  props => <VireoConfirmationProvider {...props} />,
   props => <AppSnackbarProvider {...props} />,
 ];
 
