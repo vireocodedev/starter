@@ -15,9 +15,11 @@ import {
   Popper,
   TextField,
   type BoxProps,
+  type PaperProps,
+  type PopperProps,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type React from "react";
+import React from "react";
 import { VIREO_FORM_AUTOCOMPLETE_FIELD_NAME } from "./VireoFormAutocompleteField.identity";
 import type { VireoFormAutocompleteFieldOwnerState } from "./VireoFormAutocompleteField.types";
 
@@ -57,7 +59,6 @@ export const VireoFormAutocompleteFieldInputLabel: React.ElementType = styled(In
 export const VireoFormAutocompleteFieldOutlinedInput: React.ElementType = styled(OutlinedInput, options("Input"))({});
 export const VireoFormAutocompleteFieldFilledInput: React.ElementType = styled(FilledInput, options("Input"))({});
 export const VireoFormAutocompleteFieldStandardInput: React.ElementType = styled(Input, options("Input"))({});
-export const VireoFormAutocompleteFieldHtmlInput: React.ElementType = styled("input", options("HtmlInput"))({});
 export const VireoFormAutocompleteFieldLoadingIndicator: React.ElementType = styled(
   CircularProgress,
   options("LoadingIndicator"),
@@ -70,15 +71,74 @@ export const VireoFormAutocompleteFieldFormHelperText: React.ElementType = style
   FormHelperText,
   options("FormHelperText"),
 )({});
-export const VireoFormAutocompleteFieldPopper: React.ElementType = styled(Popper, options("Popper"))({});
-export const VireoFormAutocompleteFieldPaper: React.ElementType = styled(Paper, options("Paper"))({});
+const VireoFormAutocompleteFieldStyledPopper = styled(
+  Popper,
+  options("Popper"),
+)(({ theme }) => ({ zIndex: theme.zIndex.modal }));
+const VireoFormAutocompleteFieldStyledPaper = styled(
+  Paper,
+  options("Paper"),
+)(({ theme }) => ({ ...theme.typography.body1, overflow: "auto" }));
+type PopperSlotProps = PopperProps & StyledProps;
+type PaperSlotProps = PaperProps & StyledProps;
+export const VireoFormAutocompleteFieldPopper = React.forwardRef<HTMLDivElement, PopperSlotProps>(
+  function VireoFormAutocompleteFieldPopper(props, ref) {
+    return React.createElement(VireoFormAutocompleteFieldStyledPopper, { ...props, ref });
+  },
+);
+export const VireoFormAutocompleteFieldPaper = React.forwardRef<HTMLDivElement, PaperSlotProps>(
+  function VireoFormAutocompleteFieldPaper(props, ref) {
+    return React.createElement(VireoFormAutocompleteFieldStyledPaper, { ...props, ref });
+  },
+);
 export const VireoFormAutocompleteFieldLoadingText: React.ElementType = styled("div", options("LoadingText"))({});
 export const VireoFormAutocompleteFieldNoOptionsText: React.ElementType = styled("div", options("NoOptionsText"))({});
-export const VireoFormAutocompleteFieldListbox: React.ElementType = styled("ul", options("Listbox"))({});
-export const VireoFormAutocompleteFieldOption: React.ElementType = styled("li", options("Option"))({});
+const VireoFormAutocompleteFieldStyledListbox = styled(
+  "ul",
+  options("Listbox"),
+)({
+  listStyle: "none",
+  margin: 0,
+  maxHeight: "40vh",
+  overflow: "auto",
+  padding: "8px 0",
+  position: "relative",
+});
+type ListboxSlotProps = React.HTMLAttributes<HTMLUListElement> & StyledProps;
+export const VireoFormAutocompleteFieldListbox = React.forwardRef<HTMLUListElement, ListboxSlotProps>(
+  function VireoFormAutocompleteFieldListbox(props, ref) {
+    return React.createElement(VireoFormAutocompleteFieldStyledListbox, { ...props, ref });
+  },
+);
+export const VireoFormAutocompleteFieldOption: React.ElementType = styled(
+  "li",
+  options("Option"),
+)(({ theme }) => ({
+  alignItems: "center",
+  boxSizing: "border-box",
+  cursor: "pointer",
+  display: "flex",
+  justifyContent: "flex-start",
+  minHeight: 48,
+  outline: 0,
+  overflow: "hidden",
+  padding: "6px 16px",
+  WebkitTapHighlightColor: "transparent",
+  [theme.breakpoints.up("sm")]: { minHeight: "auto" },
+  "&.Mui-focused": { backgroundColor: theme.palette.action.hover },
+  "&.Mui-focusVisible": { backgroundColor: theme.palette.action.focus },
+  '&[aria-disabled="true"]': {
+    opacity: theme.palette.action.disabledOpacity,
+    pointerEvents: "none",
+  },
+  '&[aria-selected="true"]': { backgroundColor: theme.palette.action.selected },
+}));
 export const VireoFormAutocompleteFieldGroup: React.ElementType = styled("li", options("Group"))({ listStyle: "none" });
-export const VireoFormAutocompleteFieldGroupLabel: React.ElementType = styled(ListSubheader, options("GroupLabel"))({});
+export const VireoFormAutocompleteFieldGroupLabel: React.ElementType = styled(
+  ListSubheader,
+  options("GroupLabel"),
+)(({ theme }) => ({ backgroundColor: theme.palette.background.paper, top: -8 }));
 export const VireoFormAutocompleteFieldGroupList: React.ElementType = styled(
   "ul",
   options("GroupList"),
-)({ margin: 0, padding: 0 });
+)({ margin: 0, padding: 0, "& .MuiAutocomplete-option": { paddingLeft: 24 } });

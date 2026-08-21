@@ -46,6 +46,16 @@ async function open() {
   await userEvent.click(screen.getByRole("button", { name: "Open options" }));
 }
 describe(VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_NAME, () => {
+  it("preserves MUI input resets and listbox presentation", async () => {
+    render(<TestForm />);
+    const input = screen.getByRole("combobox", { name: "Teams" });
+
+    await userEvent.click(input);
+    const listbox = await screen.findByRole("listbox", { name: "Teams" });
+    expect(listbox).toHaveClass(vireoFormAutocompleteMultipleFieldClasses.listbox);
+    expect(window.getComputedStyle(screen.getByRole("option", { name: "Alpha" })).display).toBe("flex");
+  });
+
   it("stores ordered scalar arrays and submits them", async () => {
     const onSubmit = vi.fn();
     render(<TestForm initialValue={["alpha"]} onSubmit={onSubmit} />);

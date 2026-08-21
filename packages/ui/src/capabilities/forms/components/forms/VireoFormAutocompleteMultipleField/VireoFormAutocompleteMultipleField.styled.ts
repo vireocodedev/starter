@@ -19,9 +19,11 @@ import {
   Popper,
   TextField,
   type BoxProps,
+  type PaperProps,
+  type PopperProps,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type React from "react";
+import React from "react";
 import { VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_NAME } from "./VireoFormAutocompleteMultipleField.identity";
 import type { VireoFormAutocompleteMultipleFieldOwnerState } from "./VireoFormAutocompleteMultipleField.types";
 type StyledProps = StyledSlotProps<VireoFormAutocompleteMultipleFieldOwnerState>;
@@ -72,7 +74,6 @@ export const VireoFormAutocompleteMultipleFieldFilledInput: React.ElementType = 
   options("Input"),
 )({});
 export const VireoFormAutocompleteMultipleFieldStandardInput: React.ElementType = styled(Input, options("Input"))({});
-export const VireoFormAutocompleteMultipleFieldHtmlInput: React.ElementType = styled("input", options("HtmlInput"))({});
 export const VireoFormAutocompleteMultipleFieldLoadingIndicator: React.ElementType = styled(
   CircularProgress,
   options("LoadingIndicator"),
@@ -94,8 +95,26 @@ export const VireoFormAutocompleteMultipleFieldFormHelperText: React.ElementType
   FormHelperText,
   options("FormHelperText"),
 )({});
-export const VireoFormAutocompleteMultipleFieldPopper: React.ElementType = styled(Popper, options("Popper"))({});
-export const VireoFormAutocompleteMultipleFieldPaper: React.ElementType = styled(Paper, options("Paper"))({});
+const VireoFormAutocompleteMultipleFieldStyledPopper = styled(
+  Popper,
+  options("Popper"),
+)(({ theme }) => ({ zIndex: theme.zIndex.modal }));
+const VireoFormAutocompleteMultipleFieldStyledPaper = styled(
+  Paper,
+  options("Paper"),
+)(({ theme }) => ({ ...theme.typography.body1, overflow: "auto" }));
+type PopperSlotProps = PopperProps & StyledProps;
+type PaperSlotProps = PaperProps & StyledProps;
+export const VireoFormAutocompleteMultipleFieldPopper = React.forwardRef<HTMLDivElement, PopperSlotProps>(
+  function VireoFormAutocompleteMultipleFieldPopper(props, ref) {
+    return React.createElement(VireoFormAutocompleteMultipleFieldStyledPopper, { ...props, ref });
+  },
+);
+export const VireoFormAutocompleteMultipleFieldPaper = React.forwardRef<HTMLDivElement, PaperSlotProps>(
+  function VireoFormAutocompleteMultipleFieldPaper(props, ref) {
+    return React.createElement(VireoFormAutocompleteMultipleFieldStyledPaper, { ...props, ref });
+  },
+);
 export const VireoFormAutocompleteMultipleFieldLoadingText: React.ElementType = styled(
   "div",
   options("LoadingText"),
@@ -104,8 +123,46 @@ export const VireoFormAutocompleteMultipleFieldNoOptionsText: React.ElementType 
   "div",
   options("NoOptionsText"),
 )({});
-export const VireoFormAutocompleteMultipleFieldListbox: React.ElementType = styled("ul", options("Listbox"))({});
-export const VireoFormAutocompleteMultipleFieldOption: React.ElementType = styled("li", options("Option"))({});
+const VireoFormAutocompleteMultipleFieldStyledListbox = styled(
+  "ul",
+  options("Listbox"),
+)({
+  listStyle: "none",
+  margin: 0,
+  maxHeight: "40vh",
+  overflow: "auto",
+  padding: "8px 0",
+  position: "relative",
+});
+type ListboxSlotProps = React.HTMLAttributes<HTMLUListElement> & StyledProps;
+export const VireoFormAutocompleteMultipleFieldListbox = React.forwardRef<HTMLUListElement, ListboxSlotProps>(
+  function VireoFormAutocompleteMultipleFieldListbox(props, ref) {
+    return React.createElement(VireoFormAutocompleteMultipleFieldStyledListbox, { ...props, ref });
+  },
+);
+export const VireoFormAutocompleteMultipleFieldOption: React.ElementType = styled(
+  "li",
+  options("Option"),
+)(({ theme }) => ({
+  alignItems: "center",
+  boxSizing: "border-box",
+  cursor: "pointer",
+  display: "flex",
+  justifyContent: "flex-start",
+  minHeight: 48,
+  outline: 0,
+  overflow: "hidden",
+  padding: "6px 16px",
+  WebkitTapHighlightColor: "transparent",
+  [theme.breakpoints.up("sm")]: { minHeight: "auto" },
+  "&.Mui-focused": { backgroundColor: theme.palette.action.hover },
+  "&.Mui-focusVisible": { backgroundColor: theme.palette.action.focus },
+  '&[aria-disabled="true"]': {
+    opacity: theme.palette.action.disabledOpacity,
+    pointerEvents: "none",
+  },
+  '&[aria-selected="true"]': { backgroundColor: theme.palette.action.selected },
+}));
 export const VireoFormAutocompleteMultipleFieldGroup: React.ElementType = styled(
   "li",
   options("Group"),
@@ -113,11 +170,11 @@ export const VireoFormAutocompleteMultipleFieldGroup: React.ElementType = styled
 export const VireoFormAutocompleteMultipleFieldGroupLabel: React.ElementType = styled(
   ListSubheader,
   options("GroupLabel"),
-)({});
+)(({ theme }) => ({ backgroundColor: theme.palette.background.paper, top: -8 }));
 export const VireoFormAutocompleteMultipleFieldGroupList: React.ElementType = styled(
   "ul",
   options("GroupList"),
-)({ margin: 0, padding: 0 });
+)({ margin: 0, padding: 0, "& .MuiAutocomplete-option": { paddingLeft: 24 } });
 export const VireoFormAutocompleteMultipleFieldSelectedOptions: React.ElementType = styled(
   "div",
   options("SelectedOptions"),

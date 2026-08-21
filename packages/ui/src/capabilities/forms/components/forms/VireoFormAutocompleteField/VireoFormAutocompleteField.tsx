@@ -23,7 +23,6 @@ import {
   VireoFormAutocompleteFieldGroup,
   VireoFormAutocompleteFieldGroupLabel,
   VireoFormAutocompleteFieldGroupList,
-  VireoFormAutocompleteFieldHtmlInput,
   VireoFormAutocompleteFieldInputLabel,
   VireoFormAutocompleteFieldListbox,
   VireoFormAutocompleteFieldLoadingIndicator,
@@ -335,6 +334,7 @@ function VireoFormAutocompleteFieldImpl<TOption, TValue extends VireoFormAutocom
         readOnly={readOnly}
         disableClearable={disableClearable as false}
         loading={loading}
+        fullWidth={fullWidth}
         open={effectiveOpen}
         onOpen={handleOpen}
         onClose={handleClose}
@@ -500,7 +500,9 @@ function VireoFormAutocompleteFieldImpl<TOption, TValue extends VireoFormAutocom
                     : variant === "standard"
                       ? VireoFormAutocompleteFieldStandardInput
                       : VireoFormAutocompleteFieldOutlinedInput),
-                htmlInput: slots.htmlInput ?? VireoFormAutocompleteFieldHtmlInput,
+                // Keep MUI's internal InputBaseInput unless the consumer replaces this slot.
+                // It owns the native-input reset required by every TextField variant.
+                htmlInput: slots.htmlInput,
                 formHelperText: slots.formHelperText ?? VireoFormAutocompleteFieldFormHelperText,
               }}
               onFocus={(event: React.FocusEvent<HTMLInputElement>) => {

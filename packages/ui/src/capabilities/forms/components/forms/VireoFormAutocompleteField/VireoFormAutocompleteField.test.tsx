@@ -49,6 +49,16 @@ async function choose(name: string) {
 }
 
 describe(VIREO_FORM_AUTOCOMPLETE_FIELD_NAME, () => {
+  it("preserves MUI input resets and listbox presentation", async () => {
+    render(<TestForm />);
+    const input = screen.getByRole("combobox", { name: "Team" });
+
+    await userEvent.click(input);
+    const listbox = await screen.findByRole("listbox", { name: "Team" });
+    expect(listbox).toHaveClass(vireoFormAutocompleteFieldClasses.listbox);
+    expect(window.getComputedStyle(screen.getByRole("option", { name: "Alpha" })).display).toBe("flex");
+  });
+
   it("binds and submits a scalar option value", async () => {
     const onSubmit = vi.fn();
     render(<TestForm onSubmit={onSubmit} />);
