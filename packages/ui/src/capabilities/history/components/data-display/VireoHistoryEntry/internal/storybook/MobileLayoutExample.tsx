@@ -3,14 +3,24 @@ import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history"
 import { Box } from "@mui/material";
 import { z } from "zod";
 
-const AddressSchema = z.object({ city: z.string(), postalCode: z.string() });
+const RegionSchema = z.object({ county: z.string(), country: z.string() });
+const AddressSchema = z.object({ city: z.string(), postalCode: z.string(), region: RegionSchema });
 const CustomerSchema = z.object({ id: z.string(), name: z.string(), address: AddressSchema });
+const buildRegionHistory = createHistoryDefinitionBuilderFn(RegionSchema);
+const regionHistoryDefinition = buildRegionHistory(
+  { label: "Region", key: region => region.country, render: region => region.county },
+  {
+    county: { kind: "field", label: "County" },
+    country: { kind: "field", label: "Country" },
+  },
+);
 const buildAddressHistory = createHistoryDefinitionBuilderFn(AddressSchema);
 const addressHistoryDefinition = buildAddressHistory(
   { label: "Address", key: address => address.postalCode, render: address => address.city },
   {
     city: { kind: "field", label: "City" },
     postalCode: { kind: "field", label: "Postal code" },
+    region: { kind: "object", definition: regionHistoryDefinition },
   },
 );
 const buildCustomerHistory = createHistoryDefinitionBuilderFn(CustomerSchema);
@@ -28,13 +38,26 @@ export default function MobileLayoutExample() {
     <Box sx={{ width: "100%", maxWidth: 390 }}>
       <VireoHistoryEntry
         definition={customerHistoryDefinition}
-        previous={{ id: "CUS-10482", name: "Northstar Labs", address: { city: "Zagreb", postalCode: "10000" } }}
+        previous={{
+          id: "CUS-10482",
+          name: "Northstar Labs",
+          address: {
+            city: "Zagreb",
+            postalCode: "10000",
+            region: { county: "City of Zagreb", country: "Croatia" },
+          },
+        }}
         current={{
           id: "CUS-10482",
           name: "Northstar Analytics",
-          address: { city: "Samobor", postalCode: "10430" },
+          address: {
+            city: "Samobor",
+            postalCode: "10430",
+            region: { county: "Zagreb County", country: "Croatia" },
+          },
         }}
         rootMeta="Today at 14:32 · Niko Barić"
+        defaultExpandedDepth={3}
       />
     </Box>
   );
