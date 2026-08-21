@@ -10,6 +10,28 @@ const config: StorybookConfig = {
     options: {},
   },
   async viteFinal(viteConfig) {
+    const reactDocgenPlugin = viteConfig.plugins?.find(plugin => {
+      return typeof plugin === "object" && plugin?.name === "storybook:react-docgen-plugin";
+    });
+
+    if (
+      reactDocgenPlugin &&
+      typeof reactDocgenPlugin === "object" &&
+      typeof reactDocgenPlugin.transform === "function"
+    ) {
+      const transform = reactDocgenPlugin.transform;
+
+      reactDocgenPlugin.transform = function (code, id, ...args) {
+        const isStoryOnlySource =
+          id.includes("/internal/storybook/") ||
+          id.includes("/packages/ui/storybook/") ||
+          id.includes("/packages/ui/.storybook-vireo/") ||
+          /\.stories\.[cm]?[jt]sx?(?:\?|$)/.test(id);
+
+        return isStoryOnlySource ? undefined : transform.call(this, code, id, ...args);
+      };
+    }
+
     return mergeConfig(viteConfig, {
       resolve: {
         alias: [
@@ -42,7 +64,20 @@ const config: StorybookConfig = {
             find: /^@mui\/icons-material$/,
             replacement: resolve(__dirname, "./mui-icons.ts"),
           },
+          {
+            find: /^@mui\/material$/,
+            replacement: resolve(__dirname, "./mui-material.ts"),
+          },
+          {
+            find: /^@mui\/x-date-pickers$/,
+            replacement: resolve(__dirname, "./mui-x-date-pickers.ts"),
+          },
         ],
+      },
+      build: {
+        // Gzip reporting does not affect the generated static Storybook and is
+        // redundant with deployment artifact analysis.
+        reportCompressedSize: false,
       },
     });
   },
