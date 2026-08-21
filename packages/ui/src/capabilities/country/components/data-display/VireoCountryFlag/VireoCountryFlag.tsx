@@ -120,7 +120,6 @@ export const VireoCountryFlag = React.forwardRef<HTMLSpanElement, VireoCountryFl
           style={flagSlotStyle}
           width="24"
           height="16"
-          viewBox="0 0 24 16"
           aria-hidden="true"
           focusable="false"
         />

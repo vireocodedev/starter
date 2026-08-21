@@ -6,7 +6,7 @@ import React from "react";
 const OrganizationFlag = React.forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>(
   function OrganizationFlag(props, ref) {
     return (
-      <svg {...props} ref={ref}>
+      <svg viewBox="0 0 24 16" {...props} ref={ref}>
         <rect width="24" height="16" fill="#172554" />
         <path d="M0 16 12 2l12 14Z" fill="#38bdf8" />
         <circle cx="12" cy="9" r="3" fill="#f8fafc" />

@@ -3,7 +3,7 @@ import React from "react";
 export const UnknownCountryFlag = React.forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>(
   function UnknownCountryFlag(props, ref) {
     return (
-      <svg {...props} ref={ref}>
+      <svg viewBox="0 0 24 16" {...props} ref={ref}>
         <rect width="24" height="16" fill="var(--VireoCountryFlag-unknownBackground)" />
         <text
           x="12"

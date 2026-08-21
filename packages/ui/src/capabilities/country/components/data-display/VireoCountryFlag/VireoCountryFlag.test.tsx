@@ -16,6 +16,7 @@ describe(VIREO_COUNTRY_FLAG_NAME, () => {
     expect(root).toHaveAttribute("aria-hidden", "true");
     expect(root).toHaveClass(vireoCountryFlagClasses.root, vireoCountryFlagClasses.known);
     expect(root?.querySelector("svg")).toHaveClass(vireoCountryFlagClasses.flag);
+    expect(root?.querySelector("svg")).toHaveAttribute("viewBox", "0 0 513 342");
   });
 
   it("resolves every upstream registry identifier to a real flag component", () => {
@@ -29,6 +30,12 @@ describe(VIREO_COUNTRY_FLAG_NAME, () => {
 
     expect(container.querySelectorAll(`.${vireoCountryFlagClasses.known}`)).toHaveLength(COUNTRY_CODES.length);
     expect(container.querySelectorAll(`.${vireoCountryFlagClasses.unknown}`)).toHaveLength(0);
+    expect(
+      [...container.querySelectorAll("svg")].every(svg => {
+        const viewBox = svg.getAttribute("viewBox");
+        return Boolean(viewBox) && viewBox !== "0 0 24 16";
+      }),
+    ).toBe(true);
   });
 
   it("resolves hyphenated subdivision identifiers", () => {
@@ -48,6 +55,7 @@ describe(VIREO_COUNTRY_FLAG_NAME, () => {
 
     expect(container.querySelectorAll(`.${vireoCountryFlagClasses.unknown}`)).toHaveLength(2);
     expect(screen.getAllByText("?")).toHaveLength(2);
+    expect([...container.querySelectorAll("svg")].every(svg => svg.getAttribute("viewBox") === "0 0 24 16")).toBe(true);
   });
 
   it("uses an explicit label as its accessible name", () => {
@@ -89,7 +97,7 @@ describe(VIREO_COUNTRY_FLAG_NAME, () => {
       />,
     );
     expect(container.querySelector("span")).toHaveAttribute("data-width", "3rem");
-    expect(container.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 16");
+    expect(container.querySelector("svg")).toHaveAttribute("viewBox", "0 0 513 342");
   });
 
   it("forwards refs and merges root customization", () => {
@@ -159,7 +167,7 @@ describe(VIREO_COUNTRY_FLAG_NAME, () => {
     expect(svg).toHaveAttribute("aria-hidden", "true");
     expect(svg).toHaveAttribute("focusable", "false");
     expect(svg).toHaveAttribute("height", "16");
-    expect(svg).toHaveAttribute("viewBox", "0 0 24 16");
+    expect(svg).toHaveAttribute("viewBox", "0 0 513 342");
     expect(svg).toHaveAttribute("width", "24");
   });
 
