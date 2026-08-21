@@ -2,6 +2,9 @@
 // barrel. Add an explicit re-export here when Vireo production or story code
 // imports another runtime symbol from `@mui/material`.
 export { default as Alert } from "@mui/material/Alert";
+export { default as Autocomplete, createFilterOptions } from "@mui/material/Autocomplete";
+export { default as Avatar } from "@mui/material/Avatar";
+export { default as Badge } from "@mui/material/Badge";
 export { default as Box } from "@mui/material/Box";
 export { default as Button } from "@mui/material/Button";
 export { default as ButtonGroup } from "@mui/material/ButtonGroup";
@@ -24,9 +27,11 @@ export { default as List } from "@mui/material/List";
 export { default as ListItemButton } from "@mui/material/ListItemButton";
 export { default as ListItemIcon } from "@mui/material/ListItemIcon";
 export { default as ListItemText } from "@mui/material/ListItemText";
+export { default as ListSubheader } from "@mui/material/ListSubheader";
 export { default as MenuItem } from "@mui/material/MenuItem";
 export { default as OutlinedInput } from "@mui/material/OutlinedInput";
 export { default as Paper } from "@mui/material/Paper";
+export { default as Popper } from "@mui/material/Popper";
 export { default as Radio } from "@mui/material/Radio";
 export { default as RadioGroup } from "@mui/material/RadioGroup";
 export { default as Select } from "@mui/material/Select";
