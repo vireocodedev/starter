@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { Button, ButtonProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoFormSubmitButtonClasses, type VireoFormSubmitButtonClassKey } from "./VireoFormSubmitButton.classes";
@@ -45,19 +44,12 @@ export type VireoFormSubmitButtonInheritedProps = Omit<ButtonProps, "component" 
 export type VireoFormSubmitButtonProps = VireoFormSubmitButtonOwnProps & VireoFormSubmitButtonInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_SUBMIT_BUTTON_NAME]: VireoFormSubmitButtonProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_SUBMIT_BUTTON_NAME]: VireoFormSubmitButtonClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_FORM_SUBMIT_BUTTON_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_SUBMIT_BUTTON_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_SUBMIT_BUTTON_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_SUBMIT_BUTTON_NAME];
-    };
+    [VIREO_FORM_SUBMIT_BUTTON_NAME]?: VireoThemeComponent<
+      VireoFormSubmitButtonProps,
+      VireoFormSubmitButtonClassKey,
+      VireoFormSubmitButtonOwnerState,
+      Theme
+    >;
   }
 }

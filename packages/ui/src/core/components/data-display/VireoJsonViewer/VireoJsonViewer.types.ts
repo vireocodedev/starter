@@ -1,7 +1,7 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { ContentCopy } from "@mui/icons-material";
 import type { BoxProps, IconButton } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoJsonViewerClasses, type VireoJsonViewerClassKey } from "./VireoJsonViewer.classes";
@@ -79,19 +79,12 @@ export type RgoJsonViewerProps = {
 };
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_JSON_VIEWER_NAME]: VireoJsonViewerProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_JSON_VIEWER_NAME]: VireoJsonViewerClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_JSON_VIEWER_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_JSON_VIEWER_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_JSON_VIEWER_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_JSON_VIEWER_NAME];
-    };
+    [VIREO_JSON_VIEWER_NAME]?: VireoThemeComponent<
+      VireoJsonViewerProps,
+      VireoJsonViewerClassKey,
+      VireoJsonViewerOwnerState,
+      Theme
+    >;
   }
 }

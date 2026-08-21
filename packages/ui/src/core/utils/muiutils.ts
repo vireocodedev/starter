@@ -1,4 +1,5 @@
 import { type SxProps, type Theme } from "@mui/material";
+import type { Interpolation } from "@mui/material/styles";
 import { type ComponentType, type ElementType } from "react";
 
 /** Values supported by `data-*` attributes on Vireo component slots. */
@@ -22,6 +23,31 @@ export type StyledSlotProps<TOwnerState extends object> = {
 export type StyledSlotComponent<TProps extends object, TOwnerState extends object> = ComponentType<
   TProps & StyledSlotProps<TOwnerState> & { as?: ElementType }
 >;
+
+/** Direct, compiler-scalable theme contract for one Vireo component. */
+export type VireoThemeComponent<
+  TProps extends object,
+  TClassKey extends string,
+  TOwnerState extends object,
+  TTheme = unknown,
+> = {
+  defaultProps?: Partial<TProps>;
+  styleOverrides?: Partial<
+    Record<
+      TClassKey,
+      Interpolation<
+        TProps & {
+          ownerState: TOwnerState;
+          theme: TTheme;
+        }
+      >
+    >
+  >;
+  variants?: Array<{
+    props: Partial<TProps> | ((props: Partial<TProps> & { ownerState: TOwnerState }) => boolean);
+    style: Interpolation<{ theme: TTheme }>;
+  }>;
+};
 
 /**
  * @see {@link https://mui.com/system/getting-started/the-sx-prop/#passing-the-sx-prop Passing the sx prop docs}

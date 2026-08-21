@@ -299,23 +299,17 @@ Do not leave a large inline `Omit` or conditional union inside final `Props`. Na
 Keep MUI augmentation last because it consumes the completed component prop and class-key contracts:
 
 ```ts
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { VIREO_OVERLAY_HEADER_NAME } from "./VireoOverlayHeader.identity";
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_OVERLAY_HEADER_NAME]: VireoOverlayHeaderProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_OVERLAY_HEADER_NAME]: VireoOverlayHeaderClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_OVERLAY_HEADER_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_OVERLAY_HEADER_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_OVERLAY_HEADER_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_OVERLAY_HEADER_NAME];
-    };
+    [VIREO_OVERLAY_HEADER_NAME]?: VireoThemeComponent<
+      VireoOverlayHeaderProps,
+      VireoOverlayHeaderClassKey,
+      VireoOverlayHeaderOwnerState,
+      Theme
+    >;
   }
 }
 ```
@@ -325,6 +319,8 @@ This registers:
 - `defaultProps` with the final component props.
 - `styleOverrides` with the utility class keys.
 - `variants` with the final component props.
+
+Do not add Vireo components to MUI's global `ComponentsPropsList` or `ComponentNameToClassKey` registries. MUI derives `ComponentsProps`, `ComponentsOverrides`, and `ComponentsVariants` by mapping across every registered name. Registering every Vireo component in those maps caused TypeScript to multiply the complete Vireo prop graph across the legacy MUI surface, exhausting the default Node heap. `VireoThemeComponent` keeps the same component-local theme ergonomics without expanding global mapped registries.
 
 The computed component key must use the name exported by the colocated `VireoComponent.identity.ts` file. That same identity is used by the styled file, `useThemeProps`, and utility-class generation.
 

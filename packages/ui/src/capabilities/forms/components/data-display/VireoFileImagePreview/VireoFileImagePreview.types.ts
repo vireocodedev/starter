@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps, Typography } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoFileImagePreviewClasses, type VireoFileImagePreviewClassKey } from "./VireoFileImagePreview.classes";
@@ -66,19 +65,12 @@ export type VireoFileImagePreviewInheritedProps = Omit<BoxProps<"div">, "childre
 export type VireoFileImagePreviewProps = VireoFileImagePreviewOwnProps & VireoFileImagePreviewInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FILE_IMAGE_PREVIEW_NAME]: VireoFileImagePreviewProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_FILE_IMAGE_PREVIEW_NAME]: VireoFileImagePreviewClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_FILE_IMAGE_PREVIEW_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FILE_IMAGE_PREVIEW_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FILE_IMAGE_PREVIEW_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FILE_IMAGE_PREVIEW_NAME];
-    };
+    [VIREO_FILE_IMAGE_PREVIEW_NAME]?: VireoThemeComponent<
+      VireoFileImagePreviewProps,
+      VireoFileImagePreviewClassKey,
+      VireoFileImagePreviewOwnerState,
+      Theme
+    >;
   }
 }

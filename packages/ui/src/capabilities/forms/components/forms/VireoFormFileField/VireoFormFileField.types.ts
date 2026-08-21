@@ -3,9 +3,8 @@ import type {
   VireoFormErrorFormatter,
 } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
 import type { VireoFilePreviewRenderer, VireoFormFileNameTruncation } from "@/capabilities/forms/types/vireoFile.types";
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { Box, BoxProps, Button, FormHelperText, IconButton, Typography } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoFormFileFieldClasses, type VireoFormFileFieldClassKey } from "./VireoFormFileField.classes";
@@ -178,17 +177,12 @@ export type VireoFormFileFieldInheritedProps = Omit<
 export type VireoFormFileFieldProps = VireoFormFileFieldOwnProps & VireoFormFileFieldInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_FILE_FIELD_NAME]: VireoFormFileFieldProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_FILE_FIELD_NAME]: VireoFormFileFieldClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_FORM_FILE_FIELD_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_FILE_FIELD_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_FILE_FIELD_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_FILE_FIELD_NAME];
-    };
+    [VIREO_FORM_FILE_FIELD_NAME]?: VireoThemeComponent<
+      VireoFormFileFieldProps,
+      VireoFormFileFieldClassKey,
+      VireoFormFileFieldOwnerState,
+      Theme
+    >;
   }
 }

@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { Box, BoxProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -61,17 +61,12 @@ export type VireoSlidingScreenStackInheritedProps = Omit<BoxProps<"div">, "child
 export type VireoSlidingScreenStackProps = VireoSlidingScreenStackOwnProps & VireoSlidingScreenStackInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_SLIDING_SCREEN_STACK_NAME]: VireoSlidingScreenStackProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_SLIDING_SCREEN_STACK_NAME]: VireoSlidingScreenStackClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_SLIDING_SCREEN_STACK_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_SLIDING_SCREEN_STACK_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_SLIDING_SCREEN_STACK_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_SLIDING_SCREEN_STACK_NAME];
-    };
+    [VIREO_SLIDING_SCREEN_STACK_NAME]?: VireoThemeComponent<
+      VireoSlidingScreenStackProps,
+      VireoSlidingScreenStackClassKey,
+      VireoSlidingScreenStackOwnerState,
+      Theme
+    >;
   }
 }

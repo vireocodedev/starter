@@ -1,8 +1,7 @@
 import type { FormControl, FormHelperText, InputLabel, OutlinedInput, Select, TextFieldProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type {
   VireoFormErrorDisplay,
   VireoFormErrorFormatter,
@@ -133,19 +132,12 @@ export type VireoFormTextFieldOwnProps = VireoFormTextFieldSlotsAndSlotProps & {
 export type VireoFormTextFieldProps = VireoFormTextFieldOwnProps & VireoFormTextFieldInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_TEXT_FIELD_NAME]: VireoFormTextFieldProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_TEXT_FIELD_NAME]: VireoFormTextFieldClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_FORM_TEXT_FIELD_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_TEXT_FIELD_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_TEXT_FIELD_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_TEXT_FIELD_NAME];
-    };
+    [VIREO_FORM_TEXT_FIELD_NAME]?: VireoThemeComponent<
+      VireoFormTextFieldProps,
+      VireoFormTextFieldClassKey,
+      VireoFormTextFieldOwnerState,
+      Theme
+    >;
   }
 }

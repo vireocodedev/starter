@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { SxProps, Theme } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoFormClasses, type VireoFormClassKey } from "./VireoForm.classes";
@@ -73,19 +72,7 @@ export type VireoFormInheritedProps = Omit<React.ComponentPropsWithoutRef<"form"
 export type VireoFormProps = VireoFormOwnProps & VireoFormInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_NAME]: VireoFormProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_NAME]: VireoFormClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_FORM_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_NAME];
-    };
+    [VIREO_FORM_NAME]?: VireoThemeComponent<VireoFormProps, VireoFormClassKey, VireoFormOwnerState, Theme>;
   }
 }

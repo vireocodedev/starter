@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -60,19 +59,12 @@ export type VireoSidePanelResizeHandleProps = VireoSidePanelResizeHandleOwnProps
   VireoSidePanelResizeHandleInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME]: VireoSidePanelResizeHandleProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME]: VireoSidePanelResizeHandleClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME];
-    };
+    [VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME]?: VireoThemeComponent<
+      VireoSidePanelResizeHandleProps,
+      VireoSidePanelResizeHandleClassKey,
+      VireoSidePanelResizeHandleOwnerState,
+      Theme
+    >;
   }
 }

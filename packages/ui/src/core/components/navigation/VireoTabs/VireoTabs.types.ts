@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { Box, BoxProps, Tab, Tabs } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoTabsClasses, type VireoTabsClassKey } from "./VireoTabs.classes";
@@ -41,17 +41,7 @@ export type VireoTabsInheritedProps = Omit<BoxProps<"div">, "children" | "compon
 export type VireoTabsProps = VireoTabsOwnProps & VireoTabsInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_TABS_NAME]: VireoTabsProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_TABS_NAME]: VireoTabsClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_TABS_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_TABS_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_TABS_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_TABS_NAME];
-    };
+    [VIREO_TABS_NAME]?: VireoThemeComponent<VireoTabsProps, VireoTabsClassKey, VireoTabsOwnerState, Theme>;
   }
 }

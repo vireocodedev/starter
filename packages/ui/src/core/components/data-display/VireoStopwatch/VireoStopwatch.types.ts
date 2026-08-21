@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { BoxProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoStopwatchClasses, type VireoStopwatchClassKey } from "./VireoStopwatch.classes";
@@ -53,19 +53,12 @@ export type VireoStopwatchInheritedProps = Omit<
 export type VireoStopwatchProps = VireoStopwatchOwnProps & VireoStopwatchInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_STOPWATCH_NAME]: VireoStopwatchProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_STOPWATCH_NAME]: VireoStopwatchClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_STOPWATCH_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_STOPWATCH_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_STOPWATCH_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_STOPWATCH_NAME];
-    };
+    [VIREO_STOPWATCH_NAME]?: VireoThemeComponent<
+      VireoStopwatchProps,
+      VireoStopwatchClassKey,
+      VireoStopwatchOwnerState,
+      Theme
+    >;
   }
 }

@@ -603,6 +603,7 @@
         "VireoTabsSlotsAndSlotProps",
         "VireoTabsTabSlotPropsOverrides",
         "VireoTabsTabsSlotPropsOverrides",
+        "VireoThemeComponent",
         "VireoTruncatedContent",
         "VireoTruncatedContentClassKey",
         "VireoTruncatedContentClasses",

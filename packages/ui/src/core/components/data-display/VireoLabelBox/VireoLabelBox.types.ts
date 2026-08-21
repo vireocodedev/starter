@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { BoxProps, Theme, TypographyProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoLabelBoxClasses, type VireoLabelBoxClassKey } from "./VireoLabelBox.classes";
@@ -95,19 +95,12 @@ export type VireoLabelBoxInheritedProps = Omit<
 export type VireoLabelBoxProps = VireoLabelBoxOwnProps & VireoLabelBoxInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_LABEL_BOX_NAME]: VireoLabelBoxProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_LABEL_BOX_NAME]: VireoLabelBoxClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_LABEL_BOX_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_LABEL_BOX_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_LABEL_BOX_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_LABEL_BOX_NAME];
-    };
+    [VIREO_LABEL_BOX_NAME]?: VireoThemeComponent<
+      VireoLabelBoxProps,
+      VireoLabelBoxClassKey,
+      VireoLabelBoxOwnerState,
+      Theme
+    >;
   }
 }

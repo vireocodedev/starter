@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { Button, ButtonProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoFormResetButtonClasses, type VireoFormResetButtonClassKey } from "./VireoFormResetButton.classes";
@@ -43,19 +42,12 @@ export type VireoFormResetButtonInheritedProps = Omit<ButtonProps, "component" |
 export type VireoFormResetButtonProps = VireoFormResetButtonOwnProps & VireoFormResetButtonInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_RESET_BUTTON_NAME]: VireoFormResetButtonProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_RESET_BUTTON_NAME]: VireoFormResetButtonClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_FORM_RESET_BUTTON_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_RESET_BUTTON_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_RESET_BUTTON_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_RESET_BUTTON_NAME];
-    };
+    [VIREO_FORM_RESET_BUTTON_NAME]?: VireoThemeComponent<
+      VireoFormResetButtonProps,
+      VireoFormResetButtonClassKey,
+      VireoFormResetButtonOwnerState,
+      Theme
+    >;
   }
 }

@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { SxProps, Theme } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoIconContainerClasses, type VireoIconContainerClassKey } from "./VireoIconContainer.classes";
@@ -51,19 +51,12 @@ export type VireoIconContainerInheritedProps = Omit<React.ComponentPropsWithoutR
 export type VireoIconContainerProps = VireoIconContainerOwnProps & VireoIconContainerInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_ICON_CONTAINER_NAME]: VireoIconContainerProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_ICON_CONTAINER_NAME]: VireoIconContainerClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_ICON_CONTAINER_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_ICON_CONTAINER_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_ICON_CONTAINER_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_ICON_CONTAINER_NAME];
-    };
+    [VIREO_ICON_CONTAINER_NAME]?: VireoThemeComponent<
+      VireoIconContainerProps,
+      VireoIconContainerClassKey,
+      VireoIconContainerOwnerState,
+      Theme
+    >;
   }
 }

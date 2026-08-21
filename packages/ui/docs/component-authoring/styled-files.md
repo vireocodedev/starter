@@ -75,9 +75,7 @@ The imported identity constant must be the component's canonical name from its c
 Use that constant in:
 
 - `useThemeProps` in the component implementation.
-- `ComponentsPropsList` theme augmentation.
-- `ComponentNameToClassKey` theme augmentation.
-- `Components` theme augmentation.
+- the direct `Components` theme augmentation through `VireoThemeComponent`.
 - Utility-class generation.
 
 Every styled slot uses the same identity constant, its own PascalCase MUI `slot`, and an `overridesResolver` for the matching camelCase class key.

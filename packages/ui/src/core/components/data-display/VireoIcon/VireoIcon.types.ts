@@ -1,7 +1,7 @@
 import type { VireoIconName } from "@/core/providers/VireoIconRegistryProvider/VireoIconRegistryProvider";
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { SvgIcon, SvgIconProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoIconClasses, type VireoIconClassKey } from "./VireoIcon.classes";
@@ -44,19 +44,7 @@ export type VireoIconInheritedProps = Omit<SvgIconProps, "children" | "component
 export type VireoIconProps = VireoIconOwnProps & VireoIconInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_ICON_NAME]: VireoIconProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_ICON_NAME]: VireoIconClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_ICON_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_ICON_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_ICON_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_ICON_NAME];
-    };
+    [VIREO_ICON_NAME]?: VireoThemeComponent<VireoIconProps, VireoIconClassKey, VireoIconOwnerState, Theme>;
   }
 }

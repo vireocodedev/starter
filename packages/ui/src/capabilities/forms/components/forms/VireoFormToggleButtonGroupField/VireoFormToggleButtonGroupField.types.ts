@@ -2,7 +2,7 @@ import type {
   VireoFormErrorDisplay,
   VireoFormErrorFormatter,
 } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type {
   FormControl,
   FormControlProps,
@@ -12,7 +12,6 @@ import type {
   ToggleButtonGroupProps,
   ToggleButtonProps,
 } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -196,17 +195,12 @@ export type VireoFormToggleButtonGroupFieldProps<
   VireoFormToggleButtonGroupFieldInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME]: VireoFormToggleButtonGroupFieldProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME]: VireoFormToggleButtonGroupFieldClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME];
-    };
+    [VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME]?: VireoThemeComponent<
+      VireoFormToggleButtonGroupFieldProps,
+      VireoFormToggleButtonGroupFieldClassKey,
+      VireoFormToggleButtonGroupFieldOwnerState,
+      Theme
+    >;
   }
 }

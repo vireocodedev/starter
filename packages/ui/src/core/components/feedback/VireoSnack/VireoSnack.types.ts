@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { Box, BoxProps, Typography } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoSnackClasses, type VireoSnackClassKey } from "./VireoSnack.classes";
@@ -59,17 +59,7 @@ export type VireoSnackInheritedProps = Omit<BoxProps<"div">, "children" | "compo
 export type VireoSnackProps = VireoSnackOwnProps & VireoSnackInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_SNACK_NAME]: VireoSnackProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_SNACK_NAME]: VireoSnackClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_SNACK_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_SNACK_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_SNACK_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_SNACK_NAME];
-    };
+    [VIREO_SNACK_NAME]?: VireoThemeComponent<VireoSnackProps, VireoSnackClassKey, VireoSnackOwnerState, Theme>;
   }
 }

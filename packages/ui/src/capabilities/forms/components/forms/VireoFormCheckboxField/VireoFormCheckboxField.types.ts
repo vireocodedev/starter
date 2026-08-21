@@ -2,7 +2,7 @@ import type {
   VireoFormErrorDisplay,
   VireoFormErrorFormatter,
 } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type {
   FormControl,
   FormControlLabel,
@@ -13,7 +13,6 @@ import type {
   CheckboxProps,
   Typography,
 } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -141,19 +140,12 @@ export type VireoFormCheckboxFieldOwnProps = VireoFormCheckboxFieldSlotsAndSlotP
 export type VireoFormCheckboxFieldProps = VireoFormCheckboxFieldOwnProps & VireoFormCheckboxFieldInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_CHECKBOX_FIELD_NAME]: VireoFormCheckboxFieldProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_CHECKBOX_FIELD_NAME]: VireoFormCheckboxFieldClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_FORM_CHECKBOX_FIELD_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_CHECKBOX_FIELD_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_CHECKBOX_FIELD_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_CHECKBOX_FIELD_NAME];
-    };
+    [VIREO_FORM_CHECKBOX_FIELD_NAME]?: VireoThemeComponent<
+      VireoFormCheckboxFieldProps,
+      VireoFormCheckboxFieldClassKey,
+      VireoFormCheckboxFieldOwnerState,
+      Theme
+    >;
   }
 }

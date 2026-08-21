@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { BoxProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoDelayedRenderClasses, type VireoDelayedRenderClassKey } from "./VireoDelayedRender.classes";
@@ -45,19 +45,12 @@ export type VireoDelayedRenderInheritedProps = Omit<BoxProps<"div">, "children" 
 export type VireoDelayedRenderProps = VireoDelayedRenderOwnProps & VireoDelayedRenderInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_DELAYED_RENDER_NAME]: VireoDelayedRenderProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_DELAYED_RENDER_NAME]: VireoDelayedRenderClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_DELAYED_RENDER_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_DELAYED_RENDER_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_DELAYED_RENDER_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_DELAYED_RENDER_NAME];
-    };
+    [VIREO_DELAYED_RENDER_NAME]?: VireoThemeComponent<
+      VireoDelayedRenderProps,
+      VireoDelayedRenderClassKey,
+      VireoDelayedRenderOwnerState,
+      Theme
+    >;
   }
 }

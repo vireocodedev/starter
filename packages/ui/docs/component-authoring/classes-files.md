@@ -56,7 +56,7 @@ Document the complete contract on `VireoComponentClasses`; do not add repetitive
 export type VireoComponentClassKey = keyof VireoComponentClasses;
 ```
 
-MUI's `ComponentNameToClassKey` augmentation consumes this union to type the component's `theme.components.VireoComponent.styleOverrides` keys. Deriving it ensures the theme contract cannot drift from the public utility-class record.
+The component's direct `VireoThemeComponent` augmentation consumes this union to type `theme.components.VireoComponent.styleOverrides` keys. Deriving it ensures the theme contract cannot drift from the public utility-class record without adding the component to MUI's compiler-expensive global class-key map.
 
 ## Singular utility-class generator
 

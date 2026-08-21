@@ -2,9 +2,8 @@ import type {
   VireoFormErrorDisplay,
   VireoFormErrorFormatter,
 } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps, FormHelperText, IconButton, OutlinedInput, SvgIcon, TextFieldProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type {
   DatePickerProps,
@@ -249,17 +248,12 @@ export type VireoFormTemporalFieldProps = VireoFormTemporalFieldOwnProps & Vireo
 export type VireoFormTemporalFieldPickerError = DateValidationError | TimeValidationError | DateTimeValidationError;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_TEMPORAL_FIELD_NAME]: VireoFormTemporalFieldProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_TEMPORAL_FIELD_NAME]: VireoFormTemporalFieldClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_FORM_TEMPORAL_FIELD_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_TEMPORAL_FIELD_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_TEMPORAL_FIELD_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_TEMPORAL_FIELD_NAME];
-    };
+    [VIREO_FORM_TEMPORAL_FIELD_NAME]?: VireoThemeComponent<
+      VireoFormTemporalFieldProps,
+      VireoFormTemporalFieldClassKey,
+      VireoFormTemporalFieldOwnerState,
+      Theme
+    >;
   }
 }

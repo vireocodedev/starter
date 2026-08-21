@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { BoxProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoStatusDotClasses, type VireoStatusDotClassKey } from "./VireoStatusDot.classes";
@@ -59,19 +59,12 @@ export type VireoStatusDotInheritedProps = Omit<
 export type VireoStatusDotProps = VireoStatusDotOwnProps & VireoStatusDotInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_STATUS_DOT_NAME]: VireoStatusDotProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_STATUS_DOT_NAME]: VireoStatusDotClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_STATUS_DOT_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_STATUS_DOT_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_STATUS_DOT_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_STATUS_DOT_NAME];
-    };
+    [VIREO_STATUS_DOT_NAME]?: VireoThemeComponent<
+      VireoStatusDotProps,
+      VireoStatusDotClassKey,
+      VireoStatusDotOwnerState,
+      Theme
+    >;
   }
 }

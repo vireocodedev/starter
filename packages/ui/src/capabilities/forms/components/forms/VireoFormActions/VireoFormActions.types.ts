@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { Box, BoxProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoFormActionsClasses, type VireoFormActionsClassKey } from "./VireoFormActions.classes";
@@ -45,19 +44,12 @@ export type VireoFormActionsInheritedProps = Omit<BoxProps<"div">, "children" | 
 export type VireoFormActionsProps = VireoFormActionsOwnProps & VireoFormActionsInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_ACTIONS_NAME]: VireoFormActionsProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_ACTIONS_NAME]: VireoFormActionsClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_FORM_ACTIONS_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_ACTIONS_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_ACTIONS_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_ACTIONS_NAME];
-    };
+    [VIREO_FORM_ACTIONS_NAME]?: VireoThemeComponent<
+      VireoFormActionsProps,
+      VireoFormActionsClassKey,
+      VireoFormActionsOwnerState,
+      Theme
+    >;
   }
 }

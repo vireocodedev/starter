@@ -1,7 +1,6 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { ResponsiveOverlayFrameDesktopSidePanelWidth } from "@/capabilities/overlays/types/overlay.types";
 import type { BoxProps, SxProps, Theme } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoDockedSidePanelClasses, type VireoDockedSidePanelClassKey } from "./VireoDockedSidePanel.classes";
@@ -79,19 +78,12 @@ export type DockedSidePanelProps = Pick<
 };
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_DOCKED_SIDE_PANEL_NAME]: VireoDockedSidePanelProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_DOCKED_SIDE_PANEL_NAME]: VireoDockedSidePanelClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_DOCKED_SIDE_PANEL_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_DOCKED_SIDE_PANEL_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_DOCKED_SIDE_PANEL_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_DOCKED_SIDE_PANEL_NAME];
-    };
+    [VIREO_DOCKED_SIDE_PANEL_NAME]?: VireoThemeComponent<
+      VireoDockedSidePanelProps,
+      VireoDockedSidePanelClassKey,
+      VireoDockedSidePanelOwnerState,
+      Theme
+    >;
   }
 }

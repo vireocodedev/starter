@@ -1,7 +1,6 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { Close } from "@mui/icons-material";
 import type { BoxProps, IconButton, Typography } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoOverlayHeaderClasses, type VireoOverlayHeaderClassKey } from "./VireoOverlayHeader.classes";
@@ -100,19 +99,12 @@ export type VireoOverlayHeaderProps = VireoOverlayHeaderOwnProps &
   VireoOverlayHeaderInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_OVERLAY_HEADER_NAME]: VireoOverlayHeaderProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_OVERLAY_HEADER_NAME]: VireoOverlayHeaderClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_OVERLAY_HEADER_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_OVERLAY_HEADER_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_OVERLAY_HEADER_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_OVERLAY_HEADER_NAME];
-    };
+    [VIREO_OVERLAY_HEADER_NAME]?: VireoThemeComponent<
+      VireoOverlayHeaderProps,
+      VireoOverlayHeaderClassKey,
+      VireoOverlayHeaderOwnerState,
+      Theme
+    >;
   }
 }

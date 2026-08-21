@@ -1,7 +1,7 @@
 import type { VireoIconName } from "@/core/providers/VireoIconRegistryProvider/VireoIconRegistryProvider";
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { Box, Button, ButtonProps, Typography } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -71,17 +71,12 @@ export type VireoLabeledIconButtonInheritedProps = Omit<ButtonProps, "children" 
 export type VireoLabeledIconButtonProps = VireoLabeledIconButtonOwnProps & VireoLabeledIconButtonInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_LABELED_ICON_BUTTON_NAME]: VireoLabeledIconButtonProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_LABELED_ICON_BUTTON_NAME]: VireoLabeledIconButtonClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_LABELED_ICON_BUTTON_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_LABELED_ICON_BUTTON_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_LABELED_ICON_BUTTON_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_LABELED_ICON_BUTTON_NAME];
-    };
+    [VIREO_LABELED_ICON_BUTTON_NAME]?: VireoThemeComponent<
+      VireoLabeledIconButtonProps,
+      VireoLabeledIconButtonClassKey,
+      VireoLabeledIconButtonOwnerState,
+      Theme
+    >;
   }
 }

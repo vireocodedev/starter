@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { Box, BoxProps, Typography } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import type { VireoFormSectionClasses, VireoFormSectionClassKey } from "./VireoFormSection.classes";
@@ -77,17 +76,12 @@ export type VireoFormSectionOwnProps = VireoFormSectionSlotsAndSlotProps & {
 export type VireoFormSectionInheritedProps = Omit<BoxProps<"section">, "children" | "component" | "ref">;
 export type VireoFormSectionProps = VireoFormSectionOwnProps & VireoFormSectionInheritedProps;
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_FORM_SECTION_NAME]: VireoFormSectionProps;
-  }
-  interface ComponentNameToClassKey {
-    [VIREO_FORM_SECTION_NAME]: VireoFormSectionClassKey;
-  }
   interface Components<Theme = unknown> {
-    [VIREO_FORM_SECTION_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_FORM_SECTION_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_FORM_SECTION_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_FORM_SECTION_NAME];
-    };
+    [VIREO_FORM_SECTION_NAME]?: VireoThemeComponent<
+      VireoFormSectionProps,
+      VireoFormSectionClassKey,
+      VireoFormSectionOwnerState,
+      Theme
+    >;
   }
 }

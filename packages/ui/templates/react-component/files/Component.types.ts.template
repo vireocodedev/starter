@@ -1,6 +1,5 @@
-import type { VireoDataAttributeValue } from "{{coreUtilitiesModule}}";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "{{coreUtilitiesModule}}";
 import type { BoxProps } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type {{componentName}}Classes, type {{componentName}}ClassKey } from "./{{componentName}}.classes";
@@ -39,19 +38,12 @@ export type {{componentName}}InheritedProps = Omit<BoxProps<"div">, "children" |
 export type {{componentName}}Props = {{componentName}}OwnProps & {{componentName}}InheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [{{componentConstantName}}_NAME]: {{componentName}}Props;
-  }
-
-  interface ComponentNameToClassKey {
-    [{{componentConstantName}}_NAME]: {{componentName}}ClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [{{componentConstantName}}_NAME]?: {
-      defaultProps?: ComponentsProps[typeof {{componentConstantName}}_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof {{componentConstantName}}_NAME];
-      variants?: ComponentsVariants<Theme>[typeof {{componentConstantName}}_NAME];
-    };
+    [{{componentConstantName}}_NAME]?: VireoThemeComponent<
+      {{componentName}}Props,
+      {{componentName}}ClassKey,
+      {{componentName}}OwnerState,
+      Theme
+    >;
   }
 }

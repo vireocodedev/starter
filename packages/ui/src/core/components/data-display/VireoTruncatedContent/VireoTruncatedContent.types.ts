@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
 import type { BoxProps, Button } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
+import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoTruncatedContentClasses, type VireoTruncatedContentClassKey } from "./VireoTruncatedContent.classes";
@@ -77,19 +77,12 @@ export type VireoTruncatedContentInheritedProps = Omit<BoxProps<"div">, "childre
 export type VireoTruncatedContentProps = VireoTruncatedContentOwnProps & VireoTruncatedContentInheritedProps;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_TRUNCATED_CONTENT_NAME]: VireoTruncatedContentProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_TRUNCATED_CONTENT_NAME]: VireoTruncatedContentClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_TRUNCATED_CONTENT_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_TRUNCATED_CONTENT_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_TRUNCATED_CONTENT_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_TRUNCATED_CONTENT_NAME];
-    };
+    [VIREO_TRUNCATED_CONTENT_NAME]?: VireoThemeComponent<
+      VireoTruncatedContentProps,
+      VireoTruncatedContentClassKey,
+      VireoTruncatedContentOwnerState,
+      Theme
+    >;
   }
 }

@@ -72,6 +72,7 @@ const RULES = new Set([
   "target-empty-directory",
   "vireo-name",
   "vireo-root-contract",
+  "vireo-theme-contract",
 ]);
 
 function fail(message) {
@@ -490,6 +491,34 @@ function collectComponentViolations(directories, files, violations) {
           "index.ts",
         ]);
         const actualEntries = immediateEntries(resolve(absoluteComponentsPath, entry.name, component.name));
+        const typesPath = resolve(absoluteComponentsPath, entry.name, component.name, `${component.name}.types.ts`);
+
+        if (existsSync(typesPath)) {
+          const typesSource = readFileSync(typesPath, "utf8");
+
+          if (
+            typesSource.includes("interface ComponentsPropsList") ||
+            typesSource.includes("interface ComponentNameToClassKey")
+          ) {
+            violations.push(
+              violation(
+                "vireo-theme-contract",
+                `${componentPath}/${component.name}.types.ts`,
+                "Vireo components must not augment MUI's global mapped component registries",
+              ),
+            );
+          }
+
+          if (!typesSource.includes("VireoThemeComponent<")) {
+            violations.push(
+              violation(
+                "vireo-theme-contract",
+                `${componentPath}/${component.name}.types.ts`,
+                "Vireo components require a direct VireoThemeComponent augmentation",
+              ),
+            );
+          }
+        }
 
         for (const expectedFile of expectedFiles) {
           if (!actualEntries.some(actual => !actual.isDirectory() && actual.name === expectedFile)) {

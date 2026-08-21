@@ -2,9 +2,8 @@ import type {
   ResponsiveOverlayFrameDesktopSidePanelWidth,
   ResponsiveOverlayFrameDesktopSurface,
 } from "@/capabilities/overlays/types/overlay.types";
-import type { VireoDataAttributeValue } from "@/core/public";
+import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps, DialogProps, SxProps, Theme } from "@mui/material";
-import type { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -117,19 +116,12 @@ export type ResponsiveOverlayFrameProps = Pick<
 >;
 
 declare module "@mui/material/styles" {
-  interface ComponentsPropsList {
-    [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]: VireoResponsiveOverlayFrameProps;
-  }
-
-  interface ComponentNameToClassKey {
-    [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]: VireoResponsiveOverlayFrameClassKey;
-  }
-
   interface Components<Theme = unknown> {
-    [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]?: {
-      defaultProps?: ComponentsProps[typeof VIREO_RESPONSIVE_OVERLAY_FRAME_NAME];
-      styleOverrides?: ComponentsOverrides<Theme>[typeof VIREO_RESPONSIVE_OVERLAY_FRAME_NAME];
-      variants?: ComponentsVariants<Theme>[typeof VIREO_RESPONSIVE_OVERLAY_FRAME_NAME];
-    };
+    [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]?: VireoThemeComponent<
+      VireoResponsiveOverlayFrameProps,
+      VireoResponsiveOverlayFrameClassKey,
+      VireoResponsiveOverlayFrameOwnerState,
+      Theme
+    >;
   }
 }
