@@ -61,6 +61,12 @@ npm run test
 npm run build
 ```
 
+`build` is artifact generation; `typecheck` owns full semantic source checking.
+Keeping those responsibilities separate lets the UI package use TypeScript's
+artifact-only emit without checking the same source graph twice. CI and the
+release command always run both, followed by strict checks of the emitted
+declarations.
+
 `npm run dev` watches every package. Note that watch mode never deletes from
 `dist` — deleting or renaming a source file leaves its old output behind, so take
 a one-shot `npm run build` whenever a file disappears.
