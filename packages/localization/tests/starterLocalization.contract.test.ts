@@ -7,6 +7,14 @@ import QUERYENGINE_EN from "@/queryengine/queryengine.en";
 import QUERYENGINE_HR from "@/queryengine/queryengine.hr";
 import { describe, expect, it } from "vitest";
 
+type Assert<T extends true> = T;
+type IsExact<TLeft, TRight> =
+  (<T>() => T extends TLeft ? 1 : 2) extends <T>() => T extends TRight ? 1 : 2
+    ? (<T>() => T extends TRight ? 1 : 2) extends <T>() => T extends TLeft ? 1 : 2
+      ? true
+      : false
+    : false;
+
 type JsonRecord = Record<string, unknown>;
 
 /** Returns the sorted set of dotted leaf key paths for a resource object. */
@@ -203,6 +211,19 @@ describe.each([
 });
 
 describe("starter localization contract", () => {
+  it("types localized and overridden values as strings rather than English literals", () => {
+    const resources = createStarterResources({
+      locales: ["hr"] as const,
+      overrides: { hr: { history: { title: "Revizijski trag" } } },
+    });
+
+    type TitleIsString = Assert<IsExact<typeof resources.hr.history.title, string>>;
+    const titleIsString: TitleIsString = true;
+
+    expect(titleIsString).toBe(true);
+    expect(resources.hr.history.title).toBe("Revizijski trag");
+  });
+
   it("ships the expected base locales", () => {
     expect([...STARTER_BASE_LOCALES]).toEqual(["en", "hr"]);
   });

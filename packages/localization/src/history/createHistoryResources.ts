@@ -5,23 +5,20 @@ import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/
 
 export { HISTORY_TRANSLATION_NAMESPACE, type HistoryTranslationNamespace } from "@/history/namespace";
 
-/** The canonical resource shape. English is the single source of truth. */
-export type HistoryResources = typeof HISTORY_EN;
-
-/** The resource shape with leaf string literals widened to `string`. */
-export type HistoryResourcesShape = WidenLeaves<HistoryResources>;
+/** The canonical History resource shape. English is the key source of truth. */
+export type HistoryResources = WidenLeaves<typeof HISTORY_EN>;
 
 /**
  * A recursively partial resource, used for per-locale value overrides. Leaves
  * are widened, so an override may supply any string for a shipped key.
  */
-export type HistoryResourcesOverride = DeepPartial<HistoryResourcesShape>;
+export type HistoryResourcesOverride = DeepPartial<HistoryResources>;
 
 /** Locales the History namespace ships out of the box. */
 export const HISTORY_BASE_LOCALES = ["en", "hr"] as const;
 export type HistoryBaseLocale = (typeof HISTORY_BASE_LOCALES)[number];
 
-export const historyBaseResources: Record<HistoryBaseLocale, HistoryResourcesShape> = {
+export const historyBaseResources: Record<HistoryBaseLocale, HistoryResources> = {
   en: HISTORY_EN,
   hr: HISTORY_HR,
 };
@@ -47,5 +44,5 @@ export function createHistoryResources<L extends string>(
     seedFrom: config.seedFrom ?? "en",
     locales: config.locales,
     overrides: config.overrides,
-  }) as Record<L, { [HISTORY_TRANSLATION_NAMESPACE]: HistoryResources }>;
+  });
 }

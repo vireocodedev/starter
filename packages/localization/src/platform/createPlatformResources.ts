@@ -5,27 +5,20 @@ import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/
 
 export { PLATFORM_TRANSLATION_NAMESPACE, type PlatformTranslationNamespace } from "@/platform/namespace";
 
-/** The canonical resource shape. English is the single source of truth. */
-export type PlatformResources = typeof PLATFORM_EN;
-
-/**
- * The platform resource shape with leaf string literals widened to `string`.
- * Non-English base locales share the shape but not the literal values, so the
- * base map is typed against this widened form.
- */
-export type PlatformResourcesShape = WidenLeaves<PlatformResources>;
+/** The canonical platform resource shape. English is the key source of truth. */
+export type PlatformResources = WidenLeaves<typeof PLATFORM_EN>;
 
 /**
  * A recursively partial platform resource, used for per-locale value overrides.
  * Leaves are widened, so an override may supply any string for a shipped key.
  */
-export type PlatformResourcesOverride = DeepPartial<PlatformResourcesShape>;
+export type PlatformResourcesOverride = DeepPartial<PlatformResources>;
 
 /** Locales the platform ships out of the box. */
 export const PLATFORM_BASE_LOCALES = ["en", "hr"] as const;
 export type PlatformBaseLocale = (typeof PLATFORM_BASE_LOCALES)[number];
 
-export const platformBaseResources: Record<PlatformBaseLocale, PlatformResourcesShape> = {
+export const platformBaseResources: Record<PlatformBaseLocale, PlatformResources> = {
   en: PLATFORM_EN,
   hr: PLATFORM_HR,
 };
@@ -55,5 +48,5 @@ export function createPlatformResources<L extends string>(
     seedFrom: config.seedFrom ?? "en",
     locales: config.locales,
     overrides: config.overrides,
-  }) as Record<L, { [PLATFORM_TRANSLATION_NAMESPACE]: PlatformResources }>;
+  });
 }

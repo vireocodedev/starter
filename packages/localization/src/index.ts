@@ -19,9 +19,8 @@ export {
   type PlatformBaseLocale,
   type PlatformResources,
   type PlatformResourcesOverride,
-  type PlatformResourcesShape,
   type PlatformTranslationNamespace,
-} from "@/platform";
+} from "@/platform/createPlatformResources";
 
 export {
   createQueryEngineResources,
@@ -32,9 +31,8 @@ export {
   type QueryEngineBaseLocale,
   type QueryEngineResources,
   type QueryEngineResourcesOverride,
-  type QueryEngineResourcesShape,
   type QueryEngineTranslationNamespace,
-} from "@/queryengine";
+} from "@/queryengine/createQueryEngineResources";
 
 export {
   createHistoryResources,
@@ -45,9 +43,8 @@ export {
   type HistoryBaseLocale,
   type HistoryResources,
   type HistoryResourcesOverride,
-  type HistoryResourcesShape,
   type HistoryTranslationNamespace,
-} from "@/history";
+} from "@/history/createHistoryResources";
 
 export { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 export { deepMerge } from "@/toolkit/deepMerge";

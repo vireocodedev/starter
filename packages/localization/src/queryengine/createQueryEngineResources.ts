@@ -5,23 +5,20 @@ import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/
 
 export { QUERYENGINE_TRANSLATION_NAMESPACE, type QueryEngineTranslationNamespace } from "@/queryengine/namespace";
 
-/** The canonical resource shape. English is the single source of truth. */
-export type QueryEngineResources = typeof QUERYENGINE_EN;
-
-/** The resource shape with leaf string literals widened to `string`. */
-export type QueryEngineResourcesShape = WidenLeaves<QueryEngineResources>;
+/** The canonical Query Engine resource shape. English is the key source of truth. */
+export type QueryEngineResources = WidenLeaves<typeof QUERYENGINE_EN>;
 
 /**
  * A recursively partial resource, used for per-locale value overrides. Leaves
  * are widened, so an override may supply any string for a shipped key.
  */
-export type QueryEngineResourcesOverride = DeepPartial<QueryEngineResourcesShape>;
+export type QueryEngineResourcesOverride = DeepPartial<QueryEngineResources>;
 
 /** Locales the QueryEngine namespace ships out of the box. */
 export const QUERYENGINE_BASE_LOCALES = ["en", "hr"] as const;
 export type QueryEngineBaseLocale = (typeof QUERYENGINE_BASE_LOCALES)[number];
 
-export const queryEngineBaseResources: Record<QueryEngineBaseLocale, QueryEngineResourcesShape> = {
+export const queryEngineBaseResources: Record<QueryEngineBaseLocale, QueryEngineResources> = {
   en: QUERYENGINE_EN,
   hr: QUERYENGINE_HR,
 };
@@ -47,5 +44,5 @@ export function createQueryEngineResources<L extends string>(
     seedFrom: config.seedFrom ?? "en",
     locales: config.locales,
     overrides: config.overrides,
-  }) as Record<L, { [QUERYENGINE_TRANSLATION_NAMESPACE]: QueryEngineResources }>;
+  });
 }
