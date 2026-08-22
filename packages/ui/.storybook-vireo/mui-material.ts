@@ -2,6 +2,7 @@
 // barrel. Add an explicit re-export here when Vireo production or story code
 // imports another runtime symbol from `@mui/material`.
 export { default as Alert } from "@mui/material/Alert";
+export { default as AlertTitle } from "@mui/material/AlertTitle";
 export { default as Accordion } from "@mui/material/Accordion";
 export { default as AccordionDetails } from "@mui/material/AccordionDetails";
 export { default as AccordionSummary } from "@mui/material/AccordionSummary";
