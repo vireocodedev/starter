@@ -15,7 +15,7 @@ const baseRecord = {
 describe("starter-history public workflow", () => {
   it("parses a history record with an optional entity-kind constraint", () => {
     expect(createHistoryRecordSchema().parse(baseRecord).entity).toBe("INVOICE");
-    const schema = createHistoryRecordSchema(z.enum(["INVOICE", "BUYER"]));
+    const schema = createHistoryRecordSchema({ entityKind: z.enum(["INVOICE", "BUYER"]) });
     expect(schema.parse(baseRecord).actor?.label).toBe("Alice");
     expect(() => schema.parse({ ...baseRecord, entity: "UNKNOWN" })).toThrow();
   });

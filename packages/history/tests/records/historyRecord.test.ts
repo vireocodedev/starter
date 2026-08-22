@@ -20,7 +20,7 @@ describe("history record schemas", () => {
   });
 
   it("narrows application-owned entity kinds", () => {
-    const schema = createHistoryRecordSchema(z.enum(["INVOICE", "BUYER"]));
+    const schema = createHistoryRecordSchema({ entityKind: z.enum(["INVOICE", "BUYER"]) });
     const parsed = schema.parse(record);
 
     expectTypeOf(parsed.entity).toEqualTypeOf<"INVOICE" | "BUYER">();
@@ -29,7 +29,23 @@ describe("history record schemas", () => {
 
   it("rejects invalid actor and timestamp metadata", () => {
     expect(() => HistoryActorSchema.parse({ label: "" })).toThrow();
+    expect(() => HistoryActorSchema.parse({ label: "   " })).toThrow("History actor label cannot be blank.");
     expect(() => HistoryRecordSchema.parse({ ...record, timestamp: "" })).toThrow();
+    expect(() => HistoryRecordSchema.parse({ ...record, timestamp: "yesterday" })).toThrow();
     expect(() => HistoryRecordSchema.parse({ ...record, timestamp: Number.POSITIVE_INFINITY })).toThrow();
+  });
+
+  it("supports application-owned snapshot and timestamp schemas", () => {
+    const schema = createHistoryRecordSchema({
+      entityKind: z.literal("INVOICE"),
+      snapshot: z.object({ total: z.number() }),
+      timestamp: z.string().regex(/^revision-/u),
+    });
+    const parsed = schema.parse({ ...record, timestamp: "revision-7" });
+
+    expectTypeOf(parsed.entity).toEqualTypeOf<"INVOICE">();
+    expectTypeOf(parsed.timestamp).toEqualTypeOf<string>();
+    expectTypeOf(parsed.snapshotCurrent).toEqualTypeOf<{ total: number } | null>();
+    expect(parsed.snapshotCurrent?.total).toBe(100);
   });
 });

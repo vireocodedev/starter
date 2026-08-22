@@ -31,5 +31,13 @@ export {
   HistoryActorSchema,
   HistoryRecordSchema,
   HistorySnapshotSchema,
+  HistoryTimestampSchema,
 } from "./records/historyRecord";
-export type { HistoryActor, HistoryEntityKind, HistoryRecord, HistorySnapshot } from "./records/historyRecord";
+export type {
+  HistoryActor,
+  HistoryEntityKind,
+  HistoryRecord,
+  HistoryRecordSchemaOptions,
+  HistorySnapshot,
+  HistoryTimestamp,
+} from "./records/historyRecord";

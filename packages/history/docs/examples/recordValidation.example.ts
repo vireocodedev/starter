@@ -1,7 +1,10 @@
 import { createHistoryRecordSchema } from "@vireocodedev/starter-history";
 import { z } from "zod";
 
-const CustomerHistoryRecordSchema = createHistoryRecordSchema(z.literal("CUSTOMER"));
+const CustomerHistoryRecordSchema = createHistoryRecordSchema({
+  entityKind: z.literal("CUSTOMER"),
+  snapshot: z.object({ name: z.string(), status: z.string() }),
+});
 
 export function runRecordValidationExample() {
   return CustomerHistoryRecordSchema.parse({

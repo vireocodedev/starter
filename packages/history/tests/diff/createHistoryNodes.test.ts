@@ -77,6 +77,26 @@ describe(createHistoryNodes, () => {
     ]);
   });
 
+  it("honors and validates custom change resolution", () => {
+    const schema = z.object({ value: z.string() });
+    const unchangedDefinition = createHistoryDefinition(
+      schema,
+      { label: "Value", key: () => "value" },
+      { value: { kind: "field", label: "Value", resolveChange: () => null } },
+    );
+    const invalidResolver = (() => "invalid") as never;
+    const invalidDefinition = createHistoryDefinition(
+      schema,
+      { label: "Value", key: () => "value" },
+      { value: { kind: "field", label: "Value", resolveChange: invalidResolver } },
+    );
+
+    expect(createHistoryNodes(unchangedDefinition, { value: "before" }, { value: "after" })).toEqual([]);
+    expect(() => createHistoryNodes(invalidDefinition, { value: "before" }, { value: "after" })).toThrow(
+      'History change resolver at "value" returned unsupported type "invalid".',
+    );
+  });
+
   it("emits nested object groups with raw and formatted identities", () => {
     const addressSchema = z.object({ city: z.string(), country: z.string() });
     const addressDefinition = createHistoryDefinition(
@@ -277,6 +297,25 @@ describe(createHistoryNodes, () => {
         },
       ),
     ).toThrow('Duplicate history array identity "a" in the current snapshot at "items".');
+  });
+
+  it("rejects non-finite object identities", () => {
+    const itemSchema = z.object({ name: z.string() });
+    const itemDefinition = createHistoryDefinition(
+      itemSchema,
+      { label: "Item", key: () => Number.POSITIVE_INFINITY },
+      { name: { kind: "field", label: "Name" } },
+    );
+    const schema = z.object({ items: z.array(itemSchema) });
+    const definition = createHistoryDefinition(
+      schema,
+      { label: "List", key: () => "list" },
+      { items: { kind: "array", label: "Items", item: { kind: "object", definition: itemDefinition } } },
+    );
+
+    expect(() => createHistoryNodes(definition, { items: [] }, { items: [{ name: "Invalid" }] })).toThrow(
+      'History array identity in the current snapshot at "items" must be a string or finite number.',
+    );
   });
 
   it("rejects invalid snapshots and non-string formatter results", () => {

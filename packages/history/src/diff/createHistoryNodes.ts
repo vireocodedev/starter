@@ -182,7 +182,10 @@ function createAtomicFieldRow(args: {
 }): HistoryFieldRow | null {
   const { config, previous, current, previousParent, currentParent, path, options } = args;
 
-  const changeType = config.resolveChange?.(previous, current) ?? resolveDefaultFieldChange(previous, current);
+  const changeType =
+    config.resolveChange == null
+      ? resolveDefaultFieldChange(previous, current)
+      : validateResolvedChange(config.resolveChange(previous, current), path);
 
   if (changeType == null) {
     return createUnchangedFieldRow({
@@ -249,6 +252,14 @@ function createAtomicFieldRow(args: {
       options,
     }),
   };
+}
+
+function validateResolvedChange(
+  value: unknown,
+  path: readonly HistoryPathSegment[],
+): "added" | "removed" | "updated" | null {
+  if (value === null || value === "added" || value === "removed" || value === "updated") return value;
+  throw new TypeError(`History change resolver at "${path.join(".")}" returned unsupported type "${String(value)}".`);
 }
 
 function createUnchangedFieldRow(args: {
@@ -675,6 +686,11 @@ function createArrayItemMap(
 
   array.forEach((value, index) => {
     const key = createArrayItemKey(config, value, index);
+    if ((typeof key !== "string" && typeof key !== "number") || (typeof key === "number" && !Number.isFinite(key))) {
+      throw new TypeError(
+        `History array identity in the ${side} snapshot at "${path.join(".")}" must be a string or finite number.`,
+      );
+    }
     if (map.has(key)) {
       throw new Error(
         `Duplicate history array identity "${String(key)}" in the ${side} snapshot at "${path.join(".")}".`,

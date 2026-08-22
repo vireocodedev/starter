@@ -13,7 +13,7 @@ React presentation belongs to `@vireocodedev/starter-ui`, whose
 npm install @vireocodedev/starter-history zod
 ```
 
-`zod >=3.24` is the package's only peer dependency.
+`zod >=3.24 <4` is the package's only peer dependency. Zod 4 support will be declared only after a dedicated compatibility pass.
 
 ## Define and compare an entity
 
@@ -75,7 +75,10 @@ render the formatted text or make a UI-specific decision from `raw`.
 import { createHistoryRecordSchema } from "@vireocodedev/starter-history";
 import { z } from "zod";
 
-const HistoryRecordSchema = createHistoryRecordSchema(z.enum(["INVOICE", "BUYER"]));
+const HistoryRecordSchema = createHistoryRecordSchema({
+  entityKind: z.enum(["INVOICE", "BUYER"]),
+  snapshot: z.object({ total: z.number() }),
+});
 
 const record = HistoryRecordSchema.parse(await response.json());
 ```
