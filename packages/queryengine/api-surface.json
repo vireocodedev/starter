@@ -43,6 +43,7 @@
         "SqlitePageableResponse",
         "SqlitePagedSearchArgs",
         "SqliteQueryEngineConfigRecord",
+        "SqliteQueryEngineConfigRecordSchema",
         "SqliteQueryExecutor",
         "SqliteQueryFilterAdapter",
         "SqliteQueryFilterFieldAdapter",
