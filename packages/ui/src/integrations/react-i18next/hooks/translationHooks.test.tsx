@@ -1,13 +1,13 @@
 import { createStarterResources } from "@vireocodedev/starter-localization";
+import { useHistoryTranslation } from "@/integrations/react-i18next/hooks/useHistoryTranslation/useHistoryTranslation";
+import { usePlatformTranslation } from "@/integrations/react-i18next/hooks/usePlatformTranslation/usePlatformTranslation";
+import { useQueryEngineTranslation } from "@/integrations/react-i18next/hooks/useQueryEngineTranslation/useQueryEngineTranslation";
 import { renderHook } from "@testing-library/react";
 import i18next from "i18next";
 import type { PropsWithChildren } from "react";
 import React from "react";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 import { describe, expect, it } from "vitest";
-import { useHistoryTranslation } from "./useHistoryTranslation/useHistoryTranslation";
-import { usePlatformTranslation } from "./usePlatformTranslation/usePlatformTranslation";
-import { useQueryEngineTranslation } from "./useQueryEngineTranslation/useQueryEngineTranslation";
 
 async function createWrapper() {
   const instance = i18next.createInstance();
