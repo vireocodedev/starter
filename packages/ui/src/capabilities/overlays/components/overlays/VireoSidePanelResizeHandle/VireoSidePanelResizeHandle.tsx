@@ -101,6 +101,3 @@ export const VireoSidePanelResizeHandle = React.forwardRef<HTMLDivElement, Vireo
 );
 
 VireoSidePanelResizeHandle.displayName = VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME;
-
-/** @deprecated Use {@link VireoSidePanelResizeHandle}. */
-export const SidePanelResizeHandle = VireoSidePanelResizeHandle;

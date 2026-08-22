@@ -1,4 +1,4 @@
-import { DockedSidePanel, VireoDockedSidePanel } from "./VireoDockedSidePanel";
+import { VireoDockedSidePanel } from "./VireoDockedSidePanel";
 import { vireoDockedSidePanelClasses } from "./VireoDockedSidePanel.classes";
 import { VIREO_DOCKED_SIDE_PANEL_NAME } from "./VireoDockedSidePanel.identity";
 import * as dockedSidePanelStories from "./VireoDockedSidePanel.stories";
@@ -110,23 +110,6 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
     expect(forwardedRef.current).toHaveClass(vireoDockedSidePanelClasses.root, "direct-class", "slot-class");
     expect(forwardedRef.current).toHaveAttribute("data-origin", "slot");
     expect(forwardedRef.current).toHaveStyle({ paddingLeft: "10px", paddingRight: "12px" });
-  });
-
-  it("preserves the deprecated adapter's root ref and surface sx contract", () => {
-    const rootRef = vi.fn();
-    render(
-      <DockedSidePanel
-        {...requiredProps}
-        rootRef={rootRef}
-        style={{ backgroundColor: "rgb(240, 240, 240)" }}
-        sx={{ padding: 1.5 }}
-      />,
-    );
-
-    const surface = screen.getByRole("complementary");
-    expect(rootRef).toHaveBeenLastCalledWith(surface.parentElement);
-    expect(surface.parentElement).toHaveStyle({ backgroundColor: "rgb(240, 240, 240)" });
-    expect(surface).toHaveStyle({ padding: "12px" });
   });
 
   it("supports replacement slots and owner-state slot props", () => {

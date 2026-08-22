@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { ResponsiveOverlayFrameDesktopSidePanelWidth } from "@/capabilities/overlays/types/overlay.types";
-import type { BoxProps, SxProps, Theme } from "@mui/material";
+import type { BoxProps, Theme } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoDockedSidePanelClasses, type VireoDockedSidePanelClassKey } from "./VireoDockedSidePanel.classes";
@@ -66,16 +66,6 @@ export type VireoDockedSidePanelInheritedProps = Omit<BoxProps<"div">, "children
 
 /** Props accepted by {@link VireoDockedSidePanel}. */
 export type VireoDockedSidePanelProps = VireoDockedSidePanelOwnProps & VireoDockedSidePanelInheritedProps;
-
-/** @deprecated Props accepted by {@link DockedSidePanel}. Use {@link VireoDockedSidePanelProps}. */
-export type DockedSidePanelProps = Pick<
-  VireoDockedSidePanelOwnProps,
-  "children" | "isResizing" | "maxWidth" | "minWidth" | "onExited" | "open" | "resizeHandle" | "width"
-> & {
-  rootRef?: (element: HTMLDivElement | null) => void;
-  style?: React.CSSProperties;
-  sx?: SxProps<Theme>;
-};
 
 declare module "@mui/material/styles" {
   interface Components<Theme = unknown> {

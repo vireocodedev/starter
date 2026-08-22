@@ -1,4 +1,4 @@
-import { ResponsiveOverlayFrame, VireoResponsiveOverlayFrame } from "./VireoResponsiveOverlayFrame";
+import { VireoResponsiveOverlayFrame } from "./VireoResponsiveOverlayFrame";
 import { vireoResponsiveOverlayFrameClasses } from "./VireoResponsiveOverlayFrame.classes";
 import { VIREO_RESPONSIVE_OVERLAY_FRAME_NAME } from "./VireoResponsiveOverlayFrame.identity";
 import { ThemeProvider, createTheme } from "@mui/material";
@@ -291,9 +291,4 @@ describe(VIREO_RESPONSIVE_OVERLAY_FRAME_NAME, () => {
     expect(screen.getByTestId("themed-root")).toHaveStyle({ color: "rgb(123, 45, 67)" });
   });
 
-  it("preserves the deprecated ResponsiveOverlayFrame API", () => {
-    render(<ResponsiveOverlayFrame {...requiredProps} />);
-
-    expect(screen.getByTestId("desktop-dialog")).toHaveTextContent("Overlay content");
-  });
 });

@@ -95,26 +95,6 @@ export type VireoResponsiveOverlayFrameInheritedProps = Omit<
 export type VireoResponsiveOverlayFrameProps = VireoResponsiveOverlayFrameOwnProps &
   VireoResponsiveOverlayFrameInheritedProps;
 
-/** @deprecated Props accepted by {@link ResponsiveOverlayFrame}. Use {@link VireoResponsiveOverlayFrameProps}. */
-export type ResponsiveOverlayFrameProps = Pick<
-  VireoResponsiveOverlayFrameOwnProps,
-  | "allowSidePanelResize"
-  | "children"
-  | "desktopNavWidth"
-  | "desktopPaperSx"
-  | "desktopSidePanelMinContentWidth"
-  | "desktopSidePanelMinWidth"
-  | "desktopSidePanelSx"
-  | "desktopSidePanelWidth"
-  | "desktopSurface"
-  | "maxWidth"
-  | "mobileHeight"
-  | "mobileMaxHeight"
-  | "onClose"
-  | "onExited"
-  | "open"
->;
-
 declare module "@mui/material/styles" {
   interface Components<Theme = unknown> {
     [VIREO_RESPONSIVE_OVERLAY_FRAME_NAME]?: VireoThemeComponent<

@@ -30,7 +30,6 @@ import {
 } from "./VireoResponsiveOverlayFrame.identity";
 import { VireoResponsiveOverlayFrameRoot } from "./VireoResponsiveOverlayFrame.styled";
 import {
-  type ResponsiveOverlayFrameProps,
   type VireoResponsiveOverlayFrameOwnerState,
   type VireoResponsiveOverlayFrameProps,
 } from "./VireoResponsiveOverlayFrame.types";
@@ -250,8 +249,3 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
 );
 
 VireoResponsiveOverlayFrame.displayName = VIREO_RESPONSIVE_OVERLAY_FRAME_NAME;
-
-/** @deprecated Use {@link VireoResponsiveOverlayFrame}. */
-export function ResponsiveOverlayFrame(props: ResponsiveOverlayFrameProps) {
-  return <VireoResponsiveOverlayFrame {...props} />;
-}

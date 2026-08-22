@@ -72,12 +72,6 @@ export type VireoBottomDrawerInheritedProps = Omit<
 /** Props accepted by {@link VireoBottomDrawer}. */
 export type VireoBottomDrawerProps = VireoBottomDrawerOwnProps & VireoBottomDrawerInheritedProps;
 
-/** @deprecated Props accepted by {@link AppBottomDrawer}. Use {@link VireoBottomDrawerProps}. */
-export type AppBottomDrawerProps = Pick<
-  VireoBottomDrawerOwnProps,
-  "children" | "height" | "keepMounted" | "maxHeight" | "onClose" | "onExited" | "onOpen" | "open" | "useBackdrop"
->;
-
 declare module "@mui/material/styles" {
   interface Components<Theme = unknown> {
     [VIREO_BOTTOM_DRAWER_NAME]?: VireoThemeComponent<

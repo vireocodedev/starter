@@ -11,11 +11,7 @@ import React from "react";
 import { type VireoDockedSidePanelClassKey, getVireoDockedSidePanelUtilityClass } from "./VireoDockedSidePanel.classes";
 import { VIREO_DOCKED_SIDE_PANEL_NAME, type VireoDockedSidePanelSlotName } from "./VireoDockedSidePanel.identity";
 import { VireoDockedSidePanelRoot, VireoDockedSidePanelSurface } from "./VireoDockedSidePanel.styled";
-import {
-  type DockedSidePanelProps,
-  type VireoDockedSidePanelOwnerState,
-  type VireoDockedSidePanelProps,
-} from "./VireoDockedSidePanel.types";
+import { type VireoDockedSidePanelOwnerState, type VireoDockedSidePanelProps } from "./VireoDockedSidePanel.types";
 
 function useUtilityClasses(
   _ownerState: VireoDockedSidePanelOwnerState,
@@ -250,8 +246,3 @@ export const VireoDockedSidePanel = React.forwardRef<HTMLDivElement, VireoDocked
 );
 
 VireoDockedSidePanel.displayName = VIREO_DOCKED_SIDE_PANEL_NAME;
-
-/** @deprecated Use {@link VireoDockedSidePanel}. */
-export function DockedSidePanel({ rootRef, style, sx, ...props }: DockedSidePanelProps) {
-  return <VireoDockedSidePanel {...props} ref={rootRef} style={style} slotProps={{ surface: { sx } }} />;
-}

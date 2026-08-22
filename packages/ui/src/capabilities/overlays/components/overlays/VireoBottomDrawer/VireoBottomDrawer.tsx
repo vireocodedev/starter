@@ -6,11 +6,7 @@ import React from "react";
 import { type VireoBottomDrawerClassKey, getVireoBottomDrawerUtilityClass } from "./VireoBottomDrawer.classes";
 import { VIREO_BOTTOM_DRAWER_NAME, type VireoBottomDrawerSlotName } from "./VireoBottomDrawer.identity";
 import { VireoBottomDrawerPuller, VireoBottomDrawerRoot } from "./VireoBottomDrawer.styled";
-import {
-  type AppBottomDrawerProps,
-  type VireoBottomDrawerOwnerState,
-  type VireoBottomDrawerProps,
-} from "./VireoBottomDrawer.types";
+import { type VireoBottomDrawerOwnerState, type VireoBottomDrawerProps } from "./VireoBottomDrawer.types";
 
 const IS_IOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
@@ -132,8 +128,3 @@ export const VireoBottomDrawer = React.forwardRef<HTMLDivElement, VireoBottomDra
 );
 
 VireoBottomDrawer.displayName = VIREO_BOTTOM_DRAWER_NAME;
-
-/** @deprecated Use {@link VireoBottomDrawer}. */
-export function AppBottomDrawer(props: AppBottomDrawerProps) {
-  return <VireoBottomDrawer {...props} />;
-}

@@ -1,6 +1,6 @@
 import { type AppConfig } from "@/config/app.config.types";
 import { AppLayoutNav } from "@/shell/layout/AppLayoutNav";
-import { AppBottomDrawer } from "@vireocodedev/starter-ui";
+import { VireoBottomDrawer } from "@vireocodedev/starter-ui";
 
 export function AppMobileNavDrawer({
   config,
@@ -14,7 +14,7 @@ export function AppMobileNavDrawer({
   open: boolean;
 }) {
   return (
-    <AppBottomDrawer
+    <VireoBottomDrawer
       open={open}
       onClose={onClose}
       height="auto"
@@ -29,6 +29,6 @@ export function AppMobileNavDrawer({
         onNavigate={onClose}
         onClose={onClose}
       />
-    </AppBottomDrawer>
+    </VireoBottomDrawer>
   );
 }

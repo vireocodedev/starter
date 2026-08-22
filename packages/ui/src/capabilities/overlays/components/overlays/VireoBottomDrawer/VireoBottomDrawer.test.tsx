@@ -1,4 +1,4 @@
-import { AppBottomDrawer, VireoBottomDrawer } from "./VireoBottomDrawer";
+import { VireoBottomDrawer } from "./VireoBottomDrawer";
 import { vireoBottomDrawerClasses } from "./VireoBottomDrawer.classes";
 import { VIREO_BOTTOM_DRAWER_NAME } from "./VireoBottomDrawer.identity";
 import { ThemeProvider, createTheme } from "@mui/material";
@@ -122,9 +122,4 @@ describe(VIREO_BOTTOM_DRAWER_NAME, () => {
     });
   });
 
-  it("preserves the deprecated AppBottomDrawer API", () => {
-    render(<AppBottomDrawer {...requiredProps} />);
-
-    expect(screen.getByRole("dialog")).toHaveTextContent("Drawer content");
-  });
 });
