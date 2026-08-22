@@ -120,7 +120,6 @@ describe("package entry points", () => {
       "./localization",
       "./sonner",
       "./tanstack-query",
-      "./video",
       "./storybook",
       "./storybook/VireoIconContainer",
       "./storybook/VireoDockedSidePanel",

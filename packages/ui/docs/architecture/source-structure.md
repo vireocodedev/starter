@@ -65,7 +65,7 @@ Capabilities may contain at most one level of child capabilities. See [Capabilit
 
 ### Integrations
 
-`integrations` owns adapters whose public contracts or lifecycles are coupled to external runtimes. Each finalized integration has a kebab-case directory and an explicit `public.ts` package boundary. Sonner notifications, TanStack Query boundaries and mutation extensions, typed Hello Pangea DnD primitives, and explicit Day.js/MUI X temporal localization establish the current structure; remaining code tied to OvenPlayer or another external runtime stays in the migration inventory until its integration contract is designed.
+`integrations` owns adapters whose public contracts or lifecycles are coupled to external runtimes. Each finalized integration has a kebab-case directory and an explicit `public.ts` package boundary. Sonner notifications, TanStack Query boundaries and mutation extensions, typed Hello Pangea DnD primitives, and explicit Day.js/MUI X temporal localization establish the current structure; another external runtime belongs here only after its reusable integration contract is demonstrated.
 
 Do not create a capability merely to hide integration code. Not every external import creates an integration either: an external package may be an implementation dependency of a genuine capability.
 
@@ -167,7 +167,7 @@ During structural migration:
 - Imports into `src` or undeclared implementation paths are not compatibility guarantees.
 - Deprecated `Rgo*` names may remain as thin compatibility exports until a separate removal decision.
 
-The `./country` export maps to the country capability. The `./localization` export maps to the temporal localization integration and is intentionally absent from the package root. The `./video` export will eventually map to the deferred OvenPlayer integration. The `./api` export remains a compatibility surface assembled from its eventual owners; it does not justify an API capability.
+The `./country` export maps to the country capability. The `./localization` export maps to the temporal localization integration and is intentionally absent from the package root. The `./api` export remains a compatibility surface assembled from its eventual owners; it does not justify an API capability.
 
 Integration APIs are exposed only through named package subpaths such as `./sonner` and `./tanstack-query`. They are not re-exported from the package root, which keeps optional peer dependencies outside the foundational runtime graph.
 

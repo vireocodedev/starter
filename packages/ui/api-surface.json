@@ -1442,20 +1442,6 @@
       ],
       "workerSafe": false
     },
-    "./video": {
-      "exports": [
-        "RgoVideoStreamPlayer",
-        "RgoVideoStreamPlayerProps"
-      ],
-      "dependencies": [
-        "@mui/icons-material",
-        "@mui/material",
-        "ovenplayer",
-        "react",
-        "react-i18next"
-      ],
-      "workerSafe": false
-    },
     "./storybook": {
       "exports": [
         "VireoStorybookProvider",

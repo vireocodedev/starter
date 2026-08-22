@@ -13,46 +13,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayer.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithAutoStartControlDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithCustomStylesDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithDefaultsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithDifferentSizesDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/data-display/RgoVideoStreamPlayer/stories/RgoVideoStreamPlayerWithErrorHandlingDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoSseEmitter/stories/useRgoSseEmitter.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -64,11 +24,6 @@
     {
       "rule": "legacy-source-location",
       "path": "hooks/useRgoSseEmitter/useRgoSseEmitter.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "video/index.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     }
   ]
