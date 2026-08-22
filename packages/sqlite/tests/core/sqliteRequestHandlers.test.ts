@@ -1,7 +1,4 @@
-import {
-  createSqliteRequestHandlers,
-  mergeSqliteRequestHandlers,
-} from "@/core/sqliteRequestHandlers";
+import { createSqliteRequestHandlers, mergeSqliteRequestHandlers } from "@/core/sqliteRequestHandlers";
 import { describe, expect, it } from "vitest";
 
 describe("mergeSqliteRequestHandlers", () => {
@@ -10,10 +7,7 @@ describe("mergeSqliteRequestHandlers", () => {
     const second = () => null;
 
     expect(
-      mergeSqliteRequestHandlers(
-        createSqliteRequestHandlers({ first }),
-        createSqliteRequestHandlers({ second }),
-      ),
+      mergeSqliteRequestHandlers(createSqliteRequestHandlers({ first }), createSqliteRequestHandlers({ second })),
     ).toEqual({ first, second });
   });
 

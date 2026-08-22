@@ -12,10 +12,10 @@ npm install @vireocodedev/starter-sqlite @sqlite.org/sqlite-wasm
 
 ## Entry points
 
-| Entry point | Responsibility |
-| --- | --- |
-| `@vireocodedev/starter-sqlite` | Worker runtime, entity bundles and clients, lifecycle, hydration, persistent offline queue, replay, and SQL-console contracts |
-| `@vireocodedev/starter-sqlite/offline` | Transport-neutral offline mutation, paged hydration, request-header, queue-policy, and network-status helpers |
+| Entry point                            | Responsibility                                                                                                                |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `@vireocodedev/starter-sqlite`         | Worker runtime, entity bundles and clients, lifecycle, hydration, persistent offline queue, replay, and SQL-console contracts |
+| `@vireocodedev/starter-sqlite/offline` | Transport-neutral offline mutation, paged hydration, request-header, queue-policy, and network-status helpers                 |
 
 Both entry points are React-free and worker-safe. They do not own UI, signals, query caches, application entities, or HTTP clients.
 
