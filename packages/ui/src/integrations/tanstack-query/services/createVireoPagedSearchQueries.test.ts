@@ -1,4 +1,4 @@
-import { type PageableParams, type PageableResponse } from "@vireocodedev/starter-infrastructure";
+import { type PageableParams, type PageableResponse } from "@vireocodedev/starter-infrastructure/pagination";
 import { createVireoPagedSearchQueries, type VireoPagedSearchRequestOptions } from "./createVireoPagedSearchQueries";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";

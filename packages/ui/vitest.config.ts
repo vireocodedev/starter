@@ -15,6 +15,14 @@ export default defineConfig({
         replacement: resolve(__dirname, "../infrastructure/src/index.ts"),
       },
       {
+        find: /^@vireocodedev\/starter-infrastructure\/network-status$/,
+        replacement: resolve(__dirname, "../infrastructure/src/network/appNetworkStatus.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-infrastructure\/pagination$/,
+        replacement: resolve(__dirname, "../infrastructure/src/http/pagination.ts"),
+      },
+      {
         find: /^@vireocodedev\/starter-history$/,
         replacement: resolve(__dirname, "../history/src/index.ts"),
       },

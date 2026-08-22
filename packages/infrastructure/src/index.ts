@@ -5,6 +5,7 @@ export * from "./errors/OfflineModeNotSupportedError";
 export * from "./http/AxiosHttpClient";
 export * from "./http/axiosErrorReporting";
 export * from "./http/isRequestCanceled";
+export * from "./http/pagination";
 export * from "./http/pagedSearch";
 export * from "./http/sessionExpiry";
 export * from "./network/appNetworkStatus";

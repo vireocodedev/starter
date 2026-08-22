@@ -1,4 +1,4 @@
-import type { PageableParams, PageableResponse } from "@vireocodedev/starter-infrastructure";
+import type { PageableParams, PageableResponse } from "@vireocodedev/starter-infrastructure/pagination";
 import {
   type DataTag,
   type InfiniteData,

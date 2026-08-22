@@ -3,7 +3,6 @@
   "entryPoints": {
     ".": {
       "exports": [
-        "APP_SESSION_EXPIRED_EVENT",
         "AppOfflineError",
         "AppOfflineQueuedError",
         "AxiosHttpClient",
@@ -18,58 +17,58 @@
         "OfflineModeNotSupportedError",
         "PageableParams",
         "PageableResponse",
-        "PagedSearchQueryPolicy",
         "PagedSearchRequest",
-        "PagedSearchRequestOptions",
         "PersistentSignal",
-        "QueryReconnectController",
-        "QueryReconnectControllerProps",
         "SanitizedAxiosError",
         "SearchableFilters",
-        "ServiceWorkerUpdateCheckOptions",
-        "TANSTACK_QUERY_CLIENT",
-        "beginManualLogout",
-        "cancelManualLogout",
+        "SessionExpiryChannel",
+        "SessionExpiryChannelOptions",
+        "SessionExpiryState",
         "createConnectivityState",
         "createModeAwareApi",
-        "createPagedSearchQuery",
+        "createPageableResponseSchema",
         "createPersistentSignal",
+        "createSessionExpiryChannel",
         "emptyPageableResponse",
-        "findFirstTruthy",
-        "formatDate",
-        "formatDateTime",
-        "formatDateTimeUpsert",
-        "formatDateUpsert",
-        "formatTime",
-        "formatTimeUpsert",
         "getAppOnlineStatus",
         "getAxiosRequestPath",
         "getTransactionalMetadata",
         "isAppOfflineError",
         "isRequestCanceled",
         "normalizePageableResponse",
-        "notifySessionExpired",
         "parseHttpResponse",
         "parseQueryFilterRequest",
         "postPagedSearch",
-        "resetSessionExpiryNotification",
         "resolveHttpEndpoint",
         "sanitizeAxiosError",
         "sortLocalResultsByAccessor",
-        "subscribeToSessionExpiry",
-        "transactional",
-        "useAppOnlineStatus",
-        "useServiceWorkerUpdateChecks"
+        "subscribeToAppNetworkStatus",
+        "transactional"
       ],
       "dependencies": [
-        "@preact/signals-react",
-        "@tanstack/react-query",
+        "@preact/signals-core",
         "axios",
-        "dayjs",
-        "react",
         "zod"
       ],
       "workerSafe": false
+    },
+    "./network-status": {
+      "exports": [
+        "AppOfflineError",
+        "getAppOnlineStatus",
+        "isAppOfflineError",
+        "subscribeToAppNetworkStatus"
+      ],
+      "dependencies": [],
+      "workerSafe": true
+    },
+    "./pagination": {
+      "exports": [
+        "PageableParams",
+        "PageableResponse"
+      ],
+      "dependencies": [],
+      "workerSafe": true
     }
   }
 }

@@ -1,4 +1,4 @@
-import { getAppOnlineStatus, subscribeToAppNetworkStatus } from "@vireocodedev/starter-infrastructure";
+import { getAppOnlineStatus, subscribeToAppNetworkStatus } from "@vireocodedev/starter-infrastructure/network-status";
 import React from "react";
 
 /**

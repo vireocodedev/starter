@@ -17,9 +17,13 @@ export default defineConfig(({ mode }) => ({
   build: {
     emptyOutDir: mode !== "watch",
     lib: {
-      entry: "src/index.ts",
+      entry: {
+        index: "src/index.ts",
+        "http/pagination": "src/http/pagination.ts",
+        "network/appNetworkStatus": "src/network/appNetworkStatus.ts",
+      },
       formats: ["es"],
-      fileName: "index",
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     rollupOptions: {
       external: ["axios", "zod", "@preact/signals-core"],

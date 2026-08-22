@@ -1,21 +1,7 @@
 import { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import z from "zod";
 import { parseHttpResponse, resolveHttpEndpoint, type HttpEndpointResolver } from "./AxiosHttpClient";
-
-export type PageableParams = {
-  page: number;
-  rowsPerPage: number;
-  sortBy: string;
-  sortDirection: "asc" | "desc";
-};
-
-export type PageableResponse<T> = {
-  content: T[];
-  number: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-};
+import { type PageableParams, type PageableResponse } from "./pagination";
 
 export function createPageableResponseSchema<TSchema extends z.ZodTypeAny>(contentSchema: TSchema) {
   const metadata = z.number().int().nonnegative();

@@ -21,6 +21,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./network-status": {
+      "types": "./dist/network/appNetworkStatus.d.ts",
+      "import": "./dist/network/appNetworkStatus.js"
+    },
+    "./pagination": {
+      "types": "./dist/http/pagination.d.ts",
+      "import": "./dist/http/pagination.js"
     }
   },
   "main": "./dist/index.js",

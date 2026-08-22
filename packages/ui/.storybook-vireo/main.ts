@@ -56,6 +56,14 @@ const config: StorybookConfig = {
             replacement: resolve(__dirname, "../../infrastructure/src/index.ts"),
           },
           {
+            find: /^@vireocodedev\/starter-infrastructure\/network-status$/,
+            replacement: resolve(__dirname, "../../infrastructure/src/network/appNetworkStatus.ts"),
+          },
+          {
+            find: /^@vireocodedev\/starter-infrastructure\/pagination$/,
+            replacement: resolve(__dirname, "../../infrastructure/src/http/pagination.ts"),
+          },
+          {
             find: /^@vireocodedev\/starter-localization$/,
             replacement: resolve(__dirname, "../../localization/src/index.ts"),
           },
