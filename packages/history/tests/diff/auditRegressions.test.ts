@@ -78,7 +78,7 @@ describe("history audit regressions", () => {
     ).toThrow('History values do not support object type "Map".');
   });
 
-  it.fails("preserves numeric and string array identities as distinct paths", () => {
+  it("preserves numeric and string array identities as distinct paths", () => {
     const itemSchema = z.object({ id: z.union([z.string(), z.number()]), name: z.string() });
     const itemDefinition = createHistoryDefinition(
       itemSchema,

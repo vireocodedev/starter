@@ -1,10 +1,11 @@
 import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
+import type { HistoryPath } from "@vireocodedev/starter-history";
 
 export type HistoryEntryDisclosure = {
   defaultExpandedDepth: number;
-  isExpanded: (path: readonly string[], depth: number) => boolean;
+  isExpanded: (path: HistoryPath, depth: number) => boolean;
   labels: VireoHistoryEntryLabels;
-  onToggleExpanded: (path: readonly string[], depth: number) => void;
+  onToggleExpanded: (path: HistoryPath, depth: number) => void;
   onToggleShowUnchanged: () => void;
   showUnchanged: boolean;
 };

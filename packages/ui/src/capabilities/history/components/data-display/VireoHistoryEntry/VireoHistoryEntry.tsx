@@ -9,7 +9,8 @@ import { VireoHistoryEntryRoot } from "./VireoHistoryEntry.styled";
 import { type VireoHistoryEntryOwnerState, type VireoHistoryEntryProps } from "./VireoHistoryEntry.types";
 import { HistoryNodeView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryNodeView/HistoryNodeView";
 import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
-import { createHistoryNodes, type HistoryNode } from "@vireocodedev/starter-history";
+import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
+import { createHistoryNodes, type HistoryNode, type HistoryPath } from "@vireocodedev/starter-history";
 
 const DEFAULT_LABELS = {
   expandSection: "Expand section",
@@ -39,10 +40,6 @@ function containsChangedHistoryNode(node: HistoryNode): boolean {
 function containsUnchangedHistoryNode(node: HistoryNode): boolean {
   if (node.type === "group") return node.children.some(containsUnchangedHistoryNode);
   return node.type === "unchanged";
-}
-
-function getPathKey(path: readonly string[]): string {
-  return path.length === 0 ? "$root" : path.join(".");
 }
 
 function useUtilityClasses(_ownerState: VireoHistoryEntryOwnerState, classes?: VireoHistoryEntryProps["classes"]) {
@@ -102,12 +99,12 @@ function VireoHistoryEntryImpl<TEntity extends object>(
   }, [defaultShowUnchanged, entryIdentity]);
 
   const isExpanded = React.useCallback(
-    (path: readonly string[], depth: number) => expandedByPath[getPathKey(path)] ?? depth <= defaultExpandedDepth,
+    (path: HistoryPath, depth: number) => expandedByPath[getHistoryPathKey(path)] ?? depth <= defaultExpandedDepth,
     [defaultExpandedDepth, expandedByPath],
   );
   const onToggleExpanded = React.useCallback(
-    (path: readonly string[], depth: number) => {
-      const key = getPathKey(path);
+    (path: HistoryPath, depth: number) => {
+      const key = getHistoryPathKey(path);
       setExpandedByPath(currentState => ({
         ...currentState,
         [key]: !(currentState[key] ?? depth <= defaultExpandedDepth),
@@ -161,7 +158,7 @@ function VireoHistoryEntryImpl<TEntity extends object>(
     >
       {nodes.map(node => (
         <HistoryNodeView
-          key={node.path.join(".") || "$root"}
+          key={getHistoryPathKey(node.path)}
           disclosure={disclosure}
           hasUnchanged={hasUnchanged}
           node={node}

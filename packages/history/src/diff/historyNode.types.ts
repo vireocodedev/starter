@@ -1,3 +1,5 @@
+import type { HistoryPath } from "../definitions/historyDefinition.types";
+
 export type HistoryValue = {
   raw: unknown;
   formatted: string;
@@ -6,33 +8,33 @@ export type HistoryValue = {
 export type HistoryFieldRow =
   | {
       type: "removed";
-      path: readonly string[];
+      path: HistoryPath;
       label: string;
       previous: HistoryValue;
     }
   | {
       type: "updated";
-      path: readonly string[];
+      path: HistoryPath;
       label: string;
       previous: HistoryValue;
       current: HistoryValue;
     }
   | {
       type: "added";
-      path: readonly string[];
+      path: HistoryPath;
       label: string;
       current: HistoryValue;
     }
   | {
       type: "moved";
-      path: readonly string[];
+      path: HistoryPath;
       label: string;
       previous: HistoryValue;
       current: HistoryValue;
     }
   | {
       type: "unchanged";
-      path: readonly string[];
+      path: HistoryPath;
       label: string;
       current: HistoryValue;
     };
@@ -41,7 +43,7 @@ export type HistoryGroupChangeType = "added" | "updated" | "removed" | "unchange
 
 export type HistoryGroupNode = {
   type: "group";
-  path: readonly string[];
+  path: HistoryPath;
   label: string;
   value?: HistoryValue;
   changeType: HistoryGroupChangeType;

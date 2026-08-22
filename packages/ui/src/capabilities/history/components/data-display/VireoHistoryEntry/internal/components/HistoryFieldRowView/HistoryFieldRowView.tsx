@@ -6,6 +6,7 @@ import { HistoryValueContent } from "@/capabilities/history/components/data-disp
 import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
 import { Button } from "@mui/material";
 import type { HistoryFieldRow } from "@vireocodedev/starter-history";
+import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
 import React from "react";
 
 function getHistoryStatus(row: HistoryFieldRow): HistoryStatus {
@@ -64,7 +65,7 @@ export function HistoryFieldRowView({
   const [expanded, setExpanded] = React.useState(false);
   const [previousOverflowing, setPreviousOverflowing] = React.useState(false);
   const [currentOverflowing, setCurrentOverflowing] = React.useState(false);
-  const rowKey = `${row.path.join(".")}:${row.type}`;
+  const rowKey = `${getHistoryPathKey(row.path)}:${row.type}`;
 
   React.useEffect(() => {
     setExpanded(false);

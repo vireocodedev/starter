@@ -6,6 +6,7 @@ import type {
   HistoryEntityKey,
   HistoryFieldConfig,
   HistoryObjectFieldConfig,
+  HistoryPathSegment,
 } from "../definitions/historyDefinition.types";
 import { areHistoryValuesEqual, formatHistoryValue, isHistoryValuePresent, stableStringify } from "./historyValue";
 import type {
@@ -54,7 +55,7 @@ function createHistoryGroup(
   definition: InternalHistoryDefinition,
   previous: unknown,
   current: unknown,
-  path: string[],
+  path: HistoryPathSegment[],
   options: HistoryEngineOptions = {},
   changeType?: HistoryGroupChangeType,
 ): HistoryGroupNode | null {
@@ -91,7 +92,7 @@ function createFieldNodesForDefinition(
   definition: InternalHistoryDefinition,
   previous: unknown,
   current: unknown,
-  path: string[],
+  path: HistoryPathSegment[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
   const directNodes: HistoryNode[] = [];
@@ -135,7 +136,7 @@ function createFieldNodes(args: {
   current: unknown;
   previousParent: unknown;
   currentParent: unknown;
-  path: string[];
+  path: HistoryPathSegment[];
   options: HistoryEngineOptions;
 }): HistoryNode[] {
   const { config } = args;
@@ -176,7 +177,7 @@ function createAtomicFieldRow(args: {
   current: unknown;
   previousParent: unknown;
   currentParent: unknown;
-  path: string[];
+  path: HistoryPathSegment[];
   options: HistoryEngineOptions;
 }): HistoryFieldRow | null {
   const { config, previous, current, previousParent, currentParent, path, options } = args;
@@ -256,7 +257,7 @@ function createUnchangedFieldRow(args: {
   current: unknown;
   previousParent: unknown;
   currentParent: unknown;
-  path: string[];
+  path: HistoryPathSegment[];
   options: HistoryEngineOptions;
 }): HistoryFieldRow | null {
   const { config, previous, current, previousParent, currentParent, path, options } = args;
@@ -293,7 +294,7 @@ function createObjectGroup(args: {
   config: InternalObjectFieldConfig;
   previous: unknown;
   current: unknown;
-  path: string[];
+  path: HistoryPathSegment[];
   options: HistoryEngineOptions;
 }): HistoryNode[] {
   const { config, previous, current, path, options } = args;
@@ -331,7 +332,7 @@ function createArrayGroup(args: {
   current: unknown;
   previousParent: unknown;
   currentParent: unknown;
-  path: string[];
+  path: HistoryPathSegment[];
   options: HistoryEngineOptions;
 }): HistoryNode[] {
   const { config, previous, current, previousParent, currentParent, path, options } = args;
@@ -372,7 +373,7 @@ function createSetArrayChildren(
   config: InternalArrayFieldConfig,
   previousArray: unknown[],
   currentArray: unknown[],
-  path: string[],
+  path: HistoryPathSegment[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
   const previousItems = createArrayItemMap(config, previousArray, path, "previous");
@@ -384,7 +385,7 @@ function createSetArrayChildren(
 
   for (const [key, currentEntry] of currentItems) {
     const previousEntry = previousItems.get(key);
-    const itemPath = [...path, String(key)];
+    const itemPath = [...path, key];
 
     if (previousEntry == null) {
       addedChildren.push(...createAddedArrayItemNodes(config, currentEntry.value, itemPath, options));
@@ -408,7 +409,7 @@ function createSetArrayChildren(
       continue;
     }
 
-    removedChildren.push(...createRemovedArrayItemNodes(config, previousEntry.value, [...path, String(key)], options));
+    removedChildren.push(...createRemovedArrayItemNodes(config, previousEntry.value, [...path, key], options));
   }
 
   return sortHistoryNodesByChangeType([...addedChildren, ...updatedChildren, ...removedChildren]);
@@ -418,7 +419,7 @@ function createOrderedArrayChildren(
   config: InternalArrayFieldConfig,
   previousArray: unknown[],
   currentArray: unknown[],
-  path: string[],
+  path: HistoryPathSegment[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
   const previousItems = createArrayItemMap(config, previousArray, path, "previous");
@@ -430,7 +431,7 @@ function createOrderedArrayChildren(
 
   for (const [key, currentEntry] of currentItems) {
     const previousEntry = previousItems.get(key);
-    const itemPath = [...path, String(key)];
+    const itemPath = [...path, key];
 
     if (previousEntry == null) {
       addedChildren.push(...createAddedArrayItemNodes(config, currentEntry.value, itemPath, options));
@@ -459,7 +460,7 @@ function createOrderedArrayChildren(
       continue;
     }
 
-    removedChildren.push(...createRemovedArrayItemNodes(config, previousEntry.value, [...path, String(key)], options));
+    removedChildren.push(...createRemovedArrayItemNodes(config, previousEntry.value, [...path, key], options));
   }
 
   return [
@@ -473,7 +474,7 @@ function createMatchedArrayItemNodes(args: {
   config: InternalArrayFieldConfig;
   previous: unknown;
   current: unknown;
-  path: string[];
+  path: HistoryPathSegment[];
   movedRow: HistoryFieldRow | null;
   options: HistoryEngineOptions;
 }): HistoryNode[] {
@@ -511,7 +512,7 @@ function createMatchedArrayItemNodes(args: {
 function createAddedArrayItemNodes(
   config: InternalArrayFieldConfig,
   current: unknown,
-  path: string[],
+  path: HistoryPathSegment[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
   const item = config.item as InternalArrayItemConfig;
@@ -545,7 +546,7 @@ function createAddedArrayItemNodes(
 function createRemovedArrayItemNodes(
   config: InternalArrayFieldConfig,
   previous: unknown,
-  path: string[],
+  path: HistoryPathSegment[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
   const item = config.item as InternalArrayItemConfig;
@@ -579,7 +580,7 @@ function createRemovedArrayItemNodes(
 function createMovedOnlyGroup(
   item: Extract<InternalArrayItemConfig, { kind: "object" }>,
   current: unknown,
-  path: string[],
+  path: HistoryPathSegment[],
   movedRow: HistoryFieldRow,
 ): HistoryGroupNode {
   return {
@@ -593,7 +594,7 @@ function createMovedOnlyGroup(
 }
 
 function createMovedRow(
-  path: string[],
+  path: HistoryPathSegment[],
   previousIndex: number,
   currentIndex: number,
   options: HistoryEngineOptions,
@@ -610,7 +611,7 @@ function createMovedRow(
 function createArrayItemMap(
   config: InternalArrayFieldConfig,
   array: unknown[],
-  path: readonly string[],
+  path: readonly HistoryPathSegment[],
   side: "previous" | "current",
 ): Map<HistoryEntityKey, { value: unknown; index: number }> {
   const map = new Map<HistoryEntityKey, { value: unknown; index: number }>();
@@ -764,7 +765,7 @@ function formatFieldValue(args: {
   value: unknown;
   parent: unknown;
   side: "previous" | "current";
-  path: string[];
+  path: HistoryPathSegment[];
   options: HistoryEngineOptions;
 }): HistoryValue {
   const { config, value, parent, side, path } = args;
@@ -775,7 +776,7 @@ function formatArrayValue(
   config: InternalArrayFieldConfig,
   value: unknown[],
   parent: unknown,
-  path: string[],
+  path: HistoryPathSegment[],
   side: "previous" | "current",
 ): HistoryValue | undefined {
   if (config.format == null) return undefined;
@@ -785,7 +786,7 @@ function formatArrayValue(
 function formatDefinitionValue(
   definition: InternalHistoryDefinition,
   value: unknown,
-  path: string[],
+  path: HistoryPathSegment[],
   side: "previous" | "current",
 ): HistoryValue {
   if (definition.options.format == null) {

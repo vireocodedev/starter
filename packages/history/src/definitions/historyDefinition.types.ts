@@ -2,6 +2,10 @@ import type { z } from "zod";
 
 export type HistoryEntityKey = string | number;
 
+export type HistoryPathSegment = string | number;
+
+export type HistoryPath = readonly HistoryPathSegment[];
+
 export type HistoryChangeType = "added" | "removed" | "updated";
 
 export type HistoryArrayMode = "set" | "ordered";
@@ -11,7 +15,7 @@ export type HistoryValueSide = "previous" | "current";
 export type HistoryFormatContext<TParent> = {
   parent: NonNullable<TParent>;
   side: HistoryValueSide;
-  path: readonly string[];
+  path: HistoryPath;
 };
 
 export type HistoryDefinitionOptions<TEntity extends object> = {

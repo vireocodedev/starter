@@ -7,6 +7,7 @@ import type { HistoryEntryDisclosure } from "@/capabilities/history/components/d
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { Button, ButtonBase, Collapse } from "@mui/material";
 import type { HistoryGroupNode, HistoryNode } from "@vireocodedev/starter-history";
+import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
 
 function isVisible(node: HistoryNode, showUnchanged: boolean): boolean {
   if (node.type === "group") return node.children.some(child => isVisible(child, showUnchanged));
@@ -126,7 +127,7 @@ export function HistoryGroupView({
           {visibleChildren.map(child =>
             child.type === "group" ? (
               <HistoryGroupView
-                key={child.path.join(".") || "$group"}
+                key={getHistoryPathKey(child.path)}
                 depth={depth + 1}
                 disclosure={disclosure}
                 group={child}
@@ -135,7 +136,7 @@ export function HistoryGroupView({
               />
             ) : (
               <HistoryFieldRowView
-                key={`${child.path.join(".")}:${child.type}`}
+                key={`${getHistoryPathKey(child.path)}:${child.type}`}
                 depth={depth - 1}
                 labels={disclosure.labels}
                 row={child}

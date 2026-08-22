@@ -24,6 +24,8 @@
         "HistoryGroupNode",
         "HistoryNode",
         "HistoryObjectFieldConfig",
+        "HistoryPath",
+        "HistoryPathSegment",
         "HistoryRecord",
         "HistoryRecordSchema",
         "HistorySnapshot",

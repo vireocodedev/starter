@@ -13,6 +13,8 @@ export type {
   HistoryFieldConfig,
   HistoryFormatContext,
   HistoryObjectFieldConfig,
+  HistoryPath,
+  HistoryPathSegment,
   HistoryValueSide,
 } from "./definitions/historyDefinition.types";
 export { createHistoryNodes } from "./diff/createHistoryNodes";
