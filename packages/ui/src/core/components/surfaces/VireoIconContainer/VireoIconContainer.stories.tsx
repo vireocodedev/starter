@@ -18,7 +18,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Core/Surfaces/VireoIconContainer",
+  title: "UI/Core/Surfaces/VireoIconContainer",
   component: VireoIconContainer,
   tags: ["autodocs"],
   args: {

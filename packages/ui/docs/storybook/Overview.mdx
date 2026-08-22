@@ -4,51 +4,20 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 # Vireo Starter
 
-This is the shared live-documentation portal for the vireocodedev Starter packages. Vireo UI owns the React documentation host and reusable presentation contracts; framework-free libraries contribute package-owned MDX and executable TypeScript examples.
+This is the shared live-documentation portal for the packages in the Vireo Starter monorepo.
+
+## Documentation structure
+
+- **Documentation** contains repository-level guidance that applies across packages.
+- **UI** contains `@vireocodedev/starter-ui` documentation and its complete React component and hook catalog.
+- **History** contains executable documentation for the framework-free `@vireocodedev/starter-history` package.
+
+Every additional library will receive its own top-level section as it completes the same audit and documentation pilot established by History. Framework-free packages own their MDX and executable TypeScript examples; UI owns the shared React-based Storybook host.
 
 ## Package boundaries
 
-- `@vireocodedev/starter-ui` exposes foundational components, hooks, providers, and finalized capabilities.
-- `@vireocodedev/starter-ui/forms` exposes the TanStack Form integration and bound `form.*` and `field.*` APIs.
-- `@vireocodedev/starter-ui/country` exposes typed country identifiers, localized names, and flag rendering.
-- `@vireocodedev/starter-ui/event-source` exposes native EventSource lifecycle management.
-- `@vireocodedev/starter-ui/hello-pangea-dnd` exposes typed drag-and-drop composition.
-- `@vireocodedev/starter-ui/localization` exposes temporal localization for MUI X fields.
-- `@vireocodedev/starter-ui/sonner` exposes notifications and the Vireo toaster surface.
-- `@vireocodedev/starter-ui/tanstack-query` exposes query boundaries and mutation integration.
-- `@vireocodedev/starter-history` exposes framework-free history definitions, record validation, and deterministic diff creation. Its live package documentation is under **Libraries / History**.
+- UI owns reusable React presentation, interaction, providers, and explicit integration adapters.
+- History owns framework-free history definitions, record validation, and deterministic diff creation.
+- Applications own product-specific composition, domain policy, persistence, and transport decisions.
 
-Integration subpaths are intentionally absent from the package root so applications opt into their peer dependencies explicitly.
-
-## Main capabilities
-
-- **Forms** — typed form initialization, validation policy, multi-step flows, container-responsive sections and actions, and bound fields.
-- **Tables** — one controlled, container-aware model for desktop and mobile data presentation.
-- **Overlays** — dialogs, drawers, docked panels, responsive frames, confirmation flows, and page-overlay orchestration.
-- **Page layout** — container-measured pages, headers, bodies, cards, and layout utilities.
-- **History** — responsive, nested change-history presentation.
-- **Infinite canvas** — controlled pan, zoom, transformed content, and fixed overlays.
-- **Unsaved changes** — scoped registration, discard requests, and navigation integration.
-
-## Foundational APIs
-
-- `VireoIcon`, `VireoIconRegistryProvider`, and `useVireoIcons`
-- `VireoJsonViewer`, `VireoTruncatedContent`, `VireoStopwatch`, and `VireoStatusDot`
-- `VireoTabs`, `VireoSlidingScreenStack`, and `VireoDelayedRender`
-- `VireoProviderComposer`, `VireoThemeColorMeta`, and `VireoInitializationBoundary`
-- `useVireoDebouncedCallback`, `useVireoFullscreen`, `useVireoSearchParamState`, and `useVireoTransitionPresence`
-
-## Design principles
-
-- Components use the complete Vireo contract: slots, slot props, utility classes, theme defaults, variants, tests, and executable stories.
-- Stories show copy-pastable consumer source and intentionally do not use Storybook controls.
-- Responsive behavior follows the owning container whenever component behavior depends on available space.
-- External runtimes live behind explicit integration subpaths.
-- Applications own domain composition and policy; Vireo owns reusable interaction and presentation behavior.
-
-## Getting started
-
-1. Follow the [Installation guide](?path=/docs/documentation-installation--docs).
-2. Configure the [foundational and integration providers](?path=/docs/documentation-providers-guide--docs).
-3. Review the component and hook stories for executable usage examples.
-4. Use the focused integration guides when adopting notifications, TanStack Query, drag-and-drop, or responsive tables.
+Start with **UI / Overview** for the design-system contract or **History / Overview** for the history engine.

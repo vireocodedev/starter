@@ -8,7 +8,7 @@ import { VireoInitializationBoundary } from "./VireoInitializationBoundary";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Core/Behavior/VireoInitializationBoundary",
+  title: "UI/Core/Behavior/VireoInitializationBoundary",
   component: VireoInitializationBoundary,
   tags: ["autodocs"],
   args: { initialize: () => undefined, children: null },

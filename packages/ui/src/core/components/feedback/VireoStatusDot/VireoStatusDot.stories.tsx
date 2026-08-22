@@ -12,7 +12,7 @@ import { VireoStatusDot } from "./VireoStatusDot";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Core/Feedback/VireoStatusDot",
+  title: "UI/Core/Feedback/VireoStatusDot",
   component: VireoStatusDot,
   tags: ["autodocs"],
   args: { color: "success" },

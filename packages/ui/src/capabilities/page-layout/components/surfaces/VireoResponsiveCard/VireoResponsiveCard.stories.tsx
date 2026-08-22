@@ -3,7 +3,7 @@ import defaultSource from "@/capabilities/page-layout/components/surfaces/VireoR
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoResponsiveCard } from "./VireoResponsiveCard";
 const meta = {
-  title: "Capabilities/Page Layout/VireoResponsiveCard",
+  title: "UI/Capabilities/Page Layout/VireoResponsiveCard",
   component: VireoResponsiveCard,
   parameters: {
     controls: { disable: true },

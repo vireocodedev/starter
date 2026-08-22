@@ -3,7 +3,7 @@ import defaultExampleSource from "@/core/providers/VireoProviderComposer/interna
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "Core/Providers/VireoProviderComposer",
+  title: "UI/Core/Providers/VireoProviderComposer",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },

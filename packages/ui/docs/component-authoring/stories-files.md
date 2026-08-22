@@ -41,7 +41,7 @@ Connect Storybook directly to the public component type:
 
 ```tsx
 const meta = {
-  title: "Core/Data Display/VireoComponent",
+  title: "UI/Core/Data Display/VireoComponent",
   component: VireoComponent,
   tags: ["autodocs"],
   parameters: {
@@ -84,39 +84,38 @@ The adapter may relax only the correlated contract that Storybook must represent
 
 ## Stable developer-facing navigation title
 
-The shared Vireo Starter Storybook has five ordered roots:
+The shared Vireo Starter Storybook has monorepo documentation first, followed by one root per library:
 
 ```text
 Documentation
-Core
-Capabilities
-Integrations
-Libraries
+UI
+History
 ```
 
-Core retains its responsibility categories because those categories distinguish
+The UI library retains its responsibility categories because those categories distinguish
 otherwise unrelated foundational contracts. Focused capabilities omit source
 component categories when the capability and component names already communicate
 the distinction. Integrations use a developer-facing task label and may retain
 the external runtime name when it materially helps discovery.
 
 ```text
-Core/[Category]/VireoComponent
-Capabilities/[Capability]/VireoComponent
-Capabilities/[Capability]/[Purposeful group]/VireoComponent
-Integrations/[Integration label]/VireoComponent
-Libraries/[Package]/[Documentation page]
+UI/Documentation/[Documentation page]
+UI/Core/[Category]/VireoComponent
+UI/Capabilities/[Capability]/VireoComponent
+UI/Capabilities/[Capability]/[Purposeful group]/VireoComponent
+UI/Integrations/[Integration label]/VireoComponent
+History/[Documentation page]
 ```
 
 For example:
 
 ```ts
-title: "Core/Behavior/VireoDelayedRender";
-title: "Capabilities/Tables/VireoResponsiveTable";
-title: "Integrations/Notifications · Sonner/VireoToaster";
+title: "UI/Core/Behavior/VireoDelayedRender";
+title: "UI/Capabilities/Tables/VireoResponsiveTable";
+title: "UI/Integrations/Notifications · Sonner/VireoToaster";
 ```
 
-`Libraries` contains package-owned live documentation for framework-free Starter packages. It does not contain UI component stories. Those packages own their MDX and executable TypeScript examples while UI owns the shared React-based Storybook host. See [`NON_REACT_LIVE_DOCUMENTATION.md`](../../../../docs/package-authoring/NON_REACT_LIVE_DOCUMENTATION.md).
+Each framework-free package owns its top-level documentation section but does not own the React host. Those packages own their MDX and executable TypeScript examples while UI owns the shared React-based Storybook runtime. See [`NON_REACT_LIVE_DOCUMENTATION.md`](../../../../docs/package-authoring/NON_REACT_LIVE_DOCUMENTATION.md).
 
 Do not mirror `components/data-display`, `components/layout`, or another source
 category beneath a focused capability merely because that folder exists on disk.
@@ -128,18 +127,19 @@ architecture continues to govern filesystem placement.
 Components exposed through the `useVireoForm` `field.*` facade intentionally use one additional `Fields` navigation directory beneath the forms component category:
 
 ```ts
-title: "Capabilities/Forms/Fields/VireoFormTextField";
+title: "UI/Capabilities/Forms/Fields/VireoFormTextField";
 ```
 
 This grouping contains every component bound through `field.*`. Form-level
 components such as `VireoForm`, `VireoFormActions`, `VireoFormResetButton`,
 `VireoFormSection`, `VireoFormSectionItem`, and `VireoFormSubmitButton` remain
-directly under `Capabilities/Forms`. Multi-step contracts use the sibling
-`Capabilities/Forms/Multi-Step` group and form overlays use
-`Capabilities/Forms/Overlays`.
+directly under `UI/Capabilities/Forms`. Multi-step contracts use the sibling
+`UI/Capabilities/Forms/Multi-Step` group and form overlays use
+`UI/Capabilities/Forms/Overlays`.
 
-The Vireo Starter Storybook navigation fixes the five root positions and prioritizes
-Documentation's `Overview`, `Installation`, and `Guides` entries. Elsewhere it
+The Vireo Starter Storybook navigation fixes monorepo `Documentation` first and
+then orders library roots. It prioritizes `Overview` within each library and UI's
+`Installation` and `Guides` entries. Elsewhere it
 sorts component files before child directories and alphabetizes siblings of the
 same kind.
 

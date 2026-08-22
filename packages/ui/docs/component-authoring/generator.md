@@ -85,10 +85,10 @@ responsibility category; focused capabilities and integrations are flattened so
 source folders do not become redundant navigation levels:
 
 ```text
-Core/Data Display/VireoBadge
-Capabilities/Table/VireoTableHeader
-Capabilities/Table/Management Table/VireoMobileToolbar
-Integrations/Maps/VireoMap
+UI/Core/Data Display/VireoBadge
+UI/Capabilities/Table/VireoTableHeader
+UI/Capabilities/Table/Management Table/VireoMobileToolbar
+UI/Integrations/Maps/VireoMap
 ```
 
 Override the hierarchy when the approved developer-facing group differs from
@@ -99,7 +99,7 @@ vendor should both remain visible:
 npm run generate -- react-component EmailField \
   --owner capabilities/forms \
   --category forms \
-  --set storybookCategory="Capabilities/Forms/Fields"
+  --set storybookCategory="UI/Capabilities/Forms/Fields"
 ```
 
 ## Dry run

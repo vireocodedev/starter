@@ -3,7 +3,7 @@ import defaultExampleSource from "@/core/hooks/useVireoFullscreen/internal/story
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "Core/Hooks/useVireoFullscreen",
+  title: "UI/Core/Hooks/useVireoFullscreen",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },

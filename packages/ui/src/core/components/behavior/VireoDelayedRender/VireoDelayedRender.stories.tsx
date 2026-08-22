@@ -9,7 +9,7 @@ import { VireoDelayedRender } from "./VireoDelayedRender";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Core/Behavior/VireoDelayedRender",
+  title: "UI/Core/Behavior/VireoDelayedRender",
   component: VireoDelayedRender,
   tags: ["autodocs"],
   args: { children: null },

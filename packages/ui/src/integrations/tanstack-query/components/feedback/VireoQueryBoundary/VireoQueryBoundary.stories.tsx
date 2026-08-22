@@ -23,7 +23,7 @@ import { VireoQueryBoundary } from "./VireoQueryBoundary";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Integrations/TanStack Query/VireoQueryBoundary",
+  title: "UI/Integrations/TanStack Query/VireoQueryBoundary",
   component: VireoQueryBoundary,
   tags: ["autodocs"],
   args: { children: null },

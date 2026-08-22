@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Core/Hooks/useVireoDebouncedCallback",
+  title: "UI/Core/Hooks/useVireoDebouncedCallback",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },

@@ -9,7 +9,7 @@ import { VireoSlidingScreenStack } from "./VireoSlidingScreenStack";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Core/Layout/VireoSlidingScreenStack",
+  title: "UI/Core/Layout/VireoSlidingScreenStack",
   component: VireoSlidingScreenStack,
   tags: ["autodocs"],
   parameters: {

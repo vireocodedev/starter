@@ -93,10 +93,10 @@ export default {
     const ownerSegments = inputs.owner.split("/");
     const ownerDisplayName =
       inputs.owner === "core"
-        ? `Core/${toDisplayName(inputs.category)}`
+        ? `UI/Core/${toDisplayName(inputs.category)}`
         : ownerSegments[0] === "capabilities"
-          ? `Capabilities/${ownerSegments.slice(1).map(toDisplayName).join("/")}`
-          : `Integrations/${toDisplayName(ownerSegments[1])}`;
+          ? `UI/Capabilities/${ownerSegments.slice(1).map(toDisplayName).join("/")}`
+          : `UI/Integrations/${toDisplayName(ownerSegments[1])}`;
     const publicBoundary =
       inputs.owner === "core"
         ? context.outputBase

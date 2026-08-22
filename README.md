@@ -70,7 +70,7 @@ npm run storybook
 npm run build-storybook
 ```
 
-UI stories remain under the `Core`, `Capabilities`, and `Integrations` roots. Framework-free packages contribute executable documentation under `Libraries`; History is the first pilot under `Libraries / History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
+Monorepo-level material lives under `Documentation`. Each library then owns a top-level section: UI contains its `Documentation`, `Core`, `Capabilities`, and `Integrations` groups, while History owns its executable package guides directly under `History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
 
 `build` is artifact generation; `typecheck` owns full semantic source checking.
 Keeping those responsibilities separate lets the UI package use TypeScript's

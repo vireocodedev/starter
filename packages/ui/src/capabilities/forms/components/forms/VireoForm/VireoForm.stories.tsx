@@ -24,7 +24,7 @@ function VireoFormStory(props: VireoFormProps) {
 }
 
 const meta = {
-  title: "Capabilities/Forms/VireoForm",
+  title: "UI/Capabilities/Forms/VireoForm",
   component: VireoFormStory,
   tags: ["autodocs"],
   parameters: {

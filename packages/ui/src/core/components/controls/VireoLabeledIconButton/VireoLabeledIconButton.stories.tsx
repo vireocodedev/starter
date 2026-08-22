@@ -9,7 +9,7 @@ import { expect, fn, userEvent, within } from "storybook/test";
 import { VireoLabeledIconButton } from "./VireoLabeledIconButton";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 const meta = {
-  title: "Core/Controls/VireoLabeledIconButton",
+  title: "UI/Core/Controls/VireoLabeledIconButton",
   component: VireoLabeledIconButton,
   tags: ["autodocs"],
   parameters: {

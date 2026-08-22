@@ -15,7 +15,7 @@ const requiredArgs = {
 };
 
 const meta = {
-  title: "Capabilities/Forms/Overlays/VireoResponsiveFormOverlay",
+  title: "UI/Capabilities/Forms/Overlays/VireoResponsiveFormOverlay",
   component: VireoResponsiveFormOverlay,
   tags: ["autodocs"],
   parameters: {

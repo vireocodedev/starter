@@ -28,7 +28,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Integrations/Notifications · Sonner/VireoToaster",
+  title: "UI/Integrations/Notifications · Sonner/VireoToaster",
   component: VireoToaster,
   tags: ["autodocs"],
   parameters: {

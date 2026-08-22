@@ -21,7 +21,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Core/Navigation/VireoTabs",
+  title: "UI/Core/Navigation/VireoTabs",
   component: VireoTabs,
   tags: ["autodocs"],
   parameters: {

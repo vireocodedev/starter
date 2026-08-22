@@ -21,7 +21,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "Capabilities/Forms/Fields/VireoFormRadioGroupField",
+  title: "UI/Capabilities/Forms/Fields/VireoFormRadioGroupField",
   component: VireoFormRadioGroupField,
   tags: ["autodocs"],
   parameters: {

@@ -11,7 +11,7 @@ import { VireoSidePanelResizeHandle } from "./VireoSidePanelResizeHandle";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Capabilities/Overlays/VireoSidePanelResizeHandle",
+  title: "UI/Capabilities/Overlays/VireoSidePanelResizeHandle",
   component: VireoSidePanelResizeHandle,
   tags: ["autodocs"],
   args: { onResizeStart: fn(), onResizeDoubleClick: fn() },

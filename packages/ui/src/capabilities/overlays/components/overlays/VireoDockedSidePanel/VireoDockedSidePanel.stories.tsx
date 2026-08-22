@@ -13,7 +13,7 @@ const source = (code: string) => ({
 });
 
 const meta = {
-  title: "Capabilities/Overlays/VireoDockedSidePanel",
+  title: "UI/Capabilities/Overlays/VireoDockedSidePanel",
   component: VireoDockedSidePanel,
   tags: ["autodocs"],
   args: { open: false, width: 420, minWidth: 280, maxWidth: 620, children: null },

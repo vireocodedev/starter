@@ -65,7 +65,7 @@ test("the registered React component template derives an architectural destinati
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
-    /title: "Core\/Overlays\/VireoGeneratorExample"/,
+    /title: "UI\/Core\/Overlays\/VireoGeneratorExample"/,
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
@@ -177,7 +177,7 @@ test("the React component template supports one child-capability level and requi
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
-    /title: "Capabilities\/Table\/Responsive Table\/VireoResponsiveHeader"/,
+    /title: "UI\/Capabilities\/Table\/Responsive Table\/VireoResponsiveHeader"/,
   );
 });
 
@@ -194,7 +194,7 @@ test("the React component template supports an integration-owned public componen
       name: "Toaster",
       owner: "integrations/sonner",
       category: "feedback",
-      storybookCategory: "Integrations/Notifications · Sonner",
+      storybookCategory: "UI/Integrations/Notifications · Sonner",
     },
     repoRoot: temporaryRoot,
     templateDirectory: fileURLToPath(templateDirectory),
@@ -207,7 +207,7 @@ test("the React component template supports an integration-owned public componen
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
-    /title: "Integrations\/Notifications · Sonner\/VireoToaster"/,
+    /title: "UI\/Integrations\/Notifications · Sonner\/VireoToaster"/,
   );
 });
 

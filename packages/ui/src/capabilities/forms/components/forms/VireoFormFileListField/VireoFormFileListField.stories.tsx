@@ -28,7 +28,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Capabilities/Forms/Fields/VireoFormFileListField",
+  title: "UI/Capabilities/Forms/Fields/VireoFormFileListField",
   component: VireoFormFileListField,
   tags: ["autodocs"],
   parameters: {

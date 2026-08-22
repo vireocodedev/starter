@@ -19,7 +19,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "Capabilities/Forms/VireoFileImagePreview",
+  title: "UI/Capabilities/Forms/VireoFileImagePreview",
   component: VireoFileImagePreview,
   tags: ["autodocs"],
   args: { file: placeholderFile },

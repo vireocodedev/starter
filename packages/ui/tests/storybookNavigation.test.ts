@@ -12,29 +12,30 @@ const storybookConfigFile = join(packageRoot, ".storybook-vireo", "main.ts");
 
 const EXPECTED_DOCUMENTATION_ROUTES = [
   "Documentation/Overview",
-  "Documentation/Installation",
-  "Documentation/Guides/Common Patterns",
-  "Documentation/Guides/Theming",
-  "Documentation/Guides/Providers",
-  "Documentation/Guides/Augmentable Interfaces",
-  "Documentation/Guides/Notifications",
-  "Documentation/Guides/Table Patterns",
-  "Documentation/Guides/TanStack Query",
-  "Documentation/Guides/Drag and Drop",
+  "UI/Overview",
+  "UI/Documentation/Installation",
+  "UI/Documentation/Guides/Common Patterns",
+  "UI/Documentation/Guides/Theming",
+  "UI/Documentation/Guides/Providers",
+  "UI/Documentation/Guides/Augmentable Interfaces",
+  "UI/Documentation/Guides/Notifications",
+  "UI/Documentation/Guides/Table Patterns",
+  "UI/Documentation/Guides/TanStack Query",
+  "UI/Documentation/Guides/Drag and Drop",
 ] as const;
 
 const EXPECTED_HISTORY_ROUTES = [
-  "Libraries/History/Overview",
-  "Libraries/History/Primary Workflow",
-  "Libraries/History/Record Validation",
-  "Libraries/History/Failure Semantics",
+  "History/Overview",
+  "History/Primary Workflow",
+  "History/Record Validation",
+  "History/Failure Semantics",
 ] as const;
 
 const APPROVED_STORY_ROUTES = [
-  /^Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
-  /^Capabilities\/(?:Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
-  /^Capabilities\/Forms\/(?:(?:Fields|Multi-Step|Overlays)\/)?(?:Vireo|useVireo)/u,
-  /^Integrations\/(?:Drag and Drop · Hello Pangea DND|Event Source|Localization|Notifications · Sonner|TanStack Query)\/(?:Vireo|useVireo)/u,
+  /^UI\/Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
+  /^UI\/Capabilities\/(?:Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
+  /^UI\/Capabilities\/Forms\/(?:(?:Fields|Multi-Step|Overlays)\/)?(?:Vireo|useVireo)/u,
+  /^UI\/Integrations\/(?:Drag and Drop · Hello Pangea DND|Event Source|Localization|Notifications · Sonner|TanStack Query)\/(?:Vireo|useVireo)/u,
 ] as const;
 
 function findFiles(root: string, predicate: (file: string) => boolean): string[] {
@@ -75,7 +76,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(violations).toEqual([]);
   });
 
-  it("indexes every standalone MDX page under the visible Documentation root", () => {
+  it("indexes monorepo documentation and UI-owned guides under their library roots", () => {
     const actualRoutes = findFiles(docsRoot, file => extname(file) === ".mdx")
       .map(documentationTitle)
       .sort();
@@ -83,7 +84,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(actualRoutes).toEqual([...EXPECTED_DOCUMENTATION_ROUTES].sort());
   });
 
-  it("indexes every package-owned History page under Libraries", () => {
+  it("indexes every package-owned History page under the History root", () => {
     const actualRoutes = findFiles(historyDocsRoot, file => extname(file) === ".mdx")
       .map(documentationTitle)
       .sort();

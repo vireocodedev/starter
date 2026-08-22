@@ -37,16 +37,15 @@ shared Storybook.
 
 ## Navigation
 
-Non-React packages live below the `Libraries` root:
+Every library owns a top-level Storybook root beside monorepo-level `Documentation`:
 
 ```text
-Libraries/<Package>/<Page>
+<Package>/<Page>
 ```
 
 Every package begins with `Overview`. Remaining pages follow the package's
 consumer workflow and correctness boundaries, not its internal source folders.
-UI components remain under the established `Core`, `Capabilities`, and
-`Integrations` roots.
+UI components remain under `UI/Core`, `UI/Capabilities`, and `UI/Integrations`.
 
 ## Executable source contract
 

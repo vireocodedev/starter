@@ -5,12 +5,12 @@ type StoryEntry = { title: string };
 const vireoStorySort = preview.parameters?.options?.storySort as (a: StoryEntry, b: StoryEntry) => number;
 
 describe("vireoStorySort", () => {
-  it("keeps the five public roots in their approved order", () => {
+  it("keeps monorepo documentation first and each library at the root", () => {
     const titles = [
-      "Libraries/History/Overview",
-      "Integrations/TanStack Query/VireoQueryBoundary",
-      "Capabilities/Forms/VireoForm",
-      "Core/Data Display/VireoIcon",
+      "History/Overview",
+      "UI/Integrations/TanStack Query/VireoQueryBoundary",
+      "UI/Capabilities/Forms/VireoForm",
+      "UI/Core/Data Display/VireoIcon",
       "Documentation/Overview",
     ];
 
@@ -21,19 +21,19 @@ describe("vireoStorySort", () => {
         .map(entry => entry.title),
     ).toEqual([
       "Documentation/Overview",
-      "Core/Data Display/VireoIcon",
-      "Capabilities/Forms/VireoForm",
-      "Integrations/TanStack Query/VireoQueryBoundary",
-      "Libraries/History/Overview",
+      "UI/Core/Data Display/VireoIcon",
+      "UI/Capabilities/Forms/VireoForm",
+      "UI/Integrations/TanStack Query/VireoQueryBoundary",
+      "History/Overview",
     ]);
   });
 
   it("keeps History's package pages in their learning order", () => {
     const titles = [
-      "Libraries/History/Failure Semantics",
-      "Libraries/History/Record Validation",
-      "Libraries/History/Overview",
-      "Libraries/History/Primary Workflow",
+      "History/Failure Semantics",
+      "History/Record Validation",
+      "History/Overview",
+      "History/Primary Workflow",
     ];
 
     expect(
@@ -42,20 +42,21 @@ describe("vireoStorySort", () => {
         .sort(vireoStorySort)
         .map(entry => entry.title),
     ).toEqual([
-      "Libraries/History/Overview",
-      "Libraries/History/Primary Workflow",
-      "Libraries/History/Record Validation",
-      "Libraries/History/Failure Semantics",
+      "History/Overview",
+      "History/Primary Workflow",
+      "History/Record Validation",
+      "History/Failure Semantics",
     ]);
   });
 
   it("prioritizes onboarding pages and the approved guide order", () => {
     const titles = [
-      "Documentation/Guides/Drag and Drop",
-      "Documentation/Installation",
-      "Documentation/Guides/Common Patterns",
+      "UI/Documentation/Guides/Drag and Drop",
+      "UI/Documentation/Installation",
+      "UI/Documentation/Guides/Common Patterns",
+      "UI/Overview",
       "Documentation/Overview",
-      "Documentation/Guides/Theming",
+      "UI/Documentation/Guides/Theming",
     ];
 
     expect(
@@ -65,23 +66,24 @@ describe("vireoStorySort", () => {
         .map(entry => entry.title),
     ).toEqual([
       "Documentation/Overview",
-      "Documentation/Installation",
-      "Documentation/Guides/Common Patterns",
-      "Documentation/Guides/Theming",
-      "Documentation/Guides/Drag and Drop",
+      "UI/Overview",
+      "UI/Documentation/Installation",
+      "UI/Documentation/Guides/Common Patterns",
+      "UI/Documentation/Guides/Theming",
+      "UI/Documentation/Guides/Drag and Drop",
     ]);
   });
 
   it("places component files before child folders and alphabetizes each kind", () => {
     const titles = [
-      "Capabilities/Forms/VireoFormSubmitButton",
-      "Capabilities/Forms/Fields/VireoFormTextField",
-      "Capabilities/Forms/VireoForm",
-      "Capabilities/Forms/VireoFormActions",
-      "Capabilities/Forms/Fields/VireoFormCheckboxField",
-      "Capabilities/Forms/VireoFormSection",
-      "Capabilities/Forms/VireoFormSectionItem",
-      "Capabilities/Forms/VireoFormResetButton",
+      "UI/Capabilities/Forms/VireoFormSubmitButton",
+      "UI/Capabilities/Forms/Fields/VireoFormTextField",
+      "UI/Capabilities/Forms/VireoForm",
+      "UI/Capabilities/Forms/VireoFormActions",
+      "UI/Capabilities/Forms/Fields/VireoFormCheckboxField",
+      "UI/Capabilities/Forms/VireoFormSection",
+      "UI/Capabilities/Forms/VireoFormSectionItem",
+      "UI/Capabilities/Forms/VireoFormResetButton",
     ];
 
     expect(
@@ -90,23 +92,23 @@ describe("vireoStorySort", () => {
         .sort(vireoStorySort)
         .map(entry => entry.title),
     ).toEqual([
-      "Capabilities/Forms/VireoForm",
-      "Capabilities/Forms/VireoFormActions",
-      "Capabilities/Forms/VireoFormResetButton",
-      "Capabilities/Forms/VireoFormSection",
-      "Capabilities/Forms/VireoFormSectionItem",
-      "Capabilities/Forms/VireoFormSubmitButton",
-      "Capabilities/Forms/Fields/VireoFormCheckboxField",
-      "Capabilities/Forms/Fields/VireoFormTextField",
+      "UI/Capabilities/Forms/VireoForm",
+      "UI/Capabilities/Forms/VireoFormActions",
+      "UI/Capabilities/Forms/VireoFormResetButton",
+      "UI/Capabilities/Forms/VireoFormSection",
+      "UI/Capabilities/Forms/VireoFormSectionItem",
+      "UI/Capabilities/Forms/VireoFormSubmitButton",
+      "UI/Capabilities/Forms/Fields/VireoFormCheckboxField",
+      "UI/Capabilities/Forms/Fields/VireoFormTextField",
     ]);
   });
 
   it("applies file-first ordering recursively and alphabetizes sibling folders", () => {
     const titles = [
-      "Capability/Forms/Advanced/Groups/VireoNested",
-      "Capability/Forms/Fields/VireoTextField",
-      "Capability/Forms/Advanced/VireoRule",
-      "Capability/Forms/VireoForm",
+      "UI/Capabilities/Forms/Advanced/Groups/VireoNested",
+      "UI/Capabilities/Forms/Fields/VireoTextField",
+      "UI/Capabilities/Forms/Advanced/VireoRule",
+      "UI/Capabilities/Forms/VireoForm",
     ];
 
     expect(
@@ -115,16 +117,16 @@ describe("vireoStorySort", () => {
         .sort(vireoStorySort)
         .map(entry => entry.title),
     ).toEqual([
-      "Capability/Forms/VireoForm",
-      "Capability/Forms/Advanced/VireoRule",
-      "Capability/Forms/Advanced/Groups/VireoNested",
-      "Capability/Forms/Fields/VireoTextField",
+      "UI/Capabilities/Forms/VireoForm",
+      "UI/Capabilities/Forms/Advanced/VireoRule",
+      "UI/Capabilities/Forms/Advanced/Groups/VireoNested",
+      "UI/Capabilities/Forms/Fields/VireoTextField",
     ]);
   });
 
   it("preserves declaration order for entries belonging to the same component title", () => {
-    expect(vireoStorySort({ title: "Capabilities/Forms/VireoForm" }, { title: "Capabilities/Forms/VireoForm" })).toBe(
-      0,
-    );
+    expect(
+      vireoStorySort({ title: "UI/Capabilities/Forms/VireoForm" }, { title: "UI/Capabilities/Forms/VireoForm" }),
+    ).toBe(0);
   });
 });
