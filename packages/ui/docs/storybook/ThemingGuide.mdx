@@ -2,13 +2,11 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta title="Documentation/Theming guide" />
 
-![RGO Front UI Logo](https://rgo.hr/rgo-en/d/logo.png)
-
 # Theming Guide
 
 ![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
 
-RGO Front UI is built on Material-UI's theming system. All components respect the MUI theme, so customization is done through standard MUI theme configuration.
+Vireo is built on Material UI's theming system. All components respect the MUI theme, so customization is done through standard MUI theme configuration.
 
 ## Table of Contents
 
@@ -22,7 +20,7 @@ RGO Front UI is built on Material-UI's theming system. All components respect th
 
 ## Basic Setup
 
-Every RGO Front UI application must be wrapped in `ThemeProvider`:
+Every Vireo application must be wrapped in `ThemeProvider`:
 
 ```tsx
 import { createTheme } from "@mui/material/styles";
@@ -85,7 +83,7 @@ const theme = createTheme({
 });
 ```
 
-All RGO components (chips, loaders, inputs, tables) will automatically use these colors.
+All Vireo components automatically use the active theme colors.
 
 ## Typography
 
@@ -118,7 +116,7 @@ const theme = createTheme({
 
 ## Component Overrides
 
-Override default styles for MUI components used by RGO:
+Override default styles for MUI components used by Vireo:
 
 ```tsx
 const theme = createTheme({
@@ -166,7 +164,7 @@ const theme = createTheme({
 });
 ```
 
-These overrides affect both MUI components and all RGO components that use them internally.
+These overrides affect both MUI components and all Vireo components that use them internally.
 
 ## Dark Mode
 

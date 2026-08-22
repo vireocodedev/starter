@@ -1,9 +1,8 @@
 # @vireocodedev/starter-ui
 
-The **MUI-based UI component library** for the vireocodedev **starter** product:
-the `Rgo*` design-system primitives (inputs, tables, layout, providers, hooks,
-services), plus responsive cards, mobile/infinite server tables, overlays, app
-providers, layout hooks, and formatters.
+The **MUI-based Vireo component library** for the vireocodedev **starter** product,
+including TanStack-bound forms, responsive tables, overlays, page layout,
+typed integrations, foundational providers, hooks, and formatters.
 
 > This package takes `@mui/*` as **peer dependencies** — it is tied to the
 > starter design system, not a generic component kit.
@@ -22,7 +21,7 @@ npm install @vireocodedev/starter-ui
 
 Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,
-`@tanstack/react-query`, `@tanstack/react-virtual`, `axios`, `i18next`,
+`@tanstack/react-query`, `@tanstack/react-virtual`, `i18next`,
 `react-i18next`, `zod`, `sonner`, `dayjs`. Depends on
 `@vireocodedev/starter-localization`, which owns the `platform` and `history`
 translation namespaces this package renders.

@@ -2,21 +2,18 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta title="Documentation/Augmentable interfaces" />
 
-![RGO Front UI Logo](https://rgo.hr/rgo-en/d/logo.png)
-
 # Augmentable Interfaces
 
 ![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
 
-RGO Front UI exposes several empty interfaces that consumer apps can extend via TypeScript **declaration merging**. This pattern gives the library full type-safety without hard-coding application-specific types.
+Vireo exposes focused registry interfaces that consumer apps can extend via TypeScript **declaration merging**. This pattern gives the library full type-safety without hard-coding application-specific types.
 
 ## Table of Contents
 
 - [How it works](#how-it-works)
 - [Setup](#setup)
 - [Registry reference](#registry-reference)
-  - [VireoIconRegistry](#rgoiconregistry)
-  - [RgoEventSchema](#rgoeventschema)
+  - [VireoIconRegistry](#vireoiconregistry)
   - [VireoDraggableIdRegistry](#vireodraggableidregistry)
   - [VireoDropZoneIdRegistry](#vireodropzoneidregistry)
 - [Full example](#full-example)
@@ -78,7 +75,7 @@ declare module "@vireocodedev/starter-ui" {
       </td>
       <td>
         Maps icon names to React component types. Every key becomes a valid <code>VireoIconName</code> usable with{" "}
-        <code>{'<VireoIcon icon="..." />'}</code> and the <code>useIcons</code> hook.
+        <code>{'<VireoIcon icon="..." />'}</code> and the <code>useVireoIcons</code> hook.
       </td>
     </tr>
     <tr>
@@ -86,7 +83,7 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Consumed by</strong>
       </td>
       <td>
-        <code>VireoIcon</code>, <code>useIcons</code>, <code>VireoIconRegistryProvider</code>
+        <code>VireoIcon</code>, <code>useVireoIcons</code>, <code>VireoIconRegistryProvider</code>
       </td>
     </tr>
   </tbody>

@@ -2,148 +2,52 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta title="Documentation/Overview" />
 
-![RGO Front UI Logo](https://rgo.hr/rgo-en/d/logo.png)
+# Vireo UI
 
-# RGO Front UI - Overview
+Vireo is the MUI-based component and interaction library for vireocodedev Starter applications. It owns reusable UI contracts while applications retain routing, API, persistence, and product-specific policy.
 
-![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+## Package boundaries
 
-A comprehensive React component library built on Material-UI providing production-ready components, hooks, and utilities for modern web applications.
+- `@vireocodedev/starter-ui` exposes foundational components, hooks, providers, and finalized capabilities.
+- `@vireocodedev/starter-ui/forms` exposes the TanStack Form integration and bound `form.*` and `field.*` APIs.
+- `@vireocodedev/starter-ui/country` exposes typed country identifiers, localized names, and flag rendering.
+- `@vireocodedev/starter-ui/event-source` exposes native EventSource lifecycle management.
+- `@vireocodedev/starter-ui/hello-pangea-dnd` exposes typed drag-and-drop composition.
+- `@vireocodedev/starter-ui/localization` exposes temporal localization for MUI X fields.
+- `@vireocodedev/starter-ui/sonner` exposes notifications and the Vireo toaster surface.
+- `@vireocodedev/starter-ui/tanstack-query` exposes query boundaries and mutation integration.
 
-## Table of Contents
+Integration subpaths are intentionally absent from the package root so applications opt into their peer dependencies explicitly.
 
-- [What is RGO Front UI?](#what-is-rgo-front-ui)
-- [Component Categories](#component-categories)
-  - [Input Components (17)](#input-components-17)
-  - [Data Display Components (12)](#data-display-components-12)
-  - [Feedback Components (4)](#feedback-components-4)
-  - [Layout Components (3)](#layout-components-3)
-  - [Navigation Components (1)](#navigation-components-1)
-  - [Wrapper Components (3)](#wrapper-components-3)
-  - [Miscellaneous Components (1)](#miscellaneous-components-1)
-- [Hooks (19)](#hooks-19)
-- [Architecture](#architecture)
-- [Key Features](#key-features)
-- [Getting Started](#getting-started)
-- [Next Steps](#next-steps)
+## Main capabilities
 
-## What is RGO Front UI?
+- **Forms** — typed form initialization, validation policy, multi-step flows, container-responsive sections and actions, and bound fields.
+- **Tables** — one controlled, container-aware model for desktop and mobile data presentation.
+- **Overlays** — dialogs, drawers, docked panels, responsive frames, confirmation flows, and page-overlay orchestration.
+- **Page layout** — container-measured pages, headers, bodies, cards, and layout utilities.
+- **History** — responsive, nested change-history presentation.
+- **Infinite canvas** — controlled pan, zoom, transformed content, and fixed overlays.
+- **Unsaved changes** — scoped registration, discard requests, and navigation integration.
 
-RGO Front UI provides:
+## Foundational APIs
 
-- **Components**: 41 production-ready UI components across 7 categories
-- **Hooks**: 19 specialized hooks for forms, confirmations, translations, and more
-- **Providers**: 7 modular providers for theming, notifications, localization, and icons
-- **Services**: 3 utility services for local storage, offline caching, and web workers
-- **TypeScript**: Full type safety with comprehensive type definitions
-- **Storybook**: Interactive documentation with live examples
+- `VireoIcon`, `VireoIconRegistryProvider`, and `useVireoIcons`
+- `VireoJsonViewer`, `VireoTruncatedContent`, `VireoStopwatch`, and `VireoStatusDot`
+- `VireoTabs`, `VireoSlidingScreenStack`, and `VireoDelayedRender`
+- `VireoProviderComposer`, `VireoThemeColorMeta`, and `VireoInitializationBoundary`
+- `useVireoDebouncedCallback`, `useVireoFullscreen`, `useVireoSearchParamState`, and `useVireoTransitionPresence`
 
-## Component Categories
+## Design principles
 
-### Form Components
+- Components use the complete Vireo contract: slots, slot props, utility classes, theme defaults, variants, tests, and executable stories.
+- Stories show copy-pastable consumer source and intentionally do not use Storybook controls.
+- Responsive behavior follows the owning container whenever component behavior depends on available space.
+- External runtimes live behind explicit integration subpaths.
+- Applications own domain composition and policy; Vireo owns reusable interaction and presentation behavior.
 
-TanStack-bound form structure and fields are available through `useVireoForm`. Use the `form.*` and `field.*` APIs shown under the Forms Storybook category.
+## Getting started
 
-### Data Display Components (11)
-
-Components for presenting data and information:
-
-- **VireoResponsiveTable**: Container-aware desktop and mobile data presentation with controlled pagination, sorting, filters, loading, and scroll restoration
-- **VireoIcon**: Standardized icon component using the icon registry
-- **VireoIconContainer**: SVG geometry scaler for the standard 24×24 icon coordinate system
-- **VireoJsonViewer**: Resilient structured-data viewer with copy feedback
-- **VireoLabelBox**: Consistent labeling wrapper for form elements
-- **RgoTruncatedText**: Text truncation with expand/collapse
-- **VireoToaster**: Responsive, MUI-themed Sonner notification region, available from the dedicated `/sonner` entry point
-- **VireoStopwatch**: Live and completed elapsed-duration display
-
-### Feedback Components
-
-User feedback and status indication:
-
-- **VireoQueryBoundary**: Suspense loading, safe error presentation, local TanStack Query reset, and opt-in diagnostics, available from `/tanstack-query`
-
-### Layout Components (3)
-
-Page structure and layout:
-
-- **RgoPage**: Full-page layout container
-- **RgoPageBody**: Page body content area
-- **RgoPageHeader**: Page header with title and actions
-
-### Navigation Components (1)
-
-- **VireoTabs**: Tab navigation with URL state synchronization
-
-### Wrapper Components (3)
-
-Container and composition utilities:
-
-- **VireoFormSection**: Groups fields in a named, container-responsive section
-- **VireoFormSectionItem and VireoFormActions**: Own full-row compositions and responsive form actions without direct Grid2 layout
-- **VireoInfiniteCanvas**: Pannable and zoomable infinite canvas with grid background
-
-### Miscellaneous Components (1)
-
-- **VireoInitializationBoundary**: Async initialization wrapper with loading state
-
-## Hooks
-
-Specialized functionality hooks:
-
-- **useVireoForm**: TanStack Form integration with Vireo fields and Zod validation
-- **useVireoMultiStepForm**: Typed TanStack form with conditional steps, validation-gated navigation, and subscriptions
-- **useRgoConfirm**: Modal confirmation dialogs
-- **useTheme**: Theme switching and customization
-- **useVireoSearchParamState**: Typed scalar URL state that composes with controls such as VireoTabs
-- **useVireoDebouncedCallback**: Trailing callback scheduling with cancellation and flushing
-- **useVireoFullscreen**: Observe and control fullscreen ownership for one target element
-- **useVireoTransitionPresence**: Retain values safely through transition exits
-- **useEffectOnce**: Run effect exactly once (Strict Mode safe)
-- **useVireoIcons**: Access the icon registry from VireoIconRegistryProvider
-- **useVireoInfiniteCanvas**: Access infinite canvas transform and fullscreen state
-- **useVireoMutation**: TanStack Query mutation extension with optional Sonner messages and Zod-validated error details, available from `/tanstack-query`
-
-## Architecture
-
-Provider-based architecture with optional functionality. Applications can flatten the configured tree with `VireoProviderComposer`:
-
-```tsx
-<ThemeProvider theme={customTheme}>
-  <CssBaseline />
-  <VireoThemeColorMeta />
-  <VireoIconRegistryProvider>
-    <YourApp />
-  </VireoIconRegistryProvider>
-</ThemeProvider>
-```
-
-## Key Features
-
-- **Consistent Design**: All components follow Material-UI design principles
-- **Responsive**: Mobile-first responsive design patterns
-- **Accessible**: ARIA compliance and keyboard navigation
-- **Customizable**: Theme-based styling and component variants
-- **Type Safe**: Full TypeScript support with strict typing
-- **Well Documented**: Interactive examples for every component and hook in Storybook
-
-## Getting Started
-
-1. **Installation**: Set up the library and peer dependencies
-2. **Providers**: Configure required providers for your app
-3. **Components**: Start using components in your application
-4. **Customization**: Customize themes and component behavior
-
-## Next Steps
-
-- 📦 [Installation Guide](?path=/docs/documentation-installation--docs) - Set up the library
-- 🎨 [Theming Guide](?path=/docs/documentation-theming-guide--docs) - Customize your theme
-- 🔌 [Providers Guide](?path=/docs/documentation-providers-guide--docs) - Configure providers
-- 📋 [Common Patterns](?path=/docs/documentation-common-patterns--docs) - Learn best practices
-- 📊 [Table Patterns](?path=/docs/documentation-table-patterns-guide--docs) - Build data tables
-- 📝 [Form & Input Style Guide](?path=/docs/documentation-form-and-input-style-guide--docs) - Form architecture
-- 🔧 [Services & Utilities](?path=/docs/documentation-services-and-utilities--docs) - Utility services
-- 🧩 **Browse Components** - Explore components in the sidebar
-- 🪝 **Explore Hooks** - Check out specialized hooks
-
-Ready to get started? Check out the [Installation Guide](?path=/docs/documentation-installation--docs) next!
+1. Follow the [Installation guide](?path=/docs/documentation-installation--docs).
+2. Configure the [foundational and integration providers](?path=/docs/documentation-providers-guide--docs).
+3. Review the component and hook stories for executable usage examples.
+4. Use the focused integration guides when adopting notifications, TanStack Query, drag-and-drop, or responsive tables.
