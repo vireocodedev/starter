@@ -1,15 +1,4 @@
 {
   "version": 1,
-  "exceptions": [
-    {
-      "rule": "legacy-source-location",
-      "path": "@types/mui.d.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "@types/rgo.d.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    }
-  ]
+  "exceptions": []
 }
