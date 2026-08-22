@@ -11,7 +11,6 @@ export * from "@/capabilities/forms/form-overlays/components/overlays/VireoRespo
 export * from "@/capabilities/history/public";
 export * from "@/capabilities/infinite-canvas/public";
 export * from "@/features/@hello-pangea/dnd";
-export * from "@/features/axios";
 export * from "@/features/i18next";
 export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";
 export * from "@/providers/RgoLocalizationProvider/RgoLocalizationProvider";

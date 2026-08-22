@@ -103,16 +103,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "features/axios/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/axios/lib.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "features/i18next/index.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

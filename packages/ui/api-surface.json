@@ -543,7 +543,6 @@
         "clampCanvasScale",
         "clampSidePanelWidth",
         "composeSx",
-        "configureAxiosClient",
         "configureI18nClient",
         "createCurrencyFormatter",
         "createDarkTheme",
