@@ -64,6 +64,7 @@ const WORKER_SAFE_ENTRY_POINTS = {
   "@vireocodedev/starter-infrastructure": ["./network-status", "./pagination"],
   "@vireocodedev/starter-localization": ["."],
   "@vireocodedev/starter-queryengine": ["."],
+  "@vireocodedev/starter-shell": ["."],
   "@vireocodedev/starter-sqlite": [".", "./offline"],
 };
 
