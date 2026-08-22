@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
 describe("history audit regressions", () => {
-  it.fails("distinguishes different Date values", () => {
+  it("distinguishes different Date values", () => {
     const schema = z.object({ id: z.string(), occurredAt: z.date() });
     const definition = createHistoryDefinition(
       schema,
@@ -20,7 +20,7 @@ describe("history audit regressions", () => {
     expect(nodes).toHaveLength(1);
   });
 
-  it.fails("distinguishes objects containing different bigint values", () => {
+  it("distinguishes objects containing different bigint values", () => {
     const schema = z.object({ id: z.string(), payload: z.unknown() });
     const definition = createHistoryDefinition(
       schema,
@@ -37,7 +37,7 @@ describe("history audit regressions", () => {
     ).toHaveLength(1);
   });
 
-  it.fails("rejects cyclic values instead of silently treating them as equal", () => {
+  it("rejects cyclic values instead of silently treating them as equal", () => {
     const schema = z.object({ id: z.string(), payload: z.unknown() });
     const definition = createHistoryDefinition(
       schema,
@@ -52,6 +52,30 @@ describe("history audit regressions", () => {
     expect(() =>
       createHistoryNodes(definition, { id: "event-1", payload: previous }, { id: "event-1", payload: current }),
     ).toThrow(/cyclic/u);
+  });
+
+  it("compares plain objects deterministically and rejects unsupported object types", () => {
+    const schema = z.object({ id: z.string(), payload: z.unknown() });
+    const definition = createHistoryDefinition(
+      schema,
+      { label: "Event", key: event => event.id },
+      { id: false, payload: { kind: "field", label: "Payload" } },
+    );
+
+    expect(
+      createHistoryNodes(
+        definition,
+        { id: "event-1", payload: { first: 1, second: 2 } },
+        { id: "event-1", payload: { second: 2, first: 1 } },
+      ),
+    ).toEqual([]);
+    expect(() =>
+      createHistoryNodes(
+        definition,
+        { id: "event-1", payload: new Map([["revision", 1]]) },
+        { id: "event-1", payload: new Map([["revision", 2]]) },
+      ),
+    ).toThrow('History values do not support object type "Map".');
   });
 
   it.fails("preserves numeric and string array identities as distinct paths", () => {

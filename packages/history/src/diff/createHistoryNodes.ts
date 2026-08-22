@@ -628,7 +628,7 @@ function createArrayItemMap(
   return map;
 }
 
-function createArrayItemKey(config: InternalArrayFieldConfig, value: unknown, index: number): HistoryEntityKey {
+function createArrayItemKey(config: InternalArrayFieldConfig, value: unknown, _index: number): HistoryEntityKey {
   const item = config.item as InternalArrayItemConfig;
 
   if (item.kind === "object") {
@@ -639,7 +639,7 @@ function createArrayItemKey(config: InternalArrayFieldConfig, value: unknown, in
     return value;
   }
 
-  return stableStringify(value) ?? String(index);
+  return stableStringify(value);
 }
 
 function sortHistoryNodesByChangeType(nodes: HistoryNode[]): HistoryNode[] {
