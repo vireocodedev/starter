@@ -1,12 +1,9 @@
 import dayjs, { type Dayjs } from "dayjs";
-import utc from "dayjs/plugin/utc";
 import type {
   VireoFormTemporalFieldError,
   VireoFormTemporalFieldMode,
   VireoFormTemporalFieldPrecision,
 } from "@/capabilities/forms/components/forms/VireoFormTemporalField/VireoFormTemporalField.types";
-
-dayjs.extend(utc);
 
 const pad2 = (value: number): string => String(value).padStart(2, "0");
 

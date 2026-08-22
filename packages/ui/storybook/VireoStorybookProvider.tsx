@@ -1,10 +1,11 @@
 import { Box, CssBaseline, ThemeProvider, createTheme } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { VireoTemporalLocalizationProvider, type VireoTemporalLocale } from "@vireocodedev/starter-ui/localization";
 import type React from "react";
 
 export type VireoStorybookProviderProps = {
   children: React.ReactNode;
+  /** Temporal locale used by stories that do not demonstrate localization. @default 'en' */
+  temporalLocale?: VireoTemporalLocale;
 };
 
 const vireoStorybookReviewTheme = createTheme({
@@ -36,15 +37,15 @@ const vireoStorybookReviewTheme = createTheme({
 });
 
 /** Reproduces the shared dark Vireo review surface used by executable Storybook examples. */
-export function VireoStorybookProvider({ children }: VireoStorybookProviderProps) {
+export function VireoStorybookProvider({ children, temporalLocale = "en" }: VireoStorybookProviderProps) {
   return (
     <ThemeProvider theme={vireoStorybookReviewTheme}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <VireoTemporalLocalizationProvider locale={temporalLocale}>
         <CssBaseline />
         <Box width="100%" minWidth={0} color="text.primary">
           {children}
         </Box>
-      </LocalizationProvider>
+      </VireoTemporalLocalizationProvider>
     </ThemeProvider>
   );
 }

@@ -39,7 +39,7 @@ const meta = {
 
 ### Why it exists
 
-Date and time inputs otherwise repeat adapter conversion, canonical serialization, incomplete-draft handling, bounds, step validation, clear behavior, form errors, and MUI picker customization. Vireo centralizes that plumbing without assigning a timezone or hiding the application's LocalizationProvider. Use it for year, month, year-month, date, time, and date-time form values; keep timezone conversion and domain validation in the consuming application.`,
+Date and time inputs otherwise repeat adapter conversion, canonical serialization, incomplete-draft handling, bounds, step validation, clear behavior, form errors, and MUI picker customization. Vireo centralizes that plumbing without assigning a timezone. Use it for year, month, year-month, date, time, and date-time form values inside \`VireoTemporalLocalizationProvider\`; keep timezone conversion, application translations, and domain validation in the consuming application.`,
       },
     },
   },

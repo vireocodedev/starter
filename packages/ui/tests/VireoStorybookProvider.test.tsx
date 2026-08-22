@@ -13,4 +13,14 @@ describe("VireoStorybookProvider", () => {
 
     expect(screen.getByRole("textbox", { name: "Review date" })).toHaveAttribute("placeholder", "MM/DD/YYYY");
   });
+
+  it("allows stories to select the temporal locale explicitly", () => {
+    render(
+      <VireoStorybookProvider temporalLocale="hr">
+        <DateField label="Datum" value={null} />
+      </VireoStorybookProvider>,
+    );
+
+    expect(screen.getByRole("textbox", { name: "Datum" })).toHaveAttribute("placeholder", "DD.MM.GGGG");
+  });
 });

@@ -1,4 +1,5 @@
 import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoForm";
+import { VireoTemporalLocalizationProvider } from "@/integrations/localization/public";
 import {
   formatTemporalValue,
   parseTemporalValue,
@@ -32,16 +33,37 @@ function Harness({ defaultValue = null, fieldProps, mode = "date", onSubmit, roo
     slotProps: { htmlInput: { "aria-label": "Temporal value" }, ...fieldProps?.slotProps },
   } as VireoFormTemporalFieldProps;
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <VireoTemporalLocalizationProvider locale="en">
       <form.Form>
         <form.Field name="value">{field => <field.TemporalField {...temporalFieldProps} ref={rootRef} />}</form.Field>
         <button type="submit">Submit</button>
+      </form.Form>
+    </VireoTemporalLocalizationProvider>
+  );
+}
+
+function NativeProviderHarness() {
+  const form = useVireoForm({ defaultValues: { value: null as string | null }, onSubmit: () => undefined });
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <form.Form>
+        <form.Field name="value">
+          {field => <field.TemporalField mode="date" slotProps={{ htmlInput: { "aria-label": "Date" } }} />}
+        </form.Field>
       </form.Form>
     </LocalizationProvider>
   );
 }
 
 describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
+  it("requires the Vireo temporal localization provider", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() => render(<NativeProviderHarness />)).toThrow(
+      'VireoFormTemporalField must be rendered within VireoTemporalLocalizationProvider. Import it from "@vireocodedev/starter-ui/localization".',
+    );
+    consoleError.mockRestore();
+  });
+
   it("renders its essential bound date semantics with only the required mode", () => {
     render(<Harness />);
     expect(screen.getByLabelText("Temporal value")).toBeInTheDocument();

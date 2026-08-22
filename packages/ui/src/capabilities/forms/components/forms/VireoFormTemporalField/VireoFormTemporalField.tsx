@@ -6,6 +6,7 @@ import { TextField, unstable_composeClasses as composeClasses, type TextFieldPro
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
 import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
+import { MuiPickersAdapterContext } from "@mui/x-date-pickers/LocalizationProvider";
 import { useStore } from "@tanstack/react-form";
 import { type Dayjs } from "dayjs";
 import React from "react";
@@ -48,6 +49,7 @@ type TemporalFormErrorState = {
 };
 
 const VIREO_TEMPORAL_ERROR_KEY = "__vireoTemporal";
+const VIREO_TEMPORAL_LOCALIZATION_MARKER = "__vireoTemporalLocalizationProvider";
 const temporalFormErrors = new WeakMap<object, TemporalFormErrorState>();
 
 function setTemporalFormError(form: TemporalErrorFormApi, fieldName: string, error: string | null): void {
@@ -160,6 +162,18 @@ const TemporalPickerTextField = React.forwardRef<HTMLDivElement, TemporalPickerT
  */
 export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoFormTemporalFieldProps>(
   function VireoFormTemporalField(inProps, forwardedRef) {
+    const localizationContext = React.useContext(MuiPickersAdapterContext);
+    if (
+      !(
+        localizationContext?.localeText as
+          (Record<string, unknown> & { [VIREO_TEMPORAL_LOCALIZATION_MARKER]?: boolean }) | undefined
+      )?.[VIREO_TEMPORAL_LOCALIZATION_MARKER]
+    ) {
+      throw new Error(
+        'VireoFormTemporalField must be rendered within VireoTemporalLocalizationProvider. Import it from "@vireocodedev/starter-ui/localization".',
+      );
+    }
+
     const props = useThemeProps({ props: inProps, name: VIREO_FORM_TEMPORAL_FIELD_NAME });
     const {
       ampm = false,
