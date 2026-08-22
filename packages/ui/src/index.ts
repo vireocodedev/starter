@@ -17,7 +17,6 @@ export * from "@/features/@hello-pangea/dnd";
 export * from "@/features/@tanstack/react-query";
 export * from "@/features/axios";
 export * from "@/features/i18next";
-export * from "@/hooks/useRgoMutation/useRgoMutation";
 export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";
 export * from "@/providers/AppSnackbarProvider";
 export * from "@/providers/AppThemeColorMetaProvider";

@@ -213,21 +213,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoMutation/stories/useRgoMutation.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoMutation/stories/UseRgoMutationWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoMutation/useRgoMutation.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoSseEmitter/stories/useRgoSseEmitter.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
