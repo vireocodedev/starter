@@ -5,10 +5,11 @@ import {
   useVireoInfiniteCanvas,
 } from "@vireocodedev/starter-ui";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { Add, CenterFocusStrong, Fullscreen, Remove } from "@mui/icons-material";
+import { Add, CenterFocusStrong, Fullscreen, FullscreenExit, Remove } from "@mui/icons-material";
 import { ButtonGroup, IconButton, Paper, Stack, Typography } from "@mui/material";
 function CanvasControls() {
-  const { resetTransform, scale, toggleFullscreen, zoomIn, zoomOut } = useVireoInfiniteCanvas();
+  const { isFullscreen, isFullscreenSupported, resetTransform, scale, toggleFullscreen, zoomIn, zoomOut } =
+    useVireoInfiniteCanvas();
   return (
     <Paper elevation={4}>
       <Stack direction="row" alignItems="center">
@@ -22,8 +23,12 @@ function CanvasControls() {
           <IconButton aria-label="Zoom in" onClick={zoomIn}>
             <Add />
           </IconButton>
-          <IconButton aria-label="Toggle fullscreen" onClick={() => void toggleFullscreen()}>
-            <Fullscreen />
+          <IconButton
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            disabled={!isFullscreenSupported}
+            onClick={() => void toggleFullscreen()}
+          >
+            {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
           </IconButton>
         </ButtonGroup>
         <Typography sx={{ px: 1.5 }} variant="caption">

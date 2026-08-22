@@ -36,14 +36,15 @@ compatibility contract.
 
 - **Components** — Vireo form fields and layout primitives, responsive cards,
   tables, overlays, navigation, feedback, and data-display components.
-- **Forms** — `useVireoForm`, its bound `form.*` and `field.*` APIs,
-  `ResponsiveFormOverlay`, and deferred success notifications.
+- **Forms** — `useVireoForm`, its bound `form.*` and `field.*` APIs, and
+  `VireoResponsiveFormOverlay`.
 - **Tables** — `VireoResponsiveTable`, the typed container-aware desktop table
   and mobile accordion contract with controlled sorting, pagination, loading,
   filtering surfaces, virtualization, and scroll restoration.
 - **Providers** — `AppConfirmProvider`, `AppSnackbarProvider`,
   `AppThemeColorMetaProvider`.
-- **Hooks** — `useVireoDebouncedCallback`, `useAppPageContentLayout`,
+- **Hooks** — `useVireoDebouncedCallback`, `useVireoFullscreen`,
+  `useVireoTransitionPresence`, `useAppPageContentLayout`,
   `usePageOverlayModes`, and `useDelayedOverlayMount`.
 - **Overlays** — responsive side-panel/drawer frames, page-overlay controller,
   delayed mounting, and guarded mode switching.

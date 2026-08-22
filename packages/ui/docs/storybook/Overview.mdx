@@ -21,7 +21,7 @@ A comprehensive React component library built on Material-UI providing productio
   - [Navigation Components (1)](#navigation-components-1)
   - [Wrapper Components (3)](#wrapper-components-3)
   - [Miscellaneous Components (1)](#miscellaneous-components-1)
-- [Hooks (18)](#hooks-18)
+- [Hooks (19)](#hooks-19)
 - [Architecture](#architecture)
 - [Key Features](#key-features)
 - [Getting Started](#getting-started)
@@ -32,7 +32,7 @@ A comprehensive React component library built on Material-UI providing productio
 RGO Front UI provides:
 
 - **Components**: 41 production-ready UI components across 7 categories
-- **Hooks**: 18 specialized hooks for forms, confirmations, translations, and more
+- **Hooks**: 19 specialized hooks for forms, confirmations, translations, and more
 - **Providers**: 7 modular providers for theming, notifications, localization, and icons
 - **Services**: 3 utility services for local storage, offline caching, and web workers
 - **TypeScript**: Full type safety with comprehensive type definitions
@@ -82,7 +82,7 @@ Container and composition utilities:
 
 - **VireoFormSection**: Groups fields in a named, container-responsive section
 - **VireoFormSectionItem and VireoFormActions**: Own full-row compositions and responsive form actions without direct Grid2 layout
-- **RgoInfiniteCanvas**: Pannable and zoomable infinite canvas with grid background
+- **VireoInfiniteCanvas**: Pannable and zoomable infinite canvas with grid background
 
 ### Miscellaneous Components (1)
 
@@ -101,10 +101,11 @@ Specialized functionality hooks:
 - **useRgoTabs**: Tab navigation state management
 - **useRgoUrlState**: URL-synchronized state management
 - **useVireoDebouncedCallback**: Trailing callback scheduling with cancellation and flushing
+- **useVireoFullscreen**: Observe and control fullscreen ownership for one target element
+- **useVireoTransitionPresence**: Retain values safely through transition exits
 - **useEffectOnce**: Run effect exactly once (Strict Mode safe)
-- **useRgoFullscreenListener**: Listen for fullscreen state changes
 - **useVireoIcons**: Access the icon registry from VireoIconRegistryProvider
-- **useRgoInfiniteCanvas**: Access infinite canvas transform state
+- **useVireoInfiniteCanvas**: Access infinite canvas transform and fullscreen state
 
 ## Architecture
 

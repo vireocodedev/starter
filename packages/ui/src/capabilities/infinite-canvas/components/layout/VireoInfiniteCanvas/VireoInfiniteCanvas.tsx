@@ -5,7 +5,7 @@ import {
   normalizeCanvasTransform,
   zoomCanvasAtPoint,
 } from "@/capabilities/infinite-canvas/utils/infiniteCanvas.utils";
-import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
+import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps, useVireoFullscreen } from "@/core/public";
 import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
@@ -53,6 +53,7 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
     const [internalTransform, setInternalTransform] = React.useState(initialTransform.current);
     const transform = normalizeCanvasTransform(controlledTransform ?? internalTransform, minScale, maxScale);
     const [target, setTarget] = React.useState<HTMLDivElement | null>(null);
+    const { isFullscreen, isSupported: isFullscreenSupported, toggleFullscreen } = useVireoFullscreen(target);
     const [panning, setPanning] = React.useState(false);
     const dragRef = React.useRef<VireoCanvasPoint | null>(null);
     const ownerState: VireoInfiniteCanvasOwnerState = {
@@ -153,11 +154,6 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       },
       [target, transform.scale, zoomAtClient],
     );
-    const toggleFullscreen = React.useCallback(async () => {
-      if (!target) return;
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else await target.requestFullscreen();
-    }, [target]);
     const context = React.useMemo(
       () => ({
         transform,
@@ -173,11 +169,15 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
         resetTransform: () => setTransform(initialTransform.current),
         zoomIn: () => zoomFromCenter(zoomStep),
         zoomOut: () => zoomFromCenter(1 / zoomStep),
+        isFullscreen,
+        isFullscreenSupported,
         toggleFullscreen,
       }),
       [
         clientToWorld,
         getViewportCenterWorld,
+        isFullscreen,
+        isFullscreenSupported,
         maxScale,
         minScale,
         setTransform,

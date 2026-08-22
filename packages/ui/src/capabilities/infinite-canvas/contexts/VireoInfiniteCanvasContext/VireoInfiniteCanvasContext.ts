@@ -14,6 +14,8 @@ export type VireoInfiniteCanvasContextValue = {
   resetTransform: () => void;
   zoomIn: () => void;
   zoomOut: () => void;
+  isFullscreen: boolean;
+  isFullscreenSupported: boolean;
   toggleFullscreen: () => Promise<void>;
 };
 export const VireoInfiniteCanvasContext = React.createContext<VireoInfiniteCanvasContextValue | null>(null);

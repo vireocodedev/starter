@@ -7,10 +7,12 @@ import { describe, expect, it } from "vitest";
 import { VireoInfiniteCanvas } from "./VireoInfiniteCanvas";
 import { vireoInfiniteCanvasClasses } from "./VireoInfiniteCanvas.classes";
 function Controls() {
-  const { resetTransform, scale, setTransform } = useVireoInfiniteCanvas();
+  const { isFullscreen, isFullscreenSupported, resetTransform, scale, setTransform } = useVireoInfiniteCanvas();
   return (
     <>
       <span>Scale {scale}</span>
+      <span>{isFullscreen ? "Fullscreen" : "Embedded"}</span>
+      <span>{isFullscreenSupported ? "Fullscreen supported" : "Fullscreen unsupported"}</span>
       <Button onClick={() => setTransform({ scale: 99, pan: { x: 4, y: 5 } })}>Set</Button>
       <Button onClick={resetTransform}>Reset</Button>
     </>
@@ -25,6 +27,8 @@ describe("VireoInfiniteCanvas", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "Set" }));
     expect(screen.getByText("Scale 2")).toBeInTheDocument();
+    expect(screen.getByText("Embedded")).toBeInTheDocument();
+    expect(screen.getByText("Fullscreen unsupported")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Reset" }));
     expect(screen.getByText("Scale 1")).toBeInTheDocument();
   });

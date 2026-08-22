@@ -8,6 +8,7 @@ export { default as Close } from "@mui/icons-material/Close";
 export { default as CodeRounded } from "@mui/icons-material/CodeRounded";
 export { default as ContentCopy } from "@mui/icons-material/ContentCopy";
 export { default as Fullscreen } from "@mui/icons-material/Fullscreen";
+export { default as FullscreenExit } from "@mui/icons-material/FullscreenExit";
 export { default as LockOpenRounded } from "@mui/icons-material/LockOpenRounded";
 export { default as LockRounded } from "@mui/icons-material/LockRounded";
 export { default as MoreVert } from "@mui/icons-material/MoreVert";
