@@ -109,7 +109,6 @@
     "@vireocodedev/starter-history": "^1.0.0",
     "@vireocodedev/starter-localization": "^1.1.0",
     "country-flag-icons": "1.6.20",
-    "i18next-browser-languagedetector": "^8.0.2",
     "ovenplayer": "^0.10.42",
     "react-error-boundary": "^5.0.0"
   },

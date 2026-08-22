@@ -3,11 +3,6 @@
   "exceptions": [
     {
       "rule": "legacy-source-location",
-      "path": "@types/i18n.d.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "@types/mui.d.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -58,16 +53,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "features/i18next/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/i18next/lib.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoSseEmitter/stories/useRgoSseEmitter.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -79,76 +64,6 @@
     {
       "rule": "legacy-source-location",
       "path": "hooks/useRgoSseEmitter/useRgoSseEmitter.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/config/hooks/useTranslationLocal.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/config/RgoLocale.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.bs.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.cnr.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.de.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.en.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.hr.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.it.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.pt.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "setup/translations/translation.sl.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

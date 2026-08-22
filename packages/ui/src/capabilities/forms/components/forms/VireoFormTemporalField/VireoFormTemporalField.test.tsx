@@ -1,5 +1,4 @@
 import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoForm";
-import { VireoTemporalLocalizationProvider } from "@/integrations/localization/public";
 import {
   formatTemporalValue,
   parseTemporalValue,
@@ -8,11 +7,15 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { vireoFormTemporalFieldClasses } from "./VireoFormTemporalField.classes";
 import { VIREO_FORM_TEMPORAL_FIELD_NAME } from "./VireoFormTemporalField.identity";
 import type { VireoFormTemporalFieldMode, VireoFormTemporalFieldProps } from "./VireoFormTemporalField.types";
+
+dayjs.extend(utc);
 
 type HarnessProps = {
   defaultValue?: string | null;
@@ -21,6 +24,8 @@ type HarnessProps = {
   onSubmit?: (value: string | null) => void;
   rootRef?: React.Ref<HTMLDivElement>;
 };
+
+const VIREO_TEMPORAL_LOCALIZATION_MARKER = "__vireoTemporalLocalizationProvider";
 
 function Harness({ defaultValue = null, fieldProps, mode = "date", onSubmit, rootRef }: HarnessProps) {
   const form = useVireoForm({
@@ -33,12 +38,15 @@ function Harness({ defaultValue = null, fieldProps, mode = "date", onSubmit, roo
     slotProps: { htmlInput: { "aria-label": "Temporal value" }, ...fieldProps?.slotProps },
   } as VireoFormTemporalFieldProps;
   return (
-    <VireoTemporalLocalizationProvider locale="en">
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      localeText={{ [VIREO_TEMPORAL_LOCALIZATION_MARKER]: true } as Record<string, unknown>}
+    >
       <form.Form>
         <form.Field name="value">{field => <field.TemporalField {...temporalFieldProps} ref={rootRef} />}</form.Field>
         <button type="submit">Submit</button>
       </form.Form>
-    </VireoTemporalLocalizationProvider>
+    </LocalizationProvider>
   );
 }
 

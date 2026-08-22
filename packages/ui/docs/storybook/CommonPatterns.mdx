@@ -60,7 +60,8 @@ function App() {
 All providers in the correct nesting order:
 
 ```tsx
-import { RgoLocalizationProvider, VireoConfirmationProvider } from "@vireocodedev/starter-ui";
+import { VireoConfirmationProvider } from "@vireocodedev/starter-ui";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
 import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
 import { ThemeProvider } from "@mui/material";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -69,11 +70,11 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <RgoLocalizationProvider>
+        <VireoTemporalLocalizationProvider locale="en">
           <VireoConfirmationProvider>
             <YourAppContent />
           </VireoConfirmationProvider>
-        </RgoLocalizationProvider>
+        </VireoTemporalLocalizationProvider>
       </QueryClientProvider>
       <VireoToaster />
     </ThemeProvider>
