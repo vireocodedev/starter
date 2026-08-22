@@ -25,6 +25,7 @@ export { default as DialogActions } from "@mui/material/DialogActions";
 export { default as DialogContent } from "@mui/material/DialogContent";
 export { default as Divider } from "@mui/material/Divider";
 export { default as Drawer } from "@mui/material/Drawer";
+export { default as Fade } from "@mui/material/Fade";
 export { default as FilledInput } from "@mui/material/FilledInput";
 export { default as FormControl } from "@mui/material/FormControl";
 export { default as FormControlLabel } from "@mui/material/FormControlLabel";

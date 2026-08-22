@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { mergeConfig } from "vite";
 
 const config: StorybookConfig = {
-  stories: ["../src/**/Vireo*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: ["../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: ["@storybook/addon-docs"],
   framework: {
     name: "@storybook/react-vite",
