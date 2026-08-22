@@ -98,11 +98,11 @@ function toColumnIndexes(columns: string[]): Record<string, number> {
 }
 
 function normalizePage(pageable: SqlitePageableParams): number {
-  return Number.isFinite(pageable.page) ? Math.max(0, Number(pageable.page)) : 0;
+  return Number.isFinite(pageable.page) ? Math.max(0, Math.floor(pageable.page)) : 0;
 }
 
 function normalizeRowsPerPage(pageable: SqlitePageableParams): number {
-  return Number.isFinite(pageable.rowsPerPage) ? Number(pageable.rowsPerPage) : -1;
+  return Number.isFinite(pageable.rowsPerPage) ? Math.floor(pageable.rowsPerPage) : -1;
 }
 
 function normalizePagination(pageable: SqlitePageableParams): { limit: number | null; offset: number | null } {
@@ -150,7 +150,7 @@ export function createSqliteQueryExecutor(config: CreateSqliteQueryExecutorConfi
       const whereParams = [...compiledFilter.params, ...(compiledSearch?.params ?? [])];
       const selectSql = args.selectColumns.map(column => `${column.expression} AS ${column.alias}`).join(", ");
       const sortExpression = getSortExpression(args.sortBy, args.defaultSortExpression, args.sortExpressionsByKey);
-      const sortDirection = args.sortDirection === "desc" ? "DESC" : "ASC";
+      const sortDirection = args.sortDirection?.trim().toLowerCase() === "desc" ? "DESC" : "ASC";
       const { limit, offset } = normalizePagination(args.pageable);
       const includeTotalCount = args.includeTotalCount ?? true;
       const effectiveLimit = !includeTotalCount && limit != null && limit > 0 ? limit + 1 : limit;
@@ -261,6 +261,13 @@ export function executeParameterizedSqlitePagedQuery(
   request: ParameterizedSqlitePagedQueryRequest,
   now: () => number = defaultNow,
 ): ParameterizedSqlitePagedQueryResult {
+  if (request.limit != null && (!Number.isInteger(request.limit) || request.limit <= 0)) {
+    throw new Error("SQLite page limit must be a positive integer or null.");
+  }
+  if (request.offset != null && (!Number.isInteger(request.offset) || request.offset < 0)) {
+    throw new Error("SQLite page offset must be a non-negative integer or null.");
+  }
+
   const startedAt = now();
   const queueWaitMs =
     request.clientSentAtMs == null || !Number.isFinite(request.clientSentAtMs)

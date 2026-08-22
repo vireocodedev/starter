@@ -57,6 +57,27 @@ describe("parameterized SQLite query execution", () => {
     });
     expect(statement.bind).toHaveBeenCalledWith(["A; B"]);
   });
+
+  it.each([
+    ["fractional limit", { limit: 1.5, offset: 0 }, "SQLite page limit must be a positive integer or null."],
+    ["zero limit", { limit: 0, offset: 0 }, "SQLite page limit must be a positive integer or null."],
+    ["negative offset", { limit: 10, offset: -1 }, "SQLite page offset must be a non-negative integer or null."],
+  ])("rejects an invalid %s before preparing SQL", (_name, pagination, expectedMessage) => {
+    const db = { prepare: vi.fn() };
+
+    expect(() =>
+      executeParameterizedSqlitePagedQuery(db, {
+        selectSql: "p.id AS id",
+        fromSql: "product p",
+        whereSql: "1 = 1",
+        whereParams: [],
+        orderBySql: "id ASC",
+        includeTotalCount: false,
+        ...pagination,
+      }),
+    ).toThrow(expectedMessage);
+    expect(db.prepare).not.toHaveBeenCalled();
+  });
 });
 
 describe("createSqliteQueryExecutor", () => {

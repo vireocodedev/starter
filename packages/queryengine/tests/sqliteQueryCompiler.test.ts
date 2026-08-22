@@ -244,8 +244,11 @@ describe("SQLite query compiler", () => {
       expect((await runSearch({ sortBy: "nope" })).request.orderBySql).toBe("p.id ASC");
     });
 
-    it("treats directions other than exact 'desc' as ascending", async () => {
-      expect((await runSearch({ sortBy: "price", sortDirection: "DESC" })).request.orderBySql).toBe("p.price ASC");
+    it("normalizes descending sort direction casing and whitespace", async () => {
+      expect((await runSearch({ sortBy: "price", sortDirection: " DESC " })).request.orderBySql).toBe("p.price DESC");
+    });
+
+    it("treats unknown directions as ascending", async () => {
       expect((await runSearch({ sortBy: "price", sortDirection: "sideways" })).request.orderBySql).toBe("p.price ASC");
     });
   });
@@ -265,6 +268,13 @@ describe("SQLite query compiler", () => {
 
     it("clamps negative pages to the first page", async () => {
       expect((await runSearch({ page: -5, rowsPerPage: 10 })).request.offset).toBe(0);
+    });
+
+    it("normalizes fractional pagination to whole rows", async () => {
+      const { request, response } = await runSearch({ page: 2.9, rowsPerPage: 10.8 });
+      expect(request.limit).toBe(10);
+      expect(request.offset).toBe(20);
+      expect(response).toMatchObject({ number: 2, size: 10 });
     });
 
     it("requests one probe row when the total count is skipped", async () => {
