@@ -34,7 +34,7 @@ import {
 
 The integration reports typed lifecycle events but never mutates application collections. `onDragEnd` fires exactly once for both completed and cancelled drags. Update list order or ownership in that callback. `mode="reorder"` renders the native insertion placeholder; `mode="transfer"` represents a destination action without reserving an ordered slot.
 
-While an item is active, Vireo renders that item in a private body-level drag layer. This keeps Hello Pangea's fixed viewport coordinates correct when a list is inside transformed or clipping ancestors. The layer does not change the component API or application-owned collection state.
+While an item is active, Vireo renders that item in a private body-level drag layer. This keeps Hello Pangea's fixed viewport coordinates correct when a list is inside transformed or clipping ancestors, while preserving the pointer's original grab point across the drag-activation threshold. The layer does not change the component API or application-owned collection state.
 
 ## Compatibility and acceptance
 

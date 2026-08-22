@@ -62,7 +62,7 @@ describe("VireoDndProvider", () => {
     });
   });
 
-  it("moves a mouse-dragged item outside transformed ancestors so it remains visible", async () => {
+  it("keeps a pointer-dragged item visible and aligned with its original grab point", async () => {
     const onDragEnd = vi.fn();
     render(
       <VireoDndProvider onDragEnd={onDragEnd}>
@@ -77,14 +77,18 @@ describe("VireoDndProvider", () => {
     );
 
     const first = screen.getByText("First");
+    fireEvent(first, new MouseEvent("pointerdown", { bubbles: true, button: 0, clientX: 10, clientY: 10 }));
     fireEvent.mouseDown(first, { button: 0, clientX: 10, clientY: 10 });
+    fireEvent(window, new MouseEvent("pointermove", { bubbles: true, buttons: 1, clientX: 30, clientY: 30 }));
     fireEvent.mouseMove(window, { buttons: 1, clientX: 30, clientY: 30 });
 
     await waitFor(() => expect(screen.getByText("First")).toHaveAttribute("data-dragging", "true"));
     const activeFirst = screen.getByText("First");
     expect(screen.getByTestId("transformed-ancestor")).not.toContainElement(activeFirst);
     expect(activeFirst.parentElement).toBe(document.body);
+    expect(activeFirst).toHaveStyle({ left: "20px", top: "20px" });
 
+    fireEvent(window, new MouseEvent("pointerup", { bubbles: true, button: 0, clientX: 30, clientY: 30 }));
     fireEvent.mouseUp(window, { button: 0, clientX: 30, clientY: 30 });
     await waitFor(() => expect(onDragEnd).toHaveBeenCalledTimes(1));
   });

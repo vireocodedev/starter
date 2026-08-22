@@ -40,6 +40,8 @@ type DraggableItemRootProps = Omit<
   disableDefaultFeedback: boolean;
   dragHandle: "explicit" | "root";
   forwardedRef: React.ForwardedRef<HTMLDivElement>;
+  liftCorrection: { x: number; y: number };
+  onPointerLiftStart: (event: React.PointerEvent<HTMLDivElement>) => void;
   provided: DraggableProvided;
   snapshot: DraggableStateSnapshot;
 };
@@ -52,6 +54,9 @@ export function DraggableItemRoot({
   disableDefaultFeedback,
   dragHandle,
   forwardedRef,
+  liftCorrection,
+  onPointerDownCapture,
+  onPointerLiftStart,
   provided,
   slotProps = {},
   slots = {},
@@ -70,6 +75,7 @@ export function DraggableItemRoot({
   const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
   const {
     className: rootSlotClassName,
+    onPointerDownCapture: rootSlotOnPointerDownCapture,
     ref: rootSlotRef,
     style: rootSlotStyle,
     sx: rootSlotSx,
@@ -83,6 +89,16 @@ export function DraggableItemRoot({
       handleCountRef.current -= 1;
     };
   }, []);
+
+  const handlePointerDownCapture = React.useCallback<React.PointerEventHandler<HTMLDivElement>>(
+    event => {
+      const consumerHandler = rootSlotOnPointerDownCapture ?? onPointerDownCapture;
+      consumerHandler?.(event);
+      if (event.button !== 0) return;
+      onPointerLiftStart(event);
+    },
+    [onPointerDownCapture, onPointerLiftStart, rootSlotOnPointerDownCapture],
+  );
 
   React.useEffect(() => {
     if (process.env.NODE_ENV !== "production" && dragHandle === "explicit" && handleCountRef.current === 0) {
@@ -101,6 +117,15 @@ export function DraggableItemRoot({
     [disabled, dragHandle, provided.dragHandleProps, registerHandle, snapshot.isDragging],
   );
   const nativeHandleProps = dragHandle === "root" ? provided.dragHandleProps : undefined;
+  const draggableStyle = provided.draggableProps.style;
+  const correctedDraggableStyle =
+    snapshot.isDragging && draggableStyle && "position" in draggableStyle && draggableStyle.position === "fixed"
+      ? {
+          ...draggableStyle,
+          left: typeof draggableStyle.left === "number" ? draggableStyle.left + liftCorrection.x : draggableStyle.left,
+          top: typeof draggableStyle.top === "number" ? draggableStyle.top + liftCorrection.y : draggableStyle.top,
+        }
+      : draggableStyle;
 
   const draggableItem = (
     <VireoDraggableItemContext.Provider value={contextValue}>
@@ -114,7 +139,8 @@ export function DraggableItemRoot({
         ownerState={ownerState}
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         data-dragging={snapshot.isDragging ? "true" : "false"}
-        style={{ ...style, ...rootSlotStyle, ...provided.draggableProps.style }}
+        onPointerDownCapture={handlePointerDownCapture}
+        style={{ ...style, ...rootSlotStyle, ...correctedDraggableStyle }}
         sx={mergeSx(sx, rootSlotSx)}
       >
         {children}
