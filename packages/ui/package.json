@@ -40,6 +40,11 @@
       "import": "./dist/integrations/hello-pangea-dnd/public.js",
       "default": "./dist/integrations/hello-pangea-dnd/public.js"
     },
+    "./localization": {
+      "types": "./dist/integrations/localization/public.d.ts",
+      "import": "./dist/integrations/localization/public.js",
+      "default": "./dist/integrations/localization/public.js"
+    },
     "./sonner": {
       "types": "./dist/integrations/sonner/public.d.ts",
       "import": "./dist/integrations/sonner/public.js",
