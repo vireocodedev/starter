@@ -98,6 +98,12 @@ Two consequences are enforced mechanically by
   `starter-ui/api` — must stay free of React, MUI and other framework code,
   because the consuming app evaluates them inside a Web Worker.
 
+All frontend packages other than `starter-ui` are now being migrated to the
+stricter [non-React package authoring contract](./package-authoring/NON_REACT_PACKAGES.md).
+That contract excludes React from both runtime code and public declarations;
+reusable React presentation belongs in `starter-ui`. `starter-history` is the
+first pilot, after which the same audit is applied package by package.
+
 ## Known imperfection
 
 `starter-ui` depends on `starter-history` and `starter-localization`, so it is
