@@ -117,6 +117,7 @@ describe("package entry points", () => {
       "./country",
       "./forms",
       "./hello-pangea-dnd",
+      "./localization",
       "./sonner",
       "./tanstack-query",
       "./video",
