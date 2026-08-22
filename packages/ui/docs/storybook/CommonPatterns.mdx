@@ -1,0 +1,352 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Documentation/Guides/Common Patterns" />
+
+# Common Patterns
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+Best practices and common usage patterns for Vireo components and hooks.
+
+## Table of Contents
+
+- [Provider Setup Patterns](#provider-setup-patterns)
+  - [Minimal Setup](#minimal-setup)
+  - [Full Provider Stack](#full-provider-stack)
+  - [Conditional Providers](#conditional-providers)
+- [Table Patterns](#table-patterns)
+  - [Container-aware controlled table](#container-aware-controlled-table)
+- [Hook Usage Patterns](#hook-usage-patterns)
+  - [Confirmation Dialogs](#confirmation-dialogs)
+  - [Notifications](#notifications)
+  - [Translations](#translations)
+- [Component Composition Patterns](#component-composition-patterns)
+  - [Data Display with Loading States](#data-display-with-loading-states)
+  - [Form Fields with Labels](#form-fields-with-labels)
+- [Theme Customization Patterns](#theme-customization-patterns)
+  - [Custom Theme with Brand Colors](#custom-theme-with-brand-colors)
+  - [Dark Theme Support](#dark-theme-support)
+
+## Provider Setup Patterns
+
+### Minimal Setup
+
+Only theming (required for all components):
+
+```tsx
+import { createTheme } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material";
+
+const theme = createTheme({
+  palette: {
+    primary: { main: "#1976d2" },
+    secondary: { main: "#dc004e" },
+  },
+});
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <YourAppContent />
+    </ThemeProvider>
+  );
+}
+```
+
+### Full Provider Stack
+
+All providers in the correct nesting order:
+
+```tsx
+import { VireoConfirmationProvider } from "@vireocodedev/starter-ui";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
+import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
+import { ThemeProvider } from "@mui/material";
+import { QueryClientProvider } from "@tanstack/react-query";
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <QueryClientProvider client={queryClient}>
+        <VireoTemporalLocalizationProvider locale="en">
+          <VireoConfirmationProvider>
+            <YourAppContent />
+          </VireoConfirmationProvider>
+        </VireoTemporalLocalizationProvider>
+      </QueryClientProvider>
+      <VireoToaster />
+    </ThemeProvider>
+  );
+}
+```
+
+### Conditional Providers
+
+Add only the providers you need:
+
+```tsx
+// With notifications only
+function AppWithNotifications() {
+  return (
+    <ThemeProvider theme={theme}>
+      <YourAppContent />
+      <VireoToaster />
+    </ThemeProvider>
+  );
+}
+
+// With confirmations only
+function AppWithConfirmations() {
+  return (
+    <ThemeProvider theme={theme}>
+      <VireoConfirmationProvider>
+        <YourAppContent />
+      </VireoConfirmationProvider>
+    </ThemeProvider>
+  );
+}
+```
+
+## Table Patterns
+
+### Container-aware controlled table
+
+Keep fetching and filters in application code and pass one typed column model to the responsive surface:
+
+```tsx
+import { VireoResponsiveTable } from "@vireocodedev/starter-ui";
+
+const columns = [
+  {
+    id: "name",
+    sort: "name",
+    renderHeader: () => "Name",
+    renderBody: user => user.name,
+  },
+  { id: "email", renderHeader: () => "Email", renderBody: user => user.email },
+] as const;
+
+function UserTable({ users, totalCount }) {
+  const [filters, setFilters] = React.useState({
+    page: 0,
+    rowsPerPage: 20,
+    sortBy: "name",
+    sortDirection: "asc",
+  });
+
+  return (
+    <VireoResponsiveTable
+      columns={columns}
+      data={users}
+      totalCount={totalCount}
+      filters={filters}
+      onFiltersChange={setFilters}
+      labels={tableLabels}
+      layers={{ stickyToolbar: 4, stickyRowHeader: 3 }}
+      titleColumn="name"
+      getRowKey={user => user.id}
+    />
+  );
+}
+```
+
+## Hook Usage Patterns
+
+### Confirmation Dialogs
+
+Using useVireoConfirmation for user confirmations:
+
+```tsx
+import { useVireoConfirmation } from "@vireocodedev/starter-ui";
+
+function DeleteButton({ userId }) {
+  const confirm = useVireoConfirmation();
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: "Delete User",
+      message: "Are you sure you want to delete this user? This action cannot be undone.",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      confirmColor: "error",
+    });
+
+    if (confirmed) {
+      await deleteUser(userId);
+    }
+  };
+
+  return (
+    <IconButton onClick={handleDelete} color="error">
+      <DeleteIcon />
+    </IconButton>
+  );
+}
+```
+
+### Notifications
+
+Use the dedicated Sonner integration for transient user feedback. The full native `toast` API remains available:
+
+```tsx
+import { toast } from "@vireocodedev/starter-ui/sonner";
+
+function SaveButton({ data }) {
+  const handleSave = async () => {
+    try {
+      await saveData(data);
+      toast.success("Data saved successfully!");
+    } catch (error) {
+      toast.error("Failed to save data. Please try again.");
+    }
+  };
+
+  return (
+    <Button variant="contained" onClick={handleSave}>
+      Save
+    </Button>
+  );
+}
+```
+
+### Translations
+
+Translations come from `react-i18next` directly — the package does not wrap it. Scope the hook to a namespace and read
+`t` off the result:
+
+```tsx
+import { useTranslation } from "react-i18next";
+
+function WelcomeMessage() {
+  const { t } = useTranslation("app");
+
+  return (
+    <div>
+      <h1>{t("welcome.title")}</h1>
+      <p>{t("welcome.description")}</p>
+      <button>{t("common.getStarted")}</button>
+    </div>
+  );
+}
+```
+
+## Component Composition Patterns
+
+### Data Display with Loading States
+
+Combining loader with data components:
+
+```tsx
+import { VireoQueryBoundary } from "@vireocodedev/starter-ui/tanstack-query";
+import { Typography } from "@mui/material";
+import { useSuspenseQuery } from "@tanstack/react-query";
+
+function MetricDisplay({ metricId }) {
+  return (
+    <VireoQueryBoundary resetKeys={[metricId]}>
+      <MetricContent metricId={metricId} />
+    </VireoQueryBoundary>
+  );
+}
+
+function MetricContent({ metricId }) {
+  const { data } = useSuspenseQuery({
+    queryKey: ["metric", metricId],
+    queryFn: () => fetchMetric(metricId),
+  });
+
+  return (
+    <Typography component="span">
+      {data.value == null ? "Not available" : `${data.value.toFixed(2)} ${data.unit}`}
+    </Typography>
+  );
+}
+```
+
+### Form Fields with Labels
+
+Using VireoLabelBox for consistent form field styling:
+
+```tsx
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
+
+function FormField({ label, required, helperText, children }) {
+  return (
+    <VireoLabelBox label={label} required={required} helperText={helperText}>
+      {children}
+    </VireoLabelBox>
+  );
+}
+
+// Usage
+<FormField label="User Name" required helperText="Enter your full name">
+  <TextField fullWidth />
+</FormField>;
+```
+
+## Theme Customization Patterns
+
+### Custom Theme with Brand Colors
+
+Creating a branded theme:
+
+```tsx
+import { createTheme } from "@mui/material/styles";
+
+const brandTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#2563eb", // Brand blue
+      light: "#60a5fa",
+      dark: "#1d4ed8",
+    },
+    secondary: {
+      main: "#dc2626", // Brand red
+      light: "#f87171",
+      dark: "#b91c1c",
+    },
+    background: {
+      default: "#f8fafc",
+      paper: "#ffffff",
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+    },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+});
+```
+
+### Dark Theme Support
+
+`ThemeProvider` takes a fixed `theme` prop and does not manage colour mode itself. To support light and dark, own the
+mode in the app and rebuild the theme:
+
+```tsx
+import { createTheme } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material";
+import React from "react";
+
+function App() {
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+  const theme = React.useMemo(() => createTheme({ palette: { mode: isDarkMode ? "dark" : "light" } }), [isDarkMode]);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <IconButton onClick={() => setIsDarkMode(prev => !prev)} aria-label="Toggle theme">
+        {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+      </IconButton>
+      <YourApp />
+    </ThemeProvider>
+  );
+}
+```
+
+See the [Theming Guide](?path=/docs/guides-theming--docs) for the full pattern.
+
+These patterns provide a solid foundation for building applications with Vireo. Use them as starting points and adapt them to your application-specific policies.

@@ -1,102 +1,97 @@
 # @vireocodedev/starter-queryengine
 
-Framework-agnostic **query engine client** for the vireocodedev **starter**
-product: typed models + zod schemas, an injectable HTTP-port API, a react-query
-layer, shared signals, and parameterized SQLite query/configuration primitives.
+Framework-free query metadata, transport ports, filter compilation, and parameterized SQLite execution for Vireo Starter.
 
-The engine is **generic over entity keys** (opaque strings) and **transport-
-agnostic** (you inject an HTTP client). No app/domain specifics live here.
+The package owns reusable query contracts. An application still owns its entity-key vocabulary, HTTP implementation, database schema, SQL expressions, authorization, cache lifecycle, and product UI.
 
 ## Install
 
-Published to **GitHub Packages** under the `@vireocodedev` scope (see the
-localization package README for `.npmrc` setup):
+```bash
+npm install @vireocodedev/starter-queryengine zod
+```
+
+The sole peer dependency is Zod 3. The root entry point is React-free, browser-global-free, and worker-safe.
+
+React Query integration lives in `@vireocodedev/starter-ui/tanstack-query`:
 
 ```bash
-npm install @vireocodedev/starter-queryengine
+npm install @vireocodedev/starter-ui @tanstack/react-query
 ```
 
-Peers: `react`, `zod`, `@tanstack/react-query`, `@preact/signals-react`. All
-peers must resolve to a single instance in the app.
+## Public architecture
 
-The `queryengine` translation namespace lives in
-`@vireocodedev/starter-localization` — install it alongside this package if you
-render the query-engine UI.
+```text
+application transport
+  -> createQueryEngineApi
+  -> Zod-validated entity metadata
+  -> application cache or createVireoQueryEngineQueries
+  -> query-filter JSON
+  -> compileQueryFilterWhere / compileSearchTextWhere
+  -> createSqliteQueryExecutor
+  -> application-owned SQLite worker port
+```
 
-## Wiring (host application)
+There are no package-global signals or caches. Every API, executor, and config client is instance-scoped.
 
-Inject an HTTP adapter and your own entity-key set; keep both in the app:
+## Entity metadata and API
+
+`createQueryEngineEntitySchemas` builds recursive Zod schemas from an optional application-owned entity-key schema. The default accepts any non-empty string, keeping this package generic while rejecting unusable identifiers.
+
+`createQueryEngineApi` accepts a minimal `get(path, options)` port. It validates all responses, encodes dynamic path segments, forwards abort signals, preserves transport and Zod failures, and can optionally retry an application-provided legacy entity key.
 
 ```ts
-import {
-  createQueryEngineApi,
-  createQueryEngineQueries,
-  type QueryEngineHttpClient,
-} from "@vireocodedev/starter-queryengine";
+import { createQueryEngineApi } from "@vireocodedev/starter-queryengine";
+import z from "zod";
 
-class QueryEngineHttpAdapter implements QueryEngineHttpClient {
-  get(path, options) {
-    /* call your axios/fetch client, return raw JSON */
-  }
-}
-
-export const queryEngineApi = createQueryEngineApi(new QueryEngineHttpAdapter(), {
-  entityKeySchema: AppEntityKeyCompatSchema, // your enum + normalization
-  legacyEntityKey: toLegacyAppEntityKey, // optional back-compat retry
+const api = createQueryEngineApi(fetchAdapter, {
+  entityKeySchema: z.enum(["CUSTOMER", "ORDER"]),
+  legacyEntityKey: key => (key === "CUSTOMER" ? "customer" : undefined),
 });
-export const QueryEngineQuery = createQueryEngineQueries(queryEngineApi);
 ```
 
-## i18n
+## Filter compilation
 
-The `queryengine` namespace is **owned by
-`@vireocodedev/starter-localization`**, so a single package ships every starter
-translation:
+`bindSqliteSearchColumns` creates one explicit registry for selectable columns, filter fields, and sort expressions. `compileQueryFilterWhere` compiles supported operators into SQL placeholders plus bound values. `compileSearchTextWhere` does the same for free-text search.
+
+The compiler fails closed. Malformed JSON, a mismatched entity, unknown fields, duplicate bindings, and invalid typed values throw instead of silently removing restrictions.
+
+Application-authored SQL expressions remain trusted configuration. Runtime filter/search values are always returned separately as parameters.
+
+## SQLite execution
+
+`createSqliteQueryExecutor` provides paged searches, optional count probing, concurrent-request deduplication, matching-key lookup, timing hooks, and deterministic row mapping over injected execution ports.
+
+`executeParameterizedSqliteQuery` and `executeParameterizedSqlitePagedQuery` are worker-side helpers. Pagination is normalized to whole rows before transport and validated again before interpolation into SQL.
+
+## Config persistence
+
+`createQueryEngineConfigClient` owns instance-local in-memory fallback state and an injected request transport. `createQueryEngineConfigSqliteRequestHandlers`, `replaceQueryEngineConfig`, and `getQueryEngineConfig` provide the worker-side persistence boundary.
+
+Table identifiers, singleton keys, request names, snapshot shape, and persisted JSON are validated. Corrupt storage is reported explicitly and never replaced with an empty configuration.
+
+## React Query integration
+
+The optional React adapter belongs to Starter UI because it imports React Query:
 
 ```ts
-import { createStarterResources, useQueryEngineTranslation } from "@vireocodedev/starter-localization";
+import { createVireoQueryEngineQueries } from "@vireocodedev/starter-ui/tanstack-query";
 
-const starter = createStarterResources({ locales: ["en", "hr"] });
-// spread starter.en / starter.hr into your i18next resources
+export const QueryEngineQueries = createVireoQueryEngineQueries(api);
 ```
 
-Augment i18next with the `queryengine` namespace:
+The adapter creates stable query options without mutating global signals. Applications remain free to use another cache or the framework-free API directly.
 
-```ts
-import type { QueryEngineResources } from "@vireocodedev/starter-localization";
+## Failure semantics
 
-declare module "i18next" {
-  interface CustomTypeOptions {
-    resources: { queryengine: QueryEngineResources };
-  }
-}
-```
+- Invalid API response data raises the original Zod error.
+- Transport failures remain transport failures when no legacy retry applies.
+- Aborted requests are never retried.
+- Invalid filter contracts fail closed before SQL execution.
+- Invalid pagination fails before a statement is prepared.
+- Invalid SQLite config identifiers fail synchronously.
+- Malformed or shape-incompatible persisted config raises an error.
+- Duplicate request and filter registrations are rejected.
 
-## Public API (high level)
+## Verification and live documentation
 
-- **Models:** `QueryEngineEntityKey` (string), `QueryEngineOperator`,
-  `QueryEngineFieldType`, `QueryEngine{Field,Entity}Definition`,
-  `QueryEngineEntitySummary`, `QueryEngineRelationOption`,
-  `createQueryEngineEntitySchemas`, operator/field-type/relation-mode schemas.
-- **API:** `createQueryEngineApi`, `QueryEngineApi`, `QueryEngineHttpClient`,
-  `QueryEngineRequestOptions`, `CreateQueryEngineApiOptions`.
-- **Queries:** `createQueryEngineQueries`, `QueryEngineQueries`, `QueryEngineQueryKey`.
-- **Signals:** `sigQueryEngineEntityDefinitions`, `sigQueryEngineEntitySummaries`.
-- **SQLite filters/execution:** `bindSqliteSearchColumns`,
-  `compileQueryFilterWhere`, `createSqliteQueryExecutor`, and parameterized query
-  worker functions. SQL structure is caller-configured while every user value
-  remains bound separately.
-- **SQLite configuration:** `createQueryEngineConfigClient`,
-  `createQueryEngineConfigSqliteRequestHandlers`, and injected persistence,
-  runtime, transport, request-name, table-name, and fallback contracts.
-
-> **i18n moved.** `useQueryEngineTranslation`, `createQueryEngineResources`,
-> `queryEngineBaseResources`, `QUERYENGINE_TRANSLATION_NAMESPACE` and the
-> `QueryEngineResources` types are now exported by
-> `@vireocodedev/starter-localization`.
-
-## Versioning contract
-
-Operator/field-type/relation-mode sets are a contract (add = minor,
-remove/rename = major), guarded by the contract test. The `queryengine`
-translation key surface is guarded in `@vireocodedev/starter-localization`.
+Package tests cover public schemas, API paths and failures, filter compilation, pagination, config persistence, concurrency, and framework boundaries. The unified Vireo Storybook contains executable examples under **Query Engine**; every displayed source file is the same TypeScript module Storybook executes.

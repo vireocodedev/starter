@@ -1,4 +1,4 @@
-import { type OfflineSyncCommand } from "@/offline/queue/queueingTypes";
+import { type OfflineSyncCommand } from "../offline/queue/queueingTypes";
 
 export type OfflineSyncResultReason = "APPLIED" | "ALREADY_APPLIED" | "RETRYABLE" | "REJECTED" | "RETRY_LIMIT_EXCEEDED";
 
@@ -53,6 +53,12 @@ export async function replayOfflineSyncBatch(args: {
   dependencies: OfflineSyncReplayDependencies;
 }): Promise<number> {
   const { batchSize, maxAttempts, dependencies } = args;
+  if (!Number.isInteger(batchSize) || batchSize <= 0) {
+    throw new Error("batchSize must be a positive integer.");
+  }
+  if (!Number.isInteger(maxAttempts) || maxAttempts <= 0) {
+    throw new Error("maxAttempts must be a positive integer.");
+  }
   const batch = await dependencies.getBatch(batchSize);
   if (batch.length === 0) return 0;
 

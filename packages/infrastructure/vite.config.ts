@@ -11,23 +11,27 @@ export default defineConfig(({ mode }) => ({
       rollupTypes: false,
       tsconfigPath: "./tsconfig.json",
       entryRoot: "src",
-      exclude: ["tests/**", "**/*.test.ts", "**/*.test.tsx"],
+      exclude: ["tests/**", "docs/**", "**/*.test.ts"],
     }),
   ],
   build: {
     emptyOutDir: mode !== "watch",
     lib: {
-      entry: "src/index.ts",
+      entry: {
+        index: "src/index.ts",
+        "http/pagination": "src/http/pagination.ts",
+        "network/appNetworkStatus": "src/network/appNetworkStatus.ts",
+      },
       formats: ["es"],
-      fileName: "index",
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     rollupOptions: {
-      external: ["react", "react-dom", "axios", "dayjs", "zod", "@preact/signals-react", "@tanstack/react-query"],
+      external: ["axios", "zod", "@preact/signals-core"],
     },
     sourcemap: true,
   },
   test: {
-    environment: "jsdom",
-    include: ["tests/**/*.{test,spec}.{ts,tsx}"],
+    environment: "node",
+    include: ["tests/**/*.{test,spec}.ts"],
   },
 }));

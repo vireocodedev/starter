@@ -1,0 +1,37 @@
+<style>
+  #storybook-explorer-tree .sidebar-item[data-selected="true"] {
+    color: #07111f !important;
+    background: #55aeca !important;
+  }
+
+  #storybook-explorer-tree .sidebar-item[data-selected="true"] a,
+  #storybook-explorer-tree .sidebar-item[data-selected="true"] svg {
+    color: #07111f !important;
+  }
+
+  #storybook-explorer-tree .sidebar-item[data-nodetype="group"] svg[type="group"] {
+    display: none;
+  }
+
+  #storybook-explorer-tree .vireo-sidebar-label {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #storybook-explorer-tree .vireo-sidebar-label > svg {
+    flex: 0 0 auto;
+    color: #f0b44c;
+  }
+
+  #storybook-explorer-tree .vireo-sidebar-label--root > svg {
+    color: #7cd9fd;
+  }
+
+  #storybook-panel-root,
+  #panel-tab-content,
+  #storybook-panel-root .docblock-argstable .docblock-argstable-body > tr > * {
+    background: #101828 !important;
+  }
+</style>

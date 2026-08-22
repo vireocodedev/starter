@@ -1,0 +1,29 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Overview" />
+
+# UI
+
+`@vireocodedev/starter-ui` is Vireo's React and MUI library. It exposes foundational components, hooks, providers, finalized capabilities, form bindings, and explicit integration subpaths.
+
+## Library structure
+
+- **Documentation** — installation and focused adoption guides.
+- **Core** — foundational components, hooks, providers, and surfaces.
+- **Capabilities** — cohesive forms, tables, overlays, page-layout, history-presentation, country, and infinite-canvas contracts.
+- **Integrations** — opt-in adapters for external runtimes such as Sonner, TanStack Query, MUI X localization, EventSource, and Hello Pangea DND.
+
+Integration subpaths are intentionally absent from the package root so applications opt into their peer dependencies explicitly.
+
+## Design principles
+
+- Components use the complete Vireo contract: slots, slot props, utility classes, theme defaults, variants, tests, and executable stories.
+- Stories show copy-pastable consumer source and intentionally do not use Storybook controls.
+- Responsive behavior follows the owning container whenever behavior depends on available space.
+- Applications own domain composition and policy; Vireo owns reusable interaction and presentation behavior.
+
+## Getting started
+
+1. Follow the [Installation guide](?path=/docs/ui-documentation-installation--docs).
+2. Configure the [foundational and integration providers](?path=/docs/ui-documentation-guides-providers--docs).
+3. Review component and hook stories for executable usage examples.

@@ -1,0 +1,18 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFailureSemanticsExample } from "../examples/failureSemantics.example";
+import failureSemanticsSource from "../examples/failureSemantics.example.ts?raw";
+
+<Meta title="SQLite/Failure Semantics" />
+
+# Failure semantics
+
+Invalid worker and entity configuration fails synchronously. Handler collisions never overwrite an earlier operation. Disposed runtimes reject every later request.
+
+At runtime, Worker crashes reject pending work and tear down the failed generation so a later request can initialize a fresh Worker. Migration errors roll back. Corrupt persisted queue JSON throws with its command identifier instead of replaying fallback data.
+
+<ExecutablePackageExample
+  run={runFailureSemanticsExample}
+  source={failureSemanticsSource}
+  outputLabel="Expected failures"
+/>

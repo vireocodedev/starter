@@ -1,0 +1,67 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Documentation/Guides/Providers" />
+
+# Providers guide
+
+Vireo distinguishes between foundational UI providers and integration-specific providers. Applications own which integrations are installed and how they are configured.
+
+## Foundational contracts
+
+- `VireoIconRegistryProvider` supplies the typed icon registry used by `VireoIcon`.
+- `VireoConfirmationProvider` supplies promise-based confirmation overlays.
+- `VireoProviderComposer` flattens a configured provider tree while preserving provider-specific prop typing.
+- `VireoThemeColorMeta` reversibly owns one browser theme-color meta tag.
+
+MUI's `ThemeProvider` and `CssBaseline` remain direct MUI APIs; Vireo does not wrap them.
+
+## Recommended application boundary
+
+```tsx
+import {
+  VireoConfirmationProvider,
+  VireoIconRegistryProvider,
+  VireoProviderComposer,
+  VireoThemeColorMeta,
+  type VireoProviderWrapper,
+} from "@vireocodedev/starter-ui";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
+import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { QueryClientProvider } from "@tanstack/react-query";
+
+export function AppProviders({ children }: React.PropsWithChildren) {
+  const providers = [
+    child => (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <VireoThemeColorMeta />
+        {child}
+        <VireoToaster />
+      </ThemeProvider>
+    ),
+    child => <QueryClientProvider client={queryClient}>{child}</QueryClientProvider>,
+    child => <VireoTemporalLocalizationProvider locale="en">{child}</VireoTemporalLocalizationProvider>,
+    child => <VireoIconRegistryProvider icons={icons}>{child}</VireoIconRegistryProvider>,
+    child => <VireoConfirmationProvider>{child}</VireoConfirmationProvider>,
+  ] satisfies readonly VireoProviderWrapper[];
+
+  return <VireoProviderComposer providers={providers}>{children}</VireoProviderComposer>;
+}
+```
+
+The array is ordered outermost to innermost. Every callback uses ordinary JSX, so TypeScript validates the props required by that provider.
+
+## When to use explicit nesting
+
+Prefer explicit JSX when the tree is short, when providers appear in different branches, or when the nesting itself communicates important behavior. `VireoProviderComposer` is intentionally not a dependency resolver and does not provide IDs, priorities, or automatic ordering.
+
+## Integration boundaries
+
+`VireoToaster` is the finalized Sonner notification surface. It does not accept children and is not part of `VireoProviderComposer`; mount it once as a sibling of application content beneath the MUI theme. Import it and `toast` from `@vireocodedev/starter-ui/sonner`.
+
+`VireoTemporalLocalizationProvider` is required around every `field.TemporalField`. Pass the application's effective semantic locale explicitly; the provider does not initialize i18next, detect browser language, hide children while translations load, or assign a timezone. English and Croatian Day.js locale packs and MUI picker text are bundled. For another locale, import its Day.js module in application code and optionally provide `localeText`; use `adapterLocale` when the semantic locale and Day.js identifiers differ. Import the provider from `@vireocodedev/starter-ui/localization`.
+
+Applications use TanStack Query's native `QueryClientProvider`; Vireo does not wrap client creation or cache policy. Import `VireoQueryBoundary` and the optional `useVireoMutation` extension from `@vireocodedev/starter-ui/tanstack-query`.
+
+`VireoDndProvider` owns one isolated Hello Pangea drag domain. Keep it near the lists that participate in that domain rather than adding it to the application-global composer by default. Import it and the related primitives from `@vireocodedev/starter-ui/hello-pangea-dnd`.

@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "zod"],
+      external: ["zod"],
     },
     sourcemap: true,
   },

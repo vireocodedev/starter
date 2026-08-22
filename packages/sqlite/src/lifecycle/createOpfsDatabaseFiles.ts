@@ -1,4 +1,4 @@
-import { type KeyValueStorage } from "@/lifecycle/createDatabaseOwnerStore";
+import { type KeyValueStorage } from "./createDatabaseOwnerStore";
 
 export type OpfsDatabaseFiles = {
   getFileName: (owner: string, legacyOwner: string | null) => string;

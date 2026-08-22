@@ -2,7 +2,7 @@ import {
   type OfflineStatusRuntime,
   type OfflineStatusRuntimeOptions,
   type OfflineStatusSnapshot,
-} from "@/offline/status/offlineStatusTypes";
+} from "./offlineStatusTypes";
 
 type OfflineStatusState = {
   browserOnline: boolean;

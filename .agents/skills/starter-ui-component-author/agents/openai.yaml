@@ -1,0 +1,4 @@
+interface:
+  display_name: "Starter UI Component"
+  short_description: "Author first-class Vireo UI components"
+  default_prompt: "Use $starter-ui-component-author to create a first-class Vireo component in starter-ui."

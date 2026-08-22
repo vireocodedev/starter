@@ -3,47 +3,46 @@
   "entryPoints": {
     ".": {
       "exports": [
-        "AnyArrayFieldConfig",
-        "AnyArrayItemConfig",
-        "AnyAtomicFieldConfig",
-        "AnyHistoryDefinition",
-        "AnyHistoryFieldConfig",
-        "AnyNonIgnoredHistoryFieldConfig",
-        "AnyObjectFieldConfig",
-        "History",
+        "HistoryActor",
+        "HistoryActorSchema",
         "HistoryArrayFieldConfig",
         "HistoryArrayItemConfig",
         "HistoryArrayMode",
         "HistoryAtomicFieldConfig",
         "HistoryChangeType",
         "HistoryDefinition",
-        "HistoryDefinitionBuilder",
-        "HistoryDefinitionBuilderForSchema",
         "HistoryDefinitionFields",
         "HistoryDefinitionOptions",
         "HistoryEngineOptions",
+        "HistoryEntityForDefinition",
         "HistoryEntityKey",
         "HistoryEntityKind",
         "HistoryFieldConfig",
         "HistoryFieldRow",
+        "HistoryFormatContext",
         "HistoryGroupChangeType",
         "HistoryGroupNode",
         "HistoryNode",
         "HistoryObjectFieldConfig",
-        "HistoryRenderContext",
-        "HistoryRenderSide",
-        "HistorySchemas",
+        "HistoryPath",
+        "HistoryPathSegment",
+        "HistoryRecord",
+        "HistoryRecordSchema",
+        "HistoryRecordSchemaOptions",
         "HistorySnapshot",
         "HistorySnapshotSchema",
-        "createHistoryDefinitionBuilderFn",
-        "createHistoryGroup",
+        "HistoryTimestamp",
+        "HistoryTimestampSchema",
+        "HistoryValue",
+        "HistoryValueSide",
+        "createHistoryDefinition",
         "createHistoryNodes",
-        "createHistorySchemas"
+        "createHistoryRecordSchema"
       ],
       "dependencies": [
         "zod"
       ],
-      "workerSafe": false
+      "workerSafe": true
     }
   }
 }

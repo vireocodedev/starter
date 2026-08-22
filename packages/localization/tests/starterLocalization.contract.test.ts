@@ -7,6 +7,14 @@ import QUERYENGINE_EN from "@/queryengine/queryengine.en";
 import QUERYENGINE_HR from "@/queryengine/queryengine.hr";
 import { describe, expect, it } from "vitest";
 
+type Assert<T extends true> = T;
+type IsExact<TLeft, TRight> =
+  (<T>() => T extends TLeft ? 1 : 2) extends <T>() => T extends TRight ? 1 : 2
+    ? (<T>() => T extends TRight ? 1 : 2) extends <T>() => T extends TLeft ? 1 : 2
+      ? true
+      : false
+    : false;
+
 type JsonRecord = Record<string, unknown>;
 
 /** Returns the sorted set of dotted leaf key paths for a resource object. */
@@ -19,6 +27,21 @@ function flattenKeys(obj: JsonRecord, prefix = ""): string[] {
         : [path];
     })
     .sort();
+}
+
+function flattenValues(obj: JsonRecord, prefix = ""): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(obj).flatMap(([key, value]) => {
+      const path = prefix ? `${prefix}.${key}` : key;
+      return value !== null && typeof value === "object" && !Array.isArray(value)
+        ? Object.entries(flattenValues(value as JsonRecord, path))
+        : [[path, String(value)]];
+    }),
+  );
+}
+
+function interpolationVariables(value: string): string[] {
+  return [...value.matchAll(/\{\{\s*([^},\s]+)[^}]*\}\}/gu)].map(match => match[1] ?? "").sort();
 }
 
 /**
@@ -148,9 +171,6 @@ const EXPECTED_PLATFORM_KEYS = [
   "unsavedChanges.stay",
   "unsavedChanges.title",
   "validation.thisFieldIsRequired",
-  "video.streamErrorMessage",
-  "video.streamErrorTitle",
-  "video.streamRetry",
 ].sort();
 
 const EXPECTED_QUERYENGINE_KEYS = [
@@ -203,9 +223,36 @@ describe.each([
   it("keeps every base locale structurally identical to the canonical (en) shape", () => {
     expect(flattenKeys(hr as JsonRecord)).toEqual(flattenKeys(en as JsonRecord));
   });
+
+  it("ships non-blank values with the canonical interpolation variables", () => {
+    const canonicalValues = flattenValues(en as JsonRecord);
+    const localizedValues = flattenValues(hr as JsonRecord);
+
+    for (const [key, canonicalValue] of Object.entries(canonicalValues)) {
+      expect(canonicalValue.trim(), `${_namespace}.${key} has a blank English value`).not.toBe("");
+      expect(localizedValues[key]?.trim(), `${_namespace}.${key} has a blank Croatian value`).not.toBe("");
+      expect(
+        interpolationVariables(localizedValues[key] ?? ""),
+        `${_namespace}.${key} changes interpolation variables`,
+      ).toEqual(interpolationVariables(canonicalValue));
+    }
+  });
 });
 
 describe("starter localization contract", () => {
+  it("types localized and overridden values as strings rather than English literals", () => {
+    const resources = createStarterResources({
+      locales: ["hr"] as const,
+      overrides: { hr: { history: { title: "Revizijski trag" } } },
+    });
+
+    type TitleIsString = Assert<IsExact<typeof resources.hr.history.title, string>>;
+    const titleIsString: TitleIsString = true;
+
+    expect(titleIsString).toBe(true);
+    expect(resources.hr.history.title).toBe("Revizijski trag");
+  });
+
   it("ships the expected base locales", () => {
     expect([...STARTER_BASE_LOCALES]).toEqual(["en", "hr"]);
   });
@@ -251,5 +298,15 @@ describe("starter localization contract", () => {
     expect(resources.en.history.title).toBe("Audit trail");
     expect(resources.en.history.empty).toBe(HISTORY_EN.empty);
     expect(resources.en.queryengine).toEqual(QUERYENGINE_EN);
+  });
+
+  it("rejects invalid aggregate locale configuration before building namespaces", () => {
+    expect(() => createStarterResources({ locales: [] })).toThrow("at least one locale identifier");
+    expect(() =>
+      createStarterResources({
+        locales: ["en"] as const,
+        overrides: { de: { history: { title: "Verlauf" } } } as never,
+      }),
+    ).toThrow('override for unrequested locale "de"');
   });
 });

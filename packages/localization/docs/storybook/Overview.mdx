@@ -1,0 +1,18 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Localization/Overview" />
+
+# Localization
+
+`@vireocodedev/starter-localization` is the framework-free owner of Starter's translation resources, namespace constants, resource factories, registration utilities, and locale-neutral number formatting.
+
+It deliberately does not initialize i18next, select or persist an application's locale, detect browser preferences, or provide React hooks and providers. React adapters belong to `@vireocodedev/starter-ui/react-i18next`; applications own locale policy and the i18next instance.
+
+## Public workflow
+
+1. Choose the complete set of application locales.
+2. Build Starter's namespaces with `createStarterResources`.
+3. Add typed partial overrides for locales Starter does not ship or copy the application needs to customize.
+4. Pass the result to the application-owned i18next instance.
+
+Continue with **Primary Workflow**, then review late registration, custom namespaces, formatting, and deliberate failure behavior.

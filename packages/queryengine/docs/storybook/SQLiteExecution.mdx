@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runSqliteExecutionExample } from "../examples/sqliteExecution.example";
+import sqliteExecutionSource from "../examples/sqliteExecution.example.ts?raw";
+
+<Meta title="Query Engine/SQLite Execution" />
+
+# SQLite execution
+
+The executor composes validated filters, free-text search, sorting, whole-row pagination, optional counts, and row mapping over application-injected execution ports.
+
+The resulting request keeps SQL structure and runtime values separate. The worker-side helpers bind the values and validate pagination before preparing a statement.
+
+<ExecutablePackageExample run={runSqliteExecutionExample} source={sqliteExecutionSource} />

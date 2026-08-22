@@ -19,30 +19,16 @@
  *
  * Run after `build` — it reads `dist`, not `src`.
  */
-import { execFileSync } from "node:child_process";
+import { fork } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { availableParallelism } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagesDir = join(repoRoot, "packages");
-
-const COMPILER_FLAGS = [
-  "--noEmit",
-  "--skipLibCheck",
-  "false",
-  "--strict",
-  "--target",
-  "ES2022",
-  "--module",
-  "esnext",
-  "--moduleResolution",
-  "bundler",
-  "--jsx",
-  "react-jsx",
-  "--lib",
-  "ES2022,DOM,DOM.Iterable",
-];
+const compilerWorker = join(repoRoot, "scripts", "strict-consumer-types-worker.mjs");
+const MAX_CONCURRENT_COMPILERS = Math.min(7, availableParallelism());
 
 /** Collects the `.d.ts` file each `exports` subpath resolves to. */
 function declarationEntryPoints(packageDir) {
@@ -65,30 +51,71 @@ function declarationEntryPoints(packageDir) {
 }
 
 /**
- * Only failures inside our own `dist` count.
- *
- * A strict compile also drags in third-party declarations we do not control —
- * `workbox-core`, `vite-plugin-pwa` and friends all emit invalid `.d.ts`. Those
- * are somebody else's bug and must not fail this gate.
+ * Runs one isolated consumer compilation without serializing other packages.
+ * Structured IPC keeps diagnostics reliable and avoids parsing CLI formatting.
  */
-function ownErrors(output, packageDir) {
-  const distPrefix = join(packageDir, "dist");
-  return output
-    .split("\n")
-    .filter(line => line.includes(distPrefix) && /error TS\d+/.test(line))
-    .map(line => line.replace(`${repoRoot}/`, ""));
+function compileDeclarationEntryPoints(packageDir, entries) {
+  return new Promise(resolveCompilation => {
+    const child = fork(compilerWorker, [repoRoot, packageDir, ...entries.map(entry => entry.path)], {
+      cwd: repoRoot,
+      stdio: ["ignore", "ignore", "ignore", "ipc"],
+    });
+    let settled = false;
+
+    child.once("message", result => {
+      settled = true;
+      resolveCompilation(result);
+    });
+    child.once("error", error => {
+      if (settled) return;
+      settled = true;
+      resolveCompilation({ operationalError: error.message });
+    });
+    child.once("exit", (code, signal) => {
+      if (settled) return;
+      settled = true;
+      resolveCompilation({
+        operationalError: `Compiler worker exited before reporting a result (code ${code}, signal ${signal}).`,
+      });
+    });
+  });
+}
+
+/** Maps independent checks with a bounded number of compiler processes. */
+async function mapConcurrent(items, concurrency, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex++;
+      results[index] = await mapper(items[index]);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+  return results;
 }
 
 const packageDirs = readdirSync(packagesDir)
   .map(name => join(packagesDir, name))
   .filter(dir => existsSync(join(dir, "package.json")));
 
+const packageChecks = packageDirs
+  .map(packageDir => ({ packageDir, ...declarationEntryPoints(packageDir) }))
+  .filter(check => check.entries.length > 0);
+const compilableChecks = packageChecks
+  .filter(check => check.entries.every(entry => !entry.missing))
+  .sort((left, right) => right.entries.length - left.entries.length || left.name.localeCompare(right.name));
+const compilationResults = await mapConcurrent(compilableChecks, MAX_CONCURRENT_COMPILERS, async check => ({
+  check,
+  ...(await compileDeclarationEntryPoints(check.packageDir, check.entries)),
+}));
+const resultsByPackage = new Map(compilationResults.map(result => [result.check.packageDir, result]));
+
 let failed = false;
 
-for (const packageDir of packageDirs) {
-  const { name, entries } = declarationEntryPoints(packageDir);
-  if (entries.length === 0) continue;
-
+for (const { packageDir, name, entries } of packageChecks) {
   const missing = entries.filter(entry => entry.missing);
   if (missing.length > 0) {
     failed = true;
@@ -97,22 +124,19 @@ for (const packageDir of packageDirs) {
     continue;
   }
 
-  let output = "";
-  try {
-    execFileSync("npx", ["tsc", ...COMPILER_FLAGS, ...entries.map(entry => entry.path)], {
-      cwd: repoRoot,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch (error) {
-    output = `${error.stdout ?? ""}${error.stderr ?? ""}`;
-  }
-
-  const errors = ownErrors(output, packageDir);
+  const { compilerErrors = [], errors = [], operationalError } = resultsByPackage.get(packageDir);
   if (errors.length > 0) {
     failed = true;
     console.error(`${name}: ${errors.length} declaration error(s) a strict consumer would hit`);
     for (const error of errors) console.error(`  ${error}`);
+  } else if (compilerErrors.length > 0) {
+    failed = true;
+    console.error(`${name}: strict consumer compiler failed unexpectedly`);
+    for (const error of compilerErrors) console.error(`  ${error}`);
+  } else if (operationalError) {
+    failed = true;
+    console.error(`${name}: strict consumer compiler failed unexpectedly`);
+    console.error(operationalError);
   } else {
     const subpaths = entries.map(entry => entry.subpath).join(", ");
     console.log(`${name}: ${subpaths} — clean under skipLibCheck false`);

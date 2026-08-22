@@ -51,9 +51,8 @@ package was called `core`, a name that claims the bottom of the stack while the
 code sat at the top.
 
 The coupling was never the issue either. `core` reached into `starter-ui` for
-three symbols — `RgoIcon`, `AppBottomDrawer` and `APP_PAGE_CONTENT_MIN_WIDTH` —
-across ten import sites, plus one `declare module` augmentation of the icon
-registry.
+the icon registry, mobile drawer, and page-content width contracts across ten
+import sites, plus one `declare module` augmentation of the icon registry.
 
 ### Options considered
 
@@ -95,9 +94,18 @@ Two consequences are enforced mechanically by
 
 - Every declared entry point's export list is frozen against
   `packages/<pkg>/api-surface.json`, so a layering change cannot land silently.
-- The worker-safe entry points — `starter-sqlite` (`.` and `./offline`) and
-  `starter-ui/api` — must stay free of React, MUI and other framework code,
-  because the consuming app evaluates them inside a Web Worker.
+- The worker-safe entry points — `starter-history` (`.`), `starter-localization`
+  (`.`), and `starter-sqlite` (`.` and `./offline`) — must stay free of React,
+  MUI and other framework code. SQLite is evaluated inside a Web Worker today;
+  History and Localization deliberately promise the same runtime portability as
+  part of the non-React package contract.
+
+All frontend packages other than `starter-ui` are now being migrated to the
+stricter [non-React package authoring contract](./package-authoring/NON_REACT_PACKAGES.md).
+That contract excludes React from both runtime code and public declarations;
+reusable React presentation belongs in `starter-ui`. `starter-history` and
+`starter-localization` are the completed pilots whose contracts are now applied
+package by package.
 
 ## Known imperfection
 

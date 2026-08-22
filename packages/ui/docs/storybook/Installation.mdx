@@ -1,0 +1,81 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Documentation/Installation" />
+
+# Installation
+
+Install the package and the peer dependencies used by the Vireo contracts your application consumes:
+
+```bash
+npm install @vireocodedev/starter-ui
+npm install react react-dom @mui/material @emotion/react @emotion/styled
+```
+
+Feature-specific peers remain application dependencies:
+
+```bash
+# Forms and temporal fields
+npm install @tanstack/react-form zod @mui/x-date-pickers dayjs
+
+# Mutations and server state
+npm install @tanstack/react-query
+
+# Notifications
+npm install sonner
+```
+
+## Minimal setup
+
+Vireo uses the active MUI theme. Applications own theme creation and whether `CssBaseline` is mounted:
+
+```tsx
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { VireoIconRegistryProvider, VireoThemeColorMeta } from "@vireocodedev/starter-ui";
+
+const theme = createTheme({ palette: { mode: "dark" } });
+
+export function AppRoot() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <VireoThemeColorMeta />
+      <VireoIconRegistryProvider>
+        <App />
+      </VireoIconRegistryProvider>
+    </ThemeProvider>
+  );
+}
+```
+
+## Flattening a larger provider tree
+
+Keep integration configuration application-owned while avoiding deeply nested JSX:
+
+```tsx
+import {
+  VireoIconRegistryProvider,
+  VireoProviderComposer,
+  VireoThemeColorMeta,
+  type VireoProviderWrapper,
+} from "@vireocodedev/starter-ui";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { QueryClientProvider } from "@tanstack/react-query";
+
+export function AppProviders({ children }: React.PropsWithChildren) {
+  const providers = [
+    child => (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <VireoThemeColorMeta />
+        {child}
+      </ThemeProvider>
+    ),
+    child => <QueryClientProvider client={queryClient}>{child}</QueryClientProvider>,
+    child => <VireoIconRegistryProvider>{child}</VireoIconRegistryProvider>,
+  ] satisfies readonly VireoProviderWrapper[];
+
+  return <VireoProviderComposer providers={providers}>{children}</VireoProviderComposer>;
+}
+```
+
+The first wrapper is outermost. Do not automatically sort providers: their order is part of application architecture.

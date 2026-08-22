@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFilterCompilationExample } from "../examples/filterCompilation.example";
+import filterCompilationSource from "../examples/filterCompilation.example.ts?raw";
+
+<Meta title="Query Engine/Filter Compilation" />
+
+# Filter compilation
+
+Column bindings explicitly map public filter and sort keys to application-owned SQL expressions. Runtime values are compiled separately as parameters.
+
+Malformed payloads, mismatched entities, unknown fields, duplicate registrations, and invalid typed values fail closed rather than broadening a result set.
+
+<ExecutablePackageExample run={runFilterCompilationExample} source={filterCompilationSource} />

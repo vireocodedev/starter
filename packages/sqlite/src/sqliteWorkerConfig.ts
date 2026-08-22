@@ -5,6 +5,10 @@ import { type CreateSqliteWorkerRuntimeConfigInput } from "./runtime/contracts";
 export function createSqliteWorkerRuntimeConfig(
   input: CreateSqliteWorkerRuntimeConfigInput,
 ): SqliteWorkerRuntimeConfig {
+  if (input.dbFile.trim().length === 0) {
+    throw new Error("SQLite worker configuration requires a non-empty dbFile.");
+  }
+
   return {
     dbFile: input.dbFile,
     migrations: input.migrations,

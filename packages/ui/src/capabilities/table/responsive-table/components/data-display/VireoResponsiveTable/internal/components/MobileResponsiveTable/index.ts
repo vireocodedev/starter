@@ -1,0 +1,1 @@
+export { MobileResponsiveTable } from "./MobileResponsiveTable";

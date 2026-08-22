@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFormattingExample } from "../examples/formatting.example";
+import formattingSource from "../examples/formatting.example.ts?raw";
+
+<Meta title="Localization/Number Formatting" />
+
+# Number formatting
+
+`formatIntlNumber` is a thin, framework-free `Intl.NumberFormat` boundary. The caller always supplies the locale and therefore retains ownership of effective-locale policy. Options are passed directly to the platform formatter.
+
+Invalid locale or formatting configuration returns the caller's fallback result, or `String(value)` when no fallback is supplied.
+
+<ExecutablePackageExample run={runFormattingExample} source={formattingSource} />

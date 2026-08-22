@@ -1,0 +1,874 @@
+import type {
+  HistoryArrayFieldConfig,
+  HistoryArrayItemConfig,
+  HistoryAtomicFieldConfig,
+  HistoryDefinition,
+  HistoryEntityKey,
+  HistoryFieldConfig,
+  HistoryObjectFieldConfig,
+  HistoryPathSegment,
+} from "../definitions/historyDefinition.types";
+import { areHistoryValuesEqual, formatHistoryValue, isHistoryValuePresent, stableStringify } from "./historyValue";
+import type {
+  HistoryEngineOptions,
+  HistoryFieldRow,
+  HistoryGroupChangeType,
+  HistoryGroupNode,
+  HistoryNode,
+  HistoryValue,
+} from "./historyNode.types";
+import type { z } from "zod";
+
+const DEFAULT_POSITION_LABEL = "Position";
+
+// These erased forms are implementation details; consumers use the typed
+// definition/config contracts exported from the package root.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalHistoryDefinition = HistoryDefinition<any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalFieldConfig = HistoryFieldConfig<any, any>;
+type InternalNonIgnoredFieldConfig = Exclude<InternalFieldConfig, false>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalAtomicFieldConfig = HistoryAtomicFieldConfig<any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalArrayFieldConfig = HistoryArrayFieldConfig<any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalArrayItemConfig = HistoryArrayItemConfig<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalObjectFieldConfig = HistoryObjectFieldConfig<any>;
+
+export function createHistoryNodes<TEntity extends object, TSchema extends z.ZodTypeAny>(
+  definition: HistoryDefinition<TEntity, TSchema>,
+  previous: NoInfer<TEntity> | null | undefined,
+  current: NoInfer<TEntity> | null | undefined,
+  options: HistoryEngineOptions = {},
+): HistoryNode[] {
+  const previousParsed = parseOptionalSnapshot(definition, previous);
+  const currentParsed = parseOptionalSnapshot(definition, current);
+
+  const group = createHistoryGroup(definition, previousParsed, currentParsed, [], options);
+
+  return group == null ? [] : [group];
+}
+
+function createHistoryGroup(
+  definition: InternalHistoryDefinition,
+  previous: unknown,
+  current: unknown,
+  path: HistoryPathSegment[],
+  options: HistoryEngineOptions = {},
+  changeType?: HistoryGroupChangeType,
+): HistoryGroupNode | null {
+  const children = createFieldNodesForDefinition(definition, previous, current, path, options);
+
+  if (children.length === 0 && changeType == null) {
+    return null;
+  }
+
+  return {
+    type: "group",
+    path,
+    label: definition.options.label,
+    value: formatDefinitionValue(
+      definition,
+      isHistoryValuePresent(current) ? current : previous,
+      path,
+      isHistoryValuePresent(current) ? "current" : "previous",
+    ),
+    changeType: changeType ?? resolveDefaultGroupChangeType(children),
+    children,
+  };
+}
+
+function parseOptionalSnapshot(definition: InternalHistoryDefinition, value: unknown): unknown {
+  if (!isHistoryValuePresent(value)) {
+    return undefined;
+  }
+
+  return definition.schema.parse(value);
+}
+
+function createFieldNodesForDefinition(
+  definition: InternalHistoryDefinition,
+  previous: unknown,
+  current: unknown,
+  path: HistoryPathSegment[],
+  options: HistoryEngineOptions,
+): HistoryNode[] {
+  const directNodes: HistoryNode[] = [];
+  const nestedNodes: HistoryNode[] = [];
+
+  for (const fieldName of Object.keys(definition.fields)) {
+    const fieldConfig = definition.fields[fieldName] as InternalFieldConfig;
+
+    if (fieldConfig === false) {
+      continue;
+    }
+
+    const fieldPath = [...path, fieldName];
+    const previousValue = getObjectFieldValue(previous, fieldName);
+    const currentValue = getObjectFieldValue(current, fieldName);
+
+    const nodes = createFieldNodes({
+      config: fieldConfig,
+      previous: previousValue,
+      current: currentValue,
+      previousParent: previous,
+      currentParent: current,
+      path: fieldPath,
+      options,
+    });
+
+    if (fieldConfig.kind === "field") {
+      directNodes.push(...nodes);
+      continue;
+    }
+
+    nestedNodes.push(...nodes);
+  }
+
+  return [...sortHistoryNodesByChangeType(directNodes), ...sortHistoryNodesByChangeType(nestedNodes)];
+}
+
+function createFieldNodes(args: {
+  config: InternalNonIgnoredFieldConfig;
+  previous: unknown;
+  current: unknown;
+  previousParent: unknown;
+  currentParent: unknown;
+  path: HistoryPathSegment[];
+  options: HistoryEngineOptions;
+}): HistoryNode[] {
+  const { config } = args;
+
+  switch (config.kind) {
+    case "field": {
+      const row = createAtomicFieldRow({
+        ...args,
+        config,
+      });
+
+      return row == null ? [] : [row];
+    }
+
+    case "array": {
+      return createArrayGroup({
+        ...args,
+        config,
+      });
+    }
+
+    case "object": {
+      return createObjectGroup({
+        ...args,
+        config,
+      });
+    }
+
+    default: {
+      return [];
+    }
+  }
+}
+
+function createAtomicFieldRow(args: {
+  config: InternalAtomicFieldConfig;
+  previous: unknown;
+  current: unknown;
+  previousParent: unknown;
+  currentParent: unknown;
+  path: HistoryPathSegment[];
+  options: HistoryEngineOptions;
+}): HistoryFieldRow | null {
+  const { config, previous, current, previousParent, currentParent, path, options } = args;
+
+  const changeType =
+    config.resolveChange == null
+      ? resolveDefaultFieldChange(previous, current)
+      : validateResolvedChange(config.resolveChange(previous, current), path);
+
+  if (changeType == null) {
+    return createUnchangedFieldRow({
+      config,
+      previous,
+      current,
+      previousParent,
+      currentParent,
+      path,
+      options,
+    });
+  }
+
+  if (changeType === "removed") {
+    return {
+      type: "removed",
+      path,
+      label: config.label,
+      previous: formatFieldValue({
+        config,
+        value: previous,
+        parent: previousParent,
+        side: "previous",
+        path,
+        options,
+      }),
+    };
+  }
+
+  if (changeType === "added") {
+    return {
+      type: "added",
+      path,
+      label: config.label,
+      current: formatFieldValue({
+        config,
+        value: current,
+        parent: currentParent,
+        side: "current",
+        path,
+        options,
+      }),
+    };
+  }
+
+  return {
+    type: "updated",
+    path,
+    label: config.label,
+    previous: formatFieldValue({
+      config,
+      value: previous,
+      parent: previousParent,
+      side: "previous",
+      path,
+      options,
+    }),
+    current: formatFieldValue({
+      config,
+      value: current,
+      parent: currentParent,
+      side: "current",
+      path,
+      options,
+    }),
+  };
+}
+
+function validateResolvedChange(
+  value: unknown,
+  path: readonly HistoryPathSegment[],
+): "added" | "removed" | "updated" | null {
+  if (value === null || value === "added" || value === "removed" || value === "updated") return value;
+  throw new TypeError(`History change resolver at "${path.join(".")}" returned unsupported type "${String(value)}".`);
+}
+
+function createUnchangedFieldRow(args: {
+  config: InternalAtomicFieldConfig;
+  previous: unknown;
+  current: unknown;
+  previousParent: unknown;
+  currentParent: unknown;
+  path: HistoryPathSegment[];
+  options: HistoryEngineOptions;
+}): HistoryFieldRow | null {
+  const { config, previous, current, previousParent, currentParent, path, options } = args;
+
+  if (options.showUnchanged !== true) {
+    return null;
+  }
+
+  const value = isHistoryValuePresent(current) ? current : previous;
+
+  if (!isHistoryValuePresent(value)) {
+    return null;
+  }
+
+  const parent = isHistoryValuePresent(current) ? currentParent : previousParent;
+  const side = isHistoryValuePresent(current) ? "current" : "previous";
+
+  return {
+    type: "unchanged",
+    path,
+    label: config.label,
+    current: formatFieldValue({
+      config,
+      value,
+      parent,
+      side,
+      path,
+      options,
+    }),
+  };
+}
+
+function createObjectGroup(args: {
+  config: InternalObjectFieldConfig;
+  previous: unknown;
+  current: unknown;
+  path: HistoryPathSegment[];
+  options: HistoryEngineOptions;
+}): HistoryNode[] {
+  const { config, previous, current, path, options } = args;
+
+  const group = createHistoryGroup(
+    config.definition,
+    previous,
+    current,
+    path,
+    options,
+    resolveContainerChangeType(previous, current),
+  );
+
+  return group == null ? [] : [group];
+}
+
+function resolveContainerChangeType(previous: unknown, current: unknown): HistoryGroupChangeType | undefined {
+  const previousEmpty = !isHistoryValuePresent(previous);
+  const currentEmpty = !isHistoryValuePresent(current);
+
+  if (previousEmpty && !currentEmpty) {
+    return "added";
+  }
+
+  if (!previousEmpty && currentEmpty) {
+    return "removed";
+  }
+
+  return undefined;
+}
+
+function createArrayGroup(args: {
+  config: InternalArrayFieldConfig;
+  previous: unknown;
+  current: unknown;
+  previousParent: unknown;
+  currentParent: unknown;
+  path: HistoryPathSegment[];
+  options: HistoryEngineOptions;
+}): HistoryNode[] {
+  const { config, previous, current, previousParent, currentParent, path, options } = args;
+
+  const previousArray = Array.isArray(previous) ? previous : [];
+  const currentArray = Array.isArray(current) ? current : [];
+
+  const mode = config.mode ?? "set";
+  const containerChangeType = resolveContainerChangeType(previous, current);
+
+  const children =
+    mode === "ordered"
+      ? createOrderedArrayChildren(config, previousArray, currentArray, path, options)
+      : createSetArrayChildren(config, previousArray, currentArray, path, options);
+
+  if (children.length === 0 && containerChangeType == null) {
+    return [];
+  }
+
+  return [
+    {
+      type: "group",
+      path,
+      label: config.label,
+      value: formatArrayValue(
+        config,
+        isHistoryValuePresent(current) ? currentArray : previousArray,
+        isHistoryValuePresent(current) ? currentParent : previousParent,
+        path,
+        isHistoryValuePresent(current) ? "current" : "previous",
+      ),
+      changeType: containerChangeType ?? resolveDefaultGroupChangeType(children),
+      children,
+    },
+  ];
+}
+
+function createSetArrayChildren(
+  config: InternalArrayFieldConfig,
+  previousArray: unknown[],
+  currentArray: unknown[],
+  path: HistoryPathSegment[],
+  options: HistoryEngineOptions,
+): HistoryNode[] {
+  const previousItems = createArrayItemMap(config, previousArray, path, "previous");
+  const currentItems = createArrayItemMap(config, currentArray, path, "current");
+
+  const addedChildren: HistoryNode[] = [];
+  const updatedChildren: HistoryNode[] = [];
+  const removedChildren: HistoryNode[] = [];
+
+  for (const [key, currentEntry] of currentItems) {
+    const previousEntry = previousItems.get(key);
+    const itemPath = [...path, key];
+
+    if (previousEntry == null) {
+      addedChildren.push(...createAddedArrayItemNodes(config, currentEntry.value, itemPath, options));
+      continue;
+    }
+
+    updatedChildren.push(
+      ...createMatchedArrayItemNodes({
+        config,
+        previous: previousEntry.value,
+        current: currentEntry.value,
+        path: itemPath,
+        movedRow: null,
+        options,
+      }),
+    );
+  }
+
+  for (const [key, previousEntry] of previousItems) {
+    if (currentItems.has(key)) {
+      continue;
+    }
+
+    removedChildren.push(...createRemovedArrayItemNodes(config, previousEntry.value, [...path, key], options));
+  }
+
+  return sortHistoryNodesByChangeType([...addedChildren, ...updatedChildren, ...removedChildren]);
+}
+
+function createOrderedArrayChildren(
+  config: InternalArrayFieldConfig,
+  previousArray: unknown[],
+  currentArray: unknown[],
+  path: HistoryPathSegment[],
+  options: HistoryEngineOptions,
+): HistoryNode[] {
+  const previousItems = createArrayItemMap(config, previousArray, path, "previous");
+  const currentItems = createArrayItemMap(config, currentArray, path, "current");
+  const stableKeys = new Set(
+    findLongestStableKeySequence(
+      [...previousItems.keys()].filter(key => currentItems.has(key)),
+      [...currentItems.keys()].filter(key => previousItems.has(key)),
+    ),
+  );
+
+  const addedChildren: HistoryNode[] = [];
+  const updatedChildren: HistoryNode[] = [];
+  const removedChildren: HistoryNode[] = [];
+
+  for (const [key, currentEntry] of currentItems) {
+    const previousEntry = previousItems.get(key);
+    const itemPath = [...path, key];
+
+    if (previousEntry == null) {
+      addedChildren.push(...createAddedArrayItemNodes(config, currentEntry.value, itemPath, options));
+      continue;
+    }
+
+    const movedRow = stableKeys.has(key)
+      ? null
+      : createMovedRow(itemPath, previousEntry.index, currentEntry.index, options);
+
+    updatedChildren.push(
+      ...createMatchedArrayItemNodes({
+        config,
+        previous: previousEntry.value,
+        current: currentEntry.value,
+        path: itemPath,
+        movedRow,
+        options,
+      }),
+    );
+  }
+
+  for (const [key, previousEntry] of previousItems) {
+    if (currentItems.has(key)) {
+      continue;
+    }
+
+    removedChildren.push(...createRemovedArrayItemNodes(config, previousEntry.value, [...path, key], options));
+  }
+
+  return [
+    ...sortHistoryNodesByChangeType(addedChildren),
+    ...sortHistoryNodesByChangeType(updatedChildren),
+    ...sortHistoryNodesByChangeType(removedChildren),
+  ];
+}
+
+function findLongestStableKeySequence(
+  previousKeys: readonly HistoryEntityKey[],
+  currentKeys: readonly HistoryEntityKey[],
+): HistoryEntityKey[] {
+  const lengths = Array.from({ length: previousKeys.length + 1 }, () => Array<number>(currentKeys.length + 1).fill(0));
+
+  for (let previousIndex = previousKeys.length - 1; previousIndex >= 0; previousIndex -= 1) {
+    for (let currentIndex = currentKeys.length - 1; currentIndex >= 0; currentIndex -= 1) {
+      lengths[previousIndex]![currentIndex] = areHistoryKeysEqual(
+        previousKeys[previousIndex],
+        currentKeys[currentIndex],
+      )
+        ? 1 + lengths[previousIndex + 1]![currentIndex + 1]!
+        : Math.max(lengths[previousIndex + 1]![currentIndex]!, lengths[previousIndex]![currentIndex + 1]!);
+    }
+  }
+
+  const stableKeys: HistoryEntityKey[] = [];
+  let previousIndex = 0;
+  let currentIndex = 0;
+
+  while (previousIndex < previousKeys.length && currentIndex < currentKeys.length) {
+    const previousKey = previousKeys[previousIndex]!;
+    const currentKey = currentKeys[currentIndex]!;
+
+    if (areHistoryKeysEqual(previousKey, currentKey)) {
+      stableKeys.push(previousKey);
+      previousIndex += 1;
+      currentIndex += 1;
+      continue;
+    }
+
+    const skipPreviousLength = lengths[previousIndex + 1]![currentIndex]!;
+    const skipCurrentLength = lengths[previousIndex]![currentIndex + 1]!;
+    if (skipPreviousLength > skipCurrentLength) {
+      previousIndex += 1;
+    } else {
+      currentIndex += 1;
+    }
+  }
+
+  return stableKeys;
+}
+
+function areHistoryKeysEqual(left: HistoryEntityKey | undefined, right: HistoryEntityKey | undefined): boolean {
+  return (
+    left === right ||
+    (typeof left === "number" && typeof right === "number" && Number.isNaN(left) && Number.isNaN(right))
+  );
+}
+
+function createMatchedArrayItemNodes(args: {
+  config: InternalArrayFieldConfig;
+  previous: unknown;
+  current: unknown;
+  path: HistoryPathSegment[];
+  movedRow: HistoryFieldRow | null;
+  options: HistoryEngineOptions;
+}): HistoryNode[] {
+  const { config, previous, current, path, movedRow, options } = args;
+  const item = config.item as InternalArrayItemConfig;
+
+  if (item.kind === "object") {
+    const group = createHistoryGroup(item.definition, previous, current, path, options);
+
+    if (group == null) {
+      return movedRow == null ? [] : [createMovedOnlyGroup(item, current, path, movedRow)];
+    }
+
+    return [
+      {
+        ...group,
+        children: movedRow == null ? group.children : [movedRow, ...group.children],
+      },
+    ];
+  }
+
+  const nodes = createFieldNodes({
+    config: item,
+    previous,
+    current,
+    previousParent: previous,
+    currentParent: current,
+    path,
+    options,
+  });
+
+  return movedRow == null ? nodes : [movedRow, ...nodes];
+}
+
+function createAddedArrayItemNodes(
+  config: InternalArrayFieldConfig,
+  current: unknown,
+  path: HistoryPathSegment[],
+  options: HistoryEngineOptions,
+): HistoryNode[] {
+  const item = config.item as InternalArrayItemConfig;
+
+  if (item.kind === "object") {
+    const group = createHistoryGroup(item.definition, undefined, current, path, options, "added");
+
+    return group == null
+      ? [
+          {
+            type: "added",
+            path,
+            label: item.definition.options.label,
+            current: formatDefinitionValue(item.definition, current, path, "current"),
+          },
+        ]
+      : [group];
+  }
+
+  return createFieldNodes({
+    config: item,
+    previous: undefined,
+    current,
+    previousParent: undefined,
+    currentParent: current,
+    path,
+    options,
+  });
+}
+
+function createRemovedArrayItemNodes(
+  config: InternalArrayFieldConfig,
+  previous: unknown,
+  path: HistoryPathSegment[],
+  options: HistoryEngineOptions,
+): HistoryNode[] {
+  const item = config.item as InternalArrayItemConfig;
+
+  if (item.kind === "object") {
+    const group = createHistoryGroup(item.definition, previous, undefined, path, options, "removed");
+
+    return group == null
+      ? [
+          {
+            type: "removed",
+            path,
+            label: item.definition.options.label,
+            previous: formatDefinitionValue(item.definition, previous, path, "previous"),
+          },
+        ]
+      : [group];
+  }
+
+  return createFieldNodes({
+    config: item,
+    previous,
+    current: undefined,
+    previousParent: previous,
+    currentParent: undefined,
+    path,
+    options,
+  });
+}
+
+function createMovedOnlyGroup(
+  item: Extract<InternalArrayItemConfig, { kind: "object" }>,
+  current: unknown,
+  path: HistoryPathSegment[],
+  movedRow: HistoryFieldRow,
+): HistoryGroupNode {
+  return {
+    type: "group",
+    path,
+    label: item.definition.options.label,
+    value: formatDefinitionValue(item.definition, current, path, "current"),
+    changeType: "updated",
+    children: [movedRow],
+  };
+}
+
+function createMovedRow(
+  path: HistoryPathSegment[],
+  previousIndex: number,
+  currentIndex: number,
+  options: HistoryEngineOptions,
+): HistoryFieldRow {
+  return {
+    type: "moved",
+    path: [...path, "$position"],
+    label: options.positionLabel ?? DEFAULT_POSITION_LABEL,
+    previous: createHistoryValue(previousIndex, String(previousIndex + 1)),
+    current: createHistoryValue(currentIndex, String(currentIndex + 1)),
+  };
+}
+
+function createArrayItemMap(
+  config: InternalArrayFieldConfig,
+  array: unknown[],
+  path: readonly HistoryPathSegment[],
+  side: "previous" | "current",
+): Map<HistoryEntityKey, { value: unknown; index: number }> {
+  const map = new Map<HistoryEntityKey, { value: unknown; index: number }>();
+
+  array.forEach((value, index) => {
+    const key = createArrayItemKey(config, value);
+    if ((typeof key !== "string" && typeof key !== "number") || (typeof key === "number" && !Number.isFinite(key))) {
+      throw new TypeError(
+        `History array identity in the ${side} snapshot at "${path.join(".")}" must be a string or finite number.`,
+      );
+    }
+    if (map.has(key)) {
+      throw new Error(
+        `Duplicate history array identity "${String(key)}" in the ${side} snapshot at "${path.join(".")}".`,
+      );
+    }
+    map.set(key, { value, index });
+  });
+
+  return map;
+}
+
+function createArrayItemKey(config: InternalArrayFieldConfig, value: unknown): HistoryEntityKey {
+  const item = config.item as InternalArrayItemConfig;
+
+  if (item.kind === "object") {
+    return item.definition.options.key(value);
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    return value;
+  }
+
+  return stableStringify(value);
+}
+
+function sortHistoryNodesByChangeType(nodes: HistoryNode[]): HistoryNode[] {
+  return [...nodes].sort((left, right) => getHistoryNodeChangeOrder(left) - getHistoryNodeChangeOrder(right));
+}
+
+function resolveDefaultGroupChangeType(children: HistoryNode[]): HistoryGroupChangeType {
+  const hasChangedChild = children.some(child => getHistoryNodeChangeType(child) !== "unchanged");
+
+  return hasChangedChild ? "updated" : "unchanged";
+}
+
+function getHistoryNodeChangeType(node: HistoryNode): HistoryGroupChangeType {
+  if (node.type === "group") {
+    return node.changeType ?? resolveDefaultGroupChangeType(node.children);
+  }
+
+  switch (node.type) {
+    case "added":
+      return "added";
+
+    case "removed":
+      return "removed";
+
+    case "updated":
+    case "moved":
+      return "updated";
+
+    case "unchanged":
+      return "unchanged";
+
+    default:
+      return "updated";
+  }
+}
+
+function getHistoryNodeChangeOrder(node: HistoryNode): number {
+  if (node.type === "group" && node.changeType != null) {
+    return getHistoryChangeOrder(node.changeType);
+  }
+
+  if (node.type !== "group") {
+    return getHistoryFieldRowChangeOrder(node);
+  }
+
+  if (node.children.length === 0) {
+    return 1;
+  }
+
+  return Math.min(...node.children.map(getHistoryNodeChangeOrder));
+}
+
+function getHistoryChangeOrder(changeType: HistoryGroupChangeType): number {
+  switch (changeType) {
+    case "added":
+      return 0;
+
+    case "updated":
+      return 1;
+
+    case "removed":
+      return 2;
+
+    case "unchanged":
+      return 3;
+
+    default:
+      return 1;
+  }
+}
+
+function getHistoryFieldRowChangeOrder(row: HistoryFieldRow): number {
+  switch (row.type) {
+    case "added":
+      return 0;
+
+    case "updated":
+    case "moved":
+      return 1;
+
+    case "removed":
+      return 2;
+
+    case "unchanged":
+      return 3;
+
+    default:
+      return 1;
+  }
+}
+
+function resolveDefaultFieldChange(previous: unknown, current: unknown): "added" | "removed" | "updated" | null {
+  const previousEmpty = !isHistoryValuePresent(previous);
+  const currentEmpty = !isHistoryValuePresent(current);
+
+  if (previousEmpty && currentEmpty) {
+    return null;
+  }
+
+  if (previousEmpty && !currentEmpty) {
+    return "added";
+  }
+
+  if (!previousEmpty && currentEmpty) {
+    return "removed";
+  }
+
+  if (areHistoryValuesEqual(previous, current)) {
+    return null;
+  }
+
+  return "updated";
+}
+
+function getObjectFieldValue(value: unknown, fieldName: string): unknown {
+  if (value == null || typeof value !== "object") return undefined;
+  return (value as Record<string, unknown>)[fieldName];
+}
+
+function formatFieldValue(args: {
+  config: InternalAtomicFieldConfig;
+  value: unknown;
+  parent: unknown;
+  side: "previous" | "current";
+  path: HistoryPathSegment[];
+  options: HistoryEngineOptions;
+}): HistoryValue {
+  const { config, value, parent, side, path } = args;
+  return formatHistoryValue(value, config.format, { parent, side, path });
+}
+
+function formatArrayValue(
+  config: InternalArrayFieldConfig,
+  value: unknown[],
+  parent: unknown,
+  path: HistoryPathSegment[],
+  side: "previous" | "current",
+): HistoryValue | undefined {
+  if (config.format == null) return undefined;
+  return formatHistoryValue(value, config.format, { parent, side, path });
+}
+
+function formatDefinitionValue(
+  definition: InternalHistoryDefinition,
+  value: unknown,
+  path: HistoryPathSegment[],
+  side: "previous" | "current",
+): HistoryValue {
+  if (definition.options.format == null) {
+    return createHistoryValue(value, definition.options.label);
+  }
+
+  return formatHistoryValue(value, definition.options.format, { parent: value, side, path });
+}
+
+function createHistoryValue(raw: unknown, formatted: string): HistoryValue {
+  return { raw, formatted };
+}

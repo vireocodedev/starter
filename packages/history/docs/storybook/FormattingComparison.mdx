@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFormattingComparisonExample } from "../examples/formattingComparison.example";
+import formattingComparisonSource from "../examples/formattingComparison.example.ts?raw";
+
+<Meta title="History/Formatting and Comparison" />
+
+# Formatting and comparison
+
+`format` controls presentation text while every emitted value retains its original `raw` value. `resolveChange` overrides equality for one field and returns `null` when the values should be treated as unchanged.
+
+Default structural comparison supports primitives, Dates, arrays, and plain objects. Object keys are ordered deterministically. Cycles, functions, symbols, Maps, Sets, and other unsupported object types throw instead of being silently treated as equal.
+
+<ExecutablePackageExample run={runFormattingComparisonExample} source={formattingComparisonSource} />

@@ -1,0 +1,61 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Documentation/Guides/Drag and Drop" />
+
+# Hello Pangea DND guide
+
+Vireo's optional `@vireocodedev/starter-ui/hello-pangea-dnd` entry point provides typed, themed primitives for ordinary reorder and transfer lists. Install a compatible `@hello-pangea/dnd` version alongside Starter UI before importing this entry point.
+
+## Composition
+
+Wrap one drag domain in `VireoDndProvider`, render each destination with `VireoDropZone`, and render ordered children with `VireoDraggableItem`. A simple row can use its root as the drag handle. Rows containing links, buttons, or inputs should set `dragHandle="explicit"` and render an accessibly named `VireoDragHandle`.
+
+```tsx
+import {
+  VireoDndProvider,
+  VireoDragHandle,
+  VireoDraggableItem,
+  VireoDropZone,
+} from "@vireocodedev/starter-ui/hello-pangea-dnd";
+
+<VireoDndProvider onDragEnd={result => updateApplicationState(result)}>
+  <VireoDropZone id={{ type: "task-list", listId: "backlog" }} mode="reorder">
+    {tasks.map((task, index) => (
+      <VireoDraggableItem key={task.id} id={{ type: "task", taskId: task.id }} index={index} dragHandle="explicit">
+        <VireoDragHandle aria-label={`Move ${task.title}`} />
+        {task.title}
+      </VireoDraggableItem>
+    ))}
+  </VireoDropZone>
+</VireoDndProvider>;
+```
+
+## Controlled data
+
+The integration reports typed lifecycle events but never mutates application collections. `onDragEnd` fires exactly once for both completed and cancelled drags. Update list order or ownership in that callback. `mode="reorder"` renders the native insertion placeholder; `mode="transfer"` represents a destination action without reserving an ordered slot.
+
+While an item is active, Vireo renders that item in a private body-level drag layer. This keeps Hello Pangea's fixed viewport coordinates correct when a list is inside transformed or clipping ancestors, while preserving the pointer's original grab point across the drag-activation threshold. The layer does not change the component API or application-owned collection state.
+
+## Compatibility and acceptance
+
+Zones exchange items only when their `group` values match. The default group is `"default"`. Use synchronous `canDrop` for destination-specific rules. Disabled or rejected zones are passed to Hello Pangea as disabled destinations and expose Vireo state classes and `data-drop-state` for theme and slot customization.
+
+## Typed identifiers
+
+Identifiers are JSON-compatible objects with a `type` discriminator. Extend the registries once in an application declaration file for autocomplete and discriminated-union narrowing. The codec is private and deterministic; consumers always work with the original objects.
+
+```ts
+declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+  interface VireoDraggableIdRegistry {
+    task: { taskId: string };
+  }
+
+  interface VireoDropZoneIdRegistry {
+    "task-list": { listId: string };
+  }
+}
+```
+
+## Scope
+
+This contract intentionally targets normal lists. It does not wrap virtualization, clone rendering, consumer-configured portal destinations, combining, or nested drag providers. Use Hello Pangea directly for those specialized layouts. The native advanced provider options remain available on `VireoDndProvider`.

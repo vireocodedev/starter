@@ -1,0 +1,76 @@
+import { {{componentName}} } from "./{{componentName}}";
+import { {{componentVariableName}}Classes } from "./{{componentName}}.classes";
+import { {{componentConstantName}}_NAME } from "./{{componentName}}.identity";
+import { ThemeProvider, createTheme } from "@mui/material";
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { describe, expect, it } from "vitest";
+
+describe({{componentConstantName}}_NAME, () => {
+  it("renders its essential default output with only required props", () => {
+    render(<{{componentName}} />);
+
+    expect(screen.getByText("{{componentName}}").tagName).toBe("DIV");
+  });
+
+  it("forwards refs and merges root customization", () => {
+    const forwardedRef = React.createRef<HTMLDivElement>();
+    const rootSlotRef = React.createRef<HTMLDivElement>();
+
+    render(
+      <{{componentName}}
+        ref={forwardedRef}
+        className="direct-class"
+        style={{ paddingLeft: 10 }}
+        slotProps={{
+          root: {
+            ref: rootSlotRef,
+            className: "slot-class",
+            "data-origin": "slot",
+            style: { paddingRight: 12 },
+          },
+        }}
+      />,
+    );
+
+    const root = screen.getByText("{{componentName}}");
+    expect(forwardedRef.current).toBe(root);
+    expect(rootSlotRef.current).toBe(root);
+    expect(root).toHaveClass({{componentVariableName}}Classes.root, "direct-class", "slot-class");
+    expect(root).toHaveAttribute("data-origin", "slot");
+    expect(root).toHaveStyle({ paddingLeft: "10px", paddingRight: "12px" });
+  });
+
+  it("supports a replacement root and owner-state slot props", () => {
+    render(
+      <{{componentName}}
+        slots={{ root: "section" }}
+        slotProps={{ root: () => ({ "aria-label": "Customized {{componentName}}", "data-slot": "root" }) }}
+      />,
+    );
+
+    const root = screen.getByRole("region", { name: "Customized {{componentName}}" });
+    expect(root).toHaveAttribute("data-slot", "root");
+    expect(root).toHaveClass({{componentVariableName}}Classes.root);
+  });
+
+  it("uses theme default props and root style overrides", () => {
+    const theme = createTheme({
+      components: {
+        [{{componentConstantName}}_NAME]: {
+          defaultProps: { className: "theme-default-class" },
+          styleOverrides: { root: { color: "rgb(123, 45, 67)" } },
+        },
+      },
+    });
+
+    render(
+      <ThemeProvider theme={theme}>
+        <{{componentName}} />
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByText("{{componentName}}")).toHaveClass("theme-default-class");
+    expect(screen.getByText("{{componentName}}")).toHaveStyle({ color: "rgb(123, 45, 67)" });
+  });
+});

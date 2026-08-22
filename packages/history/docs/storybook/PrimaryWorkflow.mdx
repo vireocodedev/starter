@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runPrimaryWorkflowExample } from "../examples/primaryWorkflow.example";
+import primaryWorkflowSource from "../examples/primaryWorkflow.example.ts?raw";
+
+<Meta title="History/Primary Workflow" />
+
+# Primary workflow
+
+The definition is inferred from its Zod schema. Every property must be configured or explicitly ignored, preventing newly added model fields from silently disappearing from history.
+
+The same source below is compiled by TypeScript, executed by Storybook, and shown verbatim for copying.
+
+<ExecutablePackageExample run={runPrimaryWorkflowExample} source={primaryWorkflowSource} />

@@ -1,0 +1,40 @@
+import { Typography } from "@mui/material";
+import { revalidateLogic } from "@tanstack/react-form";
+import { VireoLabelBox } from "@vireocodedev/starter-ui";
+import { useVireoForm } from "@vireocodedev/starter-ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import React from "react";
+
+export default function DefaultExample() {
+  const [savedName, setSavedName] = React.useState<string>();
+  const form = useVireoForm({
+    defaultValues: { projectName: "" },
+    onSubmit: ({ value }) => setSavedName(value.projectName),
+    validationLogic: revalidateLogic(),
+  });
+
+  return (
+    <VireoStorybookProvider>
+      <form.Form>
+        <form.Section label="Project" variant="plain" layout="stack">
+          <form.Field
+            name="projectName"
+            validators={{
+              onDynamic: ({ value }) => (value.trim() ? undefined : "Enter a project name."),
+            }}
+          >
+            {field => (
+              <VireoLabelBox label="Project name">
+                <field.TextField placeholder="Northstar" slotProps={{ htmlInput: { "aria-label": "Project name" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
+          <form.Actions>
+            <form.SubmitButton variant="contained">Save project</form.SubmitButton>
+          </form.Actions>
+          {savedName && <Typography color="success.main">Saved {savedName}</Typography>}
+        </form.Section>
+      </form.Form>
+    </VireoStorybookProvider>
+  );
+}

@@ -25,15 +25,11 @@ jobs:
       - run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run build
-      - run: npm run typecheck
-      - run: npm run test
-      # Reads dist, so it has to follow build. Compiles every published entry
-      # point with skipLibCheck disabled, which is the only way defects in our
-      # own .d.ts become visible from inside this repo.
-      - run: npm run types:strict
+      # This is the same ordered merge gate developers run locally. It includes
+      # linting, formatting, package builds, type checking, tests and contract
+      # checks, strict consumer declarations, generator tests, and the Vireo
+      # Storybook production build.
+      - run: npm run verify
 
   # Deliberately a sibling of the TypeScript job rather than a step inside it.
   # The two halves of the starter are released together because they live in one

@@ -3,8 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@vireocodedev/starter-sqlite": ["./src/index.ts"],
+      "@vireocodedev/starter-sqlite/offline": ["./src/offline/index.ts"]
     }
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "docs/examples"]
 }

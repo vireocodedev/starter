@@ -1,0 +1,21 @@
+import type { VireoCanvasPoint, VireoCanvasTransform } from "@/capabilities/infinite-canvas/types/infiniteCanvas.types";
+import React from "react";
+export type VireoInfiniteCanvasContextValue = {
+  transform: VireoCanvasTransform;
+  scale: number;
+  pan: VireoCanvasPoint;
+  minScale: number;
+  maxScale: number;
+  target: HTMLDivElement | null;
+  clientToWorld: (point: VireoCanvasPoint) => VireoCanvasPoint;
+  worldToClient: (point: VireoCanvasPoint) => VireoCanvasPoint;
+  getViewportCenterWorld: () => VireoCanvasPoint;
+  setTransform: (transform: VireoCanvasTransform) => void;
+  resetTransform: () => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  isFullscreen: boolean;
+  isFullscreenSupported: boolean;
+  toggleFullscreen: () => Promise<void>;
+};
+export const VireoInfiniteCanvasContext = React.createContext<VireoInfiniteCanvasContextValue | null>(null);

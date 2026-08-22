@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runOfflineUtilitiesExample } from "../examples/offlineUtilities.example";
+import offlineUtilitiesSource from "../examples/offlineUtilities.example.ts?raw";
+
+<Meta title="SQLite/Offline Utilities" />
+
+# Offline utilities
+
+The `/offline` entry point is transport-neutral. It provides paged snapshot collection, offline mutation ordering, normalized replay headers, queueability policy, and network-status state without opening SQLite or constructing a Worker.
+
+Sensitive headers are intentionally excluded from replay. Applications decide whether the default endpoint and method policy is sufficient or pass explicit policy options.
+
+<ExecutablePackageExample run={runOfflineUtilitiesExample} source={offlineUtilitiesSource} />

@@ -1,0 +1,66 @@
+export * from "./components/overlays/VireoBottomDrawer";
+export * from "./components/overlays/VireoDockedSidePanel";
+export * from "./components/overlays/VireoOverlayHeader";
+export * from "./components/overlays/VireoResponsiveOverlayFrame";
+export * from "./components/overlays/VireoSidePanelResizeHandle";
+export * from "./confirmation/components/overlays/VireoConfirmationDialog";
+export type {
+  VireoConfirm,
+  VireoConfirmationOptions,
+} from "./confirmation/contexts/VireoConfirmationContext/VireoConfirmationContext";
+export * from "./confirmation/hooks/useVireoConfirmation/useVireoConfirmation";
+export * from "./confirmation/providers/VireoConfirmationProvider/VireoConfirmationProvider";
+export {
+  PageOverlayControllerContext,
+  usePageOverlayController,
+  type PageOverlayControllerValue,
+} from "./page-overlays/contexts/PageOverlayControllerContext/PageOverlayControllerContext";
+export {
+  useGuardedOverlayModeSwitch,
+  type GuardedOverlayModeSwitch,
+} from "./page-overlays/hooks/useGuardedOverlayModeSwitch/useGuardedOverlayModeSwitch";
+export {
+  useDelayedOverlayMount,
+  type DelayedOverlayRenderProps,
+  type UseDelayedOverlayMountReturn,
+} from "./page-overlays/hooks/useDelayedOverlayMount/useDelayedOverlayMount";
+export {
+  usePageOverlayModes,
+  type OverlayPayloadMap,
+  type OverlayRendererProps,
+  type OverlayRenderers,
+  type OverlayState,
+  type UsePageOverlayModesReturn,
+} from "./page-overlays/hooks/usePageOverlayModes/usePageOverlayModes";
+export {
+  PageOverlay,
+  PageOverlayControllerProvider,
+  PageOverlayOutlet,
+  type PageOverlayProps,
+} from "./page-overlays/providers/PageOverlayControllerProvider/PageOverlayControllerProvider";
+export { useRafViewportWidth } from "./hooks/useRafViewportWidth/useRafViewportWidth";
+export { useSidePanelResize } from "./hooks/useSidePanelResize/useSidePanelResize";
+export {
+  DEFAULT_DESKTOP_SIDE_PANEL_MIN_WIDTH,
+  DEFAULT_DESKTOP_SIDE_PANEL_MIN_CONTENT_WIDTH,
+  DEFAULT_DESKTOP_SIDE_PANEL_VIEWPORT_INSET,
+  DESKTOP_SIDE_PANEL_WIDTH_BY_MAX_WIDTH,
+  DOCKED_SIDE_PANEL_TRANSITION_EVENT,
+  DOCKED_SIDE_PANEL_TRANSITION_MS,
+  SIDE_PANEL_RESIZE_ACTIVE_OPACITY,
+  SIDE_PANEL_RESIZE_HANDLE_WIDTH,
+  SIDE_PANEL_RESIZE_HITBOX_WIDTH,
+  SIDE_PANEL_RESIZE_HOVER_OPACITY,
+  SIDE_PANEL_WIDTH_CSS_VAR,
+  type DockedSidePanelTransitionEventDetail,
+} from "./constants/overlay.constants";
+export type {
+  ResponsiveOverlayFrameDesktopSidePanelWidth,
+  ResponsiveOverlayFrameDesktopSurface,
+} from "./types/overlay.types";
+export {
+  clampSidePanelWidth,
+  getDefaultDesktopSidePanelWidth,
+  getNumericDesktopSidePanelWidth,
+  resolveDockedSidePanelWidth,
+} from "./utils/overlay.utils";

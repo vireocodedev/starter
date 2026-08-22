@@ -3,20 +3,21 @@ import {
   HISTORY_TRANSLATION_NAMESPACE,
   type HistoryResources,
   type HistoryResourcesOverride,
-} from "@/history";
+} from "./history/createHistoryResources";
 import {
   createPlatformResources,
   PLATFORM_TRANSLATION_NAMESPACE,
   type PlatformResources,
   type PlatformResourcesOverride,
-} from "@/platform";
+} from "./platform/createPlatformResources";
 import {
   createQueryEngineResources,
   QUERYENGINE_TRANSLATION_NAMESPACE,
   type QueryEngineResources,
   type QueryEngineResourcesOverride,
-} from "@/queryengine";
+} from "./queryengine/createQueryEngineResources";
 import { type i18n as I18nInstance } from "i18next";
+import { validateResourceConfiguration } from "./toolkit/validateResourceConfiguration";
 
 /** Every i18next namespace shipped by the starter libraries. */
 export const STARTER_TRANSLATION_NAMESPACES = [
@@ -84,6 +85,8 @@ export function createStarterResources<L extends string>(
   config: CreateStarterResourcesConfig<L>,
 ): Record<L, StarterNamespaceResources> {
   const { locales, seedFrom, overrides } = config;
+
+  validateResourceConfiguration("createStarterResources", locales, overrides);
 
   const platform = createPlatformResources({
     locales,

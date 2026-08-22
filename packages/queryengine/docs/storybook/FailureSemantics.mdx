@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFailureSemanticsExample } from "../examples/failureSemantics.example";
+import failureSemanticsSource from "../examples/failureSemantics.example.ts?raw";
+
+<Meta title="Query Engine/Failure Semantics" />
+
+# Failure semantics
+
+Query metadata and persisted state are security and correctness boundaries. Invalid state raises a descriptive failure at the closest boundary instead of being ignored, defaulted, or converted into a wider query.
+
+Transport and Zod errors are preserved when no legacy API retry applies, and aborted requests are never retried.
+
+<ExecutablePackageExample run={runFailureSemanticsExample} source={failureSemanticsSource} />

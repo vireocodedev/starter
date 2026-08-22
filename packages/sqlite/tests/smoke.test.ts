@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  createSqliteClientRuntime,
+  createManagedSqliteRuntime,
   createSqliteRequestHandlers,
   createSqliteWorkerRuntime,
   createSqliteWorkerRuntimeConfig,
@@ -13,7 +13,7 @@ import {
 
 describe("starter-sqlite exports", () => {
   it("exposes runtime factories", () => {
-    expect(typeof createSqliteClientRuntime).toBe("function");
+    expect(typeof createManagedSqliteRuntime).toBe("function");
     expect(typeof createSqliteWorkerRuntime).toBe("function");
     expect(typeof createSqliteWorkerRuntimeConfig).toBe("function");
   });

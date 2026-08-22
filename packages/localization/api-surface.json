@@ -13,23 +13,19 @@
         "HistoryBaseLocale",
         "HistoryResources",
         "HistoryResourcesOverride",
-        "HistoryResourcesShape",
         "HistoryTranslationNamespace",
         "IntlNumberFormatRequest",
         "PLATFORM_BASE_LOCALES",
         "PLATFORM_TRANSLATION_NAMESPACE",
-        "PLATFORM_TRANSLATION_RESOURCES",
         "PlatformBaseLocale",
         "PlatformResources",
         "PlatformResourcesOverride",
-        "PlatformResourcesShape",
         "PlatformTranslationNamespace",
         "QUERYENGINE_BASE_LOCALES",
         "QUERYENGINE_TRANSLATION_NAMESPACE",
         "QueryEngineBaseLocale",
         "QueryEngineResources",
         "QueryEngineResourcesOverride",
-        "QueryEngineResourcesShape",
         "QueryEngineTranslationNamespace",
         "STARTER_BASE_LOCALES",
         "STARTER_TRANSLATION_NAMESPACES",
@@ -48,16 +44,10 @@
         "historyBaseResources",
         "platformBaseResources",
         "queryEngineBaseResources",
-        "registerPlatformResources",
-        "registerStarterResources",
-        "useHistoryTranslation",
-        "usePlatformTranslation",
-        "useQueryEngineTranslation"
+        "registerStarterResources"
       ],
-      "dependencies": [
-        "react-i18next"
-      ],
-      "workerSafe": false
+      "dependencies": [],
+      "workerSafe": true
     }
   }
 }

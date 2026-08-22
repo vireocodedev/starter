@@ -5,7 +5,7 @@ import {
   type QueryEngineEntityKey,
   type QueryEngineEntitySummary,
   type QueryEngineRelationOption,
-} from "@/models/queryengine.models";
+} from "../models/queryengine.models";
 import type z from "zod";
 
 /** Transport-neutral request options — no dependency on a specific HTTP client. */
@@ -53,6 +53,15 @@ export function createQueryEngineApi(
   const { entityDefinition, entitySummary } = createQueryEngineEntitySchemas(options?.entityKeySchema);
   const legacyEntityKey = options?.legacyEntityKey;
 
+  const pathSegment = (value: string, name: string): string => {
+    if (value.trim().length === 0) throw new Error(`${name} must be a non-empty string.`);
+    return encodeURIComponent(value);
+  };
+
+  const isAborted = (error: unknown, requestOptions?: QueryEngineRequestOptions): boolean =>
+    requestOptions?.signal?.aborted === true ||
+    (typeof DOMException !== "undefined" && error instanceof DOMException && error.name === "AbortError");
+
   const getParsed = async <TSchema extends z.ZodTypeAny>(
     path: string,
     schema: TSchema,
@@ -63,14 +72,16 @@ export function createQueryEngineApi(
     entityKey: QueryEngineEntityKey,
     reqOptions?: QueryEngineRequestOptions,
   ): Promise<QueryEngineEntityDefinition> => {
+    const encodedEntityKey = pathSegment(entityKey, "entityKey");
     try {
-      return await getParsed(`entities/${entityKey}`, entityDefinition, reqOptions);
-    } catch {
+      return await getParsed(`entities/${encodedEntityKey}`, entityDefinition, reqOptions);
+    } catch (error) {
+      if (isAborted(error, reqOptions)) throw error;
       const legacy = legacyEntityKey?.(entityKey);
       if (legacy === undefined || legacy === entityKey) {
-        throw new Error(`Failed to load query engine entity definition for ${entityKey}`);
+        throw error;
       }
-      return await getParsed(`entities/${legacy}`, entityDefinition, reqOptions);
+      return await getParsed(`entities/${pathSegment(legacy, "legacyEntityKey")}`, entityDefinition, reqOptions);
     }
   };
 
@@ -80,6 +91,8 @@ export function createQueryEngineApi(
     searchText?: string,
     reqOptions?: QueryEngineRequestOptions,
   ): Promise<QueryEngineRelationOption[]> => {
+    const encodedEntityKey = pathSegment(entityKey, "entityKey");
+    const encodedFieldPath = pathSegment(fieldPath, "fieldPath");
     const withSearch: QueryEngineRequestOptions = {
       ...reqOptions,
       params: { ...reqOptions?.params, searchText },
@@ -87,17 +100,18 @@ export function createQueryEngineApi(
 
     try {
       return await getParsed(
-        `entities/${entityKey}/fields/${fieldPath}/options`,
+        `entities/${encodedEntityKey}/fields/${encodedFieldPath}/options`,
         QueryEngineRelationOptionSchema.array(),
         withSearch,
       );
-    } catch {
+    } catch (error) {
+      if (isAborted(error, reqOptions)) throw error;
       const legacy = legacyEntityKey?.(entityKey);
       if (legacy === undefined || legacy === entityKey) {
-        throw new Error(`Failed to load relation options for ${entityKey}.${fieldPath}`);
+        throw error;
       }
       return await getParsed(
-        `entities/${legacy}/fields/${fieldPath}/options`,
+        `entities/${pathSegment(legacy, "legacyEntityKey")}/fields/${encodedFieldPath}/options`,
         QueryEngineRelationOptionSchema.array(),
         withSearch,
       );

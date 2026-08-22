@@ -1,4 +1,4 @@
-import { type QueueableRequest, type QueueingPolicyOptions } from "@/offline/queue/queueingTypes";
+import { type QueueableRequest, type QueueingPolicyOptions } from "./queueingTypes";
 
 const DEFAULT_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 

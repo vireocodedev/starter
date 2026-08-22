@@ -11,13 +11,13 @@ import { describe, expect, it } from "vitest";
  *
  *  1. The set of entry points is deliberate. A wildcard would make all 183 built
  *     modules public API, so every internal rename would be a breaking change.
- *  2. `./api` is safe to import from a Web Worker. That only holds while nothing
- *     in its transitive graph reaches for React, MUI or the DOM - and the graph
- *     is one careless `import` away from growing.
+ *  2. Every declared target resolves to a source file produced by the package
+ *     build.
  */
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const srcRoot = join(packageRoot, "src");
+const storybookRoot = join(packageRoot, "storybook");
 const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8")) as {
   exports: Record<string, { import?: string; types?: string }>;
 };
@@ -108,26 +108,25 @@ function runtimeGraph(entry: string): Graph {
   return { files, external };
 }
 
-/** Anything that needs React, a React renderer, or the DOM to evaluate. */
-function isFrameworkSpecifier(specifier: string): boolean {
-  return (
-    specifier === "react" ||
-    specifier.startsWith("react/") ||
-    specifier === "react-dom" ||
-    specifier.startsWith("react-dom/") ||
-    specifier.startsWith("react-") ||
-    specifier.startsWith("@mui/") ||
-    specifier.startsWith("@emotion/") ||
-    specifier.includes("/react/") ||
-    specifier.endsWith("/react")
-  );
-}
-
 describe("package entry points", () => {
   it("declares every entry point explicitly", () => {
     const subpaths = Object.keys(manifest.exports);
 
-    expect(subpaths).toEqual([".", "./api", "./country", "./video"]);
+    expect(subpaths).toEqual([
+      ".",
+      "./country",
+      "./event-source",
+      "./forms",
+      "./hello-pangea-dnd",
+      "./localization",
+      "./react-i18next",
+      "./sonner",
+      "./tanstack-query",
+      "./storybook",
+      "./storybook/VireoIconContainer",
+      "./storybook/VireoDockedSidePanel",
+      "./storybook/VireoResponsiveOverlayFrame",
+    ]);
   });
 
   it("exposes no wildcard subpath", () => {
@@ -143,32 +142,30 @@ describe("package entry points", () => {
       const entry = target.import;
       expect(entry, `${subpath} declares no import target`).toBeDefined();
 
-      const sourceFile = join(srcRoot, entry!.replace(/^\.\/dist\//, "").replace(/\.js$/, ".ts"));
+      const sourceTarget = entry!.replace(/^\.\/dist\//, "").replace(/\.js$/, ".ts");
+      const sourceFile = sourceTarget.startsWith("storybook/")
+        ? join(storybookRoot, sourceTarget.replace(/^storybook\//, ""))
+        : join(srcRoot, sourceTarget);
       expect(existsSync(sourceFile), `${subpath} -> ${sourceFile} does not exist`).toBe(true);
     }
   });
-});
 
-describe("./api is worker-safe", () => {
-  const { files, external } = runtimeGraph(join(srcRoot, "api", "index.ts"));
-
-  it("pulls in no React, MUI or DOM-renderer dependency", () => {
-    const offenders = [...external.entries()]
-      .filter(([specifier]) => isFrameworkSpecifier(specifier))
-      .map(([specifier, importer]) => `${specifier} (imported by ${importer})`);
+  it("keeps published Storybook helpers independent from Storybook runtimes", () => {
+    const entries = [
+      join(storybookRoot, "index.ts"),
+      join(storybookRoot, "VireoIconContainer", "index.ts"),
+      join(storybookRoot, "VireoDockedSidePanel", "index.ts"),
+      join(storybookRoot, "VireoResponsiveOverlayFrame", "index.ts"),
+    ];
+    const offenders = entries.flatMap(entry =>
+      [...runtimeGraph(entry).external.entries()]
+        .filter(
+          ([specifier]) =>
+            specifier === "storybook" || specifier.startsWith("storybook/") || specifier.startsWith("@storybook/"),
+        )
+        .map(([specifier, importer]) => `${specifier} (imported by ${importer})`),
+    );
 
     expect(offenders).toEqual([]);
-  });
-
-  it("contains no component module", () => {
-    const components = [...files].filter(file => file.endsWith(".tsx")).map(file => relative(packageRoot, file));
-
-    expect(components).toEqual([]);
-  });
-
-  it("keeps its third-party surface small and intentional", () => {
-    // Freezing this list means a new runtime dependency has to be argued for
-    // rather than acquired by accident through a convenience import.
-    expect([...external.keys()].sort()).toEqual(["axios", "zod"]);
   });
 });

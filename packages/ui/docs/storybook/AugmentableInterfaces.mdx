@@ -1,0 +1,250 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Documentation/Guides/Augmentable Interfaces" />
+
+# Augmentable Interfaces
+
+![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+
+Vireo exposes focused registry interfaces that consumer apps can extend via TypeScript **declaration merging**. This pattern gives the library full type-safety without hard-coding application-specific types.
+
+## Table of Contents
+
+- [How it works](#how-it-works)
+- [Setup](#setup)
+- [Registry reference](#registry-reference)
+  - [VireoIconRegistry](#vireoiconregistry)
+  - [VireoDraggableIdRegistry](#vireodraggableidregistry)
+  - [VireoDropZoneIdRegistry](#vireodropzoneidregistry)
+- [Full example](#full-example)
+
+---
+
+## How it works
+
+Each augmentable interface is declared as an empty `interface` inside `@vireocodedev/starter-ui`. Because interfaces are open in TypeScript, a consumer app can add members via `declare module`:
+
+```ts
+declare module "@vireocodedev/starter-ui" {
+  interface SomeRegistry {
+    myKey: MyType;
+  }
+}
+```
+
+The library's internal generic types then pick up those additions automatically — no wrappers, no extra configuration.
+
+---
+
+## Setup
+
+Create a single `.d.ts` file in your app (e.g. `src/@types/vireo.d.ts`) and make sure it's included by your `tsconfig.json`. All augmentations can live in this one file:
+
+```ts
+// src/@types/vireo.d.ts
+declare module "@vireocodedev/starter-ui" {
+  // extend any of the registries here
+}
+```
+
+---
+
+## Registry reference
+
+### VireoIconRegistry
+
+<table>
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <strong>Location</strong>
+      </td>
+      <td>
+        <code>VireoIconRegistryProvider</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Purpose</strong>
+      </td>
+      <td>
+        Maps icon names to React component types. Every key becomes a valid <code>VireoIconName</code> usable with{" "}
+        <code>{'<VireoIcon icon="..." />'}</code> and the <code>useVireoIcons</code> hook.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Consumed by</strong>
+      </td>
+      <td>
+        <code>VireoIcon</code>, <code>useVireoIcons</code>, <code>VireoIconRegistryProvider</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+```ts
+import { MY_ICON_REGISTRY } from "@/setup/icons/icons.registry";
+import type React from "react";
+
+declare module "@vireocodedev/starter-ui" {
+  interface VireoIconRegistry extends Record<keyof typeof MY_ICON_REGISTRY, React.ComponentType> {}
+}
+```
+
+---
+
+### VireoDraggableIdRegistry
+
+<table>
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <strong>Location</strong>
+      </td>
+      <td>
+        <code>@vireocodedev/starter-ui/hello-pangea-dnd</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Purpose</strong>
+      </td>
+      <td>
+        Maps draggable type names to their ID payload shapes. Each key becomes the <code>type</code> discriminator in
+        the <code>VireoDraggableId</code> union.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Consumed by</strong>
+      </td>
+      <td>
+        <code>VireoDraggableItem</code>, lifecycle results, and <code>useVireoDndState</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+```ts
+declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+  interface VireoDraggableIdRegistry {
+    convoy: {
+      convoyId: number;
+    };
+    task: {
+      taskId: string;
+      groupIndex: number;
+    };
+  }
+}
+```
+
+Produces:
+
+```ts
+type VireoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; taskId: string; groupIndex: number };
+```
+
+---
+
+### VireoDropZoneIdRegistry
+
+<table>
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <strong>Location</strong>
+      </td>
+      <td>
+        <code>@vireocodedev/starter-ui/hello-pangea-dnd</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Purpose</strong>
+      </td>
+      <td>
+        Maps drop-zone type names to their ID payload shapes. Each key becomes the <code>type</code> discriminator in
+        the <code>VireoDropZoneId</code> union.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Consumed by</strong>
+      </td>
+      <td>
+        <code>VireoDropZone</code>, lifecycle results, and <code>useVireoDndState</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+```ts
+declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+  interface VireoDropZoneIdRegistry {
+    chamber: {
+      chamberSide: ChamberSide;
+      chamberDirection: Direction;
+    };
+    stream: {
+      streamType: StreamType;
+      streamDirection: Direction;
+    };
+  }
+}
+```
+
+Produces:
+
+```ts
+type VireoDropZoneId =
+  | { type: "chamber"; chamberSide: ChamberSide; chamberDirection: Direction }
+  | { type: "stream"; streamType: StreamType; streamDirection: Direction };
+```
+
+---
+
+## Full example
+
+A complete `vireo.d.ts` file augmenting the icon and drag-and-drop registries:
+
+```ts
+// src/@types/vireo.d.ts
+import { type ChamberSide, type Direction, type StreamType } from "@/infrastructure/enums";
+import { type APP_ICON_REGISTRY } from "@/setup/icons/icons.registry";
+import type React from "react";
+
+declare module "@vireocodedev/starter-ui" {
+  interface VireoIconRegistry extends Record<keyof typeof APP_ICON_REGISTRY, React.ComponentType> {}
+}
+
+declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+  interface VireoDraggableIdRegistry {
+    convoy: { convoyId: number };
+  }
+
+  interface VireoDropZoneIdRegistry {
+    chamber: { chamberSide: ChamberSide; chamberDirection: Direction };
+    stream: { streamType: StreamType; streamDirection: Direction };
+  }
+}
+```

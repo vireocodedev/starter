@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runPrimaryWorkflowExample } from "../examples/primaryWorkflow.example";
+import primaryWorkflowSource from "../examples/primaryWorkflow.example.ts?raw";
+
+<Meta title="Shell/Primary Workflow" />
+
+# Primary workflow
+
+Define immutable pages and sections, build a router-neutral sitemap, then validate the application-owned shell configuration and navigation metadata.
+
+The application can adapt `sitemap.routes` to any router and render the navigation entries with any UI.
+
+<ExecutablePackageExample run={runPrimaryWorkflowExample} source={primaryWorkflowSource} />

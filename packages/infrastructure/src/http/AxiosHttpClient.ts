@@ -1,6 +1,7 @@
 import { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import z from "zod";
-import { type PageableParams, type PageableResponse } from "@/http/pagedSearch";
+import { createPageableResponseSchema } from "./pagedSearch";
+import { type PageableParams, type PageableResponse } from "./pagination";
 
 export type HttpEndpointResolver = (base: string, ...segments: (number | string)[]) => string;
 
@@ -12,25 +13,7 @@ export function resolveHttpEndpoint(base: string, ...segments: (number | string)
 }
 
 export function parseHttpResponse<TSchema extends z.ZodTypeAny>(schema: TSchema, data: unknown): z.infer<TSchema> {
-  try {
-    return schema.parse(data);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const diagnosticError = error as z.ZodError & {
-        "~description"?: string | null;
-        "~target"?: unknown;
-      };
-      diagnosticError["~description"] = schema.description ?? null;
-      diagnosticError["~target"] = data;
-      console.error(
-        `[parseHttpResponse] Validation failed${schema.description ? ` for "${schema.description}"` : ""}:`,
-        error.issues,
-        "\nReceived:",
-        data,
-      );
-    }
-    throw error;
-  }
+  return schema.parse(data);
 }
 
 export abstract class AxiosHttpClient {
@@ -64,10 +47,9 @@ export abstract class AxiosHttpClient {
       config?: AxiosRequestConfig,
     ): Promise<PageableResponse<z.infer<TSchema>>> => {
       const response = await this.doGetPageable(url, pageable, config);
-      return {
-        ...response,
-        content: parseHttpResponse(z.array(schema ?? z.unknown()), response.content) as z.infer<TSchema>[],
-      };
+      return parseHttpResponse(createPageableResponseSchema(schema ?? z.unknown()), response) as PageableResponse<
+        z.infer<TSchema>
+      >;
     };
   }
 

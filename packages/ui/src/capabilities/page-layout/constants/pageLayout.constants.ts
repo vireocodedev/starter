@@ -1,0 +1,7 @@
+export const VIREO_PAGE_LAYOUT_COMPACT_ENTER_WIDTH = 580;
+export const VIREO_PAGE_LAYOUT_COMPACT_EXIT_WIDTH = 620;
+export const VIREO_PAGE_LAYOUT_WIDE_ENTER_WIDTH = 1120;
+export const VIREO_PAGE_LAYOUT_WIDE_EXIT_WIDTH = 1080;
+
+/** Minimum content width the application shell preserves beside resizable navigation. */
+export const VIREO_PAGE_LAYOUT_MIN_WIDTH = 420;

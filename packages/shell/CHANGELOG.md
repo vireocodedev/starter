@@ -1,4 +1,4 @@
-# @vireocodedev/starter-core
+# @vireocodedev/starter-shell
 
 ## 2.2.0
 

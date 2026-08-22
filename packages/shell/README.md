@@ -1,49 +1,59 @@
 # @vireocodedev/starter-shell
 
-The **app-shell framework** for the vireocodedev **starter** product: config /
-sitemap / routing scaffolding, route guards, the responsive shell + navigation,
-and shell layout presets.
+Framework-free contracts for application sitemap construction, navigation metadata, authentication redirects, and browser overlay-history coordination.
 
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-shell
+npm install @vireocodedev/starter-shell zod
 ```
 
-Peers: `react`, `react-dom`, `react-router`, `@mui/material`,
-`@mui/icons-material`, `@preact/signals-react`, `@tanstack/react-query`. Depends on
-`@vireocodedev/starter-ui`, `@vireocodedev/starter-localization` and
-`@vireocodedev/starter-infrastructure`.
+## Primary workflow
 
-## Consumer requirements
+```ts
+import {
+  createShellSitemap,
+  defineShellConfig,
+  defineShellPages,
+  defineShellSections,
+  shellNavigation,
+} from "@vireocodedev/starter-shell";
 
-- **`vite-plugin-pwa`** — `AppPwaUpdateBanner` imports the plugin's
-  `virtual:pwa-register/react` module (externalized here; your build resolves it).
-- **Theme + icons contract** — the shell reads numeric MUI palette shades
-  (e.g. `palette.primary[600]`) and a `"dots-vertical"` overflow icon; provide
-  these via your MUI theme + the `@vireocodedev/starter-ui` icon registry (the
-  starter does).
+const pages = defineShellPages({
+  dashboard: { routePath: "", label: "Dashboard", icon: "home" },
+  customer: { routePath: ":customerId", label: "Customer", permission: "customers:view" },
+});
 
-## What's included
+const sections = defineShellSections({ customers: { routePath: "customers", label: "Customers" } });
+const sitemap = createShellSitemap([
+  pages.dashboard,
+  { node: sections.customers, children: [pages.customer] },
+] as const);
 
-- **Config / sitemap** — typed config contracts (`AppPageConfig`, `AppBrand`,
-  route/nav types), `definePages`/`defineRoutes`/`defineSections`, `appNav`,
-  `routePath` helpers, route metadata.
-- **Route guards** — `AppRouteGuardLayout`, `AppRouteGuardLogin`, `authRedirect`.
-- **Navigation** — configurable route View Transitions and nested-page
-  forward/back navigation with parent state restoration.
-- **Overlay history** — `OverlayHistoryBridge` and `useOverlayBackClose`, backed
-  by a package-internal stack state machine/store that dismisses nested overlay
-  layers before routes.
-- **Unsaved changes** — the React Router adapter that composes Starter UI's
-  scoped registry with route blocking, unload protection, bypass policy, and an
-  injected prompt renderer.
-- **Shell** — `AppShellLayout` + `AppShellContext`, responsive nav (header,
-  side nav, mobile bottom nav, resize), window-controls-overlay hooks, and the
-  `AppBare/AppDashboard/AppPublic` shell layout presets.
-- **Devtools** — `installDevConsoleFilters`.
+export const shellConfig = defineShellConfig(
+  {
+    mode: "dashboard",
+    sitemap,
+    entryPage: pages.dashboard,
+    navigation: { authenticated: [shellNavigation.item(pages.dashboard)] },
+  },
+  { permissions: ["customers:view"] },
+);
 
-## Versioning contract
+sitemap.getPath(pages.customer, { customerId: 42 }); // /customers/42
+```
 
-The routing/config helper surface is pinned by the contract test; the shell
-components are validated by consuming apps.
+## Ownership boundary
+
+Shell is deliberately independent of React, React Router, MUI, TanStack Query, PWA plugins, and Starter UI. It describes an application shell; it does not render one.
+
+Applications own router adaptation, permission evaluation, responsive layouts, PWA prompts, unsaved-change prompts, and navigation presentation. Reusable React presentation belongs in `@vireocodedev/starter-ui`, not this package.
+
+## Public areas
+
+- Sitemap: immutable page and section definitions, a flattened route registry, typed path resolution, redirects, and duplicate detection.
+- Config and navigation: serializable navigation intent plus Zod-backed validation of modes, mounted pages, identifiers, and permission registries.
+- Authentication redirects: router-neutral internal return-path creation and open-redirect protection.
+- Overlay history: pure stack reconciliation and an instance-scoped observable registry; applications adapt its actions to their router.
+
+Importing the package creates no global store, browser listener, router, cache, or UI.

@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runHydrationStateExample } from "../examples/hydrationState.example";
+import hydrationStateSource from "../examples/hydrationState.example.ts?raw";
+
+<Meta title="SQLite/Hydration State" />
+
+# Hydration state
+
+Contributor registration, forced-request batching, readiness gates, and per-entity status are independent instance-scoped contracts. They can be projected into any UI or signal layer without importing React into the persistence package.
+
+The full hydration controller composes these primitives with application-owned revision transport, locks, timeouts, and event projection.
+
+<ExecutablePackageExample run={runHydrationStateExample} source={hydrationStateSource} />

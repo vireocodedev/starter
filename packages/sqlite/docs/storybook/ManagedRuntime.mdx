@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runManagedRuntimeExample } from "../examples/managedRuntime.example";
+import managedRuntimeSource from "../examples/managedRuntime.example.ts?raw";
+
+<Meta title="SQLite/Managed Runtime" />
+
+# Managed runtime
+
+`createManagedSqliteRuntime` owns one Worker generation at a time. Initialization is single-flight, requests are correlated by identifier, reset terminates the active generation, and dispose permanently closes the runtime.
+
+The example uses a deterministic in-page Worker double so its lifecycle is observable. In an application, `workerFactory` returns `new Worker(new URL("./sqlite.worker.ts", import.meta.url), { type: "module" })` instead.
+
+<ExecutablePackageExample run={runManagedRuntimeExample} source={managedRuntimeSource} />

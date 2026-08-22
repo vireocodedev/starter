@@ -163,6 +163,12 @@ function buildKeywordValue<TRecord extends Record<string, unknown>>(
     .trim();
 }
 
+function assertNonEmpty(value: string, name: string): void {
+  if (value.trim().length === 0) {
+    throw new Error(`${name} must be a non-empty string.`);
+  }
+}
+
 export function createSqliteEntityBundle<
   const TFields extends SqliteEntityFields,
   const TSingular extends string,
@@ -175,6 +181,17 @@ export function createSqliteEntityBundle<
 ): SqliteEntityBundle<TFields, SqliteEntityOperationNames<TSingular, TPlural>, TRequestKeys, TSseEntity, TSseContext> {
   type TRecord = SqliteEntityRecordFromFields<TFields>;
   const fieldEntries = Object.entries(spec.fields) as Array<[keyof TFields & string, TFields[keyof TFields & string]]>;
+
+  assertNonEmpty(spec.entityNameSingular, "entityNameSingular");
+  assertNonEmpty(spec.entityNamePlural, "entityNamePlural");
+  assertNonEmpty(spec.tableName, "tableName");
+  assertNonEmpty(spec.requestKeys.replace, "requestKeys.replace");
+  assertNonEmpty(spec.requestKeys.upsert, "requestKeys.upsert");
+  assertNonEmpty(spec.requestKeys.delete, "requestKeys.delete");
+
+  for (const [property, field] of fieldEntries) {
+    assertNonEmpty(field.column, `fields.${property}.column`);
+  }
 
   const idFields = fieldEntries.filter(([, field]) => field.id === true);
   if (idFields.length !== 1) {
@@ -201,6 +218,22 @@ export function createSqliteEntityBundle<
 
   const mappedColumns = fieldEntries.map(([, field]) => field.column);
   const mappedProperties = fieldEntries.map(([property]) => property);
+
+  if (new Set(mappedColumns).size !== mappedColumns.length) {
+    throw new Error(`Sqlite entity spec for ${spec.entityNameSingular} maps more than one field to the same column.`);
+  }
+
+  const generatedColumns = [keywordsColumnName, ...(softDeleteEnabled ? [softDeleteColumnName] : [])];
+  const conflictingColumn = generatedColumns.find(column => mappedColumns.includes(column));
+  if (conflictingColumn) {
+    throw new Error(
+      `Sqlite entity spec for ${spec.entityNameSingular} maps field column "${conflictingColumn}", which is managed by the entity runtime.`,
+    );
+  }
+
+  if (new Set(generatedColumns).size !== generatedColumns.length) {
+    throw new Error(`Sqlite entity spec for ${spec.entityNameSingular} configures duplicate generated columns.`);
+  }
 
   const insertColumns = [...mappedColumns, keywordsColumnName];
   if (softDeleteEnabled) {

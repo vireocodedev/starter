@@ -1,0 +1,17 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Shell/Overview" />
+
+# Shell
+
+`@vireocodedev/starter-shell` is the framework-free application-shell model for typed sitemap construction, navigation metadata, authentication redirects, and overlay-history coordination.
+
+It does not render a shell. React layouts and reusable visual primitives belong to Starter UI; router adapters, permission evaluation, responsive navigation, PWA prompts, and application branding belong to the consuming application.
+
+## Package boundary
+
+- No React, router, MUI, PWA, cache, or application-global state.
+- Runtime validation uses Zod and fails closed.
+- Sitemap definitions preserve literal route paths for typed path parameters.
+- Overlay registries are instance-scoped and observable.
+- Every example in these pages is imported for execution and shown from that exact source module.

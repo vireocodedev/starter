@@ -25,20 +25,65 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./api": {
-      "types": "./dist/api/index.d.ts",
-      "import": "./dist/api/index.js",
-      "default": "./dist/api/index.js"
-    },
     "./country": {
-      "types": "./dist/country/index.d.ts",
-      "import": "./dist/country/index.js",
-      "default": "./dist/country/index.js"
+      "types": "./dist/capabilities/country/public.d.ts",
+      "import": "./dist/capabilities/country/public.js",
+      "default": "./dist/capabilities/country/public.js"
     },
-    "./video": {
-      "types": "./dist/video/index.d.ts",
-      "import": "./dist/video/index.js",
-      "default": "./dist/video/index.js"
+    "./event-source": {
+      "types": "./dist/integrations/event-source/public.d.ts",
+      "import": "./dist/integrations/event-source/public.js",
+      "default": "./dist/integrations/event-source/public.js"
+    },
+    "./forms": {
+      "types": "./dist/capabilities/forms/public.d.ts",
+      "import": "./dist/capabilities/forms/public.js",
+      "default": "./dist/capabilities/forms/public.js"
+    },
+    "./hello-pangea-dnd": {
+      "types": "./dist/integrations/hello-pangea-dnd/public.d.ts",
+      "import": "./dist/integrations/hello-pangea-dnd/public.js",
+      "default": "./dist/integrations/hello-pangea-dnd/public.js"
+    },
+    "./localization": {
+      "types": "./dist/integrations/localization/public.d.ts",
+      "import": "./dist/integrations/localization/public.js",
+      "default": "./dist/integrations/localization/public.js"
+    },
+    "./react-i18next": {
+      "types": "./dist/integrations/react-i18next/public.d.ts",
+      "import": "./dist/integrations/react-i18next/public.js",
+      "default": "./dist/integrations/react-i18next/public.js"
+    },
+    "./sonner": {
+      "types": "./dist/integrations/sonner/public.d.ts",
+      "import": "./dist/integrations/sonner/public.js",
+      "default": "./dist/integrations/sonner/public.js"
+    },
+    "./tanstack-query": {
+      "types": "./dist/integrations/tanstack-query/public.d.ts",
+      "import": "./dist/integrations/tanstack-query/public.js",
+      "default": "./dist/integrations/tanstack-query/public.js"
+    },
+    "./storybook": {
+      "types": "./dist/storybook/index.d.ts",
+      "import": "./dist/storybook/index.js",
+      "default": "./dist/storybook/index.js"
+    },
+    "./storybook/VireoIconContainer": {
+      "types": "./dist/storybook/VireoIconContainer/index.d.ts",
+      "import": "./dist/storybook/VireoIconContainer/index.js",
+      "default": "./dist/storybook/VireoIconContainer/index.js"
+    },
+    "./storybook/VireoDockedSidePanel": {
+      "types": "./dist/storybook/VireoDockedSidePanel/index.d.ts",
+      "import": "./dist/storybook/VireoDockedSidePanel/index.js",
+      "default": "./dist/storybook/VireoDockedSidePanel/index.js"
+    },
+    "./storybook/VireoResponsiveOverlayFrame": {
+      "types": "./dist/storybook/VireoResponsiveOverlayFrame/index.d.ts",
+      "import": "./dist/storybook/VireoResponsiveOverlayFrame/index.js",
+      "default": "./dist/storybook/VireoResponsiveOverlayFrame/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -50,66 +95,83 @@
   "scripts": {
     "clean": "rimraf dist",
     "build:css": "copyfiles -u 1 \"src/**/*.css\" dist",
-    "build": "npm run clean && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && npm run build:css",
+    "build": "npm run clean && npm run build:types && concurrently --kill-others-on-fail -n storybook,css \"npm run build:storybook-types:emit\" \"npm run build:css\" && tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig.storybook.build.json",
+    "build:types": "tsc -p tsconfig.build.json --noCheck",
+    "build:storybook-types": "npm run build:types && npm run build:storybook-types:emit",
+    "build:storybook-types:emit": "tsc -p tsconfig.storybook.build.json --noCheck",
+    "build:storybook-exports": "npm run build:storybook-types && tsc-alias -p tsconfig.storybook.build.json",
     "dev": "concurrently -k -n tsc,aliases,css \"npm run dev:tsc\" \"npm run dev:aliases\" \"npm run dev:css\"",
     "dev:tsc": "tsc -w -p tsconfig.build.json",
     "dev:aliases": "chokidar \"dist/**/*.js\" --debounce 150 --silent -c \"tsc-alias -p tsconfig.build.json\" --initial",
     "dev:css": "chokidar \"src/**/*.css\" -c \"npm run build:css\" --initial",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "storybook dev -p 6006 -c .storybook-vireo",
+    "build-storybook": "storybook build -c .storybook-vireo"
   },
   "dependencies": {
-    "@hello-pangea/dnd": "^18.0.1",
-    "@hookform/resolvers": "^4.1.3",
     "@vireocodedev/starter-history": "^1.0.0",
+    "@vireocodedev/starter-infrastructure": "^1.1.0",
     "@vireocodedev/starter-localization": "^1.1.0",
-    "country-flag-icons": "^1.5.16",
-    "html-react-parser": "^5.2.5",
-    "i18n-iso-countries": "^7.14.0",
-    "i18next-browser-languagedetector": "^8.0.2",
-    "jsoncrush": "^1.1.8",
-    "ovenplayer": "^0.10.42",
-    "react-error-boundary": "^5.0.0",
-    "react-timer-hook": "^3.0.8",
-    "react-use": "^17.6.0"
+    "@vireocodedev/starter-queryengine": "^3.1.0",
+    "country-flag-icons": "1.6.20",
+    "react-error-boundary": "^5.0.0"
   },
   "peerDependencies": {
+    "@hello-pangea/dnd": ">=18 <19",
     "@emotion/react": ">=11",
     "@emotion/styled": ">=11",
     "@mui/icons-material": ">=6",
     "@mui/material": ">=6",
     "@mui/x-date-pickers": ">=7",
+    "@tanstack/react-form": ">=1 <2",
     "@tanstack/react-query": ">=5",
     "@tanstack/react-virtual": ">=3.14",
-    "axios": ">=1.7",
     "dayjs": ">=1.11",
     "i18next": ">=25",
     "react": ">=18",
     "react-dom": ">=18",
-    "react-hook-form": ">=7",
     "react-i18next": ">=15",
     "sonner": ">=2",
-    "zod": ">=3.24"
+    "zod": ">=3.24 <4"
+  },
+  "peerDependenciesMeta": {
+    "@hello-pangea/dnd": {
+      "optional": true
+    },
+    "@tanstack/react-form": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "i18next": {
+      "optional": true
+    },
+    "react-i18next": {
+      "optional": true
+    },
+    "sonner": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.1",
     "@mui/x-date-pickers": "^7.27.0",
     "@storybook/addon-docs": "^9.1.20",
-    "@storybook/addon-themes": "^9.1.20",
+    "@storybook/icons": "^1.4.0",
     "@storybook/react-vite": "^9.1.20",
+    "@tanstack/react-form": "1.33.5",
     "@tanstack/react-query": "^5.64.2",
     "@tanstack/react-virtual": "^3.14.9",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/node": "^22",
-    "@types/ovenplayer": "^0.10.12",
     "@types/react": "^18.3.18",
-    "axios": "^1.7.9",
     "chokidar-cli": "^3.0.0",
     "concurrently": "^10.0.4",
     "copyfiles": "^2.4.1",
@@ -118,7 +180,6 @@
     "jsdom": "^25.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hook-form": "^7.54.2",
     "react-i18next": "^15.4.0",
     "rimraf": "^6.0.1",
     "sonner": "^2.0.7",

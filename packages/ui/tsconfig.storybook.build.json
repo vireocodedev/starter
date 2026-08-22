@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./storybook",
+    "outDir": "./dist/storybook",
+    "paths": {
+      "@vireocodedev/starter-ui/localization": ["./dist/integrations/localization/public.d.ts"]
+    }
+  },
+  "include": ["storybook"],
+  "exclude": ["**/*.test.*", "**/*.spec.*"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}

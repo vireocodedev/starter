@@ -1,4 +1,4 @@
-import { type WorkerRequestInput, type WorkerResponseResult } from "@/core/sqliteWorkerProtocol";
+import { type WorkerRequestInput, type WorkerResponseResult } from "../core/sqliteWorkerProtocol";
 
 export type SqliteTransportRuntime = {
   shouldUseInMemoryFallback: () => boolean;

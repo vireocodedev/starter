@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runConnectivityExample } from "../examples/connectivity.example";
+import connectivitySource from "../examples/connectivity.example.ts?raw";
+
+<Meta title="Infrastructure/Connectivity" />
+
+# Connectivity
+
+Browser online state is only a hint. `createConnectivityState` can combine it with heartbeat freshness and explicit backend availability while an injected runtime owns subscriptions and scheduling.
+
+One state instance permits one active runtime owner. Timing policy is validated before any listener or timer is registered.
+
+<ExecutablePackageExample run={runConnectivityExample} source={connectivitySource} />

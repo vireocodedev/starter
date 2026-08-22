@@ -1,0 +1,18 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFailureSemanticsExample } from "../examples/failureSemantics.example";
+import failureSemanticsSource from "../examples/failureSemantics.example.ts?raw";
+
+<Meta title="Localization/Failure Semantics" />
+
+# Failure semantics
+
+Resource factories reject empty locale sets, blank or duplicate locale identifiers, overrides for locales that were not requested, blank namespaces, and missing seed resources. Configuration mistakes fail at resource creation rather than becoming missing translations later.
+
+Overrides are immutable inputs. Prototype-mutating keys are ignored, and every output locale receives its own deeply isolated plain-object and array resource tree.
+
+<ExecutablePackageExample
+  run={runFailureSemanticsExample}
+  source={failureSemanticsSource}
+  outputLabel="Expected failures"
+/>

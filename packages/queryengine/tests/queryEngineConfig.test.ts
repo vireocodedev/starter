@@ -47,6 +47,19 @@ describe("createQueryEngineConfigClient", () => {
     expect(transport.sendRequest).toHaveBeenNthCalledWith(1, "putConfig", { config: snapshot });
     expect(transport.sendRequest).toHaveBeenNthCalledWith(2, "readConfig");
   });
+
+  it.each([
+    [{ replace: "", get: "read" }, "must be non-empty"],
+    [{ replace: "config", get: "config" }, "must be distinct"],
+  ])("rejects invalid request type contracts", (requestTypes, expectedMessage) => {
+    expect(() =>
+      createQueryEngineConfigClient({
+        runtime: { shouldUseInMemoryFallback: () => false, registerInMemoryStore: () => vi.fn() },
+        transport: { sendRequest: vi.fn() },
+        requestTypes,
+      }),
+    ).toThrow(expectedMessage);
+  });
 });
 
 describe("query-engine config SQLite persistence", () => {
@@ -80,13 +93,40 @@ describe("query-engine config SQLite persistence", () => {
     expect(prepared.finalize).toHaveBeenCalledOnce();
   });
 
-  it("reads and safely parses the stored config", () => {
+  it("reads and parses the stored config", () => {
     const prepared = statement();
     const db = { prepare: vi.fn(() => prepared) };
 
     expect(getQueryEngineConfig(db, { tableName: "app_query_config" })).toEqual(snapshot);
     expect(prepared.bind).toHaveBeenCalledWith(["singleton"]);
     expect(prepared.finalize).toHaveBeenCalledOnce();
+  });
+
+  it("rejects malformed stored JSON instead of hiding persistence corruption", () => {
+    const prepared = statement({ get: vi.fn(() => ["{not-json", "{}"]), finalize: vi.fn() });
+    const db = { prepare: vi.fn(() => prepared) };
+
+    expect(() => getQueryEngineConfig(db, { tableName: "app_query_config" })).toThrow(
+      "Stored query-engine config contains malformed JSON.",
+    );
+    expect(prepared.finalize).toHaveBeenCalledOnce();
+  });
+
+  it("rejects stored JSON with an incompatible config shape", () => {
+    const prepared = statement({ get: vi.fn(() => ["{}", "[]"]), finalize: vi.fn() });
+    const db = { prepare: vi.fn(() => prepared) };
+
+    expect(() => getQueryEngineConfig(db, { tableName: "app_query_config" })).toThrow();
+    expect(prepared.finalize).toHaveBeenCalledOnce();
+  });
+
+  it.each(["", "config; DROP TABLE users", "config-name"])("rejects unsafe SQLite table name %j", tableName => {
+    const db = { prepare: vi.fn() };
+
+    expect(() => replaceQueryEngineConfig(db, snapshot, { tableName })).toThrow(
+      "Query-engine config table name must be a valid SQLite identifier.",
+    );
+    expect(db.prepare).not.toHaveBeenCalled();
   });
 
   it("creates configurable worker request handlers", () => {
@@ -96,5 +136,14 @@ describe("query-engine config SQLite persistence", () => {
     });
 
     expect(Object.keys(handlers).sort()).toEqual(["put", "read"]);
+  });
+
+  it("rejects colliding worker request handler names", () => {
+    expect(() =>
+      createQueryEngineConfigSqliteRequestHandlers({
+        tableName: "app_query_config",
+        requestTypes: { replace: "config", get: "config" },
+      }),
+    ).toThrow("Query-engine config replace and get request types must be distinct.");
   });
 });

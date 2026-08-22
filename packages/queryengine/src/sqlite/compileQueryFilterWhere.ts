@@ -1,3 +1,6 @@
+import { QueryEngineOperatorSchema } from "../models/queryengine.models";
+import z from "zod";
+
 export type SqliteQueryFilterValueType = "string" | "number" | "boolean";
 
 export type SqliteQueryFilterFieldAdapter = {
@@ -40,33 +43,24 @@ export type CompiledQueryFilterWhere = {
   filterCount: number;
 };
 
-type QueryFilterRelationOption = { value: string; label: string };
-type QueryFilterOperator =
-  | "EQUALS"
-  | "NOT_EQUALS"
-  | "CONTAINS"
-  | "STARTS_WITH"
-  | "ENDS_WITH"
-  | "IN"
-  | "GREATER_THAN"
-  | "GREATER_OR_EQUAL"
-  | "LESS_THAN"
-  | "LESS_OR_EQUAL"
-  | "DATE_RANGE"
-  | "IS_NULL"
-  | "IS_NOT_NULL";
-
-type QueryFilterRow = {
-  kind: "leaf" | "relation";
-  path: string;
-  operator?: QueryFilterOperator;
-  value?: string;
-  parameterized?: boolean;
-  selectedOptions?: QueryFilterRelationOption[];
-};
-
-type QueryFilterPayload = { entity?: string; rows?: QueryFilterRow[] };
 type CompiledClause = { sql: string; params: unknown[] };
+
+const QueryFilterRowSchema = z.object({
+  kind: z.enum(["leaf", "relation"]).default("leaf"),
+  path: z.string().min(1),
+  operator: QueryEngineOperatorSchema.optional(),
+  value: z.string().optional(),
+  parameterized: z.boolean().optional(),
+  selectedOptions: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
+});
+
+const QueryFilterPayloadSchema = z.object({
+  entity: z.string().optional(),
+  rows: z.array(QueryFilterRowSchema).optional(),
+});
+
+type QueryFilterRow = z.output<typeof QueryFilterRowSchema>;
+type QueryFilterPayload = z.output<typeof QueryFilterPayloadSchema>;
 
 export function bindSqliteSearchColumns(
   columns: readonly SqliteSearchColumn[],
@@ -74,9 +68,23 @@ export function bindSqliteSearchColumns(
 ): SqliteSearchColumnBindings {
   const fieldAdapters: Record<string, SqliteQueryFilterFieldAdapter> = { ...filterOnlyFields };
   const sortExpressionsByKey: Record<string, string> = {};
+  const aliases = new Set<string>();
 
   for (const { alias, expression, valueType, filterAs, sortAs } of columns) {
-    if (filterAs !== false) fieldAdapters[filterAs ?? alias] = { expression, valueType };
+    if (alias.trim().length === 0) throw new Error("SQLite search column alias must be a non-empty string.");
+    if (expression.trim().length === 0) {
+      throw new Error(`SQLite search column "${alias}" expression must be a non-empty string.`);
+    }
+    if (aliases.has(alias)) throw new Error(`SQLite search column alias "${alias}" is registered more than once.`);
+    aliases.add(alias);
+
+    if (filterAs !== false) {
+      const filterKey = filterAs ?? alias;
+      if (fieldAdapters[filterKey]) {
+        throw new Error(`SQLite filter field "${filterKey}" is registered more than once.`);
+      }
+      fieldAdapters[filterKey] = { expression, valueType };
+    }
     if (sortAs !== false) sortExpressionsByKey[alias] = sortAs ?? alias;
   }
 
@@ -90,15 +98,20 @@ export function bindSqliteSearchColumns(
 function parseQueryFilterPayload(queryFiltersJson: string | null): QueryFilterPayload | null {
   if (!queryFiltersJson?.trim()) return null;
   try {
-    return JSON.parse(queryFiltersJson) as QueryFilterPayload;
+    return QueryFilterPayloadSchema.parse(JSON.parse(queryFiltersJson));
   } catch {
-    return null;
+    throw new Error("Query filter JSON is invalid.");
   }
 }
 
 function toBoundValue(rawValue: string, valueType: SqliteQueryFilterValueType): string | number {
   if (valueType === "string") return rawValue;
-  if (valueType === "boolean") return rawValue.trim().toLowerCase() === "true" ? 1 : 0;
+  if (valueType === "boolean") {
+    const normalized = rawValue.trim().toLowerCase();
+    if (normalized === "true" || normalized === "1") return 1;
+    if (normalized === "false" || normalized === "0") return 0;
+    throw new Error(`Invalid boolean filter value: ${rawValue}`);
+  }
 
   const numericValue = Number(rawValue);
   if (!Number.isFinite(numericValue)) throw new Error(`Invalid numeric filter value: ${rawValue}`);
@@ -196,7 +209,7 @@ export function compileQueryFilterWhere<TKey extends string | number, TEntityKey
   const compiled = (Array.isArray(payload?.rows) ? payload.rows : []).flatMap(row => {
     if (!row?.path || row.parameterized) return [];
     const field = adapter.fieldAdapters[row.path];
-    if (!field) return [];
+    if (!field) throw new Error(`Unknown SQLite filter field: ${row.path}`);
     const clause = row.kind === "relation" ? compileRelationClause(row, field) : compileLeafClause(row, field);
     return clause ? [clause] : [];
   });

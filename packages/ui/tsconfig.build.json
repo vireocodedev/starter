@@ -5,10 +5,9 @@
     "outDir": "./dist"
   },
   "include": ["src"],
-  // `storybookutils` lives outside `stories/` but is only ever imported by
-  // stories. It must stay out of dist: its declarations reference
-  // `storybook/internal/csf`, a devDependency that consumers cannot resolve.
-  "exclude": ["tests", "**/*.stories.*", "**/stories/**", "**/storybookutils.*"],
+  // Tests may live beside their source files, but are type-checked only and
+  // must never be emitted into the published package.
+  "exclude": ["tests", "**/*.test.*", "**/*.spec.*", "**/*.stories.*", "**/internal/storybook/**", "**/stories/**"],
   // Emit extensioned relative specifiers so dist is resolvable by Node's ESM
   // loader, not just by bundlers.
   "tsc-alias": {

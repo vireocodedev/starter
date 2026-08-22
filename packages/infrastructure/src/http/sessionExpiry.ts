@@ -1,32 +1,65 @@
-export const APP_SESSION_EXPIRED_EVENT = "app:session-expired";
+export type SessionExpiryState = Readonly<{
+  manualLogoutPending: boolean;
+  notificationPending: boolean;
+}>;
 
-let sessionExpiryPending = false;
-let manualLogoutPending = false;
+export type SessionExpiryChannelOptions = {
+  onListenerError?: (error: unknown) => void;
+};
 
-export function beginManualLogout(): void {
-  manualLogoutPending = true;
-}
+export type SessionExpiryChannel = {
+  beginManualLogout: () => void;
+  cancelManualLogout: () => void;
+  getState: () => SessionExpiryState;
+  notifySessionExpired: () => boolean;
+  reset: () => void;
+  subscribe: (listener: () => void) => () => void;
+};
 
-export function cancelManualLogout(): void {
-  manualLogoutPending = false;
-}
+/**
+ * Creates an isolated session-expiry coordination channel.
+ *
+ * Applications own the instance and decide how a notification changes routing
+ * or authentication state. Infrastructure only deduplicates notifications and
+ * suppresses expiry handling while an intentional logout is pending.
+ */
+export function createSessionExpiryChannel(options: SessionExpiryChannelOptions = {}): SessionExpiryChannel {
+  const listeners = new Set<() => void>();
+  let manualLogoutPending = false;
+  let notificationPending = false;
 
-export function notifySessionExpired(): boolean {
-  if (manualLogoutPending || sessionExpiryPending) {
-    return false;
-  }
+  return {
+    beginManualLogout() {
+      manualLogoutPending = true;
+    },
+    cancelManualLogout() {
+      manualLogoutPending = false;
+    },
+    getState() {
+      return { manualLogoutPending, notificationPending };
+    },
+    notifySessionExpired() {
+      if (manualLogoutPending || notificationPending) {
+        return false;
+      }
 
-  sessionExpiryPending = true;
-  window.dispatchEvent(new Event(APP_SESSION_EXPIRED_EVENT));
-  return true;
-}
-
-export function resetSessionExpiryNotification(): void {
-  sessionExpiryPending = false;
-  manualLogoutPending = false;
-}
-
-export function subscribeToSessionExpiry(listener: () => void): () => void {
-  window.addEventListener(APP_SESSION_EXPIRED_EVENT, listener);
-  return () => window.removeEventListener(APP_SESSION_EXPIRED_EVENT, listener);
+      notificationPending = true;
+      [...listeners].forEach(listener => {
+        try {
+          listener();
+        } catch (error) {
+          options.onListenerError?.(error);
+        }
+      });
+      return true;
+    },
+    reset() {
+      manualLogoutPending = false;
+      notificationPending = false;
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
 }

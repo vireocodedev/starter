@@ -1,0 +1,60 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Documentation/Guides/Table Patterns" />
+
+# Table patterns
+
+`VireoResponsiveTable` is Starter UI's canonical table contract. It presents the same typed rows as a dense desktop table or a compact mobile accordion according to its own container, while the consumer remains responsible for data fetching and controlled filter state.
+
+## Core model
+
+```tsx
+import { VireoResponsiveTable, type VireoResponsiveTableFilters } from "@vireocodedev/starter-ui";
+
+const columns = [
+  {
+    id: "customer",
+    sort: "customerName",
+    renderHeader: () => "Customer",
+    renderBody: customer => customer.name,
+  },
+  {
+    id: "owner",
+    renderHeader: () => "Owner",
+    renderBody: customer => customer.owner,
+  },
+] as const;
+
+function CustomerTable({ rows, totalCount }) {
+  const [filters, setFilters] = React.useState<VireoResponsiveTableFilters>({
+    page: 0,
+    rowsPerPage: 20,
+    sortBy: "customerName",
+    sortDirection: "asc",
+  });
+
+  return (
+    <VireoResponsiveTable
+      columns={columns}
+      data={rows}
+      totalCount={totalCount}
+      filters={filters}
+      onFiltersChange={setFilters}
+      labels={tableLabels}
+      layers={{ stickyToolbar: 4, stickyRowHeader: 3 }}
+      getRowKey={row => row.id}
+      titleColumn="customer"
+    />
+  );
+}
+```
+
+## Ownership rules
+
+- Fetching, caching, filters, and mutations stay in the consuming application.
+- The table owns responsive presentation, desktop pagination controls, mobile disclosure rows, sorting interactions, loading/empty states, virtualization, and scroll restoration.
+- Use `layout="desktop"` or `layout="mobile"` only when an enclosing capability already owns the layout decision; otherwise let the table measure its container.
+- Column renderers receive a third `context` argument whose `placement` is `desktop`, `mobile-summary`, or `mobile-detail` when presentation genuinely needs to differ.
+- Use `actionsColumn`, `titleColumn`, and title-adornment column IDs to describe mobile anatomy without duplicating a second column model.
+
+The VireoResponsiveTable stories are the executable, copy-pasteable source of truth for complete desktop, mobile, loading, slot, and theme examples.

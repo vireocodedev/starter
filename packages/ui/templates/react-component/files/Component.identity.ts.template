@@ -1,0 +1,10 @@
+import type { VireoSlotNameTuple } from "{{coreUtilitiesModule}}";
+
+/** Stable component name shared by every {{componentName}} integration point. */
+export const {{componentConstantName}}_NAME = "{{componentName}}";
+
+/** Canonical public slots exposed by {{componentName}}, in rendered DOM order. */
+export const {{componentConstantName}}_SLOTS = ["root"] as const satisfies VireoSlotNameTuple;
+
+/** Public slot names exposed by {{componentName}}. */
+export type {{componentName}}SlotName = (typeof {{componentConstantName}}_SLOTS)[number];

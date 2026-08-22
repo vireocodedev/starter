@@ -41,8 +41,8 @@ export interface QueryEngineRelationOption {
 }
 
 export const QueryEngineRelationOptionSchema: z.ZodType<QueryEngineRelationOption> = z.object({
-  value: z.string(),
-  label: z.string(),
+  value: z.string().min(1),
+  label: z.string().min(1),
 });
 
 export interface QueryEngineFieldDefinition {
@@ -97,15 +97,16 @@ export type QueryEngineEntitySchemas = {
 /**
  * Builds the entity-key-dependent parse schemas. Pass a consumer-owned
  * `entityKeySchema` (e.g. an enum with legacy normalization) to validate keys;
- * defaults to `z.string()` so the engine stays generic over any key set.
+ * defaults to a non-empty string schema so the engine stays generic over any
+ * key set while still rejecting unusable identifiers.
  */
 export function createQueryEngineEntitySchemas(
-  entityKeySchema: z.ZodType<QueryEngineEntityKey, z.ZodTypeDef, unknown> = z.string(),
+  entityKeySchema: z.ZodType<QueryEngineEntityKey, z.ZodTypeDef, unknown> = z.string().min(1),
 ): QueryEngineEntitySchemas {
   const fieldDefinition: z.ZodType<QueryEngineFieldDefinition, z.ZodTypeDef, unknown> = z.lazy(() =>
     z.object({
-      path: z.string(),
-      label: z.string(),
+      path: z.string().min(1),
+      label: z.string().min(1),
       type: QueryEngineFieldTypeSchema,
       enumType: z.string().nullable(),
       enumValues: z.array(z.string()),
@@ -116,7 +117,7 @@ export function createQueryEngineEntitySchemas(
       multiple: z.boolean(),
       relationSelectionLabelFields: z.array(z.string()),
       expandable: z.boolean(),
-      maxDepth: z.number().int(),
+      maxDepth: z.number().int().nonnegative(),
       children: z.array(fieldDefinition),
     }),
   );
@@ -124,7 +125,7 @@ export function createQueryEngineEntitySchemas(
   const entityDefinition: z.ZodType<QueryEngineEntityDefinition, z.ZodTypeDef, unknown> = z
     .object({
       key: entityKeySchema,
-      title: z.string(),
+      title: z.string().min(1),
       fields: z.array(fieldDefinition),
     })
     .passthrough();
@@ -132,7 +133,7 @@ export function createQueryEngineEntitySchemas(
   const entitySummary: z.ZodType<QueryEngineEntitySummary, z.ZodTypeDef, unknown> = z
     .object({
       key: entityKeySchema,
-      filterableFieldCount: z.number().int(),
+      filterableFieldCount: z.number().int().nonnegative(),
     })
     .passthrough();
 

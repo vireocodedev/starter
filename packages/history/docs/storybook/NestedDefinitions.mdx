@@ -1,0 +1,12 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runNestedDefinitionsExample } from "../examples/nestedDefinitions.example";
+import nestedDefinitionsSource from "../examples/nestedDefinitions.example.ts?raw";
+
+<Meta title="History/Nested Definitions" />
+
+# Nested definitions
+
+An object field points to another reusable history definition. The root schema remains the single parser for the complete snapshot, so compose the nested definition's Zod schema into the parent schema exactly as shown below. Nested schemas are not parsed a second time during traversal; this avoids applying defaults or transforms twice.
+
+<ExecutablePackageExample run={runNestedDefinitionsExample} source={nestedDefinitionsSource} />

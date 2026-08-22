@@ -1,0 +1,18 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="History/Overview" />
+
+# History
+
+`@vireocodedev/starter-history` is a framework-free engine for defining auditable entities, validating history records, and producing deterministic change trees.
+
+It deliberately owns no React components, persistence, transport client, or application entity enum. React presentation belongs to `@vireocodedev/starter-ui`; `VireoHistoryEntry` renders the nodes produced by this package.
+
+## Public workflow
+
+1. Describe an entity with a Zod schema.
+2. Create a typed history definition for every schema property.
+3. Compare previous and current snapshots with `createHistoryNodes`.
+4. Render or otherwise consume the resulting framework-neutral nodes.
+
+Continue with **Primary Workflow**, then follow the pages in navigation order. They cover nested definitions, collection identity and movement, formatting and comparison, the emitted node model, record validation, and deliberate failure behavior.

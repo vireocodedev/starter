@@ -1,0 +1,21 @@
+import { Paper, Stack, Typography } from "@mui/material";
+import { VireoStatusDot } from "@vireocodedev/starter-ui";
+import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+
+export default function StandaloneAccessibleStatusExample() {
+  return (
+    <VireoStorybookProvider>
+      <Paper variant="outlined" sx={{ maxWidth: 360, p: 2 }}>
+        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+          <Stack>
+            <Typography fontWeight={600}>Payments API</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Compact monitoring card
+            </Typography>
+          </Stack>
+          <VireoStatusDot color="error" label="Payments API unavailable" size={12} />
+        </Stack>
+      </Paper>
+    </VireoStorybookProvider>
+  );
+}

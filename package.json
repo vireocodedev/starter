@@ -11,21 +11,28 @@
     "node": ">=22"
   },
   "scripts": {
+    "verify": "sh scripts/verify.sh",
+    "storybook": "npm run storybook --workspace=@vireocodedev/starter-ui",
+    "build-storybook": "npm run build-storybook --workspace=@vireocodedev/starter-ui",
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "typecheck": "turbo run typecheck",
-    "test": "turbo run test && npm run surface",
+    "typecheck": "turbo run typecheck --concurrency=5",
+    "test": "npm run test:architecture && turbo run test && npm run surface",
+    "test:architecture": "node --test scripts/ui-architecture.test.mjs && node scripts/ui-architecture.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "api:inventory": "node scripts/api-inventory.mjs",
     "surface": "node scripts/public-surface.mjs",
     "surface:update": "node scripts/public-surface.mjs --update",
     "types:strict": "node scripts/strict-consumer-types.mjs",
+    "generate": "node scripts/generate.mjs",
+    "generate:test": "node --test scripts/generator/*.test.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run build && npm run test && npm run types:strict && changeset publish"
+    "release:smoke": "node scripts/release-pack-smoke.mjs",
+    "release": "npm run verify -- silent && npm run release:smoke && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",

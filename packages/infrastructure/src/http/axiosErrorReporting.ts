@@ -17,7 +17,10 @@ export function getAxiosRequestPath(error: AxiosError): string | undefined {
   }
 
   try {
-    return new URL(requestUrl, window.location.origin).pathname;
+    const baseUrl = error.config?.baseURL
+      ? new URL(error.config.baseURL, "http://localhost").toString()
+      : "http://localhost";
+    return new URL(requestUrl, baseUrl).pathname;
   } catch {
     return undefined;
   }

@@ -1,4 +1,5 @@
-import { deepMerge } from "@/toolkit/deepMerge";
+import { deepMerge } from "./deepMerge";
+import { validateResourceConfiguration } from "./validateResourceConfiguration";
 
 /**
  * A recursively partial version of `T`. Consumers use it to supply per-locale
@@ -52,18 +53,27 @@ export type CreateNamespaceResourcesConfig<TShape extends object, B extends stri
  * missing for any requested locale — including brand-new languages the library
  * does not ship, which fall back to the seed until translated.
  */
-export function createNamespaceResources<TShape extends object, B extends string, L extends string>(
-  config: CreateNamespaceResourcesConfig<TShape, B, L>,
-): Record<L, Record<string, TShape>> {
+export function createNamespaceResources<TShape extends object, B extends string, L extends string, N extends string>(
+  config: CreateNamespaceResourcesConfig<TShape, B, L> & { namespace: N },
+): Record<L, Record<N, TShape>> {
   const { namespace, baseResources, seedFrom, locales, overrides } = config;
+
+  if (namespace.trim().length === 0) {
+    throw new Error("createNamespaceResources requires a non-empty namespace.");
+  }
+  if (!Object.prototype.hasOwnProperty.call(baseResources, seedFrom)) {
+    throw new Error(`createNamespaceResources could not find seed locale "${seedFrom}".`);
+  }
+  validateResourceConfiguration("createNamespaceResources", locales, overrides);
+
   const seed = baseResources[seedFrom];
-  const result = {} as Record<L, Record<string, TShape>>;
+  const result = {} as Record<L, Record<N, TShape>>;
 
   for (const locale of locales) {
     const shipped = (baseResources as Record<string, TShape | undefined>)[locale];
     const override = overrides?.[locale];
 
-    let merged: TShape = seed;
+    let merged = deepMerge(seed, undefined);
     if (shipped) {
       merged = deepMerge(merged, shipped);
     }
@@ -71,7 +81,7 @@ export function createNamespaceResources<TShape extends object, B extends string
       merged = deepMerge(merged, override);
     }
 
-    result[locale] = { [namespace]: merged };
+    result[locale] = { [namespace]: merged } as Record<N, TShape>;
   }
 
   return result;

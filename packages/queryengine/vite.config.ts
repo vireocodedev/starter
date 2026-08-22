@@ -3,10 +3,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => ({
-  // rollupTypes is intentionally disabled: api-extractor cannot bundle
-  // @tanstack/react-query's unique-symbol `DataTag` types (re-exported via the
-  // query layer). Per-file declarations still rewrite the `@/*` aliases to
-  // relative paths, so consumers get a clean, self-contained d.ts tree.
+  // Per-file declarations keep source modules independently inspectable while
+  // the package exposes one deliberate root entry point.
   // `entryRoot: "src"` roots the emitted d.ts at dist/index.d.ts (not
   // dist/src/...), and tests are excluded from declaration output.
   plugins: [
@@ -15,7 +13,7 @@ export default defineConfig(({ mode }) => ({
       rollupTypes: false,
       tsconfigPath: "./tsconfig.json",
       entryRoot: "src",
-      exclude: ["tests/**", "**/*.test.ts"],
+      exclude: ["tests/**", "docs/**", "**/*.test.ts"],
     }),
   ],
   build: {
@@ -26,7 +24,7 @@ export default defineConfig(({ mode }) => ({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "zod", "@tanstack/react-query", "@preact/signals-react"],
+      external: ["zod"],
     },
     sourcemap: true,
   },

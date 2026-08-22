@@ -27,6 +27,9 @@ describe("paged response helpers", () => {
     );
 
     expect(response).toEqual({ content: [{ id: 1 }], number: 2, size: 10, totalElements: 1, totalPages: 1 });
+    expect(
+      normalizePageableResponse({ content: [], number: -2, size: 3.8, totalElements: -1, totalPages: 2.9 }, PAGEABLE),
+    ).toEqual({ content: [], number: 2, size: 3, totalElements: 0, totalPages: 2 });
     expect(emptyPageableResponse(PAGEABLE)).toEqual({
       content: [],
       number: 0,
@@ -39,7 +42,8 @@ describe("paged response helpers", () => {
   it("parses only non-empty query filters and sorts without mutating input", () => {
     expect(parseQueryFilterRequest('{"rows":[{"field":"name"}]}')).toEqual({ rows: [{ field: "name" }] });
     expect(parseQueryFilterRequest('{"rows":[]}')).toBeUndefined();
-    expect(parseQueryFilterRequest("not-json")).toBeUndefined();
+    expect(() => parseQueryFilterRequest("not-json")).toThrow(SyntaxError);
+    expect(() => parseQueryFilterRequest('{"unexpected":true}')).toThrow(z.ZodError);
 
     const items = [
       { name: "Beta", rank: 2 },
@@ -83,7 +87,6 @@ describe("postPagedSearch", () => {
   });
 
   it("rejects content that does not satisfy the supplied schema", async () => {
-    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const post = vi.fn().mockResolvedValue({
       data: { content: [{ id: "invalid" }], number: 0, size: 1, totalElements: 1, totalPages: 1 },
     } satisfies { data: PageableResponse<unknown> });
@@ -97,6 +100,21 @@ describe("postPagedSearch", () => {
         filters: { searchText: "" },
       }),
     ).rejects.toBeInstanceOf(z.ZodError);
-    errorLog.mockRestore();
+  });
+
+  it("rejects invalid pageable metadata instead of silently repairing an API response", async () => {
+    const post = vi.fn().mockResolvedValue({
+      data: { content: [{ id: 1 }], number: -1, size: 1.5, totalElements: 1, totalPages: 1 },
+    });
+
+    await expect(
+      postPagedSearch({
+        client: { post } as unknown as Pick<AxiosInstance, "post">,
+        endpointName: "widgets",
+        schema: z.object({ id: z.number() }),
+        pageable: PAGEABLE,
+        filters: { searchText: "" },
+      }),
+    ).rejects.toBeInstanceOf(z.ZodError);
   });
 });

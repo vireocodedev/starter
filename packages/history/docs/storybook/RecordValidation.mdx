@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runRecordValidationExample } from "../examples/recordValidation.example";
+import recordValidationSource from "../examples/recordValidation.example.ts?raw";
+
+<Meta title="History/Record Validation" />
+
+# Record validation
+
+`createHistoryRecordSchema` validates transport-neutral audit records. Its options accept application-owned entity-kind, snapshot, and timestamp schemas, preserving their inferred output types without coupling History to an application model.
+
+The default timestamp accepts a finite epoch number or an ISO date-time containing `Z` or an explicit offset. Supply `timestamp` when a backend uses another deliberate representation.
+
+<ExecutablePackageExample run={runRecordValidationExample} source={recordValidationSource} />

@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runCollectionsExample } from "../examples/collections.example";
+import collectionsSource from "../examples/collections.example.ts?raw";
+
+<Meta title="History/Collections" />
+
+# Collections
+
+Use `mode: "set"` when order has no meaning. Use `mode: "ordered"` when a deliberate reorder should produce a `moved` row. Ordered comparison is sequence-aware: inserting or removing an item does not falsely mark every shifted neighbor as moved.
+
+Primitive values identify themselves. Object items use their nested definition's `key`, and identities must be unique within each snapshot.
+
+<ExecutablePackageExample run={runCollectionsExample} source={collectionsSource} />

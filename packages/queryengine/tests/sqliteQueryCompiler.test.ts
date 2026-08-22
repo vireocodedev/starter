@@ -179,7 +179,6 @@ describe("SQLite query compiler", () => {
     });
 
     it.each([
-      ["an unknown field path", [{ path: "unknown", operator: "EQUALS", value: "1" }]],
       ["a parameterized row", [{ path: "price", operator: "EQUALS", value: "1", parameterized: true }]],
       ["an operator with no value", [{ path: "price", operator: "EQUALS", value: "  " }]],
       ["an empty IN list", [{ path: "price", operator: "IN", value: " , " }]],
@@ -190,9 +189,24 @@ describe("SQLite query compiler", () => {
       expect(request.whereParams).toEqual([]);
     });
 
-    it("ignores malformed filter JSON rather than throwing", async () => {
-      const { request } = await runSearch({ queryFiltersJson: "{not json" });
-      expect(request.whereSql).toBe("p.deleted = 0");
+    it("rejects malformed filter JSON instead of silently broadening the query", async () => {
+      await expect(runSearch({ queryFiltersJson: "{not json" })).rejects.toThrow("Query filter JSON is invalid.");
+    });
+
+    it("rejects unknown filter fields instead of silently broadening the query", async () => {
+      await expect(
+        runSearch({
+          queryFiltersJson: filtersJson([{ path: "unknown", operator: "EQUALS", value: "1" }]),
+        }),
+      ).rejects.toThrow("Unknown SQLite filter field: unknown");
+    });
+
+    it("rejects invalid boolean values", async () => {
+      await expect(
+        runSearch({
+          queryFiltersJson: filtersJson([{ path: "archived", operator: "EQUALS", value: "yes" }]),
+        }),
+      ).rejects.toThrow("Invalid boolean filter value: yes");
     });
 
     it("builds relation IN clauses from selected options", async () => {
@@ -230,8 +244,11 @@ describe("SQLite query compiler", () => {
       expect((await runSearch({ sortBy: "nope" })).request.orderBySql).toBe("p.id ASC");
     });
 
-    it("treats directions other than exact 'desc' as ascending", async () => {
-      expect((await runSearch({ sortBy: "price", sortDirection: "DESC" })).request.orderBySql).toBe("p.price ASC");
+    it("normalizes descending sort direction casing and whitespace", async () => {
+      expect((await runSearch({ sortBy: "price", sortDirection: " DESC " })).request.orderBySql).toBe("p.price DESC");
+    });
+
+    it("treats unknown directions as ascending", async () => {
       expect((await runSearch({ sortBy: "price", sortDirection: "sideways" })).request.orderBySql).toBe("p.price ASC");
     });
   });
@@ -251,6 +268,13 @@ describe("SQLite query compiler", () => {
 
     it("clamps negative pages to the first page", async () => {
       expect((await runSearch({ page: -5, rowsPerPage: 10 })).request.offset).toBe(0);
+    });
+
+    it("normalizes fractional pagination to whole rows", async () => {
+      const { request, response } = await runSearch({ page: 2.9, rowsPerPage: 10.8 });
+      expect(request.limit).toBe(10);
+      expect(request.offset).toBe(20);
+      expect(response).toMatchObject({ number: 2, size: 10 });
     });
 
     it("requests one probe row when the total count is skipped", async () => {

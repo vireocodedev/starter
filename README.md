@@ -26,7 +26,7 @@ Note that the two halves reuse names for different things: the npm package
 | [`@vireocodedev/starter-core`](packages/core)                     | 0.9.0   | App-shell framework: config/sitemap/routing scaffolding, route guards, the responsive shell + navigation, and layout presets.                           |
 | [`@vireocodedev/starter-localization`](packages/localization)     | 0.8.0   | Foundation i18n toolkit + shared `platform` translations.                                                                                               |
 | [`@vireocodedev/starter-sqlite`](packages/sqlite)                 | 0.5.0   | SQLite worker/client runtime primitives for offline persistence (OPFS).                                                                                 |
-| [`@vireocodedev/starter-history`](packages/history)               | 0.4.0   | Framework-agnostic entity history engine (diff/build/render definitions) and generic history models.                                                    |
+| [`@vireocodedev/starter-history`](packages/history)               | 1.0.0   | Framework-free entity history definitions, diff nodes, and transport-neutral record schemas.                                                            |
 | [`@vireocodedev/starter-infrastructure`](packages/infrastructure) | 0.4.0   | Frontend infrastructure utilities: network status, persistent signals, date/array helpers, session-expiry events, axios helpers, tanstack query client. |
 
 Versions above are the currently published ones; `packages/*/package.json` is the source of truth.
@@ -60,6 +60,23 @@ npm run typecheck
 npm run test
 npm run build
 ```
+
+### Live documentation
+
+One repository-wide Vireo Starter Storybook hosts the complete UI component catalog and package-owned live documentation for framework-free libraries:
+
+```bash
+npm run storybook
+npm run build-storybook
+```
+
+Monorepo-level material lives under `Documentation`. Each library then owns a top-level section: UI contains its `Documentation`, `Core`, `Capabilities`, and `Integrations` groups, while History owns its executable package guides directly under `History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
+
+`build` is artifact generation; `typecheck` owns full semantic source checking.
+Keeping those responsibilities separate lets the UI package use TypeScript's
+artifact-only emit without checking the same source graph twice. CI and the
+release command always run both, followed by strict checks of the emitted
+declarations.
 
 `npm run dev` watches every package. Note that watch mode never deletes from
 `dist` — deleting or renaming a source file leaves its old output behind, so take

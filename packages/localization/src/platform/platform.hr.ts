@@ -41,7 +41,7 @@ const hr = {
     no: "Ne",
     yes: "Da",
     save: "Spremi",
-    search: "Search",
+    search: "Pretraži",
     skipToMainContent: "Preskoči na glavni sadržaj",
   },
   pwa: {
@@ -137,11 +137,6 @@ const hr = {
     pageBodyMaxWidthXs: "Vrlo usko",
     title: "Postavke aplikacije",
     userSettingsSavedSuccessfully: "Postavke korisnika spremljene.",
-  },
-  video: {
-    streamErrorMessage: "Nije moguće povezati se s videostreamom. Provjerite URL i pokušajte ponovno.",
-    streamErrorTitle: "Greška pri učitavanju streama",
-    streamRetry: "Pokušaj ponovno",
   },
 } as const;
 

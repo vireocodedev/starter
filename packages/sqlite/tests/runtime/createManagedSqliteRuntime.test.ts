@@ -22,6 +22,10 @@ class FakeWorker {
     this.emit("message", { data: { id, ok: true, result } });
   }
 
+  fail(error: Error): void {
+    this.emit("error", { error, message: error.message });
+  }
+
   private emit(type: string, event: unknown): void {
     for (const listener of this.listeners.get(type) ?? []) listener(event as MessageEvent & ErrorEvent);
   }
@@ -67,6 +71,21 @@ describe("createManagedSqliteRuntime", () => {
     expect(workers).toHaveLength(2);
     workers[1].respond(2, "fresh");
     await expect(next).resolves.toBe("fresh");
+  });
+
+  it("tears down a failed worker and creates a fresh worker for later requests", async () => {
+    const { runtime, workers } = createHarness();
+    const pending = runtime.send({ type: "list" });
+    const rejected = expect(pending).rejects.toThrow("worker crashed");
+
+    workers[0].fail(new Error("worker crashed"));
+    await rejected;
+    expect(workers[0].terminate).toHaveBeenCalledOnce();
+
+    const next = runtime.send<string>({ type: "list" });
+    expect(workers).toHaveLength(2);
+    workers[1].respond(2, "recovered");
+    await expect(next).resolves.toBe("recovered");
   });
 
   it("keeps fallback stores isolated between configured runtime instances", () => {

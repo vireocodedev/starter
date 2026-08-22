@@ -1,0 +1,12 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runNavigationConfigExample } from "../examples/navigationConfig.example";
+import navigationConfigSource from "../examples/navigationConfig.example.ts?raw";
+
+<Meta title="Shell/Navigation and Config" />
+
+# Navigation and config
+
+Navigation entries describe intent: a route item, heading, application action, or divider. They contain no component types. `defineShellConfig` verifies mounted pages, duplicate identifiers, modes, and an optional application permission registry.
+
+<ExecutablePackageExample run={runNavigationConfigExample} source={navigationConfigSource} />

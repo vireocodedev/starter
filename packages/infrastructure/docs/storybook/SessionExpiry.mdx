@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runSessionExpiryExample } from "../examples/sessionExpiry.example";
+import sessionExpirySource from "../examples/sessionExpiry.example.ts?raw";
+
+<Meta title="Infrastructure/Session Expiry" />
+
+# Session expiry
+
+Each application authentication boundary owns a `createSessionExpiryChannel` instance. The channel deduplicates expiry notifications and suppresses them during an intentional logout without prescribing redirects, dialogs, or authentication storage.
+
+Subscribers are isolated from one another. Applications can inject listener-error reporting when failures need observability.
+
+<ExecutablePackageExample run={runSessionExpiryExample} source={sessionExpirySource} />

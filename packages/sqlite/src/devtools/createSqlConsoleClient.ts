@@ -1,5 +1,5 @@
-import { type SqliteTransport } from "@/runtime/createSqliteTransport";
-import { type SqlExecutionResult, type SqlPagedQueryRequest, type SqlPagedQueryResult } from "@/runtime/contracts";
+import { type SqliteTransport } from "../runtime/createSqliteTransport";
+import { type SqlExecutionResult, type SqlPagedQueryRequest, type SqlPagedQueryResult } from "../runtime/contracts";
 
 export type SqlConsoleClient = {
   executeScript: (script: string) => Promise<SqlExecutionResult>;

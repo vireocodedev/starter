@@ -3,10 +3,10 @@ import {
   OFFLINE_QUEUE_PERMANENTLY_FAILED,
   type OfflineQueuedCommand,
   type OfflineQueueStatusCounts,
-} from "@/offline-queue/offlineQueueStateSqlite";
-import { type InMemorySqliteStore } from "@/runtime/createManagedSqliteRuntime";
-import { type SqliteTransport } from "@/runtime/createSqliteTransport";
-import { type OfflineSyncCommand } from "@/offline/queue/queueingTypes";
+} from "./offlineQueueStateSqlite";
+import { type InMemorySqliteStore } from "../runtime/createManagedSqliteRuntime";
+import { type SqliteTransport } from "../runtime/createSqliteTransport";
+import { type OfflineSyncCommand } from "../offline/queue/queueingTypes";
 
 export type OfflineQueueClientRuntime = {
   shouldUseInMemoryFallback: () => boolean;
@@ -47,6 +47,9 @@ export function createOfflineQueueClient(config: CreateOfflineQueueClientConfig)
       await config.transport.sendWorkerRequest<null>({ type: "enqueue", command });
     },
     async getBatch(batchSize) {
+      if (!Number.isInteger(batchSize) || batchSize <= 0) {
+        throw new Error("batchSize must be a positive integer.");
+      }
       if (config.runtime.shouldUseInMemoryFallback()) {
         return [...inMemoryQueue.values()]
           .filter(command => command.status === OFFLINE_QUEUE_PENDING)
@@ -64,6 +67,9 @@ export function createOfflineQueueClient(config: CreateOfflineQueueClientConfig)
     },
     async markRetryable(commandIds, lastError, maxRetryCount) {
       if (commandIds.length === 0) return;
+      if (!Number.isInteger(maxRetryCount) || maxRetryCount <= 0) {
+        throw new Error("maxRetryCount must be a positive integer.");
+      }
       if (config.runtime.shouldUseInMemoryFallback()) {
         for (const commandId of commandIds) {
           const command = inMemoryQueue.get(commandId);

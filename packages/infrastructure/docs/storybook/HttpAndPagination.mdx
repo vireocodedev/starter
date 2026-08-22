@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runHttpPaginationExample } from "../examples/httpPagination.example";
+import httpPaginationSource from "../examples/httpPagination.example.ts?raw";
+
+<Meta title="Infrastructure/HTTP and Pagination" />
+
+# HTTP and pagination
+
+Infrastructure accepts an application-configured Axios transport and validates API data with application-supplied Zod schemas. Pageable searches validate rows and the complete metadata envelope.
+
+Filter JSON fails closed: malformed or shape-incompatible data throws before the request begins instead of disappearing and widening the result set.
+
+<ExecutablePackageExample run={runHttpPaginationExample} source={httpPaginationSource} />

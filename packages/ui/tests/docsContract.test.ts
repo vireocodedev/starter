@@ -23,6 +23,7 @@ import { describe, expect, it } from "vitest";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const srcRoot = join(packageRoot, "src");
+const storybookDocsRoot = join(packageRoot, "docs", "storybook");
 
 const PACKAGE_NAME = "@vireocodedev/starter-ui";
 
@@ -84,7 +85,7 @@ function extractReferences(file: string): DocReference[] {
 }
 
 describe("starter-ui docs contract", () => {
-  const references = findDocFiles(srcRoot).flatMap(extractReferences);
+  const references = [...findDocFiles(srcRoot), ...findDocFiles(storybookDocsRoot)].flatMap(extractReferences);
 
   it("resolves the frozen public surface", () => {
     expect(surface.package).toBe(PACKAGE_NAME);

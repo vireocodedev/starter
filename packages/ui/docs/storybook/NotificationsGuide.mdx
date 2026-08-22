@@ -1,0 +1,113 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="UI/Documentation/Guides/Notifications" />
+
+# Notifications guide
+
+Vireo uses Sonner for transient application notifications. Import the notification surface and imperative API from the dedicated `@vireocodedev/starter-ui/sonner` entry point.
+
+## Choose the right feedback surface
+
+- Use `toast` for brief feedback about an action or background event that does not block the current workflow.
+- Use inline field or form feedback for validation.
+- Use MUI `Alert` for persistent information, warnings, errors, and recovery instructions that remain relevant on the page.
+- Use a dialog only when the user must make a decision before continuing.
+
+Notifications must not be the sole location of information a user needs to recover from a failure.
+
+## Mount the global toaster
+
+Render one `VireoToaster` beneath the application's MUI `ThemeProvider`. It is a notification region, not a provider, so it does not wrap application children.
+
+```tsx
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
+
+export function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AppRoutes />
+      <VireoToaster />
+    </ThemeProvider>
+  );
+}
+```
+
+The default contract is:
+
+| Behavior        | Mobile, below `sm`         | Desktop      |
+| --------------- | -------------------------- | ------------ |
+| Position        | Top center                 | Bottom right |
+| Close button    | Hidden                     | Shown        |
+| Swipe dismissal | Up                         | Right        |
+| Offset          | 8px plus the top safe area | 24px         |
+
+Both modes use a 3000ms duration, three visible notifications, a 14px gap, collapsed stacking, rich semantic colors, the MUI theme direction, the accessible label `Notifications`, and Sonner's `Alt+T` focus shortcut.
+
+## Present notifications
+
+Use Sonner's native API from Vireo's integration entry point:
+
+```tsx
+import { toast } from "@vireocodedev/starter-ui/sonner";
+
+async function saveCustomer() {
+  try {
+    await customerApi.save();
+    toast.success("Customer saved");
+  } catch {
+    toast.error("Customer could not be saved");
+  }
+}
+```
+
+Actions, dismissal, promise lifecycles, custom content, IDs, and scoped toasters remain native Sonner contracts. Keep labels short and specific, and avoid duplicating the same outcome in several notifications.
+
+```tsx
+const request = customerApi.save();
+
+toast.promise(request, {
+  loading: "Saving customer…",
+  success: "Customer saved",
+  error: "Customer could not be saved",
+});
+```
+
+## TanStack Query mutations
+
+The optional `@vireocodedev/starter-ui/tanstack-query` entry point adds notification messages and schema-validated error details without replacing TanStack Query's mutation API.
+
+```tsx
+import { useVireoMutation } from "@vireocodedev/starter-ui/tanstack-query";
+import { z } from "zod";
+
+const errorDetailsSchema = z.object({
+  code: z.string(),
+  suggestion: z.string(),
+});
+
+const saveCustomer = useVireoMutation({
+  mutationFn: customerApi.save,
+  successMessage: customer => `Saved ${customer.name}`,
+  errorMessage: "Customer could not be saved",
+  errorDetails: { schema: errorDetailsSchema },
+});
+```
+
+Messages are optional. Existing `onSuccess` and `onError` callbacks still run. Error details are exposed through a notification action only after the selected payload passes the supplied Zod schema.
+
+## Responsive, themed, and scoped behavior
+
+`VireoToaster` follows the active MUI palette mode, typography, shape, shadow, and text direction. Ordinary Sonner props remain available when an application needs to override placement, duration, stacking, icons, offsets, or toast options. Vireo merges `toastOptions.style` and composes `toastOptions.classNames` with theme defaults.
+
+Most applications should mount exactly one toaster. Use `id` and Sonner's `toasterId` only when independent notification regions are a deliberate product requirement; the caller must target the correct region.
+
+## Migration
+
+- Replace `AppSnackbarProvider` with one sibling `<VireoToaster />` under the MUI theme.
+- Replace package-root `toast` imports with `@vireocodedev/starter-ui/sonner`.
+- Replace `VireoSnack` with native Sonner notification content, or with MUI `Alert` when the feedback is persistent.
+- Import `useVireoMutation` from `@vireocodedev/starter-ui/tanstack-query`.
+
+The package root intentionally exports none of these integration APIs.

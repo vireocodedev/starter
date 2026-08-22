@@ -1,0 +1,60 @@
+import CustomizedSlotsExample from "{{componentSourceModule}}/internal/storybook/CustomizedSlotsExample";
+import customizedSlotsExampleSource from "{{componentSourceModule}}/internal/storybook/CustomizedSlotsExample.tsx?raw";
+import DefaultExample from "{{componentSourceModule}}/internal/storybook/DefaultExample";
+import defaultExampleSource from "{{componentSourceModule}}/internal/storybook/DefaultExample.tsx?raw";
+import ThemeCustomizationExample from "{{componentSourceModule}}/internal/storybook/ThemeCustomizationExample";
+import themeCustomizationExampleSource from "{{componentSourceModule}}/internal/storybook/ThemeCustomizationExample.tsx?raw";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { {{componentName}} } from "./{{componentName}}";
+
+function createSourceParameters(code: string) {
+  return {
+    docs: {
+      source: {
+        code,
+        language: "tsx",
+        type: "code" as const,
+      },
+    },
+  };
+}
+
+const meta = {
+  title: "{{storybookCategory}}/{{componentName}}",
+  component: {{componentName}},
+  tags: ["autodocs"],
+  parameters: {
+    docs: {
+      description: {
+        component: `TODO(component-author): Summarize what {{componentName}} represents.
+
+### Why it exists
+
+TODO(component-author): Explain the recurring problem, why Vireo owns the abstraction, and when to use or avoid it.`,
+      },
+    },
+  },
+  argTypes: {
+    slots: { control: false },
+    slotProps: { control: false },
+    classes: { control: false },
+  },
+} satisfies Meta<typeof {{componentName}}>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  render: () => <DefaultExample />,
+  parameters: createSourceParameters(defaultExampleSource),
+};
+
+export const CustomizedSlots: Story = {
+  render: () => <CustomizedSlotsExample />,
+  parameters: createSourceParameters(customizedSlotsExampleSource),
+};
+
+export const ThemeCustomization: Story = {
+  render: () => <ThemeCustomizationExample />,
+  parameters: createSourceParameters(themeCustomizationExampleSource),
+};
