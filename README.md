@@ -61,6 +61,17 @@ npm run test
 npm run build
 ```
 
+### Live documentation
+
+One repository-wide Vireo Starter Storybook hosts the complete UI component catalog and package-owned live documentation for framework-free libraries:
+
+```bash
+npm run storybook
+npm run build-storybook
+```
+
+UI stories remain under the `Core`, `Capabilities`, and `Integrations` roots. Framework-free packages contribute executable documentation under `Libraries`; History is the first pilot under `Libraries / History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
+
 `build` is artifact generation; `typecheck` owns full semantic source checking.
 Keeping those responsibilities separate lets the UI package use TypeScript's
 artifact-only emit without checking the same source graph twice. CI and the

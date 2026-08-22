@@ -3,8 +3,12 @@ import { extname, join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const packageRoot = join(import.meta.dirname, "..");
+const packagesRoot = join(packageRoot, "..");
 const srcRoot = join(packageRoot, "src");
 const docsRoot = join(packageRoot, "docs", "storybook");
+const historyDocsRoot = join(packagesRoot, "history", "docs", "storybook");
+const historyExamplesRoot = join(packagesRoot, "history", "docs", "examples");
+const storybookConfigFile = join(packageRoot, ".storybook-vireo", "main.ts");
 
 const EXPECTED_DOCUMENTATION_ROUTES = [
   "Documentation/Overview",
@@ -17,6 +21,13 @@ const EXPECTED_DOCUMENTATION_ROUTES = [
   "Documentation/Guides/Table Patterns",
   "Documentation/Guides/TanStack Query",
   "Documentation/Guides/Drag and Drop",
+] as const;
+
+const EXPECTED_HISTORY_ROUTES = [
+  "Libraries/History/Overview",
+  "Libraries/History/Primary Workflow",
+  "Libraries/History/Record Validation",
+  "Libraries/History/Failure Semantics",
 ] as const;
 
 const APPROVED_STORY_ROUTES = [
@@ -45,7 +56,15 @@ function documentationTitle(file: string): string {
   return match?.[1] ?? "";
 }
 
-describe("Vireo Storybook navigation contract", () => {
+describe("Vireo Starter Storybook navigation contract", () => {
+  it("discovers the complete UI story catalog and package-owned History pages", () => {
+    const configSource = readFileSync(storybookConfigFile, "utf8");
+
+    expect(configSource).toContain('"../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"');
+    expect(configSource).toContain('"../docs/storybook/**/*.mdx"');
+    expect(configSource).toContain('"../../history/docs/storybook/**/*.mdx"');
+  });
+
   it("keeps every CSF entry under an approved public root and group", () => {
     const storyFiles = findFiles(srcRoot, file => /\.stories\.[cm]?[jt]sx?$/u.test(file));
     const violations = storyFiles
@@ -62,5 +81,35 @@ describe("Vireo Storybook navigation contract", () => {
       .sort();
 
     expect(actualRoutes).toEqual([...EXPECTED_DOCUMENTATION_ROUTES].sort());
+  });
+
+  it("indexes every package-owned History page under Libraries", () => {
+    const actualRoutes = findFiles(historyDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
+
+    expect(actualRoutes).toEqual([...EXPECTED_HISTORY_ROUTES].sort());
+  });
+
+  it("executes and displays every History example from the same source module", () => {
+    const exampleFiles = findFiles(historyExamplesRoot, file => file.endsWith(".example.ts"));
+    const documentationSources = findFiles(historyDocsRoot, file => extname(file) === ".mdx").map(file => ({
+      file,
+      source: readFileSync(file, "utf8"),
+    }));
+
+    for (const exampleFile of exampleFiles) {
+      const basename = exampleFile.slice(exampleFile.lastIndexOf("/") + 1, -".example.ts".length);
+      const owningPages = documentationSources.filter(({ source }) =>
+        source.includes(`../examples/${basename}.example`),
+      );
+
+      expect(owningPages, `${relative(packagesRoot, exampleFile)} must be owned by one MDX page`).toHaveLength(1);
+      expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
+
+      const exampleSource = readFileSync(exampleFile, "utf8");
+      expect(exampleSource).toContain('from "@vireocodedev/starter-history"');
+      expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
+    }
   });
 });

@@ -84,13 +84,14 @@ The adapter may relax only the correlated contract that Storybook must represent
 
 ## Stable developer-facing navigation title
 
-Storybook has four ordered roots:
+The shared Vireo Starter Storybook has five ordered roots:
 
 ```text
 Documentation
 Core
 Capabilities
 Integrations
+Libraries
 ```
 
 Core retains its responsibility categories because those categories distinguish
@@ -104,6 +105,7 @@ Core/[Category]/VireoComponent
 Capabilities/[Capability]/VireoComponent
 Capabilities/[Capability]/[Purposeful group]/VireoComponent
 Integrations/[Integration label]/VireoComponent
+Libraries/[Package]/[Documentation page]
 ```
 
 For example:
@@ -113,6 +115,8 @@ title: "Core/Behavior/VireoDelayedRender";
 title: "Capabilities/Tables/VireoResponsiveTable";
 title: "Integrations/Notifications · Sonner/VireoToaster";
 ```
+
+`Libraries` contains package-owned live documentation for framework-free Starter packages. It does not contain UI component stories. Those packages own their MDX and executable TypeScript examples while UI owns the shared React-based Storybook host. See [`NON_REACT_LIVE_DOCUMENTATION.md`](../../../../docs/package-authoring/NON_REACT_LIVE_DOCUMENTATION.md).
 
 Do not mirror `components/data-display`, `components/layout`, or another source
 category beneath a focused capability merely because that folder exists on disk.
@@ -134,7 +138,7 @@ directly under `Capabilities/Forms`. Multi-step contracts use the sibling
 `Capabilities/Forms/Multi-Step` group and form overlays use
 `Capabilities/Forms/Overlays`.
 
-The Vireo Storybook navigation fixes the four root positions and prioritizes
+The Vireo Starter Storybook navigation fixes the five root positions and prioritizes
 Documentation's `Overview`, `Installation`, and `Guides` entries. Elsewhere it
 sorts component files before child directories and alphabetizes siblings of the
 same kind.

@@ -5,8 +5,9 @@ type StoryEntry = { title: string };
 const vireoStorySort = preview.parameters?.options?.storySort as (a: StoryEntry, b: StoryEntry) => number;
 
 describe("vireoStorySort", () => {
-  it("keeps the four public roots in their approved order", () => {
+  it("keeps the five public roots in their approved order", () => {
     const titles = [
+      "Libraries/History/Overview",
       "Integrations/TanStack Query/VireoQueryBoundary",
       "Capabilities/Forms/VireoForm",
       "Core/Data Display/VireoIcon",
@@ -23,6 +24,28 @@ describe("vireoStorySort", () => {
       "Core/Data Display/VireoIcon",
       "Capabilities/Forms/VireoForm",
       "Integrations/TanStack Query/VireoQueryBoundary",
+      "Libraries/History/Overview",
+    ]);
+  });
+
+  it("keeps History's package pages in their learning order", () => {
+    const titles = [
+      "Libraries/History/Failure Semantics",
+      "Libraries/History/Record Validation",
+      "Libraries/History/Overview",
+      "Libraries/History/Primary Workflow",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "Libraries/History/Overview",
+      "Libraries/History/Primary Workflow",
+      "Libraries/History/Record Validation",
+      "Libraries/History/Failure Semantics",
     ]);
   });
 
