@@ -11,9 +11,8 @@ import { describe, expect, it } from "vitest";
  *
  *  1. The set of entry points is deliberate. A wildcard would make all 183 built
  *     modules public API, so every internal rename would be a breaking change.
- *  2. `./api` is safe to import from a Web Worker. That only holds while nothing
- *     in its transitive graph reaches for React, MUI or the DOM - and the graph
- *     is one careless `import` away from growing.
+ *  2. Every declared target resolves to a source file produced by the package
+ *     build.
  */
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -109,28 +108,12 @@ function runtimeGraph(entry: string): Graph {
   return { files, external };
 }
 
-/** Anything that needs React, a React renderer, or the DOM to evaluate. */
-function isFrameworkSpecifier(specifier: string): boolean {
-  return (
-    specifier === "react" ||
-    specifier.startsWith("react/") ||
-    specifier === "react-dom" ||
-    specifier.startsWith("react-dom/") ||
-    specifier.startsWith("react-") ||
-    specifier.startsWith("@mui/") ||
-    specifier.startsWith("@emotion/") ||
-    specifier.includes("/react/") ||
-    specifier.endsWith("/react")
-  );
-}
-
 describe("package entry points", () => {
   it("declares every entry point explicitly", () => {
     const subpaths = Object.keys(manifest.exports);
 
     expect(subpaths).toEqual([
       ".",
-      "./api",
       "./country",
       "./forms",
       "./video",
@@ -179,29 +162,5 @@ describe("package entry points", () => {
     );
 
     expect(offenders).toEqual([]);
-  });
-});
-
-describe("./api is worker-safe", () => {
-  const { files, external } = runtimeGraph(join(srcRoot, "api", "index.ts"));
-
-  it("pulls in no React, MUI or DOM-renderer dependency", () => {
-    const offenders = [...external.entries()]
-      .filter(([specifier]) => isFrameworkSpecifier(specifier))
-      .map(([specifier, importer]) => `${specifier} (imported by ${importer})`);
-
-    expect(offenders).toEqual([]);
-  });
-
-  it("contains no component module", () => {
-    const components = [...files].filter(file => file.endsWith(".tsx")).map(file => relative(packageRoot, file));
-
-    expect(components).toEqual([]);
-  });
-
-  it("keeps its third-party surface small and intentional", () => {
-    // Freezing this list means a new runtime dependency has to be argued for
-    // rather than acquired by accident through a convenience import.
-    expect([...external.keys()].sort()).toEqual(["axios", "zod"]);
   });
 });

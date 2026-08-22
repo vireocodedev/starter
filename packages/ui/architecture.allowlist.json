@@ -18,11 +18,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "api/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "components/data-display/RgoVideoStreamPlayer/RgoVideoStreamPlayer.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -318,11 +313,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "utils/apiutils.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "utils/arrayutils.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -399,11 +389,6 @@
     {
       "rule": "legacy-source-location",
       "path": "utils/typeutils.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "utils/zodutils.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

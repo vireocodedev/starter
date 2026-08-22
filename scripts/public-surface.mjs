@@ -9,9 +9,8 @@
  *   2. The list of symbols behind each entry point is stable. Today a symbol can
  *      be added or dropped by editing a barrel, with nothing forcing the author
  *      to decide whether that is a minor or a major.
- *   3. Some entry points are safe to import from a Web Worker. That holds only
- *      while nothing in their transitive graph reaches for React, MUI or the DOM
- *      - and the graph is one careless import away from growing.
+ *   3. Entry points explicitly designated as worker-safe stay independent of
+ *      React, MUI, and DOM-only modules.
  *
  * This script turns all three into a check. It records each package's surface in
  * `packages/<name>/api-surface.json` and fails when the code and the snapshot
@@ -61,7 +60,6 @@ const update = process.argv.includes("--update");
  */
 const WORKER_SAFE_ENTRY_POINTS = {
   "@vireocodedev/starter-sqlite": [".", "./offline"],
-  "@vireocodedev/starter-ui": ["./api"],
 };
 
 /* ------------------------------------------------------------------ *

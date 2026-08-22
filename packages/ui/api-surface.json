@@ -6,7 +6,6 @@
         "AppBottomDrawer",
         "AppBottomDrawerProps",
         "AppSnackbarProvider",
-        "AxiosBadRequestError",
         "BOOLEAN_ARRAY",
         "COUNTRY_CODES",
         "Class",
@@ -28,8 +27,6 @@
         "DockedSidePanelProps",
         "DockedSidePanelTransitionEventDetail",
         "EMPTY_ARRAY",
-        "EMPTY_PAGEABLE_PARAMS",
-        "EMPTY_PAGEABLE_RESPONSE",
         "ExtractObjectToTypedUnion",
         "FixedForwardRef",
         "GuardedOverlayModeSwitch",
@@ -44,10 +41,6 @@
         "PageOverlayControllerValue",
         "PageOverlayOutlet",
         "PageOverlayProps",
-        "PageableFetchProps",
-        "PageableParams",
-        "PageableResponse",
-        "PageableSortDirection",
         "RGO_ICON_SCALE_CONFIG",
         "RGO_LOCALE_NAMESPACE",
         "RGO_LOCALE_TO_DAYJS_LOCALE",
@@ -79,8 +72,6 @@
         "RgoLocale",
         "RgoLocalizationProvider",
         "RgoMuiColor",
-        "RgoMutationData",
-        "RgoMutationVariables",
         "RgoQueryClientProvider",
         "RgoQueryClientProviderProps",
         "RgoQueryErrorBoundary",
@@ -125,7 +116,6 @@
         "VIREO_PAGE_LAYOUT_MIN_WIDTH",
         "VIREO_PAGE_LAYOUT_WIDE_ENTER_WIDTH",
         "VIREO_PAGE_LAYOUT_WIDE_EXIT_WIDTH",
-        "ValidationResult",
         "VireoBottomDrawer",
         "VireoBottomDrawerClassKey",
         "VireoBottomDrawerClasses",
@@ -598,7 +588,6 @@
         "createVireoPageLayout",
         "debounce",
         "downloadBlob",
-        "endpoint",
         "filterOptionsNoop",
         "fixedForwardRef",
         "formatCompactCurrency",
@@ -646,7 +635,6 @@
         "getVireoStopwatchUtilityClass",
         "getVireoTabsUtilityClass",
         "getVireoTruncatedContentUtilityClass",
-        "handleBadRequestError",
         "isCountryCode",
         "isUnsavedChangesRegistrationInScope",
         "joinClassNames",
@@ -655,7 +643,6 @@
         "mergeSx",
         "normalizeCanvasTransform",
         "omitKeys",
-        "pageableFetch",
         "rangesOverlap",
         "resolveDockedSidePanelWidth",
         "resolveSlotProps",
@@ -663,7 +650,6 @@
         "reverseFormArray",
         "reverseNumericScale",
         "roundToDecimals",
-        "serializeError",
         "sortKeysDeep",
         "svg",
         "toast",
@@ -724,7 +710,6 @@
         "vireoStopwatchClasses",
         "vireoTabsClasses",
         "vireoTruncatedContentClasses",
-        "zodParse",
         "zoomCanvasAtPoint"
       ],
       "dependencies": [
@@ -747,7 +732,6 @@
         "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider",
         "@tanstack/react-query",
         "@tanstack/react-virtual",
-        "axios",
         "country-flag-icons/react/3x2",
         "dayjs",
         "dayjs/locale/bs",
@@ -769,29 +753,6 @@
         "zod"
       ],
       "workerSafe": false
-    },
-    "./api": {
-      "exports": [
-        "AxiosBadRequestError",
-        "EMPTY_PAGEABLE_PARAMS",
-        "EMPTY_PAGEABLE_RESPONSE",
-        "PageableFetchProps",
-        "PageableParams",
-        "PageableResponse",
-        "RgoMutationData",
-        "RgoMutationVariables",
-        "ValidationResult",
-        "endpoint",
-        "handleBadRequestError",
-        "pageableFetch",
-        "serializeError",
-        "zodParse"
-      ],
-      "dependencies": [
-        "axios",
-        "zod"
-      ],
-      "workerSafe": true
     },
     "./country": {
       "exports": [
