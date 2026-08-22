@@ -4,7 +4,7 @@ export const VIREO_STORY_SURFACE_BACKGROUND = "#080d18";
 
 export const vireoStorybookTheme = create({
   base: "dark",
-  brandTitle: "Vireo UI",
+  brandTitle: "Vireo Starter",
   brandUrl: "/",
   brandTarget: "_self",
   colorPrimary: "#36c7fa",

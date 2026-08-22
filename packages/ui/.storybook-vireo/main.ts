@@ -3,7 +3,11 @@ import { resolve } from "node:path";
 import { mergeConfig } from "vite";
 
 const config: StorybookConfig = {
-  stories: ["../docs/storybook/**/*.mdx", "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: [
+    "../docs/storybook/**/*.mdx",
+    "../../history/docs/storybook/**/*.mdx",
+    "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)",
+  ],
   addons: ["@storybook/addon-docs"],
   framework: {
     name: "@storybook/react-vite",
@@ -35,6 +39,14 @@ const config: StorybookConfig = {
     return mergeConfig(viteConfig, {
       resolve: {
         alias: [
+          {
+            find: /^@vireo-storybook\/documentation$/,
+            replacement: resolve(__dirname, "../storybook/documentation/index.ts"),
+          },
+          {
+            find: /^@vireocodedev\/starter-history$/,
+            replacement: resolve(__dirname, "../../history/src/index.ts"),
+          },
           {
             find: /^@vireocodedev\/starter-ui\/event-source$/,
             replacement: resolve(__dirname, "../src/integrations/event-source/public.ts"),

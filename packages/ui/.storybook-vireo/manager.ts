@@ -15,6 +15,7 @@ import {
   GridIcon,
   LightningIcon,
   ListOrderedIcon,
+  RepoIcon,
   RSSIcon,
   SidebarIcon,
   StackedIcon,
@@ -35,6 +36,7 @@ type SidebarIcon = React.ComponentType<{ "aria-hidden"?: boolean; size?: number 
 const SIDEBAR_ICONS: Readonly<Record<string, SidebarIcon>> = {
   Documentation: BookIcon,
   Guides: DocumentIcon,
+  Libraries: RepoIcon,
   Core: BoxIcon,
   Behavior: LightningIcon,
   Controls: ControlsIcon,

@@ -2,9 +2,9 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta title="Documentation/Overview" />
 
-# Vireo UI
+# Vireo Starter
 
-Vireo is the MUI-based component and interaction library for vireocodedev Starter applications. It owns reusable UI contracts while applications retain routing, API, persistence, and product-specific policy.
+This is the shared live-documentation portal for the vireocodedev Starter packages. Vireo UI owns the React documentation host and reusable presentation contracts; framework-free libraries contribute package-owned MDX and executable TypeScript examples.
 
 ## Package boundaries
 
@@ -16,6 +16,7 @@ Vireo is the MUI-based component and interaction library for vireocodedev Starte
 - `@vireocodedev/starter-ui/localization` exposes temporal localization for MUI X fields.
 - `@vireocodedev/starter-ui/sonner` exposes notifications and the Vireo toaster surface.
 - `@vireocodedev/starter-ui/tanstack-query` exposes query boundaries and mutation integration.
+- `@vireocodedev/starter-history` exposes framework-free history definitions, record validation, and deterministic diff creation. Its live package documentation is under **Libraries / History**.
 
 Integration subpaths are intentionally absent from the package root so applications opt into their peer dependencies explicitly.
 

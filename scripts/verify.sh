@@ -171,6 +171,6 @@ run_step 'Type checking' npm run typecheck
 run_step 'Tests and contract checks' npm run test
 run_step 'Strict consumer declarations' npm run types:strict
 run_step 'Generator tests' npm run generate:test
-run_step 'Vireo Storybook build' npm run build-storybook --workspace @vireocodedev/starter-ui
+run_step 'Vireo Starter Storybook build' npm run build-storybook
 
 print_summary 'PASSED'
