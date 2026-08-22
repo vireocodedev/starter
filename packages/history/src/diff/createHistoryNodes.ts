@@ -39,8 +39,8 @@ type InternalObjectFieldConfig = HistoryObjectFieldConfig<any>;
 
 export function createHistoryNodes<TEntity extends object, TSchema extends z.ZodTypeAny>(
   definition: HistoryDefinition<TEntity, TSchema>,
-  previous: TEntity | null | undefined,
-  current: TEntity | null | undefined,
+  previous: NoInfer<TEntity> | null | undefined,
+  current: NoInfer<TEntity> | null | undefined,
   options: HistoryEngineOptions = {},
 ): HistoryNode[] {
   const previousParsed = parseOptionalSnapshot(definition, previous);

@@ -62,9 +62,9 @@ export type VireoHistoryEntryOwnProps<TEntity extends object = Record<string, un
     /** Typed history definition used to validate, render, and diff both snapshots. */
     definition: HistoryDefinition<TEntity>;
     /** Snapshot before the recorded change. Use `null` for a newly added entity. */
-    previous: TEntity | null;
+    previous: NoInfer<TEntity> | null;
     /** Snapshot after the recorded change. Use `null` for a removed entity. */
-    current: TEntity | null;
+    current: NoInfer<TEntity> | null;
     /** Content rendered for nullish or otherwise empty field values. */
     emptyValue?: React.ReactNode;
     /** Metadata displayed beside the root expansion control. */

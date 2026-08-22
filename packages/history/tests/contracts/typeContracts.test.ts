@@ -3,7 +3,7 @@ import { describe, it } from "vitest";
 import { z } from "zod";
 
 describe("starter-history type contracts", () => {
-  it("documents the current inline-literal inference limitation", () => {
+  it("infers inline snapshot literals exclusively from the definition", () => {
     const schema = z.object({ id: z.string(), status: z.enum(["active", "inactive"]) });
     const definition = createHistoryDefinition(
       schema,
@@ -11,11 +11,6 @@ describe("starter-history type contracts", () => {
       { id: false, status: { kind: "field", label: "Status" } },
     );
 
-    createHistoryNodes(
-      // @ts-expect-error Snapshot literals currently widen and interfere with definition-derived inference.
-      definition,
-      { id: "1", status: "active" },
-      { id: "1", status: "inactive" },
-    );
+    createHistoryNodes(definition, { id: "1", status: "active" }, { id: "1", status: "inactive" });
   });
 });
