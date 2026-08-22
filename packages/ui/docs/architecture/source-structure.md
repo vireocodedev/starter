@@ -65,7 +65,7 @@ Capabilities may contain at most one level of child capabilities. See [Capabilit
 
 ### Integrations
 
-`integrations` owns adapters whose public contracts or lifecycles are coupled to external runtimes. Each finalized integration has a kebab-case directory and an explicit `public.ts` package boundary. Sonner and the TanStack Query mutation extension establish the initial structure; remaining code tied to Axios, i18next, Hello Pangea DnD, OvenPlayer, or another external runtime stays in the migration inventory until its integration contract is designed.
+`integrations` owns adapters whose public contracts or lifecycles are coupled to external runtimes. Each finalized integration has a kebab-case directory and an explicit `public.ts` package boundary. Sonner notifications and TanStack Query boundaries and mutation extensions establish the initial structure; remaining code tied to Axios, i18next, Hello Pangea DnD, OvenPlayer, or another external runtime stays in the migration inventory until its integration contract is designed.
 
 Do not create a capability merely to hide integration code. Not every external import creates an integration either: an external package may be an implementation dependency of a genuine capability.
 

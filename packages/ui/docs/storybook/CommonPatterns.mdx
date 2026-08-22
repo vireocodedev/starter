@@ -60,20 +60,21 @@ function App() {
 All providers in the correct nesting order:
 
 ```tsx
-import { RgoQueryClientProvider, RgoLocalizationProvider, VireoConfirmationProvider } from "@vireocodedev/starter-ui";
+import { RgoLocalizationProvider, VireoConfirmationProvider } from "@vireocodedev/starter-ui";
 import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
 import { ThemeProvider } from "@mui/material";
+import { QueryClientProvider } from "@tanstack/react-query";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <RgoQueryClientProvider>
+      <QueryClientProvider client={queryClient}>
         <RgoLocalizationProvider>
           <VireoConfirmationProvider>
             <YourAppContent />
           </VireoConfirmationProvider>
         </RgoLocalizationProvider>
-      </RgoQueryClientProvider>
+      </QueryClientProvider>
       <VireoToaster />
     </ThemeProvider>
   );
@@ -237,19 +238,28 @@ function WelcomeMessage() {
 Combining loader with data components:
 
 ```tsx
-import { RgoQueryErrorLoaderSuspense } from "@vireocodedev/starter-ui";
+import { VireoQueryBoundary } from "@vireocodedev/starter-ui/tanstack-query";
 import { Typography } from "@mui/material";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 function MetricDisplay({ metricId }) {
-  const { data, isLoading, error } = useQuery({
+  return (
+    <VireoQueryBoundary resetKeys={[metricId]}>
+      <MetricContent metricId={metricId} />
+    </VireoQueryBoundary>
+  );
+}
+
+function MetricContent({ metricId }) {
+  const { data } = useSuspenseQuery({
     queryKey: ["metric", metricId],
     queryFn: () => fetchMetric(metricId),
   });
 
   return (
-    <RgoQueryErrorLoaderSuspense isLoading={isLoading} error={error}>
-      <Typography component="span">{data?.value == null ? "—" : `${data.value.toFixed(2)} ${data.unit}`}</Typography>
-    </RgoQueryErrorLoaderSuspense>
+    <Typography component="span">
+      {data.value == null ? "Not available" : `${data.value.toFixed(2)} ${data.unit}`}
+    </Typography>
   );
 }
 ```

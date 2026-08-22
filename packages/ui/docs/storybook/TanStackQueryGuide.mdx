@@ -1,0 +1,97 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Documentation/TanStack Query guide" />
+
+# TanStack Query guide
+
+Vireo keeps QueryClient creation, cache defaults, query options, and provider ownership native to TanStack Query. The `/tanstack-query` entry point adds only presentation and notification contracts that benefit from Vireo-wide consistency.
+
+## Install and configure the native client
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+export function ServerStateProvider({ children }: React.PropsWithChildren) {
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+}
+```
+
+Vireo intentionally does not provide a QueryClient factory or provider wrapper. Applications retain direct access to every upstream option, and query factories should use TanStack Query's native `queryOptions` helper.
+
+## Bound one recoverable query region
+
+```tsx
+import { VireoQueryBoundary } from "@vireocodedev/starter-ui/tanstack-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
+
+function CustomerRoute({ customerId }: { customerId: string }) {
+  return (
+    <VireoQueryBoundary
+      resetKeys={[customerId]}
+      errorTitle="Customer unavailable"
+      errorMessage="Retry the request or choose another customer."
+    >
+      <CustomerContent customerId={customerId} />
+    </VireoQueryBoundary>
+  );
+}
+
+function CustomerContent({ customerId }: { customerId: string }) {
+  const { data } = useSuspenseQuery({
+    queryKey: ["customer", customerId],
+    queryFn: () => fetchCustomer(customerId),
+  });
+  return <CustomerCard customer={data} />;
+}
+```
+
+`VireoQueryBoundary` always supplies React Suspense, a React error boundary, and the nearest TanStack Query reset boundary. Successful children render directly without a permanent wrapper. Place nested boundaries around independently recoverable regions.
+
+Queries that do not suspend remain responsible for their ordinary loading UI. Non-suspense errors reach this boundary only when the query is configured to throw them.
+
+## Safe diagnostic details
+
+Raw errors are hidden by default. Opt into a details action by selecting the exact value that may be disclosed:
+
+```tsx
+<VireoQueryBoundary
+  selectErrorDetails={error => {
+    if (!(error instanceof ApiError)) return null;
+    return { status: error.status, code: error.code, requestId: error.requestId };
+  }}
+>
+  <CustomerContent customerId={customerId} />
+</VireoQueryBoundary>
+```
+
+A non-null selected value enables an information action and an internal dialog rendered with `VireoJsonViewer`. Selector failures fail closed. Do not return secrets, authorization headers, or payloads that the user is not allowed to inspect.
+
+## Retry and reset policy
+
+- `retryable` defaults to `true` and accepts either a boolean or an error predicate.
+- An explicit Retry resets only the nearest query boundary and calls `onRetry`.
+- `resetKeys` clear a stale render error when route identity or another application key changes; they do not call `onRetry`.
+- Vireo never calls `queryClient.resetQueries`, invalidates unrelated keys, or changes query retry options.
+- Use upstream `QueryErrorResetBoundary`, `ErrorBoundary`, and `Suspense` directly when the application needs different orchestration.
+
+## Mutations
+
+Use TanStack Query's `useMutation` directly unless semantic Vireo notifications are useful. `useVireoMutation` preserves the upstream mutation options and adds optional success/error messages plus Zod-validated diagnostic details. See the Notifications guide and its executable story.
+
+## Import boundary
+
+```tsx
+import { VireoQueryBoundary, useVireoMutation } from "@vireocodedev/starter-ui/tanstack-query";
+```
+
+TanStack Query APIs are not re-exported, and integration APIs are not available from the package root.

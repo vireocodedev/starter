@@ -58,4 +58,4 @@ Prefer explicit JSX when the tree is short, when providers appear in different b
 
 `VireoToaster` is the finalized Sonner notification surface. It does not accept children and is not part of `VireoProviderComposer`; mount it once as a sibling of application content beneath the MUI theme. Import it and `toast` from `@vireocodedev/starter-ui/sonner`.
 
-Localization and the TanStack Query provider remain deferred integration work. New applications should continue using their upstream providers. The optional `useVireoMutation` extension is already available from `@vireocodedev/starter-ui/tanstack-query`.
+Localization remains deferred integration work. Applications use TanStack Query's native `QueryClientProvider`; Vireo does not wrap client creation or cache policy. Import `VireoQueryBoundary` and the optional `useVireoMutation` extension from `@vireocodedev/starter-ui/tanstack-query`.
