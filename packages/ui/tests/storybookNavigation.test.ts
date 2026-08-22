@@ -9,6 +9,7 @@ const docsRoot = join(packageRoot, "docs", "storybook");
 const historyDocsRoot = join(packagesRoot, "history", "docs", "storybook");
 const historyExamplesRoot = join(packagesRoot, "history", "docs", "examples");
 const storybookConfigFile = join(packageRoot, ".storybook-vireo", "main.ts");
+const storybookManagerFile = join(packageRoot, ".storybook-vireo", "manager.ts");
 
 const EXPECTED_DOCUMENTATION_ROUTES = [
   "Documentation/Overview",
@@ -64,6 +65,14 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(configSource).toContain('"../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"');
     expect(configSource).toContain('"../docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../history/docs/storybook/**/*.mdx"');
+  });
+
+  it("assigns explicit icons to every top-level section", () => {
+    const managerSource = readFileSync(storybookManagerFile, "utf8");
+
+    expect(managerSource).toContain("Documentation: BookIcon");
+    expect(managerSource).toContain("UI: ComponentIcon");
+    expect(managerSource).toContain("History: TimeIcon");
   });
 
   it("keeps every CSF entry under an approved public root and group", () => {
