@@ -202,7 +202,6 @@
         "react-error-boundary",
         "react-i18next",
         "react-router",
-        "sonner",
         "virtual:pwa-register/react",
         "zod"
       ],

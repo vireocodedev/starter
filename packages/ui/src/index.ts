@@ -18,8 +18,6 @@ export * from "@/features/@tanstack/react-query";
 export * from "@/features/axios";
 export * from "@/features/i18next";
 export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";
-export * from "@/providers/AppSnackbarProvider";
 export * from "@/providers/RgoLocalizationProvider/RgoLocalizationProvider";
 export * from "@/providers/RgoQueryClientProvider/RgoQueryClientProvider";
 export * from "@/setup/config/RgoLocale";
-export { toast } from "sonner";

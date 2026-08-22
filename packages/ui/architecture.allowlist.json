@@ -223,11 +223,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "providers/AppSnackbarProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
