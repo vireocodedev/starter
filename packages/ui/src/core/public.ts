@@ -10,6 +10,7 @@ export * from "./components/feedback/VireoSnack";
 export * from "./components/layout/VireoSlidingScreenStack";
 export * from "./components/navigation/VireoTabs";
 export * from "./components/surfaces/VireoIconContainer";
+export * from "./hooks/useVireoDebouncedCallback/useVireoDebouncedCallback";
 export * from "./hooks/useVireoIcons/useVireoIcons";
 export * from "./providers/VireoIconRegistryProvider/VireoIconRegistryProvider";
 export * from "./utils/muiutils";

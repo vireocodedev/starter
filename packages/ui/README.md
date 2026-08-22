@@ -43,8 +43,8 @@ compatibility contract.
   filtering surfaces, virtualization, and scroll restoration.
 - **Providers** — `AppConfirmProvider`, `AppSnackbarProvider`,
   `AppThemeColorMetaProvider`.
-- **Hooks** — `useAppPageContentLayout`, `usePageOverlayModes`,
-  `useDelayedOverlayMount`, and `useSingleFlightAction`.
+- **Hooks** — `useVireoDebouncedCallback`, `useAppPageContentLayout`,
+  `usePageOverlayModes`, and `useDelayedOverlayMount`.
 - **Overlays** — responsive side-panel/drawer frames, page-overlay controller,
   delayed mounting, and guarded mode switching.
 - **Layout** — `AppPageContentLayoutContext`, layout utils + shell breakpoints,

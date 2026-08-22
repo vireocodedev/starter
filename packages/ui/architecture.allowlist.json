@@ -213,36 +213,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoAutoDismiss/stories/useRgoAutoDismiss.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoAutoDismiss/stories/UseRgoAutoDismissWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoAutoDismiss/useRgoAutoDismiss.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoDebounce/stories/useRgoDebounce.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoDebounce/stories/UseRgoDebounceWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoDebounce/useRgoDebounce.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoDownloadFn/stories/useRgoDownloadFn.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -364,11 +334,6 @@
     {
       "rule": "legacy-source-location",
       "path": "hooks/useRgoUrlState/useRgoUrlState.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useSingleFlightAction.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
