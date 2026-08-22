@@ -29,6 +29,21 @@ function flattenKeys(obj: JsonRecord, prefix = ""): string[] {
     .sort();
 }
 
+function flattenValues(obj: JsonRecord, prefix = ""): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(obj).flatMap(([key, value]) => {
+      const path = prefix ? `${prefix}.${key}` : key;
+      return value !== null && typeof value === "object" && !Array.isArray(value)
+        ? Object.entries(flattenValues(value as JsonRecord, path))
+        : [[path, String(value)]];
+    }),
+  );
+}
+
+function interpolationVariables(value: string): string[] {
+  return [...value.matchAll(/\{\{\s*([^},\s]+)[^}]*\}\}/gu)].map(match => match[1] ?? "").sort();
+}
+
 /**
  * Every starter key set is a versioned contract: removing/renaming a key or a
  * base locale is a breaking change. These explicit expected lists fail CI on any
@@ -207,6 +222,20 @@ describe.each([
 
   it("keeps every base locale structurally identical to the canonical (en) shape", () => {
     expect(flattenKeys(hr as JsonRecord)).toEqual(flattenKeys(en as JsonRecord));
+  });
+
+  it("ships non-blank values with the canonical interpolation variables", () => {
+    const canonicalValues = flattenValues(en as JsonRecord);
+    const localizedValues = flattenValues(hr as JsonRecord);
+
+    for (const [key, canonicalValue] of Object.entries(canonicalValues)) {
+      expect(canonicalValue.trim(), `${_namespace}.${key} has a blank English value`).not.toBe("");
+      expect(localizedValues[key]?.trim(), `${_namespace}.${key} has a blank Croatian value`).not.toBe("");
+      expect(
+        interpolationVariables(localizedValues[key] ?? ""),
+        `${_namespace}.${key} changes interpolation variables`,
+      ).toEqual(interpolationVariables(canonicalValue));
+    }
   });
 });
 

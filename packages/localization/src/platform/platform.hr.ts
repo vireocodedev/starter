@@ -41,7 +41,7 @@ const hr = {
     no: "Ne",
     yes: "Da",
     save: "Spremi",
-    search: "Search",
+    search: "Pretraži",
     skipToMainContent: "Preskoči na glavni sadržaj",
   },
   pwa: {
