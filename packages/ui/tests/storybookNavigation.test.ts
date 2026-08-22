@@ -10,6 +10,8 @@ const historyDocsRoot = join(packagesRoot, "history", "docs", "storybook");
 const historyExamplesRoot = join(packagesRoot, "history", "docs", "examples");
 const localizationDocsRoot = join(packagesRoot, "localization", "docs", "storybook");
 const localizationExamplesRoot = join(packagesRoot, "localization", "docs", "examples");
+const sqliteDocsRoot = join(packagesRoot, "sqlite", "docs", "storybook");
+const sqliteExamplesRoot = join(packagesRoot, "sqlite", "docs", "examples");
 const storybookConfigFile = join(packageRoot, ".storybook-vireo", "main.ts");
 const storybookManagerFile = join(packageRoot, ".storybook-vireo", "manager.ts");
 
@@ -47,6 +49,16 @@ const EXPECTED_LOCALIZATION_ROUTES = [
   "Localization/Failure Semantics",
 ] as const;
 
+const EXPECTED_SQLITE_ROUTES = [
+  "SQLite/Overview",
+  "SQLite/Primary Workflow",
+  "SQLite/Managed Runtime",
+  "SQLite/Offline Replay",
+  "SQLite/Hydration State",
+  "SQLite/Offline Utilities",
+  "SQLite/Failure Semantics",
+] as const;
+
 const APPROVED_STORY_ROUTES = [
   /^UI\/Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
   /^UI\/Capabilities\/(?:Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
@@ -81,6 +93,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(configSource).toContain('"../docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../history/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../localization/docs/storybook/**/*.mdx"');
+    expect(configSource).toContain('"../../sqlite/docs/storybook/**/*.mdx"');
   });
 
   it("assigns explicit icons to every top-level section", () => {
@@ -90,6 +103,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(managerSource).toContain("UI: ComponentIcon");
     expect(managerSource).toContain("History: TimeIcon");
     expect(managerSource).toContain("Localization: GlobeIcon");
+    expect(managerSource).toContain("SQLite: DatabaseIcon");
   });
 
   it("keeps every CSF entry under an approved public root and group", () => {
@@ -124,6 +138,14 @@ describe("Vireo Starter Storybook navigation contract", () => {
       .sort();
 
     expect(actualRoutes).toEqual([...EXPECTED_LOCALIZATION_ROUTES].sort());
+  });
+
+  it("indexes every package-owned SQLite page under the SQLite root", () => {
+    const actualRoutes = findFiles(sqliteDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
+
+    expect(actualRoutes).toEqual([...EXPECTED_SQLITE_ROUTES].sort());
   });
 
   it("executes and displays every History example from the same source module", () => {
@@ -166,6 +188,28 @@ describe("Vireo Starter Storybook navigation contract", () => {
 
       const exampleSource = readFileSync(exampleFile, "utf8");
       expect(exampleSource).toContain('from "@vireocodedev/starter-localization"');
+      expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
+    }
+  });
+
+  it("executes and displays every SQLite example from the same source module", () => {
+    const exampleFiles = findFiles(sqliteExamplesRoot, file => file.endsWith(".example.ts"));
+    const documentationSources = findFiles(sqliteDocsRoot, file => extname(file) === ".mdx").map(file => ({
+      file,
+      source: readFileSync(file, "utf8"),
+    }));
+
+    for (const exampleFile of exampleFiles) {
+      const basename = exampleFile.slice(exampleFile.lastIndexOf("/") + 1, -".example.ts".length);
+      const owningPages = documentationSources.filter(({ source }) =>
+        source.includes(`../examples/${basename}.example`),
+      );
+
+      expect(owningPages, `${relative(packagesRoot, exampleFile)} must be owned by one MDX page`).toHaveLength(1);
+      expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
+
+      const exampleSource = readFileSync(exampleFile, "utf8");
+      expect(exampleSource).toContain('from "@vireocodedev/starter-sqlite');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });

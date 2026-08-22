@@ -9,6 +9,7 @@ describe("vireoStorySort", () => {
     const titles = [
       "History/Overview",
       "Localization/Overview",
+      "SQLite/Overview",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "UI/Capabilities/Forms/VireoForm",
       "UI/Core/Data Display/VireoIcon",
@@ -27,6 +28,34 @@ describe("vireoStorySort", () => {
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "History/Overview",
       "Localization/Overview",
+      "SQLite/Overview",
+    ]);
+  });
+
+  it("keeps SQLite's package pages in their learning order", () => {
+    const titles = [
+      "SQLite/Failure Semantics",
+      "SQLite/Offline Utilities",
+      "SQLite/Managed Runtime",
+      "SQLite/Overview",
+      "SQLite/Hydration State",
+      "SQLite/Primary Workflow",
+      "SQLite/Offline Replay",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "SQLite/Overview",
+      "SQLite/Primary Workflow",
+      "SQLite/Managed Runtime",
+      "SQLite/Offline Replay",
+      "SQLite/Hydration State",
+      "SQLite/Offline Utilities",
+      "SQLite/Failure Semantics",
     ]);
   });
 

@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runOfflineReplayExample } from "../examples/offlineReplay.example";
+import offlineReplaySource from "../examples/offlineReplay.example.ts?raw";
+
+<Meta title="SQLite/Offline Replay" />
+
+# Offline replay
+
+`replayOfflineSyncBatch` applies one ordered batch and classifies every result as successful, permanently failed, or retryable. Cleanup occurs before successful commands are deleted; status refresh happens after every non-empty batch.
+
+The application supplies the network call and domain cleanup. SQLite queue clients supply the remaining dependencies without coupling replay to an HTTP library.
+
+<ExecutablePackageExample run={runOfflineReplayExample} source={offlineReplaySource} />

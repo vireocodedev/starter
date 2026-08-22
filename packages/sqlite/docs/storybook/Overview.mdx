@@ -1,0 +1,22 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="SQLite/Overview" />
+
+# SQLite
+
+`@vireocodedev/starter-sqlite` is the framework-free persistence engine for OPFS SQLite workers, typed entity operations, offline replay, hydration coordination, and local-data lifecycle.
+
+It deliberately owns no React components, HTTP client, application schema, connectivity policy, query cache, or product recovery UI.
+
+## Public workflow
+
+1. Define ordered migrations and application entity bundles.
+2. Merge them into one validated worker configuration.
+3. Install the worker runtime in an application-owned module Worker.
+4. Create one managed client runtime and transport per application runtime.
+5. Build entity, queue, hydration, and diagnostics clients from that transport.
+6. Dispose the runtime when its application scope ends.
+
+The root entry point owns SQLite persistence mechanics. The `/offline` entry point contains transport-neutral helpers that can also be used without SQLite.
+
+Continue with **Primary Workflow**, then follow the pages in order for managed lifecycle, offline replay, hydration state, offline helpers, and deliberate failure behavior.

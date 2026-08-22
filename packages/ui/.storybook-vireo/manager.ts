@@ -61,6 +61,7 @@ const SIDEBAR_ICONS: Readonly<Record<string, SidebarIcon>> = {
   "Drag and Drop · Hello Pangea DND": DragIcon,
   "Event Source": RSSIcon,
   Localization: GlobeIcon,
+  SQLite: DatabaseIcon,
   "Notifications · Sonner": BellIcon,
   "TanStack Query": SyncIcon,
 };
