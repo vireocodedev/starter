@@ -16,6 +16,7 @@ function getHistoryStatus(row: HistoryFieldRow): HistoryStatus {
 function HistoryValueBlock({
   children,
   empty = false,
+  emptyValue,
   expanded,
   label,
   notPresentLabel,
@@ -25,6 +26,7 @@ function HistoryValueBlock({
 }: {
   children?: React.ReactNode;
   empty?: boolean;
+  emptyValue?: React.ReactNode;
   expanded: boolean;
   label: string;
   notPresentLabel: string;
@@ -35,15 +37,17 @@ function HistoryValueBlock({
   return (
     <div
       className="VireoHistoryEntry-valueBlock"
-      data-empty={empty || undefined}
+      data-empty={(empty && emptyValue == null) || undefined}
       data-placement={placement}
       data-removed={removed || undefined}
     >
       <span className="VireoHistoryEntry-mobileValueLabel">{label}</span>
-      {empty ? (
+      {empty && emptyValue == null ? (
         <span className="VireoHistoryEntry-visuallyHidden">
           {label}: {notPresentLabel}
         </span>
+      ) : empty ? (
+        <span className="VireoHistoryEntry-emptyValue">{emptyValue}</span>
       ) : (
         <HistoryValueContent expanded={expanded} onOverflowChange={onOverflowChange} removed={removed}>
           {children}
@@ -55,10 +59,12 @@ function HistoryValueBlock({
 
 export function HistoryFieldRowView({
   depth,
+  emptyValue,
   labels,
   row,
 }: {
   depth: number;
+  emptyValue?: React.ReactNode;
   labels: VireoHistoryEntryLabels;
   row: HistoryFieldRow;
 }): React.ReactElement {
@@ -97,6 +103,7 @@ export function HistoryFieldRowView({
       {row.type === "unchanged" ? null : (
         <HistoryValueBlock
           empty={!hasPrevious}
+          emptyValue={emptyValue}
           expanded={expanded}
           label={labels.previous}
           notPresentLabel={labels.notPresent}
@@ -114,6 +121,7 @@ export function HistoryFieldRowView({
       ) : null}
       <HistoryValueBlock
         empty={!hasCurrent}
+        emptyValue={emptyValue}
         expanded={expanded}
         label={currentLabel}
         notPresentLabel={labels.notPresent}

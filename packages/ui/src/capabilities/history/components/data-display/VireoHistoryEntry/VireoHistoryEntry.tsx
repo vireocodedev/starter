@@ -81,8 +81,6 @@ function VireoHistoryEntryImpl<TEntity extends object>(
     sx,
     ...other
   } = props;
-  void emptyValue;
-
   const labels = { ...DEFAULT_LABELS, ...labelsProp };
   const nodes = React.useMemo(
     () => createHistoryNodes(definition, previous, current, { showUnchanged: true }),
@@ -166,6 +164,7 @@ function VireoHistoryEntryImpl<TEntity extends object>(
         <HistoryNodeView
           key={getHistoryPathKey(node.path)}
           disclosure={disclosure}
+          emptyValue={emptyValue}
           hasUnchanged={hasUnchanged}
           node={node}
           rootMeta={rootMeta}

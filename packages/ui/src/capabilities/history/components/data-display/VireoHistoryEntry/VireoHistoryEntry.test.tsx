@@ -112,7 +112,7 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(screen.queryByRole("button", { name: /section Items/u })).not.toBeInTheDocument();
   });
 
-  it.fails("renders consumer-provided content for an absent comparison value", () => {
+  it("renders consumer-provided content for an absent comparison value", () => {
     render(
       <VireoHistoryEntry
         definition={profileHistoryDefinition}

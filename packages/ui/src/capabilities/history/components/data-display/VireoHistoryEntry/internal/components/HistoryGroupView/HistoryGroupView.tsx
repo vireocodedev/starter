@@ -48,6 +48,7 @@ function getGroupStatus(group: HistoryGroupNode): HistoryStatus {
 export function HistoryGroupView({
   depth,
   disclosure,
+  emptyValue,
   group,
   hasUnchanged,
   rootMeta,
@@ -55,6 +56,7 @@ export function HistoryGroupView({
 }: {
   depth: number;
   disclosure: HistoryEntryDisclosure;
+  emptyValue?: React.ReactNode;
   group: HistoryGroupNode;
   hasUnchanged: boolean;
   rootMeta?: React.ReactNode;
@@ -150,6 +152,7 @@ export function HistoryGroupView({
                   key={getHistoryPathKey(child.path)}
                   depth={depth + 1}
                   disclosure={disclosure}
+                  emptyValue={emptyValue}
                   group={child}
                   hasUnchanged={hasUnchanged}
                   showRootEntityLabel={showRootEntityLabel}
@@ -158,6 +161,7 @@ export function HistoryGroupView({
                 <HistoryFieldRowView
                   key={`${getHistoryPathKey(child.path)}:${child.type}`}
                   depth={depth - 1}
+                  emptyValue={emptyValue}
                   labels={disclosure.labels}
                   row={child}
                 />

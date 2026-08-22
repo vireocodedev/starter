@@ -5,12 +5,14 @@ import type { HistoryNode } from "@vireocodedev/starter-history";
 
 export function HistoryNodeView({
   disclosure,
+  emptyValue,
   hasUnchanged,
   node,
   rootMeta,
   showRootEntityLabel,
 }: {
   disclosure: HistoryEntryDisclosure;
+  emptyValue?: React.ReactNode;
   hasUnchanged: boolean;
   node: HistoryNode;
   rootMeta?: React.ReactNode;
@@ -21,6 +23,7 @@ export function HistoryNodeView({
       <HistoryGroupView
         depth={1}
         disclosure={disclosure}
+        emptyValue={emptyValue}
         group={node}
         hasUnchanged={hasUnchanged}
         rootMeta={rootMeta}
@@ -29,5 +32,5 @@ export function HistoryNodeView({
     );
   }
 
-  return <HistoryFieldRowView depth={0} labels={disclosure.labels} row={node} />;
+  return <HistoryFieldRowView depth={0} emptyValue={emptyValue} labels={disclosure.labels} row={node} />;
 }
