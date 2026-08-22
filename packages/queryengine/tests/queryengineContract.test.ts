@@ -43,4 +43,35 @@ describe("queryengine contract", () => {
     expect(typeof schemas.entitySummary.parse).toBe("function");
     expect(typeof schemas.fieldDefinition.parse).toBe("function");
   });
+
+  it("rejects empty entity identifiers and negative summary counts", () => {
+    const { entitySummary } = createQueryEngineEntitySchemas();
+
+    expect(() => entitySummary.parse({ key: "", filterableFieldCount: 0 })).toThrow();
+    expect(() => entitySummary.parse({ key: "PRODUCT", filterableFieldCount: -1 })).toThrow();
+  });
+
+  it("rejects unusable field metadata", () => {
+    const { fieldDefinition } = createQueryEngineEntitySchemas();
+    const validField = {
+      path: "name",
+      label: "Name",
+      type: "STRING",
+      enumType: null,
+      enumValues: [],
+      operators: ["EQUALS"],
+      relation: false,
+      relationEntityKey: null,
+      relationMode: "CHILD",
+      multiple: false,
+      relationSelectionLabelFields: [],
+      expandable: false,
+      maxDepth: 0,
+      children: [],
+    };
+
+    expect(fieldDefinition.parse(validField)).toEqual(validField);
+    expect(() => fieldDefinition.parse({ ...validField, path: "" })).toThrow();
+    expect(() => fieldDefinition.parse({ ...validField, maxDepth: -1 })).toThrow();
+  });
 });
