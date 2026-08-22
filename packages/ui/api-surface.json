@@ -38,20 +38,14 @@
         "PageOverlayControllerValue",
         "PageOverlayOutlet",
         "PageOverlayProps",
-        "RGO_LOCALE_NAMESPACE",
-        "RGO_LOCALE_TO_DAYJS_LOCALE",
-        "RGO_LOCALE_TO_TRANSLATED_LABEL",
         "ReactStateSetter",
         "ResponsiveOverlayFrame",
         "ResponsiveOverlayFrameDesktopSidePanelWidth",
         "ResponsiveOverlayFrameDesktopSurface",
         "ResponsiveOverlayFrameProps",
         "RgoLocalStorageService",
-        "RgoLocale",
-        "RgoLocalizationProvider",
         "RgoMuiColor",
         "RgoSseStatus",
-        "RgoTranslationFn",
         "SIDE_PANEL_RESIZE_ACTIVE_OPACITY",
         "SIDE_PANEL_RESIZE_HANDLE_WIDTH",
         "SIDE_PANEL_RESIZE_HITBOX_WIDTH",
@@ -530,7 +524,6 @@
         "clampCanvasScale",
         "clampSidePanelWidth",
         "composeSx",
-        "configureI18nClient",
         "createCurrencyFormatter",
         "createDarkTheme",
         "createMonthFormatter",
@@ -666,23 +659,11 @@
         "@mui/material",
         "@mui/material/styles",
         "@mui/material/utils",
-        "@mui/x-date-pickers/AdapterDayjs",
-        "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider",
         "@tanstack/react-virtual",
         "country-flag-icons/react/3x2",
         "dayjs",
-        "dayjs/locale/bs",
-        "dayjs/locale/de",
-        "dayjs/locale/en",
-        "dayjs/locale/hr",
-        "dayjs/locale/it",
-        "dayjs/locale/me",
-        "dayjs/locale/pt",
-        "dayjs/locale/sl",
-        "i18next-browser-languagedetector",
         "react",
         "react-dom",
-        "react-i18next",
         "zod"
       ],
       "workerSafe": false
@@ -1285,9 +1266,9 @@
         "@mui/material/styles",
         "@mui/material/utils",
         "@mui/x-date-pickers",
+        "@mui/x-date-pickers/LocalizationProvider",
         "@tanstack/react-form",
         "dayjs",
-        "dayjs/plugin/utc",
         "react",
         "react-dom"
       ],
@@ -1362,6 +1343,26 @@
         "dayjs",
         "react",
         "react-dom"
+      ],
+      "workerSafe": false
+    },
+    "./localization": {
+      "exports": [
+        "VIREO_TEMPORAL_BASE_LOCALES",
+        "VireoTemporalBaseLocale",
+        "VireoTemporalLocale",
+        "VireoTemporalLocalizationProvider",
+        "VireoTemporalLocalizationProviderProps"
+      ],
+      "dependencies": [
+        "@mui/x-date-pickers/AdapterDayjs",
+        "@mui/x-date-pickers/LocalizationProvider",
+        "@mui/x-date-pickers/locales",
+        "dayjs",
+        "dayjs/locale/en",
+        "dayjs/locale/hr",
+        "dayjs/plugin/utc",
+        "react"
       ],
       "workerSafe": false
     },
@@ -1462,8 +1463,14 @@
       ],
       "dependencies": [
         "@mui/material",
-        "@mui/x-date-pickers",
-        "@mui/x-date-pickers/AdapterDayjs"
+        "@mui/x-date-pickers/AdapterDayjs",
+        "@mui/x-date-pickers/LocalizationProvider",
+        "@mui/x-date-pickers/locales",
+        "dayjs",
+        "dayjs/locale/en",
+        "dayjs/locale/hr",
+        "dayjs/plugin/utc",
+        "react"
       ],
       "workerSafe": false
     },
