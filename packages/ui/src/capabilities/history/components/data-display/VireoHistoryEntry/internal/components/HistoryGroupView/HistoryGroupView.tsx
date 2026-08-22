@@ -10,7 +10,10 @@ import type { HistoryGroupNode, HistoryNode } from "@vireocodedev/starter-histor
 import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
 
 function isVisible(node: HistoryNode, showUnchanged: boolean): boolean {
-  if (node.type === "group") return node.children.some(child => isVisible(child, showUnchanged));
+  if (node.type === "group") {
+    if (node.children.length === 0) return node.changeType !== "unchanged";
+    return node.children.some(child => isVisible(child, showUnchanged));
+  }
   return showUnchanged || node.type !== "unchanged";
 }
 
@@ -37,6 +40,7 @@ function getGroupStatus(group: HistoryGroupNode): HistoryStatus {
 
   collectStatuses(group.children);
 
+  if (statuses.size === 0) return group.changeType;
   if (statuses.size === 1) return statuses.values().next().value ?? "updated";
   return "updated";
 }
@@ -59,10 +63,32 @@ export function HistoryGroupView({
   const isRoot = depth === 1;
   const expanded = disclosure.isExpanded(group.path, depth);
   const visibleChildren = group.children.filter(child => isVisible(child, disclosure.showUnchanged));
+  const hasVisibleChildren = visibleChildren.length > 0;
   const status = getGroupStatus(group);
-  const count = countChangedFields(group.children);
+  const count = hasVisibleChildren ? countChangedFields(group.children) : group.changeType === "unchanged" ? 0 : 1;
 
-  if (!isRoot && visibleChildren.length === 0) return null;
+  if (!isRoot && !hasVisibleChildren && group.changeType === "unchanged") return null;
+
+  const summary = (
+    <>
+      {hasVisibleChildren ? (
+        <KeyboardArrowDownRoundedIcon className="VireoHistoryEntry-summaryChevron" fontSize="small" />
+      ) : null}
+      <HistoryStatusBadge focusable={false} status={status} labels={disclosure.labels} />
+      <span className="VireoHistoryEntry-summaryText">
+        <span className="VireoHistoryEntry-summaryPrimary">
+          {isRoot && !showRootEntityLabel ? (rootMeta ?? group.label) : group.label}
+          {(!isRoot || showRootEntityLabel) && group.value != null && group.value.formatted !== group.label ? (
+            <span className="VireoHistoryEntry-groupIdentity"> · {group.value.formatted}</span>
+          ) : null}
+        </span>
+        {isRoot && showRootEntityLabel && rootMeta != null ? (
+          <span className="VireoHistoryEntry-summaryMeta">{rootMeta}</span>
+        ) : null}
+      </span>
+      {!isRoot ? <span className="VireoHistoryEntry-groupCount">{disclosure.labels.changes(count)}</span> : null}
+    </>
+  );
 
   return (
     <div
@@ -74,27 +100,20 @@ export function HistoryGroupView({
       aria-level={isRoot ? undefined : depth}
     >
       <div className={isRoot ? "VireoHistoryEntry-rootHeader" : "VireoHistoryEntry-nestedHeader"}>
-        <ButtonBase
-          className={isRoot ? "VireoHistoryEntry-rootSummaryButton" : "VireoHistoryEntry-groupSummary"}
-          aria-expanded={expanded}
-          aria-label={`${expanded ? disclosure.labels.collapseSection : disclosure.labels.expandSection} ${group.label}`}
-          onClick={() => disclosure.onToggleExpanded(group.path, depth)}
-        >
-          <KeyboardArrowDownRoundedIcon className="VireoHistoryEntry-summaryChevron" fontSize="small" />
-          <HistoryStatusBadge focusable={false} status={status} labels={disclosure.labels} />
-          <span className="VireoHistoryEntry-summaryText">
-            <span className="VireoHistoryEntry-summaryPrimary">
-              {isRoot && !showRootEntityLabel ? (rootMeta ?? group.label) : group.label}
-              {(!isRoot || showRootEntityLabel) && group.value != null && group.value.formatted !== group.label ? (
-                <span className="VireoHistoryEntry-groupIdentity"> · {group.value.formatted}</span>
-              ) : null}
-            </span>
-            {isRoot && showRootEntityLabel && rootMeta != null ? (
-              <span className="VireoHistoryEntry-summaryMeta">{rootMeta}</span>
-            ) : null}
-          </span>
-          {!isRoot ? <span className="VireoHistoryEntry-groupCount">{disclosure.labels.changes(count)}</span> : null}
-        </ButtonBase>
+        {hasVisibleChildren ? (
+          <ButtonBase
+            className={isRoot ? "VireoHistoryEntry-rootSummaryButton" : "VireoHistoryEntry-groupSummary"}
+            aria-expanded={expanded}
+            aria-label={`${expanded ? disclosure.labels.collapseSection : disclosure.labels.expandSection} ${group.label}`}
+            onClick={() => disclosure.onToggleExpanded(group.path, depth)}
+          >
+            {summary}
+          </ButtonBase>
+        ) : (
+          <div className={isRoot ? "VireoHistoryEntry-rootSummaryButton" : "VireoHistoryEntry-groupSummary"}>
+            {summary}
+          </div>
+        )}
         {isRoot && expanded && hasUnchanged ? (
           <Button
             className="VireoHistoryEntry-unchangedAction"
@@ -106,45 +125,47 @@ export function HistoryGroupView({
           </Button>
         ) : null}
       </div>
-      <Collapse in={expanded} timeout={150} unmountOnExit>
-        <div
-          className={isRoot ? "VireoHistoryEntry-expandedBody" : "VireoHistoryEntry-groupChildren"}
-          style={
-            isRoot
-              ? undefined
-              : ({
-                  "--VireoHistoryEntry-connectorDepth": Math.min(Math.max(depth - 2, 0), 3),
-                } as React.CSSProperties)
-          }
-        >
-          {isRoot ? (
-            <div className="VireoHistoryEntry-columnHeadings" aria-hidden="true">
-              <span>{disclosure.labels.field}</span>
-              <span>{disclosure.labels.previous}</span>
-              <span>{disclosure.labels.current}</span>
-            </div>
-          ) : null}
-          {visibleChildren.map(child =>
-            child.type === "group" ? (
-              <HistoryGroupView
-                key={getHistoryPathKey(child.path)}
-                depth={depth + 1}
-                disclosure={disclosure}
-                group={child}
-                hasUnchanged={hasUnchanged}
-                showRootEntityLabel={showRootEntityLabel}
-              />
-            ) : (
-              <HistoryFieldRowView
-                key={`${getHistoryPathKey(child.path)}:${child.type}`}
-                depth={depth - 1}
-                labels={disclosure.labels}
-                row={child}
-              />
-            ),
-          )}
-        </div>
-      </Collapse>
+      {hasVisibleChildren ? (
+        <Collapse in={expanded} timeout={150} unmountOnExit>
+          <div
+            className={isRoot ? "VireoHistoryEntry-expandedBody" : "VireoHistoryEntry-groupChildren"}
+            style={
+              isRoot
+                ? undefined
+                : ({
+                    "--VireoHistoryEntry-connectorDepth": Math.min(Math.max(depth - 2, 0), 3),
+                  } as React.CSSProperties)
+            }
+          >
+            {isRoot ? (
+              <div className="VireoHistoryEntry-columnHeadings" aria-hidden="true">
+                <span>{disclosure.labels.field}</span>
+                <span>{disclosure.labels.previous}</span>
+                <span>{disclosure.labels.current}</span>
+              </div>
+            ) : null}
+            {visibleChildren.map(child =>
+              child.type === "group" ? (
+                <HistoryGroupView
+                  key={getHistoryPathKey(child.path)}
+                  depth={depth + 1}
+                  disclosure={disclosure}
+                  group={child}
+                  hasUnchanged={hasUnchanged}
+                  showRootEntityLabel={showRootEntityLabel}
+                />
+              ) : (
+                <HistoryFieldRowView
+                  key={`${getHistoryPathKey(child.path)}:${child.type}`}
+                  depth={depth - 1}
+                  labels={disclosure.labels}
+                  row={child}
+                />
+              ),
+            )}
+          </div>
+        </Collapse>
+      ) : null}
     </div>
   );
 }

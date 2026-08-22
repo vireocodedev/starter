@@ -61,7 +61,7 @@ function createHistoryGroup(
 ): HistoryGroupNode | null {
   const children = createFieldNodesForDefinition(definition, previous, current, path, options);
 
-  if (children.length === 0) {
+  if (children.length === 0 && changeType == null) {
     return null;
   }
 
@@ -341,13 +341,14 @@ function createArrayGroup(args: {
   const currentArray = Array.isArray(current) ? current : [];
 
   const mode = config.mode ?? "set";
+  const containerChangeType = resolveContainerChangeType(previous, current);
 
   const children =
     mode === "ordered"
       ? createOrderedArrayChildren(config, previousArray, currentArray, path, options)
       : createSetArrayChildren(config, previousArray, currentArray, path, options);
 
-  if (children.length === 0) {
+  if (children.length === 0 && containerChangeType == null) {
     return [];
   }
 
@@ -363,7 +364,7 @@ function createArrayGroup(args: {
         path,
         isHistoryValuePresent(current) ? "current" : "previous",
       ),
-      changeType: resolveDefaultGroupChangeType(children),
+      changeType: containerChangeType ?? resolveDefaultGroupChangeType(children),
       children,
     },
   ];

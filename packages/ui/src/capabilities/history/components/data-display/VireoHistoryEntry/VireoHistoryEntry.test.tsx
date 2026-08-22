@@ -87,6 +87,31 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(screen.queryByText("—")).not.toBeInTheDocument();
   });
 
+  it("renders empty container changes without a dead disclosure control", () => {
+    const schema = z.object({ id: z.string(), items: z.array(z.string()).nullable() });
+    const definition = createHistoryDefinition(
+      schema,
+      { label: "List", key: list => list.id },
+      {
+        id: false,
+        items: { kind: "array", label: "Items", item: { kind: "field", label: "Item" } },
+      },
+    );
+
+    render(
+      <VireoHistoryEntry
+        definition={definition}
+        previous={{ id: "list-1", items: null }}
+        current={{ id: "list-1", items: [] }}
+      />,
+    );
+
+    expect(screen.getByText("Items")).toBeInTheDocument();
+    expect(screen.getByText("1 change")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Added" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /section Items/u })).not.toBeInTheDocument();
+  });
+
   it.fails("renders consumer-provided content for an absent comparison value", () => {
     render(
       <VireoHistoryEntry

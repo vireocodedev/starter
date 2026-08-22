@@ -110,7 +110,7 @@ describe("history audit regressions", () => {
     ]);
   });
 
-  it.fails("emits added empty array containers", () => {
+  it("emits added and removed empty containers", () => {
     const schema = z.object({ items: z.array(z.string()).nullable() });
     const definition = createHistoryDefinition(
       schema,
@@ -122,6 +122,31 @@ describe("history audit regressions", () => {
       {
         type: "group",
         children: [{ type: "group", path: ["items"], changeType: "added", children: [] }],
+      },
+    ]);
+    expect(createHistoryNodes(definition, { items: [] }, { items: null })).toMatchObject([
+      {
+        type: "group",
+        children: [{ type: "group", path: ["items"], changeType: "removed", children: [] }],
+      },
+    ]);
+
+    const metadataSchema = z.object({ metadata: z.object({}).nullable() });
+    const emptyMetadataDefinition = createHistoryDefinition(
+      z.object({}),
+      { label: "Metadata", key: () => "metadata" },
+      {},
+    );
+    const metadataHistory = createHistoryDefinition(
+      metadataSchema,
+      { label: "Document", key: () => "document" },
+      { metadata: { kind: "object", definition: emptyMetadataDefinition } },
+    );
+
+    expect(createHistoryNodes(metadataHistory, { metadata: null }, { metadata: {} })).toMatchObject([
+      {
+        type: "group",
+        children: [{ type: "group", path: ["metadata"], changeType: "added", children: [] }],
       },
     ]);
   });

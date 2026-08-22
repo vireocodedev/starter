@@ -33,12 +33,18 @@ const DEFAULT_LABELS = {
 } as const;
 
 function containsChangedHistoryNode(node: HistoryNode): boolean {
-  if (node.type === "group") return node.children.some(containsChangedHistoryNode);
+  if (node.type === "group") {
+    if (node.children.length === 0) return node.changeType !== "unchanged";
+    return node.children.some(containsChangedHistoryNode);
+  }
   return node.type !== "unchanged";
 }
 
 function containsUnchangedHistoryNode(node: HistoryNode): boolean {
-  if (node.type === "group") return node.children.some(containsUnchangedHistoryNode);
+  if (node.type === "group") {
+    if (node.children.length === 0) return node.changeType === "unchanged";
+    return node.children.some(containsUnchangedHistoryNode);
+  }
   return node.type === "unchanged";
 }
 
