@@ -94,16 +94,18 @@ Two consequences are enforced mechanically by
 
 - Every declared entry point's export list is frozen against
   `packages/<pkg>/api-surface.json`, so a layering change cannot land silently.
-- The worker-safe entry points — `starter-history` (`.`) and `starter-sqlite`
-  (`.` and `./offline`) — must stay free of React, MUI and other framework code.
-  SQLite is evaluated inside a Web Worker today; history deliberately promises
-  the same runtime portability as part of the non-React package pilot.
+- The worker-safe entry points — `starter-history` (`.`), `starter-localization`
+  (`.`), and `starter-sqlite` (`.` and `./offline`) — must stay free of React,
+  MUI and other framework code. SQLite is evaluated inside a Web Worker today;
+  History and Localization deliberately promise the same runtime portability as
+  part of the non-React package contract.
 
 All frontend packages other than `starter-ui` are now being migrated to the
 stricter [non-React package authoring contract](./package-authoring/NON_REACT_PACKAGES.md).
 That contract excludes React from both runtime code and public declarations;
-reusable React presentation belongs in `starter-ui`. `starter-history` is the
-first pilot, after which the same audit is applied package by package.
+reusable React presentation belongs in `starter-ui`. `starter-history` and
+`starter-localization` are the completed pilots whose contracts are now applied
+package by package.
 
 ## Known imperfection
 

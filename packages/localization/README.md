@@ -146,6 +146,14 @@ Translation keys and base locales are versioned contracts:
 
 Explicit contract tests guard namespace keys and locale parity.
 
+## Live documentation
+
+The shared Vireo Starter Storybook contains the package's executable primary
+workflow, late-registration path, custom-namespace toolkit, number formatting,
+and failure semantics. Every displayed example imports this package through its
+published entry point, is typechecked with the package, and executes from the
+same source shown to readers.
+
 ## Scripts
 
 - `npm run build` — build the ESM runtime and bundled declarations.
