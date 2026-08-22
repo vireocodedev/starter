@@ -9,7 +9,7 @@ import { VireoHistoryEntryRoot } from "./VireoHistoryEntry.styled";
 import { type VireoHistoryEntryOwnerState, type VireoHistoryEntryProps } from "./VireoHistoryEntry.types";
 import { HistoryNodeView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryNodeView/HistoryNodeView";
 import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
-import { createHistoryNodes, type AnyHistoryDefinition, type HistoryNode } from "@vireocodedev/starter-history";
+import { createHistoryNodes, type HistoryNode } from "@vireocodedev/starter-history";
 
 const DEFAULT_LABELS = {
   expandSection: "Expand section",
@@ -55,8 +55,8 @@ function useUtilityClasses(_ownerState: VireoHistoryEntryOwnerState, classes?: V
   );
 }
 
-function VireoHistoryEntryImpl<TDefinition extends AnyHistoryDefinition>(
-  inProps: VireoHistoryEntryProps<TDefinition>,
+function VireoHistoryEntryImpl<TEntity extends object>(
+  inProps: VireoHistoryEntryProps<TEntity>,
   forwardedRef: React.ForwardedRef<HTMLDivElement>,
 ) {
   const props = useThemeProps({ props: inProps, name: VIREO_HISTORY_ENTRY_NAME });
@@ -78,11 +78,12 @@ function VireoHistoryEntryImpl<TDefinition extends AnyHistoryDefinition>(
     sx,
     ...other
   } = props;
+  void emptyValue;
 
   const labels = { ...DEFAULT_LABELS, ...labelsProp };
   const nodes = React.useMemo(
-    () => createHistoryNodes(definition, previous, current, { emptyValue, showUnchanged: true }),
-    [current, definition, emptyValue, previous],
+    () => createHistoryNodes(definition, previous, current, { showUnchanged: true }),
+    [current, definition, previous],
   );
 
   const hasChanges = nodes.some(containsChangedHistoryNode);
@@ -173,8 +174,8 @@ function VireoHistoryEntryImpl<TDefinition extends AnyHistoryDefinition>(
 }
 
 type VireoHistoryEntryComponent = {
-  <TDefinition extends AnyHistoryDefinition>(
-    props: VireoHistoryEntryProps<TDefinition> & React.RefAttributes<HTMLDivElement>,
+  <TEntity extends object>(
+    props: VireoHistoryEntryProps<TEntity> & React.RefAttributes<HTMLDivElement>,
   ): React.ReactElement | null;
   displayName?: string;
 };

@@ -1,12 +1,12 @@
 import { VireoHistoryEntry } from "@vireocodedev/starter-ui";
-import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history";
+import { createHistoryDefinition } from "@vireocodedev/starter-history";
 import { Box } from "@mui/material";
 import { z } from "zod";
 
 const NoteSchema = z.object({ id: z.string(), summary: z.string(), category: z.string() });
-const buildNoteHistory = createHistoryDefinitionBuilderFn(NoteSchema);
-const noteHistoryDefinition = buildNoteHistory(
-  { label: "Case note", key: note => note.id, render: note => note.category },
+const noteHistoryDefinition = createHistoryDefinition(
+  NoteSchema,
+  { label: "Case note", key: note => note.id, format: note => note.category },
   {
     id: false,
     category: { kind: "field", label: "Category" },

@@ -2,16 +2,16 @@ import { VireoHistoryEntry } from "./VireoHistoryEntry";
 import { vireoHistoryEntryClasses } from "./VireoHistoryEntry.classes";
 import { VIREO_HISTORY_ENTRY_NAME } from "./VireoHistoryEntry.identity";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history";
+import { createHistoryDefinition } from "@vireocodedev/starter-history";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
 const ProfileSchema = z.object({ id: z.string(), name: z.string(), status: z.string(), owner: z.string() });
-const buildProfileHistory = createHistoryDefinitionBuilderFn(ProfileSchema);
-const profileHistoryDefinition = buildProfileHistory(
-  { label: "Profile", key: profile => profile.id, render: profile => profile.name },
+const profileHistoryDefinition = createHistoryDefinition(
+  ProfileSchema,
+  { label: "Profile", key: profile => profile.id, format: profile => profile.name },
   {
     id: false,
     name: { kind: "field", label: "Name" },
@@ -25,16 +25,16 @@ const currentProfile = { id: "profile-1", name: "Northstar", status: "Active", o
 
 const AddressSchema = z.object({ city: z.string(), country: z.string() });
 const NestedProfileSchema = z.object({ id: z.string(), address: AddressSchema });
-const buildAddressHistory = createHistoryDefinitionBuilderFn(AddressSchema);
-const addressHistoryDefinition = buildAddressHistory(
+const addressHistoryDefinition = createHistoryDefinition(
+  AddressSchema,
   { label: "Address", key: address => address.city },
   {
     city: { kind: "field", label: "City" },
     country: { kind: "field", label: "Country" },
   },
 );
-const buildNestedProfileHistory = createHistoryDefinitionBuilderFn(NestedProfileSchema);
-const nestedProfileHistoryDefinition = buildNestedProfileHistory(
+const nestedProfileHistoryDefinition = createHistoryDefinition(
+  NestedProfileSchema,
   { label: "Profile", key: profile => profile.id },
   { id: false, address: { kind: "object", definition: addressHistoryDefinition } },
 );

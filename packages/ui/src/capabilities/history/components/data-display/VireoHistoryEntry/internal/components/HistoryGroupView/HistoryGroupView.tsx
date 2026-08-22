@@ -84,8 +84,8 @@ export function HistoryGroupView({
           <span className="VireoHistoryEntry-summaryText">
             <span className="VireoHistoryEntry-summaryPrimary">
               {isRoot && !showRootEntityLabel ? (rootMeta ?? group.label) : group.label}
-              {(!isRoot || showRootEntityLabel) && group.value != null && group.value !== group.label ? (
-                <span className="VireoHistoryEntry-groupIdentity"> · {group.value}</span>
+              {(!isRoot || showRootEntityLabel) && group.value != null && group.value.formatted !== group.label ? (
+                <span className="VireoHistoryEntry-groupIdentity"> · {group.value.formatted}</span>
               ) : null}
             </span>
             {isRoot && showRootEntityLabel && rootMeta != null ? (

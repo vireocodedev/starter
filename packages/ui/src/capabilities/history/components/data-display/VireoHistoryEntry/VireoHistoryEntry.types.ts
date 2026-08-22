@@ -1,7 +1,7 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
-import type { AnyHistoryDefinition, HistoryDefinition } from "@vireocodedev/starter-history";
+import type { HistoryDefinition } from "@vireocodedev/starter-history";
 import type React from "react";
 import { type VireoHistoryEntryClasses, type VireoHistoryEntryClassKey } from "./VireoHistoryEntry.classes";
 import type { VIREO_HISTORY_ENTRY_NAME, VireoHistoryEntrySlotName } from "./VireoHistoryEntry.identity";
@@ -54,17 +54,17 @@ export type VireoHistoryEntrySlotsAndSlotProps = CreateSlotsAndSlotProps<
 >;
 
 /** Props owned by {@link VireoHistoryEntry}. */
-export type VireoHistoryEntrySnapshot<TDefinition extends AnyHistoryDefinition> =
+export type VireoHistoryEntrySnapshot<TDefinition> =
   TDefinition extends HistoryDefinition<infer TEntity> ? TEntity : unknown;
 
-export type VireoHistoryEntryOwnProps<TDefinition extends AnyHistoryDefinition = AnyHistoryDefinition> =
+export type VireoHistoryEntryOwnProps<TEntity extends object = Record<string, unknown>> =
   VireoHistoryEntrySlotsAndSlotProps & {
     /** Typed history definition used to validate, render, and diff both snapshots. */
-    definition: TDefinition;
+    definition: HistoryDefinition<TEntity>;
     /** Snapshot before the recorded change. Use `null` for a newly added entity. */
-    previous: VireoHistoryEntrySnapshot<TDefinition> | null;
+    previous: TEntity | null;
     /** Snapshot after the recorded change. Use `null` for a removed entity. */
-    current: VireoHistoryEntrySnapshot<TDefinition> | null;
+    current: TEntity | null;
     /** Content rendered for nullish or otherwise empty field values. */
     emptyValue?: React.ReactNode;
     /** Metadata displayed beside the root expansion control. */
@@ -85,8 +85,8 @@ export type VireoHistoryEntryOwnProps<TDefinition extends AnyHistoryDefinition =
 export type VireoHistoryEntryInheritedProps = Omit<BoxProps<"div">, "children" | "component">;
 
 /** Props accepted by {@link VireoHistoryEntry}. */
-export type VireoHistoryEntryProps<TDefinition extends AnyHistoryDefinition = AnyHistoryDefinition> =
-  VireoHistoryEntryOwnProps<TDefinition> & VireoHistoryEntryInheritedProps;
+export type VireoHistoryEntryProps<TEntity extends object = Record<string, unknown>> =
+  VireoHistoryEntryOwnProps<TEntity> & VireoHistoryEntryInheritedProps;
 
 declare module "@mui/material/styles" {
   interface Components<Theme = unknown> {

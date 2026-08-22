@@ -1,5 +1,5 @@
 import { VireoHistoryEntry } from "@vireocodedev/starter-ui";
-import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history";
+import { createHistoryDefinition } from "@vireocodedev/starter-history";
 import { Box, Typography } from "@mui/material";
 import { z } from "zod";
 
@@ -10,9 +10,9 @@ const CustomerSchema = z.object({
   owner: z.string(),
 });
 
-const buildCustomerHistory = createHistoryDefinitionBuilderFn(CustomerSchema);
-const customerHistoryDefinition = buildCustomerHistory(
-  { label: "Customer", key: customer => customer.id, render: customer => customer.name },
+const customerHistoryDefinition = createHistoryDefinition(
+  CustomerSchema,
+  { label: "Customer", key: customer => customer.id, format: customer => customer.name },
   {
     id: false,
     name: { kind: "field", label: "Name" },

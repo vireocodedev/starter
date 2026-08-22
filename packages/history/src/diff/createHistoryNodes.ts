@@ -1,38 +1,45 @@
-import { HISTORY_DEFAULT_POSITION_LABEL } from "@/engine/history.engine.constants";
-import { renderArrayValue, renderDefinitionValue, renderFieldValue } from "@/engine/history.engine.render";
-import {
-  areHistoryValuesEqual,
-  getObjectFieldValue,
-  isEmptyHistoryValue,
-  isPrimitiveIdentityValue,
-  stableStringify,
-} from "@/engine/history.engine.utils";
-import type React from "react";
 import type {
-  AnyArrayFieldConfig,
-  AnyArrayItemConfig,
-  AnyAtomicFieldConfig,
-  AnyHistoryDefinition,
-  AnyHistoryFieldConfig,
-  AnyNonIgnoredHistoryFieldConfig,
-  AnyObjectFieldConfig,
+  HistoryArrayFieldConfig,
+  HistoryArrayItemConfig,
+  HistoryAtomicFieldConfig,
+  HistoryDefinition,
   HistoryEntityKey,
+  HistoryFieldConfig,
+  HistoryObjectFieldConfig,
+} from "../definitions/historyDefinition.types";
+import { areHistoryValuesEqual, formatHistoryValue, isHistoryValuePresent, stableStringify } from "./historyValue";
+import type {
+  HistoryEngineOptions,
   HistoryFieldRow,
   HistoryGroupChangeType,
   HistoryGroupNode,
   HistoryNode,
-} from "./history.engine.types";
+  HistoryValue,
+} from "./historyNode.types";
+import type { z } from "zod";
 
-export type HistoryEngineOptions = {
-  emptyValue?: React.ReactNode;
-  positionLabel?: React.ReactNode;
-  showUnchanged?: boolean;
-};
+const DEFAULT_POSITION_LABEL = "Position";
 
-export function createHistoryNodes(
-  definition: AnyHistoryDefinition,
-  previous: unknown,
-  current: unknown,
+// These erased forms are implementation details; consumers use the typed
+// definition/config contracts exported from the package root.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalHistoryDefinition = HistoryDefinition<any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalFieldConfig = HistoryFieldConfig<any, any>;
+type InternalNonIgnoredFieldConfig = Exclude<InternalFieldConfig, false>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalAtomicFieldConfig = HistoryAtomicFieldConfig<any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalArrayFieldConfig = HistoryArrayFieldConfig<any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalArrayItemConfig = HistoryArrayItemConfig<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InternalObjectFieldConfig = HistoryObjectFieldConfig<any>;
+
+export function createHistoryNodes<TEntity extends object, TSchema extends z.ZodTypeAny>(
+  definition: HistoryDefinition<TEntity, TSchema>,
+  previous: TEntity | null | undefined,
+  current: TEntity | null | undefined,
   options: HistoryEngineOptions = {},
 ): HistoryNode[] {
   const previousParsed = parseOptionalSnapshot(definition, previous);
@@ -43,8 +50,8 @@ export function createHistoryNodes(
   return group == null ? [] : [group];
 }
 
-export function createHistoryGroup(
-  definition: AnyHistoryDefinition,
+function createHistoryGroup(
+  definition: InternalHistoryDefinition,
   previous: unknown,
   current: unknown,
   path: string[],
@@ -61,14 +68,19 @@ export function createHistoryGroup(
     type: "group",
     path,
     label: definition.options.label,
-    value: renderDefinitionValue(definition, current ?? previous, path, options),
+    value: formatDefinitionValue(
+      definition,
+      isHistoryValuePresent(current) ? current : previous,
+      path,
+      isHistoryValuePresent(current) ? "current" : "previous",
+    ),
     changeType: changeType ?? resolveDefaultGroupChangeType(children),
     children,
   };
 }
 
-function parseOptionalSnapshot(definition: AnyHistoryDefinition, value: unknown): unknown {
-  if (isEmptyHistoryValue(value)) {
+function parseOptionalSnapshot(definition: InternalHistoryDefinition, value: unknown): unknown {
+  if (!isHistoryValuePresent(value)) {
     return undefined;
   }
 
@@ -76,7 +88,7 @@ function parseOptionalSnapshot(definition: AnyHistoryDefinition, value: unknown)
 }
 
 function createFieldNodesForDefinition(
-  definition: AnyHistoryDefinition,
+  definition: InternalHistoryDefinition,
   previous: unknown,
   current: unknown,
   path: string[],
@@ -86,7 +98,7 @@ function createFieldNodesForDefinition(
   const nestedNodes: HistoryNode[] = [];
 
   for (const fieldName of Object.keys(definition.fields)) {
-    const fieldConfig = definition.fields[fieldName] as AnyHistoryFieldConfig;
+    const fieldConfig = definition.fields[fieldName] as InternalFieldConfig;
 
     if (fieldConfig === false) {
       continue;
@@ -118,7 +130,7 @@ function createFieldNodesForDefinition(
 }
 
 function createFieldNodes(args: {
-  config: AnyNonIgnoredHistoryFieldConfig;
+  config: InternalNonIgnoredFieldConfig;
   previous: unknown;
   current: unknown;
   previousParent: unknown;
@@ -159,7 +171,7 @@ function createFieldNodes(args: {
 }
 
 function createAtomicFieldRow(args: {
-  config: AnyAtomicFieldConfig;
+  config: InternalAtomicFieldConfig;
   previous: unknown;
   current: unknown;
   previousParent: unknown;
@@ -188,7 +200,7 @@ function createAtomicFieldRow(args: {
       type: "removed",
       path,
       label: config.label,
-      previous: renderFieldValue({
+      previous: formatFieldValue({
         config,
         value: previous,
         parent: previousParent,
@@ -204,7 +216,7 @@ function createAtomicFieldRow(args: {
       type: "added",
       path,
       label: config.label,
-      current: renderFieldValue({
+      current: formatFieldValue({
         config,
         value: current,
         parent: currentParent,
@@ -219,7 +231,7 @@ function createAtomicFieldRow(args: {
     type: "updated",
     path,
     label: config.label,
-    previous: renderFieldValue({
+    previous: formatFieldValue({
       config,
       value: previous,
       parent: previousParent,
@@ -227,7 +239,7 @@ function createAtomicFieldRow(args: {
       path,
       options,
     }),
-    current: renderFieldValue({
+    current: formatFieldValue({
       config,
       value: current,
       parent: currentParent,
@@ -239,7 +251,7 @@ function createAtomicFieldRow(args: {
 }
 
 function createUnchangedFieldRow(args: {
-  config: AnyAtomicFieldConfig;
+  config: InternalAtomicFieldConfig;
   previous: unknown;
   current: unknown;
   previousParent: unknown;
@@ -253,20 +265,20 @@ function createUnchangedFieldRow(args: {
     return null;
   }
 
-  const value = isEmptyHistoryValue(current) ? previous : current;
+  const value = isHistoryValuePresent(current) ? current : previous;
 
-  if (isEmptyHistoryValue(value)) {
+  if (!isHistoryValuePresent(value)) {
     return null;
   }
 
-  const parent = isEmptyHistoryValue(current) ? previousParent : currentParent;
-  const side = isEmptyHistoryValue(current) ? "previous" : "current";
+  const parent = isHistoryValuePresent(current) ? currentParent : previousParent;
+  const side = isHistoryValuePresent(current) ? "current" : "previous";
 
   return {
     type: "unchanged",
     path,
     label: config.label,
-    current: renderFieldValue({
+    current: formatFieldValue({
       config,
       value,
       parent,
@@ -278,7 +290,7 @@ function createUnchangedFieldRow(args: {
 }
 
 function createObjectGroup(args: {
-  config: AnyObjectFieldConfig;
+  config: InternalObjectFieldConfig;
   previous: unknown;
   current: unknown;
   path: string[];
@@ -299,8 +311,8 @@ function createObjectGroup(args: {
 }
 
 function resolveContainerChangeType(previous: unknown, current: unknown): HistoryGroupChangeType | undefined {
-  const previousEmpty = isEmptyHistoryValue(previous);
-  const currentEmpty = isEmptyHistoryValue(current);
+  const previousEmpty = !isHistoryValuePresent(previous);
+  const currentEmpty = !isHistoryValuePresent(current);
 
   if (previousEmpty && !currentEmpty) {
     return "added";
@@ -314,13 +326,15 @@ function resolveContainerChangeType(previous: unknown, current: unknown): Histor
 }
 
 function createArrayGroup(args: {
-  config: AnyArrayFieldConfig;
+  config: InternalArrayFieldConfig;
   previous: unknown;
   current: unknown;
+  previousParent: unknown;
+  currentParent: unknown;
   path: string[];
   options: HistoryEngineOptions;
 }): HistoryNode[] {
-  const { config, previous, current, path, options } = args;
+  const { config, previous, current, previousParent, currentParent, path, options } = args;
 
   const previousArray = Array.isArray(previous) ? previous : [];
   const currentArray = Array.isArray(current) ? current : [];
@@ -341,14 +355,21 @@ function createArrayGroup(args: {
       type: "group",
       path,
       label: config.label,
-      value: renderArrayValue(config, currentArray, path),
+      value: formatArrayValue(
+        config,
+        isHistoryValuePresent(current) ? currentArray : previousArray,
+        isHistoryValuePresent(current) ? currentParent : previousParent,
+        path,
+        isHistoryValuePresent(current) ? "current" : "previous",
+      ),
+      changeType: resolveDefaultGroupChangeType(children),
       children,
     },
   ];
 }
 
 function createSetArrayChildren(
-  config: AnyArrayFieldConfig,
+  config: InternalArrayFieldConfig,
   previousArray: unknown[],
   currentArray: unknown[],
   path: string[],
@@ -394,7 +415,7 @@ function createSetArrayChildren(
 }
 
 function createOrderedArrayChildren(
-  config: AnyArrayFieldConfig,
+  config: InternalArrayFieldConfig,
   previousArray: unknown[],
   currentArray: unknown[],
   path: string[],
@@ -449,7 +470,7 @@ function createOrderedArrayChildren(
 }
 
 function createMatchedArrayItemNodes(args: {
-  config: AnyArrayFieldConfig;
+  config: InternalArrayFieldConfig;
   previous: unknown;
   current: unknown;
   path: string[];
@@ -457,7 +478,7 @@ function createMatchedArrayItemNodes(args: {
   options: HistoryEngineOptions;
 }): HistoryNode[] {
   const { config, previous, current, path, movedRow, options } = args;
-  const item = config.item as AnyArrayItemConfig;
+  const item = config.item as InternalArrayItemConfig;
 
   if (item.kind === "object") {
     const group = createHistoryGroup(item.definition, previous, current, path, options);
@@ -488,12 +509,12 @@ function createMatchedArrayItemNodes(args: {
 }
 
 function createAddedArrayItemNodes(
-  config: AnyArrayFieldConfig,
+  config: InternalArrayFieldConfig,
   current: unknown,
   path: string[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
-  const item = config.item as AnyArrayItemConfig;
+  const item = config.item as InternalArrayItemConfig;
 
   if (item.kind === "object") {
     const group = createHistoryGroup(item.definition, undefined, current, path, options, "added");
@@ -504,7 +525,7 @@ function createAddedArrayItemNodes(
             type: "added",
             path,
             label: item.definition.options.label,
-            current: renderDefinitionValue(item.definition, current, path, options),
+            current: formatDefinitionValue(item.definition, current, path, "current"),
           },
         ]
       : [group];
@@ -522,12 +543,12 @@ function createAddedArrayItemNodes(
 }
 
 function createRemovedArrayItemNodes(
-  config: AnyArrayFieldConfig,
+  config: InternalArrayFieldConfig,
   previous: unknown,
   path: string[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
-  const item = config.item as AnyArrayItemConfig;
+  const item = config.item as InternalArrayItemConfig;
 
   if (item.kind === "object") {
     const group = createHistoryGroup(item.definition, previous, undefined, path, options, "removed");
@@ -538,7 +559,7 @@ function createRemovedArrayItemNodes(
             type: "removed",
             path,
             label: item.definition.options.label,
-            previous: renderDefinitionValue(item.definition, previous, path, options),
+            previous: formatDefinitionValue(item.definition, previous, path, "previous"),
           },
         ]
       : [group];
@@ -556,7 +577,7 @@ function createRemovedArrayItemNodes(
 }
 
 function createMovedOnlyGroup(
-  item: Extract<AnyArrayItemConfig, { kind: "object" }>,
+  item: Extract<InternalArrayItemConfig, { kind: "object" }>,
   current: unknown,
   path: string[],
   movedRow: HistoryFieldRow,
@@ -566,7 +587,7 @@ function createMovedOnlyGroup(
     type: "group",
     path,
     label: item.definition.options.label,
-    value: renderDefinitionValue(item.definition, current, path, options),
+    value: formatDefinitionValue(item.definition, current, path, "current"),
     changeType: "updated",
     children: [movedRow],
   };
@@ -581,33 +602,37 @@ function createMovedRow(
   return {
     type: "moved",
     path: [...path, "$position"],
-    label: String(options.positionLabel ?? HISTORY_DEFAULT_POSITION_LABEL),
-    previous: String(previousIndex + 1),
-    current: String(currentIndex + 1),
+    label: options.positionLabel ?? DEFAULT_POSITION_LABEL,
+    previous: createHistoryValue(previousIndex, String(previousIndex + 1)),
+    current: createHistoryValue(currentIndex, String(currentIndex + 1)),
   };
 }
 
 function createArrayItemMap(
-  config: AnyArrayFieldConfig,
+  config: InternalArrayFieldConfig,
   array: unknown[],
 ): Map<HistoryEntityKey, { value: unknown; index: number }> {
   const map = new Map<HistoryEntityKey, { value: unknown; index: number }>();
 
   array.forEach((value, index) => {
-    map.set(createArrayItemKey(config, value, index), { value, index });
+    const key = createArrayItemKey(config, value, index);
+    if (map.has(key)) {
+      throw new Error(`Duplicate history array identity "${String(key)}" at "${String(index)}".`);
+    }
+    map.set(key, { value, index });
   });
 
   return map;
 }
 
-function createArrayItemKey(config: AnyArrayFieldConfig, value: unknown, index: number): HistoryEntityKey {
-  const item = config.item as AnyArrayItemConfig;
+function createArrayItemKey(config: InternalArrayFieldConfig, value: unknown, index: number): HistoryEntityKey {
+  const item = config.item as InternalArrayItemConfig;
 
   if (item.kind === "object") {
     return item.definition.options.key(value);
   }
 
-  if (isPrimitiveIdentityValue(value)) {
+  if (typeof value === "string" || typeof value === "number") {
     return value;
   }
 
@@ -704,8 +729,8 @@ function getHistoryFieldRowChangeOrder(row: HistoryFieldRow): number {
 }
 
 function resolveDefaultFieldChange(previous: unknown, current: unknown): "added" | "removed" | "updated" | null {
-  const previousEmpty = isEmptyHistoryValue(previous);
-  const currentEmpty = isEmptyHistoryValue(current);
+  const previousEmpty = !isHistoryValuePresent(previous);
+  const currentEmpty = !isHistoryValuePresent(current);
 
   if (previousEmpty && currentEmpty) {
     return null;
@@ -724,4 +749,49 @@ function resolveDefaultFieldChange(previous: unknown, current: unknown): "added"
   }
 
   return "updated";
+}
+
+function getObjectFieldValue(value: unknown, fieldName: string): unknown {
+  if (value == null || typeof value !== "object") return undefined;
+  return (value as Record<string, unknown>)[fieldName];
+}
+
+function formatFieldValue(args: {
+  config: InternalAtomicFieldConfig;
+  value: unknown;
+  parent: unknown;
+  side: "previous" | "current";
+  path: string[];
+  options: HistoryEngineOptions;
+}): HistoryValue {
+  const { config, value, parent, side, path } = args;
+  return formatHistoryValue(value, config.format, { parent, side, path });
+}
+
+function formatArrayValue(
+  config: InternalArrayFieldConfig,
+  value: unknown[],
+  parent: unknown,
+  path: string[],
+  side: "previous" | "current",
+): HistoryValue | undefined {
+  if (config.format == null) return undefined;
+  return formatHistoryValue(value, config.format, { parent, side, path });
+}
+
+function formatDefinitionValue(
+  definition: InternalHistoryDefinition,
+  value: unknown,
+  path: string[],
+  side: "previous" | "current",
+): HistoryValue {
+  if (definition.options.format == null) {
+    return createHistoryValue(value, definition.options.label);
+  }
+
+  return formatHistoryValue(value, definition.options.format, { parent: value, side, path });
+}
+
+function createHistoryValue(raw: unknown, formatted: string): HistoryValue {
+  return { raw, formatted };
 }

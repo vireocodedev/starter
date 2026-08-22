@@ -1,5 +1,5 @@
 import { VireoHistoryEntry } from "@vireocodedev/starter-ui";
-import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history";
+import { createHistoryDefinition } from "@vireocodedev/starter-history";
 import { Box } from "@mui/material";
 import { z } from "zod";
 
@@ -13,35 +13,35 @@ const CustomerSchema = z.object({
   contact: ContactSchema,
 });
 
-const buildRegionHistory = createHistoryDefinitionBuilderFn(RegionSchema);
-const regionHistoryDefinition = buildRegionHistory(
-  { label: "Region", key: region => region.country, render: region => region.county },
+const regionHistoryDefinition = createHistoryDefinition(
+  RegionSchema,
+  { label: "Region", key: region => region.country, format: region => region.county },
   {
     county: { kind: "field", label: "County" },
     country: { kind: "field", label: "Country" },
   },
 );
-const buildAddressHistory = createHistoryDefinitionBuilderFn(AddressSchema);
-const addressHistoryDefinition = buildAddressHistory(
-  { label: "Address", key: address => address.postalCode, render: address => address.city },
+const addressHistoryDefinition = createHistoryDefinition(
+  AddressSchema,
+  { label: "Address", key: address => address.postalCode, format: address => address.city },
   {
     city: { kind: "field", label: "City" },
     postalCode: { kind: "field", label: "Postal code" },
     region: { kind: "object", definition: regionHistoryDefinition },
   },
 );
-const buildContactHistory = createHistoryDefinitionBuilderFn(ContactSchema);
-const contactHistoryDefinition = buildContactHistory(
-  { label: "Contact", key: contact => contact.phone, render: contact => contact.email },
+const contactHistoryDefinition = createHistoryDefinition(
+  ContactSchema,
+  { label: "Contact", key: contact => contact.phone, format: contact => contact.email },
   {
     email: { kind: "field", label: "Email" },
     phone: { kind: "field", label: "Phone" },
   },
 );
 
-const buildCustomerHistory = createHistoryDefinitionBuilderFn(CustomerSchema);
-const customerHistoryDefinition = buildCustomerHistory(
-  { label: "Customer", key: customer => customer.id, render: customer => customer.name },
+const customerHistoryDefinition = createHistoryDefinition(
+  CustomerSchema,
+  { label: "Customer", key: customer => customer.id, format: customer => customer.name },
   {
     id: false,
     name: { kind: "field", label: "Name" },

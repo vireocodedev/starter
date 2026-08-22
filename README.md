@@ -26,7 +26,7 @@ Note that the two halves reuse names for different things: the npm package
 | [`@vireocodedev/starter-core`](packages/core)                     | 0.9.0   | App-shell framework: config/sitemap/routing scaffolding, route guards, the responsive shell + navigation, and layout presets.                           |
 | [`@vireocodedev/starter-localization`](packages/localization)     | 0.8.0   | Foundation i18n toolkit + shared `platform` translations.                                                                                               |
 | [`@vireocodedev/starter-sqlite`](packages/sqlite)                 | 0.5.0   | SQLite worker/client runtime primitives for offline persistence (OPFS).                                                                                 |
-| [`@vireocodedev/starter-history`](packages/history)               | 0.4.0   | Framework-agnostic entity history engine (diff/build/render definitions) and generic history models.                                                    |
+| [`@vireocodedev/starter-history`](packages/history)               | 1.0.0   | Framework-free entity history definitions, diff nodes, and transport-neutral record schemas.                                                            |
 | [`@vireocodedev/starter-infrastructure`](packages/infrastructure) | 0.4.0   | Frontend infrastructure utilities: network status, persistent signals, date/array helpers, session-expiry events, axios helpers, tanstack query client. |
 
 Versions above are the currently published ones; `packages/*/package.json` is the source of truth.

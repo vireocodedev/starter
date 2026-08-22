@@ -103,7 +103,7 @@ export function HistoryFieldRowView({
           placement="previous"
           removed={row.type === "removed"}
         >
-          {hasPrevious ? row.previous : null}
+          {hasPrevious ? row.previous.formatted : null}
         </HistoryValueBlock>
       )}
       {showsComparison ? (
@@ -119,7 +119,7 @@ export function HistoryFieldRowView({
         onOverflowChange={setCurrentOverflowing}
         placement="current"
       >
-        {hasCurrent ? row.current : null}
+        {hasCurrent ? row.current.formatted : null}
       </HistoryValueBlock>
       {expandable || expanded ? (
         <Button

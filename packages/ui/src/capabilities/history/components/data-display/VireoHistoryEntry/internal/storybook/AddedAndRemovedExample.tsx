@@ -1,12 +1,12 @@
 import { VireoHistoryEntry } from "@vireocodedev/starter-ui";
-import { createHistoryDefinitionBuilderFn } from "@vireocodedev/starter-history";
+import { createHistoryDefinition } from "@vireocodedev/starter-history";
 import { Box, Stack, Typography } from "@mui/material";
 import { z } from "zod";
 
 const MemberSchema = z.object({ id: z.string(), name: z.string(), role: z.string() });
-const buildMemberHistory = createHistoryDefinitionBuilderFn(MemberSchema);
-const memberHistoryDefinition = buildMemberHistory(
-  { label: "Member", key: member => member.id, render: member => member.name },
+const memberHistoryDefinition = createHistoryDefinition(
+  MemberSchema,
+  { label: "Member", key: member => member.id, format: member => member.name },
   {
     id: false,
     name: { kind: "field", label: "Name" },

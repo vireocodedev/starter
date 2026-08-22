@@ -1,64 +1,123 @@
 # @vireocodedev/starter-history
 
-Framework-agnostic **entity history** primitives for the vireocodedev **starter**
-product: a headless diff/build **engine** and **generic history models**. No UI,
-no HTTP, no app coupling — peers are only `zod` and `react` (types only).
+Framework-free entity-history primitives: typed definitions, validated history
+records, and a deterministic diff engine. The package owns no React components,
+renderers, HTTP client, application entity enum, or persistence policy.
 
-> The MUI history views, the axios-backed API, and the app's concrete entity
-> kinds intentionally stay in the host application (same split as the query
-> engine). This package is the reusable core they build on.
+React presentation belongs to `@vireocodedev/starter-ui`, whose
+`VireoHistoryEntry` component consumes the nodes produced here.
 
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-history
+npm install @vireocodedev/starter-history zod
 ```
 
-Peers: `react` (type-only), `zod`.
+`zod >=3.24` is the package's only peer dependency.
 
-## Models (generic over entity kind)
-
-Entity kinds are opaque strings; the app injects its concrete set:
+## Define and compare an entity
 
 ```ts
-import { createHistorySchemas } from "@vireocodedev/starter-history";
-import z from "zod";
+import { createHistoryDefinition, createHistoryNodes } from "@vireocodedev/starter-history";
+import { z } from "zod";
 
-const AppEntityKind = z.enum(["INVOICE", "BUYER", "COMPANY", "COUNTRY", "PRODUCT"]);
-const { history } = createHistorySchemas(AppEntityKind); // validated History zod schema
+const CountrySchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  tax: z.number(),
+});
 
-const records = z.array(history).parse(await fetchHistory());
-```
-
-- `History<TSnapshot>` — a history record, generic over the snapshot shape.
-- `HistorySnapshot` / `HistorySnapshotSchema` — an opaque field bag.
-- `HistoryEntityKind` — opaque `string` at the library level.
-- `createHistorySchemas(entityKindSchema?)` — builds the `History` parse schema.
-
-## Engine (headless diff/build)
-
-Describe how an entity's fields render, then diff two snapshots into a node tree:
-
-```ts
-import { createHistoryDefinitionBuilderFn, createHistoryNodes } from "@vireocodedev/starter-history";
-
-const build = createHistoryDefinitionBuilderFn(CountrySchema);
-const definition = build(
-  { label: "Country", key: c => c.code, render: c => c.name },
-  { code: false, tax: { kind: "field", label: "Tax", render: v => `${v}%` } },
+const countryHistory = createHistoryDefinition(
+  CountrySchema,
+  {
+    label: "Country",
+    key: country => country.code,
+    format: country => country.name,
+  },
+  {
+    code: false,
+    name: { kind: "field", label: "Name" },
+    tax: {
+      kind: "field",
+      label: "Tax",
+      format: tax => `${tax}%`,
+    },
+  },
 );
 
-const nodes = createHistoryNodes(definition, previousSnapshot, currentSnapshot);
+const nodes = createHistoryNodes(
+  countryHistory,
+  { code: "HR", name: "Croatia", tax: 25 },
+  { code: "HR", name: "Croatia", tax: 24 },
+);
 ```
 
-- `createHistoryDefinitionBuilderFn(schema)` — a typed definition builder for a zod schema.
-- `createHistoryNodes` / `createHistoryGroup` — diff snapshots into `HistoryNode[]`.
-- `HistoryEngineOptions`, `HistoryNode`, `HistoryGroupNode`, `HistoryDefinition`, … — engine types.
+Definitions are inferred from their Zod schema. Every schema property must be
+configured or explicitly ignored with `false`, so a newly added model field
+cannot silently disappear from history.
 
-`render` outputs are `React.ReactNode` (type-only dependency), so the host app
-supplies the actual rendering layer.
+`format` is optional and must return a string. Each emitted value preserves both
+representations:
 
-## Versioning contract
+```ts
+{
+  raw: 25,
+  formatted: "25%"
+}
+```
 
-The engine + model surface is a contract (add = minor, remove/rename = major),
-guarded by the contract test.
+That boundary keeps the engine useful in Node and Workers while allowing UI to
+render the formatted text or make a UI-specific decision from `raw`.
+
+## Records
+
+```ts
+import { createHistoryRecordSchema } from "@vireocodedev/starter-history";
+import { z } from "zod";
+
+const HistoryRecordSchema = createHistoryRecordSchema(z.enum(["INVOICE", "BUYER"]));
+
+const record = HistoryRecordSchema.parse(await response.json());
+```
+
+A record uses neutral actor metadata:
+
+```ts
+{
+  id: "history-1",
+  timestamp: "2026-08-22T12:00:00Z",
+  actor: { id: "user-1", label: "Alice" },
+  entity: "INVOICE",
+  entityId: "invoice-42",
+  snapshotPrevious: null,
+  snapshotCurrent: { total: 100 }
+}
+```
+
+Use `actor: null` for system-generated changes. Entity kinds remain
+application-owned; passing a Zod enum narrows and validates them.
+
+## Diff semantics
+
+- `null` and `undefined` mean a value is absent.
+- An empty string is a present value and participates in ordinary updates.
+- `set` arrays ignore order; `ordered` arrays additionally emit moved rows.
+- Array item identities must be unique within each snapshot. Duplicate keys
+  throw instead of silently overwriting an item.
+- Unchanged rows are omitted unless `showUnchanged: true` is requested.
+- Added, updated, removed, and unchanged nodes are emitted in deterministic
+  change order.
+- Both snapshots are parsed by the definition's Zod schema before comparison.
+
+## Public concepts
+
+- `createHistoryDefinition` creates a schema-derived entity definition.
+- `createHistoryNodes` validates and compares two optional snapshots.
+- `HistoryDefinition` and field config types describe definitions.
+- `HistoryNode`, `HistoryGroupNode`, `HistoryFieldRow`, and `HistoryValue`
+  describe emitted results.
+- `createHistoryRecordSchema`, `HistoryRecordSchema`, and the record/snapshot
+  types describe transport-neutral audit records.
+
+The public surface is frozen by `api-surface.json`. Export changes require a
+Changeset and deliberate semver decision.
