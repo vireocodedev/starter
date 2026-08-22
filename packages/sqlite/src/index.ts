@@ -33,4 +33,27 @@ export * from "@/offline-queue/replayOfflineSyncBatch";
 export * from "@/runtime/createManagedSqliteRuntime";
 export * from "@/runtime/createSqliteEntityClient";
 export * from "@/runtime/createSqliteTransport";
-export * from "@/runtime";
+export { createSqliteWorkerRuntime, type SqliteWorkerRuntimeConfig } from "@/core/sqliteWorkerRuntime";
+export { createSqliteWorkerRuntimeConfig } from "@/sqliteWorkerConfig";
+export {
+  HYDRATION_ENTITY_STATE_SQLITE_REQUEST_HANDLERS,
+  listHydrationEntityStates,
+  upsertHydrationEntityState,
+  type HydrationEntityStateSqliteOperationMap,
+} from "@/runtime/hydrationEntityStateSqlite";
+export {
+  executePagedQuery,
+  executeSqlScript,
+  SQL_CONSOLE_SQLITE_REQUEST_HANDLERS,
+  type SqlConsoleSqliteOperationMap,
+} from "@/runtime/sqlConsoleSqlite";
+export type {
+  CreateSqliteWorkerRuntimeConfigInput,
+  OfflineSyncCommandRecord,
+  SqlExecutionResult,
+  SqlExecutionStatementResult,
+  SqliteHydrationEntityStateRecord,
+  SqliteWorkerEntityBundleConfig,
+  SqlPagedQueryRequest,
+  SqlPagedQueryResult,
+} from "@/runtime/contracts";
