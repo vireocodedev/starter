@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { ResponsiveOverlayFrameDesktopSidePanelWidth } from "@/capabilities/overlays/types/overlay.types";
-import type { BoxProps, Theme } from "@mui/material";
+import type { BoxProps } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoDockedSidePanelClasses, type VireoDockedSidePanelClassKey } from "./VireoDockedSidePanel.classes";
