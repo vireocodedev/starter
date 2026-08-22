@@ -43,7 +43,6 @@ export type CompiledQueryFilterWhere = {
   filterCount: number;
 };
 
-type QueryFilterRelationOption = { value: string; label: string };
 type CompiledClause = { sql: string; params: unknown[] };
 
 const QueryFilterRowSchema = z.object({

@@ -39,7 +39,7 @@ export type CreateQueryEngineConfigSqliteHandlersConfig = {
   parseJson?: <T>(value: string, fallback: T) => T;
 };
 
-function defaultParseJson<T>(value: string, _fallback: T): T {
+function defaultParseJson<T>(value: string): T {
   try {
     return JSON.parse(value) as T;
   } catch {
