@@ -1,3 +1,6 @@
+import { QueryEngineOperatorSchema } from "../models/queryengine.models";
+import z from "zod";
+
 export type SqliteQueryFilterValueType = "string" | "number" | "boolean";
 
 export type SqliteQueryFilterFieldAdapter = {
@@ -232,5 +235,3 @@ export function compileSearchTextWhere(
     params: searchExpressions.map(() => `%${normalized}%`),
   };
 }
-import { QueryEngineOperatorSchema } from "../models/queryengine.models";
-import z from "zod";

@@ -3,7 +3,7 @@ import {
   compileSearchTextWhere,
   type SqliteQueryFilterAdapter,
   type SqliteSearchSelectColumn,
-} from "@/sqlite/compileQueryFilterWhere";
+} from "./compileQueryFilterWhere";
 
 export type SqlitePageableParams = {
   page: number;

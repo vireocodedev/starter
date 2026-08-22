@@ -26,6 +26,7 @@ describe("starter-queryengine framework boundary", () => {
       );
       expect(source, label).not.toMatch(/\bReact(?:Node|Element|Component|\.)/u);
       expect(source, label).not.toMatch(/\b(?:window|document|navigator)\b/u);
+      expect(source, label).not.toMatch(/from\s+["']@\//u);
     });
   });
 

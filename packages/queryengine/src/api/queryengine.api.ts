@@ -5,7 +5,7 @@ import {
   type QueryEngineEntityKey,
   type QueryEngineEntitySummary,
   type QueryEngineRelationOption,
-} from "@/models/queryengine.models";
+} from "../models/queryengine.models";
 import type z from "zod";
 
 /** Transport-neutral request options — no dependency on a specific HTTP client. */

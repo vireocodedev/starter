@@ -1,7 +1,4 @@
-import {
-  SqliteQueryEngineConfigRecordSchema,
-  type SqliteQueryEngineConfigRecord,
-} from "@/sqlite/queryEngineConfigSqlite";
+import { SqliteQueryEngineConfigRecordSchema, type SqliteQueryEngineConfigRecord } from "./queryEngineConfigSqlite";
 
 export type QueryEngineConfigClientRuntime = {
   shouldUseInMemoryFallback: () => boolean;
