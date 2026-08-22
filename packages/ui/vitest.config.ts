@@ -1,3 +1,4 @@
+import { availableParallelism } from "node:os";
 import { resolve } from "node:path";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
@@ -35,7 +36,11 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["src/**/*.{test,spec}.{ts,tsx}", "tests/**/*.{test,spec}.{ts,tsx}"],
-    maxWorkers: 16,
+    // Do not oversubscribe small CI runners: jsdom interaction tests become
+    // slower than Vitest's per-test timeout when more workers compete than the
+    // machine can actually execute. Keep the established 16-worker ceiling on
+    // larger development machines while respecting cgroup-aware CPU capacity.
+    maxWorkers: Math.min(16, availableParallelism()),
     pool: "threads",
     setupFiles: ["tests/setup.ts"],
   },
