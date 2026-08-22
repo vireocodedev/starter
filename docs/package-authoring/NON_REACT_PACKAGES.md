@@ -112,6 +112,11 @@ The package README must state:
 Examples must compile against the current public API. Generated output and old
 changelog prose are not architectural authority.
 
+Packages contribute live documentation through the shared Vireo Starter
+Storybook according to [Non-React live documentation](./NON_REACT_LIVE_DOCUMENTATION.md).
+React rendering remains owned by the UI documentation host; package examples
+remain framework-free TypeScript outside `src`.
+
 ## Pilot: `starter-history`
 
 The history pilot separates these responsibilities:
