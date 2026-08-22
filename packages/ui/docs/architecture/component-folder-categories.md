@@ -51,7 +51,7 @@ The root contract remains unchanged even when a component needs extra private im
 
 The [component-authoring guides](../component-authoring/component-files.md) are the canonical specification for the contents of these eight files. This guide governs placement and classification rather than duplicating those rules.
 
-Temporary deprecated `Rgo*` aliases may remain as thin compatibility exceptions during migration. A private component promoted to the public API must first adopt the complete Vireo contract.
+A private component promoted to the public API must first adopt the complete Vireo contract.
 
 ### Bound public components
 
@@ -145,7 +145,6 @@ VireoComplexComponent/
 - Story-only or test-only fixtures live under `internal/fixtures` when they are too large to keep in the story or test.
 - Private behavior is exercised through the public owner.
 - Package-contract and cross-capability tests live under `packages/ui/tests`, not inside a component category.
-- Existing Rgo stories remain only while the corresponding compatibility API is intentionally documented.
 
 ## Automated enforcement target
 

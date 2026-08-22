@@ -37,7 +37,7 @@ The allowlist suppresses known paths, not entire rules. It must shrink over time
 
 - Establish `core/public.ts` and approved structural folders.
 - Migrate foundational components, hooks, providers, services, models, types, styles, and utilities as complete modules.
-- Preserve root exports and thin Rgo compatibility names.
+- Replace legacy contracts with deliberately reviewed Vireo or framework-native APIs.
 
 ### Phase 3: capabilities
 
@@ -67,9 +67,9 @@ Design and migrate integrations only after core and capability boundaries stabil
 
 ### Phase 5: compatibility cleanup
 
-- Revisit deprecated Rgo aliases.
-- Revisit the compatibility-only `./api` entry point.
+- Remove deprecated aliases after their Vireo replacements are complete.
 - Remove dead, duplicated, or superseded legacy modules through separately reviewed changes.
+- Keep the architecture allowlist empty.
 
 ## Migration slice completion
 
@@ -98,11 +98,10 @@ Imports into `src` and undeclared implementation paths are not protected contrac
 
 The declared subpaths have these target dispositions:
 
-| Subpath     | Disposition                                                                                   |
-| ----------- | --------------------------------------------------------------------------------------------- |
-| `.`         | Re-export `core/public.ts` and each top-level capability public boundary directly.            |
-| `./country` | Map to `capabilities/country/public.ts`.                                                      |
-| `./api`     | Preserve as a compatibility entry assembled from new owners; do not create an API capability. |
+| Subpath     | Disposition                                                                       |
+| ----------- | --------------------------------------------------------------------------------- |
+| `.`         | Re-export `core/public.ts` and the intentionally root-safe capability boundaries. |
+| `./country` | Map to `capabilities/country/public.ts`.                                          |
 
 ## Inventory conventions
 
@@ -122,7 +121,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 | Current path pattern                                                                                                | Target owner or location              | Disposition | Notes                                                                                        |
 | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
-| `index.ts`                                                                                                          | Package root entry                    | Planned     | Will export `core/public.ts` and each top-level capability boundary directly.                |
+| `index.ts`                                                                                                          | Package root entry                    | Migrated    | Curates core and root-safe capability exports; integration APIs remain on explicit subpaths. |
 | `core/public.ts`                                                                                                    | `core` public boundary                | Migrated    | Re-exports completed core-owned public modules.                                              |
 | `capabilities/overlays/public.ts`                                                                                   | `capabilities/overlays`               | Migrated    | Curated package-facing boundary for completed overlay capability slices.                     |
 | `capabilities/forms/public.ts`                                                                                      | `capabilities/forms`                  | Migrated    | Curated package-facing boundary for completed forms capability slices.                       |
@@ -225,7 +224,6 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | --------------------------------------------------------------- | -------------------------- | ----------- | -------------------------------------------------------------------------- |
 | `core/providers/{VireoProviderComposer,VireoThemeColorMeta}/**` | `core/providers`           | Migrated    | Typed provider composition and reversible document theme-color ownership.  |
 | `core/components/behavior/VireoInitializationBoundary/**`       | `core/components/behavior` | Migrated    | Abortable subtree initialization, cleanup, restart, and error propagation. |
-| `core/services/rgoLocalStorageService/**`                       | `core/services`            | Migrated    | Existing Zod-backed local-storage contract relocated without API changes.  |
 
 ## Utility inventory
 
@@ -235,7 +233,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/forms/utils/{vireoFile.ts,vireoFile.test.ts}`                                                                    | `capabilities/forms/utils` | Migrated    | Shared browser-file acceptance, size formatting, and responsive filename truncation.        |
 | `capabilities/forms/types/vireoFile.types.ts`                                                                                  | `capabilities/forms/types` | Migrated    | Shared file-preview and filename-presentation contracts.                                    |
 | `capabilities/forms/types/vireoMultiStep.types.ts`                                                                             | `capabilities/forms/types` | Migrated    | Shared public multi-step descriptor, state, navigation-result, event, and locale contracts. |
-| `core/types/typeutils.ts`                                                                                                      | `core/types`               | Migrated    | Shared TypeScript and React type helpers retain their package-root exports.                 |
+| `core/types/typeutils.ts`                                                                                                      | `core/types`               | Migrated    | Retains the intentional public `ReactStateSetter` controlled-state contract.                |
 | `core/utils/{currencyFormatters.ts,date.ts,dateFormatters.ts,mathutils.ts,objectutils.ts,strings.ts,themeutils.ts,tsutils.ts}` | `core/utils`               | Migrated    | Generally useful pure formatting, value, theme, and serialization helpers.                  |
 
 ## Ownership decisions recorded by this baseline
@@ -352,6 +350,8 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-22   | `features/i18next/**`, `providers/RgoLocalizationProvider/**`, `setup/{config,translations}/**`, and `@types/i18n.d.ts`                        | `integrations/localization/providers/VireoTemporalLocalizationProvider`                                          | Removed UI-owned i18next configuration and resources; added explicit scoped Day.js and MUI X temporal localization.                        |
 | 2026-08-22   | `@types/{mui,rgo}.d.ts`                                                                                                                        | Removed                                                                                                          | Removed unused source-only palette augmentation and the obsolete global CSS import declaration; the architecture allowlist is now empty.   |
 | 2026-08-22   | `components/data-display/RgoVideoStreamPlayer/**`, `video/**`, and OvenPlayer dependencies                                                     | Removed                                                                                                          | Removed the unused application-specific streaming wrapper and its dedicated public subpath.                                                |
+| 2026-08-22   | `core/services/rgoLocalStorageService/**`, deprecated overlay adapters, and obsolete generic type helpers                                      | Removed                                                                                                          | Removed the final legacy runtime contracts; applications own browser persistence and consumers use the completed Vireo overlays.           |
+| 2026-08-22   | `.storybook/**` and unused `storybook/internal/legacy*` helpers                                                                                | `.storybook-vireo` and `docs/storybook`                                                                          | Removed the obsolete Storybook runtime and migrated the maintained package guides into Vireo Storybook.                                    |
 | 2026-08-22   | `hooks/useRgoSseEmitter/**` and package-root SSE exports                                                                                       | `integrations/event-source/hooks/useVireoEventSource`                                                            | Replaced JSON-coupled custom retry behavior with a native transport lifecycle, raw typed listeners, and explicit application reconnecting. |
 
 ## Automated verification

@@ -24,9 +24,7 @@ export function useAppPermissions() {
  * alongside the static `permissionScope` on nav entries and route handles.
  *
  * @example
- *   <RgoShowIf when={useAppCan("lockage:finalize", { shiftId })}>
- *     <FinalizeButton />
- *   </RgoShowIf>
+ *   {useAppCan("lockage:finalize", { shiftId }) && <FinalizeButton />}
  */
 export function useAppCan(permission: string | undefined, scope?: AppPermissionScope): boolean {
   const { canAccess } = useAppPermissions();

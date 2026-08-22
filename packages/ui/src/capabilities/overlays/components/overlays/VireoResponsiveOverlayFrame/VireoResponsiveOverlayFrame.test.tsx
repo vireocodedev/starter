@@ -290,5 +290,4 @@ describe(VIREO_RESPONSIVE_OVERLAY_FRAME_NAME, () => {
     expect(screen.getByTestId("desktop-drawer")).toBeInTheDocument();
     expect(screen.getByTestId("themed-root")).toHaveStyle({ color: "rgb(123, 45, 67)" });
   });
-
 });

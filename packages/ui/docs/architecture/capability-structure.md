@@ -108,7 +108,7 @@ The vocabulary deliberately excludes `api`, `offline`, `signals`, `enums`, `setu
 - Setup and provider code follows its behavioral owner.
 - Common and shared obscure ownership.
 
-`events` does not endorse the inherited Rgo event design. Existing event infrastructure may migrate there, but new event systems require deliberate review. Reassess the folder after the legacy event inventory is resolved.
+Event transport belongs to a reviewed integration such as `integrations/event-source`; do not add a generic in-process event bucket.
 
 Adding another structural folder requires updating this guide and architecture enforcement first. Do not create ad hoc names locally.
 
@@ -121,8 +121,6 @@ components/<category>/<PascalCaseComponent>/
 ```
 
 Every public React component is a first-class `Vireo*` component and follows the canonical eight-file contract. See [Component folder categories](./component-folder-categories.md) and the [component-authoring guides](../component-authoring/component-files.md).
-
-Temporary deprecated `Rgo*` aliases may remain as thin migration exceptions. They do not establish a second component contract.
 
 ## Named non-component modules
 

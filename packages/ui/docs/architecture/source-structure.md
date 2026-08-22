@@ -160,14 +160,11 @@ Do not introduce ambiguous catch-all names such as `shared`, `common`, `helpers`
 
 ## Supported package API
 
-During structural migration:
-
-- Every symbol exported from the package root remains available.
-- Every subpath declared in `package.json` exports remains available.
+- The package root and subpaths declared in `package.json` are the only supported consumer entry points.
+- Public additions and removals follow the package versioning and changeset policy.
 - Imports into `src` or undeclared implementation paths are not compatibility guarantees.
-- Deprecated `Rgo*` names may remain as thin compatibility exports until a separate removal decision.
 
-The `./country` export maps to the country capability. The `./localization` export maps to the temporal localization integration and is intentionally absent from the package root. The `./api` export remains a compatibility surface assembled from its eventual owners; it does not justify an API capability.
+The `./country` export maps to the country capability. The `./localization` export maps to the temporal localization integration and is intentionally absent from the package root.
 
 Integration APIs are exposed only through named package subpaths such as `./sonner` and `./tanstack-query`. They are not re-exported from the package root, which keeps optional peer dependencies outside the foundational runtime graph.
 

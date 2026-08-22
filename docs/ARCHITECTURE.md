@@ -51,9 +51,8 @@ package was called `core`, a name that claims the bottom of the stack while the
 code sat at the top.
 
 The coupling was never the issue either. `core` reached into `starter-ui` for
-three symbols — `RgoIcon`, `AppBottomDrawer` and `APP_PAGE_CONTENT_MIN_WIDTH` —
-across ten import sites, plus one `declare module` augmentation of the icon
-registry.
+the icon registry, mobile drawer, and page-content width contracts across ten
+import sites, plus one `declare module` augmentation of the icon registry.
 
 ### Options considered
 

@@ -121,5 +121,4 @@ describe(VIREO_BOTTOM_DRAWER_NAME, () => {
       backgroundColor: "rgb(123, 45, 67)",
     });
   });
-
 });
