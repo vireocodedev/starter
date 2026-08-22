@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runPersistentStateExample } from "../examples/persistentState.example";
+import persistentStateSource from "../examples/persistentState.example.ts?raw";
+
+<Meta title="Infrastructure/Persistent State" />
+
+# Persistent state
+
+`createPersistentSignal` mirrors one typed storage key into a framework-free Preact core signal. The application owns storage lifetime, serialization, migration, and error reporting.
+
+Writes reach storage before the signal changes, preventing an in-memory value from claiming persistence succeeded when it did not.
+
+<ExecutablePackageExample run={runPersistentStateExample} source={persistentStateSource} />

@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runPrimaryWorkflowExample } from "../examples/primaryWorkflow.example";
+import primaryWorkflowSource from "../examples/primaryWorkflow.example.ts?raw";
+
+<Meta title="Infrastructure/Primary Workflow" />
+
+# Primary workflow
+
+The application injects online and offline service modules plus the current execution policy. The returned API preserves the online module's public type while choosing an implementation for every invocation.
+
+Guards, fallback classification, timing, and diagnostics are explicit options. Importing Infrastructure creates no application-global mode or cache.
+
+<ExecutablePackageExample run={runPrimaryWorkflowExample} source={primaryWorkflowSource} />

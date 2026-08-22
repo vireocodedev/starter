@@ -8,6 +8,7 @@ describe("vireoStorySort", () => {
   it("keeps monorepo documentation first and each library at the root", () => {
     const titles = [
       "History/Overview",
+      "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
       "SQLite/Overview",
@@ -28,9 +29,37 @@ describe("vireoStorySort", () => {
       "UI/Capabilities/Forms/VireoForm",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "History/Overview",
+      "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
       "SQLite/Overview",
+    ]);
+  });
+
+  it("keeps Infrastructure's package pages in their learning order", () => {
+    const titles = [
+      "Infrastructure/Failure Semantics",
+      "Infrastructure/Session Expiry",
+      "Infrastructure/Connectivity",
+      "Infrastructure/Overview",
+      "Infrastructure/HTTP and Pagination",
+      "Infrastructure/Primary Workflow",
+      "Infrastructure/Persistent State",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "Infrastructure/Overview",
+      "Infrastructure/Primary Workflow",
+      "Infrastructure/HTTP and Pagination",
+      "Infrastructure/Connectivity",
+      "Infrastructure/Persistent State",
+      "Infrastructure/Session Expiry",
+      "Infrastructure/Failure Semantics",
     ]);
   });
 

@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFailureSemanticsExample } from "../examples/failureSemantics.example";
+import failureSemanticsSource from "../examples/failureSemantics.example.ts?raw";
+
+<Meta title="Infrastructure/Failure Semantics" />
+
+# Failure semantics
+
+Transport data, filter state, persistence, and connectivity lifecycle are correctness boundaries. Invalid state raises a descriptive failure at the closest boundary instead of being logged with sensitive payloads, silently repaired, or converted into broader behavior.
+
+Cancellation remains distinguishable from ordinary failures, and error sanitization deliberately excludes request and response internals.
+
+<ExecutablePackageExample run={runFailureSemanticsExample} source={failureSemanticsSource} />

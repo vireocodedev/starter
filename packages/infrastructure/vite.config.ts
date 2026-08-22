@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
       rollupTypes: false,
       tsconfigPath: "./tsconfig.json",
       entryRoot: "src",
-      exclude: ["tests/**", "**/*.test.ts", "**/*.test.tsx"],
+      exclude: ["tests/**", "docs/**", "**/*.test.ts"],
     }),
   ],
   build: {

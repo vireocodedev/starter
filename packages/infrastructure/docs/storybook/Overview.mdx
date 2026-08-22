@@ -1,0 +1,20 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Infrastructure/Overview" />
+
+# Infrastructure
+
+`@vireocodedev/starter-infrastructure` is the React-free browser boundary for connectivity, execution-mode-aware services, validated Axios transport, pagination, persistent signals, and session-expiry coordination.
+
+It deliberately owns no React hook or component, query client, service-worker lifecycle, application singleton, routing behavior, authentication store, configured transport, or product-specific endpoint policy.
+
+## Public workflow
+
+1. Create application-owned runtime and transport adapters.
+2. Model online and offline services with `createModeAwareApi` when both execution modes exist.
+3. Validate response data through `AxiosHttpClient`, `parseHttpResponse`, or `postPagedSearch`.
+4. Combine browser status, heartbeat freshness, and explicit backend status with `createConnectivityState`.
+5. Mirror typed local state with `createPersistentSignal` when a storage service is available.
+6. Coordinate one authentication boundary with an instance returned by `createSessionExpiryChannel`.
+
+Continue with **Primary Workflow**, then follow the pages in order through HTTP, connectivity, persistence, session state, and deliberate failure behavior.

@@ -52,6 +52,7 @@ const SIDEBAR_ICONS: Readonly<Record<string, SidebarIcon>> = {
   Countries: GlobeIcon,
   Forms: FormIcon,
   History: TimeIcon,
+  Infrastructure: WrenchIcon,
   "Infinite Canvas": ZoomIcon,
   Overlays: StackedIcon,
   "Page Layout": SidebarIcon,

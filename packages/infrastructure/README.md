@@ -1,66 +1,72 @@
 # @vireocodedev/starter-infrastructure
 
-Framework-agnostic **frontend infrastructure utilities** for the vireocodedev
-**starter** product. This is the dependency-light, portable core — it has **no
-UI-framework coupling**.
+React-free browser infrastructure primitives for validated HTTP transport, connectivity, persistent state, session-expiry coordination, and execution-mode-aware services.
 
-The package owns transport-neutral and policy-injected infrastructure. Host
-applications still own configured Axios instances, endpoint naming, online and
-fallback policy, service-worker registration/UI, and backend diagnostics.
+The package owns reusable mechanisms. Applications still own configured transports, endpoint vocabulary, authentication and routing, heartbeat adapters, persistence services, query caching, service-worker lifecycle, and product UI.
 
 ## Install
 
-Published to **GitHub Packages** under the `@vireocodedev` scope:
-
 ```bash
-npm install @vireocodedev/starter-infrastructure
+npm install @vireocodedev/starter-infrastructure axios zod @preact/signals-core
 ```
 
-Peers: `react`, `axios`, `zod`, `dayjs`, `@preact/signals-react`,
-`@tanstack/react-query`.
+The package has no React, MUI, React Query, locale, or application singleton dependency.
 
-## What's included
-
-- **Network status** — `AppOfflineError`, `isAppOfflineError`, `getAppOnlineStatus`,
-  `useAppOnlineStatus` (a `useSyncExternalStore` hook).
-- **Persistent signals** — `createPersistentSignal`, `PersistentSignal` (a
-  `@preact/signals-react` signal mirrored into a storage service).
-- **TanStack query client** — `TANSTACK_QUERY_CLIENT` (offline-aware retry/network
-  defaults).
-- **Session-expiry events** — `notifySessionExpired`, `subscribeToSessionExpiry`,
-  `beginManualLogout`, `cancelManualLogout`, `resetSessionExpiryNotification`,
-  `APP_SESSION_EXPIRED_EVENT` (a DOM-event pub/sub; the app decides how to react).
-- **Axios helpers** — `isRequestCanceled`, `sanitizeAxiosError`,
-  `getAxiosRequestPath`, `SanitizedAxiosError`, the injected `AxiosHttpClient`
-  base, and typed paged-search helpers.
-- **Mode-aware API dispatch** — `transactional`, `createModeAwareApi`, and
-  injected online/offline routing, fallback, guard, timing, and diagnostics
-  policy.
-- **Connectivity** — `createConnectivityState` and
-  `QueryReconnectController`, with browser/runtime/query behavior injected by
-  the host application.
-- **Query factories** — `createPagedSearchQuery` for finite and infinite
-  TanStack Query options with neutral abort requests.
-- **Service-worker checks** — `useServiceWorkerUpdateChecks` schedules checks
-  for an existing registration without owning registration or update UI.
-- **Date/array helpers** — `formatDate`, `formatDateTime`, `formatTime`,
-  `formatDateUpsert`, `formatDateTimeUpsert`, `formatTimeUpsert`, `findFirstTruthy`.
-
-## Usage
+React adapters live in Starter UI:
 
 ```ts
-import {
-  getAppOnlineStatus,
-  createPersistentSignal,
-  TANSTACK_QUERY_CLIENT,
-  subscribeToSessionExpiry,
-  formatDate,
-} from "@vireocodedev/starter-infrastructure";
-
-const unsubscribe = subscribeToSessionExpiry(() => redirectToLogin());
+import { useVireoOnlineStatus } from "@vireocodedev/starter-ui";
+import { createVireoPagedSearchQueries } from "@vireocodedev/starter-ui/tanstack-query";
 ```
 
-## Versioning contract
+## Public architecture
 
-The exported function/type surface is a contract (add = minor, remove/rename =
-major), guarded by the contract test.
+```text
+application runtime and policy
+  -> createConnectivityState / getAppOnlineStatus
+  -> createModeAwareApi
+  -> AxiosHttpClient or postPagedSearch
+  -> Zod-validated response data
+  -> application cache and product state
+
+application storage -> createPersistentSignal
+application authentication -> createSessionExpiryChannel
+```
+
+All stateful factories are instance-scoped. Importing the package creates no query client, listeners, timers, session state, or storage state.
+
+## Mode-aware services
+
+`createModeAwareApi` composes online and offline service modules behind one application API. The application injects the current mode, guards, fallback classification, timing, and diagnostics policy. `transactional` can mark offline methods whose writes should prefer the online implementation while connectivity exists.
+
+## HTTP and pagination
+
+`AxiosHttpClient` centralizes injected Axios transport and Zod response validation. `postPagedSearch` validates the complete pageable envelope, not only its rows. Malformed filter JSON and invalid metadata fail closed.
+
+`sanitizeAxiosError` produces a deliberately small diagnostic object and never exposes request bodies, headers, query strings, or response data.
+
+## Connectivity
+
+`getAppOnlineStatus` and `subscribeToAppNetworkStatus` expose the browser's lightweight network hint. `createConnectivityState` combines that hint with optional heartbeat freshness and explicit backend availability. Runtime adapters own browser subscriptions and scheduling; the state factory enforces one active runtime owner.
+
+## Persistent state
+
+`createPersistentSignal` mirrors one typed storage key into a Preact core signal. Persistence occurs before the in-memory signal changes, so a failed write cannot leave the two representations inconsistent.
+
+## Session expiry
+
+`createSessionExpiryChannel` creates an isolated coordination channel. It deduplicates expiry notifications, suppresses them during intentional logout, and lets applications decide how listeners affect routing or authentication.
+
+## Failure semantics
+
+- Invalid HTTP data raises the original Zod error without logging raw payloads.
+- Malformed query filters fail before a request is sent.
+- Invalid pageable metadata is rejected at the API boundary.
+- Request cancellation is recognized without assuming DOM globals exist.
+- Connectivity policy and concurrent runtime ownership fail synchronously.
+- Persistence failures leave the signal unchanged.
+- Session listeners are isolated and may report failures through injected policy.
+
+## Verification and live documentation
+
+Package tests cover public services, transport boundaries, connectivity lifecycle, persistence, session isolation, and the React-free contract. The unified Vireo Storybook contains executable examples under **Infrastructure**; every displayed source file is the same TypeScript module Storybook executes.
