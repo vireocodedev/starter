@@ -12,6 +12,7 @@ describe("vireoStorySort", () => {
       "Localization/Overview",
       "Query Engine/Overview",
       "SQLite/Overview",
+      "Shell/Overview",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "UI/Capabilities/Forms/VireoForm",
       "UI/Core/Data Display/VireoIcon",
@@ -33,6 +34,7 @@ describe("vireoStorySort", () => {
       "Localization/Overview",
       "Query Engine/Overview",
       "SQLite/Overview",
+      "Shell/Overview",
     ]);
   });
 
@@ -112,6 +114,33 @@ describe("vireoStorySort", () => {
       "SQLite/Hydration State",
       "SQLite/Offline Utilities",
       "SQLite/Failure Semantics",
+    ]);
+  });
+
+  it("keeps Shell's package pages in their learning order", () => {
+    const titles = [
+      "Shell/Failure Semantics",
+      "Shell/Overlay History",
+      "Shell/Auth Redirects",
+      "Shell/Navigation and Config",
+      "Shell/Sitemap and Paths",
+      "Shell/Primary Workflow",
+      "Shell/Overview",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "Shell/Overview",
+      "Shell/Primary Workflow",
+      "Shell/Sitemap and Paths",
+      "Shell/Navigation and Config",
+      "Shell/Auth Redirects",
+      "Shell/Overlay History",
+      "Shell/Failure Semantics",
     ]);
   });
 

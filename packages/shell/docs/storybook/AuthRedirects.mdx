@@ -1,0 +1,12 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runAuthRedirectExample } from "../examples/authRedirect.example";
+import authRedirectSource from "../examples/authRedirect.example.ts?raw";
+
+<Meta title="Shell/Auth Redirects" />
+
+# Auth redirects
+
+The redirect helpers accept a plain location snapshot rather than a router type. Return paths must be same-origin absolute paths; protocol-relative URLs, external URLs, backslash tricks, malformed values, and the login page itself fail closed.
+
+<ExecutablePackageExample run={runAuthRedirectExample} source={authRedirectSource} />

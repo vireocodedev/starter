@@ -65,6 +65,7 @@ const SIDEBAR_ICONS: Readonly<Record<string, SidebarIcon>> = {
   Localization: GlobeIcon,
   "Query Engine": SearchIcon,
   SQLite: DatabaseIcon,
+  Shell: SidebarIcon,
   "Notifications · Sonner": BellIcon,
   "TanStack Query": SyncIcon,
 };

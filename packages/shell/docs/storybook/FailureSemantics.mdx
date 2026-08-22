@@ -1,0 +1,12 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFailureSemanticsExample } from "../examples/failureSemantics.example";
+import failureSemanticsSource from "../examples/failureSemantics.example.ts?raw";
+
+<Meta title="Shell/Failure Semantics" />
+
+# Failure semantics
+
+Invalid route definitions fail during definition or sitemap construction. Duplicate keys and patterns, unmounted redirect targets, missing path parameters, detached config pages, duplicate navigation identifiers, and unknown permissions throw explicit errors rather than producing partial shell state.
+
+<ExecutablePackageExample run={runFailureSemanticsExample} source={failureSemanticsSource} />

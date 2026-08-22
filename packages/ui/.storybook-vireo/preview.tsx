@@ -22,7 +22,7 @@ const preview: Preview = {
       // @ts-expect-error Storybook statically evaluates this inline JavaScript comparator before Preview typing applies.
       storySort: (a, b) => {
         const orderedChildren = {
-          "": ["Documentation", "UI", "History", "Infrastructure", "Localization", "Query Engine", "SQLite"],
+          "": ["Documentation", "UI", "History", "Infrastructure", "Localization", "Query Engine", "SQLite", "Shell"],
           Documentation: ["Overview"],
           UI: ["Overview", "Documentation", "Core", "Capabilities", "Integrations"],
           "UI/Documentation": ["Installation", "Guides"],
@@ -78,6 +78,15 @@ const preview: Preview = {
             "Offline Replay",
             "Hydration State",
             "Offline Utilities",
+            "Failure Semantics",
+          ],
+          Shell: [
+            "Overview",
+            "Primary Workflow",
+            "Sitemap and Paths",
+            "Navigation and Config",
+            "Auth Redirects",
+            "Overlay History",
             "Failure Semantics",
           ],
         };

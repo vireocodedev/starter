@@ -1,0 +1,12 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runSitemapExample } from "../examples/sitemap.example";
+import sitemapSource from "../examples/sitemap.example.ts?raw";
+
+<Meta title="Shell/Sitemap and Paths" />
+
+# Sitemap and paths
+
+`createShellSitemap` resolves nested local segments into absolute patterns, records hierarchy and redirects, and exposes typed path generation. Required parameters are compile-time required and runtime validated; optional and catch-all parameters are supported without a router dependency.
+
+<ExecutablePackageExample run={runSitemapExample} source={sitemapSource} />

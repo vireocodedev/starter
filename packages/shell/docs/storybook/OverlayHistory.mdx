@@ -1,0 +1,12 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runOverlayHistoryExample } from "../examples/overlayHistory.example";
+import overlayHistorySource from "../examples/overlayHistory.example.ts?raw";
+
+<Meta title="Shell/Overlay History" />
+
+# Overlay history
+
+The pure state machine resolves one push, consume, or close request per reconciliation pass. The registry tracks open overlay layers without creating a module-global singleton. Applications own the bridge that translates actions into their router's history operations.
+
+<ExecutablePackageExample run={runOverlayHistoryExample} source={overlayHistorySource} />
