@@ -1,5 +1,5 @@
-import { extractReplayHeaders, normalizeHeaders } from "@/offline/queue/queueingHeaders";
-import { type OfflineSyncCommand } from "@/offline/queue/queueingTypes";
+import { extractReplayHeaders, normalizeHeaders } from "../offline/queue/queueingHeaders";
+import { type OfflineSyncCommand } from "../offline/queue/queueingTypes";
 
 export type OfflineQueueCaptureRequest = {
   method?: string;

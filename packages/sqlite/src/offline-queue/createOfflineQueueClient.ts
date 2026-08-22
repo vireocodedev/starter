@@ -3,10 +3,10 @@ import {
   OFFLINE_QUEUE_PERMANENTLY_FAILED,
   type OfflineQueuedCommand,
   type OfflineQueueStatusCounts,
-} from "@/offline-queue/offlineQueueStateSqlite";
-import { type InMemorySqliteStore } from "@/runtime/createManagedSqliteRuntime";
-import { type SqliteTransport } from "@/runtime/createSqliteTransport";
-import { type OfflineSyncCommand } from "@/offline/queue/queueingTypes";
+} from "./offlineQueueStateSqlite";
+import { type InMemorySqliteStore } from "../runtime/createManagedSqliteRuntime";
+import { type SqliteTransport } from "../runtime/createSqliteTransport";
+import { type OfflineSyncCommand } from "../offline/queue/queueingTypes";
 
 export type OfflineQueueClientRuntime = {
   shouldUseInMemoryFallback: () => boolean;

@@ -1,7 +1,7 @@
-import { runSqliteTransaction } from "@/core/sqliteCrud";
-import { createSqliteRequestHandlers } from "@/core/sqliteRequestHandlers";
-import { type SqliteDatabase } from "@/core/sqliteTypes";
-import { type OfflineSyncCommandRecord } from "@/runtime/contracts";
+import { runSqliteTransaction } from "../core/sqliteCrud";
+import { createSqliteRequestHandlers } from "../core/sqliteRequestHandlers";
+import { type SqliteDatabase } from "../core/sqliteTypes";
+import { type OfflineSyncCommandRecord } from "../runtime/contracts";
 
 const OFFLINE_QUEUE_TABLE = "offline_sync_commands";
 

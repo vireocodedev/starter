@@ -3,7 +3,7 @@ import {
   type WorkerRequestInput,
   type WorkerResponse,
   type WorkerResponseResult,
-} from "@/core/sqliteWorkerProtocol";
+} from "../core/sqliteWorkerProtocol";
 
 export type InMemorySqliteStore = { clear: () => void };
 

@@ -1,4 +1,4 @@
-import { type OfflineQueueStatusCounts } from "@/offline-queue/offlineQueueStateSqlite";
+import { type OfflineQueueStatusCounts } from "./offlineQueueStateSqlite";
 
 export type OfflineQueueStatusSnapshot = OfflineQueueStatusCounts & { enqueueTick: number };
 export type OfflineQueueStatusListener = (snapshot: OfflineQueueStatusSnapshot) => void;

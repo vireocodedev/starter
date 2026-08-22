@@ -1,5 +1,5 @@
-import { type InMemorySqliteStore } from "@/runtime/createManagedSqliteRuntime";
-import { type SqliteTransport } from "@/runtime/createSqliteTransport";
+import { type InMemorySqliteStore } from "./createManagedSqliteRuntime";
+import { type SqliteTransport } from "./createSqliteTransport";
 
 type SqliteEntityClientRequest = { type: string; payloadKey: string };
 

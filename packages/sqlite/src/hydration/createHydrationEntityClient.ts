@@ -1,6 +1,6 @@
-import { type InMemorySqliteStore } from "@/runtime/createManagedSqliteRuntime";
-import { type SqliteTransport } from "@/runtime/createSqliteTransport";
-import { type SqliteHydrationEntityStateRecord } from "@/runtime/contracts";
+import { type InMemorySqliteStore } from "../runtime/createManagedSqliteRuntime";
+import { type SqliteTransport } from "../runtime/createSqliteTransport";
+import { type SqliteHydrationEntityStateRecord } from "../runtime/contracts";
 
 export type HydrationEntityClientRuntime = {
   shouldUseInMemoryFallback: () => boolean;

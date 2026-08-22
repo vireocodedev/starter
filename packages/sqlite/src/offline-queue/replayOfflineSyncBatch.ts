@@ -1,4 +1,4 @@
-import { type OfflineSyncCommand } from "@/offline/queue/queueingTypes";
+import { type OfflineSyncCommand } from "../offline/queue/queueingTypes";
 
 export type OfflineSyncResultReason = "APPLIED" | "ALREADY_APPLIED" | "RETRYABLE" | "REJECTED" | "RETRY_LIMIT_EXCEEDED";
 

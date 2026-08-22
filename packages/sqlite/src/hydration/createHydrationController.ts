@@ -1,6 +1,6 @@
-import { type HydrationContributor } from "@/hydration/createHydrationContributorRegistry";
-import { type HydrationRequestBatch, type HydrationRequestQueue } from "@/hydration/createHydrationRequestQueue";
-import { type SqliteHydrationEntityStateRecord } from "@/runtime/contracts";
+import { type HydrationContributor } from "./createHydrationContributorRegistry";
+import { type HydrationRequestBatch, type HydrationRequestQueue } from "./createHydrationRequestQueue";
+import { type SqliteHydrationEntityStateRecord } from "../runtime/contracts";
 
 export type RemoteHydrationVersion = { entity: string; revision: number };
 export type HydrationRunContext = { heartbeatEnabled?: boolean; heartbeatConnected?: boolean };
