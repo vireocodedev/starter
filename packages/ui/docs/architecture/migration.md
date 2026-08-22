@@ -234,18 +234,17 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 ## Provider, service, and setup inventory
 
-| Current path pattern                                                          | Target owner                           | Disposition | Notes                                                                      |
-| ----------------------------------------------------------------------------- | -------------------------------------- | ----------- | -------------------------------------------------------------------------- |
-| `providers/{AppThemeColorMetaProvider.tsx,RgoProviders.tsx,RgoProviders.mdx}` | `core/providers`                       | Planned     | Foundational provider composition and document/theme behavior.             |
-| `providers/AppSnackbarProvider.tsx`                                           | Deferred Sonner integration            | Deferred    | Third-party notification delivery.                                         |
-| `core/components/behavior/VireoInitializationBoundary/**`                     | `core/components/behavior`             | Migrated    | Abortable subtree initialization, cleanup, restart, and error propagation. |
-| `providers/RgoThemeProvider/**`                                               | `core/providers`                       | Planned     | Legacy theme wrapper pending the foundational provider cleanup.            |
-| `providers/RgoLocalizationProvider/**`                                        | Deferred i18next/dayjs/MUI integration | Deferred    | Integration-owned initialization.                                          |
-| `providers/RgoQueryClientProvider/**`                                         | Deferred TanStack Query integration    | Deferred    | Integration-owned provider.                                                |
-| `services/**`                                                                 | `core/services`                        | Planned     | Current local-storage service is foundational browser infrastructure.      |
-| `setup/config/RgoLocale.ts`                                                   | Deferred i18next integration           | Deferred    | Locale contracts and mappings.                                             |
-| `setup/config/hooks/**`                                                       | Deferred i18next integration           | Deferred    | Translation behavior.                                                      |
-| `setup/translations/**`                                                       | Deferred i18next integration           | Deferred    | Translation resources.                                                     |
+| Current path pattern                                            | Target owner                           | Disposition | Notes                                                                      |
+| --------------------------------------------------------------- | -------------------------------------- | ----------- | -------------------------------------------------------------------------- |
+| `core/providers/{VireoProviderComposer,VireoThemeColorMeta}/**` | `core/providers`                       | Migrated    | Typed provider composition and reversible document theme-color ownership.  |
+| `providers/AppSnackbarProvider.tsx`                             | Deferred Sonner integration            | Deferred    | Third-party notification delivery.                                         |
+| `core/components/behavior/VireoInitializationBoundary/**`       | `core/components/behavior`             | Migrated    | Abortable subtree initialization, cleanup, restart, and error propagation. |
+| `providers/RgoLocalizationProvider/**`                          | Deferred i18next/dayjs/MUI integration | Deferred    | Integration-owned initialization.                                          |
+| `providers/RgoQueryClientProvider/**`                           | Deferred TanStack Query integration    | Deferred    | Integration-owned provider.                                                |
+| `services/**`                                                   | `core/services`                        | Planned     | Current local-storage service is foundational browser infrastructure.      |
+| `setup/config/RgoLocale.ts`                                     | Deferred i18next integration           | Deferred    | Locale contracts and mappings.                                             |
+| `setup/config/hooks/**`                                         | Deferred i18next integration           | Deferred    | Translation behavior.                                                      |
+| `setup/translations/**`                                         | Deferred i18next integration           | Deferred    | Translation resources.                                                     |
 
 ## Utility inventory
 
@@ -364,6 +363,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-22   | `hooks/{useRgoDownloadFn,useRgoFadePresence,useRgoFullscreenListener}`                                                                         | `core/hooks/{useVireoTransitionPresence,useVireoFullscreen}`                                                     | Removed the redundant download hook; added transition presence and fullscreen contracts, then migrated Infinite Canvas.                    |
 | 2026-08-22   | `hooks/useRgoMutation/**`                                                                                                                      | `core/hooks/useVireoMutation`                                                                                    | Replaced the legacy mutation wrapper with TanStack-native options, Vireo notifications, and Zod-validated error details.                   |
 | 2026-08-22   | `providers/RgoInitializeProvider/**`                                                                                                           | `core/components/behavior/VireoInitializationBoundary`                                                           | Replaced the misleading provider with an abortable, restart-safe initialization lifecycle boundary.                                        |
+| 2026-08-22   | `providers/{AppThemeColorMetaProvider,RgoProviders,RgoThemeProvider}/**`                                                                       | `core/providers/{VireoProviderComposer,VireoThemeColorMeta}`                                                     | Removed the trivial theme wrapper; added typed flat composition and reversible theme-color ownership.                                      |
 
 ## Automated verification
 

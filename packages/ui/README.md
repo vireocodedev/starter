@@ -41,8 +41,8 @@ compatibility contract.
 - **Tables** — `VireoResponsiveTable`, the typed container-aware desktop table
   and mobile accordion contract with controlled sorting, pagination, loading,
   filtering surfaces, virtualization, and scroll restoration.
-- **Providers** — `AppConfirmProvider`, `AppSnackbarProvider`,
-  `AppThemeColorMetaProvider`.
+- **Providers** — `VireoConfirmationProvider`, `VireoIconRegistryProvider`,
+  `VireoProviderComposer`, and `VireoThemeColorMeta`.
 - **Hooks** — `useVireoDebouncedCallback`, `useVireoFullscreen`,
   `useVireoTransitionPresence`, `useAppPageContentLayout`,
   `usePageOverlayModes`, and `useDelayedOverlayMount`.

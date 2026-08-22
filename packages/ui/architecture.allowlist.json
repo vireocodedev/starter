@@ -233,11 +233,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "providers/AppThemeColorMetaProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -253,16 +248,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "providers/RgoProviders.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoProviders.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -274,21 +259,6 @@
     {
       "rule": "legacy-source-location",
       "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoThemeProvider/RgoThemeProvider.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoThemeProvider/RgoThemeProvider.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoThemeProvider/RgoThemeProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

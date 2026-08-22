@@ -2,531 +2,56 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta title="Documentation/Providers guide" />
 
-![RGO Front UI Logo](https://rgo.hr/rgo-en/d/logo.png)
+# Providers guide
 
-# Providers Guide
+Vireo distinguishes between foundational UI providers and integration-specific providers. Applications own which integrations are installed and how they are configured.
 
-![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
+## Foundational contracts
 
-RGO Front UI uses a provider-based architecture to deliver optional functionality layers. Each provider can be added independently based on your application's needs.
+- `VireoIconRegistryProvider` supplies the typed icon registry used by `VireoIcon`.
+- `VireoConfirmationProvider` supplies promise-based confirmation overlays.
+- `VireoProviderComposer` flattens a configured provider tree while preserving provider-specific prop typing.
+- `VireoThemeColorMeta` reversibly owns one browser theme-color meta tag.
 
-## Table of Contents
+MUI's `ThemeProvider` and `CssBaseline` remain direct MUI APIs; Vireo does not wrap them.
 
-- [Overview](#overview)
-- [Provider Nesting Order](#provider-nesting-order)
-- [RgoThemeProvider](#rgothemeprovider)
-- [RgoQueryClientProvider](#rgoqueryclientprovider)
-- [RgoLocalizationProvider](#rgolocalizationprovider)
-- [VireoConfirmationProvider](#vireoconfirmationprovider)
-- [AppSnackbarProvider](#appsnackbarprovider)
-- [VireoIconRegistryProvider](#rgoiconsprovider)
-- [RgoSseProvider](#rgosseprovider)
-- [RgoProviders Utility](#rgoproviders-utility)
-
-## Overview
-
-<table>
-  <thead>
-    <tr>
-      <th>Provider</th>
-      <th>Purpose</th>
-      <th>Required Peers</th>
-      <th>Hook</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>RgoThemeProvider</code>
-      </td>
-      <td>MUI theming + CssBaseline</td>
-      <td>
-        <code>@mui/material</code>
-      </td>
-      <td>
-        <code>useTheme</code>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>RgoQueryClientProvider</code>
-      </td>
-      <td>TanStack Query client</td>
-      <td>
-        <code>@tanstack/react-query</code>
-      </td>
-      <td>—</td>
-    </tr>
-    <tr>
-      <td>
-        <code>RgoLocalizationProvider</code>
-      </td>
-      <td>i18n + date localization</td>
-      <td>
-        <code>@mui/x-date-pickers</code>, <code>dayjs</code>
-      </td>
-      <td>
-        <code>useTranslation</code>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>VireoConfirmationProvider</code>
-      </td>
-      <td>Confirmation dialogs</td>
-      <td>—</td>
-      <td>
-        <code>useVireoConfirmation</code>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>AppSnackbarProvider</code>
-      </td>
-      <td>Toast notifications</td>
-      <td>
-        <code>sonner</code>
-      </td>
-      <td>
-        <code>toast</code>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>VireoIconRegistryProvider</code>
-      </td>
-      <td>Icon registry</td>
-      <td>
-        <code>@mui/icons-material</code>
-      </td>
-      <td>
-        <code>useVireoIcons</code>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>RgoSseProvider</code>
-      </td>
-      <td>Server-Sent Events</td>
-      <td>—</td>
-      <td>—</td>
-    </tr>
-  </tbody>
-</table>
-
-## Provider Nesting Order
-
-Providers should be nested in this recommended order (outermost → innermost):
+## Recommended application boundary
 
 ```tsx
 import {
-  RgoThemeProvider,
-  RgoQueryClientProvider,
-  RgoLocalizationProvider,
+  VireoConfirmationProvider,
   VireoIconRegistryProvider,
-  VireoConfirmationProvider,
-  AppSnackbarProvider,
+  VireoProviderComposer,
+  VireoThemeColorMeta,
+  type VireoProviderWrapper,
 } from "@vireocodedev/starter-ui";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { QueryClientProvider } from "@tanstack/react-query";
 
-function App() {
-  return (
-    <RgoThemeProvider theme={theme}>
-      <RgoQueryClientProvider client={queryClient}>
-        <RgoLocalizationProvider>
-          <VireoIconRegistryProvider icons={icons}>
-            <VireoConfirmationProvider>
-              <AppSnackbarProvider>
-                <YourApp />
-              </AppSnackbarProvider>
-            </VireoConfirmationProvider>
-          </VireoIconRegistryProvider>
-        </RgoLocalizationProvider>
-      </RgoQueryClientProvider>
-    </RgoThemeProvider>
-  );
+export function AppProviders({ children }: React.PropsWithChildren) {
+  const providers = [
+    child => (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <VireoThemeColorMeta />
+        {child}
+      </ThemeProvider>
+    ),
+    child => <QueryClientProvider client={queryClient}>{child}</QueryClientProvider>,
+    child => <VireoIconRegistryProvider icons={icons}>{child}</VireoIconRegistryProvider>,
+    child => <VireoConfirmationProvider>{child}</VireoConfirmationProvider>,
+  ] satisfies readonly VireoProviderWrapper[];
+
+  return <VireoProviderComposer providers={providers}>{children}</VireoProviderComposer>;
 }
 ```
 
-## RgoThemeProvider
+The array is ordered outermost to innermost. Every callback uses ordinary JSX, so TypeScript validates the props required by that provider.
 
-**Required** — wraps the app in MUI `ThemeProvider` and applies `CssBaseline`.
+## When to use explicit nesting
 
-```tsx
-import { createTheme } from "@mui/material/styles";
-import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+Prefer explicit JSX when the tree is short, when providers appear in different branches, or when the nesting itself communicates important behavior. `VireoProviderComposer` is intentionally not a dependency resolver and does not provide IDs, priorities, or automatic ordering.
 
-const theme = createTheme({
-  palette: {
-    primary: { main: "#1976d2" },
-  },
-});
+## Integration providers
 
-<RgoThemeProvider theme={theme}>
-  <App />
-</RgoThemeProvider>;
-```
-
-<table>
-  <thead>
-    <tr>
-      <th>Prop</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>theme</code>
-      </td>
-      <td>
-        <code>Theme</code>
-      </td>
-      <td>
-        MUI theme object created with <code>createTheme()</code>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-## RgoQueryClientProvider
-
-Wraps children in TanStack `QueryClientProvider`.
-
-```tsx
-import { QueryClient } from "@tanstack/react-query";
-import { RgoQueryClientProvider } from "@vireocodedev/starter-ui";
-
-const queryClient = new QueryClient();
-
-<RgoQueryClientProvider client={queryClient}>
-  <App />
-</RgoQueryClientProvider>;
-```
-
-<table>
-  <thead>
-    <tr>
-      <th>Prop</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>client</code>
-      </td>
-      <td>
-        <code>QueryClient</code>
-      </td>
-      <td>TanStack Query client instance</td>
-    </tr>
-  </tbody>
-</table>
-
-## RgoLocalizationProvider
-
-Sets up MUI date/time localization with the `dayjs` adapter and waits for i18next to be ready before rendering children. Country display names are resolved independently through `getCountryName` from `@vireocodedev/starter-ui/country`.
-
-```tsx
-import { RgoLocalizationProvider } from "@vireocodedev/starter-ui";
-
-<RgoLocalizationProvider>
-  <App />
-</RgoLocalizationProvider>;
-```
-
-No props required. Uses the i18n instance configured elsewhere.
-
-## VireoConfirmationProvider
-
-Provides promise-based confirmation decisions via the `useVireoConfirmation` hook.
-
-```tsx
-import { VireoConfirmationProvider, useVireoConfirmation } from "@vireocodedev/starter-ui";
-
-// In your provider tree
-<VireoConfirmationProvider>
-  <App />
-</VireoConfirmationProvider>;
-
-// In any component
-function DeleteButton() {
-  const confirm = useVireoConfirmation();
-
-  const handleDelete = async () => {
-    const confirmed = await confirm({
-      title: "Delete Item",
-      message: "This action cannot be undone.",
-      confirmLabel: "Delete",
-      cancelLabel: "Cancel",
-      confirmColor: "error",
-    });
-
-    if (confirmed) {
-      // proceed with deletion
-    }
-  };
-
-  return <button onClick={handleDelete}>Delete</button>;
-}
-```
-
-<table>
-  <thead>
-    <tr>
-      <th>Dialog Prop</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>title</code>
-      </td>
-      <td>
-        <code>ReactNode</code>
-      </td>
-      <td>Dialog title</td>
-    </tr>
-    <tr>
-      <td>
-        <code>message</code>
-      </td>
-      <td>
-        <code>ReactNode</code>
-      </td>
-      <td>Dialog message body</td>
-    </tr>
-    <tr>
-      <td>
-        <code>confirmLabel</code>
-      </td>
-      <td>
-        <code>string</code>
-      </td>
-      <td>Confirm button text</td>
-    </tr>
-    <tr>
-      <td>
-        <code>cancelLabel</code>
-      </td>
-      <td>
-        <code>string</code>
-      </td>
-      <td>Cancel button text</td>
-    </tr>
-    <tr>
-      <td>
-        <code>confirmColor</code>
-      </td>
-      <td>
-        <code>string</code>
-      </td>
-      <td>MUI color for confirm button</td>
-    </tr>
-    <tr>
-      <td>
-        <code>maxWidth</code>
-      </td>
-      <td>
-        <code>Breakpoint</code>
-      </td>
-      <td>Dialog max width</td>
-    </tr>
-  </tbody>
-</table>
-
-## AppSnackbarProvider
-
-Mounts sonner's `Toaster` with responsive placement (top-right on mobile,
-bottom-center on desktop) and follows the active MUI theme mode.
-
-```tsx
-import { AppSnackbarProvider, toast } from "@vireocodedev/starter-ui";
-
-<AppSnackbarProvider>
-  <App />
-</AppSnackbarProvider>;
-
-// Anywhere in the tree:
-toast.success("Saved");
-```
-
-The provider takes no props — placement, duration and theme are derived from
-the viewport and theme. Import `toast` from `@vireocodedev/starter-ui` rather
-than from `sonner` directly so the library owns the toast implementation.
-
-## VireoIconRegistryProvider
-
-Provides a type-safe icon registry. Icons are registered by the consumer app through TypeScript interface augmentation.
-
-### Step 1: Augment the Registry
-
-```tsx
-// In your app's type declarations (e.g., icons.d.ts)
-import type { SvgIconComponent } from "@mui/icons-material";
-
-declare module "@vireocodedev/starter-ui" {
-  interface VireoIconRegistry {
-    home: SvgIconComponent;
-    settings: SvgIconComponent;
-    delete: SvgIconComponent;
-  }
-}
-```
-
-### Step 2: Provide the Icons
-
-```tsx
-import { VireoIconRegistryProvider } from "@vireocodedev/starter-ui";
-import HomeIcon from "@mui/icons-material/Home";
-import SettingsIcon from "@mui/icons-material/Settings";
-import DeleteIcon from "@mui/icons-material/Delete";
-
-const icons = { home: HomeIcon, settings: SettingsIcon, delete: DeleteIcon };
-
-<VireoIconRegistryProvider icons={icons}>
-  <App />
-</VireoIconRegistryProvider>;
-```
-
-### Step 3: Use Icons
-
-```tsx
-import { useVireoIcons, VireoIcon } from "@vireocodedev/starter-ui";
-
-// Via hook
-function MyComponent() {
-  const { muiIconsMap } = useVireoIcons();
-  const HomeIcon = muiIconsMap.home;
-  return <HomeIcon />;
-}
-
-// Via component
-<VireoIcon name="home" fontSize="large" color="primary" />;
-```
-
-## useRgoSseEmitter
-
-Manages Server-Sent Events (SSE) connections with typed event handlers. This is a hook rather than a provider — mount it
-once in a component near the root of the tree that needs the connection.
-
-```tsx
-import { useRgoSseEmitter } from "@vireocodedev/starter-ui";
-
-function AppEvents() {
-  useRgoSseEmitter({
-    url: "/api/events",
-    eventHandlers: {
-      notification: data => handleNotification(data),
-      update: data => handleUpdate(data),
-    },
-    withCredentials: true,
-  });
-
-  return null;
-}
-```
-
-<table>
-  <thead>
-    <tr>
-      <th>Option</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>url</code>
-      </td>
-      <td>
-        <code>string</code>
-      </td>
-      <td>SSE endpoint URL</td>
-    </tr>
-    <tr>
-      <td>
-        <code>eventHandlers</code>
-      </td>
-      <td>
-        <code>{"Record<string, (data) => void>"}</code>
-      </td>
-      <td>Named event handlers</td>
-    </tr>
-    <tr>
-      <td>
-        <code>withCredentials</code>
-      </td>
-      <td>
-        <code>boolean</code>
-      </td>
-      <td>Send cookies with request</td>
-    </tr>
-    <tr>
-      <td>
-        <code>disabled</code>
-      </td>
-      <td>
-        <code>boolean</code>
-      </td>
-      <td>Disable the connection</td>
-    </tr>
-    <tr>
-      <td>
-        <code>onOpen</code>
-      </td>
-      <td>
-        <code>{"() => void"}</code>
-      </td>
-      <td>Connection opened callback</td>
-    </tr>
-    <tr>
-      <td>
-        <code>onMessage</code>
-      </td>
-      <td>
-        <code>{"(event) => void"}</code>
-      </td>
-      <td>Generic message callback</td>
-    </tr>
-    <tr>
-      <td>
-        <code>onError</code>
-      </td>
-      <td>
-        <code>{"(event) => void"}</code>
-      </td>
-      <td>Error callback</td>
-    </tr>
-  </tbody>
-</table>
-
-## RgoProviders Utility
-
-A utility component that reduces provider nesting boilerplate by composing multiple providers:
-
-```tsx
-import {
-  RgoProviders,
-  RgoThemeProvider,
-  VireoConfirmationProvider,
-  AppSnackbarProvider,
-} from "@vireocodedev/starter-ui";
-
-const providers = [
-  props => <RgoThemeProvider theme={theme} {...props} />,
-  props => <VireoConfirmationProvider {...props} />,
-  props => <AppSnackbarProvider {...props} />,
-];
-
-<RgoProviders list={providers}>
-  <App />
-</RgoProviders>;
-```
-
-This is equivalent to manually nesting the providers but keeps the code flat and composable.
+The legacy Sonner, localization, and TanStack Query wrappers remain deferred to the integrations phase. New applications should prefer the upstream provider APIs until those integration contracts are finalized.

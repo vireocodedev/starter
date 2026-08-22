@@ -1,8 +1,8 @@
-import { type RgoProvider } from "@/providers/RgoProviders";
 import { RGO_LOCALE_TO_DAYJS_LOCALE } from "@/setup/config/RgoLocale";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
 import { useTranslation } from "react-i18next";
+import type React from "react";
 import "./RgoLocalizationProvider.css";
 
 import "dayjs/locale/bs";
@@ -16,7 +16,7 @@ import "dayjs/locale/sl";
 
 import { type RgoLocale } from "@/setup/config/RgoLocale";
 
-export const RgoLocalizationProvider: RgoProvider = ({ children }) => {
+export function RgoLocalizationProvider({ children }: React.PropsWithChildren) {
   const { ready, i18n } = useTranslation();
 
   if (!ready) {
@@ -30,4 +30,4 @@ export const RgoLocalizationProvider: RgoProvider = ({ children }) => {
       {children}
     </LocalizationProvider>
   );
-};
+}

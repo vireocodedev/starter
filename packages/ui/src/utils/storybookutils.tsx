@@ -172,7 +172,7 @@ export function createStories(storyNames: string[]) {
  *     steps: [
  *       {
  *         title: "Install provider",
- *         code: "import { RgoThemeProvider } from '@vireocodedev/starter-ui';",
+ *         code: "import { ThemeProvider } from '@mui/material';",
  *       },
  *     ],
  *   },

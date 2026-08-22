@@ -1,11 +1,11 @@
 import { useMediaQuery, useTheme } from "@mui/material";
-import { type RgoProvider } from "@/providers/RgoProviders";
 import { Toaster, type ToasterProps } from "sonner";
+import type React from "react";
 
 /**
  * @see {@link https://sonner.emilkowal.ski/getting-started|sonner toast API}
  */
-export const AppSnackbarProvider: RgoProvider = ({ children }) => {
+export function AppSnackbarProvider({ children }: React.PropsWithChildren) {
   const theme = useTheme();
   const mobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -35,4 +35,4 @@ export const AppSnackbarProvider: RgoProvider = ({ children }) => {
       />
     </>
   );
-};
+}

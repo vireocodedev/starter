@@ -2,224 +2,80 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta title="Documentation/Installation" />
 
-![RGO Front UI Logo](https://rgo.hr/rgo-en/d/logo.png)
-
 # Installation
 
-![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
-
-Complete setup guide for RGO Front UI in your React application.
-
-## Table of Contents
-
-- [1. Install the Package](#1-install-the-package)
-- [2. Install Peer Dependencies](#2-install-peer-dependencies)
-  - [Required Dependencies](#required-dependencies)
-  - [Optional Dependencies (by feature)](#optional-dependencies-by-feature)
-  - [Complete Installation](#complete-installation)
-- [3. Basic Setup](#3-basic-setup)
-- [4. Provider Configuration](#4-provider-configuration)
-  - [RgoThemeProvider (Required)](#rgothemeprovider-required)
-  - [RgoQueryClientProvider (Optional)](#rgoqueryclientprovider-optional)
-  - [RgoLocalizationProvider (Optional)](#rgolocalizationprovider-optional)
-  - [VireoConfirmationProvider (Optional)](#vireoconfirmationprovider-optional)
-  - [AppSnackbarProvider (Optional)](#appsnackbarprovider-optional)
-- [5. Complete Setup Example](#5-complete-setup-example)
-- [6. Special Components](#6-special-components)
-- [Next Steps](#next-steps)
-- [Troubleshooting](#troubleshooting)
-
-## 1. Install the Package
+Install the package and the peer dependencies used by the Vireo contracts your application consumes:
 
 ```bash
 npm install @vireocodedev/starter-ui
+npm install react react-dom @mui/material @emotion/react @emotion/styled
 ```
 
-## 2. Install Peer Dependencies
-
-### Required Dependencies
+Feature-specific peers remain application dependencies:
 
 ```bash
-# React and Material-UI core
-npm install react@^18.3.1 react-dom@^18.3.1
-npm install @mui/material@^6.4.1 @emotion/react@^11.14.0 @emotion/styled@^11.14.0
-npm install @mui/icons-material@^6.4.3
+# Forms and temporal fields
+npm install @tanstack/react-form zod @mui/x-date-pickers dayjs
 
-# Internationalization core
-npm install i18next@^25.4.1 react-i18next@^15.4.0
+# Mutations and server state
+npm install @tanstack/react-query
+
+# Notifications
+npm install sonner
 ```
 
-### Optional Dependencies (by feature)
+## Minimal setup
 
-```bash
-# Temporal form fields
-npm install @mui/x-date-pickers@^7.27.0
-
-# Form schemas
-npm install @tanstack/react-form@^1.33.5 zod@^3.24.2
-
-# Query handling (RgoQueryClientProvider)
-npm install @tanstack/react-query@^5.64.2 axios@^1.7.9
-```
-
-### Complete Installation
-
-For all features:
-
-```bash
-npm install react@^18.3.1 react-dom@^18.3.1 \
-  @mui/material@^6.4.1 @emotion/react@^11.14.0 @emotion/styled@^11.14.0 \
-  @mui/icons-material@^6.4.3 i18next@^25.4.1 react-i18next@^15.4.0 \
-  @mui/x-date-pickers@^7.27.0 @tanstack/react-form@^1.33.5 zod@^3.24.2 \
-  @tanstack/react-query@^5.64.2 axios@^1.7.9
-```
-
-## 3. Basic Setup
-
-### Minimal Setup (Required)
+Vireo uses the active MUI theme. Applications own theme creation and whether `CssBaseline` is mounted:
 
 ```tsx
-import React from "react";
-import { createTheme } from "@mui/material/styles";
-import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { VireoIconRegistryProvider, VireoThemeColorMeta } from "@vireocodedev/starter-ui";
 
-const theme = createTheme({
-  palette: {
-    primary: { main: "#1976d2" },
-    secondary: { main: "#dc004e" },
-  },
-});
+const theme = createTheme({ palette: { mode: "dark" } });
 
-function App() {
+export function AppRoot() {
   return (
-    <RgoThemeProvider theme={theme}>
-      <YourAppContent />
-    </RgoThemeProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <VireoThemeColorMeta />
+      <VireoIconRegistryProvider>
+        <App />
+      </VireoIconRegistryProvider>
+    </ThemeProvider>
   );
 }
 ```
 
-**Note**: You must provide a custom theme. The library does not include a default theme.
+## Flattening a larger provider tree
 
-## 4. Provider Configuration
-
-Add providers based on the features you need:
-
-### RgoThemeProvider (Required)
-
-Always required for theming and CSS baseline.
-
-### RgoQueryClientProvider (Optional)
-
-Add if using data fetching or server state management:
+Keep integration configuration application-owned while avoiding deeply nested JSX:
 
 ```tsx
-import { RgoQueryClientProvider } from "@vireocodedev/starter-ui";
-
-<RgoThemeProvider theme={theme}>
-  <RgoQueryClientProvider>
-    <App />
-  </RgoQueryClientProvider>
-</RgoThemeProvider>;
-```
-
-### RgoLocalizationProvider (Optional)
-
-Add if using the `useTranslation` hook:
-
-```tsx
-import { RgoLocalizationProvider } from "@vireocodedev/starter-ui";
-
-<RgoLocalizationProvider>
-  <App />
-</RgoLocalizationProvider>;
-```
-
-### VireoConfirmationProvider (Optional)
-
-Add if using the `useVireoConfirmation` hook:
-
-```tsx
-import { VireoConfirmationProvider } from "@vireocodedev/starter-ui";
-
-<VireoConfirmationProvider>
-  <App />
-</VireoConfirmationProvider>;
-```
-
-### AppSnackbarProvider (Optional)
-
-Add if you want toast notifications via `toast()`:
-
-```tsx
-import { AppSnackbarProvider } from "@vireocodedev/starter-ui";
-
-<AppSnackbarProvider>
-  <App />
-</AppSnackbarProvider>;
-```
-
-## 5. Complete Setup Example
-
-Full configuration with all providers:
-
-```tsx
-import React from "react";
-import { createTheme } from "@mui/material/styles";
 import {
-  RgoThemeProvider,
-  RgoQueryClientProvider,
-  RgoLocalizationProvider,
-  VireoConfirmationProvider,
-  AppSnackbarProvider,
+  VireoIconRegistryProvider,
+  VireoProviderComposer,
+  VireoThemeColorMeta,
+  type VireoProviderWrapper,
 } from "@vireocodedev/starter-ui";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { QueryClientProvider } from "@tanstack/react-query";
 
-const theme = createTheme({
-  palette: {
-    primary: { main: "#1976d2" },
-    secondary: { main: "#dc004e" },
-  },
-});
+export function AppProviders({ children }: React.PropsWithChildren) {
+  const providers = [
+    child => (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <VireoThemeColorMeta />
+        {child}
+      </ThemeProvider>
+    ),
+    child => <QueryClientProvider client={queryClient}>{child}</QueryClientProvider>,
+    child => <VireoIconRegistryProvider>{child}</VireoIconRegistryProvider>,
+  ] satisfies readonly VireoProviderWrapper[];
 
-function App() {
-  return (
-    <RgoThemeProvider theme={theme}>
-      <RgoQueryClientProvider>
-        <RgoLocalizationProvider>
-          <VireoConfirmationProvider>
-            <AppSnackbarProvider>
-              <YourAppContent />
-            </AppSnackbarProvider>
-          </VireoConfirmationProvider>
-        </RgoLocalizationProvider>
-      </RgoQueryClientProvider>
-    </RgoThemeProvider>
-  );
+  return <VireoProviderComposer providers={providers}>{children}</VireoProviderComposer>;
 }
 ```
 
-## 6. Special Components
-
-### RgoVideoStreamPlayer
-
-Requires WebRTC stream server setup. It lives behind its own entry point so that
-`ovenplayer` is only resolved by consumers that render a stream:
-
-```tsx
-import { RgoVideoStreamPlayer } from "@vireocodedev/starter-ui/video";
-
-<RgoVideoStreamPlayer url="wss://your-stream-server.com/app/stream-name" width="100%" height="100%" autoStart={true} />;
-```
-
-## Next Steps
-
-1. ✅ Complete installation and setup
-2. 📖 [Learn Common Patterns](?path=/docs/documentation-common-patterns--docs)
-3. 🧩 Explore component documentation in the sidebar
-4. 🎨 Customize your theme for your brand
-
-## Troubleshooting
-
-- **Missing peer dependencies**: Install the specific packages mentioned in console warnings
-- **Theme errors**: Ensure you're providing a valid Material-UI theme created with `createTheme()`
-- **TypeScript errors**: Verify all peer dependencies are installed with compatible versions
+The first wrapper is outermost. Do not automatically sort providers: their order is part of application architecture.

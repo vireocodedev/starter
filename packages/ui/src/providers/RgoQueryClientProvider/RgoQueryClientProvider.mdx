@@ -12,7 +12,7 @@ Thin wrapper around TanStack Query's `QueryClientProvider`. Injects a `QueryClie
 
 ## Why it exists
 
-TanStack Query requires a `QueryClient` instance delivered via context. Rather than importing TanStack's provider directly in every consumer app, `RgoQueryClientProvider` standardizes the integration point and conforms to the `RgoProvider` type signature, making it composable with `RgoProviders`.
+TanStack Query requires a `QueryClient` instance delivered via context. This legacy wrapper remains temporarily available until the integrations phase; new applications can use TanStack's provider directly inside `VireoProviderComposer`.
 
 ---
 
@@ -161,10 +161,10 @@ function CacheInspector() {
 
 ## Nesting order
 
-`RgoQueryClientProvider` should be placed **after** `RgoThemeProvider` and **before** any feature providers that perform data fetching:
+`RgoQueryClientProvider` should be placed **after** `ThemeProvider` and **before** any feature providers that perform data fetching:
 
 ```
-RgoThemeProvider
+ThemeProvider
   └─ RgoQueryClientProvider    ← here
        └─ RgoLocalizationProvider
             └─ ...feature providers that call useQuery
@@ -175,7 +175,7 @@ RgoThemeProvider
 ## Real-world consumer app pattern
 
 ```tsx
-import { RgoQueryClientProvider, type RgoProvider } from "@vireocodedev/starter-ui";
+import { RgoQueryClientProvider } from "@vireocodedev/starter-ui";
 import { QueryClient } from "@tanstack/react-query";
 
 const QUERY_CLIENT = new QueryClient({
@@ -187,9 +187,9 @@ const QUERY_CLIENT = new QueryClient({
   },
 });
 
-export const AppQueryClientProvider: RgoProvider = ({ children }) => (
-  <RgoQueryClientProvider client={QUERY_CLIENT}>{children}</RgoQueryClientProvider>
-);
+export function AppQueryClientProvider({ children }: React.PropsWithChildren) {
+  return <RgoQueryClientProvider client={QUERY_CLIENT}>{children}</RgoQueryClientProvider>;
+}
 ```
 
 ---
@@ -199,5 +199,4 @@ export const AppQueryClientProvider: RgoProvider = ({ children }) => (
 - **No custom context** — delegates entirely to TanStack Query's internal context.
 - **Single instance** — create the `QueryClient` **outside** of React (module scope) to avoid re-creating it on every render.
 - **Configuration is on the client, not the provider** — all default options, retry logic, and cache behavior live on the `QueryClient` instance itself.
-- **Type:** `RgoProvider<RgoQueryClientProviderProps>` — composable with `RgoProviders`.
-- **Companion hook `useRgoMutation`** — the library ships a `useRgoMutation` hook that wraps TanStack's `useMutation` with built-in snackbar notifications for success/error states. It depends on this provider being in the tree.
+- **Companion hook `useVireoMutation`** — adds optional Vireo notifications and Zod-validated error details while preserving TanStack mutation options.

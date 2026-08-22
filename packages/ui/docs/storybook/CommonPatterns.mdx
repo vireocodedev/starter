@@ -37,7 +37,7 @@ Only theming (required for all components):
 
 ```tsx
 import { createTheme } from "@mui/material/styles";
-import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+import { ThemeProvider } from "@mui/material";
 
 const theme = createTheme({
   palette: {
@@ -48,9 +48,9 @@ const theme = createTheme({
 
 function App() {
   return (
-    <RgoThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <YourAppContent />
-    </RgoThemeProvider>
+    </ThemeProvider>
   );
 }
 ```
@@ -61,16 +61,16 @@ All providers in the correct nesting order:
 
 ```tsx
 import {
-  RgoThemeProvider,
   RgoQueryClientProvider,
   RgoLocalizationProvider,
   VireoConfirmationProvider,
   AppSnackbarProvider,
 } from "@vireocodedev/starter-ui";
+import { ThemeProvider } from "@mui/material";
 
 function App() {
   return (
-    <RgoThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <RgoQueryClientProvider>
         <RgoLocalizationProvider>
           <VireoConfirmationProvider>
@@ -80,7 +80,7 @@ function App() {
           </VireoConfirmationProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
-    </RgoThemeProvider>
+    </ThemeProvider>
   );
 }
 ```
@@ -93,22 +93,22 @@ Add only the providers you need:
 // With notifications only
 function AppWithNotifications() {
   return (
-    <RgoThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <AppSnackbarProvider>
         <YourAppContent />
       </AppSnackbarProvider>
-    </RgoThemeProvider>
+    </ThemeProvider>
   );
 }
 
 // With confirmations only
 function AppWithConfirmations() {
   return (
-    <RgoThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <VireoConfirmationProvider>
         <YourAppContent />
       </VireoConfirmationProvider>
-    </RgoThemeProvider>
+    </ThemeProvider>
   );
 }
 ```
@@ -322,12 +322,12 @@ const brandTheme = createTheme({
 
 ### Dark Theme Support
 
-`RgoThemeProvider` takes a fixed `theme` prop and does not manage colour mode itself. To support light and dark, own the
+`ThemeProvider` takes a fixed `theme` prop and does not manage colour mode itself. To support light and dark, own the
 mode in the app and rebuild the theme:
 
 ```tsx
 import { createTheme } from "@mui/material/styles";
-import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+import { ThemeProvider } from "@mui/material";
 import React from "react";
 
 function App() {
@@ -335,12 +335,12 @@ function App() {
   const theme = React.useMemo(() => createTheme({ palette: { mode: isDarkMode ? "dark" : "light" } }), [isDarkMode]);
 
   return (
-    <RgoThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <IconButton onClick={() => setIsDarkMode(prev => !prev)} aria-label="Toggle theme">
         {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
       </IconButton>
       <YourApp />
-    </RgoThemeProvider>
+    </ThemeProvider>
   );
 }
 ```

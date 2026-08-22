@@ -22,11 +22,11 @@ RGO Front UI is built on Material-UI's theming system. All components respect th
 
 ## Basic Setup
 
-Every RGO Front UI application must be wrapped in `RgoThemeProvider`:
+Every RGO Front UI application must be wrapped in `ThemeProvider`:
 
 ```tsx
 import { createTheme } from "@mui/material/styles";
-import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 
 const theme = createTheme({
   palette: {
@@ -37,14 +37,15 @@ const theme = createTheme({
 
 function App() {
   return (
-    <RgoThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <YourApp />
-    </RgoThemeProvider>
+    </ThemeProvider>
   );
 }
 ```
 
-`RgoThemeProvider` wraps MUI's `ThemeProvider` and applies `CssBaseline` automatically.
+Vireo uses MUI's `ThemeProvider` directly. Mount `CssBaseline` explicitly when the application wants it.
 
 ## Custom Palette
 
@@ -183,16 +184,16 @@ const darkTheme = createTheme({
   },
 });
 
-<RgoThemeProvider theme={darkTheme}>
+<ThemeProvider theme={darkTheme}>
   <App />
-</RgoThemeProvider>;
+</ThemeProvider>;
 ```
 
 ### Dynamic Theme Switching
 
 ```tsx
 import { createTheme } from "@mui/material/styles";
-import { RgoThemeProvider } from "@vireocodedev/starter-ui";
+import { ThemeProvider } from "@mui/material";
 import React from "react";
 
 function App() {
@@ -210,17 +211,17 @@ function App() {
   );
 
   return (
-    <RgoThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <button onClick={() => setDarkMode(prev => !prev)}>Toggle {darkMode ? "Light" : "Dark"} Mode</button>
       <YourApp />
-    </RgoThemeProvider>
+    </ThemeProvider>
   );
 }
 ```
 
 ## Using the useTheme Hook
 
-MUI's `useTheme` hook provides access to the current theme. Import it from `@mui/material` — `RgoThemeProvider` mounts
+MUI's `useTheme` hook provides access to the current theme. Import it from `@mui/material` — `ThemeProvider` mounts
 MUI's own `ThemeProvider`, so the standard hook works unchanged:
 
 ```tsx

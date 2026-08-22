@@ -1,6 +1,5 @@
 import { type RgoDraggableId } from "@/features/@hello-pangea/dnd/models/RgoDraggableId";
 import { type RgoDroppableId } from "@/features/@hello-pangea/dnd/models/RgoDroppableId";
-import { type RgoProvider } from "@/providers/RgoProviders";
 import { jsonCrushDecode } from "@/utils/tsutils";
 import type { DragStart, DragUpdate, DropResult, ResponderProvided } from "@hello-pangea/dnd";
 import { DragDropContext } from "@hello-pangea/dnd";
@@ -18,7 +17,7 @@ export type RgoDropZoneDropProposal = {
   draggable: RgoDraggableId;
 };
 
-export type RgoDropZoneProviderProps = {
+export type RgoDropZoneProviderProps = React.PropsWithChildren<{
   onDragStart?: (start: DragStart, provided: ResponderProvided) => void;
   onDragEnd: (proposal: RgoDropZoneDropProposal, emitResponse?: boolean) => boolean;
   /** Milliseconds after mouse release to fire the response callback. When set, the response
@@ -28,7 +27,7 @@ export type RgoDropZoneProviderProps = {
    *  When set, the library's fly-to-destination animation is disabled.
    *  0 = card disappears instantly at release position. >0 = card hovers for that duration then fades. */
   dropVisibilityDuration?: number;
-};
+}>;
 
 export type RgoDropZoneContext = RgoDropZoneState & {
   onDragEnd: RgoDropZoneProviderProps["onDragEnd"];
@@ -38,13 +37,13 @@ export type RgoDropZoneContext = RgoDropZoneState & {
 // eslint-disable-next-line react-refresh/only-export-components
 export const RgoDropZoneContext = React.createContext<RgoDropZoneContext | undefined>(undefined);
 
-export const RgoDropZoneProvider: RgoProvider<RgoDropZoneProviderProps> = ({
+export const RgoDropZoneProvider = ({
   onDragStart,
   onDragEnd,
   dropResponseDelay,
   dropVisibilityDuration,
   children,
-}) => {
+}: RgoDropZoneProviderProps) => {
   const [dragState, setDragState] = React.useState<RgoDropZoneState>({
     isDragging: false,
     draggingId: null,

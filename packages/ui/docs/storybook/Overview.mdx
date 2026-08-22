@@ -86,7 +86,7 @@ Container and composition utilities:
 
 ### Miscellaneous Components (1)
 
-- **RgoInitializeProvider**: Async initialization wrapper with loading state
+- **VireoInitializationBoundary**: Async initialization wrapper with loading state
 
 ## Hooks
 
@@ -108,25 +108,16 @@ Specialized functionality hooks:
 
 ## Architecture
 
-Provider-based architecture with optional functionality:
+Provider-based architecture with optional functionality. Applications can flatten the configured tree with `VireoProviderComposer`:
 
 ```tsx
-<RgoThemeProvider theme={customTheme}>
-  {/* Required */}
-  <RgoQueryClientProvider>
-    {/* Optional: for data fetching */}
-    <RgoLocalizationProvider>
-      {/* Optional: for translations */}
-      <RgoConfirmProvider>
-        {/* Optional: for confirmations */}
-        <AppSnackbarProvider>
-          {/* Optional: for notifications */}
-          <YourApp />
-        </AppSnackbarProvider>
-      </RgoConfirmProvider>
-    </RgoLocalizationProvider>
-  </RgoQueryClientProvider>
-</RgoThemeProvider>
+<ThemeProvider theme={customTheme}>
+  <CssBaseline />
+  <VireoThemeColorMeta />
+  <VireoIconRegistryProvider>
+    <YourApp />
+  </VireoIconRegistryProvider>
+</ThemeProvider>
 ```
 
 ## Key Features
