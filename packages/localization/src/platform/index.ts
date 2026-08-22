@@ -3,7 +3,6 @@ import PLATFORM_EN from "@/platform/platform.en";
 import PLATFORM_HR from "@/platform/platform.hr";
 import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 
-export { usePlatformTranslation } from "@/platform/hooks/usePlatformTranslation";
 export { PLATFORM_TRANSLATION_NAMESPACE, type PlatformTranslationNamespace } from "@/platform/namespace";
 
 /** The canonical resource shape. English is the single source of truth. */

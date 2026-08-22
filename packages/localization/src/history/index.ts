@@ -3,7 +3,6 @@ import HISTORY_HR from "@/history/history.hr";
 import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/namespace";
 import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 
-export { useHistoryTranslation } from "@/history/hooks/useHistoryTranslation";
 export { HISTORY_TRANSLATION_NAMESPACE, type HistoryTranslationNamespace } from "@/history/namespace";
 
 /** The canonical resource shape. English is the single source of truth. */

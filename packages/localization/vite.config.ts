@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "i18next", "react-i18next"],
+      external: ["i18next"],
     },
     sourcemap: true,
   },

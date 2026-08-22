@@ -3,7 +3,6 @@ import QUERYENGINE_EN from "@/queryengine/queryengine.en";
 import QUERYENGINE_HR from "@/queryengine/queryengine.hr";
 import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 
-export { useQueryEngineTranslation } from "@/queryengine/hooks/useQueryEngineTranslation";
 export { QUERYENGINE_TRANSLATION_NAMESPACE, type QueryEngineTranslationNamespace } from "@/queryengine/namespace";
 
 /** The canonical resource shape. English is the single source of truth. */
