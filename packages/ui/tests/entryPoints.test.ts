@@ -119,6 +119,7 @@ describe("package entry points", () => {
       "./forms",
       "./hello-pangea-dnd",
       "./localization",
+      "./react-i18next",
       "./sonner",
       "./tanstack-query",
       "./storybook",
