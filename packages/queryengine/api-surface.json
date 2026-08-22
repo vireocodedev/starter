@@ -30,7 +30,6 @@
         "QueryEngineHttpClient",
         "QueryEngineOperator",
         "QueryEngineOperatorSchema",
-        "QueryEngineQueries",
         "QueryEngineQueryKey",
         "QueryEngineRelationFieldOptionsRequest",
         "QueryEngineRelationMode",
@@ -58,21 +57,16 @@
         "createQueryEngineConfigClient",
         "createQueryEngineConfigSqliteRequestHandlers",
         "createQueryEngineEntitySchemas",
-        "createQueryEngineQueries",
         "createSqliteQueryExecutor",
         "executeParameterizedSqlitePagedQuery",
         "executeParameterizedSqliteQuery",
         "getQueryEngineConfig",
-        "replaceQueryEngineConfig",
-        "sigQueryEngineEntityDefinitions",
-        "sigQueryEngineEntitySummaries"
+        "replaceQueryEngineConfig"
       ],
       "dependencies": [
-        "@preact/signals-react",
-        "@tanstack/react-query",
         "zod"
       ],
-      "workerSafe": false
+      "workerSafe": true
     }
   }
 }

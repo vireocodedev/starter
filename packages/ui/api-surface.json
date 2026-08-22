@@ -1428,8 +1428,10 @@
         "VireoQueryBoundarySlots",
         "VireoQueryBoundarySlotsAndSlotProps",
         "VireoQueryBoundaryStatus",
+        "VireoQueryEngineQueries",
         "VireoQueryErrorFallbackContext",
         "VireoQueryErrorInfo",
+        "createVireoQueryEngineQueries",
         "getVireoQueryBoundaryUtilityClass",
         "useVireoMutation",
         "vireoQueryBoundaryClasses"
@@ -1445,7 +1447,8 @@
         "dayjs",
         "react",
         "react-error-boundary",
-        "sonner"
+        "sonner",
+        "zod"
       ],
       "workerSafe": false
     },
