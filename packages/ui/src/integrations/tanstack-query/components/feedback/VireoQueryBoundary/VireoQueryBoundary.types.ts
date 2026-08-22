@@ -1,5 +1,5 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
-import { Alert, Box, Button, CircularProgress, Dialog, IconButton, Stack, type BoxProps } from "@mui/material";
+import type { Alert, Box, BoxProps, Button, CircularProgress, Dialog, IconButton, Stack } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import { type VireoQueryBoundaryClasses, type VireoQueryBoundaryClassKey } from "./VireoQueryBoundary.classes";
