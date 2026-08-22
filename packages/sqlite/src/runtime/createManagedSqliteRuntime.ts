@@ -85,7 +85,10 @@ export function createManagedSqliteRuntime(config: ManagedSqliteRuntimeConfig): 
     });
     worker.addEventListener("error", event => {
       const error = event.error instanceof Error ? event.error : new Error(event.message);
-      rejectPending(error);
+      teardownWorker(error);
+    });
+    worker.addEventListener("messageerror", () => {
+      teardownWorker(new Error("SQLite worker returned an unreadable message."));
     });
     return worker;
   };

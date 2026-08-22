@@ -1,4 +1,3 @@
-export { createSqliteClientRuntime, type SqliteClientRuntimeConfig } from "../core/sqliteClientRuntime";
 export type {
   WorkerRequest,
   WorkerRequestInput,
