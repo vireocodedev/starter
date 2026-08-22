@@ -1,5 +1,24 @@
 # @vireocodedev/starter-ui
 
+## 5.0.0
+
+### Major Changes
+
+- 72aac63: Complete the Vireo UI migration with first-class component contracts, container-responsive layouts, typed customization slots, dark-theme executable stories, and copy-pastable Storybook source across the public catalog.
+
+  Replace the legacy Rgo and standalone-input APIs with the TanStack Form-based `useVireoForm` field family, standardized form layout and multi-step primitives, responsive overlays, page layout, tables, history presentation, infinite canvas, country flags, notifications, drag and drop, EventSource, and TanStack Query integrations. Remove obsolete compatibility components, React Hook Form plumbing, Axios ownership, and application-specific compositions.
+
+### Patch Changes
+
+- Updated dependencies [72aac63]
+- Updated dependencies [72aac63]
+- Updated dependencies [72aac63]
+- Updated dependencies [72aac63]
+  - @vireocodedev/starter-history@2.0.0
+  - @vireocodedev/starter-infrastructure@2.0.0
+  - @vireocodedev/starter-localization@2.0.0
+  - @vireocodedev/starter-queryengine@4.0.0
+
 ## 4.1.0
 
 ### Minor Changes
