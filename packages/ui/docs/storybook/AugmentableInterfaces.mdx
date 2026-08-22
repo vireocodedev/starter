@@ -17,8 +17,8 @@ RGO Front UI exposes several empty interfaces that consumer apps can extend via 
 - [Registry reference](#registry-reference)
   - [VireoIconRegistry](#rgoiconregistry)
   - [RgoEventSchema](#rgoeventschema)
-  - [RgoDraggableIdRegistry](#rgodraggableidregistry)
-  - [RgoDroppableIdRegistry](#rgodroppableidregistry)
+  - [VireoDraggableIdRegistry](#vireodraggableidregistry)
+  - [VireoDropZoneIdRegistry](#vireodropzoneidregistry)
 - [Full example](#full-example)
 
 ---
@@ -103,7 +103,7 @@ declare module "@vireocodedev/starter-ui" {
 
 ---
 
-### RgoDraggableIdRegistry
+### VireoDraggableIdRegistry
 
 <table>
   <thead>
@@ -118,7 +118,7 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Location</strong>
       </td>
       <td>
-        <code>features/@hello-pangea/dnd/models</code>
+        <code>@vireocodedev/starter-ui/hello-pangea-dnd</code>
       </td>
     </tr>
     <tr>
@@ -127,7 +127,7 @@ declare module "@vireocodedev/starter-ui" {
       </td>
       <td>
         Maps draggable type names to their ID payload shapes. Each key becomes the <code>type</code> discriminator in
-        the <code>RgoDraggableId</code> union.
+        the <code>VireoDraggableId</code> union.
       </td>
     </tr>
     <tr>
@@ -135,15 +135,15 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Consumed by</strong>
       </td>
       <td>
-        DnD utilities: <code>serializeDraggableId</code>, <code>deserializeDraggableId</code>
+        <code>VireoDraggableItem</code>, lifecycle results, and <code>useVireoDndState</code>
       </td>
     </tr>
   </tbody>
 </table>
 
 ```ts
-declare module "@vireocodedev/starter-ui" {
-  interface RgoDraggableIdRegistry {
+declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+  interface VireoDraggableIdRegistry {
     convoy: {
       convoyId: number;
     };
@@ -158,12 +158,12 @@ declare module "@vireocodedev/starter-ui" {
 Produces:
 
 ```ts
-type RgoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; taskId: string; groupIndex: number };
+type VireoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; taskId: string; groupIndex: number };
 ```
 
 ---
 
-### RgoDroppableIdRegistry
+### VireoDropZoneIdRegistry
 
 <table>
   <thead>
@@ -178,7 +178,7 @@ type RgoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; tas
         <strong>Location</strong>
       </td>
       <td>
-        <code>features/@hello-pangea/dnd/models</code>
+        <code>@vireocodedev/starter-ui/hello-pangea-dnd</code>
       </td>
     </tr>
     <tr>
@@ -186,8 +186,8 @@ type RgoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; tas
         <strong>Purpose</strong>
       </td>
       <td>
-        Maps droppable type names to their ID payload shapes. Each key becomes the <code>type</code> discriminator in
-        the <code>RgoDroppableId</code> union.
+        Maps drop-zone type names to their ID payload shapes. Each key becomes the <code>type</code> discriminator in
+        the <code>VireoDropZoneId</code> union.
       </td>
     </tr>
     <tr>
@@ -195,15 +195,15 @@ type RgoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; tas
         <strong>Consumed by</strong>
       </td>
       <td>
-        DnD utilities: <code>serializeDroppableId</code>, <code>deserializeDroppableId</code>
+        <code>VireoDropZone</code>, lifecycle results, and <code>useVireoDndState</code>
       </td>
     </tr>
   </tbody>
 </table>
 
 ```ts
-declare module "@vireocodedev/starter-ui" {
-  interface RgoDroppableIdRegistry {
+declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+  interface VireoDropZoneIdRegistry {
     chamber: {
       chamberSide: ChamberSide;
       chamberDirection: Direction;
@@ -219,7 +219,7 @@ declare module "@vireocodedev/starter-ui" {
 Produces:
 
 ```ts
-type RgoDroppableId =
+type VireoDropZoneId =
   | { type: "chamber"; chamberSide: ChamberSide; chamberDirection: Direction }
   | { type: "stream"; streamType: StreamType; streamDirection: Direction };
 ```
@@ -228,28 +228,24 @@ type RgoDroppableId =
 
 ## Full example
 
-A complete `rgo.d.ts` file augmenting all four registries:
+A complete `vireo.d.ts` file augmenting the icon and drag-and-drop registries:
 
 ```ts
-// src/@types/rgo.d.ts
-import { type IDBCache } from "@/infrastructure/browser";
+// src/@types/vireo.d.ts
 import { type ChamberSide, type Direction, type StreamType } from "@/infrastructure/enums";
 import { type APP_ICON_REGISTRY } from "@/setup/icons/icons.registry";
 import type React from "react";
 
 declare module "@vireocodedev/starter-ui" {
   interface VireoIconRegistry extends Record<keyof typeof APP_ICON_REGISTRY, React.ComponentType> {}
+}
 
-  interface RgoEventSchema {
-    "app:ready": undefined;
-    "app:cache-update": IDBCache;
-  }
-
-  interface RgoDraggableIdRegistry {
+declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+  interface VireoDraggableIdRegistry {
     convoy: { convoyId: number };
   }
 
-  interface RgoDroppableIdRegistry {
+  interface VireoDropZoneIdRegistry {
     chamber: { chamberSide: ChamberSide; chamberDirection: Direction };
     stream: { streamType: StreamType; streamDirection: Direction };
   }

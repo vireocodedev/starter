@@ -58,51 +58,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/components/RgoDropZone/RgoDropZone.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/components/RgoDropZone/RgoDropZone.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/components/RgoDropZoneItem/RgoDropZoneItem.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/components/RgoDropZoneItem/RgoDropZoneItem.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/hooks/useDropZone.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/models/RgoDraggableId.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/models/RgoDroppableId.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@hello-pangea/dnd/providers/RgoDropZoneProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "features/i18next/index.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

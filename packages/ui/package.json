@@ -35,6 +35,11 @@
       "import": "./dist/capabilities/forms/public.js",
       "default": "./dist/capabilities/forms/public.js"
     },
+    "./hello-pangea-dnd": {
+      "types": "./dist/integrations/hello-pangea-dnd/public.d.ts",
+      "import": "./dist/integrations/hello-pangea-dnd/public.js",
+      "default": "./dist/integrations/hello-pangea-dnd/public.js"
+    },
     "./sonner": {
       "types": "./dist/integrations/sonner/public.d.ts",
       "import": "./dist/integrations/sonner/public.js",
@@ -96,16 +101,15 @@
     "build-storybook:legacy": "storybook build -c .storybook"
   },
   "dependencies": {
-    "@hello-pangea/dnd": "^18.0.1",
     "@vireocodedev/starter-history": "^1.0.0",
     "@vireocodedev/starter-localization": "^1.1.0",
     "country-flag-icons": "1.6.20",
     "i18next-browser-languagedetector": "^8.0.2",
-    "jsoncrush": "^1.1.8",
     "ovenplayer": "^0.10.42",
     "react-error-boundary": "^5.0.0"
   },
   "peerDependencies": {
+    "@hello-pangea/dnd": ">=18 <19",
     "@emotion/react": ">=11",
     "@emotion/styled": ">=11",
     "@mui/icons-material": ">=6",
@@ -123,6 +127,9 @@
     "zod": ">=3.24"
   },
   "peerDependenciesMeta": {
+    "@hello-pangea/dnd": {
+      "optional": true
+    },
     "@tanstack/react-form": {
       "optional": true
     },
@@ -134,6 +141,7 @@
     }
   },
   "devDependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.3",

@@ -158,7 +158,6 @@
         "validateAppConfig"
       ],
       "dependencies": [
-        "@hello-pangea/dnd",
         "@mui/icons-material",
         "@mui/icons-material/AddRounded",
         "@mui/icons-material/ArrowDownwardRounded",
@@ -195,7 +194,6 @@
         "dayjs/locale/pt",
         "dayjs/locale/sl",
         "i18next-browser-languagedetector",
-        "jsoncrush",
         "react",
         "react-dom",
         "react-i18next",

@@ -8,6 +8,7 @@
       "@vireocodedev/starter-ui": ["./src/index.ts"],
       "@vireocodedev/starter-ui/country": ["./src/capabilities/country/public.ts"],
       "@vireocodedev/starter-ui/forms": ["./src/capabilities/forms/public.ts"],
+      "@vireocodedev/starter-ui/hello-pangea-dnd": ["./src/integrations/hello-pangea-dnd/public.ts"],
       "@vireocodedev/starter-ui/sonner": ["./src/integrations/sonner/public.ts"],
       "@vireocodedev/starter-ui/tanstack-query": ["./src/integrations/tanstack-query/public.ts"],
       "@vireocodedev/starter-ui/storybook": ["./storybook/index.ts"],
