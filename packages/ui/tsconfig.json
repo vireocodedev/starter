@@ -7,6 +7,7 @@
       "@/*": ["./src/*"],
       "@vireocodedev/starter-ui": ["./src/index.ts"],
       "@vireocodedev/starter-ui/country": ["./src/capabilities/country/public.ts"],
+      "@vireocodedev/starter-ui/event-source": ["./src/integrations/event-source/public.ts"],
       "@vireocodedev/starter-ui/forms": ["./src/capabilities/forms/public.ts"],
       "@vireocodedev/starter-ui/hello-pangea-dnd": ["./src/integrations/hello-pangea-dnd/public.ts"],
       "@vireocodedev/starter-ui/localization": ["./src/integrations/localization/public.ts"],

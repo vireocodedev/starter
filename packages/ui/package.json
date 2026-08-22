@@ -30,6 +30,11 @@
       "import": "./dist/capabilities/country/public.js",
       "default": "./dist/capabilities/country/public.js"
     },
+    "./event-source": {
+      "types": "./dist/integrations/event-source/public.d.ts",
+      "import": "./dist/integrations/event-source/public.js",
+      "default": "./dist/integrations/event-source/public.js"
+    },
     "./forms": {
       "types": "./dist/capabilities/forms/public.d.ts",
       "import": "./dist/capabilities/forms/public.js",

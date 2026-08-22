@@ -10,4 +10,3 @@ export * from "@/capabilities/forms/components/forms/VireoFormSectionItem";
 export * from "@/capabilities/forms/form-overlays/components/overlays/VireoResponsiveFormOverlay";
 export * from "@/capabilities/history/public";
 export * from "@/capabilities/infinite-canvas/public";
-export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";

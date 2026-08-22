@@ -115,6 +115,7 @@ describe("package entry points", () => {
     expect(subpaths).toEqual([
       ".",
       "./country",
+      "./event-source",
       "./forms",
       "./hello-pangea-dnd",
       "./localization",

@@ -45,14 +45,12 @@
         "ResponsiveOverlayFrameProps",
         "RgoLocalStorageService",
         "RgoMuiColor",
-        "RgoSseStatus",
         "SIDE_PANEL_RESIZE_ACTIVE_OPACITY",
         "SIDE_PANEL_RESIZE_HANDLE_WIDTH",
         "SIDE_PANEL_RESIZE_HITBOX_WIDTH",
         "SIDE_PANEL_RESIZE_HOVER_OPACITY",
         "SIDE_PANEL_WIDTH_CSS_VAR",
         "SidePanelResizeHandle",
-        "SseEventHandler",
         "StyledSlotComponent",
         "StyledSlotProps",
         "TODO",
@@ -69,7 +67,6 @@
         "UseDelayedOverlayMountReturn",
         "UseMeasuredVireoPageLayoutOptions",
         "UsePageOverlayModesReturn",
-        "UseSseProps",
         "UseUnsavedChangesRegistrationProps",
         "UseUnsavedChangesRequestDiscardOptions",
         "UseVireoDebouncedCallbackOptions",
@@ -595,7 +592,6 @@
         "usePageOverlayController",
         "usePageOverlayModes",
         "useRafViewportWidth",
-        "useRgoSseEmitter",
         "useSidePanelResize",
         "useUnsavedChanges",
         "useUnsavedChangesRegistration",
@@ -701,6 +697,21 @@
         "dayjs",
         "react",
         "zod"
+      ],
+      "workerSafe": false
+    },
+    "./event-source": {
+      "exports": [
+        "UseVireoEventSourceOptions",
+        "UseVireoEventSourceResult",
+        "VireoEventSourceListener",
+        "VireoEventSourceListenerError",
+        "VireoEventSourceListeners",
+        "VireoEventSourceStatus",
+        "useVireoEventSource"
+      ],
+      "dependencies": [
+        "react"
       ],
       "workerSafe": false
     },
@@ -1444,6 +1455,9 @@
     },
     "./storybook": {
       "exports": [
+        "VireoEventSourceStoryServer",
+        "VireoEventSourceStoryServerController",
+        "VireoEventSourceStoryServerProps",
         "VireoStorybookProvider",
         "VireoStorybookProviderProps"
       ],

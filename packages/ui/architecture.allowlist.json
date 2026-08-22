@@ -10,21 +10,6 @@
       "rule": "legacy-source-location",
       "path": "@types/rgo.d.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoSseEmitter/stories/useRgoSseEmitter.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoSseEmitter/stories/UseRgoSseEmitterWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoSseEmitter/useRgoSseEmitter.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
     }
   ]
 }

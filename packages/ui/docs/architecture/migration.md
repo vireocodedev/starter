@@ -69,7 +69,6 @@ Design and migrate integrations only after core and capability boundaries stabil
 
 - Revisit deprecated Rgo aliases.
 - Revisit the compatibility-only `./api` entry point.
-- Reassess provisional event infrastructure and the SSE transport hook.
 - Remove dead, duplicated, or superseded legacy modules through separately reviewed changes.
 
 ## Migration slice completion
@@ -149,6 +148,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `integrations/sonner/**`                                                                                            | `integrations/sonner`                 | Migrated    | Dedicated Sonner public boundary and MUI-themed global notification surface.                 |
 | `integrations/tanstack-query/**`                                                                                    | `integrations/tanstack-query`         | Migrated    | TanStack Query extensions with explicit Sonner notification integration.                     |
 | `integrations/hello-pangea-dnd/**`                                                                                  | `integrations/hello-pangea-dnd`       | Migrated    | Typed reorder and transfer primitives behind an optional dedicated package entry point.      |
+| `integrations/event-source/**`                                                                                      | `integrations/event-source`           | Migrated    | Native EventSource lifecycle, reactive status, dynamic listeners, and explicit reconnecting. |
 | `integrations/localization/**`                                                                                      | `integrations/localization`           | Migrated    | Explicit Day.js and MUI X localization boundary for temporal fields.                         |
 | `capabilities/forms/form-overlays/components/overlays/VireoResponsiveFormOverlay/**`                                | `capabilities/forms/form-overlays`    | Migrated    | Responsive form surface coordination, actions, and unsaved-change scoping.                   |
 | `capabilities/history/**`                                                                                           | `capabilities/history`                | Migrated    | Public history-entry contract with private nested diff renderers.                            |
@@ -220,7 +220,6 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/overlays/confirmation/**`                                                     | `capabilities/overlays/confirmation`        | Migrated    | Safe controlled dialog plus promise-based provider and hook.                        |
 | `capabilities/forms/hooks/useVireoForm/**`                                                  | `capabilities/forms/hooks`                  | Migrated    | TanStack-preserving Vireo form façade and focused contract tests.                   |
 | `capabilities/forms/hooks/useVireoMultiStepForm/**`                                         | `capabilities/forms/hooks`                  | Migrated    | Typed multi-step form façade, navigation, conditions, ownership, and subscriptions. |
-| `hooks/useRgoSseEmitter/**`                                                                 | Deferred network/integration audit          | Deferred    | Not part of the in-process event bus.                                               |
 
 ## Provider, service, and setup inventory
 
@@ -354,6 +353,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | 2026-08-22   | `features/@hello-pangea/dnd/**`, JSONCrush identifier helpers, and package-root DnD exports                                                    | `integrations/hello-pangea-dnd`                                                                                  | Replaced delayed legacy wrappers with typed provider, zone, item, handle, lifecycle state, deterministic private IDs, tests, and stories.  |
 | 2026-08-22   | `features/i18next/**`, `providers/RgoLocalizationProvider/**`, `setup/{config,translations}/**`, and `@types/i18n.d.ts`                        | `integrations/localization/providers/VireoTemporalLocalizationProvider`                                          | Removed UI-owned i18next configuration and resources; added explicit scoped Day.js and MUI X temporal localization.                        |
 | 2026-08-22   | `components/data-display/RgoVideoStreamPlayer/**`, `video/**`, and OvenPlayer dependencies                                                     | Removed                                                                                                          | Removed the unused application-specific streaming wrapper and its dedicated public subpath.                                                |
+| 2026-08-22   | `hooks/useRgoSseEmitter/**` and package-root SSE exports                                                                                       | `integrations/event-source/hooks/useVireoEventSource`                                                            | Replaced JSON-coupled custom retry behavior with a native transport lifecycle, raw typed listeners, and explicit application reconnecting. |
 
 ## Automated verification
 
