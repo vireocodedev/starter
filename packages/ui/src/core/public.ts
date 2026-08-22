@@ -1,4 +1,5 @@
 export * from "./components/behavior/VireoDelayedRender";
+export * from "./components/behavior/VireoInitializationBoundary";
 export * from "./components/controls/VireoLabeledIconButton";
 export * from "./components/data-display/VireoLabelBox";
 export * from "./components/data-display/VireoJsonViewer";

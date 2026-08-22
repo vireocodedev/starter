@@ -20,7 +20,6 @@ export * from "@/features/i18next";
 export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";
 export * from "@/providers/AppSnackbarProvider";
 export * from "@/providers/AppThemeColorMetaProvider";
-export * from "@/providers/RgoInitializeProvider/RgoInitializeProvider";
 export * from "@/providers/RgoLocalizationProvider/RgoLocalizationProvider";
 export * from "@/providers/RgoProviders";
 export * from "@/providers/RgoQueryClientProvider/RgoQueryClientProvider";
