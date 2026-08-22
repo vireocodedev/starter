@@ -263,16 +263,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "services/RgoLocalStorageService/RgoLocalStorageService.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "services/RgoLocalStorageService/RgoLocalStorageService.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "setup/config/hooks/useTranslationLocal.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },

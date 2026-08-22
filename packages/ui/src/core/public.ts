@@ -20,4 +20,5 @@ export * from "./hooks/useVireoTransitionPresence/useVireoTransitionPresence";
 export * from "./providers/VireoIconRegistryProvider/VireoIconRegistryProvider";
 export * from "./providers/VireoProviderComposer/VireoProviderComposer";
 export * from "./providers/VireoThemeColorMeta/VireoThemeColorMeta";
+export * from "./services/rgoLocalStorageService/rgoLocalStorageService";
 export * from "./utils/muiutils";

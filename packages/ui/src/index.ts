@@ -21,7 +21,6 @@ export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";
 export * from "@/providers/AppSnackbarProvider";
 export * from "@/providers/RgoLocalizationProvider/RgoLocalizationProvider";
 export * from "@/providers/RgoQueryClientProvider/RgoQueryClientProvider";
-export * from "@/services/RgoLocalStorageService/RgoLocalStorageService";
 export * from "@/setup/config/RgoLocale";
 export * from "@/utils/apiutils";
 export * from "@/utils/arrayutils";

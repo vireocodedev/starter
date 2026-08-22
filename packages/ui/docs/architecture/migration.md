@@ -241,7 +241,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `core/components/behavior/VireoInitializationBoundary/**`       | `core/components/behavior`             | Migrated    | Abortable subtree initialization, cleanup, restart, and error propagation. |
 | `providers/RgoLocalizationProvider/**`                          | Deferred i18next/dayjs/MUI integration | Deferred    | Integration-owned initialization.                                          |
 | `providers/RgoQueryClientProvider/**`                           | Deferred TanStack Query integration    | Deferred    | Integration-owned provider.                                                |
-| `services/**`                                                   | `core/services`                        | Planned     | Current local-storage service is foundational browser infrastructure.      |
+| `core/services/rgoLocalStorageService/**`                       | `core/services`                        | Migrated    | Existing Zod-backed local-storage contract relocated without API changes.  |
 | `setup/config/RgoLocale.ts`                                     | Deferred i18next integration           | Deferred    | Locale contracts and mappings.                                             |
 | `setup/config/hooks/**`                                         | Deferred i18next integration           | Deferred    | Translation behavior.                                                      |
 | `setup/translations/**`                                         | Deferred i18next integration           | Deferred    | Translation resources.                                                     |
