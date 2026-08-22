@@ -52,8 +52,11 @@ describe("createConnectivityState", () => {
     harness.setBrowserOnline(true);
     expect(harness.state.sigOnline.value).toBe(true);
     stop();
+    stop();
     expect(harness.unsubscribe).toHaveBeenCalledOnce();
     expect(harness.stopInterval).toHaveBeenCalledOnce();
+    harness.state.startRuntime(harness.runtime)();
+    expect(harness.unsubscribe).toHaveBeenCalledTimes(2);
   });
 
   it("expires bootstrap state and requests deduplicated reconnects", () => {
@@ -101,5 +104,41 @@ describe("createConnectivityState", () => {
       syncInProgress: false,
       lastHeartbeatAt: null,
     });
+  });
+
+  it("rejects invalid timing policy and concurrent runtime owners", () => {
+    expect(() =>
+      createConnectivityState({
+        initialBrowserOnline: true,
+        heartbeatStaleAfterMs: 0,
+        heartbeatBootstrapAssumeOnlineMs: 0,
+      }),
+    ).toThrow("heartbeatStaleAfterMs must be a finite positive number");
+    expect(() =>
+      createConnectivityState({
+        initialBrowserOnline: true,
+        heartbeatStaleAfterMs: 1,
+        heartbeatBootstrapAssumeOnlineMs: -1,
+      }),
+    ).toThrow("heartbeatBootstrapAssumeOnlineMs must be a finite non-negative number");
+
+    const harness = createHarness();
+    const stop = harness.state.startRuntime(harness.runtime);
+    expect(() => harness.state.startRuntime(harness.runtime)).toThrow("Connectivity runtime has already been started");
+    stop();
+  });
+
+  it("rolls back browser subscriptions when runtime scheduling fails", () => {
+    const harness = createHarness();
+    const failure = new Error("scheduler unavailable");
+    const runtime = {
+      ...harness.runtime,
+      scheduleRepeating: () => {
+        throw failure;
+      },
+    };
+
+    expect(() => harness.state.startRuntime(runtime)).toThrow(failure);
+    expect(harness.unsubscribe).toHaveBeenCalledOnce();
   });
 });

@@ -22,6 +22,12 @@ export type ConnectivityStateOptions = {
   now?: () => number;
 };
 
+function assertFiniteDuration(name: string, value: number, allowZero: boolean): void {
+  if (!Number.isFinite(value) || (allowZero ? value < 0 : value <= 0)) {
+    throw new RangeError(`${name} must be a finite ${allowZero ? "non-negative" : "positive"} number`);
+  }
+}
+
 export function createConnectivityState({
   initialBrowserOnline,
   heartbeatStaleAfterMs,
@@ -29,6 +35,10 @@ export function createConnectivityState({
   runtimeIntervalMs = 1_000,
   now = Date.now,
 }: ConnectivityStateOptions) {
+  assertFiniteDuration("heartbeatStaleAfterMs", heartbeatStaleAfterMs, false);
+  assertFiniteDuration("heartbeatBootstrapAssumeOnlineMs", heartbeatBootstrapAssumeOnlineMs, true);
+  assertFiniteDuration("runtimeIntervalMs", runtimeIntervalMs, false);
+
   const sigBrowserOnline = signal(initialBrowserOnline);
   const sigHeartbeatEnabled = signal(false);
   const sigHeartbeatEnabledAt = signal<number | null>(null);
@@ -39,6 +49,7 @@ export function createConnectivityState({
   const sigHeartbeatAgeTick = signal(0);
   const sigLastReconnectRequestAt = signal<number | null>(null);
   const sigReconnectRequestTick = signal(0);
+  let activeRuntimeStop: (() => void) | null = null;
 
   const sigOnline = computed<boolean>(() => {
     void sigHeartbeatAgeTick.value;
@@ -145,16 +156,33 @@ export function createConnectivityState({
   }
 
   function startRuntime(adapter: ConnectivityRuntimeAdapter): () => void {
+    if (activeRuntimeStop) {
+      throw new Error("Connectivity runtime has already been started");
+    }
+
     sigBrowserOnline.value = adapter.readBrowserOnline();
     const unsubscribeBrowserOnline = adapter.subscribeBrowserOnline(online => {
       sigBrowserOnline.value = online;
     });
-    const stopHeartbeatAgeChecks = adapter.scheduleRepeating(refreshHeartbeatAge, runtimeIntervalMs);
+    let stopHeartbeatAgeChecks: () => void;
+    try {
+      stopHeartbeatAgeChecks = adapter.scheduleRepeating(refreshHeartbeatAge, runtimeIntervalMs);
+    } catch (error) {
+      unsubscribeBrowserOnline();
+      throw error;
+    }
 
-    return () => {
+    const stop = () => {
+      if (activeRuntimeStop !== stop) {
+        return;
+      }
+
+      activeRuntimeStop = null;
       unsubscribeBrowserOnline();
       stopHeartbeatAgeChecks();
     };
+    activeRuntimeStop = stop;
+    return stop;
   }
 
   return {
