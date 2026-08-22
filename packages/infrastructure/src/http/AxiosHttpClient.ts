@@ -1,6 +1,6 @@
 import { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import z from "zod";
-import { type PageableParams, type PageableResponse } from "@/http/pagedSearch";
+import { type PageableParams, type PageableResponse } from "./pagedSearch";
 
 export type HttpEndpointResolver = (base: string, ...segments: (number | string)[]) => string;
 

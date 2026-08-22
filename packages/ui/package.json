@@ -111,6 +111,7 @@
   },
   "dependencies": {
     "@vireocodedev/starter-history": "^1.0.0",
+    "@vireocodedev/starter-infrastructure": "^1.1.0",
     "@vireocodedev/starter-localization": "^1.1.0",
     "@vireocodedev/starter-queryengine": "^3.1.0",
     "country-flag-icons": "1.6.20",

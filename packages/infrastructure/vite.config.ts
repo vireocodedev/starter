@@ -22,12 +22,12 @@ export default defineConfig(({ mode }) => ({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "axios", "dayjs", "zod", "@preact/signals-react", "@tanstack/react-query"],
+      external: ["axios", "zod", "@preact/signals-core"],
     },
     sourcemap: true,
   },
   test: {
-    environment: "jsdom",
-    include: ["tests/**/*.{test,spec}.{ts,tsx}"],
+    environment: "node",
+    include: ["tests/**/*.{test,spec}.ts"],
   },
 }));

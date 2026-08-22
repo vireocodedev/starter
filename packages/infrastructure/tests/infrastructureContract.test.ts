@@ -1,9 +1,6 @@
 import {
   AppOfflineError,
   createPersistentSignal,
-  findFirstTruthy,
-  formatDate,
-  formatDateUpsert,
   getAppOnlineStatus,
   isAppOfflineError,
   isRequestCanceled,
@@ -25,16 +22,6 @@ describe("infrastructure contract", () => {
     expect(isRequestCanceled(new Error("boom"))).toBe(false);
   });
 
-  it("finds the first truthy element", () => {
-    expect(findFirstTruthy([0, "", false, null, "hit", "next"])).toBe("hit");
-    expect(findFirstTruthy([0, false, null])).toBeUndefined();
-  });
-
-  it("formats dates with the canonical patterns", () => {
-    expect(formatDate("2024-01-15")).toBe("15.01.2024");
-    expect(formatDateUpsert("2024-01-15")).toBe("2024-01-15");
-  });
-
   it("mirrors a persistent signal into its storage", () => {
     type CountData = { count: number };
     const store = new Map<keyof CountData, number>([["count", 1]]);
@@ -50,6 +37,21 @@ describe("infrastructure contract", () => {
     persistent.setLocal(5);
     expect(persistent.signal.value).toBe(5);
     expect(store.get("count")).toBe(5);
+  });
+
+  it("does not diverge in-memory state when persistence fails", () => {
+    const persistent = createPersistentSignal<{ count: number }, "count">(
+      {
+        get: () => 1,
+        set: () => {
+          throw new Error("storage unavailable");
+        },
+      },
+      "count",
+    );
+
+    expect(() => persistent.setLocal(5)).toThrow("storage unavailable");
+    expect(persistent.signal.value).toBe(1);
   });
 
   it("sanitizes axios errors without leaking internals", () => {

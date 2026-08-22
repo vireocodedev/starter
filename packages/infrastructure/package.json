@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/starter-infrastructure",
   "version": "1.1.0",
-  "description": "Framework-agnostic frontend infrastructure utilities (network status, persistent signals, date/array helpers, session-expiry events, axios helpers, tanstack query client) for the vireocodedev starter product.",
+  "description": "React-free browser infrastructure primitives for validated HTTP transport, connectivity, persistence, and execution-mode-aware services.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -14,7 +14,7 @@
     "infrastructure",
     "network-status",
     "signals",
-    "tanstack-query",
+    "http",
     "starter"
   ],
   "exports": {
@@ -36,24 +36,13 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@preact/signals-react": ">=2",
-    "@tanstack/react-query": ">=5",
+    "@preact/signals-core": ">=1.8",
     "axios": ">=1.7",
-    "dayjs": ">=1.11",
-    "react": ">=18",
     "zod": ">=3.24 <4"
   },
   "devDependencies": {
-    "@preact/signals-react": "^3.10.2",
-    "@tanstack/react-query": "^5.64.2",
-    "@testing-library/react": "^16.1.0",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
+    "@preact/signals-core": "^1.14.4",
     "axios": "^1.7.9",
-    "dayjs": "^1.11.13",
-    "jsdom": "^25.0.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "typescript": "^5.7.0",
     "vite": "^6.4.3",
     "vite-plugin-dts": "^4.5.0",

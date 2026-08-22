@@ -1,6 +1,6 @@
 import { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import z from "zod";
-import { parseHttpResponse, resolveHttpEndpoint, type HttpEndpointResolver } from "@/http/AxiosHttpClient";
+import { parseHttpResponse, resolveHttpEndpoint, type HttpEndpointResolver } from "./AxiosHttpClient";
 
 export type PageableParams = {
   page: number;

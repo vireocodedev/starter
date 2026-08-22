@@ -1,9 +1,5 @@
-import {
-  createPagedSearchQuery,
-  type PageableParams,
-  type PageableResponse,
-  type PagedSearchRequestOptions,
-} from "@/index";
+import { type PageableParams, type PageableResponse } from "@vireocodedev/starter-infrastructure";
+import { createVireoPagedSearchQueries, type VireoPagedSearchRequestOptions } from "./createVireoPagedSearchQueries";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
@@ -21,15 +17,17 @@ function page(number: number, totalPages: number): PageableResponse<Row> {
   return { content: [{ id: number }], number, size: 2, totalElements: totalPages * 2, totalPages };
 }
 
-describe("createPagedSearchQuery", () => {
+describe("createVireoPagedSearchQueries", () => {
   it("builds a finite query with stable keys, policy, and a neutral abort request", async () => {
-    const searchFn = vi.fn(async (pageable: PageableParams, filters: Filters, request?: PagedSearchRequestOptions) => {
-      void pageable;
-      void filters;
-      void request;
-      return page(0, 1);
-    });
-    const options = createPagedSearchQuery({ queryKeyRoot: "rows", searchFn, policy: POLICY }).search(PAGEABLE, {
+    const searchFn = vi.fn(
+      async (pageable: PageableParams, filters: Filters, request?: VireoPagedSearchRequestOptions) => {
+        void pageable;
+        void filters;
+        void request;
+        return page(0, 1);
+      },
+    );
+    const options = createVireoPagedSearchQueries({ queryKeyRoot: "rows", searchFn, policy: POLICY }).search(PAGEABLE, {
       searchText: "needle",
     });
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -44,7 +42,7 @@ describe("createPagedSearchQuery", () => {
       void filters;
       return page(pageable.page, 3);
     });
-    const options = createPagedSearchQuery({ queryKeyRoot: "rows", searchFn, policy: POLICY }).searchInfinite(
+    const options = createVireoPagedSearchQueries({ queryKeyRoot: "rows", searchFn, policy: POLICY }).searchInfinite(
       PAGEABLE,
       { searchText: "" },
     );

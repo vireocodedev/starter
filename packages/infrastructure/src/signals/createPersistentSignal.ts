@@ -1,4 +1,4 @@
-import { signal, type Signal } from "@preact/signals-react";
+import { signal, type Signal } from "@preact/signals-core";
 
 type Storage<TData extends Record<string, unknown>> = {
   get<TKey extends keyof TData>(key: TKey): TData[TKey];
@@ -17,8 +17,8 @@ export function createPersistentSignal<TData extends Record<string, unknown>, TK
   const state = signal<TData[TKey]>(storage.get(key));
 
   const setLocal = (value: TData[TKey]): void => {
-    state.value = value;
     storage.set(key, value);
+    state.value = value;
   };
 
   return {

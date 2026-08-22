@@ -1,4 +1,4 @@
-import { computed, signal } from "@preact/signals-react";
+import { computed, signal } from "@preact/signals-core";
 
 export type ConnectivitySnapshot = {
   online: boolean;

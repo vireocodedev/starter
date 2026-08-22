@@ -11,6 +11,10 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /^@vireocodedev\/starter-infrastructure$/,
+        replacement: resolve(__dirname, "../infrastructure/src/index.ts"),
+      },
+      {
         find: /^@vireocodedev\/starter-history$/,
         replacement: resolve(__dirname, "../history/src/index.ts"),
       },

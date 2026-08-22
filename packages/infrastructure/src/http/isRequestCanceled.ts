@@ -5,6 +5,6 @@ export function isRequestCanceled(error: unknown): boolean {
     axios.isCancel(error) ||
     error instanceof CanceledError ||
     (axios.isAxiosError(error) && error.code === "ERR_CANCELED") ||
-    (error instanceof DOMException && error.name === "AbortError")
+    (typeof DOMException !== "undefined" && error instanceof DOMException && error.name === "AbortError")
   );
 }

@@ -1,4 +1,4 @@
-import { getTransactionalMetadata } from "@/api/transactional";
+import { getTransactionalMetadata } from "./transactional";
 
 type AsyncMethod = (...args: unknown[]) => Promise<unknown>;
 
