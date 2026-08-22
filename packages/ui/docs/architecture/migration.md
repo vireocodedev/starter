@@ -224,13 +224,13 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/overlays/page-overlays/hooks/{useDelayedOverlayMount,usePageOverlayModes}/**` | `capabilities/overlays/page-overlays/hooks` | Migrated    | Page-overlay lifecycle and typed mode orchestration.                                |
 | `core/hooks/useVireoDebouncedCallback/**`                                                   | `core/hooks`                                | Migrated    | Trailing callback scheduling with explicit cancellation and flushing.               |
 | `core/hooks/useVireoFullscreen/**`                                                          | `core/hooks`                                | Migrated    | Target-owned standard Fullscreen API state and guarded commands.                    |
+| `core/hooks/useVireoSearchParamState/**`                                                    | `core/hooks`                                | Migrated    | Typed scalar URL state with explicit codecs and browser-history synchronization.    |
 | `core/hooks/useVireoTransitionPresence/**`                                                  | `core/hooks`                                | Migrated    | Transition-agnostic value retention and interrupted-exit lifecycle.                 |
 | `capabilities/overlays/confirmation/**`                                                     | `capabilities/overlays/confirmation`        | Migrated    | Safe controlled dialog plus promise-based provider and hook.                        |
 | `capabilities/forms/hooks/useVireoForm/**`                                                  | `capabilities/forms/hooks`                  | Migrated    | TanStack-preserving Vireo form façade and focused contract tests.                   |
 | `capabilities/forms/hooks/useVireoMultiStepForm/**`                                         | `capabilities/forms/hooks`                  | Migrated    | Typed multi-step form façade, navigation, conditions, ownership, and subscriptions. |
 | `hooks/useRgoMutation/**`                                                                   | Deferred TanStack Query integration         | Deferred    | Query mutation behavior is integration-bound.                                       |
 | `hooks/useRgoSseEmitter/**`                                                                 | Deferred network/integration audit          | Deferred    | Not part of the in-process event bus.                                               |
-| `hooks/{useRgoTabs,useRgoUrlState}/**`                                                      | `core/hooks`                                | Planned     | Generic navigation and URL state behavior.                                          |
 
 ## Provider, service, and setup inventory
 

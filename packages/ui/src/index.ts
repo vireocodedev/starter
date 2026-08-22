@@ -19,8 +19,6 @@ export * from "@/features/axios";
 export * from "@/features/i18next";
 export * from "@/hooks/useRgoMutation/useRgoMutation";
 export * from "@/hooks/useRgoSseEmitter/useRgoSseEmitter";
-export * from "@/hooks/useRgoTabs/useRgoTabs";
-export * from "@/hooks/useRgoUrlState/useRgoUrlState";
 export * from "@/providers/AppSnackbarProvider";
 export * from "@/providers/AppThemeColorMetaProvider";
 export * from "@/providers/RgoInitializeProvider/RgoInitializeProvider";
