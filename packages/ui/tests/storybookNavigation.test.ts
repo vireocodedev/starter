@@ -28,6 +28,10 @@ const EXPECTED_DOCUMENTATION_ROUTES = [
 const EXPECTED_HISTORY_ROUTES = [
   "History/Overview",
   "History/Primary Workflow",
+  "History/Nested Definitions",
+  "History/Collections",
+  "History/Formatting and Comparison",
+  "History/Node Model",
   "History/Record Validation",
   "History/Failure Semantics",
 ] as const;

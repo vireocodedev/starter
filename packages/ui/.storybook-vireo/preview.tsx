@@ -36,7 +36,16 @@ const preview: Preview = {
             "TanStack Query",
             "Drag and Drop",
           ],
-          History: ["Overview", "Primary Workflow", "Record Validation", "Failure Semantics"],
+          History: [
+            "Overview",
+            "Primary Workflow",
+            "Nested Definitions",
+            "Collections",
+            "Formatting and Comparison",
+            "Node Model",
+            "Record Validation",
+            "Failure Semantics",
+          ],
         };
         const aTitle = a.title ?? "";
         const bTitle = b.title ?? "";

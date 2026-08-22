@@ -21,6 +21,13 @@ const teamHistory = createHistoryDefinition(
   },
 );
 
+const PayloadSchema = z.object({ payload: z.unknown() });
+const payloadHistory = createHistoryDefinition(
+  PayloadSchema,
+  { label: "Payload", key: () => "payload" },
+  { payload: { kind: "field", label: "Payload" } },
+);
+
 function captureFailure(run: () => unknown): string {
   try {
     run();
@@ -32,6 +39,16 @@ function captureFailure(run: () => unknown): string {
 
 export function runFailureSemanticsExample() {
   return {
+    invalidDefinition: captureFailure(() =>
+      createHistoryDefinition(
+        MemberSchema,
+        { label: " ", key: member => member.id },
+        {
+          id: false,
+          name: { kind: "field", label: "Name" },
+        },
+      ),
+    ),
     duplicateIdentity: captureFailure(() =>
       createHistoryNodes(
         teamHistory,
@@ -46,6 +63,13 @@ export function runFailureSemanticsExample() {
     ),
     invalidSnapshot: captureFailure(() =>
       createHistoryNodes(teamHistory, { members: [] }, { members: [{ id: "a", name: 42 }] } as never),
+    ),
+    unsupportedValue: captureFailure(() =>
+      createHistoryNodes(
+        payloadHistory,
+        { payload: new Map([["revision", 1]]) },
+        { payload: new Map([["revision", 2]]) },
+      ),
     ),
   };
 }

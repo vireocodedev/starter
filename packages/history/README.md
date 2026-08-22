@@ -104,13 +104,52 @@ application-owned; passing a Zod enum narrows and validates them.
 
 - `null` and `undefined` mean a value is absent.
 - An empty string is a present value and participates in ordinary updates.
-- `set` arrays ignore order; `ordered` arrays additionally emit moved rows.
+- Added or removed empty arrays and objects remain visible as container changes.
+- `set` arrays ignore order; `ordered` arrays additionally emit deliberate moved
+  rows. Insertions and removals do not mark every shifted neighbor as moved.
 - Array item identities must be unique within each snapshot. Duplicate keys
   throw instead of silently overwriting an item.
+- Identities are strings or finite numbers. Node paths preserve that segment
+  type; encode paths canonically rather than joining them with a delimiter.
 - Unchanged rows are omitted unless `showUnchanged: true` is requested.
 - Added, updated, removed, and unchanged nodes are emitted in deterministic
   change order.
-- Both snapshots are parsed by the definition's Zod schema before comparison.
+- Both snapshots are parsed once by the root definition's Zod schema before
+  comparison. Parent schemas must compose the schemas owned by nested
+  definitions; nested schemas are not parsed a second time.
+
+## Value comparison and formatting
+
+Default comparison supports primitives, Dates, arrays, and plain objects. It
+uses a typed canonical representation with deterministic object-key ordering.
+Cycles, functions, symbols, Maps, Sets, and other unsupported object types throw
+instead of being silently treated as equal.
+
+Use a field's `resolveChange` when domain equality differs from structural
+equality. Return `null` to treat the field as unchanged, or `"added"`,
+`"updated"`, or `"removed"` to select an explicit change.
+
+Definitions are runtime-validated when created. Labels must be nonempty, modes
+must be supported, callbacks must be functions, and nested configurations must
+be structurally valid.
+
+## Nested definitions and collections
+
+An object field references a reusable definition:
+
+```ts
+const CustomerSchema = z.object({ address: AddressSchema });
+
+const customerHistory = createHistoryDefinition(
+  CustomerSchema,
+  { label: "Customer", key: () => "customer" },
+  { address: { kind: "object", definition: addressHistory } },
+);
+```
+
+Array object items use the nested definition's `key`. Primitive array items
+identify themselves. Use `mode: "ordered"` only when order is part of the
+audited meaning.
 
 ## Public concepts
 
@@ -119,8 +158,10 @@ application-owned; passing a Zod enum narrows and validates them.
 - `HistoryDefinition` and field config types describe definitions.
 - `HistoryNode`, `HistoryGroupNode`, `HistoryFieldRow`, and `HistoryValue`
   describe emitted results.
+- `HistoryPath` and `HistoryPathSegment` describe lossless node locations.
 - `createHistoryRecordSchema`, `HistoryRecordSchema`, and the record/snapshot
-  types describe transport-neutral audit records.
+  types describe transport-neutral audit records. The factory accepts optional
+  `entityKind`, `snapshot`, and `timestamp` Zod schemas.
 
 The public surface is frozen by `api-surface.json`. Export changes require a
 Changeset and deliberate semver decision.

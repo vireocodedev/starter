@@ -31,8 +31,12 @@ describe("vireoStorySort", () => {
   it("keeps History's package pages in their learning order", () => {
     const titles = [
       "History/Failure Semantics",
+      "History/Collections",
+      "History/Node Model",
       "History/Record Validation",
+      "History/Formatting and Comparison",
       "History/Overview",
+      "History/Nested Definitions",
       "History/Primary Workflow",
     ];
 
@@ -44,6 +48,10 @@ describe("vireoStorySort", () => {
     ).toEqual([
       "History/Overview",
       "History/Primary Workflow",
+      "History/Nested Definitions",
+      "History/Collections",
+      "History/Formatting and Comparison",
+      "History/Node Model",
       "History/Record Validation",
       "History/Failure Semantics",
     ]);
