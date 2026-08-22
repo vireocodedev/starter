@@ -1360,7 +1360,8 @@
         "@mui/material/styles",
         "@mui/material/utils",
         "dayjs",
-        "react"
+        "react",
+        "react-dom"
       ],
       "workerSafe": false
     },

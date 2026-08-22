@@ -50,8 +50,8 @@ describe("VireoDndProvider", () => {
     const first = screen.getByText("First");
     first.focus();
     fireEvent.keyDown(first, { key: " ", code: "Space", keyCode: 32, which: 32 });
-    await waitFor(() => expect(first).toHaveAttribute("data-dragging", "true"));
-    fireEvent.keyDown(first, { key: "Escape", code: "Escape", keyCode: 27, which: 27 });
+    await waitFor(() => expect(screen.getByText("First")).toHaveAttribute("data-dragging", "true"));
+    fireEvent.keyDown(screen.getByText("First"), { key: "Escape", code: "Escape", keyCode: 27, which: 27 });
 
     await waitFor(() => expect(onDragEnd).toHaveBeenCalledTimes(1));
     expect(onDragEnd.mock.calls[0][0]).toMatchObject({
@@ -60,5 +60,32 @@ describe("VireoDndProvider", () => {
       destination: null,
       reason: "cancel",
     });
+  });
+
+  it("moves a mouse-dragged item outside transformed ancestors so it remains visible", async () => {
+    const onDragEnd = vi.fn();
+    render(
+      <VireoDndProvider onDragEnd={onDragEnd}>
+        <div data-testid="transformed-ancestor" style={{ transform: "translateZ(0)", overflow: "hidden" }}>
+          <VireoDropZone id={{ type: "list", listId: "tasks" }} mode="reorder">
+            <VireoDraggableItem id={{ type: "task", taskId: "first" }} index={0}>
+              First
+            </VireoDraggableItem>
+          </VireoDropZone>
+        </div>
+      </VireoDndProvider>,
+    );
+
+    const first = screen.getByText("First");
+    fireEvent.mouseDown(first, { button: 0, clientX: 10, clientY: 10 });
+    fireEvent.mouseMove(window, { buttons: 1, clientX: 30, clientY: 30 });
+
+    await waitFor(() => expect(screen.getByText("First")).toHaveAttribute("data-dragging", "true"));
+    const activeFirst = screen.getByText("First");
+    expect(screen.getByTestId("transformed-ancestor")).not.toContainElement(activeFirst);
+    expect(activeFirst.parentElement).toBe(document.body);
+
+    fireEvent.mouseUp(window, { button: 0, clientX: 30, clientY: 30 });
+    await waitFor(() => expect(onDragEnd).toHaveBeenCalledTimes(1));
   });
 });

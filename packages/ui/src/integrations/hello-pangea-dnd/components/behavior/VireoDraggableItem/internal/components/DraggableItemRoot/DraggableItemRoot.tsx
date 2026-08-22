@@ -14,6 +14,7 @@ import type { DraggableProvided, DraggableStateSnapshot } from "@hello-pangea/dn
 import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useForkRef } from "@mui/material/utils";
 import React from "react";
+import { createPortal } from "react-dom";
 
 function useUtilityClasses(ownerState: VireoDraggableItemOwnerState, classes?: VireoDraggableItemProps["classes"]) {
   return composeClasses(
@@ -101,7 +102,7 @@ export function DraggableItemRoot({
   );
   const nativeHandleProps = dragHandle === "root" ? provided.dragHandleProps : undefined;
 
-  return (
+  const draggableItem = (
     <VireoDraggableItemContext.Provider value={contextValue}>
       <VireoDraggableItemRoot
         {...other}
@@ -120,4 +121,8 @@ export function DraggableItemRoot({
       </VireoDraggableItemRoot>
     </VireoDraggableItemContext.Provider>
   );
+
+  return snapshot.isDragging && typeof document !== "undefined"
+    ? createPortal(draggableItem, document.body)
+    : draggableItem;
 }
