@@ -17,6 +17,7 @@ Examples:
   npm run generate -- react-component Badge --owner core --category data-display
   npm run generate -- react-component TableHeader --owner capabilities/table --category data-display
   npm run generate -- react-component MobileToolbar --owner capabilities/table/management-table --category controls
+  npm run generate -- react-component Toaster --owner integrations/sonner --category feedback
   npm run generate -- react-component Badge --owner core --category data-display --dry-run`);
 }
 

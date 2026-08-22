@@ -35,6 +35,11 @@
       "import": "./dist/capabilities/forms/public.js",
       "default": "./dist/capabilities/forms/public.js"
     },
+    "./sonner": {
+      "types": "./dist/integrations/sonner/public.d.ts",
+      "import": "./dist/integrations/sonner/public.js",
+      "default": "./dist/integrations/sonner/public.js"
+    },
     "./video": {
       "types": "./dist/video/index.d.ts",
       "import": "./dist/video/index.js",
@@ -115,6 +120,9 @@
   },
   "peerDependenciesMeta": {
     "@tanstack/react-form": {
+      "optional": true
+    },
+    "sonner": {
       "optional": true
     }
   },

@@ -8,6 +8,7 @@
       "@vireocodedev/starter-ui": ["./src/index.ts"],
       "@vireocodedev/starter-ui/country": ["./src/capabilities/country/public.ts"],
       "@vireocodedev/starter-ui/forms": ["./src/capabilities/forms/public.ts"],
+      "@vireocodedev/starter-ui/sonner": ["./src/integrations/sonner/public.ts"],
       "@vireocodedev/starter-ui/storybook": ["./storybook/index.ts"],
       "@vireocodedev/starter-ui/storybook/VireoDockedSidePanel": ["./storybook/VireoDockedSidePanel/index.ts"],
       "@vireocodedev/starter-ui/storybook/VireoIconContainer": ["./storybook/VireoIconContainer/index.ts"],

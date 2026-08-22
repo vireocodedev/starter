@@ -34,12 +34,15 @@ export default {
       validate(value) {
         if (value === "core") return;
 
-        const match = value.match(/^capabilities\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?$/);
-        if (!match) {
-          return 'use "core", "capabilities/<name>", or "capabilities/<parent>/<child>" with kebab-case names.';
+        const capabilityMatch = value.match(
+          /^capabilities\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?$/,
+        );
+        const integrationMatch = value.match(/^integrations\/([a-z0-9]+(?:-[a-z0-9]+)*)$/);
+        if (!capabilityMatch && !integrationMatch) {
+          return 'use "core", "capabilities/<name>", "capabilities/<parent>/<child>", or "integrations/<name>" with kebab-case names.';
         }
-        if (match[2] && STRUCTURAL_FOLDERS.has(match[2])) {
-          return `"${match[2]}" is a reserved structural folder, not a child-capability name.`;
+        if (capabilityMatch?.[2] && STRUCTURAL_FOLDERS.has(capabilityMatch[2])) {
+          return `"${capabilityMatch[2]}" is a reserved structural folder, not a child-capability name.`;
         }
       },
     },
@@ -58,7 +61,7 @@ export default {
       },
     },
   },
-  allowedOutputRoots: ["packages/ui/src/core", "packages/ui/src/capabilities"],
+  allowedOutputRoots: ["packages/ui/src/core", "packages/ui/src/capabilities", "packages/ui/src/integrations"],
   outputDirectory: "components/{{componentCategory}}/{{componentName}}",
   files: [
     { source: "files/Component.classes.ts.template", destination: "{{componentName}}.classes.ts" },
@@ -88,12 +91,19 @@ export default {
   prepareData(inputs, context) {
     const componentName = `Vireo${inputs.name}`;
     const ownerSegments = inputs.owner.split("/");
-    const ownerDisplayName = inputs.owner === "core" ? "Core" : ownerSegments.slice(1).map(toDisplayName).join("/");
+    const ownerDisplayName =
+      inputs.owner === "core"
+        ? "Core"
+        : ownerSegments[0] === "capabilities"
+          ? ownerSegments.slice(1).map(toDisplayName).join("/")
+          : ownerSegments.map(toDisplayName).join("/");
     const inferredCategory = `${ownerDisplayName}/${toDisplayName(inputs.category)}`;
     const publicBoundary =
       inputs.owner === "core"
         ? context.outputBase
-        : resolve(context.repoRoot, "packages/ui/src/capabilities", ownerSegments[1]);
+        : ownerSegments[0] === "capabilities"
+          ? resolve(context.repoRoot, "packages/ui/src/capabilities", ownerSegments[1])
+          : context.outputBase;
 
     if (!existsSync(resolve(publicBoundary, "public.ts"))) {
       throw new Error(`Architectural owner "${inputs.owner}" requires ${publicBoundary}/public.ts before generation.`);

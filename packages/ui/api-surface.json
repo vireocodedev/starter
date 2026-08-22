@@ -1355,6 +1355,41 @@
       ],
       "workerSafe": false
     },
+    "./sonner": {
+      "exports": [
+        "Action",
+        "ExternalToast",
+        "SonnerToasterProps",
+        "ToastClassnames",
+        "ToastT",
+        "ToastToDismiss",
+        "VireoToaster",
+        "VireoToasterClassKey",
+        "VireoToasterClasses",
+        "VireoToasterInheritedProps",
+        "VireoToasterOwnProps",
+        "VireoToasterOwnerState",
+        "VireoToasterProps",
+        "VireoToasterRootSlotPropsOverrides",
+        "VireoToasterSlots",
+        "VireoToasterSlotsAndSlotProps",
+        "getVireoToasterUtilityClass",
+        "toast",
+        "vireoToasterClasses"
+      ],
+      "dependencies": [
+        "@mui/icons-material",
+        "@mui/material",
+        "@mui/material/styles",
+        "@mui/material/utils",
+        "@tanstack/react-query",
+        "dayjs",
+        "jsoncrush",
+        "react",
+        "sonner"
+      ],
+      "workerSafe": false
+    },
     "./video": {
       "exports": [
         "RgoVideoStreamPlayer",

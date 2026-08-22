@@ -59,6 +59,8 @@ const RULES = new Set([
   "forbidden-index-barrel",
   "internal-component-structure",
   "internal-package-entry-import",
+  "integration-import-boundary",
+  "integration-root-entry",
   "inventory-overlap",
   "inventory-stale-pattern",
   "inventory-unmatched",
@@ -417,6 +419,25 @@ function collectCapabilityRootViolations(violations) {
   }
 }
 
+function collectIntegrationRootViolations(violations) {
+  const integrationsRoot = resolve(srcRoot, "integrations");
+  if (!existsSync(integrationsRoot)) return;
+
+  for (const integration of immediateEntries(integrationsRoot)) {
+    const integrationPath = resolve(integrationsRoot, integration.name);
+    const relativeIntegrationPath = targetRelative(integrationPath);
+
+    if (!integration.isDirectory() || !isKebabCase(integration.name)) {
+      violations.push(
+        violation("integration-root-entry", relativeIntegrationPath, "integrations must be kebab-case directories"),
+      );
+      continue;
+    }
+
+    checkBoundaryRoot(integrationPath, "integration", violations);
+  }
+}
+
 function isPublicComponentDirectory(path) {
   return /(?:^|\/)components\/(?:behavior|controls|data-display|feedback|forms|inputs|layout|navigation|overlays|surfaces)\/[^/]+$/u.test(
     path,
@@ -637,7 +658,13 @@ function collectModuleViolations(directories, files, violations) {
 function collectTargetStructureViolations(files, directories) {
   const violations = [];
   const targetDirectories = directories.filter(
-    path => path === "core" || path.startsWith("core/") || path === "capabilities" || path.startsWith("capabilities/"),
+    path =>
+      path === "core" ||
+      path.startsWith("core/") ||
+      path === "capabilities" ||
+      path.startsWith("capabilities/") ||
+      path === "integrations" ||
+      path.startsWith("integrations/"),
   );
 
   for (const directory of targetDirectories) {
@@ -661,15 +688,29 @@ function collectTargetStructureViolations(files, directories) {
 
   checkBoundaryRoot(resolve(srcRoot, "core"), "core", violations);
   collectCapabilityRootViolations(violations);
+  collectIntegrationRootViolations(violations);
   collectComponentViolations(directories, files, violations);
   collectModuleViolations(directories, files, violations);
 
   for (const file of files.filter(
-    path => path === "core/public.ts" || path.startsWith("core/") || path.startsWith("capabilities/"),
+    path =>
+      path === "core/public.ts" ||
+      path.startsWith("core/") ||
+      path.startsWith("capabilities/") ||
+      path.startsWith("integrations/"),
   )) {
-    if (file.endsWith("/public.ts") && file !== "core/public.ts" && !/^capabilities\/[^/]+\/public\.ts$/u.test(file)) {
+    if (
+      file.endsWith("/public.ts") &&
+      file !== "core/public.ts" &&
+      !/^capabilities\/[^/]+\/public\.ts$/u.test(file) &&
+      !/^integrations\/[^/]+\/public\.ts$/u.test(file)
+    ) {
       violations.push(
-        violation("public-entry-location", file, "public.ts exists only in core and top-level capability roots"),
+        violation(
+          "public-entry-location",
+          file,
+          "public.ts exists only in core, top-level capability roots, and integration roots",
+        ),
       );
     }
 
@@ -727,6 +768,11 @@ function capabilityLocation(path) {
   };
 }
 
+function integrationLocation(path) {
+  const segments = path.split("/");
+  return segments[0] === "integrations" && segments[1] ? segments[1] : undefined;
+}
+
 export function isExecutableStoryExample(path) {
   return path.includes("/internal/storybook/") && /Example\.tsx?$/u.test(path);
 }
@@ -736,11 +782,13 @@ function collectImportViolations(files) {
   const capabilityEdges = new Map();
   const targetFiles = files.filter(
     file =>
-      (file.startsWith("core/") || file.startsWith("capabilities/")) && (file.endsWith(".ts") || file.endsWith(".tsx")),
+      (file.startsWith("core/") || file.startsWith("capabilities/") || file.startsWith("integrations/")) &&
+      (file.endsWith(".ts") || file.endsWith(".tsx")),
   );
 
   for (const file of targetFiles) {
     const owner = capabilityLocation(file);
+    const integration = integrationLocation(file);
     const executableStoryExample = isExecutableStoryExample(file);
 
     for (const specifier of sourceSpecifiers(file)) {
@@ -761,7 +809,10 @@ function collectImportViolations(files) {
       }
 
       if (specifier.startsWith(".")) {
-        const isPublicEntry = file === "core/public.ts" || /^capabilities\/[^/]+\/public\.ts$/u.test(file);
+        const isPublicEntry =
+          file === "core/public.ts" ||
+          /^capabilities\/[^/]+\/public\.ts$/u.test(file) ||
+          /^integrations\/[^/]+\/public\.ts$/u.test(file);
         if (isPublicEntry) continue;
 
         const importerDirectory = file.slice(0, file.lastIndexOf("/"));
@@ -794,6 +845,55 @@ function collectImportViolations(files) {
               "core-import-boundary",
               file,
               `core cannot import legacy or non-core source module "${specifier}"`,
+            ),
+          );
+        }
+        continue;
+      }
+
+      if (integration) {
+        if (target.startsWith("core/") && target !== "core/public") {
+          violations.push(
+            violation(
+              "integration-import-boundary",
+              file,
+              `integrations import core through @/core/public, not "${specifier}"`,
+            ),
+          );
+          continue;
+        }
+
+        if (target.startsWith("capabilities/")) {
+          violations.push(
+            violation(
+              "integration-import-boundary",
+              file,
+              `integrations cannot import capability module "${specifier}"`,
+            ),
+          );
+          continue;
+        }
+
+        if (target.startsWith("integrations/")) {
+          const targetIntegration = integrationLocation(target);
+          if (targetIntegration !== integration && target !== `integrations/${targetIntegration}/public`) {
+            violations.push(
+              violation(
+                "integration-import-boundary",
+                file,
+                `cross-integration import "${specifier}" must target the integration public.ts`,
+              ),
+            );
+          }
+          continue;
+        }
+
+        if (!target.startsWith("core/")) {
+          violations.push(
+            violation(
+              "integration-import-boundary",
+              file,
+              `integrations cannot import legacy source module "${specifier}"`,
             ),
           );
         }

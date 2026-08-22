@@ -181,6 +181,31 @@ test("the React component template supports one child-capability level and requi
   );
 });
 
+test("the React component template supports an integration-owned public component", async t => {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-integration-component-"));
+  t.after(() => rm(temporaryRoot, { force: true, recursive: true }));
+  await mkdir(join(temporaryRoot, "packages/ui/src/integrations/sonner"), { recursive: true });
+  await writeFile(join(temporaryRoot, "packages/ui/src/integrations/sonner/public.ts"), "export {};\n", "utf8");
+
+  const { config, templateDirectory } = await loadRegisteredTemplate("react-component");
+  const plan = await createGenerationPlan({
+    config,
+    rawInputs: { name: "Toaster", owner: "integrations/sonner", category: "feedback" },
+    repoRoot: temporaryRoot,
+    templateDirectory: fileURLToPath(templateDirectory),
+  });
+
+  assert.equal(plan.relativeOutputDirectory, "packages/ui/src/integrations/sonner/components/feedback/VireoToaster");
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("VireoToaster.tsx")).contents,
+    /from "@\/core\/public"/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
+    /title: "Integrations\/Sonner\/Feedback\/VireoToaster"/,
+  );
+});
+
 test("writes a validated template through a staging directory without overwriting output", async t => {
   const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-generator-test-"));
   t.after(() => rm(temporaryRoot, { force: true, recursive: true }));
