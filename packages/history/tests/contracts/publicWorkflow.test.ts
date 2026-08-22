@@ -12,7 +12,7 @@ const baseRecord = {
   snapshotCurrent: { total: 100 },
 };
 
-describe("history public workflow", () => {
+describe("starter-history public workflow", () => {
   it("parses a history record with an optional entity-kind constraint", () => {
     expect(createHistoryRecordSchema().parse(baseRecord).entity).toBe("INVOICE");
     const schema = createHistoryRecordSchema(z.enum(["INVOICE", "BUYER"]));

@@ -55,10 +55,12 @@ const update = process.argv.includes("--update");
  *
  * The consuming app runs its SQLite engine in a worker, where `window` and
  * `document` do not exist and evaluating a React or MUI module throws on import.
- * These three entry points are what that worker imports, so the framework-free
- * property is part of their contract rather than an accident of the current code.
+ * These entry points either run in a worker today or deliberately promise the
+ * same framework-free portability. The property is part of their contract
+ * rather than an accident of the current code.
  */
 const WORKER_SAFE_ENTRY_POINTS = {
+  "@vireocodedev/starter-history": ["."],
   "@vireocodedev/starter-sqlite": [".", "./offline"],
 };
 

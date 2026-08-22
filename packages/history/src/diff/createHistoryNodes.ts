@@ -375,8 +375,8 @@ function createSetArrayChildren(
   path: string[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
-  const previousItems = createArrayItemMap(config, previousArray);
-  const currentItems = createArrayItemMap(config, currentArray);
+  const previousItems = createArrayItemMap(config, previousArray, path, "previous");
+  const currentItems = createArrayItemMap(config, currentArray, path, "current");
 
   const addedChildren: HistoryNode[] = [];
   const updatedChildren: HistoryNode[] = [];
@@ -421,8 +421,8 @@ function createOrderedArrayChildren(
   path: string[],
   options: HistoryEngineOptions,
 ): HistoryNode[] {
-  const previousItems = createArrayItemMap(config, previousArray);
-  const currentItems = createArrayItemMap(config, currentArray);
+  const previousItems = createArrayItemMap(config, previousArray, path, "previous");
+  const currentItems = createArrayItemMap(config, currentArray, path, "current");
 
   const addedChildren: HistoryNode[] = [];
   const updatedChildren: HistoryNode[] = [];
@@ -611,13 +611,17 @@ function createMovedRow(
 function createArrayItemMap(
   config: InternalArrayFieldConfig,
   array: unknown[],
+  path: readonly string[],
+  side: "previous" | "current",
 ): Map<HistoryEntityKey, { value: unknown; index: number }> {
   const map = new Map<HistoryEntityKey, { value: unknown; index: number }>();
 
   array.forEach((value, index) => {
     const key = createArrayItemKey(config, value, index);
     if (map.has(key)) {
-      throw new Error(`Duplicate history array identity "${String(key)}" at "${String(index)}".`);
+      throw new Error(
+        `Duplicate history array identity "${String(key)}" in the ${side} snapshot at "${path.join(".")}".`,
+      );
     }
     map.set(key, { value, index });
   });
