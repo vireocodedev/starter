@@ -2,7 +2,7 @@ import { type AppConfig, type AppMobileBottomNavItem } from "@/config/app.config
 import { useAppNavLayout } from "@/shell/layout/AppNavLayoutContext";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
-import { usePlatformTranslation } from "@vireocodedev/starter-localization";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/localization";
 import { VireoIcon } from "@vireocodedev/starter-ui";
 import React from "react";
 import { flushSync } from "react-dom";

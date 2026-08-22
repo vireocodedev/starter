@@ -1,6 +1,6 @@
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import { Alert, Button, Snackbar } from "@mui/material";
-import { usePlatformTranslation } from "@vireocodedev/starter-localization";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/localization";
 import { useRegisterSW } from "virtual:pwa-register/react";
 
 /**
