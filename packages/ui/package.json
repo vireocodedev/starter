@@ -102,9 +102,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "storybook": "storybook dev -p 6006 -c .storybook-vireo",
-    "storybook:legacy": "storybook dev -p 6007 -c .storybook",
-    "build-storybook": "storybook build -c .storybook-vireo",
-    "build-storybook:legacy": "storybook build -c .storybook"
+    "build-storybook": "storybook build -c .storybook-vireo"
   },
   "dependencies": {
     "@vireocodedev/starter-history": "^1.0.0",
@@ -152,7 +150,6 @@
     "@mui/material": "^6.4.1",
     "@mui/x-date-pickers": "^7.27.0",
     "@storybook/addon-docs": "^9.1.20",
-    "@storybook/addon-themes": "^9.1.20",
     "@storybook/react-vite": "^9.1.20",
     "@tanstack/react-form": "1.33.5",
     "@tanstack/react-query": "^5.64.2",
