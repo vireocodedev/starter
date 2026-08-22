@@ -58,81 +58,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/RgoLoaderSuspense.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/RgoLoaderSuspense.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/stories/RgoLoaderSuspense.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoLoaderSuspense/stories/RgoLoaderSuspenseWithDefaultsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/RgoQueryErrorBoundary.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/RgoQueryErrorBoundary.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/stories/RgoQueryErrorBoundary.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/stories/RgoQueryErrorBoundaryWithDefaultsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/components/RgoQueryErrorBoundary/stories/RgoQueryErrorBoundaryWithFallbackDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/RgoQueryErrorLoaderSuspense.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/RgoQueryErrorLoaderSuspense.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspense.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspenseWithDefaultsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspenseWithErrorComponentDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "components/feedback/RgoQueryErrorLoaderSuspense/stories/RgoQueryErrorLoaderSuspenseWithLoaderComponentDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "features/@hello-pangea/dnd/components/RgoDropZone/RgoDropZone.css",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -174,16 +99,6 @@
     {
       "rule": "legacy-source-location",
       "path": "features/@hello-pangea/dnd/providers/RgoDropZoneProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@tanstack/react-query/index.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "features/@tanstack/react-query/lib.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -234,21 +149,6 @@
     {
       "rule": "legacy-source-location",
       "path": "providers/RgoLocalizationProvider/RgoLocalizationProvider.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.css",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.mdx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/RgoQueryClientProvider/RgoQueryClientProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {

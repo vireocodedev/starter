@@ -169,7 +169,6 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 
 | Current path pattern                                                                | Target owner                                 | Disposition | Notes                                                                                     |
 | ----------------------------------------------------------------------------------- | -------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------- |
-| `components/feedback/RgoQueryErrorLoaderSuspense/**`                                | Deferred core and TanStack Query audit       | Split       | Separate generic suspense presentation from query-specific reset and error behavior.      |
 | `capabilities/infinite-canvas/**`                                                   | `capabilities/infinite-canvas`               | Migrated    | Controlled pan/zoom surface, world body, fixed overlays, context, and coordinate helpers. |
 | `core/components/behavior/VireoDelayedRender/**`                                    | `core/components/behavior`                   | Migrated    | First complete core component migration slice.                                            |
 | `core/components/controls/VireoLabeledIconButton/**`                                | `core/components/controls`                   | Migrated    | Accessible icon-over-label action with selected and status states.                        |
@@ -238,7 +237,6 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `core/providers/{VireoProviderComposer,VireoThemeColorMeta}/**` | `core/providers`                       | Migrated    | Typed provider composition and reversible document theme-color ownership.  |
 | `core/components/behavior/VireoInitializationBoundary/**`       | `core/components/behavior`             | Migrated    | Abortable subtree initialization, cleanup, restart, and error propagation. |
 | `providers/RgoLocalizationProvider/**`                          | Deferred i18next/dayjs/MUI integration | Deferred    | Integration-owned initialization.                                          |
-| `providers/RgoQueryClientProvider/**`                           | Deferred TanStack Query integration    | Deferred    | Integration-owned provider.                                                |
 | `core/services/rgoLocalStorageService/**`                       | `core/services`                        | Migrated    | Existing Zod-backed local-storage contract relocated without API changes.  |
 | `setup/config/RgoLocale.ts`                                     | Deferred i18next integration           | Deferred    | Locale contracts and mappings.                                             |
 | `setup/config/hooks/**`                                         | Deferred i18next integration           | Deferred    | Translation behavior.                                                      |
