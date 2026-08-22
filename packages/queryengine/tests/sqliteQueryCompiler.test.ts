@@ -179,7 +179,6 @@ describe("SQLite query compiler", () => {
     });
 
     it.each([
-      ["an unknown field path", [{ path: "unknown", operator: "EQUALS", value: "1" }]],
       ["a parameterized row", [{ path: "price", operator: "EQUALS", value: "1", parameterized: true }]],
       ["an operator with no value", [{ path: "price", operator: "EQUALS", value: "  " }]],
       ["an empty IN list", [{ path: "price", operator: "IN", value: " , " }]],
@@ -190,9 +189,24 @@ describe("SQLite query compiler", () => {
       expect(request.whereParams).toEqual([]);
     });
 
-    it("ignores malformed filter JSON rather than throwing", async () => {
-      const { request } = await runSearch({ queryFiltersJson: "{not json" });
-      expect(request.whereSql).toBe("p.deleted = 0");
+    it("rejects malformed filter JSON instead of silently broadening the query", async () => {
+      await expect(runSearch({ queryFiltersJson: "{not json" })).rejects.toThrow("Query filter JSON is invalid.");
+    });
+
+    it("rejects unknown filter fields instead of silently broadening the query", async () => {
+      await expect(
+        runSearch({
+          queryFiltersJson: filtersJson([{ path: "unknown", operator: "EQUALS", value: "1" }]),
+        }),
+      ).rejects.toThrow("Unknown SQLite filter field: unknown");
+    });
+
+    it("rejects invalid boolean values", async () => {
+      await expect(
+        runSearch({
+          queryFiltersJson: filtersJson([{ path: "archived", operator: "EQUALS", value: "yes" }]),
+        }),
+      ).rejects.toThrow("Invalid boolean filter value: yes");
     });
 
     it("builds relation IN clauses from selected options", async () => {

@@ -61,4 +61,19 @@ describe("bindSqliteSearchColumns", () => {
       expect(buyerColumns.selectColumns).not.toContainEqual(expect.objectContaining({ alias: "country.tax" }));
     });
   });
+
+  it("rejects duplicate aliases and filter bindings", () => {
+    expect(() =>
+      bindSqliteSearchColumns([
+        { alias: "id", expression: "p.id", valueType: "number" },
+        { alias: "id", expression: "p.parent_id", valueType: "number" },
+      ]),
+    ).toThrow('SQLite search column alias "id" is registered more than once.');
+
+    expect(() =>
+      bindSqliteSearchColumns([{ alias: "country", expression: "p.country", valueType: "string" }], {
+        country: { expression: "c.code", valueType: "string" },
+      }),
+    ).toThrow('SQLite filter field "country" is registered more than once.');
+  });
 });
