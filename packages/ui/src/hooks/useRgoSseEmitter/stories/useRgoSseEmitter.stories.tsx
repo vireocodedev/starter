@@ -2,7 +2,7 @@ import {
   UseSseEmitterWithDefaultPropsDemo,
   UseSseEmitterWithDefaultPropsDemoCode,
 } from "@/hooks/useRgoSseEmitter/stories/UseRgoSseEmitterWithDefaultPropsDemo";
-import { createStories, createStorybookDescription } from "@/utils/storybookutils";
+import { createStories, createStorybookDescription } from "../../../../storybook/internal/legacyStorybookUtils";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const STORY_NAMES = ["With default props"];

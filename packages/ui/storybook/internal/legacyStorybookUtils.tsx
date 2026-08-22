@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite";
 import type { SBType } from "storybook/internal/csf";
 
-import { MdBadge } from "./markdownutils";
+import { MdBadge } from "./legacyMarkdownUtils";
 
 type StorybookDescriptionOptions = {
   /** Badge status (e.g., "STABLE", "WIP") */

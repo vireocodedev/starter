@@ -368,11 +368,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "utils/markdownutils.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "utils/mathutils.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -384,11 +379,6 @@
     {
       "rule": "legacy-source-location",
       "path": "utils/objectutils.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "utils/storybookutils.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
