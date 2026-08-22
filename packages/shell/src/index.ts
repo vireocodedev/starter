@@ -1,60 +1,52 @@
-export * from "@/config/app.config.brand";
-export * from "@/config/app.config.routes.types";
-export * from "@/config/app.config.types";
-export * from "@/config/app.config.validation";
-export * from "@/devtools/installDevConsoleFilters";
-export * from "@/devtools/isTextEmotionNthChildWarning";
-export * from "@/navigation/startRouteViewTransition";
-export * from "@/navigation/useNestedPageNavigation";
-export * from "@/overlay-history/OverlayHistoryBridge";
-export * from "@/overlay-history/useOverlayBackClose";
-export * from "@/routeguards/AppRouteGuardLayout";
-export * from "@/routeguards/AppRouteGuardLogin";
-export * from "@/routeguards/authRedirect";
-export * from "@/shell/app.shell-runtime.types";
-export * from "@/shell/AppAuthTransitionScreen";
-export * from "@/shell/AppShellContext";
-export * from "@/shell/AppShellLayout";
-export * from "@/shell/components/AppBrandLogo";
-export * from "@/shell/components/AppMobileNavDrawer";
-export * from "@/shell/components/AppPwaUpdateBanner";
-export * from "@/shell/hooks/useAppPermissions";
-export * from "@/shell/hooks/useAppShellMode";
-export * from "@/shell/hooks/useResizableNav";
-export * from "@/shell/hooks/useShellViewport";
-export * from "@/shell/hooks/useWindowControlsOverlay";
-export * from "@/shell/hooks/windowControlsOverlay.utils";
-export * from "@/shell/layout/AppLayoutHeader";
-export * from "@/shell/layout/AppLayoutNav";
-export * from "@/shell/layout/AppMobileBottomNavigation";
-export * from "@/shell/layout/AppNavLayoutContext";
-export * from "@/shell/layout/layout.tokens";
-export * from "@/shell/layout/layoutNav.constants";
-export * from "@/shell/layout/nav/AppNavControlItem";
-export * from "@/shell/layout/nav/AppNavControlPopover";
-export * from "@/shell/layout/nav/AppNavHeader";
-export * from "@/shell/layout/nav/AppNavItem";
-export * from "@/shell/layout/nav/AppNavList";
-export * from "@/shell/layout/nav/AppNavResizeHandle";
-export * from "@/shell/layout/nav/AppNavSeparator";
-export * from "@/shell/layout/nav/AppNavSlotItem";
-export * from "@/shell/layout/nav/nav.types";
-export * from "@/shell/layout/nav/nav.utils";
-export * from "@/shell/layout/nav/useVisibleNavEntries";
-export * from "@/shell/layout/presets/AppBareShellLayout";
-export * from "@/shell/layout/presets/AppDashboardShellLayout";
-export * from "@/shell/layout/presets/AppPublicShellLayout";
-export * from "@/shell/layout/presets/AppShellModeLayout";
-export * from "@/shell/useAppShellContext";
-export * from "@/sitemap/appMobileNav";
-export * from "@/sitemap/appNav";
-export * from "@/sitemap/appRoute";
-export * from "@/sitemap/AppRouteRedirect";
-export * from "@/sitemap/definePages";
-export * from "@/sitemap/defineRoutes";
-export * from "@/sitemap/defineSections";
-export * from "@/sitemap/routeMetadata";
-export * from "@/sitemap/routePath.types";
-export * from "@/sitemap/routePath.utils";
-export * from "@/sitemap/strictConfig.types";
-export * from "@/unsaved-changes/UnsavedChangesRouterProvider";
+export { defineShellConfig, ShellModeSchema } from "./config/shellConfig";
+export type { ShellConfig, ShellConfigValidationOptions, ShellMode } from "./config/shellConfig";
+export { createAuthRedirectState, isSafeInternalPath, resolvePostLoginPath } from "./navigation/authRedirect";
+export type { ShellAuthRedirectState, ShellLocationSnapshot } from "./navigation/authRedirect";
+export { ShellNavigationIdSchema, shellNavigation } from "./navigation/shellNavigation";
+export type { ShellNavigationEntry } from "./navigation/shellNavigation";
+export {
+  createOverlayHistoryRegistry,
+  getCommonOverlayPrefixLength,
+  OVERLAY_HISTORY_STATE_KEY,
+  readOverlayStack,
+  resolveOverlayHistoryAction,
+  withOverlayStack,
+} from "./overlay-history/overlayHistory";
+export type {
+  OverlayHistoryAction,
+  OverlayHistoryEntry,
+  OverlayHistoryEntryId,
+  OverlayHistoryRegistry,
+  OverlayHistoryResolveInput,
+} from "./overlay-history/overlayHistory";
+export {
+  generateShellPath,
+  getRequiredRouteParamNames,
+  joinRoutePattern,
+  normalizeRoutePath,
+} from "./sitemap/routePath";
+export {
+  createShellSitemap,
+  defineShellPages,
+  defineShellSections,
+  ShellRouteKeySchema,
+  ShellRoutePathSchema,
+} from "./sitemap/shellSitemap";
+export type {
+  ResolvedShellRoute,
+  ShellLabel,
+  ShellPage,
+  ShellPageDefinition,
+  ShellPathForPage,
+  ShellPermission,
+  ShellPermissionScope,
+  ShellRouteMetadata,
+  ShellRouteNode,
+  ShellRouteParams,
+  ShellRouteParamValue,
+  ShellRouteTreeNode,
+  ShellRouteTreePageEntries,
+  ShellSection,
+  ShellSectionDefinition,
+  ShellSitemap,
+} from "./sitemap/shellSitemap.types";
