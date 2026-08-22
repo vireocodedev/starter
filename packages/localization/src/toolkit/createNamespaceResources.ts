@@ -56,6 +56,17 @@ export function createNamespaceResources<TShape extends object, B extends string
   config: CreateNamespaceResourcesConfig<TShape, B, L>,
 ): Record<L, Record<string, TShape>> {
   const { namespace, baseResources, seedFrom, locales, overrides } = config;
+
+  if (namespace.trim().length === 0) {
+    throw new Error("createNamespaceResources requires a non-empty namespace.");
+  }
+  if (!Object.prototype.hasOwnProperty.call(baseResources, seedFrom)) {
+    throw new Error(`createNamespaceResources could not find seed locale "${seedFrom}".`);
+  }
+  if (new Set(locales).size !== locales.length) {
+    throw new Error("createNamespaceResources requires unique locale identifiers.");
+  }
+
   const seed = baseResources[seedFrom];
   const result = {} as Record<L, Record<string, TShape>>;
 
@@ -63,7 +74,7 @@ export function createNamespaceResources<TShape extends object, B extends string
     const shipped = (baseResources as Record<string, TShape | undefined>)[locale];
     const override = overrides?.[locale];
 
-    let merged: TShape = seed;
+    let merged = deepMerge(seed, undefined);
     if (shipped) {
       merged = deepMerge(merged, shipped);
     }
