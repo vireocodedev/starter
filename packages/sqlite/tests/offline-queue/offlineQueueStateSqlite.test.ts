@@ -84,4 +84,27 @@ describe("offlineQueueStateSqlite", () => {
     expect(getOfflineQueueSize(db)).toBe(0);
     db.close();
   });
+
+  it("rejects corrupted persisted commands instead of replaying altered data", () => {
+    const db = openDatabase();
+    db.exec(`
+      INSERT INTO offline_sync_commands
+        (command_id, method, url, body_json, headers_json, created_at, status, retry_count)
+      VALUES ('corrupt', 'POST', '/api/product', '{broken', '{}', 1, 'PENDING', 0);
+    `);
+
+    expect(() => getPendingOfflineCommands(db, 10)).toThrow(
+      'Offline command "corrupt" contains invalid JSON in body_json.',
+    );
+    db.close();
+  });
+
+  it("rejects invalid queue limits", () => {
+    const db = openDatabase();
+    expect(() => getPendingOfflineCommands(db, 0)).toThrow("batchSize must be a positive integer.");
+    expect(() => markOfflineCommandsRetryable(db, ["missing"], null, 0)).toThrow(
+      "maxRetryCount must be a positive integer.",
+    );
+    db.close();
+  });
 });

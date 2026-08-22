@@ -21,11 +21,31 @@ export type OfflineQueueStatusCounts = {
   permanentlyFailed: number;
 };
 
-function parseJsonValue<T>(value: string, fallback: T): T {
+function parseJsonValue(value: string, commandId: string, column: string): unknown {
   try {
-    return JSON.parse(value) as T;
+    return JSON.parse(value) as unknown;
   } catch {
-    return fallback;
+    throw new Error(`Offline command "${commandId}" contains invalid JSON in ${column}.`);
+  }
+}
+
+function parseHeaders(value: string, commandId: string): Record<string, string> {
+  const parsed = parseJsonValue(value, commandId, "headers_json");
+  if (
+    parsed == null ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    Object.values(parsed).some(header => typeof header !== "string")
+  ) {
+    throw new Error(`Offline command "${commandId}" contains invalid headers_json.`);
+  }
+
+  return parsed as Record<string, string>;
+}
+
+function assertPositiveInteger(value: number, name: string): void {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(`${name} must be a positive integer.`);
   }
 }
 
@@ -58,6 +78,7 @@ export function enqueueOfflineCommand(db: SqliteDatabase, command: OfflineSyncCo
 }
 
 export function getPendingOfflineCommands(db: SqliteDatabase, batchSize: number): OfflineQueuedCommand[] {
+  assertPositiveInteger(batchSize, "batchSize");
   const statement = db.prepare(`
     SELECT command_id, method, url, body_json, headers_json, created_at, status, retry_count, last_error
     FROM ${OFFLINE_QUEUE_TABLE}
@@ -71,12 +92,13 @@ export function getPendingOfflineCommands(db: SqliteDatabase, batchSize: number)
     statement.bind([batchSize]);
     while (statement.step()) {
       const row = statement.get([]);
+      const commandId = String(row[0] ?? "");
       commands.push({
-        commandId: String(row[0] ?? ""),
+        commandId,
         method: String(row[1] ?? ""),
         url: String(row[2] ?? ""),
-        body: parseJsonValue(String(row[3] ?? "null"), null),
-        headers: parseJsonValue<Record<string, string>>(String(row[4] ?? "{}"), {}),
+        body: parseJsonValue(String(row[3] ?? "null"), commandId, "body_json"),
+        headers: parseHeaders(String(row[4] ?? "{}"), commandId),
         createdAt: Number(row[5] ?? 0),
         status: toQueueStatus(row[6]),
         retryCount: Number(row[7] ?? 0),
@@ -144,6 +166,7 @@ export function markOfflineCommandsRetryable(
   maxRetryCount: number,
 ): void {
   if (commandIds.length === 0) return;
+  assertPositiveInteger(maxRetryCount, "maxRetryCount");
 
   runSqliteTransaction(db, () => {
     for (const commandId of commandIds) {
