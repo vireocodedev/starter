@@ -42,10 +42,9 @@ compatibility contract.
   and mobile accordion contract with controlled sorting, pagination, loading,
   filtering surfaces, virtualization, and scroll restoration.
 - **Providers** — `AppConfirmProvider`, `AppSnackbarProvider`,
-  `AppMobileAttributeProvider`, `AppThemeColorMetaProvider`.
-- **Hooks** — `useResponsiveProps`, `useAppPageContentLayout`,
-  `usePageOverlayModes`, `useDelayedOverlayMount`, `useSingleFlightAction`,
-  `useMediaQueryDevice`.
+  `AppThemeColorMetaProvider`.
+- **Hooks** — `useAppPageContentLayout`, `usePageOverlayModes`,
+  `useDelayedOverlayMount`, and `useSingleFlightAction`.
 - **Overlays** — responsive side-panel/drawer frames, page-overlay controller,
   delayed mounting, and guarded mode switching.
 - **Layout** — `AppPageContentLayoutContext`, layout utils + shell breakpoints,

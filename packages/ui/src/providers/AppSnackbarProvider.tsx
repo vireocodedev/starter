@@ -1,5 +1,4 @@
-import { useResponsiveProps } from "@/hooks/useResponsiveProps";
-import { useTheme } from "@mui/material";
+import { useMediaQuery, useTheme } from "@mui/material";
 import { type RgoProvider } from "@/providers/RgoProviders";
 import { Toaster, type ToasterProps } from "sonner";
 
@@ -8,21 +7,21 @@ import { Toaster, type ToasterProps } from "sonner";
  */
 export const AppSnackbarProvider: RgoProvider = ({ children }) => {
   const theme = useTheme();
+  const mobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const toasterProps = useResponsiveProps<ToasterProps>({
-    mobile: {
-      position: "top-right",
-      toastOptions: { style: { height: 49 } },
-      closeButton: false,
-      swipeDirections: ["right"],
-      mobileOffset: { top: 8 },
-    },
-    desktop: {
-      position: "bottom-center",
-      closeButton: true,
-      swipeDirections: ["bottom"],
-    },
-  });
+  const toasterProps: ToasterProps = mobile
+    ? {
+        position: "top-right",
+        toastOptions: { style: { height: 49 } },
+        closeButton: false,
+        swipeDirections: ["right"],
+        mobileOffset: { top: 8 },
+      }
+    : {
+        position: "bottom-center",
+        closeButton: true,
+        swipeDirections: ["bottom"],
+      };
 
   return (
     <>

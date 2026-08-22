@@ -130,11 +130,11 @@ Module-like hooks, contexts, providers, services, and state artifacts receive a 
 
 ```text
 hooks/
-  useResponsiveProps/
-    useResponsiveProps.ts
-    useResponsiveProps.types.ts
-    useResponsiveProps.test.ts
-    useResponsiveProps.stories.tsx
+  useCapabilityState/
+    useCapabilityState.ts
+    useCapabilityState.types.ts
+    useCapabilityState.test.ts
+    useCapabilityState.stories.tsx
     internal/
 
 providers/
@@ -151,6 +151,18 @@ services/
 Only files the module needs are present. Root files use the module basename. Module-owned types or constants may stay in the module; contracts shared outside it move to the capability's structural folders.
 
 Named non-component modules do not receive `index.ts`. Import their files explicitly.
+
+## Responsive behavior
+
+Responsive presentation is container-aware by default:
+
+- use CSS container queries for visual layout and styling changes;
+- use the page-layout capability for semantic compact and regular page behavior;
+- use a capability-specific measured hook when a component must choose structurally different render trees from its container size;
+- use MUI `useMediaQuery` locally only for genuinely viewport-owned behavior, such as global portals;
+- use a component-internal `ResizeObserver` when calculations require raw element dimensions.
+
+Do not create device-category wrappers, JavaScript prop selectors for ordinary responsive styling, generic window resize listeners, or public raw-size hooks without a concrete cross-capability contract. A viewport width does not identify a physical device, and window resize events do not represent container resizing.
 
 ## Flat support catalogs
 

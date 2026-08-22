@@ -213,16 +213,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useMediaQueryDevice.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useResponsiveProps.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoAutoDismiss/stories/useRgoAutoDismiss.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -234,21 +224,6 @@
     {
       "rule": "legacy-source-location",
       "path": "hooks/useRgoAutoDismiss/useRgoAutoDismiss.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoContainerSize/stories/useRgoContainerSize.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoContainerSize/stories/UseRgoContainerSizeWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoContainerSize/useRgoContainerSize.ts",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
@@ -338,21 +313,6 @@
     },
     {
       "rule": "legacy-source-location",
-      "path": "hooks/useRgoResizeListener/stories/useRgoResizeListener.stories.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoResizeListener/stories/UseRgoResizeListenerWithDefaultPropsDemo.tsx",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "hooks/useRgoResizeListener/useRgoResizeListener.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
       "path": "hooks/useRgoSseEmitter/stories/useRgoSseEmitter.stories.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
@@ -409,11 +369,6 @@
     {
       "rule": "legacy-source-location",
       "path": "hooks/useSingleFlightAction.ts",
-      "reason": "Pre-architecture source file tracked by the migration inventory."
-    },
-    {
-      "rule": "legacy-source-location",
-      "path": "providers/AppMobileAttributeProvider.tsx",
       "reason": "Pre-architecture source file tracked by the migration inventory."
     },
     {
