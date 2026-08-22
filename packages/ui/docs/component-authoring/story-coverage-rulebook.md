@@ -167,3 +167,11 @@ Follow the matrix with:
 3. relevant verification, including interaction assertions where meaningful.
 
 Add component-family-specific rules only after several approved components demonstrate a stable recurring need. Do not encode speculative family requirements from a single component.
+
+## Notification integration stories
+
+Notification stories follow the same executable-source and no-Controls contract as every Vireo story. Because notifications render through a global region, each standalone example mounts its own `VireoToaster`, triggers notifications through the public `toast` API, and leaves no notification state shared with another story.
+
+A complete notification-surface audit considers canonical semantic notifications, actions and dismissal, promise lifecycle, stacking, responsive defaults, intentional scoped regions, meaningful slot replacement, and component-specific theme customization. These are coverage questions rather than mandatory story names: retain a story only when it demonstrates a distinct public behavior.
+
+Use deterministic local promises rather than network requests. Interaction assertions should target accessible button names and the rendered notification content. Notification stories must not use `VireoSnack`, package-root `toast`, private Sonner imports, or a provider-shaped wrapper. See [Notifications guide](../storybook/NotificationsGuide.mdx) for the consumer contract.

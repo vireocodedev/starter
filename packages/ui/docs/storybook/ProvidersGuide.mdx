@@ -25,6 +25,7 @@ import {
   VireoThemeColorMeta,
   type VireoProviderWrapper,
 } from "@vireocodedev/starter-ui";
+import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { QueryClientProvider } from "@tanstack/react-query";
 
@@ -35,6 +36,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
         <CssBaseline />
         <VireoThemeColorMeta />
         {child}
+        <VireoToaster />
       </ThemeProvider>
     ),
     child => <QueryClientProvider client={queryClient}>{child}</QueryClientProvider>,
@@ -52,6 +54,8 @@ The array is ordered outermost to innermost. Every callback uses ordinary JSX, s
 
 Prefer explicit JSX when the tree is short, when providers appear in different branches, or when the nesting itself communicates important behavior. `VireoProviderComposer` is intentionally not a dependency resolver and does not provide IDs, priorities, or automatic ordering.
 
-## Integration providers
+## Integration boundaries
 
-The legacy Sonner, localization, and TanStack Query wrappers remain deferred to the integrations phase. New applications should prefer the upstream provider APIs until those integration contracts are finalized.
+`VireoToaster` is the finalized Sonner notification surface. It does not accept children and is not part of `VireoProviderComposer`; mount it once as a sibling of application content beneath the MUI theme. Import it and `toast` from `@vireocodedev/starter-ui/sonner`.
+
+Localization and the TanStack Query provider remain deferred integration work. New applications should continue using their upstream providers. The optional `useVireoMutation` extension is already available from `@vireocodedev/starter-ui/tanstack-query`.

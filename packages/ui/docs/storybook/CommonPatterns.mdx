@@ -60,12 +60,8 @@ function App() {
 All providers in the correct nesting order:
 
 ```tsx
-import {
-  RgoQueryClientProvider,
-  RgoLocalizationProvider,
-  VireoConfirmationProvider,
-  AppSnackbarProvider,
-} from "@vireocodedev/starter-ui";
+import { RgoQueryClientProvider, RgoLocalizationProvider, VireoConfirmationProvider } from "@vireocodedev/starter-ui";
+import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
 import { ThemeProvider } from "@mui/material";
 
 function App() {
@@ -74,12 +70,11 @@ function App() {
       <RgoQueryClientProvider>
         <RgoLocalizationProvider>
           <VireoConfirmationProvider>
-            <AppSnackbarProvider>
-              <YourAppContent />
-            </AppSnackbarProvider>
+            <YourAppContent />
           </VireoConfirmationProvider>
         </RgoLocalizationProvider>
       </RgoQueryClientProvider>
+      <VireoToaster />
     </ThemeProvider>
   );
 }
@@ -94,9 +89,8 @@ Add only the providers you need:
 function AppWithNotifications() {
   return (
     <ThemeProvider theme={theme}>
-      <AppSnackbarProvider>
-        <YourAppContent />
-      </AppSnackbarProvider>
+      <YourAppContent />
+      <VireoToaster />
     </ThemeProvider>
   );
 }
@@ -192,11 +186,10 @@ function DeleteButton({ userId }) {
 
 ### Notifications
 
-Using `toast` for user feedback. The package re-exports [sonner](https://sonner.emilkowal.ski/)'s `toast`, so the full
-sonner API is available:
+Use the dedicated Sonner integration for transient user feedback. The full native `toast` API remains available:
 
 ```tsx
-import { toast } from "@vireocodedev/starter-ui";
+import { toast } from "@vireocodedev/starter-ui/sonner";
 
 function SaveButton({ data }) {
   const handleSave = async () => {
