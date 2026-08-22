@@ -134,8 +134,9 @@ declare module "i18next" {
 
 ## Failure and versioning policy
 
-`createNamespaceResources` rejects blank namespaces, missing seed locales, and
-duplicate locale identifiers. Prototype-mutating override keys are ignored.
+Resource factories reject blank namespaces, empty locale sets, blank or
+duplicate locale identifiers, missing seed locales, and overrides targeting a
+locale that was not requested. Prototype-mutating override keys are ignored.
 
 Translation keys and base locales are versioned contracts:
 

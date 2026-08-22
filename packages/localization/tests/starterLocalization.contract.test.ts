@@ -270,4 +270,14 @@ describe("starter localization contract", () => {
     expect(resources.en.history.empty).toBe(HISTORY_EN.empty);
     expect(resources.en.queryengine).toEqual(QUERYENGINE_EN);
   });
+
+  it("rejects invalid aggregate locale configuration before building namespaces", () => {
+    expect(() => createStarterResources({ locales: [] })).toThrow("at least one locale identifier");
+    expect(() =>
+      createStarterResources({
+        locales: ["en"] as const,
+        overrides: { de: { history: { title: "Verlauf" } } } as never,
+      }),
+    ).toThrow('override for unrequested locale "de"');
+  });
 });

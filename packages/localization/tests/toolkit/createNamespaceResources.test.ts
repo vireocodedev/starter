@@ -50,5 +50,20 @@ describe("createNamespaceResources", () => {
     expect(() =>
       createNamespaceResources({ namespace: "platform", baseResources, seedFrom: "en", locales: ["en", "en"] }),
     ).toThrow("unique locale identifiers");
+    expect(() =>
+      createNamespaceResources({ namespace: "platform", baseResources, seedFrom: "en", locales: [] }),
+    ).toThrow("at least one locale identifier");
+    expect(() =>
+      createNamespaceResources({ namespace: "platform", baseResources, seedFrom: "en", locales: [" en"] }),
+    ).toThrow("non-empty, trimmed locale identifiers");
+    expect(() =>
+      createNamespaceResources({
+        namespace: "platform",
+        baseResources,
+        seedFrom: "en",
+        locales: ["en"] as const,
+        overrides: { hr: { common: { save: "Spremi" } } } as never,
+      }),
+    ).toThrow('override for unrequested locale "hr"');
   });
 });

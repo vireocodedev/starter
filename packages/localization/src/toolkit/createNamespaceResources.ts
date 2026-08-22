@@ -1,4 +1,5 @@
 import { deepMerge } from "@/toolkit/deepMerge";
+import { validateResourceConfiguration } from "@/toolkit/validateResourceConfiguration";
 
 /**
  * A recursively partial version of `T`. Consumers use it to supply per-locale
@@ -63,9 +64,7 @@ export function createNamespaceResources<TShape extends object, B extends string
   if (!Object.prototype.hasOwnProperty.call(baseResources, seedFrom)) {
     throw new Error(`createNamespaceResources could not find seed locale "${seedFrom}".`);
   }
-  if (new Set(locales).size !== locales.length) {
-    throw new Error("createNamespaceResources requires unique locale identifiers.");
-  }
+  validateResourceConfiguration("createNamespaceResources", locales, overrides);
 
   const seed = baseResources[seedFrom];
   const result = {} as Record<L, Record<N, TShape>>;
