@@ -1,0 +1,12 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runRecordValidationExample } from "../examples/recordValidation.example";
+import recordValidationSource from "../examples/recordValidation.example.ts?raw";
+
+<Meta title="Libraries/History/Record Validation" />
+
+# Record validation
+
+`createHistoryRecordSchema` validates transport-neutral audit records. Passing an application-owned Zod entity schema narrows the record's `entity` value without coupling this package to an application enum.
+
+<ExecutablePackageExample run={runRecordValidationExample} source={recordValidationSource} />

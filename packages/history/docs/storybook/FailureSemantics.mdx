@@ -1,0 +1,16 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runFailureSemanticsExample } from "../examples/failureSemantics.example";
+import failureSemanticsSource from "../examples/failureSemantics.example.ts?raw";
+
+<Meta title="Libraries/History/Failure Semantics" />
+
+# Failure semantics
+
+Invalid snapshots fail Zod parsing before comparison. Array item identities must also be unique within each snapshot; duplicates throw rather than silently overwriting an item.
+
+<ExecutablePackageExample
+  run={runFailureSemanticsExample}
+  source={failureSemanticsSource}
+  outputLabel="Expected failures"
+/>
