@@ -13,7 +13,19 @@ export function createSqliteRequestHandlers<THandlers extends SqliteRequestHandl
 }
 
 export function mergeSqliteRequestHandlers(...handlersList: SqliteRequestHandlers[]): SqliteRequestHandlers {
-  return Object.assign({}, ...handlersList);
+  const merged: SqliteRequestHandlers = {};
+
+  for (const handlers of handlersList) {
+    for (const [operation, handler] of Object.entries(handlers)) {
+      if (operation in merged) {
+        throw new Error(`SQLite request handler operation "${operation}" is registered more than once.`);
+      }
+
+      merged[operation] = handler;
+    }
+  }
+
+  return merged;
 }
 
 export async function dispatchSqliteRequest(
