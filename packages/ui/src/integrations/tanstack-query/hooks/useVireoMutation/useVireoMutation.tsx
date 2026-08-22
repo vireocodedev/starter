@@ -1,9 +1,9 @@
-import { VireoIcon } from "@/core/components/data-display/VireoIcon";
-import { VireoSnack } from "@/core/components/feedback/VireoSnack";
+"use client";
+
+import { toast } from "@/integrations/sonner/public";
 import { useMutation } from "@tanstack/react-query";
 import React from "react";
-import { toast } from "sonner";
-import { VireoMutationErrorDetailsButton } from "@/core/hooks/useVireoMutation/internal/VireoMutationErrorDetailsButton";
+import { MutationErrorDetailsAction } from "@/integrations/tanstack-query/hooks/useVireoMutation/internal/MutationErrorDetailsAction";
 import type {
   UseVireoMutationOptions,
   VireoMutationErrorDetails,
@@ -53,30 +53,21 @@ export function useVireoMutation<
       onSuccess?.(...args);
       const message = resolveMessage(successMessage, args[0]);
       if (message == null || message === false || message === "") return;
-      toast.custom(() => (
-        <VireoSnack variant="success" startAdornment={<VireoIcon icon="check-circle" />} message={message} />
-      ));
+      toast.success(message);
     },
     onError: (...args) => {
       onError?.(...args);
       const message = resolveMessage(errorMessage, args[0]);
       if (message == null || message === false || message === "") return;
       const parsedDetails = parseErrorDetails(args[0], errorDetails);
-      toast.custom(() => (
-        <VireoSnack
-          variant="error"
-          startAdornment={<VireoIcon icon="x-circle" />}
-          message={message}
-          endAdornment={
-            parsedDetails ? (
-              <VireoMutationErrorDetailsButton
-                data={parsedDetails.data}
-                options={parsedDetails.options as VireoMutationErrorDetails<unknown, TErrorDetails>}
-              />
-            ) : undefined
-          }
-        />
-      ));
+      toast.error(message, {
+        action: parsedDetails ? (
+          <MutationErrorDetailsAction
+            data={parsedDetails.data}
+            options={parsedDetails.options as VireoMutationErrorDetails<unknown, TErrorDetails>}
+          />
+        ) : undefined,
+      });
     },
   });
 }

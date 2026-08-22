@@ -102,7 +102,6 @@
         "UseUnsavedChangesRegistrationProps",
         "UseUnsavedChangesRequestDiscardOptions",
         "UseVireoDebouncedCallbackOptions",
-        "UseVireoMutationOptions",
         "UseVireoTransitionPresenceOptions",
         "UtilityClassSlotMap",
         "VIREO_PAGE_LAYOUT_COMPACT_ENTER_WIDTH",
@@ -351,8 +350,6 @@
         "VireoLabeledIconButtonSlotsAndSlotProps",
         "VireoLabeledIconButtonStatusDotSlotPropsOverrides",
         "VireoLabeledIconButtonVisualSlotPropsOverrides",
-        "VireoMutationErrorDetails",
-        "VireoMutationMessage",
         "VireoNullableSearchParamStateOptions",
         "VireoOverlayHeader",
         "VireoOverlayHeaderActionsSlotPropsOverrides",
@@ -661,7 +658,6 @@
         "useVireoFullscreen",
         "useVireoIcons",
         "useVireoInfiniteCanvas",
-        "useVireoMutation",
         "useVireoPageLayout",
         "useVireoSearchParamState",
         "useVireoTransitionPresence",
@@ -772,12 +768,10 @@
         "@mui/material",
         "@mui/material/styles",
         "@mui/material/utils",
-        "@tanstack/react-query",
         "country-flag-icons/react/3x2",
         "dayjs",
         "jsoncrush",
         "react",
-        "sonner",
         "zod"
       ],
       "workerSafe": false
@@ -1345,13 +1339,11 @@
         "@mui/material/utils",
         "@mui/x-date-pickers",
         "@tanstack/react-form",
-        "@tanstack/react-query",
         "dayjs",
         "dayjs/plugin/utc",
         "jsoncrush",
         "react",
-        "react-dom",
-        "sonner"
+        "react-dom"
       ],
       "workerSafe": false
     },
@@ -1376,6 +1368,25 @@
         "getVireoToasterUtilityClass",
         "toast",
         "vireoToasterClasses"
+      ],
+      "dependencies": [
+        "@mui/icons-material",
+        "@mui/material",
+        "@mui/material/styles",
+        "@mui/material/utils",
+        "dayjs",
+        "jsoncrush",
+        "react",
+        "sonner"
+      ],
+      "workerSafe": false
+    },
+    "./tanstack-query": {
+      "exports": [
+        "UseVireoMutationOptions",
+        "VireoMutationErrorDetails",
+        "VireoMutationMessage",
+        "useVireoMutation"
       ],
       "dependencies": [
         "@mui/icons-material",

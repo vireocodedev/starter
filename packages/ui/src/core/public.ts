@@ -14,7 +14,6 @@ export * from "./components/surfaces/VireoIconContainer";
 export * from "./hooks/useVireoDebouncedCallback/useVireoDebouncedCallback";
 export * from "./hooks/useVireoFullscreen/useVireoFullscreen";
 export * from "./hooks/useVireoIcons/useVireoIcons";
-export * from "./hooks/useVireoMutation/useVireoMutation";
 export * from "./hooks/useVireoSearchParamState/useVireoSearchParamState";
 export * from "./hooks/useVireoTransitionPresence/useVireoTransitionPresence";
 export * from "./providers/VireoIconRegistryProvider/VireoIconRegistryProvider";

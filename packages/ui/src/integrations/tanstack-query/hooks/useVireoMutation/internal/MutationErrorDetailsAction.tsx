@@ -1,9 +1,9 @@
-import { VireoJsonViewer } from "@/core/components/data-display/VireoJsonViewer";
+import { VireoJsonViewer } from "@/core/public";
 import { Dialog, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
 import React from "react";
-import type { VireoMutationErrorDetails } from "@/core/hooks/useVireoMutation/useVireoMutation.types";
+import type { VireoMutationErrorDetails } from "@/integrations/tanstack-query/hooks/useVireoMutation/useVireoMutation.types";
 
-export function VireoMutationErrorDetailsButton<TDetails>({
+export function MutationErrorDetailsAction<TDetails>({
   data,
   options,
 }: {

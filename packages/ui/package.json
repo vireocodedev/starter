@@ -40,6 +40,11 @@
       "import": "./dist/integrations/sonner/public.js",
       "default": "./dist/integrations/sonner/public.js"
     },
+    "./tanstack-query": {
+      "types": "./dist/integrations/tanstack-query/public.d.ts",
+      "import": "./dist/integrations/tanstack-query/public.js",
+      "default": "./dist/integrations/tanstack-query/public.js"
+    },
     "./video": {
       "types": "./dist/video/index.d.ts",
       "import": "./dist/video/index.js",
@@ -120,6 +125,9 @@
   },
   "peerDependenciesMeta": {
     "@tanstack/react-form": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
       "optional": true
     },
     "sonner": {

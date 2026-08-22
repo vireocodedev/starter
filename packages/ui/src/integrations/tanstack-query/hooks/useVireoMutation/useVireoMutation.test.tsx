@@ -1,13 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { VireoIconRegistryProvider } from "@/core/providers/VireoIconRegistryProvider/VireoIconRegistryProvider";
 import { useVireoMutation } from "./useVireoMutation";
 
-vi.mock("sonner", () => ({ toast: { custom: vi.fn() } }));
+vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 function Wrapper({ children }: React.PropsWithChildren) {
   const [client] = React.useState(() => new QueryClient({ defaultOptions: { mutations: { retry: false } } }));
@@ -15,7 +14,10 @@ function Wrapper({ children }: React.PropsWithChildren) {
 }
 
 describe("useVireoMutation", () => {
-  beforeEach(() => vi.mocked(toast.custom).mockClear());
+  beforeEach(() => {
+    vi.mocked(toast.error).mockClear();
+    vi.mocked(toast.success).mockClear();
+  });
 
   it("preserves TanStack success callbacks and presents a success notification", async () => {
     const onSuccess = vi.fn();
@@ -32,11 +34,7 @@ describe("useVireoMutation", () => {
     act(() => result.current.mutate("Northstar"));
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(onSuccess).toHaveBeenCalled();
-    expect(toast.custom).toHaveBeenCalledOnce();
-
-    const renderToast = vi.mocked(toast.custom).mock.calls[0]?.[0];
-    render(<VireoIconRegistryProvider>{renderToast?.("toast-id") as React.ReactElement}</VireoIconRegistryProvider>);
-    expect(screen.getByText("Saved Northstar")).toBeInTheDocument();
+    expect(toast.success).toHaveBeenCalledWith("Saved Northstar");
   });
 
   it("validates selected error details with Zod before exposing them", async () => {
@@ -55,9 +53,12 @@ describe("useVireoMutation", () => {
 
     act(() => result.current.mutate());
     await waitFor(() => expect(result.current.isError).toBe(true));
-    const renderToast = vi.mocked(toast.custom).mock.calls.at(-1)?.[0];
-    render(<VireoIconRegistryProvider>{renderToast?.("toast-id") as React.ReactElement}</VireoIconRegistryProvider>);
+    const action = vi.mocked(toast.error).mock.calls.at(-1)?.[1]?.action;
+    render(action as React.ReactElement);
     expect(screen.getByRole("button", { name: "Show error details" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show error details" }));
+    expect(screen.getByRole("dialog", { name: "Error details" })).toBeInTheDocument();
+    expect(screen.getByText(/DUPLICATE/)).toBeInTheDocument();
   });
 
   it("does not expose malformed error details", async () => {
@@ -74,9 +75,7 @@ describe("useVireoMutation", () => {
 
     act(() => result.current.mutate());
     await waitFor(() => expect(result.current.isError).toBe(true));
-    const renderToast = vi.mocked(toast.custom).mock.calls.at(-1)?.[0];
-    render(<VireoIconRegistryProvider>{renderToast?.("toast-id") as React.ReactElement}</VireoIconRegistryProvider>);
-    expect(screen.queryByRole("button", { name: "Show error details" })).not.toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalledWith("Could not save", { action: undefined });
   });
 
   it("does not notify when a message is omitted", async () => {
@@ -85,6 +84,7 @@ describe("useVireoMutation", () => {
     });
     act(() => result.current.mutate());
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(toast.custom).not.toHaveBeenCalled();
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
   });
 });

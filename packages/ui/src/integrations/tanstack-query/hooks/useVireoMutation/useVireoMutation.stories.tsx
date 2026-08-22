@@ -1,9 +1,9 @@
-import DefaultExample from "@/core/hooks/useVireoMutation/internal/storybook/DefaultExample";
-import defaultExampleSource from "@/core/hooks/useVireoMutation/internal/storybook/DefaultExample.tsx?raw";
+import DefaultExample from "@/integrations/tanstack-query/hooks/useVireoMutation/internal/storybook/DefaultExample";
+import defaultExampleSource from "@/integrations/tanstack-query/hooks/useVireoMutation/internal/storybook/DefaultExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "Core/Hooks/useVireoMutation",
+  title: "Integrations/TanStack Query/useVireoMutation",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
