@@ -1,9 +1,9 @@
-import { PLATFORM_TRANSLATION_NAMESPACE } from "@/platform/namespace";
-import PLATFORM_EN from "@/platform/platform.en";
-import PLATFORM_HR from "@/platform/platform.hr";
-import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
+import { PLATFORM_TRANSLATION_NAMESPACE } from "./namespace";
+import PLATFORM_EN from "./platform.en";
+import PLATFORM_HR from "./platform.hr";
+import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "../toolkit/createNamespaceResources";
 
-export { PLATFORM_TRANSLATION_NAMESPACE, type PlatformTranslationNamespace } from "@/platform/namespace";
+export { PLATFORM_TRANSLATION_NAMESPACE, type PlatformTranslationNamespace } from "./namespace";
 
 /** The canonical platform resource shape. English is the key source of truth. */
 export type PlatformResources = WidenLeaves<typeof PLATFORM_EN>;

@@ -1,9 +1,9 @@
-import HISTORY_EN from "@/history/history.en";
-import HISTORY_HR from "@/history/history.hr";
-import { HISTORY_TRANSLATION_NAMESPACE } from "@/history/namespace";
-import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
+import HISTORY_EN from "./history.en";
+import HISTORY_HR from "./history.hr";
+import { HISTORY_TRANSLATION_NAMESPACE } from "./namespace";
+import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "../toolkit/createNamespaceResources";
 
-export { HISTORY_TRANSLATION_NAMESPACE, type HistoryTranslationNamespace } from "@/history/namespace";
+export { HISTORY_TRANSLATION_NAMESPACE, type HistoryTranslationNamespace } from "./namespace";
 
 /** The canonical History resource shape. English is the key source of truth. */
 export type HistoryResources = WidenLeaves<typeof HISTORY_EN>;

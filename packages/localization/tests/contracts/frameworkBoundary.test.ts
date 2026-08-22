@@ -24,6 +24,7 @@ describe("starter-localization framework boundary", () => {
       expect(source, file).not.toMatch(/(?:from\s+|import\s*\()["'](?:react(?:-dom|-i18next)?|@mui\/)/u);
       expect(source, file).not.toMatch(/\bReact(?:Node|Element|Component|\.)/u);
       expect(source, file).not.toMatch(/\b(?:window|document|navigator)\b/u);
+      expect(source, file).not.toMatch(/(?:from\s+|import\s*\()["']@\//u);
     });
   });
 

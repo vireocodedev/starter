@@ -8,7 +8,7 @@ export {
   type StarterNamespaceResources,
   type StarterResourcesOverride,
   type StarterTranslationNamespace,
-} from "@/createStarterResources";
+} from "./createStarterResources";
 
 export {
   createPlatformResources,
@@ -20,7 +20,7 @@ export {
   type PlatformResources,
   type PlatformResourcesOverride,
   type PlatformTranslationNamespace,
-} from "@/platform/createPlatformResources";
+} from "./platform/createPlatformResources";
 
 export {
   createQueryEngineResources,
@@ -32,7 +32,7 @@ export {
   type QueryEngineResources,
   type QueryEngineResourcesOverride,
   type QueryEngineTranslationNamespace,
-} from "@/queryengine/createQueryEngineResources";
+} from "./queryengine/createQueryEngineResources";
 
 export {
   createHistoryResources,
@@ -44,8 +44,8 @@ export {
   type HistoryResources,
   type HistoryResourcesOverride,
   type HistoryTranslationNamespace,
-} from "@/history/createHistoryResources";
+} from "./history/createHistoryResources";
 
-export { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
-export { deepMerge } from "@/toolkit/deepMerge";
-export { formatIntlNumber, type IntlNumberFormatRequest } from "@/formatters/intlNumberFormat";
+export { createNamespaceResources, type DeepPartial, type WidenLeaves } from "./toolkit/createNamespaceResources";
+export { deepMerge } from "./toolkit/deepMerge";
+export { formatIntlNumber, type IntlNumberFormatRequest } from "./formatters/intlNumberFormat";

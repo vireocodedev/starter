@@ -1,5 +1,5 @@
-import { deepMerge } from "@/toolkit/deepMerge";
-import { validateResourceConfiguration } from "@/toolkit/validateResourceConfiguration";
+import { deepMerge } from "./deepMerge";
+import { validateResourceConfiguration } from "./validateResourceConfiguration";
 
 /**
  * A recursively partial version of `T`. Consumers use it to supply per-locale

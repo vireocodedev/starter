@@ -1,9 +1,9 @@
-import { QUERYENGINE_TRANSLATION_NAMESPACE } from "@/queryengine/namespace";
-import QUERYENGINE_EN from "@/queryengine/queryengine.en";
-import QUERYENGINE_HR from "@/queryengine/queryengine.hr";
-import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
+import { QUERYENGINE_TRANSLATION_NAMESPACE } from "./namespace";
+import QUERYENGINE_EN from "./queryengine.en";
+import QUERYENGINE_HR from "./queryengine.hr";
+import { createNamespaceResources, type DeepPartial, type WidenLeaves } from "../toolkit/createNamespaceResources";
 
-export { QUERYENGINE_TRANSLATION_NAMESPACE, type QueryEngineTranslationNamespace } from "@/queryengine/namespace";
+export { QUERYENGINE_TRANSLATION_NAMESPACE, type QueryEngineTranslationNamespace } from "./namespace";
 
 /** The canonical Query Engine resource shape. English is the key source of truth. */
 export type QueryEngineResources = WidenLeaves<typeof QUERYENGINE_EN>;
