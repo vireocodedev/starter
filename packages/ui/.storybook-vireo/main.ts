@@ -7,6 +7,7 @@ const config: StorybookConfig = {
     "../docs/storybook/**/*.mdx",
     "../../history/docs/storybook/**/*.mdx",
     "../../localization/docs/storybook/**/*.mdx",
+    "../../queryengine/docs/storybook/**/*.mdx",
     "../../sqlite/docs/storybook/**/*.mdx",
     "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
@@ -52,6 +53,10 @@ const config: StorybookConfig = {
           {
             find: /^@vireocodedev\/starter-localization$/,
             replacement: resolve(__dirname, "../../localization/src/index.ts"),
+          },
+          {
+            find: /^@vireocodedev\/starter-queryengine$/,
+            replacement: resolve(__dirname, "../../queryengine/src/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-sqlite\/offline$/,

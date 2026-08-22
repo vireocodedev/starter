@@ -1,0 +1,21 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Query Engine/Overview" />
+
+# Query Engine
+
+`@vireocodedev/starter-queryengine` is the framework-free boundary for validated entity metadata, injected API transport, fail-closed filter compilation, parameterized SQLite queries, and query-engine config persistence.
+
+It deliberately owns no React component, query cache, signal, HTTP client, application entity vocabulary, database schema, or product UI.
+
+## Public workflow
+
+1. Define the application's entity-key schema.
+2. Adapt its transport to the small `QueryEngineHttpClient` port.
+3. Load Zod-validated metadata through `createQueryEngineApi`.
+4. Use the API directly or adapt it with `createVireoQueryEngineQueries` from Starter UI.
+5. Bind trusted SQL expressions and compile runtime filters to placeholders and values.
+6. Execute through injected main-thread and worker-side SQLite ports.
+7. Persist engine metadata through an instance-scoped config client when offline operation requires it.
+
+Continue with **Primary Workflow**, then follow the pages in order through filters, execution, config state, and deliberate failure behavior.

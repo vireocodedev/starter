@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runConfigPersistenceExample } from "../examples/configPersistence.example";
+import configPersistenceSource from "../examples/configPersistence.example.ts?raw";
+
+<Meta title="Query Engine/Config Persistence" />
+
+# Config persistence
+
+The config client owns fallback state per instance and delegates persistent operation to an injected request transport. Runtime reset can clear that state through the registered store without relying on package globals.
+
+Worker-side helpers validate identifiers, request names, JSON, and snapshot shape before reading or writing SQLite state.
+
+<ExecutablePackageExample run={runConfigPersistenceExample} source={configPersistenceSource} />

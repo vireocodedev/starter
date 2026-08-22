@@ -10,6 +10,8 @@ const historyDocsRoot = join(packagesRoot, "history", "docs", "storybook");
 const historyExamplesRoot = join(packagesRoot, "history", "docs", "examples");
 const localizationDocsRoot = join(packagesRoot, "localization", "docs", "storybook");
 const localizationExamplesRoot = join(packagesRoot, "localization", "docs", "examples");
+const queryEngineDocsRoot = join(packagesRoot, "queryengine", "docs", "storybook");
+const queryEngineExamplesRoot = join(packagesRoot, "queryengine", "docs", "examples");
 const sqliteDocsRoot = join(packagesRoot, "sqlite", "docs", "storybook");
 const sqliteExamplesRoot = join(packagesRoot, "sqlite", "docs", "examples");
 const storybookConfigFile = join(packageRoot, ".storybook-vireo", "main.ts");
@@ -59,6 +61,15 @@ const EXPECTED_SQLITE_ROUTES = [
   "SQLite/Failure Semantics",
 ] as const;
 
+const EXPECTED_QUERY_ENGINE_ROUTES = [
+  "Query Engine/Overview",
+  "Query Engine/Primary Workflow",
+  "Query Engine/Filter Compilation",
+  "Query Engine/SQLite Execution",
+  "Query Engine/Config Persistence",
+  "Query Engine/Failure Semantics",
+] as const;
+
 const APPROVED_STORY_ROUTES = [
   /^UI\/Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
   /^UI\/Capabilities\/(?:Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
@@ -93,6 +104,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(configSource).toContain('"../docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../history/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../localization/docs/storybook/**/*.mdx"');
+    expect(configSource).toContain('"../../queryengine/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../sqlite/docs/storybook/**/*.mdx"');
   });
 
@@ -103,6 +115,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(managerSource).toContain("UI: ComponentIcon");
     expect(managerSource).toContain("History: TimeIcon");
     expect(managerSource).toContain("Localization: GlobeIcon");
+    expect(managerSource).toContain('"Query Engine": SearchIcon');
     expect(managerSource).toContain("SQLite: DatabaseIcon");
   });
 
@@ -146,6 +159,14 @@ describe("Vireo Starter Storybook navigation contract", () => {
       .sort();
 
     expect(actualRoutes).toEqual([...EXPECTED_SQLITE_ROUTES].sort());
+  });
+
+  it("indexes every package-owned Query Engine page under the Query Engine root", () => {
+    const actualRoutes = findFiles(queryEngineDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
+
+    expect(actualRoutes).toEqual([...EXPECTED_QUERY_ENGINE_ROUTES].sort());
   });
 
   it("executes and displays every History example from the same source module", () => {
@@ -210,6 +231,28 @@ describe("Vireo Starter Storybook navigation contract", () => {
 
       const exampleSource = readFileSync(exampleFile, "utf8");
       expect(exampleSource).toContain('from "@vireocodedev/starter-sqlite');
+      expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
+    }
+  });
+
+  it("executes and displays every Query Engine example from the same source module", () => {
+    const exampleFiles = findFiles(queryEngineExamplesRoot, file => file.endsWith(".example.ts"));
+    const documentationSources = findFiles(queryEngineDocsRoot, file => extname(file) === ".mdx").map(file => ({
+      file,
+      source: readFileSync(file, "utf8"),
+    }));
+
+    for (const exampleFile of exampleFiles) {
+      const basename = exampleFile.slice(exampleFile.lastIndexOf("/") + 1, -".example.ts".length);
+      const owningPages = documentationSources.filter(({ source }) =>
+        source.includes(`../examples/${basename}.example`),
+      );
+
+      expect(owningPages, `${relative(packagesRoot, exampleFile)} must be owned by one MDX page`).toHaveLength(1);
+      expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
+
+      const exampleSource = readFileSync(exampleFile, "utf8");
+      expect(exampleSource).toContain('from "@vireocodedev/starter-queryengine"');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });

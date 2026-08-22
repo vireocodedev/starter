@@ -9,6 +9,7 @@ describe("vireoStorySort", () => {
     const titles = [
       "History/Overview",
       "Localization/Overview",
+      "Query Engine/Overview",
       "SQLite/Overview",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "UI/Capabilities/Forms/VireoForm",
@@ -28,7 +29,33 @@ describe("vireoStorySort", () => {
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "History/Overview",
       "Localization/Overview",
+      "Query Engine/Overview",
       "SQLite/Overview",
+    ]);
+  });
+
+  it("keeps Query Engine's package pages in their learning order", () => {
+    const titles = [
+      "Query Engine/Failure Semantics",
+      "Query Engine/Config Persistence",
+      "Query Engine/Primary Workflow",
+      "Query Engine/SQLite Execution",
+      "Query Engine/Overview",
+      "Query Engine/Filter Compilation",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "Query Engine/Overview",
+      "Query Engine/Primary Workflow",
+      "Query Engine/Filter Compilation",
+      "Query Engine/SQLite Execution",
+      "Query Engine/Config Persistence",
+      "Query Engine/Failure Semantics",
     ]);
   });
 

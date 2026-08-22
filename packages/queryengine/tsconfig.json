@@ -3,8 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@vireocodedev/starter-queryengine": ["./src/index.ts"]
     }
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "docs/examples"]
 }
