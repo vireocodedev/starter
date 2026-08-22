@@ -31,7 +31,8 @@
     "format:check": "prettier --check .",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run build && npm run typecheck && npm run test && npm run types:strict && changeset publish"
+    "release:smoke": "node scripts/release-pack-smoke.mjs",
+    "release": "npm run build && npm run typecheck && npm run test && npm run types:strict && npm run release:smoke && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
