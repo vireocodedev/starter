@@ -8,6 +8,7 @@ describe("vireoStorySort", () => {
   it("keeps monorepo documentation first and each library at the root", () => {
     const titles = [
       "History/Overview",
+      "Localization/Overview",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "UI/Capabilities/Forms/VireoForm",
       "UI/Core/Data Display/VireoIcon",
@@ -25,6 +26,7 @@ describe("vireoStorySort", () => {
       "UI/Capabilities/Forms/VireoForm",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
       "History/Overview",
+      "Localization/Overview",
     ]);
   });
 
@@ -54,6 +56,31 @@ describe("vireoStorySort", () => {
       "History/Node Model",
       "History/Record Validation",
       "History/Failure Semantics",
+    ]);
+  });
+
+  it("keeps Localization's package pages in their learning order", () => {
+    const titles = [
+      "Localization/Failure Semantics",
+      "Localization/Custom Namespaces",
+      "Localization/Primary Workflow",
+      "Localization/Number Formatting",
+      "Localization/Overview",
+      "Localization/Late Registration",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "Localization/Overview",
+      "Localization/Primary Workflow",
+      "Localization/Late Registration",
+      "Localization/Custom Namespaces",
+      "Localization/Number Formatting",
+      "Localization/Failure Semantics",
     ]);
   });
 

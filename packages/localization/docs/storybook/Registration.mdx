@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runRegistrationExample } from "../examples/registration.example";
+import registrationSource from "../examples/registration.example.ts?raw";
+
+<Meta title="Localization/Late Registration" />
+
+# Late registration
+
+Use `registerStarterResources` when the caller-owned i18next instance is already initialized. It adds every Starter namespace for every requested locale and deliberately overwrites existing values with the generated resource contract, including explicit consumer overrides.
+
+Use `createStarterResources` during initial i18next setup; use this imperative path only when resource loading happens later in the application lifecycle.
+
+<ExecutablePackageExample run={runRegistrationExample} source={registrationSource} />

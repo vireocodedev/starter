@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runPrimaryWorkflowExample } from "../examples/primaryWorkflow.example";
+import primaryWorkflowSource from "../examples/primaryWorkflow.example.ts?raw";
+
+<Meta title="Localization/Primary Workflow" />
+
+# Primary workflow
+
+One factory builds every Starter-owned namespace for every requested locale. Shipped locales use their localized resources; unshipped locales start from `seedFrom` (`"en"` by default) and receive deeply merged overrides.
+
+The returned trees are isolated: changing one generated locale cannot mutate a shipped resource or a sibling locale.
+
+<ExecutablePackageExample run={runPrimaryWorkflowExample} source={primaryWorkflowSource} />

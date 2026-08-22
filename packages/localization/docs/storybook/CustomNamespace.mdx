@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ExecutablePackageExample } from "@vireo-storybook/documentation";
+import { runCustomNamespaceExample } from "../examples/customNamespace.example";
+import customNamespaceSource from "../examples/customNamespace.example.ts?raw";
+
+<Meta title="Localization/Custom Namespaces" />
+
+# Custom namespaces
+
+`createNamespaceResources` applies the same seeded, isolated, deeply merged resource policy to a library- or application-owned namespace. Give the resource shape explicit widened string leaves so translated and overridden values remain accurately typed.
+
+This helper owns resource assembly only. Namespace naming, translation-key versioning, loading, and locale policy remain with the owning package or application.
+
+<ExecutablePackageExample run={runCustomNamespaceExample} source={customNamespaceSource} />

@@ -8,6 +8,8 @@ const srcRoot = join(packageRoot, "src");
 const docsRoot = join(packageRoot, "docs", "storybook");
 const historyDocsRoot = join(packagesRoot, "history", "docs", "storybook");
 const historyExamplesRoot = join(packagesRoot, "history", "docs", "examples");
+const localizationDocsRoot = join(packagesRoot, "localization", "docs", "storybook");
+const localizationExamplesRoot = join(packagesRoot, "localization", "docs", "examples");
 const storybookConfigFile = join(packageRoot, ".storybook-vireo", "main.ts");
 const storybookManagerFile = join(packageRoot, ".storybook-vireo", "manager.ts");
 
@@ -34,6 +36,15 @@ const EXPECTED_HISTORY_ROUTES = [
   "History/Node Model",
   "History/Record Validation",
   "History/Failure Semantics",
+] as const;
+
+const EXPECTED_LOCALIZATION_ROUTES = [
+  "Localization/Overview",
+  "Localization/Primary Workflow",
+  "Localization/Late Registration",
+  "Localization/Custom Namespaces",
+  "Localization/Number Formatting",
+  "Localization/Failure Semantics",
 ] as const;
 
 const APPROVED_STORY_ROUTES = [
@@ -63,12 +74,13 @@ function documentationTitle(file: string): string {
 }
 
 describe("Vireo Starter Storybook navigation contract", () => {
-  it("discovers the complete UI story catalog and package-owned History pages", () => {
+  it("discovers the complete UI catalog and every audited package's pages", () => {
     const configSource = readFileSync(storybookConfigFile, "utf8");
 
     expect(configSource).toContain('"../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"');
     expect(configSource).toContain('"../docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../history/docs/storybook/**/*.mdx"');
+    expect(configSource).toContain('"../../localization/docs/storybook/**/*.mdx"');
   });
 
   it("assigns explicit icons to every top-level section", () => {
@@ -77,6 +89,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(managerSource).toContain("Documentation: BookIcon");
     expect(managerSource).toContain("UI: ComponentIcon");
     expect(managerSource).toContain("History: TimeIcon");
+    expect(managerSource).toContain("Localization: GlobeIcon");
   });
 
   it("keeps every CSF entry under an approved public root and group", () => {
@@ -105,6 +118,14 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(actualRoutes).toEqual([...EXPECTED_HISTORY_ROUTES].sort());
   });
 
+  it("indexes every package-owned Localization page under the Localization root", () => {
+    const actualRoutes = findFiles(localizationDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
+
+    expect(actualRoutes).toEqual([...EXPECTED_LOCALIZATION_ROUTES].sort());
+  });
+
   it("executes and displays every History example from the same source module", () => {
     const exampleFiles = findFiles(historyExamplesRoot, file => file.endsWith(".example.ts"));
     const documentationSources = findFiles(historyDocsRoot, file => extname(file) === ".mdx").map(file => ({
@@ -123,6 +144,28 @@ describe("Vireo Starter Storybook navigation contract", () => {
 
       const exampleSource = readFileSync(exampleFile, "utf8");
       expect(exampleSource).toContain('from "@vireocodedev/starter-history"');
+      expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
+    }
+  });
+
+  it("executes and displays every Localization example from the same source module", () => {
+    const exampleFiles = findFiles(localizationExamplesRoot, file => file.endsWith(".example.ts"));
+    const documentationSources = findFiles(localizationDocsRoot, file => extname(file) === ".mdx").map(file => ({
+      file,
+      source: readFileSync(file, "utf8"),
+    }));
+
+    for (const exampleFile of exampleFiles) {
+      const basename = exampleFile.slice(exampleFile.lastIndexOf("/") + 1, -".example.ts".length);
+      const owningPages = documentationSources.filter(({ source }) =>
+        source.includes(`../examples/${basename}.example`),
+      );
+
+      expect(owningPages, `${relative(packagesRoot, exampleFile)} must be owned by one MDX page`).toHaveLength(1);
+      expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
+
+      const exampleSource = readFileSync(exampleFile, "utf8");
+      expect(exampleSource).toContain('from "@vireocodedev/starter-localization"');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });
