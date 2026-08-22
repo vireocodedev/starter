@@ -484,7 +484,7 @@ function createMatchedArrayItemNodes(args: {
     const group = createHistoryGroup(item.definition, previous, current, path, options);
 
     if (group == null) {
-      return movedRow == null ? [] : [createMovedOnlyGroup(item, current, path, movedRow, options)];
+      return movedRow == null ? [] : [createMovedOnlyGroup(item, current, path, movedRow)];
     }
 
     return [
@@ -581,7 +581,6 @@ function createMovedOnlyGroup(
   current: unknown,
   path: string[],
   movedRow: HistoryFieldRow,
-  options: HistoryEngineOptions,
 ): HistoryGroupNode {
   return {
     type: "group",
