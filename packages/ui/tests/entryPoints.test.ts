@@ -116,6 +116,8 @@ describe("package entry points", () => {
       ".",
       "./country",
       "./forms",
+      "./sonner",
+      "./tanstack-query",
       "./video",
       "./storybook",
       "./storybook/VireoIconContainer",
