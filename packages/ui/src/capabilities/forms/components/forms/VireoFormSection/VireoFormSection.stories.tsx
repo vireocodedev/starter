@@ -20,7 +20,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Forms/Forms/VireoFormSection",
+  title: "Capabilities/Forms/VireoFormSection",
   component: VireoFormSection,
   tags: ["autodocs"],
   parameters: {

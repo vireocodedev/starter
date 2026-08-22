@@ -21,7 +21,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "Forms/Forms/Fields/VireoFormCheckboxField",
+  title: "Capabilities/Forms/Fields/VireoFormCheckboxField",
   component: VireoFormCheckboxField,
   tags: ["autodocs"],
   args: { label: "Preference" },

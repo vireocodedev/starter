@@ -3,7 +3,7 @@ import defaultSource from "@/capabilities/infinite-canvas/components/overlays/Vi
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoInfiniteCanvasOverlay } from "./VireoInfiniteCanvasOverlay";
 const meta = {
-  title: "Infinite Canvas/Overlays/VireoInfiniteCanvasOverlay",
+  title: "Capabilities/Infinite Canvas/VireoInfiniteCanvasOverlay",
   component: VireoInfiniteCanvasOverlay,
   parameters: {
     controls: { disable: true },

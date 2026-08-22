@@ -3,7 +3,7 @@ import defaultSource from "@/capabilities/page-layout/components/layout/VireoPag
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoPage } from "./VireoPage";
 const meta = {
-  title: "Page Layout/Layout/VireoPage",
+  title: "Capabilities/Page Layout/VireoPage",
   component: VireoPage,
   parameters: {
     controls: { disable: true },

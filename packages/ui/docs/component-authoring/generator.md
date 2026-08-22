@@ -80,21 +80,26 @@ Choose ownership and category using the [source structure](../architecture/sourc
 
 ## Storybook title
 
-The default Storybook hierarchy is derived from owner and category:
+The default Storybook hierarchy is derived from the public owner. Core keeps its
+responsibility category; focused capabilities and integrations are flattened so
+source folders do not become redundant navigation levels:
 
 ```text
 Core/Data Display/VireoBadge
-Table/Data Display/VireoTableHeader
-Table/Management Table/Controls/VireoMobileToolbar
+Capabilities/Table/VireoTableHeader
+Capabilities/Table/Management Table/VireoMobileToolbar
+Integrations/Maps/VireoMap
 ```
 
-Override the hierarchy only when the documented navigation genuinely needs a different label:
+Override the hierarchy when the approved developer-facing group differs from
+the source owner, such as a bound form field or an integration whose task and
+vendor should both remain visible:
 
 ```bash
-npm run generate -- react-component Badge \
-  --owner core \
-  --category data-display \
-  --set storybookCategory="Foundations/Status"
+npm run generate -- react-component EmailField \
+  --owner capabilities/forms \
+  --category forms \
+  --set storybookCategory="Capabilities/Forms/Fields"
 ```
 
 ## Dry run

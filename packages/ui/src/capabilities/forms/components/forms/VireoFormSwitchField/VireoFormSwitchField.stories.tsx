@@ -21,7 +21,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "Forms/Forms/Fields/VireoFormSwitchField",
+  title: "Capabilities/Forms/Fields/VireoFormSwitchField",
   component: VireoFormSwitchField,
   tags: ["autodocs"],
   args: { label: "Preference" },

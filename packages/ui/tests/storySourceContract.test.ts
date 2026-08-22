@@ -158,11 +158,13 @@ describe("Vireo executable story-source contract", () => {
     expect(storyCount).toBeGreaterThan(50);
   });
 
-  it("groups bound form-field components under Forms/Forms/Fields", () => {
+  it("groups bound form-field components under Capabilities/Forms/Fields", () => {
     const violations = storyFiles
       .filter(file => FORM_FIELD_STORY_FILE_PATTERN.test(file))
-      .filter(file => !/title:\s*"Forms\/Forms\/Fields\/VireoForm[A-Z]\w*Field"/u.test(readFileSync(file, "utf8")))
-      .map(file => `${relative(packageRoot, file)}: expected a Forms/Forms/Fields story title`);
+      .filter(
+        file => !/title:\s*"Capabilities\/Forms\/Fields\/VireoForm[A-Z]\w*Field"/u.test(readFileSync(file, "utf8")),
+      )
+      .map(file => `${relative(packageRoot, file)}: expected a Capabilities/Forms/Fields story title`);
 
     expect(violations).toEqual([]);
   });

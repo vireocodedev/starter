@@ -27,7 +27,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "Country/Data Display/VireoCountryFlag",
+  title: "Capabilities/Countries/VireoCountryFlag",
   component: VireoCountryFlag,
   tags: ["autodocs"],
   parameters: {

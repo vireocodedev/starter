@@ -19,7 +19,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "Forms/Forms/Fields/VireoFormSelectMultipleField",
+  title: "Capabilities/Forms/Fields/VireoFormSelectMultipleField",
   component: VireoFormSelectMultipleField,
   tags: ["autodocs"],
   parameters: {

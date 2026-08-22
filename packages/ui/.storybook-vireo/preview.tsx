@@ -17,16 +17,45 @@ const preview: Preview = {
   parameters: {
     layout: "padded",
     options: {
+      // Storybook's static indexer requires this comparator to remain inline.
+      // packages/ui/tests/storySort.test.ts protects the mirrored navigation contract.
       // @ts-expect-error Storybook statically evaluates this inline JavaScript comparator before Preview typing applies.
       storySort: (a, b) => {
-        const aSegments = a.title.split("/");
-        const bSegments = b.title.split("/");
+        const orderedChildren = {
+          "": ["Documentation", "Core", "Capabilities", "Integrations"],
+          Documentation: ["Overview", "Installation", "Guides"],
+          "Documentation/Guides": [
+            "Common Patterns",
+            "Theming",
+            "Providers",
+            "Augmentable Interfaces",
+            "Notifications",
+            "Table Patterns",
+            "TanStack Query",
+            "Drag and Drop",
+          ],
+        };
+        const aTitle = a.title ?? "";
+        const bTitle = b.title ?? "";
+        if (aTitle === bTitle) return 0;
+
+        const aSegments = aTitle.split("/");
+        const bSegments = bTitle.split("/");
         const sharedLength = Math.min(aSegments.length, bSegments.length);
 
         for (let index = 0; index < sharedLength; index += 1) {
           const aSegment = aSegments[index];
           const bSegment = bSegments[index];
           if (aSegment === bSegment) continue;
+
+          const parent = aSegments.slice(0, index).join("/");
+          // @ts-expect-error The statically evaluated comparator intentionally uses a dynamic route key.
+          const parentOrder = orderedChildren[parent] ?? [];
+          const aOrderedIndex = parentOrder.indexOf(aSegment);
+          const bOrderedIndex = parentOrder.indexOf(bSegment);
+          const aOrder = aOrderedIndex < 0 ? Number.POSITIVE_INFINITY : aOrderedIndex;
+          const bOrder = bOrderedIndex < 0 ? Number.POSITIVE_INFINITY : bOrderedIndex;
+          if (aOrder !== bOrder) return aOrder - bOrder;
 
           const aIsLeaf = index === aSegments.length - 1;
           const bIsLeaf = index === bSegments.length - 1;

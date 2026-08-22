@@ -16,7 +16,7 @@ import { VireoResponsiveOverlayFrame } from "./VireoResponsiveOverlayFrame";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "Overlays/Overlays/VireoResponsiveOverlayFrame",
+  title: "Capabilities/Overlays/VireoResponsiveOverlayFrame",
   component: VireoResponsiveOverlayFrame,
   tags: ["autodocs"],
   args: { open: false, onClose: fn(), children: null },

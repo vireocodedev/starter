@@ -21,7 +21,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "Forms/Forms/Fields/VireoFormTextField",
+  title: "Capabilities/Forms/Fields/VireoFormTextField",
   component: VireoFormTextField,
   tags: ["autodocs"],
   parameters: {

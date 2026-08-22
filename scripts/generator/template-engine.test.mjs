@@ -177,7 +177,7 @@ test("the React component template supports one child-capability level and requi
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
-    /title: "Table\/Responsive Table\/Data Display\/VireoResponsiveHeader"/,
+    /title: "Capabilities\/Table\/Responsive Table\/VireoResponsiveHeader"/,
   );
 });
 
@@ -190,7 +190,12 @@ test("the React component template supports an integration-owned public componen
   const { config, templateDirectory } = await loadRegisteredTemplate("react-component");
   const plan = await createGenerationPlan({
     config,
-    rawInputs: { name: "Toaster", owner: "integrations/sonner", category: "feedback" },
+    rawInputs: {
+      name: "Toaster",
+      owner: "integrations/sonner",
+      category: "feedback",
+      storybookCategory: "Integrations/Notifications · Sonner",
+    },
     repoRoot: temporaryRoot,
     templateDirectory: fileURLToPath(templateDirectory),
   });
@@ -202,7 +207,7 @@ test("the React component template supports an integration-owned public componen
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
-    /title: "Integrations\/Sonner\/Feedback\/VireoToaster"/,
+    /title: "Integrations\/Notifications · Sonner\/VireoToaster"/,
   );
 });
 

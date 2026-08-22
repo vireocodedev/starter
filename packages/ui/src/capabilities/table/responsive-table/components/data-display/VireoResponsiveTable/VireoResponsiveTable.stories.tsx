@@ -24,7 +24,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Table/Responsive Table/Data Display/VireoResponsiveTable",
+  title: "Capabilities/Tables/VireoResponsiveTable",
   component: VireoResponsiveTable,
   tags: ["autodocs"],
   parameters: {

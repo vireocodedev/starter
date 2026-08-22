@@ -24,7 +24,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormAutocompleteMultipleField } from "./VireoFormAutocompleteMultipleField";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 const meta = {
-  title: "Forms/Forms/Fields/VireoFormAutocompleteMultipleField",
+  title: "Capabilities/Forms/Fields/VireoFormAutocompleteMultipleField",
   component: VireoFormAutocompleteMultipleField,
   tags: ["autodocs"],
   parameters: {

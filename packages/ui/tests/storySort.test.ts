@@ -5,16 +5,12 @@ type StoryEntry = { title: string };
 const vireoStorySort = preview.parameters?.options?.storySort as (a: StoryEntry, b: StoryEntry) => number;
 
 describe("vireoStorySort", () => {
-  it("places component files before child folders and alphabetizes each kind", () => {
+  it("keeps the four public roots in their approved order", () => {
     const titles = [
-      "Forms/Forms/VireoFormSubmitButton",
-      "Forms/Forms/Fields/VireoFormTextField",
-      "Forms/Forms/VireoForm",
-      "Forms/Forms/VireoFormActions",
-      "Forms/Forms/Fields/VireoFormCheckboxField",
-      "Forms/Forms/VireoFormSection",
-      "Forms/Forms/VireoFormSectionItem",
-      "Forms/Forms/VireoFormResetButton",
+      "Integrations/TanStack Query/VireoQueryBoundary",
+      "Capabilities/Forms/VireoForm",
+      "Core/Data Display/VireoIcon",
+      "Documentation/Overview",
     ];
 
     expect(
@@ -23,14 +19,62 @@ describe("vireoStorySort", () => {
         .sort(vireoStorySort)
         .map(entry => entry.title),
     ).toEqual([
-      "Forms/Forms/VireoForm",
-      "Forms/Forms/VireoFormActions",
-      "Forms/Forms/VireoFormResetButton",
-      "Forms/Forms/VireoFormSection",
-      "Forms/Forms/VireoFormSectionItem",
-      "Forms/Forms/VireoFormSubmitButton",
-      "Forms/Forms/Fields/VireoFormCheckboxField",
-      "Forms/Forms/Fields/VireoFormTextField",
+      "Documentation/Overview",
+      "Core/Data Display/VireoIcon",
+      "Capabilities/Forms/VireoForm",
+      "Integrations/TanStack Query/VireoQueryBoundary",
+    ]);
+  });
+
+  it("prioritizes onboarding pages and the approved guide order", () => {
+    const titles = [
+      "Documentation/Guides/Drag and Drop",
+      "Documentation/Installation",
+      "Documentation/Guides/Common Patterns",
+      "Documentation/Overview",
+      "Documentation/Guides/Theming",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "Documentation/Overview",
+      "Documentation/Installation",
+      "Documentation/Guides/Common Patterns",
+      "Documentation/Guides/Theming",
+      "Documentation/Guides/Drag and Drop",
+    ]);
+  });
+
+  it("places component files before child folders and alphabetizes each kind", () => {
+    const titles = [
+      "Capabilities/Forms/VireoFormSubmitButton",
+      "Capabilities/Forms/Fields/VireoFormTextField",
+      "Capabilities/Forms/VireoForm",
+      "Capabilities/Forms/VireoFormActions",
+      "Capabilities/Forms/Fields/VireoFormCheckboxField",
+      "Capabilities/Forms/VireoFormSection",
+      "Capabilities/Forms/VireoFormSectionItem",
+      "Capabilities/Forms/VireoFormResetButton",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "Capabilities/Forms/VireoForm",
+      "Capabilities/Forms/VireoFormActions",
+      "Capabilities/Forms/VireoFormResetButton",
+      "Capabilities/Forms/VireoFormSection",
+      "Capabilities/Forms/VireoFormSectionItem",
+      "Capabilities/Forms/VireoFormSubmitButton",
+      "Capabilities/Forms/Fields/VireoFormCheckboxField",
+      "Capabilities/Forms/Fields/VireoFormTextField",
     ]);
   });
 
@@ -56,6 +100,8 @@ describe("vireoStorySort", () => {
   });
 
   it("preserves declaration order for entries belonging to the same component title", () => {
-    expect(vireoStorySort({ title: "Forms/Forms/VireoForm" }, { title: "Forms/Forms/VireoForm" })).toBe(0);
+    expect(vireoStorySort({ title: "Capabilities/Forms/VireoForm" }, { title: "Capabilities/Forms/VireoForm" })).toBe(
+      0,
+    );
   });
 });

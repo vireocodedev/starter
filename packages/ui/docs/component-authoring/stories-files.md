@@ -82,36 +82,69 @@ Use a named `Meta<typeof VireoComponent>` annotation in this exception when the 
 
 The adapter may relax only the correlated contract that Storybook must represent as partial story args. Derive its fields from public types; do not manually copy the complete component prop surface. Every predefined story must still supply a valid runtime combination. Introduce a typed story-only render wrapper only when Storybook's partial args would otherwise produce an invalid runtime or accessibility state.
 
-## Stable architecture-aware navigation title
+## Stable developer-facing navigation title
 
-Use the explicit hierarchy derived from the component's architectural owner and approved category:
+Storybook has four ordered roots:
+
+```text
+Documentation
+Core
+Capabilities
+Integrations
+```
+
+Core retains its responsibility categories because those categories distinguish
+otherwise unrelated foundational contracts. Focused capabilities omit source
+component categories when the capability and component names already communicate
+the distinction. Integrations use a developer-facing task label and may retain
+the external runtime name when it materially helps discovery.
 
 ```text
 Core/[Category]/VireoComponent
-[Top-level capability]/[Category]/VireoComponent
-[Top-level capability]/[Child capability]/[Category]/VireoComponent
+Capabilities/[Capability]/VireoComponent
+Capabilities/[Capability]/[Purposeful group]/VireoComponent
+Integrations/[Integration label]/VireoComponent
 ```
 
 For example:
 
 ```ts
 title: "Core/Behavior/VireoDelayedRender";
-title: "Table/Management Table/Controls/VireoMobileToolbar";
+title: "Capabilities/Tables/VireoResponsiveTable";
+title: "Integrations/Notifications · Sonner/VireoToaster";
 ```
+
+Do not mirror `components/data-display`, `components/layout`, or another source
+category beneath a focused capability merely because that folder exists on disk.
+The navigation communicates public ownership and developer intent; the source
+architecture continues to govern filesystem placement.
 
 ### Bound form-field grouping
 
 Components exposed through the `useVireoForm` `field.*` facade intentionally use one additional `Fields` navigation directory beneath the forms component category:
 
 ```ts
-title: "Forms/Forms/Fields/VireoFormTextField";
+title: "Capabilities/Forms/Fields/VireoFormTextField";
 ```
 
-This grouping currently contains `VireoFormCheckboxField`, `VireoFormCounterField`, `VireoFormFileField`, `VireoFormFileListField`, `VireoFormNumberField`, `VireoFormRadioGroupField`, `VireoFormSelectField`, `VireoFormSelectMultipleField`, `VireoFormSwitchField`, `VireoFormTemporalField`, `VireoFormTextField`, and `VireoFormToggleButtonGroupField`. Form-level components such as `VireoForm`, `VireoFormActions`, `VireoFormResetButton`, `VireoFormSection`, `VireoFormSectionItem`, and `VireoFormSubmitButton` remain directly under `Forms/Forms`.
+This grouping contains every component bound through `field.*`. Form-level
+components such as `VireoForm`, `VireoFormActions`, `VireoFormResetButton`,
+`VireoFormSection`, `VireoFormSectionItem`, and `VireoFormSubmitButton` remain
+directly under `Capabilities/Forms`. Multi-step contracts use the sibling
+`Capabilities/Forms/Multi-Step` group and form overlays use
+`Capabilities/Forms/Overlays`.
 
-The Vireo Storybook navigation sorts component files before child directories at every level. Within those two groups, entries remain alphabetical. Consequently, `Forms/Forms` lists its four form-level components first and the `Fields` directory afterward.
+The Vireo Storybook navigation fixes the four root positions and prioritizes
+Documentation's `Overview`, `Installation`, and `Guides` entries. Elsewhere it
+sorts component files before child directories and alphabetizes siblings of the
+same kind.
 
-The owner and category must match the source architecture rather than an invented Storybook-only grouping. Storybook 9 statically indexes CSF files and requires `meta.title` to be a string literal. This literal is the deliberate exception to importing the canonical identity everywhere the component name is used. Keep its final segment identical to `VIREO_COMPONENT_NAME`; the generator derives the initial title and identity from the same inputs.
+Storybook 9 statically indexes CSF files and requires `meta.title` to be a string
+literal. This literal is the deliberate exception to importing the canonical
+identity everywhere the component name is used. Keep its final segment identical
+to `VIREO_COMPONENT_NAME`; the generator derives the initial title and identity
+from the same inputs. The navigation contract tests reject unapproved roots and
+missing standalone documentation routes.
 
 ## Autodocs and component description
 
@@ -388,7 +421,7 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - The file is named `VireoComponent.stories.tsx` and is colocated with the component.
 - It is excluded from the published build and absent from public barrels.
 - Metadata directly satisfies or is explicitly annotated as `Meta<typeof VireoComponent>`.
-- The literal title follows the owner/category hierarchy, matches the component's source ownership, and ends with the canonical identity.
+- The literal title follows the four-root developer-facing hierarchy, preserves public ownership, and ends with the canonical identity.
 - `component` references the public component without a cast.
 - `tags: ["autodocs"]` is present.
 - The component description opens with a one-sentence summary and includes `### Why it exists` with the recurring problem, Vireo rationale, and use-or-avoid boundary.

@@ -10,7 +10,23 @@
   }
 
   #storybook-explorer-tree .sidebar-item[data-nodetype="group"] svg[type="group"] {
-    color: #f0b44c !important;
+    display: none;
+  }
+
+  #storybook-explorer-tree .vireo-sidebar-label {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #storybook-explorer-tree .vireo-sidebar-label > svg {
+    flex: 0 0 auto;
+    color: #f0b44c;
+  }
+
+  #storybook-explorer-tree .vireo-sidebar-label--root > svg {
+    color: #7cd9fd;
   }
 
   #storybook-panel-root,

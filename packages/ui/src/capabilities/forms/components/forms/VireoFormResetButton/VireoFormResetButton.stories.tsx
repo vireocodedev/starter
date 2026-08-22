@@ -17,7 +17,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Forms/Forms/VireoFormResetButton",
+  title: "Capabilities/Forms/VireoFormResetButton",
   component: VireoFormResetButton,
   tags: ["autodocs"],
   parameters: {

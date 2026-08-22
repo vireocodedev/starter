@@ -8,7 +8,7 @@ import providerHookSource from "@/capabilities/overlays/confirmation/components/
 import { VireoConfirmationDialog } from "./VireoConfirmationDialog";
 
 const meta = {
-  title: "Overlays/Confirmation/VireoConfirmationDialog",
+  title: "Capabilities/Overlays/VireoConfirmationDialog",
   component: VireoConfirmationDialog,
   parameters: {
     controls: { disable: true },

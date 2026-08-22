@@ -18,7 +18,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Forms/Forms/VireoFormErrorSummary",
+  title: "Capabilities/Forms/VireoFormErrorSummary",
   component: VireoFormErrorSummary,
   tags: ["autodocs"],
   parameters: {

@@ -93,11 +93,10 @@ export default {
     const ownerSegments = inputs.owner.split("/");
     const ownerDisplayName =
       inputs.owner === "core"
-        ? "Core"
+        ? `Core/${toDisplayName(inputs.category)}`
         : ownerSegments[0] === "capabilities"
-          ? ownerSegments.slice(1).map(toDisplayName).join("/")
-          : ownerSegments.map(toDisplayName).join("/");
-    const inferredCategory = `${ownerDisplayName}/${toDisplayName(inputs.category)}`;
+          ? `Capabilities/${ownerSegments.slice(1).map(toDisplayName).join("/")}`
+          : `Integrations/${toDisplayName(ownerSegments[1])}`;
     const publicBoundary =
       inputs.owner === "core"
         ? context.outputBase
@@ -116,7 +115,7 @@ export default {
       componentVariableName: `${componentName.charAt(0).toLowerCase()}${componentName.slice(1)}`,
       componentConstantName: `VIREO_${toScreamingSnakeCase(inputs.name)}`,
       coreUtilitiesModule: inputs.owner === "core" ? "@/core/utils/muiutils" : "@/core/public",
-      storybookCategory: inputs.storybookCategory ?? inferredCategory,
+      storybookCategory: inputs.storybookCategory ?? ownerDisplayName,
     };
   },
 };

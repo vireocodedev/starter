@@ -22,7 +22,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "Integrations/Hello Pangea DND/VireoDraggableItem",
+  title: "Integrations/Drag and Drop · Hello Pangea DND/VireoDraggableItem",
   component: VireoDraggableItem,
   tags: ["autodocs"],
   parameters: {
