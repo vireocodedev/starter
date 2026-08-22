@@ -90,9 +90,10 @@
   "scripts": {
     "clean": "rimraf dist",
     "build:css": "copyfiles -u 1 \"src/**/*.css\" dist",
-    "build": "npm run clean && concurrently --kill-others-on-fail -n types,storybook,css \"npm run build:types\" \"npm run build:storybook-types\" \"npm run build:css\" && tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig.storybook.build.json",
+    "build": "npm run clean && npm run build:types && concurrently --kill-others-on-fail -n storybook,css \"npm run build:storybook-types:emit\" \"npm run build:css\" && tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig.storybook.build.json",
     "build:types": "tsc -p tsconfig.build.json --noCheck",
-    "build:storybook-types": "tsc -p tsconfig.storybook.build.json --noCheck",
+    "build:storybook-types": "npm run build:types && npm run build:storybook-types:emit",
+    "build:storybook-types:emit": "tsc -p tsconfig.storybook.build.json --noCheck",
     "build:storybook-exports": "npm run build:storybook-types && tsc-alias -p tsconfig.storybook.build.json",
     "dev": "concurrently -k -n tsc,aliases,css \"npm run dev:tsc\" \"npm run dev:aliases\" \"npm run dev:css\"",
     "dev:tsc": "tsc -w -p tsconfig.build.json",
