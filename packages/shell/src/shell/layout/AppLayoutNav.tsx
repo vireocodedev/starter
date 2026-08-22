@@ -7,7 +7,7 @@ import { AppNavResizeHandle } from "@/shell/layout/nav/AppNavResizeHandle";
 import { useVisibleNavEntries } from "@/shell/layout/nav/useVisibleNavEntries";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { Box } from "@mui/material";
-import { usePlatformTranslation } from "@vireocodedev/starter-ui/localization";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
 import React from "react";
 import { useLocation, useNavigate } from "react-router";
 

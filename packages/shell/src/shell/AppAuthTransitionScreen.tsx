@@ -1,7 +1,7 @@
 import { AppBrandLogo } from "@/shell/components/AppBrandLogo";
 import { useAppShellContext } from "@/shell/useAppShellContext";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { usePlatformTranslation } from "@vireocodedev/starter-ui/localization";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
 
 export function AppAuthTransitionScreen({ fullscreen = true }: { fullscreen?: boolean }) {
   const { config } = useAppShellContext();

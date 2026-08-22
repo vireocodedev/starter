@@ -128,3 +128,19 @@ The pilot removes React from dependencies and declarations, replaces
 `render(...): ReactNode` with `format(...): string`, makes empty strings real
 values rather than missing values, rejects duplicate array identities, narrows
 the public surface, and establishes focused coverage for all diff modes.
+
+## Pilot: `starter-localization`
+
+The localization pilot separates resource ownership from React consumption:
+
+- `starter-localization` owns namespace constants, translations, resource
+  factories, registration, merge utilities, and locale-neutral formatters;
+- `starter-ui/react-i18next` exclusively owns the `react-i18next` namespace
+  hooks and other React localization adapters;
+- applications continue to own i18next initialization, locale selection,
+  persistence, detection, and provider placement.
+
+The framework-free package must be safe to load in Node and Web Workers. Its
+resource factories return deeply isolated locale objects, reject invalid
+configuration, and never depend on DOM globals. Shared translation keys remain
+versioned public contracts guarded by explicit key-surface tests.

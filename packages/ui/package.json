@@ -50,6 +50,11 @@
       "import": "./dist/integrations/localization/public.js",
       "default": "./dist/integrations/localization/public.js"
     },
+    "./react-i18next": {
+      "types": "./dist/integrations/react-i18next/public.d.ts",
+      "import": "./dist/integrations/react-i18next/public.js",
+      "default": "./dist/integrations/react-i18next/public.js"
+    },
     "./sonner": {
       "types": "./dist/integrations/sonner/public.d.ts",
       "import": "./dist/integrations/sonner/public.js",
@@ -136,6 +141,12 @@
       "optional": true
     },
     "@tanstack/react-query": {
+      "optional": true
+    },
+    "i18next": {
+      "optional": true
+    },
+    "react-i18next": {
       "optional": true
     },
     "sonner": {

@@ -14,7 +14,7 @@ import { AppMobileBottomNavigation } from "@/shell/layout/AppMobileBottomNavigat
 import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { NAV_MIN_EXPANDED_WIDTH, NAV_WIDTH_CSS_VAR } from "@/shell/layout/layoutNav.constants";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
-import { usePlatformTranslation } from "@vireocodedev/starter-ui/localization";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
 import { VIREO_PAGE_LAYOUT_MIN_WIDTH } from "@vireocodedev/starter-ui";
 import React from "react";
 import { Outlet, useLocation } from "react-router";

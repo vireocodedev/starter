@@ -1,11 +1,3 @@
-import {
-  createPlatformResources,
-  PLATFORM_TRANSLATION_NAMESPACE,
-  platformBaseResources,
-  type CreatePlatformResourcesConfig,
-} from "@/platform";
-import { type i18n as I18nInstance } from "i18next";
-
 export {
   createStarterResources,
   registerStarterResources,
@@ -60,28 +52,3 @@ export {
 export { createNamespaceResources, type DeepPartial, type WidenLeaves } from "@/toolkit/createNamespaceResources";
 export { deepMerge } from "@/toolkit/deepMerge";
 export { formatIntlNumber, type IntlNumberFormatRequest } from "@/formatters/intlNumberFormat";
-
-/** @deprecated Prefer {@link platformBaseResources} or {@link createPlatformResources}. */
-export const PLATFORM_TRANSLATION_RESOURCES = platformBaseResources;
-
-/**
- * Imperatively registers platform resources onto an existing i18next instance.
- * Useful when resources are added after i18next has already been initialized.
- *
- * @deprecated Prefer `registerStarterResources`, which covers every starter namespace.
- */
-export function registerPlatformResources<L extends string>(
-  i18n: I18nInstance,
-  config: CreatePlatformResourcesConfig<L>,
-): void {
-  const resources = createPlatformResources(config);
-  for (const locale of Object.keys(resources) as L[]) {
-    i18n.addResourceBundle(
-      locale,
-      PLATFORM_TRANSLATION_NAMESPACE,
-      resources[locale][PLATFORM_TRANSLATION_NAMESPACE],
-      true,
-      true,
-    );
-  }
-}

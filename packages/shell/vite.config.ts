@@ -58,6 +58,10 @@ export default defineConfig(({ mode }) => ({
               replacement: resolve(__dirname, "../localization/src/index.ts"),
             },
             {
+              find: /^@vireocodedev\/starter-ui\/react-i18next$/,
+              replacement: resolve(__dirname, "../ui/src/integrations/react-i18next/public.ts"),
+            },
+            {
               find: /^@vireocodedev\/starter-ui$/,
               replacement: resolve(__dirname, "../ui/src/index.ts"),
             },

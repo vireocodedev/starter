@@ -1,116 +1,105 @@
 # @vireocodedev/starter-localization
 
-Foundation i18n toolkit and **the single home for every `@vireocodedev` shared
-translation** in the **starter** product.
+Framework-free localization resources and tooling shared by the Starter
+packages. It is the single owner of the `platform`, `queryengine`, and `history`
+i18next namespaces.
 
-It owns three i18next namespaces — `platform` (generic UI: `common`, `network`,
-`pwa`), `queryengine` (filter builder / dev tools) and `history` (entity history
-views) — and exports the reusable utilities (`createStarterResources`,
-`createNamespaceResources`, `deepMerge`, types) that other `starter` libraries
-build on.
+The package owns translation resources, namespace constants, resource
+factories, imperative registration, deep-merge utilities, and locale-neutral
+number formatting. It deliberately does not own React hooks, providers,
+i18next initialization, locale detection, persistence, or application locale
+policy.
 
-Other starter packages (`starter-ui`, `starter-queryengine`, `starter-shell`) do
-**not** ship translations; they depend on this package for both resources and
-namespace hooks. App consumers therefore wire i18n once and inherit every shared
-string instead of restating it.
-
-This package does **not** initialize i18next, own a provider, or manage locale
-persistence — those stay in the consuming app. It contributes typed resources,
-namespace hooks, merge utilities, and locale-neutral formatting primitives to a
-single, app-owned i18next instance.
+The package has no React dependency and is safe to load in Node and Web Workers.
+React consumers import namespace hooks from
+`@vireocodedev/starter-ui/react-i18next`.
 
 ## Install
 
-Published to **GitHub Packages** under the `@vireocodedev` scope. Point the scope
-at the GitHub registry (e.g. in the consuming project's `.npmrc`) and authenticate
-with a token that has `read:packages`:
+Published to GitHub Packages under the `@vireocodedev` scope. Configure the
+scope and authenticate with a token that has `read:packages`:
 
 ```ini
-# .npmrc
 @vireocodedev:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
 ```bash
-npm install @vireocodedev/starter-localization
+npm install @vireocodedev/starter-localization i18next
 ```
 
-`i18next`, `react-i18next`, and `react` are **peer dependencies** — the package
-must run against the app's single i18next instance, never a bundled copy. When
-linking locally, dedupe those in your bundler (e.g. Vite `resolve.dedupe`).
+`i18next` is the only peer dependency. The package runs against the consuming
+application's instance and never bundles its own copy.
 
-## Quick start
+## Primary workflow
 
-Build **every** starter namespace for the locales your app supports and spread
-one object per locale into the resources you pass to i18next:
+Create every Starter namespace for the locales your app supports, then pass the
+result to the app-owned i18next instance:
 
 ```ts
 import { createStarterResources } from "@vireocodedev/starter-localization";
+import i18next from "i18next";
 
-const APP_LOCALES = ["en", "hr"] as const;
+const resources = createStarterResources({
+  locales: ["en", "hr", "de"] as const,
+  overrides: {
+    de: {
+      platform: { common: { save: "Speichern" } },
+      history: { title: "Verlauf" },
+    },
+  },
+});
 
-const starter = createStarterResources({ locales: APP_LOCALES });
-
-const resources = {
-  en: { translation: appEn, ...starter.en }, // { platform, queryengine, history }
-  hr: { translation: appHr, ...starter.hr },
-};
+await i18next.init({
+  lng: "de",
+  fallbackLng: "en",
+  resources,
+});
 ```
 
-Adding a new starter namespace later is a zero-diff change in your app.
-Per-namespace factories (`createPlatformResources`, `createQueryEngineResources`,
-`createHistoryResources`) remain available if you only want a subset.
+Locales not shipped by Starter are seeded from English by default. Partial
+overrides are deeply merged, so untranslated keys retain the seed value. Set
+`seedFrom: "hr"` to use Croatian as the seed instead.
 
-Consume translations with the matching namespace hook:
+Every generated locale owns an isolated resource tree. Mutating one result does
+not mutate the shipped base resources or another locale.
+
+## Registering resources after initialization
+
+Use `registerStarterResources` when an initialized instance needs the resources
+later in its lifecycle:
+
+```ts
+import { registerStarterResources } from "@vireocodedev/starter-localization";
+
+registerStarterResources(i18next, {
+  locales: ["en", "hr"],
+});
+```
+
+The function registers every Starter namespace. Per-namespace factories remain
+available when a consumer intentionally needs only one namespace.
+
+## React consumption
+
+React adapters belong to Starter UI:
 
 ```tsx
-import { usePlatformTranslation } from "@vireocodedev/starter-localization";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
 
-function SaveButton() {
+export function SaveButton() {
   const { t } = usePlatformTranslation();
   return <button>{t("common.save")}</button>;
 }
 ```
 
-## Overriding shipped values
-
-Pass per-locale, per-namespace overrides. They are deep-merged over the shipped
-base, so partial overrides never drop keys:
-
-```ts
-createStarterResources({
-  locales: ["en", "hr"],
-  overrides: {
-    en: {
-      platform: { common: { save: "Store" } },
-      history: { title: "Audit trail" },
-    },
-  },
-});
-```
-
-## Adding a new language
-
-Locales the package does not ship are **seeded** from a base locale (`en` by
-default), so every key is always present — untranslated keys fall back to the
-seed until you translate them:
-
-```ts
-createStarterResources({
-  locales: ["en", "hr", "de"],
-  seedFrom: "en",
-  overrides: {
-    de: { platform: { common: { save: "Speichern", cancel: "Abbrechen" } } },
-  },
-});
-```
-
-For a fully robust setup, also set i18next `fallbackLng` to a base locale.
+`useQueryEngineTranslation` and `useHistoryTranslation` are available from the
+same UI subpath. This package itself remains usable without React.
 
 ## Type safety
 
-Augment i18next with the exported resource types so `t()` gets autocomplete and
-strict key checks:
+Augment i18next with the exported namespace resource types for strict keys and
+autocomplete:
 
 ```ts
 import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/starter-localization";
@@ -118,7 +107,6 @@ import type { HistoryResources, PlatformResources, QueryEngineResources } from "
 declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
-      // ...your app namespace(s)
       platform: PlatformResources;
       queryengine: QueryEngineResources;
       history: HistoryResources;
@@ -129,34 +117,36 @@ declare module "i18next" {
 
 ## Public API
 
-| Export                                                                                        | Purpose                                                              |
-| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `createStarterResources({ locales, seedFrom?, overrides? })`                                  | Build every starter namespace per locale in one call.                |
-| `registerStarterResources(i18n, config)`                                                      | Imperatively add every starter namespace to a live i18next instance. |
-| `usePlatformTranslation()` / `useQueryEngineTranslation()` / `useHistoryTranslation()`        | `react-i18next` hooks bound to their namespace.                      |
-| `createPlatformResources` / `createQueryEngineResources` / `createHistoryResources`           | Per-namespace resource builders.                                     |
-| `STARTER_TRANSLATION_NAMESPACES`, `STARTER_BASE_LOCALES`                                      | The shipped namespace and locale sets.                               |
-| `platformBaseResources`, `queryEngineBaseResources`, `historyBaseResources`                   | The shipped base resources.                                          |
-| `PLATFORM_/QUERYENGINE_/HISTORY_TRANSLATION_NAMESPACE`                                        | The namespace strings.                                               |
-| `createNamespaceResources`, `deepMerge`                                                       | Generic toolkit reused by other starter libraries.                   |
-| `formatIntlNumber(value, { locale, options?, fallback? })`                                    | Format a number with caller-owned locale and fallback policy.        |
-| `PlatformResources`, `QueryEngineResources`, `HistoryResources`, `DeepPartial`, `WidenLeaves` | Types.                                                               |
+| Export                                                                      | Purpose                                                             |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `createStarterResources`                                                    | Build every Starter namespace for requested locales.                |
+| `registerStarterResources`                                                  | Register every namespace on a caller-owned i18next instance.        |
+| `createPlatformResources`                                                   | Build only the `platform` namespace.                                |
+| `createQueryEngineResources`                                                | Build only the `queryengine` namespace.                             |
+| `createHistoryResources`                                                    | Build only the `history` namespace.                                 |
+| `STARTER_TRANSLATION_NAMESPACES`, `STARTER_BASE_LOCALES`                    | Shipped namespace and locale contracts.                             |
+| `*_TRANSLATION_NAMESPACE`, `*_BASE_LOCALES`                                 | Per-namespace constants.                                            |
+| `platformBaseResources`, `queryEngineBaseResources`, `historyBaseResources` | Shipped resource maps.                                              |
+| `createNamespaceResources`                                                  | Build a complete custom namespace from shipped seeds and overrides. |
+| `deepMerge`                                                                 | Immutable, prototype-safe merge used by resource factories.         |
+| `formatIntlNumber`                                                          | Format a number with caller-owned locale and fallback policy.       |
+| Resource/configuration utility types                                        | Type namespace shapes, overrides, and custom factories.             |
 
-## Versioning contract
+## Failure and versioning policy
 
-Every shipped key set is a contract:
+`createNamespaceResources` rejects blank namespaces, missing seed locales, and
+duplicate locale identifiers. Prototype-mutating override keys are ignored.
 
-- **Adding** a key, namespace or locale → minor release.
-- **Renaming/removing** a key or dropping a base locale → major (breaking).
+Translation keys and base locales are versioned contracts:
 
-The contract test (`tests/starterLocalization.contract.test.ts`) guards the key
-surface, namespace set and locale set against accidental changes.
+- adding a key, namespace, or locale is a minor release;
+- renaming/removing a key or dropping a base locale is breaking;
+- changing a shipped translation value is reviewed as user-visible behavior.
+
+Explicit contract tests guard namespace keys and locale parity.
 
 ## Scripts
 
-- `npm run build` — Vite lib build → `dist/index.js` + bundled `dist/index.d.ts`.
-- `npm run typecheck` — `tsc --noEmit`.
-- `npm run test` — Vitest (contract test).
-
-Internal imports use the package-scoped `@/*` alias (`tsconfig.json` `paths`
-→ `./src/*`); the Vite build inlines them, so nothing but the public entry ships.
+- `npm run build` — build the ESM runtime and bundled declarations.
+- `npm run typecheck` — typecheck source and tests without emitting.
+- `npm run test` — run behavior, workflow, resource-contract, and architecture tests.

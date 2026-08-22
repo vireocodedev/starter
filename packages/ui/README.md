@@ -42,6 +42,8 @@ compatibility contract.
   filtering surfaces, virtualization, and scroll restoration.
 - **Providers** — `VireoConfirmationProvider`, `VireoIconRegistryProvider`,
   `VireoProviderComposer`, and `VireoThemeColorMeta`.
+- **Localization integrations** — temporal picker localization under
+  `/localization` and namespace-bound React hooks under `/react-i18next`.
 - **Hooks** — `useVireoDebouncedCallback`, `useVireoFullscreen`,
   `useVireoTransitionPresence`, `useAppPageContentLayout`,
   `usePageOverlayModes`, and `useDelayedOverlayMount`.

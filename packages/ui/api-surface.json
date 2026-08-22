@@ -1362,6 +1362,17 @@
       ],
       "workerSafe": false
     },
+    "./react-i18next": {
+      "exports": [
+        "useHistoryTranslation",
+        "usePlatformTranslation",
+        "useQueryEngineTranslation"
+      ],
+      "dependencies": [
+        "react-i18next"
+      ],
+      "workerSafe": false
+    },
     "./sonner": {
       "exports": [
         "Action",

@@ -11,8 +11,8 @@ npm install @vireocodedev/starter-shell
 ```
 
 Peers: `react`, `react-dom`, `react-router`, `@mui/material`,
-`@mui/icons-material`, `@preact/signals-react`, `@tanstack/react-query`. Depends on
-`@vireocodedev/starter-ui`, `@vireocodedev/starter-localization` and
+`@mui/icons-material`, `@preact/signals-react`, `@tanstack/react-query`,
+`i18next`, and `react-i18next`. Depends on `@vireocodedev/starter-ui` and
 `@vireocodedev/starter-infrastructure`.
 
 ## Consumer requirements

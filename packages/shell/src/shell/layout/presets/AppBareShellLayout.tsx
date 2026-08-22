@@ -6,7 +6,7 @@ import { AppSkipToContentLink } from "@/shell/components/AppSkipToContentLink";
 import { createWindowControlsOverlayRootStyle, useWindowControlsOverlay } from "@/shell/hooks/useWindowControlsOverlay";
 import { AppNavLayoutContext } from "@/shell/layout/AppNavLayoutContext";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
-import { usePlatformTranslation } from "@vireocodedev/starter-ui/localization";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
 import React from "react";
 import { Outlet } from "react-router";
 

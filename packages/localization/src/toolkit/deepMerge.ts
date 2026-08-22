@@ -2,7 +2,12 @@ type UnknownRecord = Record<string, unknown>;
 const UNSAFE_OBJECT_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 function isPlainObject(value: unknown): value is UnknownRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
 }
 
 function cloneValue<T>(value: T): T {
@@ -27,8 +32,8 @@ function cloneValue<T>(value: T): T {
  * Recursively merges `override` onto `base`, returning a new value.
  *
  * - Plain objects are merged key-by-key.
- * - Any non-object value (string, number, array, etc.) in `override` replaces
- *   the corresponding value in `base`.
+ * - Any non-plain-object value (string, number, array, etc.) in `override`
+ *   replaces the corresponding value in `base`.
  * - `undefined` values in `override` are ignored, so partial overrides never
  *   erase base keys.
  * - Inputs and nested values are cloned, so callers cannot mutate source

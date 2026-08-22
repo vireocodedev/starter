@@ -54,11 +54,15 @@ The `queryengine` namespace is **owned by
 translation:
 
 ```ts
-import { createStarterResources, useQueryEngineTranslation } from "@vireocodedev/starter-localization";
+import { createStarterResources } from "@vireocodedev/starter-localization";
 
 const starter = createStarterResources({ locales: ["en", "hr"] });
 // spread starter.en / starter.hr into your i18next resources
 ```
+
+React consumers obtain `useQueryEngineTranslation` from
+`@vireocodedev/starter-ui/react-i18next`; the resource package remains
+framework-free.
 
 Augment i18next with the `queryengine` namespace:
 
@@ -90,10 +94,11 @@ declare module "i18next" {
   `createQueryEngineConfigSqliteRequestHandlers`, and injected persistence,
   runtime, transport, request-name, table-name, and fallback contracts.
 
-> **i18n moved.** `useQueryEngineTranslation`, `createQueryEngineResources`,
+> **i18n resources moved.** `createQueryEngineResources`,
 > `queryEngineBaseResources`, `QUERYENGINE_TRANSLATION_NAMESPACE` and the
-> `QueryEngineResources` types are now exported by
-> `@vireocodedev/starter-localization`.
+> `QueryEngineResources` types are exported by
+> `@vireocodedev/starter-localization`. The React hook is exported by
+> `@vireocodedev/starter-ui/react-i18next`.
 
 ## Versioning contract
 

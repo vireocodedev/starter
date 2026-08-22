@@ -18,7 +18,6 @@
         "IntlNumberFormatRequest",
         "PLATFORM_BASE_LOCALES",
         "PLATFORM_TRANSLATION_NAMESPACE",
-        "PLATFORM_TRANSLATION_RESOURCES",
         "PlatformBaseLocale",
         "PlatformResources",
         "PlatformResourcesOverride",
@@ -48,16 +47,10 @@
         "historyBaseResources",
         "platformBaseResources",
         "queryEngineBaseResources",
-        "registerPlatformResources",
-        "registerStarterResources",
-        "useHistoryTranslation",
-        "usePlatformTranslation",
-        "useQueryEngineTranslation"
+        "registerStarterResources"
       ],
-      "dependencies": [
-        "react-i18next"
-      ],
-      "workerSafe": false
+      "dependencies": [],
+      "workerSafe": true
     }
   }
 }
