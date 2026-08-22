@@ -685,7 +685,7 @@ function createArrayItemMap(
   const map = new Map<HistoryEntityKey, { value: unknown; index: number }>();
 
   array.forEach((value, index) => {
-    const key = createArrayItemKey(config, value, index);
+    const key = createArrayItemKey(config, value);
     if ((typeof key !== "string" && typeof key !== "number") || (typeof key === "number" && !Number.isFinite(key))) {
       throw new TypeError(
         `History array identity in the ${side} snapshot at "${path.join(".")}" must be a string or finite number.`,
@@ -702,7 +702,7 @@ function createArrayItemMap(
   return map;
 }
 
-function createArrayItemKey(config: InternalArrayFieldConfig, value: unknown, _index: number): HistoryEntityKey {
+function createArrayItemKey(config: InternalArrayFieldConfig, value: unknown): HistoryEntityKey {
   const item = config.item as InternalArrayItemConfig;
 
   if (item.kind === "object") {
