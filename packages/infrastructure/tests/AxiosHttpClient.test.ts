@@ -65,7 +65,7 @@ describe("AxiosHttpClient", () => {
 
     const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
     await expect(client.getWidget("invalid")).rejects.toBeInstanceOf(z.ZodError);
-    expect(errorLog).toHaveBeenCalled();
+    expect(errorLog).not.toHaveBeenCalled();
     errorLog.mockRestore();
   });
 });

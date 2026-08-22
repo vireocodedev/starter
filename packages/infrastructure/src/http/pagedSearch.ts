@@ -17,6 +17,18 @@ export type PageableResponse<T> = {
   totalPages: number;
 };
 
+export function createPageableResponseSchema<TSchema extends z.ZodTypeAny>(contentSchema: TSchema) {
+  const metadata = z.number().int().nonnegative();
+
+  return z.object({
+    content: z.array(contentSchema),
+    number: metadata,
+    size: metadata,
+    totalElements: metadata,
+    totalPages: metadata,
+  });
+}
+
 export type SearchableFilters = {
   searchText: string;
   queryFiltersJson?: string | null;
@@ -37,14 +49,16 @@ export function normalizePageableResponse<T>(
   fallbackPageable: PageableParams,
 ): PageableResponse<T> {
   const content = Array.isArray(response?.content) ? response.content : [];
-  const fallbackPage = Number.isFinite(fallbackPageable.page) ? fallbackPageable.page : 0;
-  const fallbackSize = Number.isFinite(fallbackPageable.rowsPerPage) ? fallbackPageable.rowsPerPage : content.length;
-  const number = Number.isFinite(response?.number) ? response.number : fallbackPage;
-  const size = Number.isFinite(response?.size) ? response.size : fallbackSize;
-  const totalElements = Number.isFinite(response?.totalElements) ? response.totalElements : content.length;
+  const toNonnegativeInteger = (value: number, fallback: number) =>
+    Number.isFinite(value) && value >= 0 ? Math.floor(value) : fallback;
+  const fallbackPage = toNonnegativeInteger(fallbackPageable.page, 0);
+  const fallbackSize = toNonnegativeInteger(fallbackPageable.rowsPerPage, content.length);
+  const number = toNonnegativeInteger(response?.number, fallbackPage);
+  const size = toNonnegativeInteger(response?.size, fallbackSize);
+  const totalElements = toNonnegativeInteger(response?.totalElements, content.length);
   const totalPages =
     Number.isFinite(response?.totalPages) && response.totalPages >= 0
-      ? response.totalPages
+      ? Math.floor(response.totalPages)
       : size > 0
         ? Math.ceil(totalElements / size)
         : 0;
@@ -80,18 +94,12 @@ export function parseQueryFilterRequest(filtersJson: string | null): unknown | u
     return undefined;
   }
 
-  try {
-    const parsed = JSON.parse(filtersJson) as { rows?: unknown[] } | null;
+  const parsed = z
+    .object({ rows: z.array(z.unknown()) })
+    .passthrough()
+    .parse(JSON.parse(filtersJson));
 
-    if (parsed == null || typeof parsed !== "object") {
-      return undefined;
-    }
-
-    const rows = Array.isArray(parsed.rows) ? parsed.rows : [];
-    return rows.length === 0 ? undefined : parsed;
-  } catch {
-    return undefined;
-  }
+  return parsed.rows.length === 0 ? undefined : parsed;
 }
 
 export async function postPagedSearch<TEntity, TFilters extends SearchableFilters>({
@@ -113,8 +121,5 @@ export async function postPagedSearch<TEntity, TFilters extends SearchableFilter
     },
   );
 
-  return normalizePageableResponse(
-    { ...response.data, content: parseHttpResponse(z.array(schema), response.data.content) },
-    pageable,
-  );
+  return parseHttpResponse(createPageableResponseSchema(schema), response.data);
 }
