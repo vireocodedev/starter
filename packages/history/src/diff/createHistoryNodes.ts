@@ -425,6 +425,12 @@ function createOrderedArrayChildren(
 ): HistoryNode[] {
   const previousItems = createArrayItemMap(config, previousArray, path, "previous");
   const currentItems = createArrayItemMap(config, currentArray, path, "current");
+  const stableKeys = new Set(
+    findLongestStableKeySequence(
+      [...previousItems.keys()].filter(key => currentItems.has(key)),
+      [...currentItems.keys()].filter(key => previousItems.has(key)),
+    ),
+  );
 
   const addedChildren: HistoryNode[] = [];
   const updatedChildren: HistoryNode[] = [];
@@ -439,10 +445,9 @@ function createOrderedArrayChildren(
       continue;
     }
 
-    const movedRow =
-      previousEntry.index === currentEntry.index
-        ? null
-        : createMovedRow(itemPath, previousEntry.index, currentEntry.index, options);
+    const movedRow = stableKeys.has(key)
+      ? null
+      : createMovedRow(itemPath, previousEntry.index, currentEntry.index, options);
 
     updatedChildren.push(
       ...createMatchedArrayItemNodes({
@@ -469,6 +474,57 @@ function createOrderedArrayChildren(
     ...sortHistoryNodesByChangeType(updatedChildren),
     ...sortHistoryNodesByChangeType(removedChildren),
   ];
+}
+
+function findLongestStableKeySequence(
+  previousKeys: readonly HistoryEntityKey[],
+  currentKeys: readonly HistoryEntityKey[],
+): HistoryEntityKey[] {
+  const lengths = Array.from({ length: previousKeys.length + 1 }, () => Array<number>(currentKeys.length + 1).fill(0));
+
+  for (let previousIndex = previousKeys.length - 1; previousIndex >= 0; previousIndex -= 1) {
+    for (let currentIndex = currentKeys.length - 1; currentIndex >= 0; currentIndex -= 1) {
+      lengths[previousIndex]![currentIndex] = areHistoryKeysEqual(
+        previousKeys[previousIndex],
+        currentKeys[currentIndex],
+      )
+        ? 1 + lengths[previousIndex + 1]![currentIndex + 1]!
+        : Math.max(lengths[previousIndex + 1]![currentIndex]!, lengths[previousIndex]![currentIndex + 1]!);
+    }
+  }
+
+  const stableKeys: HistoryEntityKey[] = [];
+  let previousIndex = 0;
+  let currentIndex = 0;
+
+  while (previousIndex < previousKeys.length && currentIndex < currentKeys.length) {
+    const previousKey = previousKeys[previousIndex]!;
+    const currentKey = currentKeys[currentIndex]!;
+
+    if (areHistoryKeysEqual(previousKey, currentKey)) {
+      stableKeys.push(previousKey);
+      previousIndex += 1;
+      currentIndex += 1;
+      continue;
+    }
+
+    const skipPreviousLength = lengths[previousIndex + 1]![currentIndex]!;
+    const skipCurrentLength = lengths[previousIndex]![currentIndex + 1]!;
+    if (skipPreviousLength > skipCurrentLength) {
+      previousIndex += 1;
+    } else {
+      currentIndex += 1;
+    }
+  }
+
+  return stableKeys;
+}
+
+function areHistoryKeysEqual(left: HistoryEntityKey | undefined, right: HistoryEntityKey | undefined): boolean {
+  return (
+    left === right ||
+    (typeof left === "number" && typeof right === "number" && Number.isNaN(left) && Number.isNaN(right))
+  );
 }
 
 function createMatchedArrayItemNodes(args: {

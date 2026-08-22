@@ -151,7 +151,7 @@ describe("history audit regressions", () => {
     ]);
   });
 
-  it.fails("does not report insertion shifts as deliberate moves", () => {
+  it("does not report insertion shifts as deliberate moves", () => {
     const itemSchema = z.object({ id: z.string() });
     const itemDefinition = createHistoryDefinition(itemSchema, { label: "Item", key: item => item.id }, { id: false });
     const schema = z.object({ items: z.array(itemSchema) });
@@ -176,6 +176,10 @@ describe("history audit regressions", () => {
     if (root?.type !== "group" || root.children[0]?.type !== "group") throw new Error("Expected items group.");
 
     expect(root.children[0].children).toHaveLength(1);
-    expect(root.children[0].children[0]).toMatchObject({ type: "added", path: ["items", "x"] });
+    expect(root.children[0].children[0]).toMatchObject({
+      type: "group",
+      path: ["items", "x"],
+      changeType: "added",
+    });
   });
 });

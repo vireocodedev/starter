@@ -217,14 +217,38 @@ describe(createHistoryNodes, () => {
         previous: { raw: 1, formatted: "2" },
         current: { raw: 0, formatted: "1" },
       },
-      {
-        type: "moved",
-        path: ["items", "a", "$position"],
-        label: "Position",
-        previous: { raw: 0, formatted: "1" },
-        current: { raw: 1, formatted: "2" },
-      },
     ]);
+  });
+
+  it("uses the configured position label for deliberate moves", () => {
+    const itemSchema = z.object({ id: z.string() });
+    const itemDefinition = createHistoryDefinition(itemSchema, { label: "Item", key: item => item.id }, { id: false });
+    const schema = z.object({ items: z.array(itemSchema) });
+    const definition = createHistoryDefinition(
+      schema,
+      { label: "List", key: () => "list" },
+      {
+        items: {
+          kind: "array",
+          label: "Items",
+          mode: "ordered",
+          item: { kind: "object", definition: itemDefinition },
+        },
+      },
+    );
+
+    const [root] = createHistoryNodes(
+      definition,
+      { items: [{ id: "a" }, { id: "b" }] },
+      { items: [{ id: "b" }, { id: "a" }] },
+      { positionLabel: "Order" },
+    );
+    if (root?.type !== "group" || root.children[0]?.type !== "group") throw new Error("Expected items group.");
+
+    expect(root.children[0].children[0]).toMatchObject({
+      type: "group",
+      children: [{ type: "moved", label: "Order" }],
+    });
   });
 
   it("rejects duplicate identities instead of silently overwriting array items", () => {
