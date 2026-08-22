@@ -7,7 +7,7 @@ const toasterId = "stacking";
 export default function StackingExample() {
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start">
+      <Stack spacing={2} alignItems="flex-start" sx={{ minHeight: 480, width: "100%" }}>
         <Typography variant="h6">Compact three-toast stack</Typography>
         <Button
           variant="outlined"

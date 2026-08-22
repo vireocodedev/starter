@@ -5,7 +5,7 @@ import { Button, Stack, Typography } from "@mui/material";
 export default function ScopedToasterExample() {
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start">
+      <Stack spacing={2} alignItems="flex-start" sx={{ minHeight: 480, width: "100%" }}>
         <Typography variant="h6">Explicitly routed notification regions</Typography>
         <Stack direction="row" spacing={1}>
           <Button variant="outlined" onClick={() => toast.info("Workspace notification", { toasterId: "workspace" })}>
