@@ -1,6 +1,6 @@
 import { type RgoDraggableId } from "@/features/@hello-pangea/dnd/models/RgoDraggableId";
 import { type RgoDroppableId } from "@/features/@hello-pangea/dnd/models/RgoDroppableId";
-import { jsonCrushDecode } from "@/utils/tsutils";
+import { jsonCrushDecode } from "@/core/utils/tsutils";
 import type { DragStart, DragUpdate, DropResult, ResponderProvided } from "@hello-pangea/dnd";
 import { DragDropContext } from "@hello-pangea/dnd";
 import React from "react";

@@ -1,4 +1,4 @@
-import { type ExtractObjectToTypedUnion } from "@/utils/typeutils";
+import { type ExtractObjectToTypedUnion } from "@/core/types/typeutils";
 
 /**
  * Augmentable registry that maps draggable type names to their ID payload shapes.

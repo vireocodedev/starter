@@ -1,4 +1,4 @@
-import { type TODO } from "@/utils/typeutils";
+import { type TODO } from "@/core/types/typeutils";
 import JSONCrush from "jsoncrush";
 
 export function sortKeysDeep<T extends Record<string, TODO>>(obj: T): T {

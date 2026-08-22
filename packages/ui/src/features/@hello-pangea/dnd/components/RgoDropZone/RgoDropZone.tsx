@@ -1,7 +1,7 @@
 import { useDropZone } from "@/features/@hello-pangea/dnd/hooks/useDropZone";
 import { type RgoDraggableId } from "@/features/@hello-pangea/dnd/models/RgoDraggableId";
 import { type RgoDroppableId } from "@/features/@hello-pangea/dnd/models/RgoDroppableId";
-import { jsonCrushDecode, jsonCrushEncode } from "@/utils/tsutils";
+import { jsonCrushDecode, jsonCrushEncode } from "@/core/utils/tsutils";
 import { Droppable, type DroppableStateSnapshot } from "@hello-pangea/dnd";
 import { Box } from "@mui/material";
 import React from "react";

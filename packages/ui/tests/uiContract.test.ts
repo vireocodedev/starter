@@ -1,5 +1,5 @@
-import { createCurrencyFormatter, formatCompactCurrency } from "@/utils/currencyFormatters";
-import { createMonthFormatter, createMonthYearFormatter } from "@/utils/dateFormatters";
+import { createCurrencyFormatter, formatCompactCurrency } from "@/core/utils/currencyFormatters";
+import { createMonthFormatter, createMonthYearFormatter } from "@/core/utils/dateFormatters";
 import { describe, expect, it } from "vitest";
 
 /** Guards dependency-light package utility behavior. */

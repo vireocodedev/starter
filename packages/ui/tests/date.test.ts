@@ -1,4 +1,4 @@
-import { DateFormat, formatDate, formatMonth, getElapsedMilliseconds, getTimestamp } from "@/utils/date";
+import { DateFormat, formatDate, formatMonth, getElapsedMilliseconds, getTimestamp } from "@/core/utils/date";
 import dayjs from "dayjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
