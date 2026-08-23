@@ -14,6 +14,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.ConstraintViolationException;
@@ -67,6 +69,27 @@ public class GlobalExceptionHandler {
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Bad request",
                                 violations,
+                                Instant.now());
+        }
+
+        @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        ApiError handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+                Map<String, String> errors = Map.of(ex.getName(), "must have a valid value");
+                return new ApiError(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad request",
+                                errors,
+                                Instant.now());
+        }
+
+        @ExceptionHandler(HandlerMethodValidationException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        ApiError handleHandlerMethodValidation(HandlerMethodValidationException ex) {
+                return new ApiError(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad request",
+                                Map.of("request", "Request parameters are invalid"),
                                 Instant.now());
         }
 

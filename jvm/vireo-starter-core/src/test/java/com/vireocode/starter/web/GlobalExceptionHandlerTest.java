@@ -18,6 +18,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.ConstraintViolation;
@@ -25,6 +26,18 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 
 class GlobalExceptionHandlerTest {
+
+    @Test
+    void handleMethodArgumentTypeMismatch_ReturnsBadRequestWithoutLeakingInput() {
+        GlobalExceptionHandler handler = new GlobalExceptionHandler(mock(Environment.class));
+        MethodArgumentTypeMismatchException exception = new MethodArgumentTypeMismatchException(
+                "not-a-number", Integer.class, "limit", null, new NumberFormatException("bad"));
+
+        ApiError error = handler.handleMethodArgumentTypeMismatch(exception);
+
+        assertEquals(400, error.status());
+        assertEquals("must have a valid value", error.errors().get("limit"));
+    }
 
     @Test
     void handleMethodArgumentNotValid_CollectsFieldErrors() {
