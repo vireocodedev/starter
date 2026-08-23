@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vireocode.starter.security.SecurityExpressions;
 import com.vireocode.starter.web.RestUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,13 +42,15 @@ public class HistoryController {
     private static final int MAX_LIMIT = 500;
 
     private final HistoryRepository repository;
+    private final ObjectMapper objectMapper;
 
-    public HistoryController(HistoryRepository repository) {
+    public HistoryController(HistoryRepository repository, ObjectMapper objectMapper) {
         this.repository = repository;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping
-    public List<HistoryEntryDTO> find(@RequestParam("entity") String entity,
+    public List<HistoryRecord> find(@RequestParam("entity") String entity,
             @RequestParam("entityId") String entityId,
             @RequestParam(value = "limit", required = false) String limitParam) {
         int limit = resolveLimit(limitParam);
@@ -80,16 +86,28 @@ public class HistoryController {
         return Math.min(requestedLimit, MAX_LIMIT);
     }
 
-    private HistoryEntryDTO toDto(HistoryEntry entry) {
-        HistoryEntryDTO dto = new HistoryEntryDTO();
-        dto.setId(entry.getId());
-        dto.setTimestamp(entry.getOccurredAt());
-        dto.setOwnerId(entry.getOwnerId());
-        dto.setOwnerUsername(entry.getOwnerUsername());
-        dto.setEntity(entry.getEntity());
-        dto.setEntityId(entry.getEntityId());
-        dto.setSnapshotPrevious(entry.getSnapshotPrevious());
-        dto.setSnapshotCurrent(entry.getSnapshotCurrent());
-        return dto;
+    private HistoryRecord toDto(HistoryEntry entry) {
+        HistoryActor actor = new HistoryActor(
+                entry.getOwnerId() == null ? null : entry.getOwnerId().toString(),
+                entry.getOwnerUsername());
+        return new HistoryRecord(
+                entry.getId(),
+                entry.getOccurredAt(),
+                actor,
+                entry.getEntity(),
+                entry.getEntityId(),
+                parseSnapshot(entry.getSnapshotPrevious()),
+                parseSnapshot(entry.getSnapshotCurrent()));
+    }
+
+    private JsonNode parseSnapshot(String snapshot) {
+        if (snapshot == null) {
+            return null;
+        }
+        try {
+            return objectMapper.readTree(snapshot);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Persisted history snapshot is not valid JSON", exception);
+        }
     }
 }

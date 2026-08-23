@@ -33,7 +33,7 @@ public class StarterHistoryAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    HistoryController starterHistoryController(HistoryRepository repository) {
-        return new HistoryController(repository);
+    HistoryController starterHistoryController(HistoryRepository repository, ObjectMapper objectMapper) {
+        return new HistoryController(repository, objectMapper);
     }
 }

@@ -1,6 +1,15 @@
+public final record com.vireocode.starter.history.HistoryActor
+    extends java.lang.Record
+    public com.vireocode.starter.history.HistoryActor(java.lang.String,java.lang.String)
+    public final boolean com.vireocode.starter.history.HistoryActor.equals(java.lang.Object)
+    public final int com.vireocode.starter.history.HistoryActor.hashCode()
+    public final java.lang.String com.vireocode.starter.history.HistoryActor.toString()
+    public java.lang.String com.vireocode.starter.history.HistoryActor.id()
+    public java.lang.String com.vireocode.starter.history.HistoryActor.label()
+
 public class com.vireocode.starter.history.HistoryController
-    public com.vireocode.starter.history.HistoryController(com.vireocode.starter.history.HistoryRepository)
-    public java.util.List<com.vireocode.starter.history.HistoryEntryDTO> com.vireocode.starter.history.HistoryController.find(java.lang.String,java.lang.String,java.lang.String)
+    public com.vireocode.starter.history.HistoryController(com.vireocode.starter.history.HistoryRepository,com.fasterxml.jackson.databind.ObjectMapper)
+    public java.util.List<com.vireocode.starter.history.HistoryRecord> com.vireocode.starter.history.HistoryController.find(java.lang.String,java.lang.String,java.lang.String)
 
 public class com.vireocode.starter.history.HistoryEntry
     public com.vireocode.starter.history.HistoryEntry()
@@ -21,24 +30,19 @@ public class com.vireocode.starter.history.HistoryEntry
     public void com.vireocode.starter.history.HistoryEntry.setSnapshotCurrent(java.lang.String)
     public void com.vireocode.starter.history.HistoryEntry.setSnapshotPrevious(java.lang.String)
 
-public class com.vireocode.starter.history.HistoryEntryDTO
-    public com.vireocode.starter.history.HistoryEntryDTO()
-    public java.lang.String com.vireocode.starter.history.HistoryEntryDTO.getEntity()
-    public java.lang.String com.vireocode.starter.history.HistoryEntryDTO.getEntityId()
-    public java.lang.String com.vireocode.starter.history.HistoryEntryDTO.getOwnerUsername()
-    public java.lang.String com.vireocode.starter.history.HistoryEntryDTO.getSnapshotCurrent()
-    public java.lang.String com.vireocode.starter.history.HistoryEntryDTO.getSnapshotPrevious()
-    public java.time.Instant com.vireocode.starter.history.HistoryEntryDTO.getTimestamp()
-    public java.util.UUID com.vireocode.starter.history.HistoryEntryDTO.getId()
-    public java.util.UUID com.vireocode.starter.history.HistoryEntryDTO.getOwnerId()
-    public void com.vireocode.starter.history.HistoryEntryDTO.setEntity(java.lang.String)
-    public void com.vireocode.starter.history.HistoryEntryDTO.setEntityId(java.lang.String)
-    public void com.vireocode.starter.history.HistoryEntryDTO.setId(java.util.UUID)
-    public void com.vireocode.starter.history.HistoryEntryDTO.setOwnerId(java.util.UUID)
-    public void com.vireocode.starter.history.HistoryEntryDTO.setOwnerUsername(java.lang.String)
-    public void com.vireocode.starter.history.HistoryEntryDTO.setSnapshotCurrent(java.lang.String)
-    public void com.vireocode.starter.history.HistoryEntryDTO.setSnapshotPrevious(java.lang.String)
-    public void com.vireocode.starter.history.HistoryEntryDTO.setTimestamp(java.time.Instant)
+public final record com.vireocode.starter.history.HistoryRecord
+    extends java.lang.Record
+    public com.vireocode.starter.history.HistoryRecord(java.util.UUID,java.time.Instant,com.vireocode.starter.history.HistoryActor,java.lang.String,java.lang.String,com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.JsonNode)
+    public com.fasterxml.jackson.databind.JsonNode com.vireocode.starter.history.HistoryRecord.snapshotCurrent()
+    public com.fasterxml.jackson.databind.JsonNode com.vireocode.starter.history.HistoryRecord.snapshotPrevious()
+    public com.vireocode.starter.history.HistoryActor com.vireocode.starter.history.HistoryRecord.actor()
+    public final boolean com.vireocode.starter.history.HistoryRecord.equals(java.lang.Object)
+    public final int com.vireocode.starter.history.HistoryRecord.hashCode()
+    public final java.lang.String com.vireocode.starter.history.HistoryRecord.toString()
+    public java.lang.String com.vireocode.starter.history.HistoryRecord.entity()
+    public java.lang.String com.vireocode.starter.history.HistoryRecord.entityId()
+    public java.time.Instant com.vireocode.starter.history.HistoryRecord.timestamp()
+    public java.util.UUID com.vireocode.starter.history.HistoryRecord.id()
 
 public class com.vireocode.starter.history.HistoryRecorder
     implements com.vireocode.starter.base.HistoryEventsRecorder
