@@ -13,7 +13,7 @@ React presentation belongs to `@vireocodedev/starter-ui`, whose
 npm install @vireocodedev/starter-history zod
 ```
 
-`zod >=3.24 <4` is the package's only peer dependency. Zod 4 support will be declared only after a dedicated compatibility pass.
+`zod >=4.4 <5` is the package's only peer dependency.
 
 ## Define and compare an entity
 

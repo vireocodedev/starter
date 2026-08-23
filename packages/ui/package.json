@@ -133,7 +133,7 @@
     "react-dom": ">=18",
     "react-i18next": ">=15",
     "sonner": ">=2",
-    "zod": ">=3.24 <4"
+    "zod": ">=4.4 <5"
   },
   "peerDependenciesMeta": {
     "@hello-pangea/dnd": {
@@ -189,7 +189,7 @@
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vite": "^8.2.2",
     "vitest": "^4.1.11",
-    "zod": "^3.24.2"
+    "zod": "^4.4.3"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

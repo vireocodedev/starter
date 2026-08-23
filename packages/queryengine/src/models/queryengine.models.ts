@@ -89,9 +89,9 @@ export interface QueryEngineRelationFieldOptionsRequest {
 }
 
 export type QueryEngineEntitySchemas = {
-  fieldDefinition: z.ZodType<QueryEngineFieldDefinition, z.ZodTypeDef, unknown>;
-  entityDefinition: z.ZodType<QueryEngineEntityDefinition, z.ZodTypeDef, unknown>;
-  entitySummary: z.ZodType<QueryEngineEntitySummary, z.ZodTypeDef, unknown>;
+  fieldDefinition: z.ZodType<QueryEngineFieldDefinition>;
+  entityDefinition: z.ZodType<QueryEngineEntityDefinition>;
+  entitySummary: z.ZodType<QueryEngineEntitySummary>;
 };
 
 /**
@@ -101,9 +101,9 @@ export type QueryEngineEntitySchemas = {
  * key set while still rejecting unusable identifiers.
  */
 export function createQueryEngineEntitySchemas(
-  entityKeySchema: z.ZodType<QueryEngineEntityKey, z.ZodTypeDef, unknown> = z.string().min(1),
+  entityKeySchema: z.ZodType<QueryEngineEntityKey> = z.string().min(1),
 ): QueryEngineEntitySchemas {
-  const fieldDefinition: z.ZodType<QueryEngineFieldDefinition, z.ZodTypeDef, unknown> = z.lazy(() =>
+  const fieldDefinition: z.ZodType<QueryEngineFieldDefinition> = z.lazy(() =>
     z.object({
       path: z.string().min(1),
       label: z.string().min(1),
@@ -122,7 +122,7 @@ export function createQueryEngineEntitySchemas(
     }),
   );
 
-  const entityDefinition: z.ZodType<QueryEngineEntityDefinition, z.ZodTypeDef, unknown> = z
+  const entityDefinition: z.ZodType<QueryEngineEntityDefinition> = z
     .object({
       key: entityKeySchema,
       title: z.string().min(1),
@@ -130,7 +130,7 @@ export function createQueryEngineEntitySchemas(
     })
     .passthrough();
 
-  const entitySummary: z.ZodType<QueryEngineEntitySummary, z.ZodTypeDef, unknown> = z
+  const entitySummary: z.ZodType<QueryEngineEntitySummary> = z
     .object({
       key: entityKeySchema,
       filterableFieldCount: z.number().int().nonnegative(),
