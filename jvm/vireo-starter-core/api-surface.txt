@@ -23,10 +23,6 @@ public abstract class com.vireocode.starter.base.BaseService<ID,DOMAIN extends c
     public com.vireocode.starter.base.BaseService(com.vireocode.starter.base.SearchableRepository<DOMAIN, ID>,com.vireocode.starter.base.BaseMapper<DOMAIN, DTO>,com.vireocode.starter.base.EntityConfig)
     public com.vireocode.starter.base.BaseService(com.vireocode.starter.base.SearchableRepository<DOMAIN, ID>,com.vireocode.starter.base.BaseMapper<DOMAIN, DTO>,java.util.List<java.lang.String>)
     public com.vireocode.starter.base.BaseService(com.vireocode.starter.base.SearchableRepository<DOMAIN, ID>,com.vireocode.starter.base.BaseMapper<DOMAIN, DTO>,java.util.List<java.lang.String>,java.util.List<java.lang.String>)
-    protected com.vireocode.starter.base.HistoryEventsRecorder com.vireocode.starter.base.BaseService.historyRecorder
-    protected com.vireocode.starter.spi.FilterSpecificationBuilder com.vireocode.starter.base.BaseService.filterSpecificationBuilder
-    protected com.vireocode.starter.spi.OfflineChangeBroadcaster com.vireocode.starter.base.BaseService.offlineChangeBroadcaster
-    protected com.vireocode.starter.spi.OfflineRevisionTracker com.vireocode.starter.base.BaseService.offlineRevisionTracker
     protected final com.vireocode.starter.base.BaseMapper<DOMAIN, DTO> com.vireocode.starter.base.BaseService.mapper
     protected final com.vireocode.starter.base.EntityConfig com.vireocode.starter.base.BaseService.entityConfig
     protected final com.vireocode.starter.base.SearchableRepository<DOMAIN, ID> com.vireocode.starter.base.BaseService.repository
@@ -42,16 +38,11 @@ public abstract class com.vireocode.starter.base.BaseService<ID,DOMAIN extends c
     protected final DTO com.vireocode.starter.base.BaseService.finalizeUpdatedEntity(DOMAIN,DTO)
     protected final void com.vireocode.starter.base.BaseService.finalizeDeletedEntity(DOMAIN,DTO)
     protected java.lang.String com.vireocode.starter.base.BaseService.extractId(DOMAIN)
-    protected org.springframework.data.domain.Page<DTO> com.vireocode.starter.base.BaseService.performSearch(java.lang.String,org.springframework.data.domain.Pageable)
     protected org.springframework.data.jpa.domain.Specification<DOMAIN> com.vireocode.starter.base.BaseService.notDeletedSpecification()
     protected void com.vireocode.starter.base.BaseService.applyRelations(DOMAIN,DTO)
     protected void com.vireocode.starter.base.BaseService.applyUpdateChanges(DOMAIN,DTO)
     protected void com.vireocode.starter.base.BaseService.performDelete(DOMAIN)
     protected void com.vireocode.starter.base.BaseService.populateKeywords(DOMAIN)
-    protected void com.vireocode.starter.base.BaseService.publishEntityChange(java.lang.String,DTO)
-    protected void com.vireocode.starter.base.BaseService.recordCreate(DOMAIN,DTO)
-    protected void com.vireocode.starter.base.BaseService.recordDelete(DOMAIN,DTO)
-    protected void com.vireocode.starter.base.BaseService.recordUpdate(DOMAIN,DTO,DTO)
     protected void com.vireocode.starter.base.BaseService.validateCreateRequest(DTO)
     protected void com.vireocode.starter.base.BaseService.validateDeleteRequest(ID)
     protected void com.vireocode.starter.base.BaseService.validateUpdateRequest(ID,DTO)
@@ -81,11 +72,6 @@ public static class com.vireocode.starter.base.EntityConfig$EntityConfigBuilder
 public abstract interface com.vireocode.starter.base.HistoryEntityType
     public abstract java.lang.String com.vireocode.starter.base.HistoryEntityType.name()
 
-public abstract interface com.vireocode.starter.base.HistoryEventsRecorder
-    public abstract void com.vireocode.starter.base.HistoryEventsRecorder.recordCreate(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object)
-    public abstract void com.vireocode.starter.base.HistoryEventsRecorder.recordDelete(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object)
-    public abstract void com.vireocode.starter.base.HistoryEventsRecorder.recordUpdate(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object,java.lang.Object)
-
 public abstract class com.vireocode.starter.base.JsonNodeMapper
     public com.vireocode.starter.base.JsonNodeMapper()
     protected com.fasterxml.jackson.databind.ObjectMapper com.vireocode.starter.base.JsonNodeMapper.objectMapper
@@ -109,18 +95,6 @@ public abstract interface com.vireocode.starter.base.SearchableRepository<DOMAIN
     implements org.springframework.data.jpa.repository.JpaRepository<DOMAIN, ID>
     implements org.springframework.data.jpa.repository.JpaSpecificationExecutor<DOMAIN>
 
-public class com.vireocode.starter.config.JsonConfig
-    public com.vireocode.starter.config.JsonConfig()
-    public com.fasterxml.jackson.databind.ObjectMapper com.vireocode.starter.config.JsonConfig.objectMapper()
-    public org.springframework.http.converter.json.MappingJackson2HttpMessageConverter com.vireocode.starter.config.JsonConfig.mappingJackson2HttpMessageConverter(com.fasterxml.jackson.databind.ObjectMapper)
-
-public class com.vireocode.starter.config.MessageSourceConfig
-    public com.vireocode.starter.config.MessageSourceConfig()
-    public org.springframework.context.MessageSource com.vireocode.starter.config.MessageSourceConfig.messageSource()
-
-public class com.vireocode.starter.config.OpenApiConfig
-    public com.vireocode.starter.config.OpenApiConfig()
-
 public class com.vireocode.starter.config.StarterCoreAutoConfiguration
     public com.vireocode.starter.config.StarterCoreAutoConfiguration()
 
@@ -132,6 +106,13 @@ public static class com.vireocode.starter.config.StarterCoreAutoConfiguration$St
 
 public static class com.vireocode.starter.config.StarterCoreAutoConfiguration$StarterMethodSecurityConfiguration
     public com.vireocode.starter.config.StarterCoreAutoConfiguration$StarterMethodSecurityConfiguration()
+
+public class com.vireocode.starter.config.StarterCoreProperties
+    public com.vireocode.starter.config.StarterCoreProperties()
+    public boolean com.vireocode.starter.config.StarterCoreProperties.isExposeInternalErrorDetails()
+    public java.lang.String com.vireocode.starter.config.StarterCoreProperties.getSystemAuditor()
+    public void com.vireocode.starter.config.StarterCoreProperties.setExposeInternalErrorDetails(boolean)
+    public void com.vireocode.starter.config.StarterCoreProperties.setSystemAuditor(java.lang.String)
 
 public final class com.vireocode.starter.flyway.StarterFlywayMigrations
     public static java.lang.String com.vireocode.starter.flyway.StarterFlywayMigrations.resolveVendor(javax.sql.DataSource)
@@ -157,6 +138,11 @@ public final class com.vireocode.starter.security.SecurityExpressions
 public abstract interface com.vireocode.starter.spi.FilterSpecificationBuilder
     public abstract <DOMAIN> org.springframework.data.jpa.domain.Specification<DOMAIN> com.vireocode.starter.spi.FilterSpecificationBuilder.build(java.lang.Class<DOMAIN>,com.vireocode.starter.spi.QueryFilterCriteria)
 
+public abstract interface com.vireocode.starter.spi.HistoryEventsRecorder
+    public abstract void com.vireocode.starter.spi.HistoryEventsRecorder.recordCreate(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object)
+    public abstract void com.vireocode.starter.spi.HistoryEventsRecorder.recordDelete(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object)
+    public abstract void com.vireocode.starter.spi.HistoryEventsRecorder.recordUpdate(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object,java.lang.Object)
+
 public abstract interface com.vireocode.starter.spi.OfflineChangeBroadcaster
     public abstract void com.vireocode.starter.spi.OfflineChangeBroadcaster.publishCreateEvent(java.lang.String,java.lang.Object,java.lang.Long)
     public abstract void com.vireocode.starter.spi.OfflineChangeBroadcaster.publishDeleteEvent(java.lang.String,java.lang.Object,java.lang.Long)
@@ -179,13 +165,12 @@ public final record com.vireocode.starter.web.ApiError
     public java.util.Map<java.lang.String, java.lang.String> com.vireocode.starter.web.ApiError.errors()
 
 public class com.vireocode.starter.web.GlobalExceptionHandler
-    public com.vireocode.starter.web.GlobalExceptionHandler(org.springframework.core.env.Environment)
+    public com.vireocode.starter.web.GlobalExceptionHandler(com.vireocode.starter.config.StarterCoreProperties,java.time.Clock)
 
 public abstract @interface com.vireocode.starter.web.OutputOnly
     implements java.lang.annotation.Annotation
 
-public class com.vireocode.starter.web.RestUtils
-    public com.vireocode.starter.web.RestUtils()
+public final class com.vireocode.starter.web.RestUtils
     public static <T> java.util.Optional<T> com.vireocode.starter.web.RestUtils.getCurrentPrincipal(java.lang.Class<T>)
     public static com.vireocode.starter.web.SearchablePageable com.vireocode.starter.web.RestUtils.makePageable(int,int,java.lang.String,java.lang.String,java.lang.String)
     public static org.springframework.web.server.ResponseStatusException com.vireocode.starter.web.RestUtils.badRequest(java.lang.String)
