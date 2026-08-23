@@ -2,24 +2,16 @@ package com.vireocode.starter.queryengine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
-import jakarta.persistence.TypedQuery;
 
 class QueryEngineRelationOptionServiceTest {
 
@@ -62,12 +54,8 @@ class QueryEngineRelationOptionServiceTest {
     void listOptions_BlankSearchBuildsSortedLabelsWithoutSearchParam() throws Exception {
         QueryEngineRegistry registry = mock(QueryEngineRegistry.class);
         QueryEngineMetadataGenerator generator = mock(QueryEngineMetadataGenerator.class);
-        QueryEngineRelationOptionService service = new QueryEngineRelationOptionService(registry, generator);
-
-        EntityManager entityManager = mock(EntityManager.class);
-        @SuppressWarnings("unchecked")
-        TypedQuery<Category> query = mock(TypedQuery.class);
-        setEntityManager(service, entityManager);
+        StubRelationOptionService service = new StubRelationOptionService(registry, generator,
+                List.of(new Category(2L, "bravo", "BR"), new Category(1L, "Alpha", "AL")));
 
         QueryFieldDefinition relationField = new QueryFieldDefinition(
                 "category", "category", QueryFieldType.RELATION, null, List.of(), List.of(), true,
@@ -79,15 +67,6 @@ class QueryEngineRelationOptionServiceTest {
         when(generator.generate("WIDGET", Widget.class)).thenReturn(definition);
         doReturn(Category.class).when(registry).requireEntityType("CATEGORY");
 
-        when(entityManager.createQuery(
-                eq("select e from Category e where e.deleted = false order by e.createdAt desc"), eq(Category.class)))
-                .thenReturn(query);
-        when(query.setMaxResults(anyInt())).thenReturn(query);
-
-        Category c1 = new Category(2L, "bravo", "BR");
-        Category c2 = new Category(1L, "Alpha", "AL");
-        when(query.getResultList()).thenReturn(List.of(c1, c2));
-
         List<QueryRelationOption> result = service.listOptions("WIDGET", "category", "   ");
 
         assertEquals(2, result.size());
@@ -95,19 +74,16 @@ class QueryEngineRelationOptionServiceTest {
         assertEquals("Alpha · AL", result.get(0).label());
         assertEquals("2", result.get(1).value());
         assertEquals("bravo · BR", result.get(1).label());
-        verify(query, never()).setParameter(eq("searchText"), eq("%alpha%"));
+        assertEquals(List.of("name", "code"), service.labelFields);
+        assertEquals("   ", service.searchText);
     }
 
     @Test
     void listOptions_NonBlankSearchAddsLikeParameter() throws Exception {
         QueryEngineRegistry registry = mock(QueryEngineRegistry.class);
         QueryEngineMetadataGenerator generator = mock(QueryEngineMetadataGenerator.class);
-        QueryEngineRelationOptionService service = new QueryEngineRelationOptionService(registry, generator);
-
-        EntityManager entityManager = mock(EntityManager.class);
-        @SuppressWarnings("unchecked")
-        TypedQuery<CategoryNoLabel> query = mock(TypedQuery.class);
-        setEntityManager(service, entityManager);
+        StubRelationOptionService service = new StubRelationOptionService(registry, generator,
+                List.of(new CategoryNoLabel(9L), new CategoryNoLabel(null)));
 
         QueryFieldDefinition relationField = new QueryFieldDefinition(
                 "category", "category", QueryFieldType.RELATION, null, List.of(), List.of(), true,
@@ -119,21 +95,12 @@ class QueryEngineRelationOptionServiceTest {
         when(generator.generate("WIDGET", Widget.class)).thenReturn(definition);
         doReturn(CategoryNoLabel.class).when(registry).requireEntityType("CATEGORY");
 
-        when(entityManager.createQuery(
-                eq("select e from CategoryNoLabel e where e.deleted = false and lower(e.keywords) like :searchText order by e.createdAt desc"),
-                eq(CategoryNoLabel.class)))
-                .thenReturn(query);
-        when(query.setParameter(eq("searchText"), eq("%test%"))).thenReturn(query);
-        when(query.setMaxResults(anyInt())).thenReturn(query);
-
-        when(query.getResultList()).thenReturn(List.of(new CategoryNoLabel(9L), new CategoryNoLabel(null)));
-
         List<QueryRelationOption> result = service.listOptions("WIDGET", "category", "  TeSt  ");
 
         assertEquals(2, result.size());
-                assertEquals("", result.get(0).label());
-                assertEquals("9", result.get(1).label());
-        verify(query).setParameter("searchText", "%test%");
+        assertEquals("", result.get(0).label());
+        assertEquals("9", result.get(1).label());
+        assertEquals("  TeSt  ", service.searchText);
     }
 
     @Test
@@ -178,11 +145,23 @@ class QueryEngineRelationOptionServiceTest {
         return (T) method.invoke(target, args);
     }
 
-    private static void setEntityManager(QueryEngineRelationOptionService service, EntityManager entityManager)
-            throws Exception {
-        Field field = QueryEngineRelationOptionService.class.getDeclaredField("entityManager");
-        field.setAccessible(true);
-        field.set(service, entityManager);
+    private static final class StubRelationOptionService extends QueryEngineRelationOptionService {
+        private final List<?> results;
+        private List<String> labelFields;
+        private String searchText;
+
+        private StubRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
+                List<?> results) {
+            super(registry, generator);
+            this.results = results;
+        }
+
+        @Override
+        protected List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
+            this.labelFields = labelFields;
+            this.searchText = searchText;
+            return results;
+        }
     }
 
     static class Widget {
@@ -195,12 +174,6 @@ class QueryEngineRelationOptionServiceTest {
         private String name;
         @SuppressWarnings("unused")
         private String code;
-        @SuppressWarnings("unused")
-        private boolean deleted;
-        @SuppressWarnings("unused")
-        private String keywords;
-        @SuppressWarnings("unused")
-        private Instant createdAt;
 
         Category(Long id, String name, String code) {
             this.id = id;
@@ -212,12 +185,6 @@ class QueryEngineRelationOptionServiceTest {
     static class CategoryNoLabel {
         @Id
         private Long id;
-        @SuppressWarnings("unused")
-        private boolean deleted;
-        @SuppressWarnings("unused")
-        private String keywords;
-        @SuppressWarnings("unused")
-        private Instant createdAt;
 
         CategoryNoLabel(Long id) {
             this.id = id;

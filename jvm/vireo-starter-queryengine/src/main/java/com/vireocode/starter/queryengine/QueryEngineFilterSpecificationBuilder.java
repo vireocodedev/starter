@@ -36,17 +36,25 @@ import jakarta.persistence.criteria.Root;
 public class QueryEngineFilterSpecificationBuilder implements FilterSpecificationBuilder {
 
     private final QueryEngineRegistry registry;
+    private final QueryEngineMetadataGenerator metadataGenerator;
     private final List<QueryCustomFieldResolver<?>> customFieldResolvers;
 
     public QueryEngineFilterSpecificationBuilder(QueryEngineRegistry registry) {
-        this(registry, List.of());
+        this(registry, null, List.of());
     }
 
     @Autowired
     public QueryEngineFilterSpecificationBuilder(QueryEngineRegistry registry,
             List<QueryCustomFieldResolver<?>> customFieldResolvers) {
+        this(registry, null, customFieldResolvers);
+    }
+
+    public QueryEngineFilterSpecificationBuilder(QueryEngineRegistry registry,
+            QueryEngineMetadataGenerator metadataGenerator,
+            List<QueryCustomFieldResolver<?>> customFieldResolvers) {
         this.registry = registry;
-        this.customFieldResolvers = customFieldResolvers;
+        this.metadataGenerator = metadataGenerator;
+        this.customFieldResolvers = List.copyOf(customFieldResolvers);
     }
 
     @Override
@@ -71,6 +79,11 @@ public class QueryEngineFilterSpecificationBuilder implements FilterSpecificatio
             throw RestUtils.badRequest("Invalid filter entity. Expected: " + expectedEntity);
         }
 
+        if (metadataGenerator != null) {
+            QueryEntityDefinition definition = metadataGenerator.generate(expectedEntity, domainType);
+            validateNodes(definition.fields(), filterNodes);
+        }
+
         return (root, query, criteriaBuilder) -> {
             query.distinct(true);
             JoinRegistry joins = new JoinRegistry();
@@ -82,6 +95,39 @@ public class QueryEngineFilterSpecificationBuilder implements FilterSpecificatio
 
             return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
         };
+    }
+
+    private void validateNodes(List<QueryFieldDefinition> fields, List<QueryFilterNode> nodes) {
+        for (QueryFilterNode node : nodes) {
+            if (node == null || node.path() == null || node.path().isBlank() || node.parameterized()) {
+                continue;
+            }
+            QueryFieldDefinition field = findField(fields, node.path());
+            if (field == null) {
+                throw RestUtils.badRequest("Unknown filter field: " + node.path());
+            }
+            if ("relation".equalsIgnoreCase(node.kind())) {
+                if (!field.relation() || field.relationMode() == RelationFilterMode.CHILD) {
+                    throw RestUtils.badRequest("Relation selection is not enabled for field: " + node.path());
+                }
+            } else if (node.operator() != null && !field.operators().contains(node.operator())) {
+                throw RestUtils.badRequest("Operator " + node.operator() + " is not enabled for field: " + node.path());
+            }
+            validateNodes(field.children(), node.children());
+        }
+    }
+
+    private QueryFieldDefinition findField(List<QueryFieldDefinition> fields, String path) {
+        for (QueryFieldDefinition field : fields) {
+            if (field.path().equals(path)) {
+                return field;
+            }
+            QueryFieldDefinition nested = findField(field.children(), path);
+            if (nested != null) {
+                return nested;
+            }
+        }
+        return null;
     }
 
     private List<QueryFilterNode> resolveFilterNodes(QueryFilterRequest request) {

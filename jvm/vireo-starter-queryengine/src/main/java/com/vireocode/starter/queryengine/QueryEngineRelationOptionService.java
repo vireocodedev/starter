@@ -11,20 +11,27 @@ import java.util.Locale;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 public class QueryEngineRelationOptionService {
-
-    private static final int DEFAULT_LIMIT = 20;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     private final QueryEngineRegistry registry;
     private final QueryEngineMetadataGenerator generator;
+    private final int resultLimit;
 
     public QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator) {
+        this(registry, generator, new StarterQueryEngineProperties());
+    }
+
+    public QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
+            StarterQueryEngineProperties properties) {
         this.registry = registry;
         this.generator = generator;
+        this.resultLimit = properties.getRelationOptionsLimit();
     }
 
     public List<QueryRelationOption> listOptions(String entityKey, String fieldPath, String searchText) {
@@ -40,7 +47,7 @@ public class QueryEngineRelationOptionService {
         }
 
         Class<?> relationType = registry.requireEntityType(fieldDefinition.relationEntityKey());
-        List<?> results = searchEntities(relationType, searchText);
+        List<?> results = searchEntities(relationType, fieldDefinition.relationSelectionLabelFields(), searchText);
 
         List<QueryRelationOption> options = new ArrayList<>();
         for (Object entity : results) {
@@ -53,22 +60,30 @@ public class QueryEngineRelationOptionService {
         return options;
     }
 
-    private List<?> searchEntities(Class<?> entityType, String searchText) {
+    protected List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
+        return searchEntitiesTyped(entityType, labelFields, searchText);
+    }
+
+    private <T> List<T> searchEntitiesTyped(Class<T> entityType, List<String> labelFields, String searchText) {
         String normalizedSearchText = searchText == null ? "" : searchText.trim().toLowerCase(Locale.ROOT);
-        String jpql = "select e from " + entityType.getSimpleName() + " e where e.deleted = false";
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var criteriaQuery = criteriaBuilder.createQuery(entityType);
+        Root<T> root = criteriaQuery.from(entityType);
+        criteriaQuery.select(root);
 
         if (!normalizedSearchText.isBlank()) {
-            jpql += " and lower(e.keywords) like :searchText";
+            if (labelFields.isEmpty()) {
+                throw new IllegalArgumentException("Relation option search requires at least one label field");
+            }
+            List<Predicate> predicates = labelFields.stream()
+                    .map(field -> criteriaBuilder.like(criteriaBuilder.lower(root.get(field).as(String.class)),
+                            "%" + normalizedSearchText + "%"))
+                    .toList();
+            criteriaQuery.where(criteriaBuilder.or(predicates.toArray(Predicate[]::new)));
         }
 
-        jpql += " order by e.createdAt desc";
-
-        var query = entityManager.createQuery(jpql, entityType);
-        if (!normalizedSearchText.isBlank()) {
-            query.setParameter("searchText", "%" + normalizedSearchText + "%");
-        }
-
-        query.setMaxResults(DEFAULT_LIMIT);
+        var query = entityManager.createQuery(criteriaQuery);
+        query.setMaxResults(resultLimit);
         return query.getResultList();
     }
 

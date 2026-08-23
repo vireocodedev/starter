@@ -28,7 +28,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @Validated
-@RequestMapping("/api/filters")
+@RequestMapping("${vireo.starter.query-engine.saved-filters-endpoint-path:/api/filters}")
 @Tag(name = "SavedFilter")
 @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
 public class SavedFilterController {
