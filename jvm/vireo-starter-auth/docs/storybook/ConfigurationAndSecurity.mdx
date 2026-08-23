@@ -1,0 +1,27 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Auth/Configuration and Security" />
+
+# Configuration and security
+
+Auth exposes validated properties for endpoint enablement, routes, the protected API pattern, and API-documentation access.
+
+## Why it exists
+
+Authentication paths and documentation policy vary between applications, but inconsistent controller mappings and filter rules create accidental public or unreachable endpoints. One validated property contract drives both mappings and security decisions.
+
+```properties
+vireo.starter.auth.endpoints-enabled=true
+vireo.starter.auth.account-endpoints-enabled=true
+vireo.starter.auth.login-path=/api/auth/login
+vireo.starter.auth.logout-path=/api/auth/logout
+vireo.starter.auth.current-user-path=/api/auth/me
+vireo.starter.auth.change-username-path=/api/account/username
+vireo.starter.auth.change-password-path=/api/account/password
+vireo.starter.auth.api-path-pattern=/api/**
+vireo.starter.auth.docs-role=
+```
+
+Login rotates an existing session ID before saving the authenticated context. State-changing authenticated endpoints require CSRF; login and logout are excluded. Authentication and authorization failures use Vireo's JSON `ApiError` shape.
+
+The default role model represents exactly one application-authored role string. Replace the default user store and endpoints when the application needs external identity, multiple authorities, or a different current-user response.

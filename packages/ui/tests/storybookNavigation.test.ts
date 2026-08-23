@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const packageRoot = join(import.meta.dirname, "..");
 const packagesRoot = join(packageRoot, "..");
+const repositoryRoot = join(packageRoot, "..", "..");
 const srcRoot = join(packageRoot, "src");
 const docsRoot = join(packageRoot, "docs", "storybook");
 const historyDocsRoot = join(packagesRoot, "history", "docs", "storybook");
@@ -18,6 +19,8 @@ const shellDocsRoot = join(packagesRoot, "shell", "docs", "storybook");
 const shellExamplesRoot = join(packagesRoot, "shell", "docs", "examples");
 const sqliteDocsRoot = join(packagesRoot, "sqlite", "docs", "storybook");
 const sqliteExamplesRoot = join(packagesRoot, "sqlite", "docs", "examples");
+const jvmAuthDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-auth", "docs", "storybook");
+const jvmHistoryDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-history", "docs", "storybook");
 const storybookConfigFile = join(packageRoot, ".storybook-vireo", "main.ts");
 const storybookManagerFile = join(packageRoot, ".storybook-vireo", "manager.ts");
 
@@ -94,6 +97,14 @@ const EXPECTED_SHELL_ROUTES = [
   "Shell/Failure Semantics",
 ] as const;
 
+const EXPECTED_JVM_AUTH_ROUTES = [
+  "JVM/Auth/Overview",
+  "JVM/Auth/Primary Workflow",
+  "JVM/Auth/Configuration and Security",
+] as const;
+
+const EXPECTED_JVM_HISTORY_ROUTES = ["JVM/History/Overview", "JVM/History/Security and Actors"] as const;
+
 const APPROVED_STORY_ROUTES = [
   /^UI\/Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
   /^UI\/Capabilities\/(?:Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
@@ -132,6 +143,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(configSource).toContain('"../../queryengine/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../shell/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../sqlite/docs/storybook/**/*.mdx"');
+    expect(configSource).toContain('"../../../jvm/*/docs/storybook/**/*.mdx"');
   });
 
   it("assigns explicit icons to every top-level section", () => {
@@ -139,6 +151,8 @@ describe("Vireo Starter Storybook navigation contract", () => {
 
     expect(managerSource).toContain("Documentation: BookIcon");
     expect(managerSource).toContain("UI: ComponentIcon");
+    expect(managerSource).toContain("JVM: BoxIcon");
+    expect(managerSource).toContain("Auth: LockIcon");
     expect(managerSource).toContain("History: TimeIcon");
     expect(managerSource).toContain("Infrastructure: WrenchIcon");
     expect(managerSource).toContain("Localization: GlobeIcon");
@@ -211,6 +225,18 @@ describe("Vireo Starter Storybook navigation contract", () => {
       .sort();
 
     expect(actualRoutes).toEqual([...EXPECTED_SHELL_ROUTES].sort());
+  });
+
+  it("indexes audited JVM guides under the JVM root", () => {
+    const authRoutes = findFiles(jvmAuthDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
+    const historyRoutes = findFiles(jvmHistoryDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
+
+    expect(authRoutes).toEqual([...EXPECTED_JVM_AUTH_ROUTES].sort());
+    expect(historyRoutes).toEqual([...EXPECTED_JVM_HISTORY_ROUTES].sort());
   });
 
   it("executes and displays every History example from the same source module", () => {

@@ -8,6 +8,8 @@ describe("vireoStorySort", () => {
   it("keeps monorepo documentation first and each library at the root", () => {
     const titles = [
       "History/Overview",
+      "JVM/History/Overview",
+      "JVM/Auth/Overview",
       "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
@@ -29,12 +31,37 @@ describe("vireoStorySort", () => {
       "UI/Core/Data Display/VireoIcon",
       "UI/Capabilities/Forms/VireoForm",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
+      "JVM/Auth/Overview",
+      "JVM/History/Overview",
       "History/Overview",
       "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
       "SQLite/Overview",
       "Shell/Overview",
+    ]);
+  });
+
+  it("keeps audited JVM artifacts and pages in their learning order", () => {
+    const titles = [
+      "JVM/History/Security and Actors",
+      "JVM/Auth/Configuration and Security",
+      "JVM/History/Overview",
+      "JVM/Auth/Primary Workflow",
+      "JVM/Auth/Overview",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "JVM/Auth/Overview",
+      "JVM/Auth/Primary Workflow",
+      "JVM/Auth/Configuration and Security",
+      "JVM/History/Overview",
+      "JVM/History/Security and Actors",
     ]);
   });
 
