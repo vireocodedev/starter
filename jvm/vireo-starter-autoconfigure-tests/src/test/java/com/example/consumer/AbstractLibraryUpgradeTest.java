@@ -69,7 +69,7 @@ abstract class AbstractLibraryUpgradeTest {
         upgrade(dataSource);
 
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_auth")).containsExactly("1", "2");
-        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_history")).containsExactly("1");
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_history")).containsExactly("1", "2");
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_queryengine")).containsExactly("1");
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1");
     }
@@ -122,6 +122,43 @@ abstract class AbstractLibraryUpgradeTest {
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM app_user WHERE username = 'kept'", Integer.class))
                 .isEqualTo(1);
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_auth")).containsExactly("1");
+    }
+
+    @Test
+    void upgradingHistoryFromPublishedV1PreservesActorsAndRemovesTheAuthForeignKey() {
+        DataSource dataSource = dataSource();
+        String vendor = StarterFlywayMigrations.resolveVendor(dataSource);
+
+        StarterFlywayMigrations.migrate(new StarterFlywayModule("auth", 10), dataSource, vendor);
+        Flyway.configure()
+                .dataSource(dataSource)
+                .table("flyway_schema_history_vireo_history")
+                .locations("classpath:db/vireo-previous/history")
+                .baselineOnMigrate(true)
+                .baselineVersion("0")
+                .load()
+                .migrate();
+
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        jdbc.update("INSERT INTO app_user (id, username, password_hash, role, enabled, deleted)"
+                + " VALUES ('11111111-1111-1111-1111-111111111111', 'legacy-user', 'x', 'USER', TRUE, FALSE)");
+        jdbc.update("INSERT INTO history"
+                + " (id, occurred_at, owner_id, owner_username, entity, entity_id, snapshot_current)"
+                + " VALUES ('22222222-2222-2222-2222-222222222222', CURRENT_TIMESTAMP,"
+                + " '11111111-1111-1111-1111-111111111111', 'legacy-user', 'ITEM', '42', '{}')");
+
+        StarterFlywayMigrations.migrate(new StarterFlywayModule("history", 20), dataSource, vendor);
+
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_history")).containsExactly("1", "2");
+        assertThat(jdbc.queryForObject(
+                "SELECT actor_id FROM history WHERE entity_id = '42'", String.class))
+                .isEqualTo("11111111-1111-1111-1111-111111111111");
+        assertThat(jdbc.queryForObject(
+                "SELECT actor_label FROM history WHERE entity_id = '42'", String.class))
+                .isEqualTo("legacy-user");
+        assertThat(columnNames(dataSource, "history"))
+                .contains("ACTOR_ID", "ACTOR_LABEL")
+                .doesNotContain("OWNER_ID", "OWNER_USERNAME");
     }
 
     private void deploy(DataSource dataSource) {

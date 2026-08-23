@@ -14,6 +14,10 @@ History owns snapshot serialization, neutral actor attribution, persistence, bou
 
 Persistence and the default controller/recorder are implementation details.
 
+## Migration compatibility
+
+The History 0.2 runtime still brings in Starter Auth solely so a fresh database can apply the immutable History V1 migration published in `jvm-v0.1.0`. History V2 copies the legacy owner values into the neutral actor columns and removes the Auth foreign key. Public Java code and the resulting schema are Auth-neutral; applications must use `HistoryActorResolver`, not `StarterUserDetails`, for attribution.
+
 ## Failure semantics
 
 Recording participates in the owning service transaction. Missing identity, an empty event, snapshot serialization failure, or persistence failure aborts the operation. Malformed persisted snapshots fail retrieval explicitly. The module never converts those failures into partial records.
