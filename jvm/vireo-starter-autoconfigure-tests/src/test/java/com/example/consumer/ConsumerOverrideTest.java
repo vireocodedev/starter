@@ -21,7 +21,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.vireocode.starter.base.HistoryEntityType;
-import com.vireocode.starter.base.HistoryEventsRecorder;
+import com.vireocode.starter.spi.HistoryEventsRecorder;
 import com.vireocode.starter.history.HistoryActor;
 import com.vireocode.starter.history.HistoryActorResolver;
 import com.vireocode.starter.history.HistoryReadAuthorizer;

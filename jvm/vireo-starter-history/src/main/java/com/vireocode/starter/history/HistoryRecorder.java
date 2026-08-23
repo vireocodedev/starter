@@ -7,7 +7,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.starter.base.HistoryEntityType;
-import com.vireocode.starter.base.HistoryEventsRecorder;
+import com.vireocode.starter.spi.HistoryEventsRecorder;
 
 /**
  * Central sink for entity change history. Serializes DTO snapshots to JSON and

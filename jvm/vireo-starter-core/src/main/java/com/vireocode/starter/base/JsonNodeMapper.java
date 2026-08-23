@@ -21,9 +21,8 @@ public abstract class JsonNodeMapper {
         }
         try {
             return objectMapper.readTree(source);
-        } catch (Exception e) {
-            // Logs error or falls back cleanly to prevent mapper crashes
-            return null;
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Could not parse persisted JSON", ex);
         }
     }
 

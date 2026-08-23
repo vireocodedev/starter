@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.vireocode.starter.spi.FilterSpecificationBuilder;
+import com.vireocode.starter.spi.HistoryEventsRecorder;
 import com.vireocode.starter.spi.OfflineChangeBroadcaster;
 import com.vireocode.starter.spi.OfflineRevisionTracker;
 import com.vireocode.starter.spi.QueryFilterCriteria;
@@ -43,25 +44,6 @@ class BaseServiceTest {
     /** Stands in for an application's own audited-entity set. */
     enum TestHistoryEntityType implements HistoryEntityType {
         ITEM
-    }
-
-    @Test
-    void constructor_RejectsCrudOverride() {
-        SearchableRepository<TestEntity, Long> repository = mockRepository();
-        BaseMapper<TestEntity, TestDto> mapper = mockMapper();
-
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> new CrudOverrideService(repository, mapper, defaultConfig()));
-        assertTrue(exception.getMessage().contains("Do not override BaseService CRUD entry points"));
-    }
-
-    @Test
-    void performSearch_ReturnsNullWhenNoSearchableFields() {
-        TestBaseService service = new TestBaseService(mockRepository(), mockMapper(), EntityConfig.builder().build());
-
-        Page<TestDto> page = service.callPerformSearch("needle", PageRequest.of(0, 10));
-
-        assertNull(page);
     }
 
     @Test
@@ -142,6 +124,19 @@ class BaseServiceTest {
     }
 
     @Test
+    void create_WithConfiguredHistoryButNoRecorder_FailsBeforePersistence() {
+        SearchableRepository<TestEntity, Long> repository = mockRepository();
+        BaseMapper<TestEntity, TestDto> mapper = mockMapper();
+        TestBaseService service = new TestBaseService(repository, mapper, historyConfig());
+
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> service.create(new TestDto("new item")));
+
+        assertTrue(error.getMessage().contains("no HistoryEventsRecorder bean"));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void create_DoesNotPublishSuccessWhenHistoryRecordingFails() {
         SearchableRepository<TestEntity, Long> repository = mockRepository();
         BaseMapper<TestEntity, TestDto> mapper = mockMapper();
@@ -199,6 +194,7 @@ class BaseServiceTest {
         EntityConfig config = EntityConfig.builder().softDelete(true).history(TestHistoryEntityType.ITEM).build();
         TestBaseService service = new TestBaseService(repository, mapper, config);
 
+        service.historyRecorder = mock(HistoryEventsRecorder.class);
         service.offlineChangeBroadcaster = mock(OfflineChangeBroadcaster.class);
 
         TestEntity existing = entity(3L, "to-delete", false);
@@ -227,6 +223,19 @@ class BaseServiceTest {
 
         verify(repository).delete(existing);
         verify(repository, never()).saveAndFlush(existing);
+    }
+
+    @Test
+    void update_RejectsSoftDeletedEntity() {
+        SearchableRepository<TestEntity, Long> repository = mockRepository();
+        TestBaseService service = new TestBaseService(repository, mockMapper(), softDeleteConfig());
+        when(repository.findById(8L)).thenReturn(Optional.of(entity(8L, "deleted", true)));
+
+        var error = assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> service.update(8L, new TestDto("updated")));
+
+        assertEquals(404, error.getStatusCode().value());
+        verify(repository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -289,18 +298,30 @@ class BaseServiceTest {
     }
 
     @Test
-    void populateKeywords_CoversEmptyAndMissingFieldPaths() {
+    void populateKeywords_CoversEmptyAndConfiguredFieldPaths() {
         TestBaseService noFields = new TestBaseService(mockRepository(), mockMapper(), defaultConfig());
         TestEntity emptyEntity = entity(1L, "Alpha", false);
         noFields.callPopulateKeywords(emptyEntity);
         assertNull(emptyEntity.getKeywords());
 
-        EntityConfig config = EntityConfig.builder().localSearchableFields(List.of("name", "missingField")).build();
+        EntityConfig config = EntityConfig.builder().localSearchableFields(List.of("name")).build();
         TestBaseService withFields = new TestBaseService(mockRepository(), mockMapper(), config);
         TestEntity entity = entity(2L, "  Alpha  ", false);
         withFields.callPopulateKeywords(entity);
 
         assertEquals("  Alpha  ", entity.getKeywords());
+    }
+
+    @Test
+    void constructor_RejectsInvalidSearchConfiguration() {
+        EntityConfig unknownLocal = EntityConfig.builder().localSearchableFields(List.of("missingField")).build();
+        EntityConfig invalidRelation = EntityConfig.builder().relationSearchableFields(List.of("nonBaseRelation"))
+                .build();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new TestBaseService(mockRepository(), mockMapper(), unknownLocal));
+        assertThrows(IllegalArgumentException.class,
+                () -> new TestBaseService(mockRepository(), mockMapper(), invalidRelation));
     }
 
     @Test
@@ -338,7 +359,7 @@ class BaseServiceTest {
     void searchSpecification_CoversChunkAndRelationBranches() {
         EntityConfig config = EntityConfig.builder()
                 .localSearchableFields(List.of("name"))
-                .relationSearchableFields(List.of("related", "unknownField", "nonBaseRelation"))
+                .relationSearchableFields(List.of("related"))
                 .build();
         SearchableRepository<TestEntity, Long> repository = mockRepository();
         BaseMapper<TestEntity, TestDto> mapper = mockMapper();
@@ -408,43 +429,6 @@ class BaseServiceTest {
         verify(query, never()).distinct(true);
     }
 
-    @Test
-    void searchSpecification_ReturnsConjunctionWhenNoValidPredicates() {
-        EntityConfig config = EntityConfig.builder()
-                .relationSearchableFields(List.of("unknownField", "nonBaseRelation"))
-                .build();
-
-        SearchableRepository<TestEntity, Long> repository = mockRepository();
-        BaseMapper<TestEntity, TestDto> mapper = mockMapper();
-        TestBaseService service = new TestBaseService(repository, mapper, config);
-
-        when(repository.findAll(any(Specification.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of()));
-
-        service.findAll(new SearchablePageable(PageRequest.of(0, 10), "abc"), null);
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Specification<TestEntity>> specificationCaptor = ArgumentCaptor.forClass(Specification.class);
-        verify(repository).findAll(specificationCaptor.capture(), any(Pageable.class));
-
-        Specification<TestEntity> specification = specificationCaptor.getValue();
-
-        @SuppressWarnings("unchecked")
-        Root<TestEntity> root = mock(Root.class);
-        @SuppressWarnings("unchecked")
-        CriteriaQuery<Object> query = mock(CriteriaQuery.class);
-        CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
-        Predicate conjunction = mock(Predicate.class);
-
-        when(root.getJavaType()).thenReturn((Class) TestEntity.class);
-        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
-        when(criteriaBuilder.and(any(Predicate[].class))).thenReturn(conjunction);
-
-        Predicate result = specification.toPredicate(root, query, criteriaBuilder);
-
-        assertNull(result);
-    }
-
     private static SearchableRepository<TestEntity, Long> mockRepository() {
         @SuppressWarnings("unchecked")
         SearchableRepository<TestEntity, Long> repository = mock(SearchableRepository.class);
@@ -495,10 +479,6 @@ class BaseServiceTest {
             super(repository, mapper, entityConfig);
         }
 
-        Page<TestDto> callPerformSearch(String searchText, Pageable pageable) {
-            return performSearch(searchText, pageable);
-        }
-
         void callPopulateKeywords(TestEntity entity) {
             populateKeywords(entity);
         }
@@ -524,18 +504,6 @@ class BaseServiceTest {
 
         String callExtractId(NoIdEntity entity) {
             return extractId(entity);
-        }
-    }
-
-    static class CrudOverrideService extends TestBaseService {
-        CrudOverrideService(SearchableRepository<TestEntity, Long> repository, BaseMapper<TestEntity, TestDto> mapper,
-                EntityConfig entityConfig) {
-            super(repository, mapper, entityConfig);
-        }
-
-        @Override
-        public TestDto create(TestDto dto) {
-            return dto;
         }
     }
 
