@@ -43,12 +43,6 @@ public class StarterHistoryAutoConfiguration {
         return new SecurityContextHistoryActorResolver();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    Clock starterHistoryClock() {
-        return Clock.systemUTC();
-    }
-
     @Bean("historyReadAuthorizer")
     @ConditionalOnMissingBean(HistoryReadAuthorizer.class)
     HistoryReadAuthorizer starterHistoryReadAuthorizer() {

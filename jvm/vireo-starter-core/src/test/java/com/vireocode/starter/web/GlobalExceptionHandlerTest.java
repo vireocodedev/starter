@@ -6,13 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
@@ -21,64 +24,49 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.vireocode.starter.config.StarterCoreProperties;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 
 class GlobalExceptionHandlerTest {
 
+    private static final Instant NOW = Instant.parse("2026-08-23T10:15:30Z");
+
     @Test
     void handleMethodArgumentTypeMismatch_ReturnsBadRequestWithoutLeakingInput() {
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(mock(Environment.class));
         MethodArgumentTypeMismatchException exception = new MethodArgumentTypeMismatchException(
                 "not-a-number", Integer.class, "limit", null, new NumberFormatException("bad"));
 
-        ApiError error = handler.handleMethodArgumentTypeMismatch(exception);
+        ApiError error = handler(false).handleMethodArgumentTypeMismatch(exception);
 
         assertEquals(400, error.status());
         assertEquals("must have a valid value", error.errors().get("limit"));
+        assertEquals(NOW, error.timestamp());
     }
 
     @Test
-    void handleMethodArgumentNotValid_CollectsFieldErrors() {
-        Environment env = mock(Environment.class);
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
-
+    void handleMethodArgumentNotValid_CollectsAllFieldErrorsWithoutOverwritingDuplicates() {
         MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
         org.springframework.validation.BindingResult bindingResult = mock(org.springframework.validation.BindingResult.class);
         when(exception.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(
                 new FieldError("dto", "name", "must not be blank"),
-                new FieldError("dto", "code", "must not be blank")));
+                new FieldError("dto", "name", "must be shorter"),
+                new FieldError("dto", "code", null)));
 
-        ApiError error = handler.handleMethodArgumentNotValid(exception);
+        ApiError error = handler(false).handleMethodArgumentNotValid(exception);
 
-        assertEquals(400, error.status());
-        assertEquals("Bad request", error.message());
-        assertEquals("must not be blank", error.errors().get("name"));
-        assertEquals("must not be blank", error.errors().get("code"));
-        assertNotNull(error.timestamp());
+        assertEquals("must not be blank; must be shorter", error.errors().get("name"));
+        assertEquals("is invalid", error.errors().get("code"));
     }
 
     @Test
-    void handleBindException_CollectsFieldErrors() {
-        Environment env = mock(Environment.class);
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
-
-        BindException exception = new BindException(new Object(), "dto");
-        exception.addError(new FieldError("dto", "page", "must be positive"));
-
-        ApiError error = handler.handleBindException(exception);
-
-        assertEquals(400, error.status());
-        assertEquals("Bad request", error.message());
-        assertEquals("must be positive", error.errors().get("page"));
-    }
-
-    @Test
-    void handleConstraintViolation_CollectsViolations() {
-        Environment env = mock(Environment.class);
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
+    void handleBindAndConstraintViolations_CollectsFieldErrors() {
+        BindException bindException = new BindException(new Object(), "dto");
+        bindException.addError(new FieldError("dto", "page", "must be positive"));
+        assertEquals("must be positive", handler(false).handleBindException(bindException).errors().get("page"));
 
         @SuppressWarnings("unchecked")
         ConstraintViolation<Object> violation = mock(ConstraintViolation.class);
@@ -86,97 +74,67 @@ class GlobalExceptionHandlerTest {
         when(path.toString()).thenReturn("dto.code");
         when(violation.getPropertyPath()).thenReturn(path);
         when(violation.getMessage()).thenReturn("invalid code");
-
         ConstraintViolationException exception = new ConstraintViolationException(Set.of(violation));
 
-        ApiError error = handler.handleConstraintViolation(exception);
-
-        assertEquals(400, error.status());
-        assertEquals("Bad request", error.message());
-        assertEquals("invalid code", error.errors().get("dto.code"));
+        assertEquals("invalid code", handler(false).handleConstraintViolation(exception).errors().get("dto.code"));
     }
 
     @Test
-    void handleAuthenticationAndAccessDenied_ReturnsExpectedStatuses() {
-        Environment env = mock(Environment.class);
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
+    void malformedRequestBody_IsClassifiedAsBadRequest() {
+        HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
 
-        ApiError auth = handler.handleAuthentication(new AuthenticationException("x") {
+        ApiError error = handler(false).handleHttpMessageNotReadable(exception);
+
+        assertEquals(400, error.status());
+        assertEquals("Request body is malformed or has an invalid value", error.errors().get("request"));
+    }
+
+    @Test
+    void authenticationAndAccessDenied_ReturnExpectedStatuses() {
+        ApiError auth = handler(false).handleAuthentication(new AuthenticationException("x") {
             private static final long serialVersionUID = 1L;
         });
-        ApiError denied = handler.handleAccessDenied(new AccessDeniedException("x"));
+        ApiError denied = handler(false).handleAccessDenied(new AccessDeniedException("x"));
 
         assertEquals(401, auth.status());
         assertEquals("Unauthorized", auth.message());
         assertNull(auth.errors());
-
         assertEquals(403, denied.status());
         assertEquals("Forbidden", denied.message());
         assertNull(denied.errors());
     }
 
     @Test
-    void handleResponseStatusException_UsesReasonOrDefaultPhrase() {
-        Environment env = mock(Environment.class);
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
-
-        ResponseEntity<ApiError> withReason = handler
+    void responseStatusException_UsesReasonOrDefaultPhrase() {
+        ResponseEntity<ApiError> withReason = handler(false)
                 .handleResponseStatusException(new ResponseStatusException(HttpStatus.NOT_FOUND, "missing"));
-        ResponseEntity<ApiError> withoutReason = handler
+        ResponseEntity<ApiError> withoutReason = handler(false)
                 .handleResponseStatusException(new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
         assertEquals(404, withReason.getStatusCode().value());
         assertEquals("missing", withReason.getBody().message());
-
         assertEquals(400, withoutReason.getStatusCode().value());
         assertEquals("Bad Request", withoutReason.getBody().message());
     }
 
     @Test
-    void handleGenericException_DevProfileExposesRootCauseDetails() {
-        Environment env = mock(Environment.class);
-        when(env.getActiveProfiles()).thenReturn(new String[] { "dev" });
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
+    void genericException_ExposesDetailsOnlyWhenExplicitlyEnabled() {
+        RuntimeException exception = new RuntimeException("top", new IllegalArgumentException("root"));
 
-        IllegalArgumentException root = new IllegalArgumentException("root");
-        RuntimeException ex = new RuntimeException("top", root);
+        ApiError hidden = handler(false).handleGenericException(exception);
+        ApiError exposed = handler(true).handleGenericException(exception);
 
-        ApiError error = handler.handleGenericException(ex);
-
-        assertEquals(500, error.status());
-        assertEquals("Internal server error", error.message());
-        assertNotNull(error.errors());
-        assertEquals(RuntimeException.class.getName(), error.errors().get("exception"));
-        assertEquals("top", error.errors().get("message"));
-        assertEquals(IllegalArgumentException.class.getName(), error.errors().get("rootException"));
-        assertEquals("root", error.errors().get("rootMessage"));
+        assertNull(hidden.errors());
+        assertNotNull(exposed.errors());
+        assertEquals(RuntimeException.class.getName(), exposed.errors().get("exception"));
+        assertEquals("top", exposed.errors().get("message"));
+        assertEquals(IllegalArgumentException.class.getName(), exposed.errors().get("rootException"));
+        assertEquals("root", exposed.errors().get("rootMessage"));
     }
 
-    @Test
-    void handleGenericException_TestProfileWithoutCauseStillExposesErrors() {
-        Environment env = mock(Environment.class);
-        when(env.getActiveProfiles()).thenReturn(new String[] { "test" });
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
-
-        RuntimeException ex = new RuntimeException((String) null);
-
-        ApiError error = handler.handleGenericException(ex);
-
-        assertEquals(500, error.status());
-        assertNotNull(error.errors());
-        assertEquals("", error.errors().get("message"));
-        assertNull(error.errors().get("rootException"));
-    }
-
-    @Test
-    void handleGenericException_NonDevProfileHidesInternalErrors() {
-        Environment env = mock(Environment.class);
-        when(env.getActiveProfiles()).thenReturn(new String[] { "prod" });
-        GlobalExceptionHandler handler = new GlobalExceptionHandler(env);
-
-        ApiError error = handler.handleGenericException(new RuntimeException("x"));
-
-        assertEquals(500, error.status());
-        assertNull(error.errors());
+    private GlobalExceptionHandler handler(boolean exposeInternalDetails) {
+        StarterCoreProperties properties = new StarterCoreProperties();
+        properties.setExposeInternalErrorDetails(exposeInternalDetails);
+        return new GlobalExceptionHandler(properties, Clock.fixed(NOW, ZoneOffset.UTC));
     }
 }

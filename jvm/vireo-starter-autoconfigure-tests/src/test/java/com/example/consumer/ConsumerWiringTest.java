@@ -2,6 +2,8 @@ package com.example.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,7 @@ class ConsumerWiringTest {
         assertThat(context.getBean(GlobalExceptionHandler.class)).isNotNull();
         assertThat(context.getBean(JsonNodeMapper.class)).isNotNull();
         assertThat(context.getBean(JsonNullableMapper.class)).isNotNull();
+        assertThat(context.getBeansOfType(Clock.class)).hasSize(1).containsKey("starterClock");
     }
 
     @Test

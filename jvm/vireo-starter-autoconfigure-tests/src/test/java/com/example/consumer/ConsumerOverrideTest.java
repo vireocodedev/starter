@@ -2,6 +2,9 @@ package com.example.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +33,8 @@ import com.vireocode.starter.offline.OfflineActorResolver;
 import com.vireocode.starter.offline.OfflineSyncService;
 import com.vireocode.starter.offline.StarterOfflineActorResolver;
 import com.vireocode.starter.queryengine.QueryEngineRegistry;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A default is only a default if it gets out of the way.
@@ -67,6 +72,13 @@ class ConsumerOverrideTest {
     @DisplayName("replaces the password encoder")
     void replacesThePasswordEncoder() {
         assertThat(context.getBean(PasswordEncoder.class)).isInstanceOf(NoOpPasswordEncoder.class);
+    }
+
+    @Test
+    @DisplayName("replaces Core infrastructure defaults")
+    void replacesCoreInfrastructureDefaults() {
+        assertThat(context.getBean(Clock.class).instant()).isEqualTo(Instant.parse("2026-01-01T00:00:00Z"));
+        assertThat(context.getBean(ObjectMapper.class)).isSameAs(context.getBean("consumerObjectMapper"));
     }
 
     @Test
@@ -139,6 +151,16 @@ class ConsumerOverrideTest {
         @Bean
         OfflineActorResolver consumerActorResolver() {
             return new FixedActorResolver();
+        }
+
+        @Bean
+        Clock consumerClock() {
+            return Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+        }
+
+        @Bean
+        ObjectMapper consumerObjectMapper() {
+            return new ObjectMapper();
         }
     }
 

@@ -4,7 +4,6 @@ import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,11 +20,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration(proxyBeanMethods = false)
-public class JsonConfig {
+class JsonConfig {
     @Bean
     @ConditionalOnMissingBean
-    @Primary
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         ObjectMapper objectMapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .addModule(new JsonNullableModule())
@@ -40,9 +38,16 @@ public class JsonConfig {
         return objectMapper;
     }
 
+    /**
+     * Keeps Jackson 2 wire models such as {@code JsonNullable} and
+     * {@code JsonNode} executable on Spring Framework 7. This compatibility
+     * bridge can disappear only when all published wire contracts migrate to
+     * Jackson 3 together.
+     */
     @Bean
     @ConditionalOnMissingBean
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
+    @SuppressWarnings("removal")
+    MappingJackson2HttpMessageConverter starterJackson2HttpMessageConverter(ObjectMapper objectMapper) {
         return new MappingJackson2HttpMessageConverter(objectMapper);
     }
 

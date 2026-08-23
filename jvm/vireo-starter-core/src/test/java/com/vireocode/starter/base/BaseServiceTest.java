@@ -47,6 +47,13 @@ class BaseServiceTest {
     }
 
     @Test
+    void constructor_RejectsCrudOverride() {
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> new CrudOverrideService(mockRepository(), mockMapper(), defaultConfig()));
+        assertTrue(exception.getMessage().contains("Do not override BaseService CRUD entry points"));
+    }
+
+    @Test
     void getById_ThrowsWhenEntityIsHiddenBySoftDelete() {
         SearchableRepository<TestEntity, Long> repository = mockRepository();
         BaseMapper<TestEntity, TestDto> mapper = mockMapper();
@@ -504,6 +511,18 @@ class BaseServiceTest {
 
         String callExtractId(NoIdEntity entity) {
             return extractId(entity);
+        }
+    }
+
+    static class CrudOverrideService extends TestBaseService {
+        CrudOverrideService(SearchableRepository<TestEntity, Long> repository, BaseMapper<TestEntity, TestDto> mapper,
+                EntityConfig entityConfig) {
+            super(repository, mapper, entityConfig);
+        }
+
+        @Override
+        public TestDto create(TestDto dto) {
+            return dto;
         }
     }
 

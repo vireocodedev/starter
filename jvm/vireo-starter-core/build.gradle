@@ -17,4 +17,5 @@ dependencies {
     // inherit Flyway; the migration strategy is @ConditionalOnClass.
     compileOnly 'org.flywaydb:flyway-core'
     compileOnly 'org.springframework.boot:spring-boot-flyway'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 }

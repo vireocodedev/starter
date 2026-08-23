@@ -1,6 +1,7 @@
 package com.vireocode.starter.base;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,6 +64,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
         this.domainType = resolvedDomainType;
 
         validateConfiguredFields();
+        assertNoCrudOverrides();
     }
 
     /**
@@ -122,7 +124,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     }
 
     @Transactional
-    public final DTO create(DTO dto) {
+    public DTO create(DTO dto) {
         requireHistoryRecorder();
         validateCreateRequest(dto);
         DOMAIN domain = buildCreateDomain(dto);
@@ -131,7 +133,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     }
 
     @Transactional
-    public final DTO update(ID id, DTO dto) {
+    public DTO update(ID id, DTO dto) {
         requireHistoryRecorder();
         validateUpdateRequest(id, dto);
         DOMAIN domain = findUpdateDomain(id);
@@ -143,7 +145,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     }
 
     @Transactional
-    public final void delete(ID id) {
+    public void delete(ID id) {
         requireHistoryRecorder();
         validateDeleteRequest(id);
         DOMAIN domain = findDeleteDomain(id);
@@ -218,6 +220,25 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     protected final void finalizeDeletedEntity(DOMAIN domain, DTO previousDto) {
         recordDelete(domain, previousDto);
         publishEntityChange("delete", previousDto);
+    }
+
+    private void assertNoCrudOverrides() {
+        for (Method method : getClass().getDeclaredMethods()) {
+            if (method.isBridge() || method.isSynthetic()) {
+                continue;
+            }
+            if (isForbiddenCrudOverride(method)) {
+                throw new IllegalStateException(
+                        "Do not override BaseService CRUD entry points in " + getClass().getName()
+                                + ". Use template hooks (validate*/build*/find*/apply*/performDelete) instead.");
+            }
+        }
+    }
+
+    private boolean isForbiddenCrudOverride(Method method) {
+        return ("create".equals(method.getName()) && method.getParameterCount() == 1)
+                || ("update".equals(method.getName()) && method.getParameterCount() == 2)
+                || ("delete".equals(method.getName()) && method.getParameterCount() == 1);
     }
 
     /**

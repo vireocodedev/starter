@@ -1,4 +1,4 @@
 /**
- * Reusable framework configuration beans (Jackson, OpenAPI, i18n message source).
+ * Core configuration properties and Spring Boot auto-configuration.
  */
 package com.vireocode.starter.config;

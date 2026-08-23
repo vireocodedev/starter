@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
-public class RestUtils {
+public final class RestUtils {
+    private RestUtils() {
+    }
     public static ResponseStatusException notFound(String param, String value) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity with " + param + "=" + value + " not found");
     }

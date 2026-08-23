@@ -34,6 +34,10 @@ import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.starter.flyway.StarterFlywayModule;
 import com.vireocode.starter.web.ApiError;
@@ -65,6 +69,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(StarterAuthProperties.class)
+@SecurityScheme(name = "cookieAuth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.COOKIE,
+        paramName = "JSESSIONID")
 public class StarterAuthAutoConfiguration {
 
     /**
@@ -117,12 +123,6 @@ public class StarterAuthAutoConfiguration {
     @ConditionalOnMissingBean
     SessionAuthenticationStrategy starterSessionAuthenticationStrategy() {
         return new ChangeSessionIdAuthenticationStrategy();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    Clock starterAuthClock() {
-        return Clock.systemUTC();
     }
 
     /**
