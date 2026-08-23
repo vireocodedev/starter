@@ -1,5 +1,11 @@
 # @vireocodedev/starter-history
 
+## 3.0.0
+
+### Major Changes
+
+- 1c5ba14: Require Zod 4.4 or newer and migrate the public schema contracts to Zod 4's type model.
+
 ## 2.0.0
 
 ### Major Changes
