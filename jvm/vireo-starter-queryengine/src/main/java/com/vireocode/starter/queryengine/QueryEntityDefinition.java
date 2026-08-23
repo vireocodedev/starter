@@ -7,4 +7,8 @@ public record QueryEntityDefinition(
         String title,
         String javaType,
         List<QueryFieldDefinition> fields) {
+
+    public QueryEntityDefinition {
+        fields = fields == null ? List.of() : List.copyOf(fields);
+    }
 }

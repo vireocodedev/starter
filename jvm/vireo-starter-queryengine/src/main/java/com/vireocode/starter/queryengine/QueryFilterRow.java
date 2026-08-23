@@ -12,4 +12,8 @@ public record QueryFilterRow(
         String value,
         boolean parameterized,
         List<QueryFilterRelationOption> selectedOptions) {
+
+    public QueryFilterRow {
+        selectedOptions = selectedOptions == null ? List.of() : List.copyOf(selectedOptions);
+    }
 }

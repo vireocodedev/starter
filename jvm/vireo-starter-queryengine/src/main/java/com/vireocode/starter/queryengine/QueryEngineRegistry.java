@@ -3,6 +3,7 @@ package com.vireocode.starter.queryengine;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,18 +27,24 @@ public class QueryEngineRegistry {
     @Autowired
     public QueryEngineRegistry(List<QueryEntityTypeResolver> resolvers) {
         Map<String, Class<?>> mutableEntityTypes = new LinkedHashMap<>();
-        for (QueryEntityTypeResolver resolver : resolvers) {
-            resolver.entityTypes().forEach((key, entityType) -> {
+        for (QueryEntityTypeResolver resolver : List.copyOf(Objects.requireNonNull(resolvers, "resolvers must not be null"))) {
+            Map<QueryEntityKey, Class<?>> resolvedTypes = Objects.requireNonNull(
+                    Objects.requireNonNull(resolver, "resolver must not be null").entityTypes(),
+                    "resolver entityTypes must not be null");
+            resolvedTypes.forEach((key, entityType) -> {
+                Objects.requireNonNull(key, "query entity key must not be null");
+                Objects.requireNonNull(entityType, "query entity type must not be null");
                 String normalized = normalize(key.name());
-                Class<?> previous = mutableEntityTypes.put(normalized, entityType);
-                if (previous != null && !previous.equals(entityType)) {
-                    throw new IllegalStateException("Duplicate query engine entity key '" + normalized
-                            + "' bound to both " + previous.getName() + " and " + entityType.getName());
+                Class<?> previous = mutableEntityTypes.putIfAbsent(normalized, entityType);
+                if (previous != null) {
+                    throw new IllegalStateException("Duplicate query engine entity key '" + normalized + "'"
+                            + (previous.equals(entityType) ? "" : " bound to both " + previous.getName()
+                                    + " and " + entityType.getName()));
                 }
             });
         }
 
-        this.entityTypes = Map.copyOf(mutableEntityTypes);
+        this.entityTypes = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(mutableEntityTypes));
     }
 
     public List<QueryEntitySummary> listEntities() {
@@ -56,11 +63,13 @@ public class QueryEngineRegistry {
     }
 
     public String requireEntityKey(Class<?> entityType) {
+        Objects.requireNonNull(entityType, "entityType must not be null");
         return entityTypes.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(entityType))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElseGet(() -> toEntityKey(entityType));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Unregistered query engine entity type: " + entityType.getName()));
     }
 
     public Map<String, Class<?>> getEntityTypes() {
@@ -73,12 +82,5 @@ public class QueryEngineRegistry {
         }
 
         return entityKey.trim().toUpperCase();
-    }
-
-    private String toEntityKey(Class<?> entityType) {
-        String simpleName = entityType.getSimpleName();
-        return simpleName
-                .replaceAll("([a-z0-9])([A-Z])", "$1_$2")
-                .toUpperCase();
     }
 }

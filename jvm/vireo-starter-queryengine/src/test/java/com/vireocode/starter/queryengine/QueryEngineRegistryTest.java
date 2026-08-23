@@ -23,12 +23,12 @@ class QueryEngineRegistryTest {
     }
 
     @Test
-    void defaultConstructor_ProvidesEmptyRegistryAndFallbackKeyFormatting() {
+    void defaultConstructor_ProvidesEmptyRegistryAndRejectsUnregisteredTypes() {
         QueryEngineRegistry registry = new QueryEngineRegistry();
 
         assertTrue(registry.listEntities().isEmpty());
         assertTrue(registry.getEntityTypes().isEmpty());
-        assertEquals("SOME_DOMAIN_ENTITY", registry.requireEntityKey(SomeDomainEntity.class));
+        assertThrows(IllegalArgumentException.class, () -> registry.requireEntityKey(SomeDomainEntity.class));
     }
 
     @Test
@@ -70,6 +70,14 @@ class QueryEngineRegistryTest {
                 () -> new QueryEngineRegistry(List.of(first, second)));
 
         assertTrue(exception.getMessage().contains("Duplicate query engine entity key 'ITEM'"));
+    }
+
+    @Test
+    void autowiredConstructor_RejectsDuplicateBindingsEvenWhenTypesMatch() {
+        QueryEntityTypeResolver first = () -> Map.of(TestEntityKey.ITEM, ItemEntity.class);
+        QueryEntityTypeResolver second = () -> Map.of(TestEntityKey.ITEM, ItemEntity.class);
+
+        assertThrows(IllegalStateException.class, () -> new QueryEngineRegistry(List.of(first, second)));
     }
 
     @Test

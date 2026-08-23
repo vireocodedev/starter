@@ -1,6 +1,8 @@
 package com.vireocode.starter.queryengine;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,7 +11,10 @@ import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +37,9 @@ public class QueryEngineMetadataGenerator {
     @Autowired
     public QueryEngineMetadataGenerator(QueryEngineRegistry registry,
             List<QueryCustomFieldProvider> customFieldProviders) {
-        this.registry = registry;
-        this.customFieldProviders = customFieldProviders;
+        this.registry = java.util.Objects.requireNonNull(registry, "registry must not be null");
+        this.customFieldProviders = List.copyOf(java.util.Objects.requireNonNull(customFieldProviders,
+                "customFieldProviders must not be null"));
     }
 
     public QueryEntityDefinition generate(String entityKey, Class<?> entityType) {
@@ -57,16 +63,9 @@ public class QueryEngineMetadataGenerator {
                 .filter(metadata.value()::isInstance)
                 .findFirst()
                 .map(QueryCustomFieldProvider::getFields)
-                .orElseGet(() -> instantiateProvider(metadata.value()).getFields());
-    }
-
-    private QueryCustomFieldProvider instantiateProvider(Class<? extends QueryCustomFieldProvider> providerType) {
-        try {
-            return providerType.getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Missing query custom field provider bean: " + providerType.getName(),
-                    exception);
-        }
+                .map(fields -> fields == null ? List.<QueryFieldDefinition>of() : List.copyOf(fields))
+                .orElseThrow(() -> new IllegalStateException(
+                        "Missing query custom field provider bean: " + metadata.value().getName()));
     }
 
     private String resolveEntityTitle(Class<?> entityType) {
@@ -81,7 +80,7 @@ public class QueryEngineMetadataGenerator {
     private List<QueryFieldDefinition> generateFields(Class<?> entityType, String prefix, int depth) {
         List<QueryFieldDefinition> fields = new ArrayList<>();
 
-        for (Field field : entityType.getDeclaredFields()) {
+        for (Field field : allFields(entityType)) {
             if (!shouldInspect(field)) {
                 continue;
             }
@@ -90,6 +89,7 @@ public class QueryEngineMetadataGenerator {
             if (filterable == null) {
                 continue;
             }
+            validateFilterable(field, filterable);
 
             String path = prefix.isBlank() ? field.getName() : prefix + "." + field.getName();
             QueryFieldType type = resolveType(field);
@@ -98,14 +98,15 @@ public class QueryEngineMetadataGenerator {
             boolean relation = type == QueryFieldType.RELATION;
             List<QueryOperator> operators = resolveOperators(filterable, type);
             RelationFilterMode relationMode = filterable.relationMode();
-            String relationEntityKey = relation ? resolveRelationEntityKey(field.getType()) : null;
+            Class<?> relationType = relation ? resolveRelationType(field) : null;
+            String relationEntityKey = relation ? resolveRelationEntityKey(relationType) : null;
             List<String> relationSelectionLabelFields = resolveRelationSelectionLabelFields(field, filterable, relation,
                     path);
             List<QueryFieldDefinition> children = List.of();
 
             if (relation && relationMode != RelationFilterMode.SELECTION && depth < filterable.maxDepth()
                     && !isCollectionRelation(field)) {
-                children = generateFields(field.getType(), path, depth + 1);
+                children = generateFields(relationType, path, depth + 1);
             }
 
             fields.add(new QueryFieldDefinition(
@@ -128,6 +129,28 @@ public class QueryEngineMetadataGenerator {
         return fields;
     }
 
+    private List<Field> allFields(Class<?> entityType) {
+        Map<String, Field> fields = new LinkedHashMap<>();
+        List<Class<?>> hierarchy = new ArrayList<>();
+        for (Class<?> current = entityType; current != null && current != Object.class; current = current.getSuperclass()) {
+            hierarchy.add(current);
+        }
+        Collections.reverse(hierarchy);
+        hierarchy.forEach(type -> Stream.of(type.getDeclaredFields()).forEach(field -> fields.put(field.getName(), field)));
+        return List.copyOf(fields.values());
+    }
+
+    private void validateFilterable(Field field, Filterable filterable) {
+        if (filterable.maxDepth() < 0) {
+            throw new IllegalArgumentException("@Filterable maxDepth must be non-negative for "
+                    + field.getDeclaringClass().getName() + "." + field.getName());
+        }
+        if (!isRelationField(field) && filterable.relationSelectionLabelFields().length > 0) {
+            throw new IllegalArgumentException("relationSelectionLabelFields requires a relation field: "
+                    + field.getDeclaringClass().getName() + "." + field.getName());
+        }
+    }
+
     private boolean shouldInspect(Field field) {
         int modifiers = field.getModifiers();
         return !Modifier.isStatic(modifiers) && !field.isSynthetic();
@@ -135,6 +158,20 @@ public class QueryEngineMetadataGenerator {
 
     private boolean isCollectionRelation(Field field) {
         return Collection.class.isAssignableFrom(field.getType());
+    }
+
+    private Class<?> resolveRelationType(Field field) {
+        if (!isCollectionRelation(field)) {
+            return field.getType();
+        }
+        Type genericType = field.getGenericType();
+        if (genericType instanceof ParameterizedType parameterizedType
+                && parameterizedType.getActualTypeArguments().length == 1
+                && parameterizedType.getActualTypeArguments()[0] instanceof Class<?> relationType) {
+            return relationType;
+        }
+        throw new IllegalArgumentException("Collection relation must declare one concrete entity type: "
+                + field.getDeclaringClass().getName() + "." + field.getName());
     }
 
     private QueryFieldType resolveType(Field field) {
@@ -189,7 +226,10 @@ public class QueryEngineMetadataGenerator {
         return switch (type) {
             case STRING -> List.of(QueryOperator.CONTAINS, QueryOperator.EQUALS, QueryOperator.STARTS_WITH,
                     QueryOperator.ENDS_WITH, QueryOperator.IS_NULL, QueryOperator.IS_NOT_NULL);
-            case NUMBER, DATE -> List.of(QueryOperator.EQUALS, QueryOperator.NOT_EQUALS, QueryOperator.GREATER_THAN,
+            case NUMBER -> List.of(QueryOperator.EQUALS, QueryOperator.NOT_EQUALS, QueryOperator.GREATER_THAN,
+                    QueryOperator.GREATER_OR_EQUAL, QueryOperator.LESS_THAN, QueryOperator.LESS_OR_EQUAL,
+                    QueryOperator.IS_NULL, QueryOperator.IS_NOT_NULL);
+            case DATE -> List.of(QueryOperator.EQUALS, QueryOperator.NOT_EQUALS, QueryOperator.GREATER_THAN,
                     QueryOperator.GREATER_OR_EQUAL, QueryOperator.LESS_THAN, QueryOperator.LESS_OR_EQUAL,
                     QueryOperator.DATE_RANGE,
                     QueryOperator.IS_NULL, QueryOperator.IS_NOT_NULL);
@@ -238,10 +278,6 @@ public class QueryEngineMetadataGenerator {
     }
 
     private String resolveRelationEntityKey(Class<?> relationType) {
-        if (!relationType.isAnnotationPresent(Entity.class)) {
-            return null;
-        }
-
         return registry.requireEntityKey(relationType);
     }
 
@@ -253,17 +289,18 @@ public class QueryEngineMetadataGenerator {
 
         List<String> fromField = List.of(filterable.relationSelectionLabelFields());
         if (!fromField.isEmpty()) {
-            validateRelationSelectionLabelFields(field.getType(), fromField, path, "@Filterable");
+            validateRelationSelectionLabelFields(resolveRelationType(field), fromField, path, "@Filterable");
             return fromField;
         }
 
-        FilterableMetadata metadata = field.getType().getAnnotation(FilterableMetadata.class);
+        Class<?> relationType = resolveRelationType(field);
+        FilterableMetadata metadata = relationType.getAnnotation(FilterableMetadata.class);
         if (metadata == null || metadata.relationSelectionLabelFields().length == 0) {
             return List.of();
         }
 
         List<String> fromMetadata = List.of(metadata.relationSelectionLabelFields());
-        validateRelationSelectionLabelFields(field.getType(), fromMetadata, path, "@FilterableMetadata");
+        validateRelationSelectionLabelFields(relationType, fromMetadata, path, "@FilterableMetadata");
         return fromMetadata;
     }
 
