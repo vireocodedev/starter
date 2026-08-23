@@ -178,7 +178,7 @@ export function useVireoMultiStepForm<
   const { initialStepId, onStepChange, steps, ...formOptions } = options;
   const form = useVireoForm(formOptions);
   const runtimeForm = getVireoFormRuntimeApi(form);
-  const controllerRef = React.useRef<VireoMultiStepStore>();
+  const controllerRef = React.useRef<VireoMultiStepStore | undefined>(undefined);
   if (!controllerRef.current) {
     controllerRef.current = new VireoMultiStepStore(
       runtimeForm,

@@ -123,8 +123,8 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
     const rootRef = useForkRef(forwardedRef, rootSlotRef, rootElementRef);
     const inheritedRootProps = { ...other, ...rootSlotOther } as unknown as BoxProps;
 
-    const handleSubmit = (event: React.FormEvent<Element>): void => {
-      const formEvent = event as React.FormEvent<HTMLFormElement>;
+    const handleSubmit = (event: React.SubmitEvent<Element>): void => {
+      const formEvent = event as React.SubmitEvent<HTMLFormElement>;
       onSubmit?.(formEvent);
       if (event.defaultPrevented) return;
       rootSlotOnSubmit?.(formEvent);

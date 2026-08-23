@@ -10,7 +10,7 @@ type VireoFormStyledSlotComponent<TProps extends object> = StyledSlotComponent<T
 type VireoFormRootProps = BoxProps & {
   noValidate?: boolean;
   onReset?: React.FormEventHandler<Element>;
-  onSubmit?: React.FormEventHandler<Element>;
+  onSubmit?: React.SubmitEventHandler<Element>;
 };
 
 export const VireoFormRoot: VireoFormStyledSlotComponent<VireoFormRootProps> = styled(Box, {
