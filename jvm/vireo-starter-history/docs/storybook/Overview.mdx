@@ -1,0 +1,32 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/History/Overview" />
+
+# JVM History
+
+`vireo-starter-history` records create, update, and delete snapshots produced by `BaseService` and exposes a bounded, chronologically ordered HTTP read model.
+
+## Why it exists
+
+Audit trails otherwise repeat serialization, actor lookup, persistence, ordering, and transport mapping in every application. History owns those mechanics while leaving entity kinds, actor identity, and record-level authorization to the application.
+
+## Public contract
+
+- `HistoryRecord` and `HistoryActor` are immutable wire models matching `@vireocodedev/starter-history`.
+- `HistoryActorResolver` maps the application's current principal to a neutral actor.
+- `HistoryReadAuthorizer` decides whether a caller may read one entity's history.
+- `StarterHistoryProperties` configures the default endpoint and result bounds.
+- Persistence entities, repositories, the controller implementation, and the default recorder are internal.
+
+History recording participates in the owning `BaseService` transaction. Invalid identity, snapshot serialization failure, or database failure aborts that transaction rather than saving incomplete audit data.
+
+## Defaults
+
+```properties
+vireo.starter.history.endpoint-enabled=true
+vireo.starter.history.endpoint-path=/api/history
+vireo.starter.history.default-limit=200
+vireo.starter.history.max-limit=500
+```
+
+The endpoint requires an authenticated caller by default. Applications with record-level authorization requirements replace `HistoryReadAuthorizer`.

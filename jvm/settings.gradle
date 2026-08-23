@@ -11,6 +11,10 @@ include 'vireo-starter-queryengine'
 include 'vireo-starter-offline'
 include 'vireo-starter-history'
 
+// Compiles the exact Java sources displayed by the unified Storybook. It is a
+// documentation fixture, never a published artifact.
+include 'vireo-starter-documentation-examples'
+
 // Not an artifact. A stand-in consumer that depends on all five modules and
 // asserts they wire themselves, so the auto-configuration is tested from the
 // outside rather than from inside a module that already knows its own beans.

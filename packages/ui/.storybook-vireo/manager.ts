@@ -38,6 +38,7 @@ const SIDEBAR_ICONS: Readonly<Record<string, SidebarIcon>> = {
   Documentation: BookIcon,
   Guides: DocumentIcon,
   UI: ComponentIcon,
+  JVM: BoxIcon,
   Core: BoxIcon,
   Behavior: LightningIcon,
   Controls: ControlsIcon,

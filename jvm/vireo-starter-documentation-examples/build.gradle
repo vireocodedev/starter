@@ -1,0 +1,5 @@
+description = 'Compiles the exact JVM examples displayed by the Vireo Starter Storybook. Never published.'
+
+dependencies {
+    implementation project(':vireo-starter-history')
+}
