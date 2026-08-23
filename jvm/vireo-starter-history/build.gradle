@@ -4,3 +4,9 @@ dependencies {
     api project(':vireo-starter-core')
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 }
+
+sourceSets {
+    test {
+        resources.srcDir "${rootProject.projectDir}/../contracts"
+    }
+}

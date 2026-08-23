@@ -1,0 +1,18 @@
+{
+  "id": "0f37eb9e-6f78-4bd8-a32a-7cedac27f879",
+  "timestamp": "2026-08-23T06:00:00Z",
+  "actor": {
+    "id": "user-42",
+    "label": "Niko Barić"
+  },
+  "entity": "CUSTOMER",
+  "entityId": "customer-7",
+  "snapshotPrevious": {
+    "name": "Northstar Labs",
+    "active": false
+  },
+  "snapshotCurrent": {
+    "name": "Northstar Analytics",
+    "active": true
+  }
+}

@@ -1,4 +1,5 @@
 import { createHistoryRecordSchema, HistoryActorSchema, HistoryRecordSchema, HistorySnapshotSchema } from "@/index";
+import { readFileSync } from "node:fs";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { z } from "zod";
 
@@ -13,6 +14,14 @@ const record = {
 };
 
 describe("history record schemas", () => {
+  it("accepts the shared JVM and TypeScript wire fixture", () => {
+    const fixture = JSON.parse(
+      readFileSync(new URL("../../../../contracts/history-record.json", import.meta.url), "utf8"),
+    );
+
+    expect(HistoryRecordSchema.parse(fixture)).toEqual(fixture);
+  });
+
   it("parses generic records and system actors", () => {
     expect(HistoryRecordSchema.parse(record)).toEqual(record);
     expect(HistoryRecordSchema.parse({ ...record, actor: null }).actor).toBeNull();
