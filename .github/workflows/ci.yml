@@ -48,6 +48,6 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew build
+      - run: ./gradlew build aggregateJavadoc
       - name: Verify locally published artifacts through an external consumer
         run: ./scripts/verify-publication-consumer.sh

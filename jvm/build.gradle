@@ -88,6 +88,27 @@ configure(subprojects.findAll { it.name != 'vireo-starter-bom' }) {
     }
 }
 
+// One browsable documentation tree for the complete published Java API. The
+// per-module javadoc tasks still build the artifacts attached to each Maven
+// publication; this task additionally proves that links across library
+// boundaries resolve when the family is viewed as one API.
+def documentedModules = subprojects.findAll {
+    it.name in rootProject.ext.publishedModules && it.name != 'vireo-starter-bom'
+}
+
+tasks.register('aggregateJavadoc', Javadoc) {
+    group = 'documentation'
+    description = 'Generates one Javadoc site for every published JVM library.'
+    title = "Vireo Starter JVM ${project.version} API"
+    source documentedModules.collect { it.sourceSets.main.allJava }
+    classpath = files(documentedModules.collect {
+        [it.sourceSets.main.output, it.sourceSets.main.compileClasspath]
+    })
+    destinationDir = layout.buildDirectory.dir('docs/javadoc').get().asFile
+    options.addStringOption('Xdoclint:all,-missing', '-quiet')
+    dependsOn documentedModules.collect { it.tasks.named('classes') }
+}
+
 // The public-API gate, and the reason it is a committed snapshot rather than a
 // diff against the last release: a snapshot works before the first release
 // exists, works with no network, and puts the surface change in the diff next to

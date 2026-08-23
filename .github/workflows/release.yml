@@ -69,7 +69,7 @@ jobs:
       # can reach the registry.
       - name: Verify the JVM release candidate
         run: |
-          ./gradlew clean check javadoc --no-build-cache
+          ./gradlew clean check aggregateJavadoc --no-build-cache
           ./scripts/verify-publication-consumer.sh
 
       # A release that only touched packages/ leaves the JVM version untouched,
