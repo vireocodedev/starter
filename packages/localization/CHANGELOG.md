@@ -1,5 +1,11 @@
 # @vireocodedev/starter-localization
 
+## 3.0.0
+
+### Major Changes
+
+- d65fe29: Require i18next 26 and react-i18next 17 for Starter localization resources and React translation hooks.
+
 ## 2.0.0
 
 ### Major Changes

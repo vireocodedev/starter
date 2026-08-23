@@ -1,5 +1,23 @@
 # @vireocodedev/starter-ui
 
+## 6.0.0
+
+### Major Changes
+
+- d65fe29: Require i18next 26 and react-i18next 17 for Starter localization resources and React translation hooks.
+- 75bf9c3: Upgrade the public MUI foundation to Material UI 9 and MUI X Date Pickers 9. Autocomplete and input slots now use the current MUI slot APIs, switch fields expose the semantic `switch` role, and temporal fields use MUI X's accessible segmented input structure.
+- 1c5ba14: Require Zod 4.4 or newer and migrate the public schema contracts to Zod 4's type model.
+
+### Patch Changes
+
+- 4481d7b: Upgrade the internal error-boundary runtime to react-error-boundary 6 and safely handle unknown fallback errors.
+- Updated dependencies [d65fe29]
+- Updated dependencies [1c5ba14]
+  - @vireocodedev/starter-localization@3.0.0
+  - @vireocodedev/starter-history@3.0.0
+  - @vireocodedev/starter-infrastructure@3.0.0
+  - @vireocodedev/starter-queryengine@5.0.0
+
 ## 5.0.0
 
 ### Major Changes
