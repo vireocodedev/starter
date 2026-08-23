@@ -87,7 +87,9 @@ describe(VIREO_INITIALIZATION_BOUNDARY_NAME, () => {
       throw new Error("Configuration unavailable");
     });
     render(
-      <ErrorBoundary fallbackRender={({ error }) => <span>{error.message}</span>}>
+      <ErrorBoundary
+        fallbackRender={({ error }) => <span>{error instanceof Error ? error.message : String(error)}</span>}
+      >
         <VireoInitializationBoundary initialize={initialize}>Ready</VireoInitializationBoundary>
       </ErrorBoundary>,
     );

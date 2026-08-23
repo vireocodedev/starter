@@ -17,7 +17,7 @@ export default function FailureAndRetryExample() {
         resetKeys={[attempt]}
         fallbackRender={({ error }) => (
           <Stack spacing={2} sx={{ maxWidth: 520 }}>
-            <Alert severity="error">{error.message}</Alert>
+            <Alert severity="error">{error instanceof Error ? error.message : String(error)}</Alert>
             <Button onClick={() => setAttempt(value => value + 1)}>Retry initialization</Button>
           </Stack>
         )}
