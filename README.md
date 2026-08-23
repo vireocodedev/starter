@@ -65,7 +65,7 @@ npm run build
 
 One repository-wide Vireo Starter Storybook hosts the complete UI component catalog and package-owned live documentation for framework-free libraries:
 
-<https://vireocodedev.github.io/starter/>
+**[Open the Vireo Starter documentation](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs)**
 
 ```bash
 npm run storybook
