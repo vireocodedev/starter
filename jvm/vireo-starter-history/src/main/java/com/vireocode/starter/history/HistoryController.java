@@ -87,9 +87,9 @@ public class HistoryController {
     }
 
     private HistoryRecord toDto(HistoryEntry entry) {
-        HistoryActor actor = new HistoryActor(
-                entry.getOwnerId() == null ? null : entry.getOwnerId().toString(),
-                entry.getOwnerUsername());
+        HistoryActor actor = entry.getActorLabel() == null
+                ? null
+                : new HistoryActor(entry.getActorId(), entry.getActorLabel());
         return new HistoryRecord(
                 entry.getId(),
                 entry.getOccurredAt(),

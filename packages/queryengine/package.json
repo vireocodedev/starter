@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/starter-queryengine",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "Framework-free query schemas, transport ports, and parameterized SQLite execution for Vireo Starter.",
   "type": "module",
   "sideEffects": false,

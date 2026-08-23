@@ -1,5 +1,7 @@
 package com.vireocode.starter.history;
 
+import java.time.Clock;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -27,8 +29,21 @@ public class StarterHistoryAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(HistoryEventsRecorder.class)
-    HistoryRecorder starterHistoryRecorder(HistoryRepository repository, ObjectMapper objectMapper) {
-        return new HistoryRecorder(repository, objectMapper);
+    HistoryRecorder starterHistoryRecorder(HistoryRepository repository, ObjectMapper objectMapper,
+            HistoryActorResolver actorResolver, Clock clock) {
+        return new HistoryRecorder(repository, objectMapper, actorResolver, clock);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    HistoryActorResolver starterHistoryActorResolver() {
+        return new SecurityContextHistoryActorResolver();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    Clock starterHistoryClock() {
+        return Clock.systemUTC();
     }
 
     @Bean

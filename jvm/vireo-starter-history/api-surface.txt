@@ -7,26 +7,29 @@ public final record com.vireocode.starter.history.HistoryActor
     public java.lang.String com.vireocode.starter.history.HistoryActor.id()
     public java.lang.String com.vireocode.starter.history.HistoryActor.label()
 
+public abstract interface com.vireocode.starter.history.HistoryActorResolver
+    public abstract java.util.Optional<com.vireocode.starter.history.HistoryActor> com.vireocode.starter.history.HistoryActorResolver.resolveCurrentActor()
+
 public class com.vireocode.starter.history.HistoryController
     public com.vireocode.starter.history.HistoryController(com.vireocode.starter.history.HistoryRepository,com.fasterxml.jackson.databind.ObjectMapper)
     public java.util.List<com.vireocode.starter.history.HistoryRecord> com.vireocode.starter.history.HistoryController.find(java.lang.String,java.lang.String,java.lang.String)
 
 public class com.vireocode.starter.history.HistoryEntry
     public com.vireocode.starter.history.HistoryEntry()
+    public java.lang.String com.vireocode.starter.history.HistoryEntry.getActorId()
+    public java.lang.String com.vireocode.starter.history.HistoryEntry.getActorLabel()
     public java.lang.String com.vireocode.starter.history.HistoryEntry.getEntity()
     public java.lang.String com.vireocode.starter.history.HistoryEntry.getEntityId()
-    public java.lang.String com.vireocode.starter.history.HistoryEntry.getOwnerUsername()
     public java.lang.String com.vireocode.starter.history.HistoryEntry.getSnapshotCurrent()
     public java.lang.String com.vireocode.starter.history.HistoryEntry.getSnapshotPrevious()
     public java.time.Instant com.vireocode.starter.history.HistoryEntry.getOccurredAt()
     public java.util.UUID com.vireocode.starter.history.HistoryEntry.getId()
-    public java.util.UUID com.vireocode.starter.history.HistoryEntry.getOwnerId()
+    public void com.vireocode.starter.history.HistoryEntry.setActorId(java.lang.String)
+    public void com.vireocode.starter.history.HistoryEntry.setActorLabel(java.lang.String)
     public void com.vireocode.starter.history.HistoryEntry.setEntity(java.lang.String)
     public void com.vireocode.starter.history.HistoryEntry.setEntityId(java.lang.String)
     public void com.vireocode.starter.history.HistoryEntry.setId(java.util.UUID)
     public void com.vireocode.starter.history.HistoryEntry.setOccurredAt(java.time.Instant)
-    public void com.vireocode.starter.history.HistoryEntry.setOwnerId(java.util.UUID)
-    public void com.vireocode.starter.history.HistoryEntry.setOwnerUsername(java.lang.String)
     public void com.vireocode.starter.history.HistoryEntry.setSnapshotCurrent(java.lang.String)
     public void com.vireocode.starter.history.HistoryEntry.setSnapshotPrevious(java.lang.String)
 
@@ -46,11 +49,15 @@ public final record com.vireocode.starter.history.HistoryRecord
 
 public class com.vireocode.starter.history.HistoryRecorder
     implements com.vireocode.starter.base.HistoryEventsRecorder
-    public com.vireocode.starter.history.HistoryRecorder(com.vireocode.starter.history.HistoryRepository,com.fasterxml.jackson.databind.ObjectMapper)
+    public com.vireocode.starter.history.HistoryRecorder(com.vireocode.starter.history.HistoryRepository,com.fasterxml.jackson.databind.ObjectMapper,com.vireocode.starter.history.HistoryActorResolver,java.time.Clock)
     public void com.vireocode.starter.history.HistoryRecorder.record(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object,java.lang.Object)
     public void com.vireocode.starter.history.HistoryRecorder.recordCreate(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object)
     public void com.vireocode.starter.history.HistoryRecorder.recordDelete(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object)
     public void com.vireocode.starter.history.HistoryRecorder.recordUpdate(com.vireocode.starter.base.HistoryEntityType,java.lang.Object,java.lang.Object,java.lang.Object)
+
+public class com.vireocode.starter.history.HistoryRecordingException
+    extends java.lang.RuntimeException
+    public com.vireocode.starter.history.HistoryRecordingException(java.lang.String,java.lang.Throwable)
 
 public abstract interface com.vireocode.starter.history.HistoryRepository
     implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.starter.history.HistoryEntry, java.util.UUID>

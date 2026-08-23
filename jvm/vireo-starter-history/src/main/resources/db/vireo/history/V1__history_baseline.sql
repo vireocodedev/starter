@@ -8,18 +8,15 @@
 -- HistoryEntityType implementation. There is deliberately no CHECK constraint:
 -- the library owns this table but not the set of values that may appear in it.
 --
--- The foreign key into app_user is why this module migrates after auth.
-
 CREATE TABLE IF NOT EXISTS history (
     id UUID PRIMARY KEY,
     occurred_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    owner_id UUID,
-    owner_username VARCHAR(100) NOT NULL,
+    actor_id VARCHAR(128),
+    actor_label VARCHAR(100),
     entity VARCHAR(32) NOT NULL,
     entity_id VARCHAR(64) NOT NULL,
     snapshot_previous TEXT,
-    snapshot_current TEXT,
-    CONSTRAINT fk_history_owner FOREIGN KEY (owner_id) REFERENCES app_user (id) ON DELETE SET NULL
+    snapshot_current TEXT
 );
 
 CREATE INDEX IF NOT EXISTS ix_history_entity_row ON history (entity, entity_id, occurred_at DESC);

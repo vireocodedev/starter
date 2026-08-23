@@ -2,5 +2,4 @@ description = 'Append-only audit log of every create, update and delete performe
 
 dependencies {
     api project(':vireo-starter-core')
-    api project(':vireo-starter-auth')
 }

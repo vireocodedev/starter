@@ -56,7 +56,7 @@ class HistoryControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(entry.getId().toString()))
                 .andExpect(jsonPath("$[0].actor.id").doesNotExist())
-                .andExpect(jsonPath("$[0].actor.label").value(entry.getOwnerUsername()))
+                .andExpect(jsonPath("$[0].actor.label").value(entry.getActorLabel()))
                 .andExpect(jsonPath("$[0].entity").value("ITEM"))
                 .andExpect(jsonPath("$[0].entityId").value(entityId))
                 .andExpect(jsonPath("$[0].snapshotPrevious.name").value("Widget"))
@@ -172,7 +172,7 @@ class HistoryControllerTest {
             String snapshotPrevious, String snapshotCurrent) {
         HistoryEntry entry = new HistoryEntry();
         entry.setOccurredAt(occurredAt);
-        entry.setOwnerUsername("demo");
+        entry.setActorLabel("demo");
         entry.setEntity(entity.name());
         entry.setEntityId(entityId);
         entry.setSnapshotPrevious(snapshotPrevious);
