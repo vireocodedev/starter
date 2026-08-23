@@ -135,3 +135,8 @@ part of the recorded surface, because they are genuinely part of the jar.
 
 To publish from a workstation, set `gpr.user` and `gpr.key` in
 `~/.gradle/gradle.properties` and run `./gradlew publish` from `jvm/`.
+
+JVM library work follows the repository's
+[JVM package-authoring](docs/package-authoring/JVM_PACKAGES.md) and
+[JVM live-documentation](docs/package-authoring/JVM_LIVE_DOCUMENTATION.md)
+contracts.
