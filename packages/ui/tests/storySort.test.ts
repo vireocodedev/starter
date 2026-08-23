@@ -9,6 +9,7 @@ describe("vireoStorySort", () => {
     const titles = [
       "History/Overview",
       "JVM/History/Overview",
+      "JVM/Offline/Overview",
       "JVM/Auth/Overview",
       "JVM/Core/Overview",
       "Infrastructure/Overview",
@@ -35,6 +36,7 @@ describe("vireoStorySort", () => {
       "JVM/Core/Overview",
       "JVM/Auth/Overview",
       "JVM/History/Overview",
+      "JVM/Offline/Overview",
       "History/Overview",
       "Infrastructure/Overview",
       "Localization/Overview",
@@ -47,6 +49,12 @@ describe("vireoStorySort", () => {
   it("keeps audited JVM artifacts and pages in their learning order", () => {
     const titles = [
       "JVM/History/Security and Actors",
+      "JVM/Offline/Configuration, Security, and Persistence",
+      "JVM/Offline/Primary Workflow",
+      "JVM/Offline/Overview",
+      "JVM/Query Engine/Configuration, Security, and Persistence",
+      "JVM/Query Engine/Primary Workflow",
+      "JVM/Query Engine/Overview",
       "JVM/Core/Web, Migrations, and Extensions",
       "JVM/Auth/Configuration and Security",
       "JVM/Core/Primary Workflow",
@@ -68,8 +76,14 @@ describe("vireoStorySort", () => {
       "JVM/Auth/Overview",
       "JVM/Auth/Primary Workflow",
       "JVM/Auth/Configuration and Security",
+      "JVM/Query Engine/Overview",
+      "JVM/Query Engine/Primary Workflow",
+      "JVM/Query Engine/Configuration, Security, and Persistence",
       "JVM/History/Overview",
       "JVM/History/Security and Actors",
+      "JVM/Offline/Overview",
+      "JVM/Offline/Primary Workflow",
+      "JVM/Offline/Configuration, Security, and Persistence",
     ]);
   });
 

@@ -1,0 +1,37 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Offline/Configuration, Security, and Persistence" />
+
+# Configuration, security, and persistence
+
+Offline exposes independently disableable controllers and a validated fail-closed policy for mutation replay.
+
+## Why it exists
+
+Replay accepts stored requests and executes them later with a current authenticated session, so loose paths, methods, headers, ownership, or retry limits become security boundaries. Typed startup validation and centralized persistence keep that policy explicit and consistent.
+
+```properties
+vireo.starter.offline.sync-endpoint-enabled=true
+vireo.starter.offline.heartbeat-endpoint-enabled=true
+vireo.starter.offline.hydration-endpoint-enabled=true
+vireo.starter.offline.sync-endpoint-path=/api/offline/sync
+vireo.starter.offline.heartbeat-endpoint-path=/api/offline/heartbeat
+vireo.starter.offline.hydration-endpoint-path=/api/offline/hydration
+vireo.starter.offline.max-batch-size=100
+vireo.starter.offline.max-replay-attempts=5
+vireo.starter.offline.max-hydration-entities=100
+vireo.starter.offline.heartbeat-interval=1s
+vireo.starter.offline.replay-api-prefix=/api/
+vireo.starter.offline.replay-methods=POST,PUT,PATCH,DELETE
+vireo.starter.offline.excluded-replay-path-prefixes=/api/auth,/api/offline/
+vireo.starter.offline.replay-headers=Content-Type,Idempotency-Key,X-Offline-Temp-Id
+vireo.starter.offline.privileged-role=SUPERADMIN
+```
+
+Every default endpoint requires authentication. Relative canonical paths and mutation methods are required; Auth and Offline routes, absolute URLs, fragments, encoded traversal, and unapproved headers are rejected. Session cookies and XSRF tokens come only from the current flush request.
+
+Non-privileged command search is owner-scoped. The default actor adapter uses Starter Auth, but applications can replace it with any `OfflineActorResolver`. The schema deliberately has no Auth foreign key.
+
+`DONE` commands are idempotent success. Transient failures remain retryable up to the server budget. Permanent client errors become `REJECTED`; request timeout and throttling remain retryable. Transactional change events publish after commit and disappear on rollback.
+
+The module owns `sync_command` and `offline_entity_version` through its isolated Flyway history. Applied migrations remain immutable; V2 removes the legacy user-table constraint while preserving recorded actor IDs.

@@ -5,4 +5,5 @@ dependencies {
     implementation project(':vireo-starter-auth')
     implementation project(':vireo-starter-history')
     implementation project(':vireo-starter-queryengine')
+    implementation project(':vireo-starter-offline')
 }

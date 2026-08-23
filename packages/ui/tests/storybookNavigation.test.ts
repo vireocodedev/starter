@@ -22,6 +22,8 @@ const sqliteExamplesRoot = join(packagesRoot, "sqlite", "docs", "examples");
 const jvmAuthDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-auth", "docs", "storybook");
 const jvmCoreDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-core", "docs", "storybook");
 const jvmHistoryDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-history", "docs", "storybook");
+const jvmOfflineDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-offline", "docs", "storybook");
+const jvmQueryEngineDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-queryengine", "docs", "storybook");
 const jvmDocumentationExamplesRoot = join(
   repositoryRoot,
   "jvm",
@@ -120,6 +122,18 @@ const EXPECTED_JVM_CORE_ROUTES = [
 
 const EXPECTED_JVM_HISTORY_ROUTES = ["JVM/History/Overview", "JVM/History/Security and Actors"] as const;
 
+const EXPECTED_JVM_OFFLINE_ROUTES = [
+  "JVM/Offline/Overview",
+  "JVM/Offline/Primary Workflow",
+  "JVM/Offline/Configuration, Security, and Persistence",
+] as const;
+
+const EXPECTED_JVM_QUERY_ENGINE_ROUTES = [
+  "JVM/Query Engine/Overview",
+  "JVM/Query Engine/Primary Workflow",
+  "JVM/Query Engine/Configuration, Security, and Persistence",
+] as const;
+
 const APPROVED_STORY_ROUTES = [
   /^UI\/Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
   /^UI\/Capabilities\/(?:Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
@@ -170,6 +184,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(managerSource).toContain("Core: BoxIcon");
     expect(managerSource).toContain("Auth: LockIcon");
     expect(managerSource).toContain("History: TimeIcon");
+    expect(managerSource).toContain("Offline: SyncIcon");
     expect(managerSource).toContain("Infrastructure: WrenchIcon");
     expect(managerSource).toContain("Localization: GlobeIcon");
     expect(managerSource).toContain('"Query Engine": SearchIcon');
@@ -253,15 +268,29 @@ describe("Vireo Starter Storybook navigation contract", () => {
     const historyRoutes = findFiles(jvmHistoryDocsRoot, file => extname(file) === ".mdx")
       .map(documentationTitle)
       .sort();
+    const offlineRoutes = findFiles(jvmOfflineDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
+    const queryEngineRoutes = findFiles(jvmQueryEngineDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
 
     expect(coreRoutes).toEqual([...EXPECTED_JVM_CORE_ROUTES].sort());
     expect(authRoutes).toEqual([...EXPECTED_JVM_AUTH_ROUTES].sort());
     expect(historyRoutes).toEqual([...EXPECTED_JVM_HISTORY_ROUTES].sort());
+    expect(offlineRoutes).toEqual([...EXPECTED_JVM_OFFLINE_ROUTES].sort());
+    expect(queryEngineRoutes).toEqual([...EXPECTED_JVM_QUERY_ENGINE_ROUTES].sort());
   });
 
   it("displays every compiled JVM documentation example from its exact source file", () => {
     const exampleFiles = findFiles(jvmDocumentationExamplesRoot, file => extname(file) === ".java");
-    const documentationSources = [jvmCoreDocsRoot, jvmAuthDocsRoot, jvmHistoryDocsRoot].flatMap(root =>
+    const documentationSources = [
+      jvmCoreDocsRoot,
+      jvmAuthDocsRoot,
+      jvmQueryEngineDocsRoot,
+      jvmHistoryDocsRoot,
+      jvmOfflineDocsRoot,
+    ].flatMap(root =>
       findFiles(root, file => extname(file) === ".mdx").map(file => ({ file, source: readFileSync(file, "utf8") })),
     );
 

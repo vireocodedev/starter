@@ -35,11 +35,12 @@ const preview: Preview = {
           ],
           Documentation: ["Overview"],
           UI: ["Overview", "Documentation", "Core", "Capabilities", "Integrations"],
-          JVM: ["Core", "Auth", "Query Engine", "History"],
+          JVM: ["Core", "Auth", "Query Engine", "History", "Offline"],
           "JVM/Core": ["Overview", "Primary Workflow", "Web, Migrations, and Extensions"],
           "JVM/Auth": ["Overview", "Primary Workflow", "Configuration and Security"],
           "JVM/Query Engine": ["Overview", "Primary Workflow", "Configuration, Security, and Persistence"],
           "JVM/History": ["Overview", "Security and Actors"],
+          "JVM/Offline": ["Overview", "Primary Workflow", "Configuration, Security, and Persistence"],
           "UI/Documentation": ["Installation", "Guides"],
           "UI/Documentation/Guides": [
             "Common Patterns",
