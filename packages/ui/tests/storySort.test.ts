@@ -10,6 +10,7 @@ describe("vireoStorySort", () => {
       "History/Overview",
       "JVM/History/Overview",
       "JVM/Auth/Overview",
+      "JVM/Core/Overview",
       "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
@@ -31,6 +32,7 @@ describe("vireoStorySort", () => {
       "UI/Core/Data Display/VireoIcon",
       "UI/Capabilities/Forms/VireoForm",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
+      "JVM/Core/Overview",
       "JVM/Auth/Overview",
       "JVM/History/Overview",
       "History/Overview",
@@ -45,8 +47,11 @@ describe("vireoStorySort", () => {
   it("keeps audited JVM artifacts and pages in their learning order", () => {
     const titles = [
       "JVM/History/Security and Actors",
+      "JVM/Core/Web, Migrations, and Extensions",
       "JVM/Auth/Configuration and Security",
+      "JVM/Core/Primary Workflow",
       "JVM/History/Overview",
+      "JVM/Core/Overview",
       "JVM/Auth/Primary Workflow",
       "JVM/Auth/Overview",
     ];
@@ -57,6 +62,9 @@ describe("vireoStorySort", () => {
         .sort(vireoStorySort)
         .map(entry => entry.title),
     ).toEqual([
+      "JVM/Core/Overview",
+      "JVM/Core/Primary Workflow",
+      "JVM/Core/Web, Migrations, and Extensions",
       "JVM/Auth/Overview",
       "JVM/Auth/Primary Workflow",
       "JVM/Auth/Configuration and Security",

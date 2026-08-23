@@ -1,0 +1,42 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Core/Web, Migrations, and Extensions" />
+
+# Web, migrations, and extensions
+
+Core defines stable failure semantics, deterministic module migrations, and narrow SPIs through which optional Vireo artifacts join the CRUD lifecycle.
+
+## Why it exists
+
+Shared foundations become dangerous when they silently guess: invalid request pagination becomes a 500, an optional filter is ignored, two libraries share a Flyway version namespace, or an audit write disappears because its module is absent. Core makes these boundaries explicit and fail-fast while keeping optional artifacts directionally dependent on Core rather than the reverse.
+
+## HTTP behavior
+
+`GlobalExceptionHandler` maps validation, malformed JSON, authentication, authorization, `ResponseStatusException`, and unexpected failures to `ApiError`. Multiple messages for one field are retained in order. Internal exception details are hidden by default.
+
+`RestUtils.makePageable` accepts zero-based pages, positive row counts or exactly `-1`, a non-blank sort field, and `asc` or `desc` case-insensitively. Invalid public values return HTTP 400. Controllers should still whitelist sort fields before passing them to persistence.
+
+## Migration isolation
+
+Every optional persistence module contributes a `StarterFlywayModule` with a lowercase SQL-safe name and relative order. Core runs modules by order and then name, rejects duplicate names, and gives each one:
+
+```text
+classpath:db/vireo/{module}
+classpath:db/vireo/{module}/vendor/{database}
+flyway_schema_history_vireo_{module}
+```
+
+The consumer's `flyway_schema_history` remains separate and receives only application migrations. Module adoption, idempotent redeployment, and upgrades are verified against H2 and PostgreSQL.
+
+## Optional-module SPIs
+
+| Core SPI | Default provider | Behavior when required but absent |
+| --- | --- | --- |
+| `FilterSpecificationBuilder` | Query Engine | A supplied filter payload fails explicitly. |
+| `HistoryEventsRecorder` | History | A history-enabled write fails before persistence. |
+| `OfflineRevisionTracker` | Offline | No revision is assigned. |
+| `OfflineChangeBroadcaster` | Offline | No change notification is published. |
+
+Filtering and history are request/entity opt-ins, so missing required providers are errors. Offline publication is additive and remains a no-op when the Offline artifact is not installed.
+
+Consumer replacements use ordinary beans. Do not depend on package-private implementation classes; the SPI and auto-configuration conditions are the supported extension boundary.
