@@ -65,12 +65,18 @@ npm run build
 
 One repository-wide Vireo Starter Storybook hosts the complete UI component catalog and package-owned live documentation for framework-free libraries:
 
+<https://vireocodedev.github.io/starter/>
+
 ```bash
 npm run storybook
 npm run build-storybook
 ```
 
 Monorepo-level material lives under `Documentation`. Each library then owns a top-level section: UI contains its `Documentation`, `Core`, `Capabilities`, and `Integrations` groups, while History owns its executable package guides directly under `History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
+
+Every push to `main` publishes the production Storybook to GitHub Pages. See
+[Storybook deployment](docs/STORYBOOK_DEPLOYMENT.md) for repository setup,
+permissions, local verification, custom-domain guidance, and failure handling.
 
 `build` is artifact generation; `typecheck` owns full semantic source checking.
 Keeping those responsibilities separate lets the UI package use TypeScript's
