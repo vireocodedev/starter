@@ -1,6 +1,10 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { mergeConfig } from "vite";
+
+const storybookDirectory = import.meta.dirname;
+const addonDocsBlocksEntry = fileURLToPath(import.meta.resolve("@storybook/addon-docs/blocks"));
 
 const config: StorybookConfig = {
   stories: [
@@ -47,89 +51,93 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
+            find: /^@storybook\/addon-docs\/blocks$/,
+            replacement: addonDocsBlocksEntry,
+          },
+          {
             find: /^@vireo-storybook\/documentation$/,
-            replacement: resolve(__dirname, "../storybook/documentation/index.ts"),
+            replacement: resolve(storybookDirectory, "../storybook/documentation/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-history$/,
-            replacement: resolve(__dirname, "../../history/src/index.ts"),
+            replacement: resolve(storybookDirectory, "../../history/src/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-infrastructure$/,
-            replacement: resolve(__dirname, "../../infrastructure/src/index.ts"),
+            replacement: resolve(storybookDirectory, "../../infrastructure/src/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-infrastructure\/network-status$/,
-            replacement: resolve(__dirname, "../../infrastructure/src/network/appNetworkStatus.ts"),
+            replacement: resolve(storybookDirectory, "../../infrastructure/src/network/appNetworkStatus.ts"),
           },
           {
             find: /^@vireocodedev\/starter-infrastructure\/pagination$/,
-            replacement: resolve(__dirname, "../../infrastructure/src/http/pagination.ts"),
+            replacement: resolve(storybookDirectory, "../../infrastructure/src/http/pagination.ts"),
           },
           {
             find: /^@vireocodedev\/starter-localization$/,
-            replacement: resolve(__dirname, "../../localization/src/index.ts"),
+            replacement: resolve(storybookDirectory, "../../localization/src/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-queryengine$/,
-            replacement: resolve(__dirname, "../../queryengine/src/index.ts"),
+            replacement: resolve(storybookDirectory, "../../queryengine/src/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-shell$/,
-            replacement: resolve(__dirname, "../../shell/src/index.ts"),
+            replacement: resolve(storybookDirectory, "../../shell/src/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-sqlite\/offline$/,
-            replacement: resolve(__dirname, "../../sqlite/src/offline/index.ts"),
+            replacement: resolve(storybookDirectory, "../../sqlite/src/offline/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-sqlite$/,
-            replacement: resolve(__dirname, "../../sqlite/src/index.ts"),
+            replacement: resolve(storybookDirectory, "../../sqlite/src/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/event-source$/,
-            replacement: resolve(__dirname, "../src/integrations/event-source/public.ts"),
+            replacement: resolve(storybookDirectory, "../src/integrations/event-source/public.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/country$/,
-            replacement: resolve(__dirname, "../src/capabilities/country/public.ts"),
+            replacement: resolve(storybookDirectory, "../src/capabilities/country/public.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/forms$/,
-            replacement: resolve(__dirname, "../src/capabilities/forms/public.ts"),
+            replacement: resolve(storybookDirectory, "../src/capabilities/forms/public.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/storybook\/VireoDockedSidePanel$/,
-            replacement: resolve(__dirname, "../storybook/VireoDockedSidePanel/index.ts"),
+            replacement: resolve(storybookDirectory, "../storybook/VireoDockedSidePanel/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/storybook\/VireoIconContainer$/,
-            replacement: resolve(__dirname, "../storybook/VireoIconContainer/index.ts"),
+            replacement: resolve(storybookDirectory, "../storybook/VireoIconContainer/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/storybook\/VireoResponsiveOverlayFrame$/,
-            replacement: resolve(__dirname, "../storybook/VireoResponsiveOverlayFrame/index.ts"),
+            replacement: resolve(storybookDirectory, "../storybook/VireoResponsiveOverlayFrame/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui\/storybook$/,
-            replacement: resolve(__dirname, "../storybook/index.ts"),
+            replacement: resolve(storybookDirectory, "../storybook/index.ts"),
           },
           {
             find: /^@vireocodedev\/starter-ui$/,
-            replacement: resolve(__dirname, "./starter-ui-entry.ts"),
+            replacement: resolve(storybookDirectory, "./starter-ui-entry.ts"),
           },
-          { find: "@", replacement: resolve(__dirname, "../src") },
+          { find: "@", replacement: resolve(storybookDirectory, "../src") },
           {
             find: /^@mui\/icons-material$/,
-            replacement: resolve(__dirname, "./mui-icons.ts"),
+            replacement: resolve(storybookDirectory, "./mui-icons.ts"),
           },
           {
             find: /^@mui\/material$/,
-            replacement: resolve(__dirname, "./mui-material.ts"),
+            replacement: resolve(storybookDirectory, "./mui-material.ts"),
           },
           {
             find: /^@mui\/x-date-pickers$/,
-            replacement: resolve(__dirname, "./mui-x-date-pickers.ts"),
+            replacement: resolve(storybookDirectory, "./mui-x-date-pickers.ts"),
           },
         ],
       },
