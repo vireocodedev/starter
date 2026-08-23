@@ -170,6 +170,16 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
                     password = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key')
                 }
             }
+
+            // A pre-release consumer check publishes every artifact into one
+            // throwaway repository. It is opt-in so ordinary `publish` cannot
+            // accidentally write a verification repository into the checkout.
+            if (rootProject.hasProperty('vireoTestRepository')) {
+                maven {
+                    name = 'Verification'
+                    url = uri(rootProject.property('vireoTestRepository'))
+                }
+            }
         }
     }
 

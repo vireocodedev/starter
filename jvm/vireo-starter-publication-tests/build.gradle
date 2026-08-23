@@ -1,0 +1,64 @@
+plugins {
+    id 'java'
+}
+
+def repositoryLocation = providers.gradleProperty('vireoRepository')
+        .orElse(providers.environmentVariable('VIREO_REPOSITORY'))
+def vireoVersion = providers.gradleProperty('vireoVersion')
+        .orElse(providers.environmentVariable('VIREO_VERSION'))
+
+if (!repositoryLocation.isPresent() || !vireoVersion.isPresent()) {
+    throw new GradleException('Provide vireoRepository and vireoVersion to verify published JVM artifacts.')
+}
+
+def repositoryUri = uri(repositoryLocation.get())
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'VireoPublicationUnderTest'
+                url = repositoryUri
+                if (repositoryUri.scheme in ['http', 'https'] && System.getenv('GITHUB_TOKEN')) {
+                    credentials {
+                        username = System.getenv('GITHUB_ACTOR') ?: 'x'
+                        password = System.getenv('GITHUB_TOKEN')
+                    }
+                }
+            }
+        }
+        filter {
+            includeGroup 'com.vireocode'
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform("com.vireocode:vireo-starter-bom:${vireoVersion.get()}")
+    implementation 'com.vireocode:vireo-starter-core'
+    implementation 'com.vireocode:vireo-starter-auth'
+    implementation 'com.vireocode:vireo-starter-queryengine'
+    implementation 'com.vireocode:vireo-starter-history'
+    implementation 'com.vireocode:vireo-starter-offline'
+
+    // Intentionally versionless: this proves that the BOM's imported Spring
+    // Boot platform also reaches an ordinary external consumer.
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'vireo.expected.version', vireoVersion.get()
+}
