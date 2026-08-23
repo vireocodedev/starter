@@ -1,7 +1,7 @@
 public final record com.vireocode.starter.offline.OfflineActor
     extends java.lang.Record
     public com.vireocode.starter.offline.OfflineActor(java.util.UUID,java.lang.String,boolean)
-    public boolean com.vireocode.starter.offline.OfflineActor.superadmin()
+    public boolean com.vireocode.starter.offline.OfflineActor.privileged()
     public final boolean com.vireocode.starter.offline.OfflineActor.equals(java.lang.Object)
     public final int com.vireocode.starter.offline.OfflineActor.hashCode()
     public final java.lang.String com.vireocode.starter.offline.OfflineActor.toString()
@@ -10,16 +10,6 @@ public final record com.vireocode.starter.offline.OfflineActor
 
 public abstract interface com.vireocode.starter.offline.OfflineActorResolver
     public abstract java.util.Optional<com.vireocode.starter.offline.OfflineActor> com.vireocode.starter.offline.OfflineActorResolver.resolveCurrentActor()
-
-public final record com.vireocode.starter.offline.OfflineEntityChangeEvent
-    extends java.lang.Record
-    public com.vireocode.starter.offline.OfflineEntityChangeEvent(java.lang.String,java.lang.Object,java.lang.Long)
-    public final boolean com.vireocode.starter.offline.OfflineEntityChangeEvent.equals(java.lang.Object)
-    public final int com.vireocode.starter.offline.OfflineEntityChangeEvent.hashCode()
-    public final java.lang.String com.vireocode.starter.offline.OfflineEntityChangeEvent.toString()
-    public java.lang.Long com.vireocode.starter.offline.OfflineEntityChangeEvent.revision()
-    public java.lang.Object com.vireocode.starter.offline.OfflineEntityChangeEvent.payload()
-    public java.lang.String com.vireocode.starter.offline.OfflineEntityChangeEvent.entity()
 
 public class com.vireocode.starter.offline.OfflineEntityVersionEntity
     public com.vireocode.starter.offline.OfflineEntityVersionEntity()
@@ -62,7 +52,6 @@ public class com.vireocode.starter.offline.OfflineHeartbeatService
     public com.vireocode.starter.offline.OfflineHeartbeatPayload com.vireocode.starter.offline.OfflineHeartbeatService.getCurrentHeartbeat()
     public org.springframework.web.servlet.mvc.method.annotation.SseEmitter com.vireocode.starter.offline.OfflineHeartbeatService.createEmitter()
     public void com.vireocode.starter.offline.OfflineHeartbeatService.flushBatch()
-    public void com.vireocode.starter.offline.OfflineHeartbeatService.markSyncInProgress(boolean)
     public void com.vireocode.starter.offline.OfflineHeartbeatService.publishCreateEvent(java.lang.String,java.lang.Object,java.lang.Long)
     public void com.vireocode.starter.offline.OfflineHeartbeatService.publishDeleteEvent(java.lang.String,java.lang.Object,java.lang.Long)
     public void com.vireocode.starter.offline.OfflineHeartbeatService.publishHeartbeat()
@@ -139,8 +128,8 @@ public final record com.vireocode.starter.offline.OfflineSyncCommandDto
     public com.fasterxml.jackson.databind.JsonNode com.vireocode.starter.offline.OfflineSyncCommandDto.body()
     public final boolean com.vireocode.starter.offline.OfflineSyncCommandDto.equals(java.lang.Object)
     public final int com.vireocode.starter.offline.OfflineSyncCommandDto.hashCode()
-    public final java.lang.String com.vireocode.starter.offline.OfflineSyncCommandDto.toString()
     public java.lang.String com.vireocode.starter.offline.OfflineSyncCommandDto.method()
+    public java.lang.String com.vireocode.starter.offline.OfflineSyncCommandDto.toString()
     public java.lang.String com.vireocode.starter.offline.OfflineSyncCommandDto.url()
     public java.util.Map<java.lang.String, java.lang.String> com.vireocode.starter.offline.OfflineSyncCommandDto.headers()
     public java.util.UUID com.vireocode.starter.offline.OfflineSyncCommandDto.commandId()
@@ -226,7 +215,7 @@ public class com.vireocode.starter.offline.OfflineSyncController
 
 public abstract interface com.vireocode.starter.offline.OfflineSyncReplayHandler
     public abstract boolean com.vireocode.starter.offline.OfflineSyncReplayHandler.supports(com.vireocode.starter.offline.OfflineSyncCommandDto,org.springframework.http.HttpMethod)
-    public abstract com.vireocode.starter.offline.OfflineSyncCommandResultDto com.vireocode.starter.offline.OfflineSyncReplayHandler.process(com.vireocode.starter.offline.OfflineSyncCommandDto,com.vireocode.starter.offline.OfflineSyncCommandEntity)
+    public abstract com.vireocode.starter.offline.OfflineSyncCommandResultDto com.vireocode.starter.offline.OfflineSyncReplayHandler.process(com.vireocode.starter.offline.OfflineSyncCommandDto)
 
 public final enum com.vireocode.starter.offline.OfflineSyncResultReason
     extends java.lang.Enum<com.vireocode.starter.offline.OfflineSyncResultReason>
@@ -250,3 +239,40 @@ public class com.vireocode.starter.offline.StarterOfflineActorResolver
 
 public class com.vireocode.starter.offline.StarterOfflineAutoConfiguration
     public com.vireocode.starter.offline.StarterOfflineAutoConfiguration()
+
+public class com.vireocode.starter.offline.StarterOfflineProperties
+    public com.vireocode.starter.offline.StarterOfflineProperties()
+    public boolean com.vireocode.starter.offline.StarterOfflineProperties.isEndpointPathsDistinct()
+    public boolean com.vireocode.starter.offline.StarterOfflineProperties.isHeartbeatEndpointEnabled()
+    public boolean com.vireocode.starter.offline.StarterOfflineProperties.isHeartbeatIntervalValid()
+    public boolean com.vireocode.starter.offline.StarterOfflineProperties.isHydrationEndpointEnabled()
+    public boolean com.vireocode.starter.offline.StarterOfflineProperties.isReplayMethodPolicyValid()
+    public boolean com.vireocode.starter.offline.StarterOfflineProperties.isReplayPathPolicyValid()
+    public boolean com.vireocode.starter.offline.StarterOfflineProperties.isSyncEndpointEnabled()
+    public int com.vireocode.starter.offline.StarterOfflineProperties.getMaxBatchSize()
+    public int com.vireocode.starter.offline.StarterOfflineProperties.getMaxHydrationEntities()
+    public int com.vireocode.starter.offline.StarterOfflineProperties.getMaxReplayAttempts()
+    public java.lang.String com.vireocode.starter.offline.StarterOfflineProperties.getHeartbeatEndpointPath()
+    public java.lang.String com.vireocode.starter.offline.StarterOfflineProperties.getHydrationEndpointPath()
+    public java.lang.String com.vireocode.starter.offline.StarterOfflineProperties.getPrivilegedRole()
+    public java.lang.String com.vireocode.starter.offline.StarterOfflineProperties.getReplayApiPrefix()
+    public java.lang.String com.vireocode.starter.offline.StarterOfflineProperties.getSyncEndpointPath()
+    public java.time.Duration com.vireocode.starter.offline.StarterOfflineProperties.getHeartbeatInterval()
+    public java.util.List<java.lang.String> com.vireocode.starter.offline.StarterOfflineProperties.getExcludedReplayPathPrefixes()
+    public java.util.List<java.lang.String> com.vireocode.starter.offline.StarterOfflineProperties.getReplayHeaders()
+    public java.util.List<java.lang.String> com.vireocode.starter.offline.StarterOfflineProperties.getReplayMethods()
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setExcludedReplayPathPrefixes(java.util.List<java.lang.String>)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setHeartbeatEndpointEnabled(boolean)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setHeartbeatEndpointPath(java.lang.String)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setHeartbeatInterval(java.time.Duration)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setHydrationEndpointEnabled(boolean)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setHydrationEndpointPath(java.lang.String)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setMaxBatchSize(int)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setMaxHydrationEntities(int)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setMaxReplayAttempts(int)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setPrivilegedRole(java.lang.String)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setReplayApiPrefix(java.lang.String)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setReplayHeaders(java.util.List<java.lang.String>)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setReplayMethods(java.util.List<java.lang.String>)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setSyncEndpointEnabled(boolean)
+    public void com.vireocode.starter.offline.StarterOfflineProperties.setSyncEndpointPath(java.lang.String)
