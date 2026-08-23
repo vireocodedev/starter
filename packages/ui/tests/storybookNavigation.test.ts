@@ -20,6 +20,7 @@ const shellExamplesRoot = join(packagesRoot, "shell", "docs", "examples");
 const sqliteDocsRoot = join(packagesRoot, "sqlite", "docs", "storybook");
 const sqliteExamplesRoot = join(packagesRoot, "sqlite", "docs", "examples");
 const jvmAuthDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-auth", "docs", "storybook");
+const jvmBomDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-bom", "docs", "storybook");
 const jvmCoreDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-core", "docs", "storybook");
 const jvmHistoryDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-history", "docs", "storybook");
 const jvmOfflineDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-offline", "docs", "storybook");
@@ -114,6 +115,8 @@ const EXPECTED_JVM_AUTH_ROUTES = [
   "JVM/Auth/Configuration and Security",
 ] as const;
 
+const EXPECTED_JVM_BOM_ROUTES = ["JVM/BOM/Overview", "JVM/BOM/Consumption and Release Semantics"] as const;
+
 const EXPECTED_JVM_CORE_ROUTES = [
   "JVM/Core/Overview",
   "JVM/Core/Primary Workflow",
@@ -181,6 +184,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(managerSource).toContain("Documentation: BookIcon");
     expect(managerSource).toContain("UI: ComponentIcon");
     expect(managerSource).toContain("JVM: BoxIcon");
+    expect(managerSource).toContain("BOM: BranchIcon");
     expect(managerSource).toContain("Core: BoxIcon");
     expect(managerSource).toContain("Auth: LockIcon");
     expect(managerSource).toContain("History: TimeIcon");
@@ -259,6 +263,9 @@ describe("Vireo Starter Storybook navigation contract", () => {
   });
 
   it("indexes audited JVM guides under the JVM root", () => {
+    const bomRoutes = findFiles(jvmBomDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
     const coreRoutes = findFiles(jvmCoreDocsRoot, file => extname(file) === ".mdx")
       .map(documentationTitle)
       .sort();
@@ -275,6 +282,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       .map(documentationTitle)
       .sort();
 
+    expect(bomRoutes).toEqual([...EXPECTED_JVM_BOM_ROUTES].sort());
     expect(coreRoutes).toEqual([...EXPECTED_JVM_CORE_ROUTES].sort());
     expect(authRoutes).toEqual([...EXPECTED_JVM_AUTH_ROUTES].sort());
     expect(historyRoutes).toEqual([...EXPECTED_JVM_HISTORY_ROUTES].sort());
@@ -285,6 +293,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
   it("displays every compiled JVM documentation example from its exact source file", () => {
     const exampleFiles = findFiles(jvmDocumentationExamplesRoot, file => extname(file) === ".java");
     const documentationSources = [
+      jvmBomDocsRoot,
       jvmCoreDocsRoot,
       jvmAuthDocsRoot,
       jvmQueryEngineDocsRoot,
