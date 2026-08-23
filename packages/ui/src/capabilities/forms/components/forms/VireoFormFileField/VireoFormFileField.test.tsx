@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import type { VireoFormFileFieldProps } from "./VireoFormFileField.types";
 import { vireoFormFileFieldClasses } from "./VireoFormFileField.classes";
 import { VIREO_FORM_FILE_FIELD_NAME } from "./VireoFormFileField.identity";
@@ -11,11 +11,11 @@ import { VIREO_FORM_FILE_FIELD_NAME } from "./VireoFormFileField.identity";
 type TestFormProps = {
   fieldProps?: Omit<VireoFormFileFieldProps, "ref"> & { ref?: React.Ref<HTMLDivElement> };
   initialValue?: File | null;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: File | null) => unknown;
 };
 
-function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(), validate }: TestFormProps) {
+function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(() => undefined), validate }: TestFormProps) {
   const form = useVireoForm({ defaultValues: { attachment: initialValue }, onSubmit });
   return (
     <form.Form>
@@ -57,7 +57,7 @@ describe(VIREO_FORM_FILE_FIELD_NAME, () => {
   });
 
   it("selects, displays, submits, clears, and resets one file", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const user = userEvent.setup();
     const file = new File(["report"], "quarterly-report.pdf", { type: "application/pdf" });
     render(<TestForm onSubmit={onSubmit} />);
@@ -89,7 +89,10 @@ describe(VIREO_FORM_FILE_FIELD_NAME, () => {
     });
     const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       font: "",
-      measureText: value => ({ width: value.length * 8 }) as TextMetrics,
+      measureText: value =>
+        ({
+          width: value.length * 8,
+        }) as TextMetrics,
     } as CanvasRenderingContext2D);
 
     try {

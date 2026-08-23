@@ -4,7 +4,7 @@ import { revalidateLogic } from "@tanstack/react-form";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { z } from "zod";
 import { vireoFormToggleButtonGroupFieldClasses } from "./VireoFormToggleButtonGroupField.classes";
 import { VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME } from "./VireoFormToggleButtonGroupField.identity";
@@ -27,12 +27,12 @@ type ExclusiveProps = Partial<
 function ExclusiveForm({
   fieldProps,
   initialValue = null,
-  onSubmit = vi.fn(),
+  onSubmit = vi.fn(() => undefined),
   validate,
 }: {
   fieldProps?: ExclusiveProps;
   initialValue?: string | null;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: string | null) => unknown;
 }) {
   const form = useVireoForm({ defaultValues: { density: initialValue }, onSubmit });
@@ -102,7 +102,7 @@ describe(VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME, () => {
   });
 
   it("preserves numeric option values when submitting", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     function NumericForm() {
       const form = useVireoForm({ defaultValues: { columns: null as number | null }, onSubmit });
       return (

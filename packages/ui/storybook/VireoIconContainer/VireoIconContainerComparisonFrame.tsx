@@ -27,73 +27,93 @@ type IconCoordinateGridProps = {
 function IconCoordinateGrid({ children, measurement, measurementColor }: IconCoordinateGridProps) {
   return (
     <Box
-      position="relative"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      width="min(100%, 280px)"
-      height={240}
-      overflow="visible"
-      border="1px solid"
-      borderColor="divider"
-      borderRadius={2}
       sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 2,
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "min(100%, 280px)",
+        height: 240,
+        overflow: "visible",
         color: "text.primary",
         backgroundColor: "background.default",
+
         backgroundImage: theme =>
           `linear-gradient(${alpha(theme.palette.divider, 0.45)} 1px, transparent 1px), linear-gradient(90deg, ${alpha(theme.palette.divider, 0.45)} 1px, transparent 1px)`,
+
         backgroundPosition: "center center",
         backgroundSize: `${PREVIEW_SCALE * 2}px ${PREVIEW_SCALE * 2}px`,
       }}
     >
       <Typography
-        position="absolute"
-        top={24}
-        paddingX={1.25}
-        paddingY={0.5}
         color={measurementColor}
-        fontWeight={700}
         variant="caption"
-        border="1px solid"
-        borderColor={measurementColor}
-        borderRadius={1}
-        sx={theme => ({
-          backgroundColor: alpha(
-            measurementColor === "error.main" ? theme.palette.error.main : theme.palette.success.main,
-            0.12,
-          ),
-          lineHeight: 1.4,
-          whiteSpace: "nowrap",
-        })}
+        sx={[
+          {
+            px: 1.25,
+            py: 0.5,
+            border: "1px solid",
+            borderColor: measurementColor,
+            borderRadius: 1,
+            position: "absolute",
+            top: 24,
+            fontWeight: 700,
+          },
+          theme => ({
+            backgroundColor: alpha(
+              measurementColor === "error.main" ? theme.palette.error.main : theme.palette.success.main,
+              0.12,
+            ),
+            lineHeight: 1.4,
+            whiteSpace: "nowrap",
+          }),
+        ]}
       >
         {measurement}
       </Typography>
 
       <Box
-        position="absolute"
-        width={TARGET_PREVIEW_SIZE}
-        height={TARGET_PREVIEW_SIZE}
-        border="1px dashed"
-        borderColor="primary.main"
-        sx={theme => ({
-          backgroundColor: alpha(theme.palette.primary.main, 0.04),
-          pointerEvents: "none",
-        })}
+        sx={[
+          {
+            border: "1px dashed",
+            borderColor: "primary.main",
+            position: "absolute",
+            width: TARGET_PREVIEW_SIZE,
+            height: TARGET_PREVIEW_SIZE,
+          },
+          theme => ({
+            backgroundColor: alpha(theme.palette.primary.main, 0.04),
+            pointerEvents: "none",
+          }),
+        ]}
       />
 
-      <Box position="relative" display="flex" alignItems="center" justifyContent="center">
+      <Box
+        sx={{
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {children}
       </Box>
 
       <Typography
-        position="absolute"
-        bottom={20}
-        paddingX={1}
-        paddingY={0.25}
         color="text.secondary"
         variant="caption"
-        borderRadius={1}
-        sx={{ backgroundColor: "background.default", whiteSpace: "nowrap" }}
+        sx={{
+          px: 1,
+          py: 0.25,
+          borderRadius: 1,
+          position: "absolute",
+          bottom: 20,
+          backgroundColor: "background.default",
+          whiteSpace: "nowrap",
+        }}
       >
         24×24 target · {PREVIEW_SCALE}× preview
       </Typography>
@@ -103,25 +123,39 @@ function IconCoordinateGrid({ children, measurement, measurementColor }: IconCoo
 
 function IconPreview({ children, description, title }: IconPreviewProps) {
   return (
-    <Stack flex="1 1 0" minWidth={0} gap={1.5}>
+    <Stack
+      sx={{
+        flex: "1 1 0",
+        minWidth: 0,
+        gap: 1.5,
+      }}
+    >
       <Box>
-        <Typography fontWeight={700}>{title}</Typography>
+        <Typography
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          {title}
+        </Typography>
         <Typography color="text.secondary" variant="body2" sx={{ minHeight: { md: "2lh" } }}>
           {description}
         </Typography>
       </Box>
 
       <Box
-        flexGrow={1}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        minHeight={192}
-        padding={3}
-        border="1px solid"
-        borderColor="divider"
-        borderRadius={2}
-        sx={{ backgroundColor: "background.paper" }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+          flexGrow: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 192,
+          padding: 3,
+          backgroundColor: "background.paper",
+        }}
       >
         {children}
       </Box>
@@ -136,7 +170,13 @@ export function VireoIconContainerComparisonFrame({
   sourceDimensions,
 }: VireoIconContainerComparisonFrameProps) {
   return (
-    <Stack direction={{ xs: "column", md: "row" }} width="100%" gap={3}>
+    <Stack
+      direction={{ xs: "column", md: "row" }}
+      sx={{
+        width: "100%",
+        gap: 3,
+      }}
+    >
       <IconPreview
         title="Original geometry"
         description={`${sourceDimensions} source SVG shown at its native canvas size.`}

@@ -18,7 +18,12 @@ export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
       <Paper ref={setTarget} sx={{ display: "grid", minHeight: 240, p: 3, placeItems: "center" }}>
-        <Stack alignItems="center" spacing={2}>
+        <Stack
+          spacing={2}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <Typography variant="h6">Presentation surface</Typography>
           <Typography color="text.secondary">
             {isFullscreen ? "This surface owns fullscreen." : "This surface is embedded in the page."}

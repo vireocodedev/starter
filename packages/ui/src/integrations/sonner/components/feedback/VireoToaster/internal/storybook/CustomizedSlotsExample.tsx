@@ -22,7 +22,14 @@ const InstrumentedToaster = React.forwardRef<HTMLElement, SonnerToasterProps & {
 export default function CustomizedSlotsExample() {
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start" sx={{ minHeight: 480, width: "100%" }}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+          minHeight: 480,
+          width: "100%",
+        }}
+      >
         <Typography variant="h6">Instrumented notification region</Typography>
         <Button variant="outlined" onClick={() => toast.success("Audit event recorded", { toasterId })}>
           Record audit event

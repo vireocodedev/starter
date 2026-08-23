@@ -15,7 +15,14 @@ export default function SemanticStatusesExample() {
     <VireoStorybookProvider>
       <Stack spacing={1.5}>
         {statuses.map(status => (
-          <Stack key={status.color} direction="row" spacing={1} alignItems="center">
+          <Stack
+            key={status.color}
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <VireoStatusDot color={status.color} />
             <Typography>{status.label}</Typography>
           </Stack>

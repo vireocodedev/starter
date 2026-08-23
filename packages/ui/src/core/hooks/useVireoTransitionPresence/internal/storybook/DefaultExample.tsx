@@ -18,7 +18,13 @@ export default function DefaultExample() {
         </Stack>
         <Fade in={visible} onExited={completeExit} timeout={300}>
           <Paper sx={{ p: 2 }}>
-            <Typography fontWeight={700}>{renderedValue ?? "No account"}</Typography>
+            <Typography
+              sx={{
+                fontWeight: 700,
+              }}
+            >
+              {renderedValue ?? "No account"}
+            </Typography>
             <Typography color="text.secondary">Retained until the fade exit completes.</Typography>
           </Paper>
         </Fade>

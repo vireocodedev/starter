@@ -8,7 +8,13 @@ export default function ClickableRecordRowExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={1.5} width={560} maxWidth="100%">
+      <Stack
+        spacing={1.5}
+        sx={{
+          maxWidth: "100%",
+          width: 560,
+        }}
+      >
         <Paper variant="outlined">
           <Table>
             <TableBody>
@@ -20,7 +26,13 @@ export default function ClickableRecordRowExample() {
                     collapseLabel="Hide full note"
                     stopPropagation
                   >
-                    <Typography fontWeight={700}>Quarterly account review</Typography>
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                      }}
+                    >
+                      Quarterly account review
+                    </Typography>
                     <Typography color="text.secondary" variant="body2">
                       The rollout is approved. Confirm retention settings, administrator training, and the final
                       production-readiness review before enabling the workspace.

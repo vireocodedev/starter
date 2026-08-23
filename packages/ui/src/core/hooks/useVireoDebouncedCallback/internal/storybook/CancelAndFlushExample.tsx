@@ -18,7 +18,13 @@ export default function CancelAndFlushExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} width="100%" maxWidth={520}>
+      <Stack
+        spacing={2}
+        sx={{
+          maxWidth: 520,
+          width: "100%",
+        }}
+      >
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
           <Button
             variant="contained"

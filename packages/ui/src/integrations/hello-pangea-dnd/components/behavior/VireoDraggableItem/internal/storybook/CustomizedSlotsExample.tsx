@@ -19,7 +19,13 @@ export default function CustomizedSlotsExample() {
             slots={{ root: "article" }}
           >
             <Paper variant="outlined" sx={{ width: 360, p: 1 }}>
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <VireoDragHandle aria-label="Move release task" />
                 <Typography>Prepare release</Typography>
               </Stack>

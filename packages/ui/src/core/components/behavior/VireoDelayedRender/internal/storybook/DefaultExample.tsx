@@ -6,7 +6,14 @@ export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
       <VireoDelayedRender>
-        <Stack direction="row" spacing={1.5} alignItems="center" role="status">
+        <Stack
+          direction="row"
+          spacing={1.5}
+          role="status"
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <CircularProgress size={20} />
           <Typography>Loading report…</Typography>
         </Stack>

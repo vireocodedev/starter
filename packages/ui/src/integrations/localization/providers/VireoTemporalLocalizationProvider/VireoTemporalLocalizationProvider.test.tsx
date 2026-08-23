@@ -1,6 +1,7 @@
 import { resetVireoLocaleWarningsForTests } from "@/integrations/localization/utils/localeResolver";
 import { DateField } from "@mui/x-date-pickers/DateField";
-import { LocalizationProvider, MuiPickersAdapterContext } from "@mui/x-date-pickers/LocalizationProvider";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { usePickerAdapter, usePickerTranslations } from "@mui/x-date-pickers/hooks";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { render, screen } from "@testing-library/react";
 import dayjs from "dayjs";
@@ -10,12 +11,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { VireoTemporalLocalizationProvider } from "./VireoTemporalLocalizationProvider";
 
 function AdapterState({ testId }: { testId: string }) {
-  const context = React.useContext(MuiPickersAdapterContext);
+  const adapter = usePickerAdapter();
+  const localeText = usePickerTranslations();
   return (
     <output
-      data-format={context?.utils?.formats.keyboardDate}
-      data-locale={context?.utils?.getCurrentLocaleCode()}
-      data-text={context?.localeText?.clearButtonLabel}
+      data-format={adapter.formats.keyboardDate}
+      data-locale={adapter.getCurrentLocaleCode()}
+      data-text={localeText.clearButtonLabel}
       data-testid={testId}
     />
   );
@@ -108,8 +110,8 @@ describe("VireoTemporalLocalizationProvider", () => {
         mounts += 1;
         return mounts;
       });
-      const context = React.useContext(MuiPickersAdapterContext);
-      return <output data-testid="child">{`${instance}:${context?.utils?.getCurrentLocaleCode()}`}</output>;
+      const adapter = usePickerAdapter();
+      return <output data-testid="child">{`${instance}:${adapter.getCurrentLocaleCode()}`}</output>;
     }
 
     const { rerender } = render(
@@ -149,7 +151,7 @@ describe("VireoTemporalLocalizationProvider", () => {
       </VireoTemporalLocalizationProvider>,
     );
 
-    expect(screen.getByRole("textbox", { name: "Datum" })).toHaveAttribute("placeholder", "DD.MM.GGGG");
+    expect(screen.getByRole("group", { name: "Datum" })).toHaveTextContent("DD.MM.GGGG");
   });
 
   it("does not treat a native MUI provider as a Vireo provider", () => {

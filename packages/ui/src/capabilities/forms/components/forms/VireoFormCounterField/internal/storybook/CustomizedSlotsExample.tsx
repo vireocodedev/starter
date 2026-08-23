@@ -1,5 +1,5 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";

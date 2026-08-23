@@ -42,7 +42,13 @@ export function VireoStorybookProvider({ children, temporalLocale = "en" }: Vire
     <ThemeProvider theme={vireoStorybookReviewTheme}>
       <VireoTemporalLocalizationProvider locale={temporalLocale}>
         <CssBaseline />
-        <Box width="100%" minWidth={0} color="text.primary">
+        <Box
+          color="text.primary"
+          sx={{
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
           {children}
         </Box>
       </VireoTemporalLocalizationProvider>

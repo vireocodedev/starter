@@ -6,7 +6,7 @@ import type { VireoProviderWrapper } from "./VireoProviderComposer.types";
 
 const OrderContext = React.createContext<string[]>([]);
 
-function namedProvider(name: string, call: ReturnType<typeof vi.fn>): VireoProviderWrapper {
+function namedProvider(name: string, call: (name: string) => void): VireoProviderWrapper {
   return children => {
     call(name);
     return (
@@ -19,7 +19,7 @@ function namedProvider(name: string, call: ReturnType<typeof vi.fn>): VireoProvi
 
 describe("VireoProviderComposer", () => {
   it("orders wrappers from outermost to innermost", () => {
-    const called = vi.fn();
+    const called = vi.fn<(name: string) => void>();
     function Consumer() {
       return <span>{React.useContext(OrderContext).join(" > ")}</span>;
     }

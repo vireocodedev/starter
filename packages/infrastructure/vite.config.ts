@@ -1,19 +1,22 @@
+import { resolve } from "node:path";
 import dts from "vite-plugin-dts";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => ({
   // Per-file declarations avoid API Extractor failures on TanStack Query's
   // private symbol graph while preserving a clean root declaration entrypoint.
   plugins: [
-    tsconfigPaths(),
     dts({
-      rollupTypes: false,
+      bundleTypes: false,
       tsconfigPath: "./tsconfig.json",
       entryRoot: "src",
       exclude: ["tests/**", "docs/**", "**/*.test.ts"],
     }),
   ],
+  resolve: {
+    tsconfigPaths: true,
+    alias: [{ find: /^@\//, replacement: `${resolve(import.meta.dirname, "src")}/` }],
+  },
   build: {
     emptyOutDir: mode !== "watch",
     lib: {

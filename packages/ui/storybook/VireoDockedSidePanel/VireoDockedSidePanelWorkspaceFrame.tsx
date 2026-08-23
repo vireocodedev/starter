@@ -22,7 +22,14 @@ export function VireoDockedSidePanelWorkspaceFrame({ children }: VireoDockedSide
       }}
     >
       <Box component="main" sx={{ flex: 1, minWidth: 0, p: 3 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Box>
             <Typography variant="overline" color="primary.main">
               Finance workspace

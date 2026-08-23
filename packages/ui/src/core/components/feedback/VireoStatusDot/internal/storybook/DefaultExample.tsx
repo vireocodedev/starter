@@ -5,7 +5,13 @@ import { Stack, Typography } from "@mui/material";
 export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <VireoStatusDot color="success" />
         <Typography>Service operational</Typography>
       </Stack>

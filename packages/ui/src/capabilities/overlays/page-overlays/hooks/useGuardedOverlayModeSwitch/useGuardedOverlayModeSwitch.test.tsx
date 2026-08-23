@@ -13,7 +13,7 @@ type TestModes = {
   filters: { value: string };
 };
 
-function GuardedSwitchHarness({ onOpen }: { onOpen: ReturnType<typeof vi.fn> }) {
+function GuardedSwitchHarness({ onOpen }: { onOpen: (mode: keyof TestModes, payload: { value: string }) => void }) {
   const openMode = useGuardedOverlayModeSwitch<TestModes>(true, onOpen);
 
   return (
@@ -23,7 +23,13 @@ function GuardedSwitchHarness({ onOpen }: { onOpen: ReturnType<typeof vi.fn> }) 
   );
 }
 
-function renderHarness({ dirty, onOpen }: { dirty: boolean; onOpen: ReturnType<typeof vi.fn> }) {
+function renderHarness({
+  dirty,
+  onOpen,
+}: {
+  dirty: boolean;
+  onOpen: (mode: keyof TestModes, payload: { value: string }) => void;
+}) {
   let pendingRequest: UnsavedChangesDiscardRequest | undefined;
   const context: UnsavedChangesContextValue = {
     removeRegistration: vi.fn(),
@@ -46,7 +52,7 @@ function renderHarness({ dirty, onOpen }: { dirty: boolean; onOpen: ReturnType<t
 
 describe("useGuardedOverlayModeSwitch", () => {
   it("waits for discard confirmation before replacing dirty overlay content", async () => {
-    const onOpen = vi.fn();
+    const onOpen = vi.fn<(mode: keyof TestModes, payload: { value: string }) => void>();
     const { confirmDiscard } = renderHarness({ dirty: true, onOpen });
 
     fireEvent.click(screen.getByRole("button", { name: "Open filters" }));
@@ -59,7 +65,7 @@ describe("useGuardedOverlayModeSwitch", () => {
   });
 
   it("switches immediately when nothing is dirty", () => {
-    const onOpen = vi.fn();
+    const onOpen = vi.fn<(mode: keyof TestModes, payload: { value: string }) => void>();
     renderHarness({ dirty: false, onOpen });
 
     fireEvent.click(screen.getByRole("button", { name: "Open filters" }));

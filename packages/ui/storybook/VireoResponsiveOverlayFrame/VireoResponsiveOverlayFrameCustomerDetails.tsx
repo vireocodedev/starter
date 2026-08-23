@@ -23,17 +23,42 @@ export function VireoResponsiveOverlayFrameCustomerDetails({
             <Typography variant="h5">Northstar Analytics</Typography>
           </Box>
           <Divider />
-          <Stack direction="row" justifyContent="space-between">
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+            }}
+          >
             <Typography color="text.secondary">Account status</Typography>
             <Chip label="Active" size="small" color="success" />
           </Stack>
-          <Stack direction="row" justifyContent="space-between">
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+            }}
+          >
             <Typography color="text.secondary">Annual value</Typography>
-            <Typography fontWeight={700}>$48,600</Typography>
+            <Typography
+              sx={{
+                fontWeight: 700,
+              }}
+            >
+              $48,600
+            </Typography>
           </Stack>
         </Stack>
       </Box>
-      <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          justifyContent: "flex-end",
+          p: 2,
+          borderTop: 1,
+          borderColor: "divider",
+        }}
+      >
         <Button onClick={onClose}>Cancel</Button>
         <Button variant="contained">Edit customer</Button>
       </Stack>

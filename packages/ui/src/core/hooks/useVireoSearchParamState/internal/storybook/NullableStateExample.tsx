@@ -15,7 +15,13 @@ export default function NullableStateExample() {
       <Stack spacing={2} sx={{ maxWidth: 560 }}>
         <Typography variant="h6">Selected customer</Typography>
         <Typography color="text.secondary">{customer ?? "No customer selected"}</Typography>
-        <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Stack
+          direction="row"
+          sx={{
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
           {customers.map(value => (
             <Button
               key={value}

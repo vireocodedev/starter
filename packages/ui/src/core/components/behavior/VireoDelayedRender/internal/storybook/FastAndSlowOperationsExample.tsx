@@ -27,7 +27,12 @@ export default function FastAndSlowOperationsExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
         <ButtonGroup aria-label="Operation duration">
           <Button onClick={() => runOperation(100)}>Run fast operation</Button>
           <Button onClick={() => runOperation(900)}>Run slow operation</Button>
@@ -38,14 +43,28 @@ export default function FastAndSlowOperationsExample() {
         )}
         {operationState === "running" && (
           <VireoDelayedRender delay={300}>
-            <Stack direction="row" spacing={1.5} alignItems="center" role="status">
+            <Stack
+              direction="row"
+              spacing={1.5}
+              role="status"
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <CircularProgress size={20} />
               <Typography>Still loading…</Typography>
             </Stack>
           </VireoDelayedRender>
         )}
         {operationState === "complete" && (
-          <Stack direction="row" spacing={1} alignItems="center" color="success.main">
+          <Stack
+            direction="row"
+            spacing={1}
+            color="success.main"
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <CheckCircleRoundedIcon aria-hidden />
             <Typography>
               {completedQuickly ? "Completed before fallback mounted" : "Completed after fallback mounted"}

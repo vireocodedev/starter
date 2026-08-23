@@ -3,4 +3,10 @@
 export { DatePicker } from "@mui/x-date-pickers/DatePicker";
 export { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 export { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+export {
+  PickersFilledInput,
+  PickersInput,
+  PickersOutlinedInput,
+  PickersTextField,
+} from "@mui/x-date-pickers/PickersTextField";
 export { TimePicker } from "@mui/x-date-pickers/TimePicker";

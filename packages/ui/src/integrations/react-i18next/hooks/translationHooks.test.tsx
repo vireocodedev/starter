@@ -14,7 +14,6 @@ async function createWrapper() {
   await instance.use(initReactI18next).init({
     lng: "en",
     resources: createStarterResources({ locales: ["en"] }),
-    showSupportNotice: false,
   });
 
   return function LocalizationWrapper({ children }: PropsWithChildren) {

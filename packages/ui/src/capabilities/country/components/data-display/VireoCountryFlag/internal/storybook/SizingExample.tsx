@@ -7,9 +7,21 @@ const widths = [16, 24, 36, 48] as const;
 export default function SizingExample() {
   return (
     <VireoStorybookProvider>
-      <Stack direction="row" alignItems="end" spacing={3}>
+      <Stack
+        direction="row"
+        spacing={3}
+        sx={{
+          alignItems: "end",
+        }}
+      >
         {widths.map(width => (
-          <Stack key={width} alignItems="center" spacing={1}>
+          <Stack
+            key={width}
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <VireoCountryFlag countryCode="DE" width={width} label={`Flag of Germany at ${width} pixels`} />
             <Typography variant="caption">{width}px</Typography>
           </Stack>

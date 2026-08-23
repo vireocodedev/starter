@@ -1,35 +1,70 @@
 import { availableParallelism } from "node:os";
 import { resolve } from "node:path";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 // Tests only. The package is built with `tsc` (see tsconfig.build.json) so that
 // dist mirrors src file-for-file and consumers can deep-import subpaths.
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   // Unit tests consume workspace dependencies from source. Production builds
   // and strict consumer checks validate the published dist entry points.
   resolve: {
+    tsconfigPaths: true,
     alias: [
       {
+        find: /^@vireocodedev\/starter-ui$/,
+        replacement: resolve(import.meta.dirname, "src/index.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/country$/,
+        replacement: resolve(import.meta.dirname, "src/capabilities/country/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/event-source$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/event-source/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/forms$/,
+        replacement: resolve(import.meta.dirname, "src/capabilities/forms/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/hello-pangea-dnd$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/hello-pangea-dnd/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/localization$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/localization/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/sonner$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/sonner/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/tanstack-query$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/tanstack-query/public.ts"),
+      },
+      {
+        find: /^@\//,
+        replacement: `${resolve(import.meta.dirname, "src")}/`,
+      },
+      {
         find: /^@vireocodedev\/starter-infrastructure$/,
-        replacement: resolve(__dirname, "../infrastructure/src/index.ts"),
+        replacement: resolve(import.meta.dirname, "../infrastructure/src/index.ts"),
       },
       {
         find: /^@vireocodedev\/starter-infrastructure\/network-status$/,
-        replacement: resolve(__dirname, "../infrastructure/src/network/appNetworkStatus.ts"),
+        replacement: resolve(import.meta.dirname, "../infrastructure/src/network/appNetworkStatus.ts"),
       },
       {
         find: /^@vireocodedev\/starter-infrastructure\/pagination$/,
-        replacement: resolve(__dirname, "../infrastructure/src/http/pagination.ts"),
+        replacement: resolve(import.meta.dirname, "../infrastructure/src/http/pagination.ts"),
       },
       {
         find: /^@vireocodedev\/starter-history$/,
-        replacement: resolve(__dirname, "../history/src/index.ts"),
+        replacement: resolve(import.meta.dirname, "../history/src/index.ts"),
       },
       {
         find: /^@vireocodedev\/starter-localization$/,
-        replacement: resolve(__dirname, "../localization/src/index.ts"),
+        replacement: resolve(import.meta.dirname, "../localization/src/index.ts"),
       },
     ],
   },

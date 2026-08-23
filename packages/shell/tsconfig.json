@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "types": ["node"],
     "paths": {
       "@vireocodedev/starter-shell": ["./src/index.ts"]
     }

@@ -75,14 +75,16 @@ vi.mock("@mui/material", async importOriginal => {
   return {
     ...actual,
     useMediaQuery: () => testState.variant === "mobile",
-    Dialog: ({ children, maxWidth, onClose, slotProps, TransitionProps }: Record<string, unknown>) => (
+    Dialog: ({ children, maxWidth, onClose, slotProps }: Record<string, unknown>) => (
       <section
         data-testid="desktop-dialog"
         data-max-width={maxWidth}
         data-custom-paper={String(slotProps !== undefined)}
       >
         <button onClick={onClose as () => void}>Close dialog</button>
-        <button onClick={(TransitionProps as { onExited?: () => void } | undefined)?.onExited}>Exit dialog</button>
+        <button onClick={(slotProps as { transition?: { onExited?: () => void } } | undefined)?.transition?.onExited}>
+          Exit dialog
+        </button>
         {children as React.ReactNode}
       </section>
     ),

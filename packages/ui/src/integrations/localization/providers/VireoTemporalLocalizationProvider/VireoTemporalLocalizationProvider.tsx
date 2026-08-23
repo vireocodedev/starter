@@ -11,7 +11,11 @@ import { enUS, hrHR } from "@mui/x-date-pickers/locales";
 import React from "react";
 import type { VireoTemporalLocalizationProviderProps } from "./VireoTemporalLocalizationProvider.types";
 
-export const VIREO_TEMPORAL_LOCALIZATION_MARKER = "__vireoTemporalLocalizationProvider";
+const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/starter-ui/VireoTemporalLocalizationProvider");
+
+class VireoAdapterDayjs extends AdapterDayjs {
+  readonly [VIREO_TEMPORAL_ADAPTER_MARKER] = true;
+}
 
 const BUNDLED_LOCALE_TEXT = {
   en: enUS.components.MuiLocalizationProvider.defaultProps.localeText,
@@ -32,7 +36,6 @@ export function VireoTemporalLocalizationProvider({
     () => ({
       ...bundledLocaleText,
       ...localeText,
-      [VIREO_TEMPORAL_LOCALIZATION_MARKER]: true,
     }),
     [bundledLocaleText, localeText],
   );
@@ -40,7 +43,7 @@ export function VireoTemporalLocalizationProvider({
   return (
     <LocalizationProvider
       adapterLocale={resolvedAdapterLocale}
-      dateAdapter={AdapterDayjs}
+      dateAdapter={VireoAdapterDayjs}
       dateFormats={dateFormats}
       localeText={resolvedLocaleText}
     >

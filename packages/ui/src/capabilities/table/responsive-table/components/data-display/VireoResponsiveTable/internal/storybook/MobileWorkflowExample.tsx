@@ -16,7 +16,13 @@ const columns = [
     renderHeader: () => "Customer",
     renderBody: (row: (typeof rows)[number]) => (
       <Stack>
-        <Typography fontWeight={700}>{row.customer}</Typography>
+        <Typography
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          {row.customer}
+        </Typography>
         <Typography variant="caption" color="text.secondary">
           {row.id}
         </Typography>
@@ -91,7 +97,7 @@ export default function MobileWorkflowExample() {
             fullWidth
             size="small"
             placeholder="Search customers"
-            inputProps={{ "aria-label": "Search customers" }}
+            slotProps={{ htmlInput: { "aria-label": "Search customers" } }}
           />
         )}
         renderMobileFilters={() => (

@@ -16,7 +16,13 @@ export default function BuiltInCodecsExample() {
     <VireoStorybookProvider>
       <Stack spacing={2} sx={{ maxWidth: 520 }}>
         <Typography variant="h6">Results view</Typography>
-        <Stack alignItems="center" direction="row" spacing={1}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <Button disabled={page <= 1} onClick={() => setPage(current => current - 1)}>
             Previous page
           </Button>

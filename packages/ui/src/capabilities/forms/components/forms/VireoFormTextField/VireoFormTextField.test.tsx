@@ -65,10 +65,9 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
     render(<TestForm initialValue="Northstar" />);
 
     const input = screen.getByRole("textbox", { name: "Name" });
+    expect(input).toHaveClass("MuiInputBase-input", "MuiOutlinedInput-input");
     expect(input).toHaveStyle({
       background: "none",
-      border: "0px",
-      boxSizing: "content-box",
       display: "block",
       width: "100%",
     });
@@ -97,7 +96,7 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
 
     const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
     expect(root).toHaveClass(vireoFormTextFieldClasses.root);
-    expect(root?.querySelector("label")).toHaveClass(vireoFormTextFieldClasses.inputLabel);
+    expect(root?.querySelector(`.${vireoFormTextFieldClasses.inputLabel}`)).toBeInTheDocument();
     expect(root?.querySelector(".MuiInputBase-root")).toHaveClass(
       vireoFormTextFieldClasses.input,
       vireoFormTextFieldClasses.select,

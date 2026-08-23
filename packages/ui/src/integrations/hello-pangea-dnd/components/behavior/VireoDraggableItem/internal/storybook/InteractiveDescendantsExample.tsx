@@ -14,9 +14,19 @@ export default function InteractiveDescendantsExample() {
         <VireoDropZone id={{ type: "lane", laneId: "editable" }} mode="reorder">
           <VireoDraggableItem id={{ type: "task", taskId: "editable" }} index={0} dragHandle="explicit">
             <Paper variant="outlined" sx={{ p: 1.5, width: 440 }}>
-              <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <VireoDragHandle aria-label="Move editable task" />
-                <TextField size="small" defaultValue="Editable task" inputProps={{ "aria-label": "Task title" }} />
+                <TextField
+                  size="small"
+                  defaultValue="Editable task"
+                  slotProps={{ htmlInput: { "aria-label": "Task title" } }}
+                />
                 <Button size="small">Open</Button>
                 <Typography variant="caption" color="text.secondary">
                   Only the grip drags

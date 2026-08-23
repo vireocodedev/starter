@@ -40,7 +40,7 @@ export interface QueryEngineApi {
 
 export type CreateQueryEngineApiOptions = {
   /** Consumer-owned schema used to validate/normalize entity keys in responses. Defaults to `z.string()`. */
-  entityKeySchema?: z.ZodTypeAny;
+  entityKeySchema?: z.ZodType<QueryEngineEntityKey>;
   /** Optional legacy path key for back-compat retries (return `undefined` when there is none). */
   legacyEntityKey?: (entityKey: QueryEngineEntityKey) => string | undefined;
 };
@@ -62,11 +62,11 @@ export function createQueryEngineApi(
     requestOptions?.signal?.aborted === true ||
     (typeof DOMException !== "undefined" && error instanceof DOMException && error.name === "AbortError");
 
-  const getParsed = async <TSchema extends z.ZodTypeAny>(
+  const getParsed = async <TOutput>(
     path: string,
-    schema: TSchema,
+    schema: z.ZodType<TOutput>,
     reqOptions?: QueryEngineRequestOptions,
-  ): Promise<z.infer<TSchema>> => schema.parse(await http.get(path, reqOptions));
+  ): Promise<TOutput> => schema.parse(await http.get(path, reqOptions));
 
   const describeEntity = async (
     entityKey: QueryEngineEntityKey,

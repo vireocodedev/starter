@@ -36,9 +36,9 @@ export type HistoryRecordSchemaOptions<
   TSnapshot extends HistorySnapshot = HistorySnapshot,
   TTimestamp extends HistoryTimestamp = HistoryTimestamp,
 > = {
-  entityKind?: z.ZodType<TEntityKind, z.ZodTypeDef, unknown>;
-  snapshot?: z.ZodType<TSnapshot, z.ZodTypeDef, unknown>;
-  timestamp?: z.ZodType<TTimestamp, z.ZodTypeDef, unknown>;
+  entityKind?: z.ZodType<TEntityKind>;
+  snapshot?: z.ZodType<TSnapshot>;
+  timestamp?: z.ZodType<TTimestamp>;
 };
 
 export function createHistoryRecordSchema<
@@ -47,12 +47,10 @@ export function createHistoryRecordSchema<
   TTimestamp extends HistoryTimestamp = HistoryTimestamp,
 >(
   options: HistoryRecordSchemaOptions<TEntityKind, TSnapshot, TTimestamp> = {},
-): z.ZodType<HistoryRecord<TSnapshot, TEntityKind, TTimestamp>, z.ZodTypeDef, unknown> {
-  const entityKindSchema =
-    options.entityKind ?? (z.string().min(1) as unknown as z.ZodType<TEntityKind, z.ZodTypeDef, unknown>);
-  const snapshotSchema = options.snapshot ?? (HistorySnapshotSchema as z.ZodType<TSnapshot, z.ZodTypeDef, unknown>);
-  const timestampSchema =
-    options.timestamp ?? (HistoryTimestampSchema as unknown as z.ZodType<TTimestamp, z.ZodTypeDef, unknown>);
+): z.ZodType<HistoryRecord<TSnapshot, TEntityKind, TTimestamp>> {
+  const entityKindSchema = options.entityKind ?? (z.string().min(1) as unknown as z.ZodType<TEntityKind>);
+  const snapshotSchema = options.snapshot ?? (HistorySnapshotSchema as z.ZodType<TSnapshot>);
+  const timestampSchema = options.timestamp ?? (HistoryTimestampSchema as unknown as z.ZodType<TTimestamp>);
 
   return z.object({
     id: z.string().min(1),
@@ -62,7 +60,7 @@ export function createHistoryRecordSchema<
     entityId: z.string().min(1),
     snapshotPrevious: snapshotSchema.nullable(),
     snapshotCurrent: snapshotSchema.nullable(),
-  }) as z.ZodType<HistoryRecord<TSnapshot, TEntityKind, TTimestamp>, z.ZodTypeDef, unknown>;
+  }) as z.ZodType<HistoryRecord<TSnapshot, TEntityKind, TTimestamp>>;
 }
 
 export const HistoryRecordSchema = createHistoryRecordSchema();

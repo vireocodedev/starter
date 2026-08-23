@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { vireoFormAutocompleteFieldClasses } from "./VireoFormAutocompleteField.classes";
 import { VIREO_FORM_AUTOCOMPLETE_FIELD_NAME } from "./VireoFormAutocompleteField.identity";
 import type { VireoFormAutocompleteFieldProps } from "./VireoFormAutocompleteField.types";
@@ -17,11 +17,11 @@ type Option = (typeof options)[number];
 function TestForm({
   initialValue = null,
   fieldProps = {},
-  onSubmit = vi.fn(),
+  onSubmit = vi.fn(() => undefined),
 }: {
   initialValue?: string | null;
   fieldProps?: Partial<VireoFormAutocompleteFieldProps<Option, string>>;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
 }) {
   const form = useVireoForm({ defaultValues: { teamId: initialValue }, onSubmit });
   const sharedFieldProps = fieldProps as Record<string, unknown>;
@@ -60,7 +60,7 @@ describe(VIREO_FORM_AUTOCOMPLETE_FIELD_NAME, () => {
   });
 
   it("binds and submits a scalar option value", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     render(<TestForm onSubmit={onSubmit} />);
     await choose("Beta");
     await userEvent.click(screen.getByRole("button", { name: "Submit" }));

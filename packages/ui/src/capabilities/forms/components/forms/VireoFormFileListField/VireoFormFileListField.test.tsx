@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { vireoFormFileListFieldClasses } from "./VireoFormFileListField.classes";
 import { VIREO_FORM_FILE_LIST_FIELD_NAME } from "./VireoFormFileListField.identity";
 import type { VireoFormFileListFieldProps } from "./VireoFormFileListField.types";
@@ -11,11 +11,11 @@ import type { VireoFormFileListFieldProps } from "./VireoFormFileListField.types
 type TestFormProps = {
   fieldProps?: Omit<VireoFormFileListFieldProps, "ref"> & { ref?: React.Ref<HTMLDivElement> };
   initialValue?: File[];
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: File[]) => unknown;
 };
 
-function TestForm({ fieldProps, initialValue = [], onSubmit = vi.fn(), validate }: TestFormProps) {
+function TestForm({ fieldProps, initialValue = [], onSubmit = vi.fn(() => undefined), validate }: TestFormProps) {
   const form = useVireoForm({ defaultValues: { attachments: initialValue }, onSubmit });
   return (
     <form.Form>
@@ -52,7 +52,10 @@ describe(VIREO_FORM_FILE_LIST_FIELD_NAME, () => {
   beforeEach(() => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       font: "",
-      measureText: value => ({ width: value.length * 8 }) as TextMetrics,
+      measureText: value =>
+        ({
+          width: value.length * 8,
+        }) as TextMetrics,
     } as CanvasRenderingContext2D);
   });
 
@@ -81,7 +84,7 @@ describe(VIREO_FORM_FILE_LIST_FIELD_NAME, () => {
     const second = file("second.pdf", "two");
     const third = file("third.pdf", "three");
     const onFilesAdded = vi.fn();
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const user = userEvent.setup();
     render(<TestForm initialValue={[initial]} onSubmit={onSubmit} fieldProps={{ onFilesAdded }} />);
 
@@ -284,7 +287,10 @@ describe(VIREO_FORM_FILE_LIST_FIELD_NAME, () => {
     });
     const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       font: "",
-      measureText: value => ({ width: value.length * 8 }) as TextMetrics,
+      measureText: value =>
+        ({
+          width: value.length * 8,
+        }) as TextMetrics,
     } as CanvasRenderingContext2D);
 
     try {

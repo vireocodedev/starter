@@ -5,7 +5,13 @@ import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
-      <Stack direction="row" alignItems="center" spacing={1.25}>
+      <Stack
+        direction="row"
+        spacing={1.25}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <VireoCountryFlag countryCode="HR" label="Flag of Croatia" />
         <Typography>Croatia</Typography>
       </Stack>

@@ -1,6 +1,6 @@
 import { useVireoForm } from "@vireocodedev/starter-ui/forms";
 import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 function TemporalForm() {
@@ -22,6 +22,10 @@ describe("temporal localization public contract", () => {
       </VireoTemporalLocalizationProvider>,
     );
 
-    expect(screen.getByRole("textbox", { name: "Review date" })).toHaveAttribute("placeholder", "MM/DD/YYYY");
+    const field = screen.getByRole("group", { name: "Review date" });
+
+    expect(within(field).getByRole("spinbutton", { name: "Month" })).toHaveTextContent("MM");
+    expect(within(field).getByRole("spinbutton", { name: "Day" })).toHaveTextContent("DD");
+    expect(within(field).getByRole("spinbutton", { name: "Year" })).toHaveTextContent("YYYY");
   });
 });

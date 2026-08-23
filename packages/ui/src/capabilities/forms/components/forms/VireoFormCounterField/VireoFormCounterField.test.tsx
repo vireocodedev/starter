@@ -1,11 +1,11 @@
 import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoForm";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { FormControl, ThemeProvider, createTheme, type FormControlProps } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { z } from "zod";
 import { vireoFormCounterFieldClasses } from "./VireoFormCounterField.classes";
 import { VIREO_FORM_COUNTER_FIELD_NAME } from "./VireoFormCounterField.identity";
@@ -16,12 +16,12 @@ type CounterProps = Partial<VireoFormCounterFieldProps & React.RefAttributes<HTM
 function TestForm({
   fieldProps,
   initialValue = 1,
-  onSubmit = vi.fn(),
+  onSubmit = vi.fn(() => undefined),
   validate,
 }: {
   fieldProps?: CounterProps;
   initialValue?: number | null;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: number | null) => unknown;
 }) {
   const form = useVireoForm({ defaultValues: { quantity: initialValue }, onSubmit });
@@ -48,7 +48,7 @@ describe(VIREO_FORM_COUNTER_FIELD_NAME, () => {
   });
 
   it("steps with buttons and Arrow keys, edits directly, and submits the numeric value", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const user = userEvent.setup();
     render(<TestForm onSubmit={onSubmit} />);
     const input = screen.getByRole("spinbutton", { name: "Quantity" });
@@ -119,7 +119,7 @@ describe(VIREO_FORM_COUNTER_FIELD_NAME, () => {
   });
 
   it("clears to null and rejects unsupported syntax without corrupting the stored value", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const user = userEvent.setup();
     render(<TestForm initialValue={4} onSubmit={onSubmit} />);
     const input = screen.getByRole("spinbutton", { name: "Quantity" });

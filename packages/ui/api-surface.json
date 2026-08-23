@@ -1263,7 +1263,7 @@
         "@mui/material/styles",
         "@mui/material/utils",
         "@mui/x-date-pickers",
-        "@mui/x-date-pickers/LocalizationProvider",
+        "@mui/x-date-pickers/hooks",
         "@tanstack/react-form",
         "dayjs",
         "react",

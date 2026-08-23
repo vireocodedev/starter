@@ -12,7 +12,7 @@ export default function RuntimeLocaleChangeExample() {
   return (
     <VireoStorybookProvider>
       <VireoTemporalLocalizationProvider locale={locale}>
-        <Stack spacing={2} maxWidth={420}>
+        <Stack spacing={2} sx={{ maxWidth: 420 }}>
           <Typography>Active locale: {locale}</Typography>
           <DateField label="Review date" value={dayjs("2026-08-25")} />
           <input aria-label="Persistent note" value={note} onChange={event => setNote(event.target.value)} />

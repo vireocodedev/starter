@@ -12,7 +12,13 @@ export default function HistoryNavigationExample() {
     <VireoStorybookProvider>
       <Stack spacing={2} sx={{ maxWidth: 560 }}>
         <Typography variant="h6">Current view: {view}</Typography>
-        <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Stack
+          direction="row"
+          sx={{
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
           {(["summary", "activity", "billing"] as const).map(value => (
             <Button key={value} variant={view === value ? "contained" : "outlined"} onClick={() => setView(value)}>
               {value}

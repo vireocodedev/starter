@@ -4,7 +4,7 @@ import { VIREO_DOCKED_SIDE_PANEL_NAME } from "./VireoDockedSidePanel.identity";
 import * as dockedSidePanelStories from "./VireoDockedSidePanel.stories";
 import { DOCKED_SIDE_PANEL_TRANSITION_EVENT } from "@/capabilities/overlays/constants/overlay.constants";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { composeStories } from "@storybook/react";
+import { composeStories } from "@storybook/react-vite";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";

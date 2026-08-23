@@ -1,6 +1,6 @@
 import { VireoStorybookProvider } from "../storybook";
 import { DateField } from "@mui/x-date-pickers/DateField";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 describe("VireoStorybookProvider", () => {
@@ -11,7 +11,11 @@ describe("VireoStorybookProvider", () => {
       </VireoStorybookProvider>,
     );
 
-    expect(screen.getByRole("textbox", { name: "Review date" })).toHaveAttribute("placeholder", "MM/DD/YYYY");
+    const field = screen.getByRole("group", { name: "Review date" });
+
+    expect(within(field).getByRole("spinbutton", { name: "Month" })).toHaveTextContent("MM");
+    expect(within(field).getByRole("spinbutton", { name: "Day" })).toHaveTextContent("DD");
+    expect(within(field).getByRole("spinbutton", { name: "Year" })).toHaveTextContent("YYYY");
   });
 
   it("allows stories to select the temporal locale explicitly", () => {
@@ -21,6 +25,10 @@ describe("VireoStorybookProvider", () => {
       </VireoStorybookProvider>,
     );
 
-    expect(screen.getByRole("textbox", { name: "Datum" })).toHaveAttribute("placeholder", "DD.MM.GGGG");
+    const field = screen.getByRole("group", { name: "Datum" });
+
+    expect(within(field).getByRole("spinbutton", { name: "Dan" })).toHaveTextContent("DD");
+    expect(within(field).getByRole("spinbutton", { name: "Mjesec" })).toHaveTextContent("MM");
+    expect(within(field).getByRole("spinbutton", { name: "Godina" })).toHaveTextContent("GGGG");
   });
 });

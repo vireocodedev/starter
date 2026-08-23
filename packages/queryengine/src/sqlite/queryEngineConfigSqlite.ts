@@ -7,7 +7,7 @@ export type SqliteQueryEngineConfigRecord = {
 
 export const SqliteQueryEngineConfigRecordSchema: z.ZodType<SqliteQueryEngineConfigRecord> = z.object({
   entities: z.array(z.unknown()),
-  entityDefinitions: z.record(z.unknown()),
+  entityDefinitions: z.record(z.string(), z.unknown()),
 });
 
 export type QueryEngineConfigSqliteOperationMap = {

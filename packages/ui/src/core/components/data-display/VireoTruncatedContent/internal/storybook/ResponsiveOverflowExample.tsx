@@ -8,7 +8,12 @@ export default function ResponsiveOverflowExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
         <ButtonGroup aria-label="Preview width">
           <Button variant={compact ? "contained" : "outlined"} onClick={() => setCompact(true)}>
             Compact
@@ -18,9 +23,11 @@ export default function ResponsiveOverflowExample() {
           </Button>
         </ButtonGroup>
         <Box
-          width={compact ? 260 : 560}
-          maxWidth="100%"
-          sx={{ transition: theme => theme.transitions.create("width") }}
+          sx={{
+            maxWidth: "100%",
+            width: compact ? 260 : 560,
+            transition: theme => theme.transitions.create("width"),
+          }}
         >
           <VireoTruncatedContent collapsedHeight={24} expandLabel="Show more" collapseLabel="Show less">
             <Typography variant="body2">

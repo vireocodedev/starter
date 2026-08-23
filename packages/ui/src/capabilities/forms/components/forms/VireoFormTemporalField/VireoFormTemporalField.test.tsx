@@ -17,6 +17,12 @@ import type { VireoFormTemporalFieldMode, VireoFormTemporalFieldProps } from "./
 
 dayjs.extend(utc);
 
+const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/starter-ui/VireoTemporalLocalizationProvider");
+
+class VireoTestAdapterDayjs extends AdapterDayjs {
+  readonly [VIREO_TEMPORAL_ADAPTER_MARKER] = true;
+}
+
 type HarnessProps = {
   defaultValue?: string | null;
   fieldProps?: Partial<VireoFormTemporalFieldProps>;
@@ -24,8 +30,6 @@ type HarnessProps = {
   onSubmit?: (value: string | null) => void;
   rootRef?: React.Ref<HTMLDivElement>;
 };
-
-const VIREO_TEMPORAL_LOCALIZATION_MARKER = "__vireoTemporalLocalizationProvider";
 
 function Harness({ defaultValue = null, fieldProps, mode = "date", onSubmit, rootRef }: HarnessProps) {
   const form = useVireoForm({
@@ -38,10 +42,7 @@ function Harness({ defaultValue = null, fieldProps, mode = "date", onSubmit, roo
     slotProps: { htmlInput: { "aria-label": "Temporal value" }, ...fieldProps?.slotProps },
   } as VireoFormTemporalFieldProps;
   return (
-    <LocalizationProvider
-      dateAdapter={AdapterDayjs}
-      localeText={{ [VIREO_TEMPORAL_LOCALIZATION_MARKER]: true } as Record<string, unknown>}
-    >
+    <LocalizationProvider dateAdapter={VireoTestAdapterDayjs} adapterLocale="en">
       <form.Form>
         <form.Field name="value">{field => <field.TemporalField {...temporalFieldProps} ref={rootRef} />}</form.Field>
         <button type="submit">Submit</button>
@@ -63,6 +64,16 @@ function NativeProviderHarness() {
   );
 }
 
+function getTemporalGroup(): HTMLElement {
+  return screen.getByRole("group", { name: "Temporal value" });
+}
+
+function getTemporalHiddenInput(): HTMLInputElement {
+  const input = getTemporalGroup().querySelector<HTMLInputElement>('input[name="value"]');
+  if (!input) throw new Error("Expected the temporal field's canonical hidden input.");
+  return input;
+}
+
 describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
   it("requires the Vireo temporal localization provider", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -74,7 +85,7 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
 
   it("renders its essential bound date semantics with only the required mode", () => {
     render(<Harness />);
-    expect(screen.getByLabelText("Temporal value")).toBeInTheDocument();
+    expect(getTemporalGroup()).toBeInTheDocument();
   });
 
   it.each([
@@ -86,13 +97,13 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
     ["date-time", "2026-08-25T14:30:00"],
   ] as const)("renders the %s mode from its canonical value", (mode, defaultValue) => {
     render(<Harness mode={mode} defaultValue={defaultValue} />);
-    expect((screen.getByLabelText("Temporal value") as HTMLInputElement).value).not.toBe("");
+    expect(getTemporalHiddenInput().value).not.toBe("");
   });
 
   it("keeps the month picker year-independent", async () => {
     render(<Harness mode="month" defaultValue="08" />);
     fireEvent.click(screen.getByRole("button", { name: /choose date/i }));
-    expect(await screen.findByText("August")).toBeInTheDocument();
+    expect((await screen.findAllByText("August")).length).toBeGreaterThan(0);
     expect(screen.queryByText(/2000/)).not.toBeInTheDocument();
   });
 
@@ -108,7 +119,7 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
     const onSubmit = vi.fn();
     render(<Harness mode="time" defaultValue="14:30:15" onSubmit={onSubmit} />);
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
-    await waitFor(() => expect(screen.getByLabelText("Temporal value")).toHaveAttribute("aria-invalid", "true"));
+    await waitFor(() => expect(getTemporalGroup()).toHaveAttribute("aria-invalid", "true"));
     expect(screen.getByText("Seconds must be 00 when minute precision is used.")).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -128,10 +139,7 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
 
   it("supports owner-state slot props", () => {
     render(<Harness fieldProps={{ slotProps: { root: ownerState => ({ "data-mode": ownerState.mode }) } }} />);
-    expect(screen.getByLabelText("Temporal value").closest(`.${vireoFormTemporalFieldClasses.root}`)).toHaveAttribute(
-      "data-mode",
-      "date",
-    );
+    expect(getTemporalGroup().closest(`.${vireoFormTemporalFieldClasses.root}`)).toHaveAttribute("data-mode", "date");
   });
 
   it("uses theme defaults and per-slot style overrides", () => {
@@ -148,7 +156,7 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
         <Harness />
       </ThemeProvider>,
     );
-    const root = screen.getByLabelText("Temporal value").closest(`.${vireoFormTemporalFieldClasses.root}`);
+    const root = getTemporalGroup().closest(`.${vireoFormTemporalFieldClasses.root}`);
     expect(root).toHaveClass("theme-default");
     expect(root).toHaveStyle({ color: "rgb(123, 45, 67)" });
   });

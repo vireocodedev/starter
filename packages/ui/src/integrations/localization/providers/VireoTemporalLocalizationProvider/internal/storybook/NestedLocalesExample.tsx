@@ -8,7 +8,7 @@ export default function NestedLocalesExample() {
   return (
     <VireoStorybookProvider>
       <VireoTemporalLocalizationProvider locale="en">
-        <Stack spacing={2} maxWidth={520}>
+        <Stack spacing={2} sx={{ maxWidth: 520 }}>
           <Typography>Outer English scope</Typography>
           <DateField label="Review date" value={dayjs("2026-08-25")} />
           <VireoTemporalLocalizationProvider locale="hr">

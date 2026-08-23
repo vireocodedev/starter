@@ -18,7 +18,13 @@ const OrganizationFlag = React.forwardRef<SVGSVGElement, React.SVGProps<SVGSVGEl
 export default function CustomizedSlotsExample() {
   return (
     <VireoStorybookProvider>
-      <Stack direction="row" alignItems="center" spacing={1.25}>
+      <Stack
+        direction="row"
+        spacing={1.25}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <VireoCountryFlag
           countryCode="NORTHSTAR"
           label="Northstar organization flag"

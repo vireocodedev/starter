@@ -20,7 +20,17 @@ export default tseslint.config(
       "react-refresh": reactRefresh,
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // Keep the established hooks contract explicit. React Hooks 7 folds
+      // React Compiler diagnostics into its recommended preset; adopting
+      // those rules belongs with the React 19/compiler migration rather than
+      // an ESLint runtime upgrade.
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      // ESLint 10 added these rules to @eslint/js recommended. Enable them in
+      // a dedicated source-policy change instead of silently broadening this
+      // toolchain-only migration.
+      "no-useless-assignment": "off",
+      "preserve-caught-error": "off",
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/consistent-type-imports": "error",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],

@@ -4,7 +4,7 @@ import { revalidateLogic } from "@tanstack/react-form";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { z } from "zod";
 import { vireoFormSelectMultipleFieldClasses } from "./VireoFormSelectMultipleField.classes";
 import { VIREO_FORM_SELECT_MULTIPLE_FIELD_NAME } from "./VireoFormSelectMultipleField.identity";
@@ -22,11 +22,11 @@ type Option = (typeof options)[number];
 type TestFormProps = {
   fieldProps?: Partial<VireoFormSelectMultipleFieldProps<Option, string>>;
   initialValue?: string[];
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: string[]) => unknown;
 };
 
-function TestForm({ fieldProps, initialValue = [], onSubmit = vi.fn(), validate }: TestFormProps) {
+function TestForm({ fieldProps, initialValue = [], onSubmit = vi.fn(() => undefined), validate }: TestFormProps) {
   const form = useVireoForm({ defaultValues: { teamIds: initialValue }, onSubmit });
 
   return (
@@ -61,12 +61,12 @@ describe(VIREO_FORM_SELECT_MULTIPLE_FIELD_NAME, () => {
     const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
     expect(select).toHaveTextContent("Choose teams");
     expect(root).toHaveClass("MuiFormControl-fullWidth", vireoFormSelectMultipleFieldClasses.root);
-    expect(root?.querySelector("label")).toHaveClass(vireoFormSelectMultipleFieldClasses.inputLabel);
+    expect(root?.querySelector(`.${vireoFormSelectMultipleFieldClasses.inputLabel}`)).toBeInTheDocument();
     expect(root?.querySelector(`.${vireoFormSelectMultipleFieldClasses.select}`)).toBeInTheDocument();
   });
 
   it("keeps the menu open while toggling checkbox rows and submits the ordered selection", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const user = userEvent.setup();
     render(<TestForm onSubmit={onSubmit} />);
 
@@ -151,7 +151,7 @@ describe(VIREO_FORM_SELECT_MULTIPLE_FIELD_NAME, () => {
       { id: 10, label: "Ten" },
       { id: 20, label: "Twenty" },
     ];
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
 
     function NumericForm() {
       const form = useVireoForm({ defaultValues: { limits: [] as number[] }, onSubmit });

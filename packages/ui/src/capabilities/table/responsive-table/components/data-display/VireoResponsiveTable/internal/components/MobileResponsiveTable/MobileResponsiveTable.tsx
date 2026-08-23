@@ -251,7 +251,12 @@ export function MobileResponsiveTable<
           maxHeight="88dvh"
         >
           <Box sx={{ px: 3, pb: 1, borderBottom: 1, borderColor: "divider" }}>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+              }}
+            >
               {filtersLabel}
             </Typography>
           </Box>
@@ -507,14 +512,44 @@ function MobileResponsiveTableSkeleton({
               bgcolor: "surface.raised",
             }}
           >
-            <Skeleton animation="wave" height={22} variant="rounded" width={`${42 + ((cardIndex * 13) % 24)}%`} />
+            <Skeleton
+              animation="wave"
+              variant="rounded"
+              sx={{
+                height: 22,
+                width: `${42 + ((cardIndex * 13) % 24)}%`,
+              }}
+            />
             {hasEndAdornment || hasHelper ? (
               <Stack spacing={0.5} sx={{ ml: "auto", alignItems: "flex-end" }}>
-                {hasEndAdornment ? <Skeleton animation="wave" height={18} width={72} /> : null}
-                {hasHelper ? <Skeleton animation="wave" height={14} width={48} /> : null}
+                {hasEndAdornment ? (
+                  <Skeleton
+                    animation="wave"
+                    sx={{
+                      height: 18,
+                      width: 72,
+                    }}
+                  />
+                ) : null}
+                {hasHelper ? (
+                  <Skeleton
+                    animation="wave"
+                    sx={{
+                      height: 14,
+                      width: 48,
+                    }}
+                  />
+                ) : null}
               </Stack>
             ) : null}
-            <Skeleton animation="wave" height={24} variant="circular" width={24} />
+            <Skeleton
+              animation="wave"
+              variant="circular"
+              sx={{
+                height: 24,
+                width: 24,
+              }}
+            />
           </Box>
         </Box>
       ))}

@@ -19,9 +19,14 @@ export default function FlagRegistryExample() {
           <Stack
             key={countryCode}
             direction="row"
-            alignItems="center"
             spacing={1}
-            sx={{ p: 1, border: 1, borderColor: "divider", borderRadius: 1 }}
+            sx={{
+              alignItems: "center",
+              p: 1,
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 1,
+            }}
           >
             <VireoCountryFlag countryCode={countryCode} />
             <Box sx={{ minWidth: 0 }}>

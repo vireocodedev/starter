@@ -136,7 +136,7 @@ const VireoQueryBoundaryFallback = React.forwardRef<HTMLDivElement, FallbackProp
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
     const { className: loadingClassName, size: loadingSize, ...loadingOther } = resolvedLoadingIndicatorSlotProps;
     const { className: alertClassName, ...alertOther } = resolvedErrorAlertSlotProps;
-    const { className: actionsClassName, ...actionsOther } = resolvedActionsSlotProps;
+    const { className: actionsClassName, sx: actionsSx, ...actionsOther } = resolvedActionsSlotProps;
     const { className: retryClassName, onClick: retrySlotOnClick, ...retryOther } = resolvedRetryButtonSlotProps;
     const {
       className: detailsButtonClassName,
@@ -215,11 +215,11 @@ const VireoQueryBoundaryFallback = React.forwardRef<HTMLDivElement, FallbackProp
               <VireoQueryBoundaryActions
                 direction="row"
                 spacing={1}
-                alignItems="center"
                 {...actionsOther}
                 as={slots.actions}
                 ownerState={ownerState}
                 className={joinClassNames(classes.actions, actionsClassName)}
+                sx={mergeSx({ alignItems: "center" }, actionsSx)}
               >
                 {retryable && (
                   <VireoQueryBoundaryRetryButton

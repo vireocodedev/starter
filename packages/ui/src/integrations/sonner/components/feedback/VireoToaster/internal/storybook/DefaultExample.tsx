@@ -5,9 +5,23 @@ import { Button, Stack, Typography } from "@mui/material";
 export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start" sx={{ minHeight: 480, width: "100%" }}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+          minHeight: 480,
+          width: "100%",
+        }}
+      >
         <Typography variant="h6">Workspace notifications</Typography>
-        <Stack direction="row" useFlexGap flexWrap="wrap" gap={1}>
+        <Stack
+          direction="row"
+          useFlexGap
+          sx={{
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
           <Button variant="outlined" onClick={() => toast("Background sync completed")}>
             Neutral
           </Button>

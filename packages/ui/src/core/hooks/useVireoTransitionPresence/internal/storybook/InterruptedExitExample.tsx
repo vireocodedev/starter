@@ -21,7 +21,13 @@ export default function InterruptedExitExample() {
         </Stack>
         <Fade in={visible} onExited={completeExit} timeout={800}>
           <Paper sx={{ p: 2 }}>
-            <Typography fontWeight={700}>{renderedValue ?? "No account"}</Typography>
+            <Typography
+              sx={{
+                fontWeight: 700,
+              }}
+            >
+              {renderedValue ?? "No account"}
+            </Typography>
             <Typography color="text.secondary">
               Select either account during the slower exit to reverse it without clearing the new value.
             </Typography>

@@ -482,7 +482,7 @@ function VireoFormFreeSoloAutocompleteMultipleFieldImpl<TOption>(
             className: joinClassNames(classes.popupButton, resolved.popupButton?.className as string),
           },
         }}
-        renderTags={() => {
+        renderValue={() => {
           const SelectedOptions = slots.selectedOptions ?? VireoFormFreeSoloAutocompleteMultipleFieldSelectedOptions;
           const SelectedOption = slots.selectedOption ?? VireoFormFreeSoloAutocompleteMultipleFieldSelectedOption;
           const DeleteIcon =
@@ -617,7 +617,7 @@ function VireoFormFreeSoloAutocompleteMultipleFieldImpl<TOption>(
                   checked={state.selected}
                   tabIndex={-1}
                   disableRipple
-                  inputProps={{ "aria-hidden": true }}
+                  slotProps={{ input: { "aria-hidden": true } }}
                   className={joinClassNames(classes.optionCheckbox, resolved.optionCheckbox?.className as string)}
                   ownerState={ownerState}
                 />
@@ -664,7 +664,7 @@ function VireoFormFreeSoloAutocompleteMultipleFieldImpl<TOption>(
               ownerState={ownerState}
             />
           ) : null;
-          const autocompleteInputRef = params.inputProps.ref as React.Ref<HTMLInputElement> | undefined;
+          const autocompleteInputRef = params.slotProps.htmlInput.ref as React.Ref<HTMLInputElement> | undefined;
           return (
             <TextField
               {...params}
@@ -720,44 +720,46 @@ function VireoFormFreeSoloAutocompleteMultipleFieldImpl<TOption>(
                 setFocused(false);
                 field.handleBlur();
               }}
-              InputLabelProps={{
-                ...params.InputLabelProps,
-                ...resolved.inputLabel,
-                className: joinClassNames(classes.inputLabel, resolved.inputLabel?.className as string),
-              }}
-              InputProps={{
-                ...params.InputProps,
-                ...resolved.input,
-                className: joinClassNames(
-                  classes.input,
-                  params.InputProps.className,
-                  resolved.input?.className as string,
-                ),
-                endAdornment: (
-                  <>
-                    {loadingAdornment}
-                    {params.InputProps.endAdornment}
-                  </>
-                ),
-              }}
-              inputProps={{
-                ...params.inputProps,
-                ...htmlInputProps,
-                name: field.name,
-                ref: (node: HTMLInputElement | null) => {
-                  assignRef(autocompleteInputRef, node);
-                  assignRef(combinedInputRef, node);
+              slotProps={{
+                inputLabel: {
+                  ...params.slotProps.inputLabel,
+                  ...resolved.inputLabel,
+                  className: joinClassNames(classes.inputLabel, resolved.inputLabel?.className as string),
                 },
-                className: joinClassNames(
-                  classes.htmlInput,
-                  params.inputProps.className,
-                  htmlInputProps.className as string,
-                ),
-                "aria-invalid": effectiveError || undefined,
-              }}
-              FormHelperTextProps={{
-                ...resolved.formHelperText,
-                className: joinClassNames(classes.formHelperText, resolved.formHelperText?.className as string),
+                input: {
+                  ...params.slotProps.input,
+                  ...resolved.input,
+                  className: joinClassNames(
+                    classes.input,
+                    params.slotProps.input.className,
+                    resolved.input?.className as string,
+                  ),
+                  endAdornment: (
+                    <>
+                      {loadingAdornment}
+                      {params.slotProps.input.endAdornment}
+                    </>
+                  ),
+                },
+                htmlInput: {
+                  ...params.slotProps.htmlInput,
+                  ...htmlInputProps,
+                  name: field.name,
+                  ref: (node: HTMLInputElement | null) => {
+                    assignRef(autocompleteInputRef, node);
+                    assignRef(combinedInputRef, node);
+                  },
+                  className: joinClassNames(
+                    classes.htmlInput,
+                    params.slotProps.htmlInput.className,
+                    htmlInputProps.className as string,
+                  ),
+                  "aria-invalid": effectiveError || undefined,
+                },
+                formHelperText: {
+                  ...resolved.formHelperText,
+                  className: joinClassNames(classes.formHelperText, resolved.formHelperText?.className as string),
+                },
               }}
             />
           );
