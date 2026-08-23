@@ -1,4 +1,5 @@
 plugins {
+    id 'java-base'
     id 'com.adarshr.test-logger' version '4.0.0' apply false
 }
 
@@ -13,6 +14,10 @@ ext.publishedModules = [
         'vireo-starter-history',
         'vireo-starter-bom',
 ]
+
+repositories {
+    mavenCentral()
+}
 
 subprojects {
     group = rootProject.group
@@ -95,15 +100,35 @@ configure(subprojects.findAll { it.name != 'vireo-starter-bom' }) {
 def documentedModules = subprojects.findAll {
     it.name in rootProject.ext.publishedModules && it.name != 'vireo-starter-bom'
 }
+def aggregateJavadocClasspath = configurations.create('aggregateJavadocClasspath') {
+    canBeConsumed = false
+    canBeResolved = true
+    description = 'Root-owned classpath used to render the complete published JVM API.'
+    attributes {
+        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_API))
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.JAR))
+        attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 21)
+    }
+}
+
+dependencies {
+    add(aggregateJavadocClasspath.name, platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
+    documentedModules.each {
+        add(aggregateJavadocClasspath.name, project(it.path))
+    }
+    add(aggregateJavadocClasspath.name, 'org.projectlombok:lombok')
+    add(aggregateJavadocClasspath.name, 'org.flywaydb:flyway-core')
+    add(aggregateJavadocClasspath.name, 'org.springframework.boot:spring-boot-flyway')
+}
 
 tasks.register('aggregateJavadoc', Javadoc) {
     group = 'documentation'
     description = 'Generates one Javadoc site for every published JVM library.'
     title = "Vireo Starter JVM ${project.version} API"
     source documentedModules.collect { it.sourceSets.main.allJava }
-    classpath = files(documentedModules.collect {
-        [it.sourceSets.main.output, it.sourceSets.main.compileClasspath]
-    })
+    classpath = aggregateJavadocClasspath
     destinationDir = layout.buildDirectory.dir('docs/javadoc').get().asFile
     options.addStringOption('Xdoclint:all,-missing', '-quiet')
     dependsOn documentedModules.collect { it.tasks.named('classes') }
