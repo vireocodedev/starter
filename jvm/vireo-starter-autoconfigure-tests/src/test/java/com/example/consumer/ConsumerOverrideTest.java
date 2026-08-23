@@ -25,6 +25,9 @@ import com.vireocode.starter.auth.DatabaseUserDetailsService;
 import com.vireocode.starter.base.HistoryEntityType;
 import com.vireocode.starter.base.HistoryEventsRecorder;
 import com.vireocode.starter.history.HistoryController;
+import com.vireocode.starter.history.HistoryActor;
+import com.vireocode.starter.history.HistoryActorResolver;
+import com.vireocode.starter.history.HistoryReadAuthorizer;
 import com.vireocode.starter.history.HistoryRecorder;
 import com.vireocode.starter.offline.OfflineActor;
 import com.vireocode.starter.offline.OfflineActorResolver;
@@ -77,6 +80,13 @@ class ConsumerOverrideTest {
     }
 
     @Test
+    @DisplayName("replaces history actor and read policies")
+    void replacesHistoryPolicies() {
+        assertThat(context.getBean(HistoryActorResolver.class)).isInstanceOf(FixedHistoryActorResolver.class);
+        assertThat(context.getBean(HistoryReadAuthorizer.class)).isInstanceOf(FixedHistoryReadAuthorizer.class);
+    }
+
+    @Test
     @DisplayName("replaces the offline actor resolver")
     void replacesTheOfflineActorResolver() {
         assertThat(context.getBean(OfflineActorResolver.class)).isInstanceOf(FixedActorResolver.class);
@@ -121,6 +131,16 @@ class ConsumerOverrideTest {
         }
 
         @Bean
+        HistoryActorResolver consumerHistoryActorResolver() {
+            return new FixedHistoryActorResolver();
+        }
+
+        @Bean("historyReadAuthorizer")
+        HistoryReadAuthorizer consumerHistoryReadAuthorizer() {
+            return new FixedHistoryReadAuthorizer();
+        }
+
+        @Bean
         OfflineActorResolver consumerActorResolver() {
             return new FixedActorResolver();
         }
@@ -147,6 +167,23 @@ class ConsumerOverrideTest {
         @Override
         public Optional<OfflineActor> resolveCurrentActor() {
             return Optional.empty();
+        }
+    }
+
+    static class FixedHistoryActorResolver implements HistoryActorResolver {
+
+        @Override
+        public Optional<HistoryActor> resolveCurrentActor() {
+            return Optional.of(new HistoryActor("consumer-1", "Consumer"));
+        }
+    }
+
+    static class FixedHistoryReadAuthorizer implements HistoryReadAuthorizer {
+
+        @Override
+        public boolean canRead(org.springframework.security.core.Authentication authentication,
+                String entity, String entityId) {
+            return true;
         }
     }
 }

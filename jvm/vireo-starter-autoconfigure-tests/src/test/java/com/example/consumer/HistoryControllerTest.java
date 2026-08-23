@@ -134,6 +134,17 @@ class HistoryControllerTest {
     }
 
     @Test
+    @DisplayName("GET " + API_BASE_URL + " - Rejects blank entity identity")
+    @WithMockUser(username = "demo", roles = "USER")
+    void find_WithBlankEntity_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(get(API_BASE_URL)
+                .with(csrf())
+                .queryParam("entity", " ")
+                .queryParam("entityId", "1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("GET " + API_BASE_URL + " - Returns unauthorized without authentication")
     void find_WithoutAuthentication_ReturnsUnauthorized() throws Exception {
         mockMvc.perform(get(API_BASE_URL)

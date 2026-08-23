@@ -19,4 +19,4 @@ CREATE TABLE IF NOT EXISTS history (
     snapshot_current TEXT
 );
 
-CREATE INDEX IF NOT EXISTS ix_history_entity_row ON history (entity, entity_id, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS ix_history_entity_row ON history (entity, entity_id, occurred_at DESC, id DESC);

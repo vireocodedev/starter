@@ -11,8 +11,8 @@ public abstract interface com.vireocode.starter.history.HistoryActorResolver
     public abstract java.util.Optional<com.vireocode.starter.history.HistoryActor> com.vireocode.starter.history.HistoryActorResolver.resolveCurrentActor()
 
 public class com.vireocode.starter.history.HistoryController
-    public com.vireocode.starter.history.HistoryController(com.vireocode.starter.history.HistoryRepository,com.fasterxml.jackson.databind.ObjectMapper)
-    public java.util.List<com.vireocode.starter.history.HistoryRecord> com.vireocode.starter.history.HistoryController.find(java.lang.String,java.lang.String,java.lang.String)
+    public com.vireocode.starter.history.HistoryController(com.vireocode.starter.history.HistoryRepository,com.fasterxml.jackson.databind.ObjectMapper,com.vireocode.starter.history.StarterHistoryProperties)
+    public java.util.List<com.vireocode.starter.history.HistoryRecord> com.vireocode.starter.history.HistoryController.find(java.lang.String,java.lang.String,java.lang.Integer)
 
 public class com.vireocode.starter.history.HistoryEntry
     public com.vireocode.starter.history.HistoryEntry()
@@ -32,6 +32,9 @@ public class com.vireocode.starter.history.HistoryEntry
     public void com.vireocode.starter.history.HistoryEntry.setOccurredAt(java.time.Instant)
     public void com.vireocode.starter.history.HistoryEntry.setSnapshotCurrent(java.lang.String)
     public void com.vireocode.starter.history.HistoryEntry.setSnapshotPrevious(java.lang.String)
+
+public abstract interface com.vireocode.starter.history.HistoryReadAuthorizer
+    public abstract boolean com.vireocode.starter.history.HistoryReadAuthorizer.canRead(org.springframework.security.core.Authentication,java.lang.String,java.lang.String)
 
 public final record com.vireocode.starter.history.HistoryRecord
     extends java.lang.Record
@@ -61,7 +64,19 @@ public class com.vireocode.starter.history.HistoryRecordingException
 
 public abstract interface com.vireocode.starter.history.HistoryRepository
     implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.starter.history.HistoryEntry, java.util.UUID>
-    public abstract java.util.List<com.vireocode.starter.history.HistoryEntry> com.vireocode.starter.history.HistoryRepository.findByEntityAndEntityIdOrderByOccurredAtDesc(java.lang.String,java.lang.String,org.springframework.data.domain.Pageable)
+    public abstract java.util.List<com.vireocode.starter.history.HistoryEntry> com.vireocode.starter.history.HistoryRepository.findByEntityAndEntityIdOrderByOccurredAtDescIdDesc(java.lang.String,java.lang.String,org.springframework.data.domain.Pageable)
 
 public class com.vireocode.starter.history.StarterHistoryAutoConfiguration
     public com.vireocode.starter.history.StarterHistoryAutoConfiguration()
+
+public class com.vireocode.starter.history.StarterHistoryProperties
+    public com.vireocode.starter.history.StarterHistoryProperties()
+    public boolean com.vireocode.starter.history.StarterHistoryProperties.isDefaultLimitWithinMaximum()
+    public boolean com.vireocode.starter.history.StarterHistoryProperties.isEndpointEnabled()
+    public int com.vireocode.starter.history.StarterHistoryProperties.getDefaultLimit()
+    public int com.vireocode.starter.history.StarterHistoryProperties.getMaxLimit()
+    public java.lang.String com.vireocode.starter.history.StarterHistoryProperties.getEndpointPath()
+    public void com.vireocode.starter.history.StarterHistoryProperties.setDefaultLimit(int)
+    public void com.vireocode.starter.history.StarterHistoryProperties.setEndpointEnabled(boolean)
+    public void com.vireocode.starter.history.StarterHistoryProperties.setEndpointPath(java.lang.String)
+    public void com.vireocode.starter.history.StarterHistoryProperties.setMaxLimit(int)

@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface HistoryRepository extends JpaRepository<HistoryEntry, java.util.UUID> {
 
-    List<HistoryEntry> findByEntityAndEntityIdOrderByOccurredAtDesc(String entity, String entityId,
+    List<HistoryEntry> findByEntityAndEntityIdOrderByOccurredAtDescIdDesc(String entity, String entityId,
             Pageable pageable);
 }
