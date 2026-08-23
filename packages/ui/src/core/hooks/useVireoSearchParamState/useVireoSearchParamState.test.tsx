@@ -349,8 +349,8 @@ describe("useVireoSearchParamState", () => {
       useVireoSearchParamState("missing-codec", { defaultValue: 1 });
       // @ts-expect-error Nullable state requires a codec.
       useVireoSearchParamState("missing-nullable-codec", { defaultValue: null });
-      // @ts-expect-error A null default cannot be retained in the URL.
       useVireoSearchParamState("nullable-retained", {
+        // @ts-expect-error A null default cannot be retained in the URL.
         defaultValue: null,
         codec: vireoSearchParamCodecs.string,
         keepDefaultInUrl: true,

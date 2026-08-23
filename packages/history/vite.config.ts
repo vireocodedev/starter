@@ -3,7 +3,15 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => ({
-  plugins: [tsconfigPaths(), dts({ rollupTypes: true, tsconfigPath: "./tsconfig.json" })],
+  plugins: [
+    tsconfigPaths(),
+    dts({
+      bundleTypes: false,
+      tsconfigPath: "./tsconfig.json",
+      entryRoot: "src",
+      exclude: ["tests/**", "docs/**", "**/*.test.ts"],
+    }),
+  ],
   build: {
     emptyOutDir: mode !== "watch",
     lib: {

@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     tsconfigPaths(),
     dts({
-      rollupTypes: false,
+      bundleTypes: false,
       tsconfigPath: "./tsconfig.json",
       entryRoot: "src",
       exclude: ["tests/**", "docs/**", "**/*.test.ts"],
