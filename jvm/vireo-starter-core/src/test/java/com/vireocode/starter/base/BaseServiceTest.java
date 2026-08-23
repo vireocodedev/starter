@@ -122,6 +122,26 @@ class BaseServiceTest {
     }
 
     @Test
+    void create_RecordsHistoryWhenConfigured() {
+        SearchableRepository<TestEntity, Long> repository = mockRepository();
+        BaseMapper<TestEntity, TestDto> mapper = mockMapper();
+        TestBaseService service = new TestBaseService(repository, mapper, historyConfig());
+        service.historyRecorder = mock(HistoryEventsRecorder.class);
+
+        TestDto input = new TestDto("new item");
+        TestEntity mapped = entity(1L, "new item", false);
+        TestEntity saved = entity(10L, "new item", false);
+        TestDto created = new TestDto("created");
+
+        when(mapper.toDomain(input)).thenReturn(mapped);
+        when(repository.saveAndFlush(mapped)).thenReturn(saved);
+        when(mapper.toDto(saved)).thenReturn(created);
+
+        assertEquals(created, service.create(input));
+        verify(service.historyRecorder).recordCreate(TestHistoryEntityType.ITEM, "10", created);
+    }
+
+    @Test
     void update_RecordsHistoryAndPublishesUpdateEvent() {
         SearchableRepository<TestEntity, Long> repository = mockRepository();
         BaseMapper<TestEntity, TestDto> mapper = mockMapper();

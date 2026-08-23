@@ -215,6 +215,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     protected final DTO finalizeCreatedEntity(DOMAIN saved) {
         DTO createdDto = mapper.toDto(saved);
+        recordCreate(saved, createdDto);
         publishEntityChange("create", createdDto);
         return createdDto;
     }
