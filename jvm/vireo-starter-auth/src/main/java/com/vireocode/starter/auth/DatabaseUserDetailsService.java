@@ -4,11 +4,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public class DatabaseUserDetailsService implements UserDetailsService {
+class DatabaseUserDetailsService implements UserDetailsService {
 
     private final StarterUserRepository userRepository;
 
-    public DatabaseUserDetailsService(StarterUserRepository userRepository) {
+    DatabaseUserDetailsService(StarterUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

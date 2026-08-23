@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vireocode.starter.auth.AuthController;
+import com.vireocode.starter.auth.LoginRequest;
 import com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO;
 
 @SpringBootTest
@@ -135,7 +135,7 @@ class SavedFilterControllerTest {
     }
 
     private MockHttpSession loginAsDemo() throws Exception {
-        String loginPayload = objectMapper.writeValueAsString(new AuthController.LoginRequest("demo", "demo123"));
+        String loginPayload = objectMapper.writeValueAsString(new LoginRequest("demo", "demo123"));
 
         MvcResult loginResult = mockMvc.perform(post(AUTH_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)

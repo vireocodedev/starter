@@ -12,9 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vireocode.starter.auth.AccountController;
-import com.vireocode.starter.auth.AuthController;
-import com.vireocode.starter.auth.DatabaseUserDetailsService;
 import com.vireocode.starter.auth.StarterUserRepository;
 import com.vireocode.starter.base.JsonNodeMapper;
 import com.vireocode.starter.base.JsonNullableMapper;
@@ -63,11 +60,12 @@ class ConsumerWiringTest {
     @Test
     @DisplayName("gets the authentication stack")
     void getsTheAuthenticationStack() {
-        assertThat(context.getBean(UserDetailsService.class)).isInstanceOf(DatabaseUserDetailsService.class);
+        assertThat(context.getBean(UserDetailsService.class).getClass().getSimpleName())
+                .isEqualTo("DatabaseUserDetailsService");
         assertThat(context.getBean(PasswordEncoder.class)).isNotNull();
         assertThat(context.getBean(SecurityFilterChain.class)).isNotNull();
-        assertThat(context.getBean(AuthController.class)).isNotNull();
-        assertThat(context.getBean(AccountController.class)).isNotNull();
+        assertThat(context.containsBean("starterAuthController")).isTrue();
+        assertThat(context.containsBean("starterAccountController")).isTrue();
     }
 
     @Test

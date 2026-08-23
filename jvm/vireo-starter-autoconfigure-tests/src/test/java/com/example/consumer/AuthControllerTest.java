@@ -1,5 +1,6 @@
 package com.example.consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -17,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vireocode.starter.auth.AuthController;
+import com.vireocode.starter.auth.LoginRequest;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,7 +37,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /api/auth/login - Authenticates demo user and allows /me with USER role")
     void login_DemoUser_ReturnsOkAndEnablesMe() throws Exception {
-        String payload = objectMapper.writeValueAsString(new AuthController.LoginRequest("demo", "demo123"));
+        String payload = objectMapper.writeValueAsString(new LoginRequest("demo", "demo123"));
 
         MvcResult loginResult = mockMvc.perform(post(API_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -55,10 +56,28 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/auth/login - Changes an existing session ID")
+    void login_WithExistingSession_ProtectsAgainstSessionFixation() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        String originalSessionId = session.getId();
+        String payload = objectMapper.writeValueAsString(new LoginRequest("demo", "demo123"));
+
+        MvcResult result = mockMvc.perform(post(API_BASE_URL + "/login")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(((MockHttpSession) result.getRequest().getSession(false)).getId())
+                .isNotEqualTo(originalSessionId);
+    }
+
+    @Test
     @DisplayName("POST /api/auth/login - Authenticates superadmin and returns SUPERADMIN role in /me")
     void login_Superadmin_ReturnsOkAndMeRole() throws Exception {
         String payload = objectMapper
-                .writeValueAsString(new AuthController.LoginRequest("superadmin", "superadmin123"));
+                .writeValueAsString(new LoginRequest("superadmin", "superadmin123"));
 
         MvcResult loginResult = mockMvc.perform(post(API_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +98,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /api/auth/login - Returns unauthorized for invalid credentials")
     void login_InvalidCredentials_ReturnsUnauthorized() throws Exception {
-        String payload = objectMapper.writeValueAsString(new AuthController.LoginRequest("demo", "wrong-password"));
+        String payload = objectMapper.writeValueAsString(new LoginRequest("demo", "wrong-password"));
 
         mockMvc.perform(post(API_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -91,7 +110,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /api/auth/logout - Invalidates session and blocks /me afterwards")
     void logout_AfterLogin_InvalidatesSession() throws Exception {
-        String payload = objectMapper.writeValueAsString(new AuthController.LoginRequest("demo", "demo123"));
+        String payload = objectMapper.writeValueAsString(new LoginRequest("demo", "demo123"));
 
         MvcResult loginResult = mockMvc.perform(post(API_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)

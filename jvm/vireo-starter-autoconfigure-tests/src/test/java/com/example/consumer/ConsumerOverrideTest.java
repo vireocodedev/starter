@@ -20,8 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.vireocode.starter.auth.AuthController;
-import com.vireocode.starter.auth.DatabaseUserDetailsService;
 import com.vireocode.starter.base.HistoryEntityType;
 import com.vireocode.starter.base.HistoryEventsRecorder;
 import com.vireocode.starter.history.HistoryActor;
@@ -53,7 +51,8 @@ class ConsumerOverrideTest {
     @DisplayName("replaces the user store")
     void replacesTheUserStore() {
         assertThat(context.getBean(UserDetailsService.class)).isInstanceOf(InMemoryUserDetailsManager.class);
-        assertThat(context.getBeansOfType(DatabaseUserDetailsService.class)).isEmpty();
+        assertThat(context.containsBean("starterUserDetailsService")).isFalse();
+        assertThat(context.containsBean("starterAccountController")).isFalse();
     }
 
     @Test
@@ -99,7 +98,7 @@ class ConsumerOverrideTest {
         assertThat(context.getBean(QueryEngineRegistry.class)).isNotNull();
         assertThat(context.getBean(OfflineSyncService.class)).isNotNull();
         assertThat(context.containsBean("starterHistoryController")).isTrue();
-        assertThat(context.getBean(AuthController.class)).isNotNull();
+        assertThat(context.containsBean("starterAuthController")).isTrue();
     }
 
     @TestConfiguration(proxyBeanMethods = false)

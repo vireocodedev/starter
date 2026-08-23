@@ -9,8 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vireocode.starter.security.SecurityExpressions;
 import com.vireocode.starter.web.RestUtils;
@@ -19,23 +19,22 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/api/account")
 @Tag(name = "Account")
-public class AccountController {
+class AccountController {
 
     private final StarterUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AccountController(StarterUserRepository userRepository, PasswordEncoder passwordEncoder) {
+    AccountController(StarterUserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PutMapping("/username")
+    @PutMapping("${vireo.starter.auth.change-username-path:/api/account/username}")
     @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
+    @Transactional
     public UsernameResponse changeUsername(@Valid @RequestBody ChangeUsernameRequest request,
             HttpServletRequest httpRequest) {
         StarterUser user = getCurrentUser();
@@ -53,9 +52,10 @@ public class AccountController {
         return new UsernameResponse(newUsername);
     }
 
-    @PutMapping("/password")
+    @PutMapping("${vireo.starter.auth.change-password-path:/api/account/password}")
     @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
-    public MessageResponse changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    @Transactional
+    public AuthMessageResponse changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         StarterUser user = getCurrentUser();
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
@@ -65,14 +65,17 @@ public class AccountController {
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
 
-        return new MessageResponse("Password updated");
+        return new AuthMessageResponse("Password updated");
     }
 
     private StarterUser getCurrentUser() {
-        StarterUserDetails principal = RestUtils.getCurrentPrincipal(StarterUserDetails.class)
-                .orElseThrow(() -> RestUtils.unauthorized("Unauthorized"));
+        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+        if (principal == null || !principal.isAuthenticated() || principal.getName() == null
+                || principal.getName().isBlank()) {
+            throw RestUtils.unauthorized("Unauthorized");
+        }
 
-        return userRepository.findByUsername(principal.getUsername())
+        return userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> RestUtils.unauthorized("Unauthorized"));
     }
 
@@ -89,17 +92,5 @@ public class AccountController {
         if (session != null) {
             session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
         }
-    }
-
-    public record ChangeUsernameRequest(@NotBlank String username) {
-    }
-
-    public record UsernameResponse(String username) {
-    }
-
-    public record ChangePasswordRequest(@NotBlank String currentPassword, @NotBlank String newPassword) {
-    }
-
-    public record MessageResponse(String message) {
     }
 }
