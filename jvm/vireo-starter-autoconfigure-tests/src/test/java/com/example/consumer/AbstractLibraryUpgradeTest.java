@@ -1,6 +1,7 @@
 package com.example.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.vireocode.starter.flyway.StarterFlywayMigrations;
@@ -71,7 +73,7 @@ abstract class AbstractLibraryUpgradeTest {
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_auth")).containsExactly("1", "2");
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_history")).containsExactly("1", "2");
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_queryengine")).containsExactly("1");
-        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1");
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1", "2");
     }
 
     @Test
@@ -159,6 +161,67 @@ abstract class AbstractLibraryUpgradeTest {
         assertThat(columnNames(dataSource, "history"))
                 .contains("ACTOR_ID", "ACTOR_LABEL")
                 .doesNotContain("OWNER_ID", "OWNER_USERNAME");
+    }
+
+    @Test
+    void upgradingOfflineFromPublishedV1PreservesCommandsAndRemovesTheAuthForeignKey() {
+        DataSource dataSource = dataSource();
+        String vendor = StarterFlywayMigrations.resolveVendor(dataSource);
+
+        StarterFlywayMigrations.migrate(new StarterFlywayModule("auth", 10), dataSource, vendor);
+        Flyway.configure()
+                .dataSource(dataSource)
+                .table("flyway_schema_history_vireo_offline")
+                .locations("classpath:db/vireo/offline")
+                .baselineOnMigrate(true)
+                .baselineVersion("0")
+                .target("1")
+                .load()
+                .migrate();
+
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        jdbc.update("INSERT INTO app_user (id, username, password_hash, role, enabled, deleted)"
+                + " VALUES ('11111111-1111-1111-1111-111111111111', 'legacy-user', 'x', 'USER', TRUE, FALSE)");
+        if ("h2".equals(vendor)) {
+            // H2 2.4 cannot evaluate V1's persisted IN-list check after Flyway
+            // closes its migration session. V2 repairs that production issue;
+            // dropping it here only lets this upgrade fixture seed a V1 row.
+            jdbc.execute("ALTER TABLE sync_command DROP CONSTRAINT ck_sync_command_status");
+        }
+        jdbc.update("INSERT INTO sync_command"
+                + " (id, command_id, owner_id, owner_username, http_method, url, request_headers,"
+                + " request_body, status, created_at)"
+                + " VALUES ('22222222-2222-2222-2222-222222222222',"
+                + " '33333333-3333-3333-3333-333333333333',"
+                + " '11111111-1111-1111-1111-111111111111', 'legacy-user', 'POST', '/api/items',"
+                + " '{}', '{}', 'PENDING', CURRENT_TIMESTAMP)");
+
+        StarterFlywayMigrations.migrate(new StarterFlywayModule("offline", 20), dataSource, vendor);
+
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1", "2");
+        assertThat(jdbc.queryForObject(
+                "SELECT owner_id FROM sync_command WHERE id = '22222222-2222-2222-2222-222222222222'",
+                String.class))
+                .isEqualTo("11111111-1111-1111-1111-111111111111");
+
+        jdbc.update("DELETE FROM app_user WHERE id = '11111111-1111-1111-1111-111111111111'");
+
+        assertThat(jdbc.queryForObject(
+                "SELECT COUNT(*) FROM sync_command WHERE id = '22222222-2222-2222-2222-222222222222'",
+                Integer.class))
+                .isEqualTo(1);
+
+        jdbc.update("INSERT INTO sync_command"
+                + " (id, command_id, owner_username, http_method, url, status, created_at)"
+                + " VALUES ('44444444-4444-4444-4444-444444444444',"
+                + " '55555555-5555-5555-5555-555555555555', 'current-user', 'PATCH', '/api/items/42',"
+                + " 'DONE', CURRENT_TIMESTAMP)");
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO sync_command"
+                + " (id, command_id, owner_username, http_method, url, status, created_at)"
+                + " VALUES ('66666666-6666-6666-6666-666666666666',"
+                + " '77777777-7777-7777-7777-777777777777', 'current-user', 'PATCH', '/api/items/42',"
+                + " 'UNKNOWN', CURRENT_TIMESTAMP)"))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     private void deploy(DataSource dataSource) {
