@@ -31,6 +31,14 @@ public class SavedFilterService extends BaseService<Long, SavedFilter, SavedFilt
             SavedFilterRepository repository,
             SavedFilterMapper mapper,
             StarterUserRepository userRepository,
+            QueryEngineRegistry registry) {
+        this(repository, mapper, userRepository, registry, new QueryEngineFilterSpecificationBuilder(registry));
+    }
+
+    public SavedFilterService(
+            SavedFilterRepository repository,
+            SavedFilterMapper mapper,
+            StarterUserRepository userRepository,
             QueryEngineRegistry registry,
             QueryEngineFilterSpecificationBuilder filterSpecificationBuilder) {
         super(repository, mapper, EntityConfig.builder()

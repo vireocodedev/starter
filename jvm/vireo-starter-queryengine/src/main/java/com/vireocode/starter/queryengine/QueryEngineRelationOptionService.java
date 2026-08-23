@@ -60,7 +60,7 @@ public class QueryEngineRelationOptionService {
         return options;
     }
 
-    protected List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
+    List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
         return searchEntitiesTyped(entityType, labelFields, searchText);
     }
 

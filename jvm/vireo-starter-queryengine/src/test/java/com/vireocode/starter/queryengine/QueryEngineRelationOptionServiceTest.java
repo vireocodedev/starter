@@ -157,7 +157,7 @@ class QueryEngineRelationOptionServiceTest {
         }
 
         @Override
-        protected List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
+        List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
             this.labelFields = labelFields;
             this.searchText = searchText;
             return results;
