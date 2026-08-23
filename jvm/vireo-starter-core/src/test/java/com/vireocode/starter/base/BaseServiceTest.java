@@ -142,6 +142,28 @@ class BaseServiceTest {
     }
 
     @Test
+    void create_DoesNotPublishSuccessWhenHistoryRecordingFails() {
+        SearchableRepository<TestEntity, Long> repository = mockRepository();
+        BaseMapper<TestEntity, TestDto> mapper = mockMapper();
+        TestBaseService service = new TestBaseService(repository, mapper, historyConfig());
+        service.historyRecorder = mock(HistoryEventsRecorder.class);
+        service.offlineChangeBroadcaster = mock(OfflineChangeBroadcaster.class);
+
+        TestDto input = new TestDto("new item");
+        TestEntity saved = entity(10L, "new item", false);
+        TestDto created = new TestDto("created");
+        when(mapper.toDomain(input)).thenReturn(saved);
+        when(repository.saveAndFlush(saved)).thenReturn(saved);
+        when(mapper.toDto(saved)).thenReturn(created);
+        org.mockito.Mockito.doThrow(new IllegalStateException("history unavailable"))
+                .when(service.historyRecorder)
+                .recordCreate(TestHistoryEntityType.ITEM, "10", created);
+
+        assertThrows(IllegalStateException.class, () -> service.create(input));
+        verify(service.offlineChangeBroadcaster, never()).publishCreateEvent(any(), any(), any());
+    }
+
+    @Test
     void update_RecordsHistoryAndPublishesUpdateEvent() {
         SearchableRepository<TestEntity, Long> repository = mockRepository();
         BaseMapper<TestEntity, TestDto> mapper = mockMapper();

@@ -145,6 +145,20 @@ class HistoryControllerTest {
     }
 
     @Test
+    @DisplayName("GET " + API_BASE_URL + " - Fails explicitly for a corrupt persisted snapshot")
+    @WithMockUser(username = "demo", roles = "USER")
+    void find_WithCorruptSnapshot_ReturnsInternalServerError() throws Exception {
+        saveEntry(ConsumerHistoryEntityType.ITEM, "corrupt", Instant.now(), "not-json", null);
+
+        mockMvc.perform(get(API_BASE_URL)
+                .with(csrf())
+                .queryParam("entity", "ITEM")
+                .queryParam("entityId", "corrupt"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Internal server error"));
+    }
+
+    @Test
     @DisplayName("GET " + API_BASE_URL + " - Returns unauthorized without authentication")
     void find_WithoutAuthentication_ReturnsUnauthorized() throws Exception {
         mockMvc.perform(get(API_BASE_URL)
