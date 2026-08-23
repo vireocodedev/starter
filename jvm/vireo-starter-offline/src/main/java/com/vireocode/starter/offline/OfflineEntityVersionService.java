@@ -1,5 +1,6 @@
 package com.vireocode.starter.offline;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -14,9 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class OfflineEntityVersionService implements OfflineRevisionTracker {
 
     private final OfflineEntityVersionRepository repository;
+    private final Clock clock;
 
     public OfflineEntityVersionService(OfflineEntityVersionRepository repository) {
+        this(repository, Clock.systemUTC());
+    }
+
+    OfflineEntityVersionService(OfflineEntityVersionRepository repository, Clock clock) {
         this.repository = repository;
+        this.clock = java.util.Objects.requireNonNull(clock, "clock");
     }
 
     @Transactional
@@ -38,7 +45,7 @@ public class OfflineEntityVersionService implements OfflineRevisionTracker {
                         });
 
                 state.setRevision(state.getRevision() + 1);
-                state.setChangedAt(Instant.now());
+                state.setChangedAt(Instant.now(clock));
                 repository.saveAndFlush(state);
                 return state.getRevision();
             } catch (DataIntegrityViolationException ex) {
@@ -77,7 +84,7 @@ public class OfflineEntityVersionService implements OfflineRevisionTracker {
     }
 
     public OfflineHydrationVersionsResponseDto getVersionSnapshot(List<String> entityKeys) {
-        return new OfflineHydrationVersionsResponseDto(Instant.now(), getVersions(entityKeys));
+        return new OfflineHydrationVersionsResponseDto(Instant.now(clock), getVersions(entityKeys));
     }
 
     private String normalizeEntityKey(String entityKey) {

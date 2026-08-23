@@ -14,4 +14,14 @@ public record OfflineSyncCommandDto(
         @NotBlank String url,
         JsonNode body,
         Map<String, String> headers) {
+
+    public OfflineSyncCommandDto {
+        headers = headers == null ? Map.of() : Map.copyOf(headers);
+    }
+
+    /** Omits potentially sensitive body and header values from diagnostics. */
+    @Override
+    public String toString() {
+        return "OfflineSyncCommandDto[commandId=" + commandId + ", method=" + method + ", url=" + url + "]";
+    }
 }

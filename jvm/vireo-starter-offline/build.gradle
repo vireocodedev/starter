@@ -3,5 +3,5 @@ description = 'Offline-first sync: command replay, entity version tracking and t
 dependencies {
     api project(':vireo-starter-core')
     api project(':vireo-starter-queryengine')
-    api project(':vireo-starter-auth')
+    implementation project(':vireo-starter-auth')
 }

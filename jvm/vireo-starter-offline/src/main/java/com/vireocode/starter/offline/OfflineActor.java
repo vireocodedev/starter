@@ -5,5 +5,5 @@ import java.util.UUID;
 public record OfflineActor(
         UUID id,
         String username,
-        boolean superadmin) {
+        boolean privileged) {
 }

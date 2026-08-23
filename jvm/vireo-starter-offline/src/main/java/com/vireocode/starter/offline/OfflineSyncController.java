@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/offline/sync")
+@RequestMapping("${vireo.starter.offline.sync-endpoint-path:/api/offline/sync}")
 @Validated
 public class OfflineSyncController {
 
@@ -29,6 +29,7 @@ public class OfflineSyncController {
     }
 
     @PostMapping
+    @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
     public OfflineSyncBatchResponseDto sync(@Valid @RequestBody OfflineSyncBatchRequestDto request,
             HttpServletRequest httpServletRequest) {
         return offlineSyncService.processBatch(request, httpServletRequest);

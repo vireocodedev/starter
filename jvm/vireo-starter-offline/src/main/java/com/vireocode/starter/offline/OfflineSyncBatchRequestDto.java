@@ -7,4 +7,8 @@ import jakarta.validation.constraints.NotNull;
 
 public record OfflineSyncBatchRequestDto(
         @NotNull List<@Valid OfflineSyncCommandDto> commands) {
+
+    public OfflineSyncBatchRequestDto {
+        commands = commands == null ? null : List.copyOf(commands);
+    }
 }

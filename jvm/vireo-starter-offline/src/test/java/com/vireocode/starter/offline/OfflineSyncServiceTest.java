@@ -49,8 +49,8 @@ class OfflineSyncServiceTest {
 
         assertEquals(0, response.accepted());
         assertEquals(0, response.failed());
-        verify(heartbeatService, never()).markSyncInProgress(true);
-        verify(heartbeatService, never()).markSyncInProgress(false);
+        verify(heartbeatService, never()).beginSync();
+        verify(heartbeatService, never()).endSync();
     }
 
     @Test
@@ -99,7 +99,7 @@ class OfflineSyncServiceTest {
 
         when(repository.findAllByCommandIdIn(any())).thenReturn(List.of(existing));
         when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
-        when(handler.process(eq(command), any(OfflineSyncCommandEntity.class)))
+        when(handler.process(eq(command)))
                 .thenReturn(new OfflineSyncCommandResultDto(commandId, true, 200, null));
 
         OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(),
@@ -114,9 +114,9 @@ class OfflineSyncServiceTest {
         assertEquals(OfflineSyncResultReason.APPLIED, response.results().get(0).reason());
         assertEquals(2, existing.getRetryCount());
         assertNull(existing.getErrorMessage());
-        verify(repository).save(existing);
+        verify(repository, org.mockito.Mockito.times(2)).save(existing);
         verify(repository, never()).saveAndFlush(any(OfflineSyncCommandEntity.class));
-        verify(handler).process(eq(command), eq(existing));
+        verify(handler).process(eq(command));
     }
 
     @Test
@@ -128,7 +128,7 @@ class OfflineSyncServiceTest {
         existing.setCommandId(commandId);
         existing.setStatus(OfflineSyncCommandStatus.FAILED);
         existing.setResponseStatus(503);
-        existing.setRetryCount(OfflineSyncService.MAX_REPLAY_ATTEMPTS);
+        existing.setRetryCount(new StarterOfflineProperties().getMaxReplayAttempts());
         when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
 
         OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(
@@ -142,7 +142,7 @@ class OfflineSyncServiceTest {
         assertEquals(OfflineSyncResultReason.RETRY_LIMIT_EXCEEDED, response.results().get(0).reason());
         assertEquals(OfflineSyncCommandStatus.REJECTED, existing.getStatus());
         assertNotNull(existing.getProcessedAt());
-        assertEquals(OfflineSyncService.MAX_REPLAY_ATTEMPTS, existing.getRetryCount());
+        assertEquals(new StarterOfflineProperties().getMaxReplayAttempts(), existing.getRetryCount());
         verify(repository()).save(existing);
     }
 
@@ -211,7 +211,7 @@ class OfflineSyncServiceTest {
         OfflineSyncCommandEntity exhausted = new OfflineSyncCommandEntity();
         exhausted.setCommandId(exhaustedId);
         exhausted.setStatus(OfflineSyncCommandStatus.FAILED);
-        exhausted.setRetryCount(OfflineSyncService.MAX_REPLAY_ATTEMPTS);
+        exhausted.setRetryCount(new StarterOfflineProperties().getMaxReplayAttempts());
 
         when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(done, rejected, exhausted));
 
@@ -307,12 +307,12 @@ class OfflineSyncServiceTest {
         assertEquals(0, response.accepted());
         assertEquals(1, response.failed());
         assertFalse(response.results().get(0).success());
-        assertEquals(500, response.results().get(0).status());
+        assertEquals(400, response.results().get(0).status());
 
         ArgumentCaptor<OfflineSyncCommandEntity> captor = ArgumentCaptor.forClass(OfflineSyncCommandEntity.class);
         verify(repository(), atLeastOnce()).save(captor.capture());
         OfflineSyncCommandEntity saved = captor.getValue();
-                assertEquals(OfflineSyncCommandStatus.FAILED, saved.getStatus());
+        assertEquals(OfflineSyncCommandStatus.REJECTED, saved.getStatus());
     }
 
     @Test
@@ -329,7 +329,7 @@ class OfflineSyncServiceTest {
 
         when(repository.findAllByCommandIdIn(any())).thenReturn(List.of());
         when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
-        when(handler.process(eq(command), any(OfflineSyncCommandEntity.class)))
+        when(handler.process(eq(command)))
                 .thenReturn(new OfflineSyncCommandResultDto(commandId, true, 201, null));
 
         OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(), actorResolver,
@@ -357,7 +357,7 @@ class OfflineSyncServiceTest {
 
         when(repository.findAllByCommandIdIn(any())).thenReturn(List.of());
         when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
-        when(handler.process(eq(command), any(OfflineSyncCommandEntity.class))).thenThrow(new RuntimeException("boom"));
+        when(handler.process(eq(command))).thenThrow(new RuntimeException("boom"));
 
         OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(), actorResolver,
                 List.of(handler), filterBuilder);
@@ -368,7 +368,7 @@ class OfflineSyncServiceTest {
         assertEquals(0, response.accepted());
         assertEquals(1, response.failed());
         assertEquals(500, response.results().get(0).status());
-        assertEquals("boom", response.results().get(0).error());
+        assertEquals("Command replay failed.", response.results().get(0).error());
     }
 
     @Test
@@ -437,15 +437,22 @@ class OfflineSyncServiceTest {
 
         invoke(service, "copyHeaders", new Class<?>[] { HttpHeaders.class, Map.class, jakarta.servlet.http.HttpServletRequest.class },
                 headers,
-                Map.of("X-Custom", "ok", "Host", "example.org", "Cookie", "should-not-pass", "", "skip"), request);
+                Map.of("Idempotency-Key", "ok", "X-Custom", "blocked", "Host", "example.org", "Cookie",
+                        "should-not-pass", "", "skip"),
+                request);
 
         assertEquals("SESSION=abc", headers.getFirst("Cookie"));
         assertEquals("token", headers.getFirst("X-XSRF-TOKEN"));
-        assertEquals("ok", headers.getFirst("X-Custom"));
+        assertEquals("ok", headers.getFirst("Idempotency-Key"));
+        assertNull(headers.getFirst("X-Custom"));
         assertNull(headers.getFirst("Host"));
 
         assertTrue((Boolean) invoke(service, "isReplayableApiUrl", new Class<?>[] { String.class }, "/api/product"));
         assertFalse((Boolean) invoke(service, "isReplayableApiUrl", new Class<?>[] { String.class }, "/api/offline/sync"));
+        assertFalse((Boolean) invoke(service, "isReplayableApiUrl", new Class<?>[] { String.class },
+                "/api/%2e%2e/auth/login"));
+        assertFalse((Boolean) invoke(service, "isReplayableApiUrl", new Class<?>[] { String.class },
+                "https://example.org/api/product"));
         assertFalse((Boolean) invoke(service, "isReplayableApiUrl", new Class<?>[] { String.class }, " "));
 
         assertNull(invoke(service, "toJson", new Class<?>[] { Object.class }, new Object[] { null }));
