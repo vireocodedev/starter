@@ -4,7 +4,7 @@ import { revalidateLogic } from "@tanstack/react-form";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { z } from "zod";
 import { vireoFormNumberFieldClasses } from "./VireoFormNumberField.classes";
 import { VIREO_FORM_NUMBER_FIELD_NAME } from "./VireoFormNumberField.identity";
@@ -13,11 +13,11 @@ import type { VireoFormNumberFieldProps } from "./VireoFormNumberField.types";
 type TestFormProps = {
   fieldProps?: VireoFormNumberFieldProps;
   initialValue?: number | null;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: number | null) => unknown;
 };
 
-function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(), validate }: TestFormProps) {
+function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(() => undefined), validate }: TestFormProps) {
   const form = useVireoForm({
     defaultValues: { amount: initialValue },
     onSubmit,
@@ -48,7 +48,7 @@ describe(VIREO_FORM_NUMBER_FIELD_NAME, () => {
   });
 
   it("normalizes decimal commas and submits a number rather than text", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     render(<TestForm onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Amount" }), { target: { value: "12,5" } });
@@ -85,7 +85,7 @@ describe(VIREO_FORM_NUMBER_FIELD_NAME, () => {
   });
 
   it("clamps complete values to min and max without emitting invalid numbers", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     render(<TestForm fieldProps={{ max: 5, min: 1 }} onSubmit={onSubmit} />);
     const input = screen.getByRole("textbox", { name: "Amount" });
 

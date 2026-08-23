@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { vireoFormAutocompleteMultipleFieldClasses } from "./VireoFormAutocompleteMultipleField.classes";
 import { VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_NAME } from "./VireoFormAutocompleteMultipleField.identity";
 import type { VireoFormAutocompleteMultipleFieldProps } from "./VireoFormAutocompleteMultipleField.types";
@@ -17,11 +17,11 @@ type Option = (typeof options)[number];
 function TestForm({
   initialValue = [],
   fieldProps = {},
-  onSubmit = vi.fn(),
+  onSubmit = vi.fn(() => undefined),
 }: {
   initialValue?: string[];
   fieldProps?: Partial<VireoFormAutocompleteMultipleFieldProps<Option, string>>;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
 }) {
   const form = useVireoForm({ defaultValues: { teams: initialValue }, onSubmit });
   const shared = fieldProps as Record<string, unknown>;
@@ -57,7 +57,7 @@ describe(VIREO_FORM_AUTOCOMPLETE_MULTIPLE_FIELD_NAME, () => {
   });
 
   it("stores ordered scalar arrays and submits them", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     render(<TestForm initialValue={["alpha"]} onSubmit={onSubmit} />);
     await open();
     await userEvent.click(await screen.findByRole("option", { name: "Beta" }));

@@ -11,7 +11,7 @@ import { revalidateLogic } from "@tanstack/react-form";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { z } from "zod";
 import { vireoFormRadioGroupFieldClasses } from "./VireoFormRadioGroupField.classes";
 import { VIREO_FORM_RADIO_GROUP_FIELD_NAME } from "./VireoFormRadioGroupField.identity";
@@ -29,11 +29,11 @@ type TestFieldProps = Partial<VireoFormRadioGroupFieldProps<Strategy, string>>;
 type TestFormProps = {
   fieldProps?: TestFieldProps;
   initialValue?: string | null;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: string | null) => unknown;
 };
 
-function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(), validate }: TestFormProps) {
+function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(() => undefined), validate }: TestFormProps) {
   const form = useVireoForm({ defaultValues: { strategy: initialValue }, onSubmit });
 
   return (
@@ -74,7 +74,7 @@ describe(VIREO_FORM_RADIO_GROUP_FIELD_NAME, () => {
   });
 
   it("updates and submits the selected string value", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const user = userEvent.setup();
     render(<TestForm onSubmit={onSubmit} />);
 
@@ -87,7 +87,7 @@ describe(VIREO_FORM_RADIO_GROUP_FIELD_NAME, () => {
   });
 
   it("preserves numeric option values instead of submitting DOM strings", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const levels = [
       { id: 1, label: "Basic" },
       { id: 2, label: "Advanced" },

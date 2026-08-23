@@ -11,7 +11,7 @@ import { revalidateLogic } from "@tanstack/react-form";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { z } from "zod";
 import { vireoFormCheckboxFieldClasses } from "./VireoFormCheckboxField.classes";
 import { VIREO_FORM_CHECKBOX_FIELD_NAME } from "./VireoFormCheckboxField.identity";
@@ -20,11 +20,11 @@ import type { VireoFormCheckboxFieldProps } from "./VireoFormCheckboxField.types
 type TestFormProps = {
   fieldProps?: Omit<VireoFormCheckboxFieldProps, "label">;
   initialValue?: boolean;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: boolean) => unknown;
 };
 
-function TestForm({ fieldProps, initialValue = false, onSubmit = vi.fn(), validate }: TestFormProps) {
+function TestForm({ fieldProps, initialValue = false, onSubmit = vi.fn(() => undefined), validate }: TestFormProps) {
   const form = useVireoForm({
     defaultValues: { enabled: initialValue },
     onSubmit,
@@ -58,7 +58,7 @@ describe(VIREO_FORM_CHECKBOX_FIELD_NAME, () => {
   });
 
   it("updates and submits the bound boolean value", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const user = userEvent.setup();
     render(<TestForm onSubmit={onSubmit} />);
 

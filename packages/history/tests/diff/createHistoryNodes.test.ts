@@ -176,7 +176,7 @@ describe(createHistoryNodes, () => {
     if (root?.type !== "group" || root.children[0]?.type !== "group") {
       throw new Error("Expected a members group.");
     }
-    expect(root.children[0].children.map(node => [node.type, node.path.at(-1)])).toEqual([
+    expect(root.children[0].children.map(node => [node.type, node.path[node.path.length - 1]])).toEqual([
       ["group", "3"],
       ["group", "1"],
       ["group", "2"],

@@ -1,35 +1,38 @@
 import { availableParallelism } from "node:os";
 import { resolve } from "node:path";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 // Tests only. The package is built with `tsc` (see tsconfig.build.json) so that
 // dist mirrors src file-for-file and consumers can deep-import subpaths.
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   // Unit tests consume workspace dependencies from source. Production builds
   // and strict consumer checks validate the published dist entry points.
   resolve: {
+    tsconfigPaths: true,
     alias: [
       {
+        find: /^@\//,
+        replacement: `${resolve(import.meta.dirname, "src")}/`,
+      },
+      {
         find: /^@vireocodedev\/starter-infrastructure$/,
-        replacement: resolve(__dirname, "../infrastructure/src/index.ts"),
+        replacement: resolve(import.meta.dirname, "../infrastructure/src/index.ts"),
       },
       {
         find: /^@vireocodedev\/starter-infrastructure\/network-status$/,
-        replacement: resolve(__dirname, "../infrastructure/src/network/appNetworkStatus.ts"),
+        replacement: resolve(import.meta.dirname, "../infrastructure/src/network/appNetworkStatus.ts"),
       },
       {
         find: /^@vireocodedev\/starter-infrastructure\/pagination$/,
-        replacement: resolve(__dirname, "../infrastructure/src/http/pagination.ts"),
+        replacement: resolve(import.meta.dirname, "../infrastructure/src/http/pagination.ts"),
       },
       {
         find: /^@vireocodedev\/starter-history$/,
-        replacement: resolve(__dirname, "../history/src/index.ts"),
+        replacement: resolve(import.meta.dirname, "../history/src/index.ts"),
       },
       {
         find: /^@vireocodedev\/starter-localization$/,
-        replacement: resolve(__dirname, "../localization/src/index.ts"),
+        replacement: resolve(import.meta.dirname, "../localization/src/index.ts"),
       },
     ],
   },

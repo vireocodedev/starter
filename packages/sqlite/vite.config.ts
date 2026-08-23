@@ -1,6 +1,5 @@
 import { resolve } from "node:path";
 import dts from "vite-plugin-dts";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => ({
@@ -8,7 +7,6 @@ export default defineConfig(({ mode }) => ({
   // second entry point, and api-extractor's rollup emits a single d.ts.
   // `entryRoot: "src"` roots them at dist/index.d.ts and dist/offline/index.d.ts.
   plugins: [
-    tsconfigPaths(),
     dts({
       bundleTypes: false,
       tsconfigPath: "./tsconfig.json",
@@ -16,12 +14,16 @@ export default defineConfig(({ mode }) => ({
       exclude: ["tests/**", "docs/**", "**/*.test.ts"],
     }),
   ],
+  resolve: {
+    tsconfigPaths: true,
+    alias: [{ find: /^@\//, replacement: `${resolve(import.meta.dirname, "src")}/` }],
+  },
   build: {
     emptyOutDir: mode !== "watch",
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
-        "offline/index": resolve(__dirname, "src/offline/index.ts"),
+        index: resolve(import.meta.dirname, "src/index.ts"),
+        "offline/index": resolve(import.meta.dirname, "src/offline/index.ts"),
       },
       formats: ["es"],
       fileName: (_format, entryName) => `${entryName}.js`,

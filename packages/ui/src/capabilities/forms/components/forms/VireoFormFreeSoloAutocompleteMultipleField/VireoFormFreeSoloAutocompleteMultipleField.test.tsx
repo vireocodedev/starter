@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { vireoFormFreeSoloAutocompleteMultipleFieldClasses } from "./VireoFormFreeSoloAutocompleteMultipleField.classes";
 import { VIREO_FORM_FREE_SOLO_AUTOCOMPLETE_MULTIPLE_FIELD_NAME } from "./VireoFormFreeSoloAutocompleteMultipleField.identity";
 import type { VireoFormFreeSoloAutocompleteMultipleFieldProps } from "./VireoFormFreeSoloAutocompleteMultipleField.types";
@@ -17,11 +17,11 @@ type Option = (typeof options)[number];
 function TestForm({
   initialValue = [],
   fieldProps = {},
-  onSubmit = vi.fn(),
+  onSubmit = vi.fn(() => undefined),
 }: {
   initialValue?: string[];
   fieldProps?: Partial<VireoFormFreeSoloAutocompleteMultipleFieldProps<Option>>;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
 }) {
   const form = useVireoForm({ defaultValues: { tags: initialValue }, onSubmit });
   const shared = fieldProps as Record<string, unknown>;
@@ -44,7 +44,7 @@ function TestForm({
 }
 describe(VIREO_FORM_FREE_SOLO_AUTOCOMPLETE_MULTIPLE_FIELD_NAME, () => {
   it("stores ordered known and custom string values", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     render(<TestForm initialValue={["alpha"]} onSubmit={onSubmit} />);
     await userEvent.click(screen.getByRole("combobox", { name: "Tags" }));
     await userEvent.click(await screen.findByRole("option", { name: "Beta" }));

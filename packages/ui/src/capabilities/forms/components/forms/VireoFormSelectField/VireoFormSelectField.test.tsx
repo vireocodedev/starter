@@ -4,7 +4,7 @@ import { revalidateLogic } from "@tanstack/react-form";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { z } from "zod";
 import { vireoFormSelectFieldClasses } from "./VireoFormSelectField.classes";
 import { VIREO_FORM_SELECT_FIELD_NAME } from "./VireoFormSelectField.identity";
@@ -21,11 +21,11 @@ type Option = (typeof options)[number];
 type TestFormProps = {
   fieldProps?: Partial<VireoFormSelectFieldProps<Option, string>>;
   initialValue?: string | null;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
   validate?: (value: string | null) => unknown;
 };
 
-function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(), validate }: TestFormProps) {
+function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(() => undefined), validate }: TestFormProps) {
   const form = useVireoForm({ defaultValues: { teamId: initialValue }, onSubmit });
 
   return (
@@ -85,7 +85,7 @@ describe(VIREO_FORM_SELECT_FIELD_NAME, () => {
   });
 
   it("selects and submits a string option value", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     render(<TestForm onSubmit={onSubmit} />);
 
     await chooseOption("Beta");
@@ -101,7 +101,7 @@ describe(VIREO_FORM_SELECT_FIELD_NAME, () => {
       { id: 10, label: "Ten" },
       { id: 20, label: "Twenty" },
     ];
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
 
     function NumericForm() {
       const form = useVireoForm({ defaultValues: { limit: null as number | null }, onSubmit });

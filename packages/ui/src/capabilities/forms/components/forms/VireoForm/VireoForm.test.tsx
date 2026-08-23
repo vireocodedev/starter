@@ -3,17 +3,17 @@ import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoFo
 import { ThemeProvider, createTheme } from "@mui/material";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import { vireoFormClasses } from "./VireoForm.classes";
 import { VIREO_FORM_NAME } from "./VireoForm.identity";
 import type { VireoFormProps } from "./VireoForm.types";
 
 type HarnessProps = {
   formProps?: VireoFormProps;
-  onSubmit?: ReturnType<typeof vi.fn>;
+  onSubmit?: Mock<() => void>;
 };
 
-function FormHarness({ formProps, onSubmit = vi.fn() }: HarnessProps) {
+function FormHarness({ formProps, onSubmit = vi.fn(() => undefined) }: HarnessProps) {
   const form = useVireoForm({
     defaultValues: { name: "" },
     onSubmit,
@@ -93,7 +93,7 @@ describe(VIREO_FORM_NAME, () => {
   });
 
   it("submits through TanStack Form after the consumer event and respects cancellation", async () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<() => void>();
     const consumerSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
     const { rerender } = render(<FormHarness formProps={{ onSubmit: consumerSubmit }} onSubmit={onSubmit} />);
 
