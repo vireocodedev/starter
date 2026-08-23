@@ -9,7 +9,13 @@ export default function DefaultExample() {
         <VireoDropZone id={{ type: "lane", laneId: "todo" }} mode="reorder">
           <VireoDraggableItem id={{ type: "task", taskId: "review" }} index={0}>
             <Paper variant="outlined" sx={{ p: 2, width: 360 }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack
+                direction="row"
+                sx={{
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Typography>Review pull request</Typography>
                 <Button size="small">Open</Button>
               </Stack>

@@ -20,7 +20,12 @@ function DecisionButton() {
       }),
     );
   return (
-    <Stack alignItems="flex-start" spacing={2}>
+    <Stack
+      spacing={2}
+      sx={{
+        alignItems: "flex-start",
+      }}
+    >
       <Button color="error" variant="contained" onClick={requestDelete}>
         Delete customer
       </Button>

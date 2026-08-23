@@ -24,7 +24,13 @@ export default function ThemeCustomizationExample() {
           <VireoDropZone id={{ type: "lane", laneId: "theme" }} mode="reorder">
             <VireoDraggableItem id={{ type: "task", taskId: "theme" }} index={0} dragHandle="explicit">
               <Paper variant="outlined" sx={{ p: 1, width: 360 }}>
-                <Stack direction="row" alignItems="center" spacing={1}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <VireoDragHandle aria-label="Move themed task" />
                   <Typography>Theme-owned handle</Typography>
                 </Stack>

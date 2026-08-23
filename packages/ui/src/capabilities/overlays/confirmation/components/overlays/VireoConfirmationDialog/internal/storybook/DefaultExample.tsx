@@ -7,7 +7,12 @@ export default function DefaultExample() {
   const [open, setOpen] = React.useState(false);
   return (
     <VireoStorybookProvider>
-      <Stack alignItems="flex-start" spacing={2}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
         <Typography>Open the dialog to review a controlled confirmation surface.</Typography>
         <Button variant="contained" onClick={() => setOpen(true)}>
           Archive project

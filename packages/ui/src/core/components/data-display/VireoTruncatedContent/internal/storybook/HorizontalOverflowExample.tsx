@@ -5,7 +5,12 @@ import { Box } from "@mui/material";
 export default function HorizontalOverflowExample() {
   return (
     <VireoStorybookProvider>
-      <Box width={280} maxWidth="100%">
+      <Box
+        sx={{
+          maxWidth: "100%",
+          width: 280,
+        }}
+      >
         <VireoTruncatedContent
           collapsedHeight={40}
           expandLabel="Show more"

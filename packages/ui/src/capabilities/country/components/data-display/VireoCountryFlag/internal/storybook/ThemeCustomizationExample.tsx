@@ -26,12 +26,30 @@ export default function ThemeCustomizationExample() {
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={createCustomizedTheme}>
-        <Stack direction="row" alignItems="center" spacing={3}>
-          <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack
+          direction="row"
+          spacing={3}
+          sx={{
+            alignItems: "center",
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <VireoCountryFlag countryCode="IT" />
             <Typography>Known</Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <VireoCountryFlag countryCode="ZZ" />
             <Typography>Unknown</Typography>
           </Stack>

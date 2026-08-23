@@ -11,7 +11,14 @@ export function VireoResponsiveOverlayFrameWorkspace({ children, onOpen }: Vireo
   return (
     <Box sx={{ display: "flex", width: "100%", minWidth: { xs: 0, md: 720 }, height: 520, overflow: "hidden" }}>
       <Box component="main" sx={{ flex: 1, minWidth: 0, p: 3, bgcolor: "background.default" }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Box>
             <Typography variant="overline" color="primary.main">
               Operations

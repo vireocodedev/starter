@@ -15,7 +15,13 @@ export default function CustomizedSlotsExample() {
         <VireoDropZone id={{ type: "lane", laneId: "custom" }} mode="reorder">
           <VireoDraggableItem id={{ type: "task", taskId: "custom" }} index={0} dragHandle="explicit">
             <Paper variant="outlined" sx={{ p: 1, width: 360 }}>
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <VireoDragHandle
                   aria-label="Move customized task"
                   slots={{ icon: DragHandleRounded }}

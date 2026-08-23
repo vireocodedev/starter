@@ -209,8 +209,10 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
           onClose={onClose}
           maxWidth={maxWidth}
           fullWidth
-          slotProps={desktopPaperSx ? { paper: { sx: desktopPaperSx } } : undefined}
-          TransitionProps={{ onExited }}
+          slotProps={{
+            ...(desktopPaperSx && { paper: { sx: desktopPaperSx } }),
+            transition: { onExited },
+          }}
         >
           {children}
         </Dialog>

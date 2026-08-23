@@ -12,7 +12,13 @@ export default function ContainerResponsiveLayoutExample() {
     <VireoStorybookProvider>
       <Stack spacing={2}>
         {examples.map(example => (
-          <Box key={example.label} width={example.width} maxWidth="100%">
+          <Box
+            key={example.label}
+            sx={{
+              maxWidth: "100%",
+              width: example.width,
+            }}
+          >
             <Typography color="text.secondary" variant="caption">
               {example.label} · {example.width}px
             </Typography>

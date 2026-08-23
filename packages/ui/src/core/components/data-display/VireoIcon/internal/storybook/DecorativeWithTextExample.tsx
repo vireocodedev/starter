@@ -6,7 +6,13 @@ export default function DecorativeWithTextExample() {
   return (
     <VireoStorybookProvider>
       <VireoIconRegistryProvider>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <VireoIcon icon="check-circle" color="success" aria-hidden />
           <Typography>Completed successfully</Typography>
         </Stack>

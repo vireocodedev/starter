@@ -1,5 +1,5 @@
 import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoForm";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { FormControl, ThemeProvider, createTheme, type FormControlProps } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";

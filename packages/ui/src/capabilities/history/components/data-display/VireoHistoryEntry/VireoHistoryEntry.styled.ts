@@ -24,7 +24,10 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     minWidth: 0,
     overflow: "hidden",
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius * 2,
+    borderRadius:
+      typeof theme.shape.borderRadius === "number"
+        ? theme.shape.borderRadius * 2
+        : `calc(${theme.shape.borderRadius} * 2)`,
     backgroundColor: theme.palette.background.paper,
   },
   "& .VireoHistoryEntry-rootHeader": {

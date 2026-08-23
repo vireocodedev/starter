@@ -21,7 +21,14 @@ export default function ThemeCustomizationExample() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Stack spacing={2} alignItems="flex-start" sx={{ minHeight: 480, width: "100%" }}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+          minHeight: 480,
+          width: "100%",
+        }}
+      >
         <Typography variant="h6">Branded notifications</Typography>
         <Button variant="contained" onClick={() => toast.success("Release published", { toasterId })}>
           Publish release

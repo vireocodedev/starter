@@ -63,6 +63,11 @@ function joinIds(...ids: Array<string | undefined>): string | undefined {
   return joined || undefined;
 }
 
+function assignRef<T>(ref: React.Ref<T> | undefined, value: T | null): void {
+  if (typeof ref === "function") ref(value);
+  else if (ref) (ref as React.MutableRefObject<T | null>).current = value;
+}
+
 /**
  * Binds a labelled MUI Checkbox to the current TanStack Form boolean field and shared validation policy.
  *
@@ -145,6 +150,7 @@ export const VireoFormCheckboxField = React.forwardRef<HTMLDivElement, VireoForm
       className: checkboxSlotClassName,
       inputProps: checkboxSlotInputProps,
       inputRef: checkboxSlotInputRef,
+      slotProps: checkboxMuiSlotProps,
       onBlur: checkboxSlotOnBlur,
       onChange: checkboxSlotOnChange,
       ...checkboxSlotOther
@@ -229,12 +235,26 @@ export const VireoFormCheckboxField = React.forwardRef<HTMLDivElement, VireoForm
               checked={ownerState.checked}
               className={joinClassNames(classes.checkbox, checkboxSlotClassName)}
               disabled={disabled}
-              inputProps={{
-                ...checkboxSlotInputProps,
-                "aria-describedby": inputDescribedBy,
-                "aria-invalid": effectiveError || isAriaInvalid(checkboxSlotInputProps?.["aria-invalid"]) || undefined,
+              slotProps={{
+                ...checkboxMuiSlotProps,
+                input: muiOwnerState => {
+                  const muiInputProps =
+                    typeof checkboxMuiSlotProps?.input === "function"
+                      ? checkboxMuiSlotProps.input(muiOwnerState)
+                      : checkboxMuiSlotProps?.input;
+                  return {
+                    ...muiInputProps,
+                    ...checkboxSlotInputProps,
+                    "aria-describedby": inputDescribedBy,
+                    "aria-invalid":
+                      effectiveError || isAriaInvalid(checkboxSlotInputProps?.["aria-invalid"]) || undefined,
+                    ref: (node: HTMLInputElement | null) => {
+                      assignRef(muiInputProps?.ref, node);
+                      assignRef(nativeInputRef, node);
+                    },
+                  };
+                },
               }}
-              inputRef={nativeInputRef}
               name={field.name}
               onBlur={handleBlur}
               onChange={handleChange}

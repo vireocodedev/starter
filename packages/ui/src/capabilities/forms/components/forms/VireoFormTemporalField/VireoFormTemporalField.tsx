@@ -2,11 +2,17 @@ import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormCont
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
-import { TextField, unstable_composeClasses as composeClasses, type TextFieldProps } from "@mui/material";
+import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
-import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
-import { MuiPickersAdapterContext } from "@mui/x-date-pickers/LocalizationProvider";
+import {
+  DatePicker,
+  DateTimePicker,
+  PickersTextField,
+  TimePicker,
+  type PickersTextFieldProps,
+} from "@mui/x-date-pickers";
+import { usePickerAdapter } from "@mui/x-date-pickers/hooks";
 import { useStore } from "@tanstack/react-form";
 import { type Dayjs } from "dayjs";
 import React from "react";
@@ -40,6 +46,8 @@ import {
   type VireoFormTemporalFieldValue,
 } from "./VireoFormTemporalField.types";
 
+const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/starter-ui/VireoTemporalLocalizationProvider");
+
 type TemporalErrorFormApi = {
   setErrorMap: (errorMap: Record<string, unknown>) => void;
 };
@@ -49,7 +57,6 @@ type TemporalFormErrorState = {
 };
 
 const VIREO_TEMPORAL_ERROR_KEY = "__vireoTemporal";
-const VIREO_TEMPORAL_LOCALIZATION_MARKER = "__vireoTemporalLocalizationProvider";
 const temporalFormErrors = new WeakMap<object, TemporalFormErrorState>();
 
 function setTemporalFormError(form: TemporalErrorFormApi, fieldName: string, error: string | null): void {
@@ -117,10 +124,10 @@ function resolveExternalSlotProps<TProps, TOwnerState>(
   return typeof slotProps === "function" ? (slotProps as (state: TOwnerState) => TProps)(ownerState) : slotProps;
 }
 
-type TemporalPickerTextFieldProps = TextFieldProps & {
+type TemporalPickerTextFieldProps = PickersTextFieldProps & {
   vireoTextFieldComponent?: React.ElementType;
-  vireoSlots?: TextFieldProps["slots"];
-  vireoSlotProps?: TextFieldProps["slotProps"];
+  vireoSlots?: PickersTextFieldProps["slots"];
+  vireoSlotProps?: PickersTextFieldProps["slotProps"];
 };
 
 const TemporalPickerTextField = React.forwardRef<HTMLDivElement, TemporalPickerTextFieldProps>(
@@ -128,7 +135,7 @@ const TemporalPickerTextField = React.forwardRef<HTMLDivElement, TemporalPickerT
     { vireoSlotProps, vireoSlots, vireoTextFieldComponent, ...textFieldProps },
     forwardedRef,
   ) {
-    const Component = vireoTextFieldComponent ?? TextField;
+    const Component = vireoTextFieldComponent ?? PickersTextField;
     const inputSlotProps = vireoSlotProps?.input;
     const htmlInputSlotProps = vireoSlotProps?.htmlInput;
     return (
@@ -140,12 +147,10 @@ const TemporalPickerTextField = React.forwardRef<HTMLDivElement, TemporalPickerT
           ...textFieldProps.slotProps,
           ...vireoSlotProps,
           input: {
-            ...(textFieldProps.InputProps as object),
             ...(textFieldProps.slotProps?.input as object),
             ...(inputSlotProps as object),
           },
           htmlInput: {
-            ...(textFieldProps.inputProps as object),
             ...(textFieldProps.slotProps?.htmlInput as object),
             ...(htmlInputSlotProps as object),
           },
@@ -162,13 +167,11 @@ const TemporalPickerTextField = React.forwardRef<HTMLDivElement, TemporalPickerT
  */
 export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoFormTemporalFieldProps>(
   function VireoFormTemporalField(inProps, forwardedRef) {
-    const localizationContext = React.useContext(MuiPickersAdapterContext);
-    if (
-      !(
-        localizationContext?.localeText as
-          (Record<string, unknown> & { [VIREO_TEMPORAL_LOCALIZATION_MARKER]?: boolean }) | undefined
-      )?.[VIREO_TEMPORAL_LOCALIZATION_MARKER]
-    ) {
+    const adapter = usePickerAdapter();
+    const hasVireoLocalizationProvider = Boolean(
+      (adapter as unknown as Record<PropertyKey, unknown>)[VIREO_TEMPORAL_ADAPTER_MARKER],
+    );
+    if (!hasVireoLocalizationProvider) {
       throw new Error(
         'VireoFormTemporalField must be rendered within VireoTemporalLocalizationProvider. Import it from "@vireocodedev/starter-ui/localization".',
       );
@@ -468,7 +471,7 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
       }),
       textField: (pickerOwnerState: unknown) => {
         const advancedTextField = resolveExternalSlotProps(advancedTextFieldSlotProps as never, pickerOwnerState) as
-          TextFieldProps | undefined;
+          PickersTextFieldProps | undefined;
         const advancedTextFieldSlots = advancedTextField?.slots ?? {};
         const advancedTextFieldNestedSlotProps = advancedTextField?.slotProps ?? {};
         return {
@@ -478,7 +481,7 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
           helperText: effectiveHelperText,
           inputRef: nativeInputRef,
           name: field.name,
-          onBlur: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+          onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
             advancedTextField?.onBlur?.(event);
             if (event.defaultPrevented) return;
             onBlur?.(event);
@@ -499,6 +502,9 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
             input: {
               ...(advancedTextFieldNestedSlotProps.input as object),
               ...inputSlotOther,
+              "aria-label":
+                (inputSlotOther as React.HTMLAttributes<HTMLDivElement>)["aria-label"] ??
+                (htmlInputSlotOther as React.InputHTMLAttributes<HTMLInputElement>)["aria-label"],
               ownerState,
               className: joinClassNames(classes.input, inputSlotClassName),
             },

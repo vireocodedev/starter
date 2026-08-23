@@ -3,20 +3,22 @@ import CalendarToday from "@mui/icons-material/CalendarToday";
 import Close from "@mui/icons-material/Close";
 import {
   Box,
-  FilledInput,
   FormHelperText,
   IconButton,
-  Input,
-  OutlinedInput,
   type BoxProps,
-  type FilledInputProps,
   type FormHelperTextProps,
   type IconButtonProps,
-  type InputProps,
-  type OutlinedInputProps,
   type SvgIconProps,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import {
+  PickersFilledInput,
+  PickersInput,
+  PickersOutlinedInput,
+  type PickersFilledInputProps,
+  type PickersInputProps,
+  type PickersOutlinedInputProps,
+} from "@mui/x-date-pickers";
 import { VIREO_FORM_TEMPORAL_FIELD_NAME } from "./VireoFormTemporalField.identity";
 import { type VireoFormTemporalFieldOwnerState } from "./VireoFormTemporalField.types";
 
@@ -32,24 +34,22 @@ export const VireoFormTemporalFieldRoot: VireoFormTemporalFieldStyledSlotCompone
   overridesResolver: (_props, styles) => styles.root,
 })<VireoFormTemporalFieldStyledSlotProps>({});
 
-export const VireoFormTemporalFieldOutlinedInput: VireoFormTemporalFieldStyledSlotComponent<OutlinedInputProps> =
-  styled(OutlinedInput, {
+export const VireoFormTemporalFieldOutlinedInput: VireoFormTemporalFieldStyledSlotComponent<PickersOutlinedInputProps> =
+  styled(PickersOutlinedInput, {
     name: VIREO_FORM_TEMPORAL_FIELD_NAME,
     slot: "Input",
     overridesResolver: (_props, styles) => styles.input,
   })<VireoFormTemporalFieldStyledSlotProps>({});
 
-export const VireoFormTemporalFieldFilledInput: VireoFormTemporalFieldStyledSlotComponent<FilledInputProps> = styled(
-  FilledInput,
-  {
+export const VireoFormTemporalFieldFilledInput: VireoFormTemporalFieldStyledSlotComponent<PickersFilledInputProps> =
+  styled(PickersFilledInput, {
     name: VIREO_FORM_TEMPORAL_FIELD_NAME,
     slot: "Input",
     overridesResolver: (_props, styles) => styles.input,
-  },
-)<VireoFormTemporalFieldStyledSlotProps>({});
+  })<VireoFormTemporalFieldStyledSlotProps>({});
 
-export const VireoFormTemporalFieldStandardInput: VireoFormTemporalFieldStyledSlotComponent<InputProps> = styled(
-  Input,
+export const VireoFormTemporalFieldStandardInput: VireoFormTemporalFieldStyledSlotComponent<PickersInputProps> = styled(
+  PickersInput,
   {
     name: VIREO_FORM_TEMPORAL_FIELD_NAME,
     slot: "Input",

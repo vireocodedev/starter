@@ -33,7 +33,12 @@ export default function LoadingAndEmptyExample() {
     <VireoStorybookProvider>
       <Stack spacing={3}>
         <Box>
-          <Typography variant="h6" mb={1}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 1,
+            }}
+          >
             Loading
           </Typography>
           <VireoResponsiveTable
@@ -49,7 +54,12 @@ export default function LoadingAndEmptyExample() {
           />
         </Box>
         <Box>
-          <Typography variant="h6" mb={1}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 1,
+            }}
+          >
             Empty result
           </Typography>
           <VireoResponsiveTable

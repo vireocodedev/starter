@@ -11,7 +11,14 @@ function publishRelease() {
 export default function PromiseLifecycleExample() {
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start" sx={{ minHeight: 480, width: "100%" }}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+          minHeight: 480,
+          width: "100%",
+        }}
+      >
         <Typography variant="h6">One notification follows the complete operation</Typography>
         <Button
           variant="outlined"

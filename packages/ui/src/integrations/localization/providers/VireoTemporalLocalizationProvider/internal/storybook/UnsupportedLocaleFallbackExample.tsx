@@ -8,7 +8,7 @@ export default function UnsupportedLocaleFallbackExample() {
   return (
     <VireoStorybookProvider>
       <VireoTemporalLocalizationProvider locale="zz-ZZ">
-        <Stack spacing={2} maxWidth={420}>
+        <Stack spacing={2} sx={{ maxWidth: 420 }}>
           <Alert severity="info">The unavailable locale falls back to English without hiding its children.</Alert>
           <DateField label="Fallback date" value={dayjs("2026-08-25")} />
         </Stack>

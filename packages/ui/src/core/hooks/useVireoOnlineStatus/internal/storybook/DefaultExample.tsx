@@ -7,7 +7,13 @@ export default function DefaultExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} width="100%" maxWidth={560}>
+      <Stack
+        spacing={2}
+        sx={{
+          maxWidth: 560,
+          width: "100%",
+        }}
+      >
         <Alert severity={isOnline ? "success" : "warning"}>
           {isOnline ? "Browser is online" : "Browser is offline"}
         </Alert>

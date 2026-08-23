@@ -52,7 +52,10 @@ describe(VIREO_FORM_FILE_LIST_FIELD_NAME, () => {
   beforeEach(() => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       font: "",
-      measureText: value => ({ width: value.length * 8 }) as TextMetrics,
+      measureText: value =>
+        ({
+          width: value.length * 8,
+        }) as TextMetrics,
     } as CanvasRenderingContext2D);
   });
 
@@ -284,7 +287,10 @@ describe(VIREO_FORM_FILE_LIST_FIELD_NAME, () => {
     });
     const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       font: "",
-      measureText: value => ({ width: value.length * 8 }) as TextMetrics,
+      measureText: value =>
+        ({
+          width: value.length * 8,
+        }) as TextMetrics,
     } as CanvasRenderingContext2D);
 
     try {

@@ -1,5 +1,5 @@
 import type { VireoDataAttributeValue } from "@/core/utils/muiutils";
-import type { BoxProps, Theme, TypographyProps } from "@mui/material";
+import type { BoxProps, Theme } from "@mui/material";
 import type { VireoThemeComponent } from "@/core/utils/muiutils";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
@@ -15,7 +15,7 @@ export type VireoLabelBoxColor = string | ((theme: Theme) => string);
 export type VireoLabelBoxOwnerState = {
   direction: VireoLabelBoxDirection;
   color: VireoLabelBoxColor;
-  fontWeight: NonNullable<TypographyProps["fontWeight"]>;
+  fontWeight: NonNullable<React.CSSProperties["fontWeight"]>;
   required: boolean;
   hasLabel: boolean;
   hasHelperText: boolean;
@@ -78,7 +78,7 @@ export type VireoLabelBoxOwnProps = VireoLabelBoxSlotsAndSlotProps & {
   /** Shows a visual required indicator after the label. @default false */
   required?: boolean;
   /** Font weight applied to the label header. @default 600 */
-  fontWeight?: TypographyProps["fontWeight"];
+  fontWeight?: React.CSSProperties["fontWeight"];
   /** Lays out the label anatomy above or beside its content. @default 'column' */
   direction?: VireoLabelBoxDirection;
   /** Override or extend the utility classes applied to each slot. */

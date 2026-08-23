@@ -11,6 +11,38 @@ export default defineConfig({
     tsconfigPaths: true,
     alias: [
       {
+        find: /^@vireocodedev\/starter-ui$/,
+        replacement: resolve(import.meta.dirname, "src/index.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/country$/,
+        replacement: resolve(import.meta.dirname, "src/capabilities/country/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/event-source$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/event-source/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/forms$/,
+        replacement: resolve(import.meta.dirname, "src/capabilities/forms/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/hello-pangea-dnd$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/hello-pangea-dnd/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/localization$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/localization/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/sonner$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/sonner/public.ts"),
+      },
+      {
+        find: /^@vireocodedev\/starter-ui\/tanstack-query$/,
+        replacement: resolve(import.meta.dirname, "src/integrations/tanstack-query/public.ts"),
+      },
+      {
         find: /^@\//,
         replacement: `${resolve(import.meta.dirname, "src")}/`,
       },

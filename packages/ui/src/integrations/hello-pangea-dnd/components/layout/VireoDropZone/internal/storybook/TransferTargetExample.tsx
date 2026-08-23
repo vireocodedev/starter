@@ -7,7 +7,13 @@ export default function TransferTargetExample() {
   return (
     <VireoStorybookProvider>
       <VireoDndProvider onDragEnd={() => undefined}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="stretch">
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          sx={{
+            alignItems: "stretch",
+          }}
+        >
           <VireoDropZone
             id={{ type: "task-list", listId: "active" }}
             mode="reorder"
@@ -26,7 +32,11 @@ export default function TransferTargetExample() {
             group="tasks"
             sx={{ width: 260, minHeight: 100, display: "grid", placeItems: "center", p: 2 }}
           >
-            <Stack alignItems="center">
+            <Stack
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <ArchiveRounded />
               <Typography>Archive</Typography>
             </Stack>

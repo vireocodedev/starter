@@ -45,7 +45,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
   it("binds a boolean field and defaults to a full-width labelled switch", () => {
     render(<TestForm />);
 
-    const input = screen.getByRole("checkbox", { name: "Enabled" });
+    const input = screen.getByRole("switch", { name: "Enabled" });
     const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
     expect(input).toHaveAttribute("name", "enabled");
     expect(input).not.toBeChecked();
@@ -60,8 +60,8 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
     const user = userEvent.setup();
     render(<TestForm onSubmit={onSubmit} />);
 
-    await user.click(screen.getByRole("checkbox", { name: "Enabled" }));
-    expect(screen.getByRole("checkbox", { name: "Enabled" })).toBeChecked();
+    await user.click(screen.getByRole("switch", { name: "Enabled" }));
+    expect(screen.getByRole("switch", { name: "Enabled" })).toBeChecked();
     await user.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
@@ -72,15 +72,15 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
     const user = userEvent.setup();
     render(<TestForm initialValue />);
 
-    await user.click(screen.getByRole("checkbox", { name: "Enabled" }));
-    expect(screen.getByRole("checkbox", { name: "Enabled" })).not.toBeChecked();
+    await user.click(screen.getByRole("switch", { name: "Enabled" }));
+    expect(screen.getByRole("switch", { name: "Enabled" })).not.toBeChecked();
     await user.click(screen.getByRole("button", { name: "Reset" }));
-    expect(screen.getByRole("checkbox", { name: "Enabled" })).toBeChecked();
+    expect(screen.getByRole("switch", { name: "Enabled" })).toBeChecked();
   });
 
   it("presents validation errors through the shared form policy", async () => {
     render(<TestForm initialValue validate={value => (value ? undefined : "Enable this setting.")} />);
-    const input = screen.getByRole("checkbox", { name: "Enabled" });
+    const input = screen.getByRole("switch", { name: "Enabled" });
 
     fireEvent.click(input);
     fireEvent.blur(input);
@@ -118,7 +118,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
 
     await user.click(screen.getByRole("button", { name: "Submit" }));
     expect(await screen.findByText("Accept the terms.")).toBeInTheDocument();
-    await user.click(screen.getByRole("checkbox", { name: "Terms accepted" }));
+    await user.click(screen.getByRole("switch", { name: "Terms accepted" }));
     await waitFor(() => expect(screen.queryByText("Accept the terms.")).not.toBeInTheDocument());
   });
 
@@ -152,7 +152,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
     expect(screen.getByText("Enable updates.")).toBeInTheDocument();
 
     await user.type(screen.getByRole("textbox", { name: "Display name" }), "Ada");
-    await user.click(screen.getByRole("checkbox", { name: "Product updates" }));
+    await user.click(screen.getByRole("switch", { name: "Product updates" }));
     await waitFor(() => {
       expect(screen.queryByText("Enter at least two characters.")).not.toBeInTheDocument();
       expect(screen.queryByText("Enable updates.")).not.toBeInTheDocument();
@@ -162,7 +162,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
   it("wires required, disabled, helper text, and native input accessibility", () => {
     render(<TestForm fieldProps={{ disabled: true, required: true }} />);
 
-    const input = screen.getByRole("checkbox", { name: /Enabled/ });
+    const input = screen.getByRole("switch", { name: /Enabled/ });
     const helperText = screen.getByText("Optional preference");
     expect(input).toBeDisabled();
     expect(input).toBeRequired();
@@ -175,7 +175,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
     const onBlur = vi.fn((event: React.FocusEvent<HTMLButtonElement>) => event.preventDefault());
     render(<TestForm fieldProps={{ onBlur, onChange }} />);
 
-    const input = screen.getByRole("checkbox", { name: "Enabled" });
+    const input = screen.getByRole("switch", { name: "Enabled" });
     fireEvent.click(input);
     fireEvent.blur(input);
 
@@ -213,7 +213,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
     expect(forwardedRef.current).toBe(rootSlotRef.current);
     expect(forwardedRef.current).toHaveClass(vireoFormSwitchFieldClasses.root);
     expect(inputRef.current).toBe(switchSlotInputRef.current);
-    expect(inputRef.current).toBe(screen.getByRole("checkbox", { name: "Enabled" }));
+    expect(inputRef.current).toBe(screen.getByRole("switch", { name: "Enabled" }));
   });
 
   it("supports replacement slots, owner-state slot props, and class customization", async () => {
@@ -241,7 +241,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
         }}
       />,
     );
-    await user.click(screen.getByRole("checkbox", { name: "Enabled" }));
+    await user.click(screen.getByRole("switch", { name: "Enabled" }));
 
     const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
     expect(root).toHaveAttribute("data-custom-root", "true");

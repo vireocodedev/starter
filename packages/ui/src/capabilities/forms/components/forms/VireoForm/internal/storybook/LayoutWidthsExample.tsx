@@ -8,7 +8,13 @@ function WidthExample({ layoutWidth }: { layoutWidth: VireoFormLayoutWidth }) {
   return (
     <Box sx={{ border: 1, borderColor: "divider", p: 2 }}>
       <form.Form layoutWidth={layoutWidth}>
-        <Typography fontWeight={700}>{layoutWidth}</Typography>
+        <Typography
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          {layoutWidth}
+        </Typography>
         <Typography color="text.secondary">The form owns this content-width constraint.</Typography>
       </form.Form>
     </Box>

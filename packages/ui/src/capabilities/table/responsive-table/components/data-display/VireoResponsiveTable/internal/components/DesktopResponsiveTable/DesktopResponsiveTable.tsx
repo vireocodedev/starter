@@ -132,10 +132,10 @@ export function DesktopResponsiveTable<
                         <TableCell align={column.align} key={column.id} sx={{ ...getStickyCellSx(column, false) }}>
                           <Skeleton
                             animation="wave"
-                            height={isActionsColumn ? 30 : 18}
                             variant="rounded"
-                            width={skeletonWidth}
                             sx={{
+                              height: isActionsColumn ? 30 : 18,
+                              width: skeletonWidth,
                               ml: column.align === "right" || column.align === "center" ? "auto" : 0,
                               mr: column.align === "center" ? "auto" : 0,
                             }}
@@ -188,11 +188,16 @@ export function DesktopResponsiveTable<
           </Table>
         </TableContainer>
         <TablePagination
-          backIconButtonProps={{ disabled: skeleton || filters.page <= 0 }}
           component="div"
           count={totalCount ?? data.length}
-          nextIconButtonProps={{
-            disabled: skeleton || filters.page >= Math.ceil((totalCount ?? data.length) / filters.rowsPerPage) - 1,
+          slotProps={{
+            actions: {
+              previousButton: { disabled: skeleton || filters.page <= 0 },
+              nextButton: {
+                disabled: skeleton || filters.page >= Math.ceil((totalCount ?? data.length) / filters.rowsPerPage) - 1,
+              },
+            },
+            select: { disabled: skeleton },
           }}
           page={filters.page}
           labelRowsPerPage={labels.rowsPerPage}
@@ -202,7 +207,6 @@ export function DesktopResponsiveTable<
           getItemAriaLabel={labels.paginationItem}
           rowsPerPage={filters.rowsPerPage}
           rowsPerPageOptions={rowsPerPageOptions}
-          SelectProps={{ disabled: skeleton }}
           onPageChange={(_, page) => onFiltersChange({ ...filters, page })}
           onRowsPerPageChange={event =>
             onFiltersChange({ ...filters, page: 0, rowsPerPage: Number.parseInt(event.target.value, 10) })

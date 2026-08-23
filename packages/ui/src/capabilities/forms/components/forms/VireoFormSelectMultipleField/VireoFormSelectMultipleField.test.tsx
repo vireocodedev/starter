@@ -61,7 +61,7 @@ describe(VIREO_FORM_SELECT_MULTIPLE_FIELD_NAME, () => {
     const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
     expect(select).toHaveTextContent("Choose teams");
     expect(root).toHaveClass("MuiFormControl-fullWidth", vireoFormSelectMultipleFieldClasses.root);
-    expect(root?.querySelector("label")).toHaveClass(vireoFormSelectMultipleFieldClasses.inputLabel);
+    expect(root?.querySelector(`.${vireoFormSelectMultipleFieldClasses.inputLabel}`)).toBeInTheDocument();
     expect(root?.querySelector(`.${vireoFormSelectMultipleFieldClasses.select}`)).toBeInTheDocument();
   });
 

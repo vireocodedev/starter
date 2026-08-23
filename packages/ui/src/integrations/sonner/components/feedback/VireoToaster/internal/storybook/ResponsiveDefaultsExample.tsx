@@ -7,7 +7,14 @@ const toasterId = "responsive-defaults";
 export default function ResponsiveDefaultsExample() {
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start" sx={{ minHeight: 480, width: "100%" }}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+          minHeight: 480,
+          width: "100%",
+        }}
+      >
         <Typography variant="h6">Resize the viewport before opening the toast</Typography>
         <Typography color="text.secondary">
           Mobile uses top-center placement; desktop uses bottom-right placement.

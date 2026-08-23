@@ -64,7 +64,13 @@ function EventFeed({ server }: { server: VireoEventSourceStoryServerController }
   return (
     <Paper variant="outlined" sx={{ maxWidth: 760, p: 3 }}>
       <Stack spacing={2}>
-        <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ sm: "center" }} gap={1}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          sx={{
+            alignItems: { sm: "center" },
+            gap: 1,
+          }}
+        >
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Application event stream
           </Typography>
@@ -78,7 +84,12 @@ function EventFeed({ server }: { server: VireoEventSourceStoryServerController }
           </Typography>
         </Stack>
 
-        <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          sx={{
+            gap: 1,
+          }}
+        >
           <Button variant="contained" disabled={stream.status !== "open"} onClick={emitActivity}>
             Emit Zod-validated activity
           </Button>
@@ -90,7 +101,12 @@ function EventFeed({ server }: { server: VireoEventSourceStoryServerController }
           </Button>
         </Stack>
 
-        <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          sx={{
+            gap: 1,
+          }}
+        >
           <Button color="warning" disabled={stream.status !== "open"} onClick={server.interrupt}>
             Interrupt
           </Button>
@@ -105,20 +121,37 @@ function EventFeed({ server }: { server: VireoEventSourceStoryServerController }
           </Button>
         </Stack>
 
-        <Stack direction={{ xs: "column", sm: "row" }} gap={2}>
-          <Stack direction="row" alignItems="center" gap={1}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          sx={{
+            gap: 2,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
             <Switch
               checked={enabled}
               onChange={event => setEnabled(event.target.checked)}
-              inputProps={{ "aria-label": "Enable stream" }}
+              slotProps={{ input: { "aria-label": "Enable stream" } }}
             />
             <Typography>Enabled</Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" gap={1}>
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
             <Switch
               checked={listenForAudits}
               onChange={event => setListenForAudits(event.target.checked)}
-              inputProps={{ "aria-label": "Listen for audit events" }}
+              slotProps={{ input: { "aria-label": "Listen for audit events" } }}
             />
             <Typography>Audit listener</Typography>
           </Stack>

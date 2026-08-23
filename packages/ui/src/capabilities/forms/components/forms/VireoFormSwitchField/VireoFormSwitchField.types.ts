@@ -39,6 +39,10 @@ export interface VireoFormSwitchFieldFormControlLabelSlotPropsOverrides {
 
 export interface VireoFormSwitchFieldSwitchSlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;
+  /** Compatibility alias merged into MUI's native `input` slot. */
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  /** Compatibility alias forwarded to MUI's native `input` slot. */
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
 export interface VireoFormSwitchFieldLabelSlotPropsOverrides {

@@ -63,7 +63,7 @@ describe(VIREO_FORM_SELECT_FIELD_NAME, () => {
     expect(select).toHaveTextContent("Choose a team");
     expect(document.querySelector('input[name="teamId"]')).toHaveValue("");
     expect(root).toHaveClass("MuiFormControl-fullWidth", vireoFormSelectFieldClasses.root);
-    expect(root?.querySelector("label")).toHaveClass(vireoFormSelectFieldClasses.inputLabel);
+    expect(root?.querySelector(`.${vireoFormSelectFieldClasses.inputLabel}`)).toBeInTheDocument();
     expect(root?.querySelector(`.${vireoFormSelectFieldClasses.select}`)).toBeInTheDocument();
   });
 
@@ -71,7 +71,7 @@ describe(VIREO_FORM_SELECT_FIELD_NAME, () => {
     render(<TestForm initialValue="alpha" fieldProps={{ placeholder: undefined }} />);
 
     const root = screen.getByTestId("form").querySelector(".MuiFormControl-root");
-    expect(root?.querySelector("label")).toHaveClass("MuiInputLabel-shrink");
+    expect(root?.querySelector(`.${vireoFormSelectFieldClasses.inputLabel}`)).toHaveClass("MuiInputLabel-shrink");
     expect(screen.getByRole("combobox", { name: "Team" })).toHaveTextContent("Alpha");
   });
 

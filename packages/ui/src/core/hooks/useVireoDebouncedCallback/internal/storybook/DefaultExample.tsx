@@ -10,7 +10,13 @@ export default function DefaultExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} width="100%" maxWidth={520}>
+      <Stack
+        spacing={2}
+        sx={{
+          maxWidth: 520,
+          width: "100%",
+        }}
+      >
         <VireoLabelBox label="Search query">
           <TextField
             value={draft}

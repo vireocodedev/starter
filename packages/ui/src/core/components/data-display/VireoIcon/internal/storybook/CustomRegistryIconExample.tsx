@@ -17,7 +17,13 @@ export default function CustomRegistryIconExample() {
   return (
     <VireoStorybookProvider>
       <VireoIconRegistryProvider icons={{ "status-clock": ClockGeometry }}>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <VireoIcon icon="status-clock" color="info" aria-hidden />
           <Typography>Scheduled task</Typography>
         </Stack>

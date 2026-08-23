@@ -8,11 +8,21 @@ export default function ControlledExpansionExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
         <Button variant="outlined" onClick={() => setExpanded(current => !current)}>
           {expanded ? "Collapse summary" : "Expand summary"}
         </Button>
-        <Box width={420} maxWidth="100%">
+        <Box
+          sx={{
+            maxWidth: "100%",
+            width: 420,
+          }}
+        >
           <VireoTruncatedContent
             collapsedHeight={64}
             expanded={expanded}
@@ -21,7 +31,13 @@ export default function ControlledExpansionExample() {
             onExpandedChange={setExpanded}
           >
             <Stack spacing={1}>
-              <Typography fontWeight={700}>Application-owned disclosure state</Typography>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                }}
+              >
+                Application-owned disclosure state
+              </Typography>
               <Typography variant="body2">
                 The external action and the component toggle update the same state. This lets a surrounding workflow
                 coordinate expansion without replacing Vireo's disclosure behavior.

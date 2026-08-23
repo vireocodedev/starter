@@ -5,7 +5,13 @@ import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 function ActionsAtWidth({ label, width }: { label: string; width: number }) {
   return (
     <Box sx={{ maxWidth: width, width: "100%" }}>
-      <Typography color="text.secondary" mb={1} variant="body2">
+      <Typography
+        color="text.secondary"
+        variant="body2"
+        sx={{
+          mb: 1,
+        }}
+      >
         {label}
       </Typography>
       <VireoFormActions>
@@ -19,7 +25,12 @@ function ActionsAtWidth({ label, width }: { label: string; width: number }) {
 export default function ContainerResponsiveLayoutExample() {
   return (
     <VireoStorybookProvider>
-      <Stack alignItems="flex-start" spacing={3}>
+      <Stack
+        spacing={3}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
         <ActionsAtWidth label="Wide container" width={640} />
         <ActionsAtWidth label="Compact container" width={320} />
       </Stack>

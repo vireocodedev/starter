@@ -3,7 +3,7 @@ import type {
   VireoFormErrorFormatter,
 } from "@/capabilities/forms/components/forms/VireoForm/VireoForm.types";
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
-import type { BoxProps, FormHelperText, IconButton, OutlinedInput, SvgIcon, TextFieldProps } from "@mui/material";
+import type { BoxProps, FormHelperText, IconButton, SvgIcon, TextFieldProps } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type {
   DatePickerProps,
@@ -12,8 +12,8 @@ import type {
   DateValidationError,
   TimePickerProps,
   TimeValidationError,
+  PickersOutlinedInput,
 } from "@mui/x-date-pickers";
-import type { Dayjs } from "dayjs";
 import type React from "react";
 import {
   type VireoFormTemporalFieldClasses,
@@ -73,9 +73,9 @@ export type VireoFormTemporalFieldSlotsAndSlotProps = CreateSlotsAndSlotProps<
   {
     /** @default 'div' */
     root: SlotProps<"div", VireoFormTemporalFieldRootSlotPropsOverrides, VireoFormTemporalFieldOwnerState>;
-    /** @default OutlinedInput; follows `variant` for standard and filled fields. */
+    /** @default PickersOutlinedInput; follows `variant` for standard and filled fields. */
     input: SlotProps<
-      typeof OutlinedInput,
+      typeof PickersOutlinedInput,
       VireoFormTemporalFieldInputSlotPropsOverrides,
       VireoFormTemporalFieldOwnerState
     >;
@@ -138,9 +138,9 @@ type VireoOwnedPickerProp =
   | "value"
   | "views";
 
-export type VireoFormTemporalFieldDatePickerProps = Omit<DatePickerProps<Dayjs>, VireoOwnedPickerProp>;
-export type VireoFormTemporalFieldTimePickerProps = Omit<TimePickerProps<Dayjs>, VireoOwnedPickerProp>;
-export type VireoFormTemporalFieldDateTimePickerProps = Omit<DateTimePickerProps<Dayjs>, VireoOwnedPickerProp>;
+export type VireoFormTemporalFieldDatePickerProps = Omit<DatePickerProps, VireoOwnedPickerProp>;
+export type VireoFormTemporalFieldTimePickerProps = Omit<TimePickerProps, VireoOwnedPickerProp>;
+export type VireoFormTemporalFieldDateTimePickerProps = Omit<DateTimePickerProps, VireoOwnedPickerProp>;
 
 type VireoFormTemporalFieldCommonProps = VireoFormTemporalFieldSlotsAndSlotProps & {
   classes?: Partial<VireoFormTemporalFieldClasses>;
@@ -156,7 +156,8 @@ type VireoFormTemporalFieldCommonProps = VireoFormTemporalFieldSlotsAndSlotProps
   min?: string;
   /** Inclusive canonical upper bound matching the selected mode. */
   max?: string;
-  onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+  /** Called when focus leaves MUI X's accessible segmented input group. */
+  onBlur?: React.FocusEventHandler<HTMLDivElement>;
   onValueChange?: (value: VireoFormTemporalFieldValue) => void;
   /** Canonical value used only to choose initial picker focus when the bound value is null. */
   referenceValue?: string;

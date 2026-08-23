@@ -173,6 +173,7 @@ type OwnedAutocompleteProp =
   | "renderInput"
   | "renderOption"
   | "renderTags"
+  | "renderValue"
   | "slotProps"
   | "slots"
   | "value";

@@ -7,7 +7,13 @@ const fields = ["First name", "Last name", "Company"];
 function SectionAtWidth({ label, width }: { label: string; width: number }) {
   return (
     <Box sx={{ maxWidth: width, width: "100%" }}>
-      <Typography color="text.secondary" mb={1} variant="body2">
+      <Typography
+        color="text.secondary"
+        variant="body2"
+        sx={{
+          mb: 1,
+        }}
+      >
         {label}
       </Typography>
       <VireoFormSection label="Customer" maxColumns={3}>
@@ -24,7 +30,12 @@ function SectionAtWidth({ label, width }: { label: string; width: number }) {
 export default function ContainerResponsiveColumnsExample() {
   return (
     <VireoStorybookProvider>
-      <Stack alignItems="flex-start" spacing={3}>
+      <Stack
+        spacing={3}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
         <SectionAtWidth label="Wide container: three columns" width={1040} />
         <SectionAtWidth label="Compact container: one column" width={420} />
       </Stack>

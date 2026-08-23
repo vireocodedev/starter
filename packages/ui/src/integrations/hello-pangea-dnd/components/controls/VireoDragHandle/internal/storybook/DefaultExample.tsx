@@ -14,7 +14,13 @@ export default function DefaultExample() {
         <VireoDropZone id={{ type: "lane", laneId: "default" }} mode="reorder">
           <VireoDraggableItem id={{ type: "task", taskId: "accessible" }} index={0} dragHandle="explicit">
             <Paper variant="outlined" sx={{ p: 1, width: 360 }}>
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <VireoDragHandle aria-label="Move accessibility review" />
                 <Typography>Accessibility review</Typography>
               </Stack>

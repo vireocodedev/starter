@@ -1,4 +1,4 @@
-import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleOutline from "@mui/icons-material/CheckCircleOutlineOutlined";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import { Stack, Typography } from "@mui/material";
 import { VireoLabelBox } from "@vireocodedev/starter-ui";
@@ -33,13 +33,30 @@ export default function CustomOptionPresentationExample() {
                   options={plans}
                   getOptionProps={option => ({ "data-plan": option.value })}
                   renderOption={(option, state) => (
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{
+                        alignItems: "center",
+                      }}
+                    >
                       {state.selected ? <CheckCircleOutline /> : <RadioButtonUnchecked />}
                       <span>
-                        <Typography component="span" fontWeight={700}>
+                        <Typography
+                          component="span"
+                          sx={{
+                            fontWeight: 700,
+                          }}
+                        >
                           {option.label}
                         </Typography>
-                        <Typography component="span" display="block" variant="caption">
+                        <Typography
+                          component="span"
+                          variant="caption"
+                          sx={{
+                            display: "block",
+                          }}
+                        >
                           {descriptions[option.value]}
                         </Typography>
                       </span>

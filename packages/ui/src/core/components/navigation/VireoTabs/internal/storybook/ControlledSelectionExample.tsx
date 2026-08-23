@@ -8,7 +8,12 @@ export default function ControlledSelectionExample() {
 
   return (
     <VireoStorybookProvider>
-      <Stack spacing={2} alignItems="flex-start">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
         <Button variant="outlined" onClick={() => setSelectedTab("billing")}>
           Open billing from application state
         </Button>

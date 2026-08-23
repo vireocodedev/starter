@@ -6,9 +6,22 @@ export default function StandaloneAccessibleStatusExample() {
   return (
     <VireoStorybookProvider>
       <Paper variant="outlined" sx={{ maxWidth: 360, p: 2 }}>
-        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Stack>
-            <Typography fontWeight={600}>Payments API</Typography>
+            <Typography
+              sx={{
+                fontWeight: 600,
+              }}
+            >
+              Payments API
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               Compact monitoring card
             </Typography>

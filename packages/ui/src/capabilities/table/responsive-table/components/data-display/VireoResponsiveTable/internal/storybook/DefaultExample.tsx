@@ -21,7 +21,13 @@ const columns = [
     renderHeader: () => "Customer",
     renderBody: (row: (typeof rows)[number]) => (
       <Stack>
-        <Typography fontWeight={700}>{row.customer}</Typography>
+        <Typography
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          {row.customer}
+        </Typography>
         <Typography variant="caption" color="text.secondary">
           {row.id}
         </Typography>
@@ -49,7 +55,15 @@ const columns = [
     align: "right" as const,
     minWidthPx: 130,
     renderHeader: () => "Annual value",
-    renderBody: (row: (typeof rows)[number]) => <Typography fontWeight={700}>{row.value}</Typography>,
+    renderBody: (row: (typeof rows)[number]) => (
+      <Typography
+        sx={{
+          fontWeight: 700,
+        }}
+      >
+        {row.value}
+      </Typography>
+    ),
   },
   {
     id: "actions",

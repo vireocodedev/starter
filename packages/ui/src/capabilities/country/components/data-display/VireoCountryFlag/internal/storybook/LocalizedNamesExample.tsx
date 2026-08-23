@@ -12,7 +12,15 @@ export default function LocalizedNamesExample() {
         <Box sx={{ display: "grid", gridTemplateColumns: "80px repeat(5, minmax(145px, 1fr))", minWidth: 820 }}>
           <Box />
           {countryCodes.map(countryCode => (
-            <Stack key={countryCode} direction="row" alignItems="center" spacing={1} sx={{ p: 1 }}>
+            <Stack
+              key={countryCode}
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                p: 1,
+              }}
+            >
               <VireoCountryFlag countryCode={countryCode} />
               <Typography variant="subtitle2">{countryCode}</Typography>
             </Stack>
@@ -27,9 +35,13 @@ export default function LocalizedNamesExample() {
                 <Stack
                   key={`${locale}-${countryCode}`}
                   direction="row"
-                  alignItems="center"
                   spacing={1}
-                  sx={{ p: 1, borderTop: 1, borderColor: "divider" }}
+                  sx={{
+                    alignItems: "center",
+                    p: 1,
+                    borderTop: 1,
+                    borderColor: "divider",
+                  }}
                 >
                   <VireoCountryFlag countryCode={countryCode} label={name} enableTooltip />
                   <Typography variant="body2">{name}</Typography>

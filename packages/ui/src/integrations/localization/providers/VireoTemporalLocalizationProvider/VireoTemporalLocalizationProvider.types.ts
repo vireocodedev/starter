@@ -1,6 +1,5 @@
 import type { AdapterFormats } from "@mui/x-date-pickers/models";
 import type { PickersInputLocaleText } from "@mui/x-date-pickers/locales";
-import type { Dayjs } from "dayjs";
 import type React from "react";
 
 export const VIREO_TEMPORAL_BASE_LOCALES = ["en", "hr"] as const;
@@ -19,5 +18,5 @@ export type VireoTemporalLocalizationProviderProps = {
   /** Semantic application locale. English and Croatian are available without extra imports. */
   locale: VireoTemporalLocale;
   /** Overrides the bundled English or Croatian MUI picker text. */
-  localeText?: PickersInputLocaleText<Dayjs>;
+  localeText?: PickersInputLocaleText;
 };

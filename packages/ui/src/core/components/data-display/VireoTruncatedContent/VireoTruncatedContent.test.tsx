@@ -28,7 +28,12 @@ class ResizeObserverMock {
 
   emit(elements: Element[] = [...this.observedElements]) {
     this.callback(
-      elements.map(target => ({ target }) as ResizeObserverEntry),
+      elements.map(
+        target =>
+          ({
+            target,
+          }) as ResizeObserverEntry,
+      ),
       this as unknown as ResizeObserver,
     );
   }

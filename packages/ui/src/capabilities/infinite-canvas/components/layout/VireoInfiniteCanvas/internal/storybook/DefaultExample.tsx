@@ -12,7 +12,12 @@ function CanvasControls() {
     useVireoInfiniteCanvas();
   return (
     <Paper elevation={4}>
-      <Stack direction="row" alignItems="center">
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <ButtonGroup>
           <IconButton aria-label="Zoom out" onClick={zoomOut}>
             <Remove />
@@ -31,7 +36,7 @@ function CanvasControls() {
             {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
           </IconButton>
         </ButtonGroup>
-        <Typography sx={{ px: 1.5 }} variant="caption">
+        <Typography variant="caption" sx={{ px: 1.5 }}>
           {Math.round(scale * 100)}%
         </Typography>
       </Stack>
