@@ -24,11 +24,9 @@ import com.vireocode.starter.auth.AuthController;
 import com.vireocode.starter.auth.DatabaseUserDetailsService;
 import com.vireocode.starter.base.HistoryEntityType;
 import com.vireocode.starter.base.HistoryEventsRecorder;
-import com.vireocode.starter.history.HistoryController;
 import com.vireocode.starter.history.HistoryActor;
 import com.vireocode.starter.history.HistoryActorResolver;
 import com.vireocode.starter.history.HistoryReadAuthorizer;
-import com.vireocode.starter.history.HistoryRecorder;
 import com.vireocode.starter.offline.OfflineActor;
 import com.vireocode.starter.offline.OfflineActorResolver;
 import com.vireocode.starter.offline.OfflineSyncService;
@@ -76,7 +74,6 @@ class ConsumerOverrideTest {
     @DisplayName("replaces the history sink")
     void replacesTheHistorySink() {
         assertThat(context.getBean(HistoryEventsRecorder.class)).isInstanceOf(RecordingHistorySink.class);
-        assertThat(context.getBeansOfType(HistoryRecorder.class)).isEmpty();
     }
 
     @Test
@@ -101,7 +98,7 @@ class ConsumerOverrideTest {
     void keepsEverythingItDidNotReplace() {
         assertThat(context.getBean(QueryEngineRegistry.class)).isNotNull();
         assertThat(context.getBean(OfflineSyncService.class)).isNotNull();
-        assertThat(context.getBean(HistoryController.class)).isNotNull();
+        assertThat(context.containsBean("starterHistoryController")).isTrue();
         assertThat(context.getBean(AuthController.class)).isNotNull();
     }
 

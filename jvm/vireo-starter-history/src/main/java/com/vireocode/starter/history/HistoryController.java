@@ -24,13 +24,13 @@ import jakarta.validation.constraints.Size;
 @RestController
 @RequestMapping("${vireo.starter.history.endpoint-path:/api/history}")
 @Tag(name = "History")
-public class HistoryController {
+class HistoryController {
 
     private final HistoryRepository repository;
     private final ObjectMapper objectMapper;
     private final StarterHistoryProperties properties;
 
-    public HistoryController(HistoryRepository repository, ObjectMapper objectMapper,
+    HistoryController(HistoryRepository repository, ObjectMapper objectMapper,
             StarterHistoryProperties properties) {
         this.repository = repository;
         this.objectMapper = objectMapper;

@@ -28,7 +28,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class HistoryEntry {
+class HistoryEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -18,8 +18,6 @@ import com.vireocode.starter.auth.DatabaseUserDetailsService;
 import com.vireocode.starter.auth.StarterUserRepository;
 import com.vireocode.starter.base.JsonNodeMapper;
 import com.vireocode.starter.base.JsonNullableMapper;
-import com.vireocode.starter.history.HistoryController;
-import com.vireocode.starter.history.HistoryRepository;
 import com.vireocode.starter.offline.OfflineEntityVersionRepository;
 import com.vireocode.starter.offline.OfflineHeartbeatController;
 import com.vireocode.starter.offline.OfflineHydrationController;
@@ -94,7 +92,7 @@ class ConsumerWiringTest {
     @Test
     @DisplayName("gets the history stack")
     void getsTheHistoryStack() {
-        assertThat(context.getBean(HistoryController.class)).isNotNull();
+        assertThat(context.containsBean("starterHistoryController")).isTrue();
     }
 
     /**
@@ -120,7 +118,7 @@ class ConsumerWiringTest {
     void getsTheLibraryRepositories() {
         assertThat(context.getBean(StarterUserRepository.class)).isNotNull();
         assertThat(context.getBean(SavedFilterRepository.class)).isNotNull();
-        assertThat(context.getBean(HistoryRepository.class)).isNotNull();
+        assertThat(context.containsBean("historyRepository")).isTrue();
         assertThat(context.getBean(OfflineEntityVersionRepository.class)).isNotNull();
     }
 

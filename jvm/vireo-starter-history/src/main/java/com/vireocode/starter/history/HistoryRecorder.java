@@ -13,14 +13,14 @@ import com.vireocode.starter.base.HistoryEventsRecorder;
  * Central sink for entity change history. Serializes DTO snapshots to JSON and
  * stamps each row with the acting user resolved from the security context.
  */
-public class HistoryRecorder implements HistoryEventsRecorder {
+class HistoryRecorder implements HistoryEventsRecorder {
 
     private final HistoryRepository repository;
     private final ObjectMapper objectMapper;
     private final HistoryActorResolver actorResolver;
     private final Clock clock;
 
-    public HistoryRecorder(HistoryRepository repository, ObjectMapper objectMapper,
+    HistoryRecorder(HistoryRepository repository, ObjectMapper objectMapper,
             HistoryActorResolver actorResolver, Clock clock) {
         this.repository = repository;
         this.objectMapper = objectMapper;
