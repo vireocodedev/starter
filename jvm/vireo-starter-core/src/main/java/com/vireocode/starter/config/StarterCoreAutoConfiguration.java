@@ -2,7 +2,10 @@ package com.vireocode.starter.config;
 
 import java.time.Clock;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -91,12 +94,25 @@ public class StarterCoreAutoConfiguration {
 
                 StarterFlywayMigrations.prepareConsumerHistory(consumerFlyway.getConfiguration());
 
-                modules.orderedStream()
-                        .sorted(Comparator.comparingInt(StarterFlywayModule::order))
+                sortedFlywayModules(modules.stream().toList()).stream()
                         .forEach(module -> StarterFlywayMigrations.migrate(module, dataSource, vendor));
 
                 consumerFlyway.migrate();
             };
+        }
+
+        static List<StarterFlywayModule> sortedFlywayModules(List<StarterFlywayModule> modules) {
+            Set<String> names = new HashSet<>();
+            for (StarterFlywayModule module : modules) {
+                if (!names.add(module.name())) {
+                    throw new IllegalStateException("Duplicate Starter Flyway module name: " + module.name());
+                }
+            }
+
+            return modules.stream()
+                    .sorted(Comparator.comparingInt(StarterFlywayModule::order)
+                            .thenComparing(StarterFlywayModule::name))
+                    .toList();
         }
     }
 
