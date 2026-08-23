@@ -13,6 +13,7 @@ describe("vireoStorySort", () => {
       "JVM/Auth/Overview",
       "JVM/Core/Overview",
       "JVM/BOM/Overview",
+      "JVM/Overview",
       "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
@@ -34,6 +35,7 @@ describe("vireoStorySort", () => {
       "UI/Core/Data Display/VireoIcon",
       "UI/Capabilities/Forms/VireoForm",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
+      "JVM/Overview",
       "JVM/BOM/Overview",
       "JVM/Core/Overview",
       "JVM/Auth/Overview",
@@ -50,6 +52,7 @@ describe("vireoStorySort", () => {
 
   it("keeps audited JVM artifacts and pages in their learning order", () => {
     const titles = [
+      "JVM/Overview",
       "JVM/History/Security and Actors",
       "JVM/BOM/Consumption and Release Semantics",
       "JVM/BOM/Overview",
@@ -74,6 +77,7 @@ describe("vireoStorySort", () => {
         .sort(vireoStorySort)
         .map(entry => entry.title),
     ).toEqual([
+      "JVM/Overview",
       "JVM/BOM/Overview",
       "JVM/BOM/Consumption and Release Semantics",
       "JVM/Core/Overview",

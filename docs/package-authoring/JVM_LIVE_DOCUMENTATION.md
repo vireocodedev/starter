@@ -19,20 +19,17 @@ The displayed source and the compiled source must be the same file.
 
 ## Navigation
 
-Add one top-level `JVM` section to the unified Vireo Starter Storybook:
+The unified Vireo Starter Storybook has one top-level `JVM` section:
 
 ```text
 JVM
   Overview
-  Getting Started
-  Dependency Selection
-  Configuration
+  BOM
   Core
   Auth
   Query Engine
   History
   Offline
-  BOM
 ```
 
 Each artifact lives below `JVM` rather than becoming another root. This avoids
@@ -117,8 +114,9 @@ test implementation as consumer guidance.
 
 Javadoc is the detailed API reference and ships with each artifact.
 
-Add an aggregate task that combines the public packages of all published JVM
-modules. Deploy it beside Storybook when documentation hosting is introduced:
+The root `aggregateJavadoc` task combines the public packages of all published
+JVM libraries. Deploy its output beside Storybook when documentation hosting is
+introduced:
 
 ```text
 <docs-root>/                 unified Storybook

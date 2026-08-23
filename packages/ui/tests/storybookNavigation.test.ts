@@ -19,6 +19,7 @@ const shellDocsRoot = join(packagesRoot, "shell", "docs", "storybook");
 const shellExamplesRoot = join(packagesRoot, "shell", "docs", "examples");
 const sqliteDocsRoot = join(packagesRoot, "sqlite", "docs", "storybook");
 const sqliteExamplesRoot = join(packagesRoot, "sqlite", "docs", "examples");
+const jvmDocsRoot = join(repositoryRoot, "jvm", "docs", "storybook");
 const jvmAuthDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-auth", "docs", "storybook");
 const jvmBomDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-bom", "docs", "storybook");
 const jvmCoreDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-core", "docs", "storybook");
@@ -115,6 +116,8 @@ const EXPECTED_JVM_AUTH_ROUTES = [
   "JVM/Auth/Configuration and Security",
 ] as const;
 
+const EXPECTED_JVM_ROUTES = ["JVM/Overview"] as const;
+
 const EXPECTED_JVM_BOM_ROUTES = ["JVM/BOM/Overview", "JVM/BOM/Consumption and Release Semantics"] as const;
 
 const EXPECTED_JVM_CORE_ROUTES = [
@@ -175,6 +178,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(configSource).toContain('"../../queryengine/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../shell/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../sqlite/docs/storybook/**/*.mdx"');
+    expect(configSource).toContain('"../../../jvm/docs/storybook/**/*.mdx"');
     expect(configSource).toContain('"../../../jvm/*/docs/storybook/**/*.mdx"');
   });
 
@@ -263,6 +267,9 @@ describe("Vireo Starter Storybook navigation contract", () => {
   });
 
   it("indexes audited JVM guides under the JVM root", () => {
+    const jvmRoutes = findFiles(jvmDocsRoot, file => extname(file) === ".mdx")
+      .map(documentationTitle)
+      .sort();
     const bomRoutes = findFiles(jvmBomDocsRoot, file => extname(file) === ".mdx")
       .map(documentationTitle)
       .sort();
@@ -282,6 +289,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       .map(documentationTitle)
       .sort();
 
+    expect(jvmRoutes).toEqual([...EXPECTED_JVM_ROUTES].sort());
     expect(bomRoutes).toEqual([...EXPECTED_JVM_BOM_ROUTES].sort());
     expect(coreRoutes).toEqual([...EXPECTED_JVM_CORE_ROUTES].sort());
     expect(authRoutes).toEqual([...EXPECTED_JVM_AUTH_ROUTES].sort());
