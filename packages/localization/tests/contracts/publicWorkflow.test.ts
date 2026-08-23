@@ -29,7 +29,7 @@ describe("starter-localization public workflow", () => {
 
   it("registers every namespace onto a caller-owned i18next instance", async () => {
     const instance = i18next.createInstance();
-    await instance.init({ lng: "en", resources: {}, showSupportNotice: false });
+    await instance.init({ lng: "en", resources: {} });
 
     registerStarterResources(instance, { locales: ["en", "hr"] as const });
 
