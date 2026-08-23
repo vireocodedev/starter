@@ -17,4 +17,13 @@ public record QueryFieldDefinition(
         boolean expandable,
         int maxDepth,
         List<QueryFieldDefinition> children) {
+
+    public QueryFieldDefinition {
+        enumValues = enumValues == null ? List.of() : List.copyOf(enumValues);
+        operators = operators == null ? List.of() : List.copyOf(operators);
+        relationSelectionLabelFields = relationSelectionLabelFields == null
+                ? List.of()
+                : List.copyOf(relationSelectionLabelFields);
+        children = children == null ? List.of() : List.copyOf(children);
+    }
 }

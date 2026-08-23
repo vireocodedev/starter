@@ -2,6 +2,7 @@ package com.vireocode.starter.queryengine.savedfilter;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vireocode.starter.web.OutputOnly;
 
 import jakarta.validation.constraints.NotBlank;
@@ -37,8 +38,10 @@ public class SavedFilterDTO {
     private boolean isDefault;
 
     @OutputOnly
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID userId;
 
     @OutputOnly
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String username;
 }

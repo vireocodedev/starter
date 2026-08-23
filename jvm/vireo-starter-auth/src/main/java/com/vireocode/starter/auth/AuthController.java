@@ -6,11 +6,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vireocode.starter.security.SecurityExpressions;
@@ -21,26 +22,30 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/api/auth")
 @Tag(name = "Authentication")
-public class AuthController {
+class AuthController {
 
     private final AuthenticationManager authenticationManager;
+    private final SessionAuthenticationStrategy sessionAuthenticationStrategy;
     private final HttpSessionSecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+    private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
-    public AuthController(AuthenticationManager authenticationManager) {
+    AuthController(AuthenticationManager authenticationManager,
+            SessionAuthenticationStrategy sessionAuthenticationStrategy) {
         this.authenticationManager = authenticationManager;
+        this.sessionAuthenticationStrategy = sessionAuthenticationStrategy;
     }
 
-    @PostMapping("/login")
+    @PostMapping("${vireo.starter.auth.login-path:/api/auth/login}")
     @PreAuthorize(SecurityExpressions.PERMIT_ALL)
     public LoginResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
         Authentication authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(request.username(), request.password()));
+                UsernamePasswordAuthenticationToken.unauthenticated(request.username().trim(), request.password()));
+
+        sessionAuthenticationStrategy.onAuthentication(authentication, httpRequest, httpResponse);
 
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
@@ -53,38 +58,23 @@ public class AuthController {
         return new LoginResponse(authentication.getName(), "Authenticated");
     }
 
-    @PostMapping("/logout")
+    @PostMapping("${vireo.starter.auth.logout-path:/api/auth/logout}")
     @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
-    public MessageResponse logout(HttpServletRequest httpRequest) {
-        HttpSession session = httpRequest.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        SecurityContextHolder.clearContext();
+    public AuthMessageResponse logout(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
+            Authentication authentication) {
+        logoutHandler.logout(httpRequest, httpResponse, authentication);
 
-        return new MessageResponse("Logged out");
+        return new AuthMessageResponse("Logged out");
     }
 
-    @GetMapping("/me")
+    @GetMapping("${vireo.starter.auth.current-user-path:/api/auth/me}")
     @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
-    public MeResponse me(Authentication authentication) {
+    public CurrentUserResponse me(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw RestUtils.unauthorized("Unauthorized");
         }
 
         String role = StarterUserDetails.resolveRole(authentication.getAuthorities());
-        return new MeResponse(authentication.getName(), role);
-    }
-
-    public record LoginRequest(@NotBlank String username, @NotBlank String password) {
-    }
-
-    public record LoginResponse(String username, String message) {
-    }
-
-    public record MeResponse(String username, String role) {
-    }
-
-    public record MessageResponse(String message) {
+        return new CurrentUserResponse(authentication.getName(), role);
     }
 }

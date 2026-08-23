@@ -2,8 +2,6 @@ package com.vireocode.starter.offline;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import com.vireocode.starter.auth.StarterUserDetails;
 import com.vireocode.starter.web.RestUtils;
 
@@ -25,8 +23,11 @@ public class StarterOfflineActorResolver implements OfflineActorResolver {
     private final String privilegedRole;
 
     public StarterOfflineActorResolver(
-            @Value("${vireo.starter.offline.privileged-role:SUPERADMIN}") String privilegedRole) {
-        this.privilegedRole = privilegedRole;
+            String privilegedRole) {
+        if (privilegedRole == null || privilegedRole.isBlank()) {
+            throw new IllegalArgumentException("privilegedRole must not be blank");
+        }
+        this.privilegedRole = privilegedRole.trim();
     }
 
     @Override

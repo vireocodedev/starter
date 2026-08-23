@@ -1,7 +1,11 @@
 package com.vireocode.starter.config;
 
+import java.time.Clock;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -13,11 +17,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration;
 import org.springframework.boot.flyway.autoconfigure.FlywayMigrationStrategy;
 import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
-import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -39,8 +42,7 @@ import com.vireocode.starter.web.GlobalExceptionHandler;
  * <p>
  * Ordered before Boot's JPA auto-configurations because
  * {@link StarterPackagesRegistrar} has to have contributed the starter's base
- * package before entity scanning and repository scanning read it, and before
- * Jackson's because the library replaces the default {@code ObjectMapper}.
+ * package before entity scanning and repository scanning read it.
  *
  * <p>
  * Every bean here is {@link ConditionalOnMissingBean}. A consumer overrides one
@@ -49,15 +51,22 @@ import com.vireocode.starter.web.GlobalExceptionHandler;
  */
 @AutoConfiguration(before = {
         DataJpaRepositoriesAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class,
-        JacksonAutoConfiguration.class })
-@Import({ StarterPackagesRegistrar.class, JsonConfig.class, MessageSourceConfig.class, OpenApiConfig.class })
+        HibernateJpaAutoConfiguration.class })
+@EnableConfigurationProperties(StarterCoreProperties.class)
+@Import({ StarterPackagesRegistrar.class, JsonConfig.class })
 public class StarterCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    GlobalExceptionHandler starterGlobalExceptionHandler(Environment environment) {
-        return new GlobalExceptionHandler(environment);
+    GlobalExceptionHandler starterGlobalExceptionHandler(StarterCoreProperties properties, Clock clock) {
+        return new GlobalExceptionHandler(properties, clock);
+    }
+
+    /** Shared deterministic time source for every Starter module. */
+    @Bean
+    @ConditionalOnMissingBean
+    Clock starterClock() {
+        return Clock.systemUTC();
     }
 
     /**
@@ -85,12 +94,25 @@ public class StarterCoreAutoConfiguration {
 
                 StarterFlywayMigrations.prepareConsumerHistory(consumerFlyway.getConfiguration());
 
-                modules.orderedStream()
-                        .sorted(Comparator.comparingInt(StarterFlywayModule::order))
+                sortedFlywayModules(modules.stream().toList()).stream()
                         .forEach(module -> StarterFlywayMigrations.migrate(module, dataSource, vendor));
 
                 consumerFlyway.migrate();
             };
+        }
+
+        static List<StarterFlywayModule> sortedFlywayModules(List<StarterFlywayModule> modules) {
+            Set<String> names = new HashSet<>();
+            for (StarterFlywayModule module : modules) {
+                if (!names.add(module.name())) {
+                    throw new IllegalStateException("Duplicate Starter Flyway module name: " + module.name());
+                }
+            }
+
+            return modules.stream()
+                    .sorted(Comparator.comparingInt(StarterFlywayModule::order)
+                            .thenComparing(StarterFlywayModule::name))
+                    .toList();
         }
     }
 
@@ -155,18 +177,18 @@ public class StarterCoreAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        AuditorAware<String> starterAuditorProvider() {
+        AuditorAware<String> starterAuditorProvider(StarterCoreProperties properties) {
             return () -> {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
                 if (authentication == null || !authentication.isAuthenticated()
                         || authentication instanceof AnonymousAuthenticationToken) {
-                    return Optional.of("system");
+                    return Optional.of(properties.getSystemAuditor());
                 }
 
                 return Optional.ofNullable(authentication.getName())
                         .filter(name -> !name.isBlank())
-                        .or(() -> Optional.of("system"));
+                        .or(() -> Optional.of(properties.getSystemAuditor()));
             };
         }
     }

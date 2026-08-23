@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import com.vireocode.starter.auth.StarterUserRepository;
@@ -26,6 +28,7 @@ import com.vireocode.starter.spi.FilterSpecificationBuilder;
  * entity is a matter of publishing a bean rather than editing the library.
  */
 @AutoConfiguration
+@EnableConfigurationProperties(StarterQueryEngineProperties.class)
 public class StarterQueryEngineAutoConfiguration {
 
     @Bean
@@ -56,19 +59,20 @@ public class StarterQueryEngineAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder(QueryEngineRegistry registry,
-            List<QueryCustomFieldResolver<?>> customFieldResolvers) {
-        return new QueryEngineFilterSpecificationBuilder(registry, customFieldResolvers);
+            QueryEngineMetadataGenerator generator, List<QueryCustomFieldResolver<?>> customFieldResolvers) {
+        return new QueryEngineFilterSpecificationBuilder(registry, generator, customFieldResolvers);
     }
 
     @Bean
     @ConditionalOnMissingBean
     QueryEngineRelationOptionService queryEngineRelationOptionService(QueryEngineRegistry registry,
-            QueryEngineMetadataGenerator generator) {
-        return new QueryEngineRelationOptionService(registry, generator);
+            QueryEngineMetadataGenerator generator, StarterQueryEngineProperties properties) {
+        return new QueryEngineRelationOptionService(registry, generator, properties);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "vireo.starter.query-engine", name = "endpoint-enabled", matchIfMissing = true)
     QueryEngineController queryEngineController(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
             QueryEngineRelationOptionService relationOptionService) {
         return new QueryEngineController(registry, generator, relationOptionService);
@@ -90,12 +94,14 @@ public class StarterQueryEngineAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     SavedFilterService savedFilterService(SavedFilterRepository repository, SavedFilterMapper mapper,
-            StarterUserRepository userRepository, QueryEngineRegistry registry) {
-        return new SavedFilterService(repository, mapper, userRepository, registry);
+            StarterUserRepository userRepository, QueryEngineRegistry registry,
+            QueryEngineFilterSpecificationBuilder filterSpecificationBuilder) {
+        return new SavedFilterService(repository, mapper, userRepository, registry, filterSpecificationBuilder);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "vireo.starter.query-engine", name = "saved-filters-endpoint-enabled", matchIfMissing = true)
     SavedFilterController savedFilterController(SavedFilterService service) {
         return new SavedFilterController(service);
     }

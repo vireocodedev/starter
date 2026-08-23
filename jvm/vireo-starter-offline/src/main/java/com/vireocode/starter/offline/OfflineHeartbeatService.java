@@ -1,10 +1,11 @@
 package com.vireocode.starter.offline;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,16 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
     private static final String DELETE_EVENT = "delete";
 
     private final ConcurrentLinkedQueue<SseEmitter> emitters = new ConcurrentLinkedQueue<>();
-    private final AtomicBoolean syncInProgress = new AtomicBoolean(false);
+    private final AtomicInteger activeSyncs = new AtomicInteger();
+    private final Clock clock;
+
+    public OfflineHeartbeatService() {
+        this(Clock.systemUTC());
+    }
+
+    OfflineHeartbeatService(Clock clock) {
+        this.clock = java.util.Objects.requireNonNull(clock, "clock");
+    }
 
     public SseEmitter createEmitter() {
         SseEmitter emitter = new SseEmitter(SSE_NO_TIMEOUT);
@@ -42,11 +52,15 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
     }
 
     public OfflineHeartbeatPayload getCurrentHeartbeat() {
-        return new OfflineHeartbeatPayload(Instant.now(), syncInProgress.get());
+        return new OfflineHeartbeatPayload(Instant.now(clock), activeSyncs.get() > 0);
     }
 
-    public void markSyncInProgress(boolean inProgress) {
-        syncInProgress.set(inProgress);
+    void beginSync() {
+        activeSyncs.incrementAndGet();
+    }
+
+    void endSync() {
+        activeSyncs.updateAndGet(current -> Math.max(0, current - 1));
     }
 
     @Override
@@ -64,7 +78,7 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
         queueEntityChange(DELETE_EVENT, entity, payload, revision);
     }
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRateString = "${vireo.starter.offline.heartbeat-interval:PT1S}")
     public void publishHeartbeat() {
         for (SseEmitter emitter : emitters) {
             sendHeartbeatToEmitter(emitter);

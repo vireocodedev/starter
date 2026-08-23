@@ -3,6 +3,7 @@ package com.vireocode.starter.web;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -21,5 +22,10 @@ class SearchablePageableTest {
 
         assertEquals(1, valueText.getPageable().getPageNumber());
         assertEquals("query", valueText.getSearchText());
+    }
+
+    @Test
+    void rejectsMissingPageable() {
+        assertThrows(NullPointerException.class, () -> new SearchablePageable(null, "query"));
     }
 }

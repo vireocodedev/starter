@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,7 +17,9 @@ class AuthControllerUnitTest {
 
     private static final AuthenticationManager NOOP_AUTHENTICATION_MANAGER = authentication -> authentication;
 
-    private final AuthController controller = new AuthController(NOOP_AUTHENTICATION_MANAGER);
+    private final AuthController controller = new AuthController(NOOP_AUTHENTICATION_MANAGER,
+            (authentication, request, response) -> {
+            });
 
     @AfterEach
     void clearSecurityContext() {
@@ -48,7 +51,8 @@ class AuthControllerUnitTest {
         SecurityContextHolder.getContext().setAuthentication(authenticated);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        AuthController.MessageResponse response = controller.logout(request);
+        MockHttpServletResponse httpResponse = new MockHttpServletResponse();
+        AuthMessageResponse response = controller.logout(request, httpResponse, authenticated);
 
         assertEquals("Logged out", response.message());
         assertNull(SecurityContextHolder.getContext().getAuthentication());

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -28,6 +29,7 @@ public final class StarterFlywayMigrations {
      * a connection pool, a test container or a cloud binding.
      */
     public static String resolveVendor(DataSource dataSource) {
+        Objects.requireNonNull(dataSource, "dataSource must not be null");
         try (Connection connection = dataSource.getConnection()) {
             return DatabaseDriver.fromJdbcUrl(connection.getMetaData().getURL()).getId();
         } catch (SQLException ex) {
@@ -44,6 +46,15 @@ public final class StarterFlywayMigrations {
      */
     public static void migrate(StarterFlywayModule module, DataSource dataSource, String vendor,
             String... additionalLocations) {
+
+        Objects.requireNonNull(module, "module must not be null");
+        Objects.requireNonNull(dataSource, "dataSource must not be null");
+        Objects.requireNonNull(additionalLocations, "additionalLocations must not be null");
+        for (String location : additionalLocations) {
+            if (location == null || location.isBlank()) {
+                throw new IllegalArgumentException("additional migration locations must not be null or blank");
+            }
+        }
 
         List<String> locations = new ArrayList<>();
         locations.add(module.commonLocation());
@@ -88,6 +99,7 @@ public final class StarterFlywayMigrations {
      * elsewhere. Baselining at zero leaves the consumer's own V1 pending.
      */
     public static void prepareConsumerHistory(Configuration consumerConfiguration) {
+        Objects.requireNonNull(consumerConfiguration, "consumerConfiguration must not be null");
         if (!historyTableExists(consumerConfiguration)) {
             Flyway.configure()
                     .configuration(consumerConfiguration)

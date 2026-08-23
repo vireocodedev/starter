@@ -1,0 +1,28 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Offline/Overview" />
+
+# JVM Offline
+
+`vireo-starter-offline` provides authenticated command replay, idempotent outcome tracking, hydration revisions, and transaction-aware SSE change batches.
+
+## Why it exists
+
+Row-shaped offline applications otherwise duplicate retry classification, command audit storage, current-user scoping, hydration invalidation, and stream lifecycle behavior. Offline centralizes the server protocol while applications retain domain mutation logic, record authorization, browser persistence, and conflict UX.
+
+## Installation
+
+```groovy
+dependencies {
+    implementation platform("com.vireocode:vireo-starter-bom:0.2.0")
+    implementation "com.vireocode:vireo-starter-offline"
+}
+```
+
+The dependency auto-configures replay, hydration, heartbeat, the Core revision and change-broadcast SPIs, isolated migrations, and authenticated HTTP endpoints. Applications may replace `OfflineActorResolver`, contribute ordered `OfflineSyncReplayHandler` beans, or disable any controller independently.
+
+## Ownership boundary
+
+The JVM module owns server replay policy, persisted idempotency, retry state, revision counters, and committed change publication. `@vireocodedev/starter-sqlite` owns browser queue persistence, scheduling, local hydration, and network state. Applications own which requests may be queued and the business semantics of custom handlers.
+
+This capability is designed for row-shaped administrative data. Tile caches, binary media synchronization, collaborative document merges, and domain-specific conflict-free data types need application infrastructure rather than this generic command protocol.

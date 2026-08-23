@@ -16,7 +16,7 @@ import com.vireocode.starter.security.SecurityExpressions;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/queryengine")
+@RequestMapping("${vireo.starter.query-engine.endpoint-path:/api/queryengine}")
 @Tag(name = "Query Engine")
 @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
 public class QueryEngineController {

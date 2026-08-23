@@ -20,8 +20,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vireocode.starter.auth.AccountController;
-import com.vireocode.starter.auth.AuthController;
+import com.vireocode.starter.auth.ChangePasswordRequest;
+import com.vireocode.starter.auth.ChangeUsernameRequest;
+import com.vireocode.starter.auth.LoginRequest;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,7 +41,7 @@ class AccountControllerTest {
     private ObjectMapper objectMapper;
 
     private MockHttpSession loginAs(String username, String password) throws Exception {
-        String payload = objectMapper.writeValueAsString(new AuthController.LoginRequest(username, password));
+        String payload = objectMapper.writeValueAsString(new LoginRequest(username, password));
 
         MvcResult loginResult = mockMvc.perform(post(AUTH_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -57,7 +58,7 @@ class AccountControllerTest {
         MockHttpSession session = loginAs("demo", "demo123");
 
         String payload = objectMapper
-                .writeValueAsString(new AccountController.ChangeUsernameRequest("demo-renamed"));
+                .writeValueAsString(new ChangeUsernameRequest("demo-renamed"));
 
         mockMvc.perform(put(API_BASE_URL + "/username")
                 .session(session)
@@ -78,7 +79,7 @@ class AccountControllerTest {
         MockHttpSession session = loginAs("demo", "demo123");
 
         String payload = objectMapper
-                .writeValueAsString(new AccountController.ChangeUsernameRequest("superadmin"));
+                .writeValueAsString(new ChangeUsernameRequest("superadmin"));
 
         mockMvc.perform(put(API_BASE_URL + "/username")
                 .session(session)
@@ -95,7 +96,7 @@ class AccountControllerTest {
         MockHttpSession session = loginAs("demo", "demo123");
 
         String payload = objectMapper
-                .writeValueAsString(new AccountController.ChangePasswordRequest("demo123", "new-password-123"));
+                .writeValueAsString(new ChangePasswordRequest("demo123", "new-password-123"));
 
         mockMvc.perform(put(API_BASE_URL + "/password")
                 .session(session)
@@ -108,14 +109,14 @@ class AccountControllerTest {
         // The new password authenticates successfully.
         mockMvc.perform(post(AUTH_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new AuthController.LoginRequest("demo", "new-password-123"))))
+                .content(objectMapper.writeValueAsString(new LoginRequest("demo", "new-password-123"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("demo"));
 
         // The old password no longer works.
         mockMvc.perform(post(AUTH_BASE_URL + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new AuthController.LoginRequest("demo", "demo123"))))
+                .content(objectMapper.writeValueAsString(new LoginRequest("demo", "demo123"))))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -125,7 +126,7 @@ class AccountControllerTest {
         MockHttpSession session = loginAs("demo", "demo123");
 
         String payload = objectMapper
-                .writeValueAsString(new AccountController.ChangePasswordRequest("wrong-password", "new-password-123"));
+                .writeValueAsString(new ChangePasswordRequest("wrong-password", "new-password-123"));
 
         mockMvc.perform(put(API_BASE_URL + "/password")
                 .session(session)

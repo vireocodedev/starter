@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vireocode.starter.spi.FilterSpecificationBuilder;
+import com.vireocode.starter.spi.HistoryEventsRecorder;
 import com.vireocode.starter.spi.OfflineChangeBroadcaster;
 import com.vireocode.starter.spi.OfflineRevisionTracker;
 import com.vireocode.starter.spi.QueryFilterCriteria;
@@ -38,26 +38,19 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     protected final List<String> relationSearchableFields;
     protected final Class<DOMAIN> domainType;
 
-    @Autowired(required = false)
-    protected HistoryEventsRecorder historyRecorder;
-
-    @Autowired(required = false)
-    protected FilterSpecificationBuilder filterSpecificationBuilder;
-
-    @Autowired(required = false)
-    protected OfflineChangeBroadcaster offlineChangeBroadcaster;
-
-    @Autowired(required = false)
-    protected OfflineRevisionTracker offlineRevisionTracker;
+    HistoryEventsRecorder historyRecorder;
+    FilterSpecificationBuilder filterSpecificationBuilder;
+    OfflineChangeBroadcaster offlineChangeBroadcaster;
+    OfflineRevisionTracker offlineRevisionTracker;
 
     /**
      * Primary constructor accepting the full {@link EntityConfig}.
      */
     public BaseService(SearchableRepository<DOMAIN, ID> repository, BaseMapper<DOMAIN, DTO> mapper,
             EntityConfig entityConfig) {
-        this.repository = repository;
-        this.mapper = mapper;
-        this.entityConfig = entityConfig;
+        this.repository = Objects.requireNonNull(repository, "repository must not be null");
+        this.mapper = Objects.requireNonNull(mapper, "mapper must not be null");
+        this.entityConfig = Objects.requireNonNull(entityConfig, "entityConfig must not be null");
         this.localSearchableFields = entityConfig.getLocalSearchableFields();
         this.relationSearchableFields = entityConfig.getRelationSearchableFields();
         @SuppressWarnings("unchecked")
@@ -70,6 +63,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
         }
         this.domainType = resolvedDomainType;
 
+        validateConfiguredFields();
         assertNoCrudOverrides();
     }
 
@@ -110,24 +104,16 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
             specification = specification.and(makeSearchSpecification(pageable.getSearchText()));
         }
 
-        if (filterRequest != null && filterSpecificationBuilder != null) {
+        if (filterRequest != null) {
+            if (filterSpecificationBuilder == null) {
+                throw new IllegalStateException(
+                        "A QueryFilterCriteria was supplied, but no FilterSpecificationBuilder bean is available");
+            }
             specification = specification.and(
                     filterSpecificationBuilder.build(domainType, filterRequest));
         }
 
         return repository.findAll(specification, pageable.getPageable()).map(mapper::toDto);
-    }
-
-    /**
-     * Perform search using the configured searchable fields.
-     * Returns null if no searchable fields are defined.
-     */
-    protected Page<DTO> performSearch(String searchText, Pageable pageable) {
-        if (!hasSearchableFields()) {
-            return null; // No searchable fields defined
-        }
-        Specification<DOMAIN> specification = notDeletedSpecification().and(makeSearchSpecification(searchText));
-        return repository.findAll(specification, pageable).map(mapper::toDto);
     }
 
     public DTO getById(ID id) {
@@ -139,6 +125,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     @Transactional
     public DTO create(DTO dto) {
+        requireHistoryRecorder();
         validateCreateRequest(dto);
         DOMAIN domain = buildCreateDomain(dto);
         DOMAIN saved = repository.saveAndFlush(domain);
@@ -147,6 +134,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     @Transactional
     public DTO update(ID id, DTO dto) {
+        requireHistoryRecorder();
         validateUpdateRequest(id, dto);
         DOMAIN domain = findUpdateDomain(id);
 
@@ -158,6 +146,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     @Transactional
     public void delete(ID id) {
+        requireHistoryRecorder();
         validateDeleteRequest(id);
         DOMAIN domain = findDeleteDomain(id);
 
@@ -188,6 +177,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     protected DOMAIN findUpdateDomain(ID id) {
         return repository.findById(id)
+                .filter(entity -> !isHidden(entity))
                 .orElseThrow(() -> RestUtils.notFound("id", String.valueOf(id)));
     }
 
@@ -215,6 +205,7 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
     protected final DTO finalizeCreatedEntity(DOMAIN saved) {
         DTO createdDto = mapper.toDto(saved);
+        recordCreate(saved, createdDto);
         publishEntityChange("create", createdDto);
         return createdDto;
     }
@@ -236,7 +227,6 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
-
             if (isForbiddenCrudOverride(method)) {
                 throw new IllegalStateException(
                         "Do not override BaseService CRUD entry points in " + getClass().getName()
@@ -277,26 +267,30 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
         return entityConfig.recordsHistory() ? mapper.toDto(domain) : null;
     }
 
-    protected void recordCreate(DOMAIN saved, DTO currentDto) {
-        if (canRecordHistory()) {
+    private void recordCreate(DOMAIN saved, DTO currentDto) {
+        if (entityConfig.recordsHistory()) {
             historyRecorder.recordCreate(entityConfig.getHistory(), extractId(saved), currentDto);
         }
     }
 
-    protected void recordUpdate(DOMAIN saved, DTO previousDto, DTO currentDto) {
-        if (canRecordHistory()) {
+    private void recordUpdate(DOMAIN saved, DTO previousDto, DTO currentDto) {
+        if (entityConfig.recordsHistory()) {
             historyRecorder.recordUpdate(entityConfig.getHistory(), extractId(saved), previousDto, currentDto);
         }
     }
 
-    protected void recordDelete(DOMAIN domain, DTO previousDto) {
-        if (canRecordHistory()) {
+    private void recordDelete(DOMAIN domain, DTO previousDto) {
+        if (entityConfig.recordsHistory()) {
             historyRecorder.recordDelete(entityConfig.getHistory(), extractId(domain), previousDto);
         }
     }
 
-    private boolean canRecordHistory() {
-        return entityConfig.recordsHistory() && historyRecorder != null;
+    private void requireHistoryRecorder() {
+        if (entityConfig.recordsHistory() && historyRecorder == null) {
+            throw new IllegalStateException(
+                    "Entity history is enabled for " + domainType.getName()
+                            + ", but no HistoryEventsRecorder bean is available");
+        }
     }
 
     protected String extractId(DOMAIN domain) {
@@ -323,18 +317,14 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
             return;
         }
 
-        try {
-            String keywords = localSearchableFields.stream()
-                    .map(fieldName -> extractFieldValue(domain, fieldName))
-                    .filter(Objects::nonNull)
-                    .map(Object::toString)
-                    .filter(value -> value != null && !value.isBlank())
-                    .collect(Collectors.joining(" "));
+        String keywords = localSearchableFields.stream()
+                .map(fieldName -> extractFieldValue(domain, fieldName))
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.joining(" "));
 
-            domain.setKeywords(keywords);
-        } catch (Exception e) {
-            log.warn("Failed to populate keywords for entity {}", domain.getClass().getSimpleName(), e);
-        }
+        domain.setKeywords(keywords);
     }
 
     private Specification<DOMAIN> makeSearchSpecification(String searchText) {
@@ -371,18 +361,6 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
 
         for (String relationFieldName : relationSearchableFields) {
             Field relationField = findField(root.getJavaType(), relationFieldName);
-
-            if (relationField == null) {
-                log.warn("Could not find searchable relation field {} on {}", relationFieldName,
-                        root.getJavaType().getSimpleName());
-                continue;
-            }
-
-            if (!BaseEntity.class.isAssignableFrom(relationField.getType())) {
-                log.warn("Searchable relation field {} on {} is not auditable", relationFieldName,
-                        root.getJavaType().getSimpleName());
-                continue;
-            }
 
             var join = root.join(relationFieldName, JoinType.LEFT);
             predicates.add(criteriaBuilder.like(
@@ -457,8 +435,12 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
         return null;
     }
 
-    protected void publishEntityChange(String action, DTO dto) {
+    final void publishEntityChange(String action, DTO dto) {
         if (dto == null || action == null) {
+            return;
+        }
+
+        if (offlineChangeBroadcaster == null) {
             return;
         }
 
@@ -470,10 +452,6 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
             if (bumpedRevision > 0) {
                 revision = bumpedRevision;
             }
-        }
-
-        if (offlineChangeBroadcaster == null) {
-            return;
         }
 
         switch (action) {
@@ -497,5 +475,52 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
         }
 
         return Character.toLowerCase(entityName.charAt(0)) + entityName.substring(1);
+    }
+
+    @Autowired(required = false)
+    void setHistoryRecorder(HistoryEventsRecorder historyRecorder) {
+        this.historyRecorder = historyRecorder;
+    }
+
+    @Autowired(required = false)
+    void setFilterSpecificationBuilder(FilterSpecificationBuilder filterSpecificationBuilder) {
+        this.filterSpecificationBuilder = filterSpecificationBuilder;
+    }
+
+    @Autowired(required = false)
+    void setOfflineChangeBroadcaster(OfflineChangeBroadcaster offlineChangeBroadcaster) {
+        this.offlineChangeBroadcaster = offlineChangeBroadcaster;
+    }
+
+    @Autowired(required = false)
+    void setOfflineRevisionTracker(OfflineRevisionTracker offlineRevisionTracker) {
+        this.offlineRevisionTracker = offlineRevisionTracker;
+    }
+
+    private void validateConfiguredFields() {
+        for (String fieldName : localSearchableFields) {
+            if (findField(domainType, fieldName) == null) {
+                throw new IllegalArgumentException(
+                        "Unknown local searchable field '" + fieldName + "' on " + domainType.getName());
+            }
+        }
+
+        for (String fieldName : relationSearchableFields) {
+            Field relationField = findField(domainType, fieldName);
+            if (relationField == null) {
+                throw new IllegalArgumentException(
+                        "Unknown relation searchable field '" + fieldName + "' on " + domainType.getName());
+            }
+            if (!BaseEntity.class.isAssignableFrom(relationField.getType())) {
+                throw new IllegalArgumentException(
+                        "Relation searchable field '" + fieldName + "' on " + domainType.getName()
+                                + " must extend BaseEntity");
+            }
+        }
+
+        if (entityConfig.recordsHistory() && findIdFieldName(domainType) == null) {
+            throw new IllegalArgumentException(
+                    "History-enabled entity " + domainType.getName() + " must declare an @Id field");
+        }
     }
 }

@@ -1,36 +1,33 @@
 package com.vireocode.starter.history;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.starter.base.HistoryEntityType;
-import com.vireocode.starter.auth.StarterUser;
-import com.vireocode.starter.auth.StarterUserDetails;
 
 @ExtendWith(MockitoExtension.class)
 class HistoryRecorderTest {
+
+    private static final Instant NOW = Instant.parse("2026-08-23T06:00:00Z");
 
     @Mock
     private HistoryRepository repository;
@@ -38,119 +35,76 @@ class HistoryRecorderTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    @AfterEach
-    void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
-    }
-
     @Test
-    void record_WithNullEntity_DoesNotPersist() {
-        HistoryRecorder recorder = new HistoryRecorder(repository, objectMapper);
+    void record_RejectsMissingIdentityAndSnapshots() {
+        HistoryRecorder recorder = recorder(Optional.empty());
 
-        recorder.record(null, "42", null, null);
+        assertThrows(NullPointerException.class, () -> recorder.record(null, "42", null, Map.of()));
+        assertThrows(NullPointerException.class,
+                () -> recorder.record(TestHistoryEntityType.ITEM, null, null, Map.of()));
+        assertThrows(IllegalArgumentException.class,
+                () -> recorder.record(TestHistoryEntityType.ITEM, "42", null, null));
 
         verify(repository, never()).save(any());
     }
 
     @Test
-    void record_WithNullEntityId_DoesNotPersist() {
-        HistoryRecorder recorder = new HistoryRecorder(repository, objectMapper);
+    void record_WithNoResolvedActor_PersistsSystemActivityWithoutInventingAnActor() throws Exception {
+        when(objectMapper.writeValueAsString(any())).thenReturn("{\"value\":1}");
+        HistoryRecorder recorder = recorder(Optional.empty());
 
-        recorder.record(TestHistoryEntityType.ITEM, null, null, null);
+        recorder.recordCreate(TestHistoryEntityType.ITEM, "1", Map.of("value", 1));
 
-        verify(repository, never()).save(any());
+        HistoryEntry saved = captureSavedEntry();
+        assertNull(saved.getActorId());
+        assertNull(saved.getActorLabel());
+        assertEquals(NOW, saved.getOccurredAt());
     }
 
     @Test
-    void record_WithAnonymousAuthentication_SetsSystemActor() {
-        HistoryRecorder recorder = new HistoryRecorder(repository, objectMapper);
-        SecurityContextHolder.getContext().setAuthentication(new AnonymousAuthenticationToken(
-                "key",
-                "anonymousUser",
-                List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))));
-
-        recorder.record(TestHistoryEntityType.ITEM, "1", null, null);
-
-        ArgumentCaptor<HistoryEntry> captor = ArgumentCaptor.forClass(HistoryEntry.class);
-        verify(repository).save(captor.capture());
-        HistoryEntry saved = captor.getValue();
-
-        assertEquals("system", saved.getOwnerUsername());
-        assertNull(saved.getOwnerId());
-        assertNotNull(saved.getOccurredAt());
-    }
-
-    @Test
-    void record_WithBlankAuthenticationName_UsesSystemActor() {
-        HistoryRecorder recorder = new HistoryRecorder(repository, objectMapper);
-        var authentication = UsernamePasswordAuthenticationToken.authenticated(
-                "   ",
-                "ignored",
-                List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        recorder.record(TestHistoryEntityType.ITEM, "1", null, null);
-
-        ArgumentCaptor<HistoryEntry> captor = ArgumentCaptor.forClass(HistoryEntry.class);
-        verify(repository).save(captor.capture());
-        HistoryEntry saved = captor.getValue();
-
-        assertEquals("system", saved.getOwnerUsername());
-        assertNull(saved.getOwnerId());
-    }
-
-    @Test
-    void record_WithAppUserPrincipal_SetsOwnerIdAndSerializedSnapshots() throws Exception {
-        UUID userId = UUID.randomUUID();
-        StarterUser user = new StarterUser(userId, "demo", "hash", "SUPERADMIN", true);
-        StarterUserDetails userDetails = new StarterUserDetails(user);
-        var authentication = UsernamePasswordAuthenticationToken.authenticated(
-                userDetails,
-                "ignored",
-                userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+    void record_WithApplicationActor_PersistsNeutralActorAndSerializedSnapshots() throws Exception {
         when(objectMapper.writeValueAsString(any())).thenAnswer(invocation -> "json:" + invocation.getArgument(0));
+        HistoryRecorder recorder = recorder(Optional.of(new HistoryActor("user-42", "Demo user")));
 
-        HistoryRecorder recorder = new HistoryRecorder(repository, objectMapper);
         recorder.recordUpdate(
                 TestHistoryEntityType.ITEM,
                 "2",
                 Map.of("before", "x"),
                 Map.of("after", "y"));
 
-        ArgumentCaptor<HistoryEntry> captor = ArgumentCaptor.forClass(HistoryEntry.class);
-        verify(repository).save(captor.capture());
-        HistoryEntry saved = captor.getValue();
-
-        assertEquals("demo", saved.getOwnerUsername());
-        assertEquals(userId, saved.getOwnerId());
+        HistoryEntry saved = captureSavedEntry();
+        assertEquals("user-42", saved.getActorId());
+        assertEquals("Demo user", saved.getActorLabel());
         assertEquals("2", saved.getEntityId());
-        assertNotNull(saved.getSnapshotPrevious());
-        assertNotNull(saved.getSnapshotCurrent());
+        assertEquals("json:{before=x}", saved.getSnapshotPrevious());
+        assertEquals("json:{after=y}", saved.getSnapshotCurrent());
     }
 
     @Test
-    void record_WithSerializationFailure_StoresNullSnapshots() throws Exception {
+    void record_WithSerializationFailure_AbortsInsteadOfPersistingPartialHistory() throws Exception {
         when(objectMapper.writeValueAsString(any()))
                 .thenThrow(new JsonProcessingException("boom") {
                     private static final long serialVersionUID = 1L;
                 });
+        HistoryRecorder recorder = recorder(Optional.empty());
 
-        HistoryRecorder recorder = new HistoryRecorder(repository, objectMapper);
-        recorder.recordCreate(TestHistoryEntityType.ITEM, "3", Map.of("k", "v"));
+        assertThrows(HistoryRecordingException.class,
+                () -> recorder.recordCreate(TestHistoryEntityType.ITEM, "3", Map.of("k", "v")));
 
-        ArgumentCaptor<HistoryEntry> captor = ArgumentCaptor.forClass(HistoryEntry.class);
-        verify(repository).save(captor.capture());
-        HistoryEntry saved = captor.getValue();
-
-        assertNull(saved.getSnapshotCurrent());
+        verify(repository, never()).save(any());
     }
 
-    /**
-     * The library owns the history table but not the set of values that may
-     * appear in its entity column; a consumer supplies its own implementation.
-     */
+    private HistoryRecorder recorder(Optional<HistoryActor> actor) {
+        Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
+        return new HistoryRecorder(repository, objectMapper, () -> actor, clock);
+    }
+
+    private HistoryEntry captureSavedEntry() {
+        ArgumentCaptor<HistoryEntry> captor = ArgumentCaptor.forClass(HistoryEntry.class);
+        verify(repository).save(captor.capture());
+        return captor.getValue();
+    }
+
     private enum TestHistoryEntityType implements HistoryEntityType {
         ITEM
     }

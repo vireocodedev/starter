@@ -1,5 +1,8 @@
 package com.vireocode.starter.flyway;
 
+import java.util.Objects;
+import java.util.regex.Pattern;
+
 /**
  * A module's claim on a set of database tables.
  *
@@ -29,6 +32,19 @@ package com.vireocode.starter.flyway;
  */
 public record StarterFlywayModule(String name, int order) {
 
+    private static final Pattern IDENTIFIER = Pattern.compile("[a-z][a-z0-9_]*");
+
+    public StarterFlywayModule {
+        Objects.requireNonNull(name, "name must not be null");
+        if (!IDENTIFIER.matcher(name).matches()) {
+            throw new IllegalArgumentException(
+                    "name must be a lowercase SQL-safe identifier starting with a letter: " + name);
+        }
+        if (order < 0) {
+            throw new IllegalArgumentException("order must be greater than or equal to zero");
+        }
+    }
+
     /** Migrations every database gets. */
     public String commonLocation() {
         return "classpath:db/vireo/" + name;
@@ -40,6 +56,11 @@ public record StarterFlywayModule(String name, int order) {
      * Absent directories are not an error.
      */
     public String vendorLocation(String vendor) {
+        Objects.requireNonNull(vendor, "vendor must not be null");
+        if (!IDENTIFIER.matcher(vendor).matches()) {
+            throw new IllegalArgumentException(
+                    "vendor must be a lowercase location-safe identifier starting with a letter: " + vendor);
+        }
         return "classpath:db/vireo/" + name + "/vendor/" + vendor;
     }
 

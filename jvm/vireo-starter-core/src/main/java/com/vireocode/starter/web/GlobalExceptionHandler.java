@@ -1,12 +1,15 @@
 package com.vireocode.starter.web;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
@@ -14,135 +17,140 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
-import jakarta.validation.ConstraintViolationException;
+import com.vireocode.starter.config.StarterCoreProperties;
 
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+
+/** Produces the shared {@link ApiError} wire contract for common HTTP failures. */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-        private final Environment environment;
+    private final StarterCoreProperties properties;
+    private final Clock clock;
 
-        public GlobalExceptionHandler(Environment environment) {
-                this.environment = environment;
+    public GlobalExceptionHandler(StarterCoreProperties properties, Clock clock) {
+        this.properties = Objects.requireNonNull(properties, "properties must not be null");
+        this.clock = Objects.requireNonNull(clock, "clock must not be null");
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ApiError handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                fieldErrors.merge(error.getField(), safeMessage(error.getDefaultMessage()), this::mergeMessages));
+        return badRequest(fieldErrors);
+    }
+
+    @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ApiError handleBindException(BindException ex) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                fieldErrors.merge(error.getField(), safeMessage(error.getDefaultMessage()), this::mergeMessages));
+        return badRequest(fieldErrors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ApiError handleConstraintViolation(ConstraintViolationException ex) {
+        Map<String, String> violations = new LinkedHashMap<>();
+        ex.getConstraintViolations().forEach(violation -> violations.merge(
+                violation.getPropertyPath().toString(), safeMessage(violation.getMessage()), this::mergeMessages));
+        return badRequest(violations);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ApiError handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        return badRequest(Map.of("request", "Request body is malformed or has an invalid value"));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ApiError handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return badRequest(Map.of(ex.getName(), "must have a valid value"));
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ApiError handleHandlerMethodValidation(HandlerMethodValidationException ex) {
+        return badRequest(Map.of("request", "Request parameters are invalid"));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    ApiError handleAuthentication(AuthenticationException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "Unauthorized", null);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    ApiError handleAccessDenied(AccessDeniedException ex) {
+        return error(HttpStatus.FORBIDDEN, "Forbidden", null);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    ResponseEntity<ApiError> handleResponseStatusException(ResponseStatusException ex) {
+        HttpStatusCode status = ex.getStatusCode();
+        HttpStatus knownStatus = HttpStatus.resolve(status.value());
+        String message = ex.getReason() != null
+                ? ex.getReason()
+                : knownStatus != null ? knownStatus.getReasonPhrase() : "Request failed";
+        return ResponseEntity.status(status).body(new ApiError(status.value(), message, null, now()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ApiError handleGenericException(Exception ex) {
+        log.error("Unhandled request failure", ex);
+        Map<String, String> details = properties.isExposeInternalErrorDetails() ? buildInternalErrors(ex) : null;
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", details);
+    }
+
+    private ApiError badRequest(Map<String, String> errors) {
+        return error(HttpStatus.BAD_REQUEST, "Bad request", errors);
+    }
+
+    private ApiError error(HttpStatus status, String message, Map<String, String> errors) {
+        return new ApiError(status.value(), message, errors, now());
+    }
+
+    private Instant now() {
+        return Instant.now(clock);
+    }
+
+    private String safeMessage(String message) {
+        return message == null || message.isBlank() ? "is invalid" : message;
+    }
+
+    private String mergeMessages(String first, String second) {
+        return first.equals(second) ? first : first + "; " + second;
+    }
+
+    private Map<String, String> buildInternalErrors(Exception ex) {
+        Throwable rootCause = getRootCause(ex);
+        Map<String, String> errors = new LinkedHashMap<>();
+        errors.put("exception", ex.getClass().getName());
+        errors.put("message", ex.getMessage() != null ? ex.getMessage() : "");
+        if (rootCause != ex) {
+            errors.put("rootException", rootCause.getClass().getName());
+            errors.put("rootMessage", rootCause.getMessage() != null ? rootCause.getMessage() : "");
         }
+        return errors;
+    }
 
-        @ExceptionHandler(MethodArgumentNotValidException.class)
-        @ResponseStatus(HttpStatus.BAD_REQUEST)
-        ApiError handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-                Map<String, String> fieldErrors = new LinkedHashMap<>();
-                ex.getBindingResult().getFieldErrors()
-                                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
-
-                return new ApiError(
-                                HttpStatus.BAD_REQUEST.value(),
-                                "Bad request",
-                                fieldErrors,
-                                Instant.now());
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null) {
+            current = current.getCause();
         }
-
-        @ExceptionHandler(BindException.class)
-        @ResponseStatus(HttpStatus.BAD_REQUEST)
-        ApiError handleBindException(BindException ex) {
-                Map<String, String> fieldErrors = new LinkedHashMap<>();
-                ex.getBindingResult().getFieldErrors()
-                                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
-
-                return new ApiError(
-                                HttpStatus.BAD_REQUEST.value(),
-                                "Bad request",
-                                fieldErrors,
-                                Instant.now());
-        }
-
-        @ExceptionHandler(ConstraintViolationException.class)
-        @ResponseStatus(HttpStatus.BAD_REQUEST)
-        ApiError handleConstraintViolation(ConstraintViolationException ex) {
-                Map<String, String> violations = new LinkedHashMap<>();
-                ex.getConstraintViolations()
-                                .forEach(violation -> violations.put(violation.getPropertyPath().toString(),
-                                                violation.getMessage()));
-
-                return new ApiError(
-                                HttpStatus.BAD_REQUEST.value(),
-                                "Bad request",
-                                violations,
-                                Instant.now());
-        }
-
-        @ExceptionHandler(AuthenticationException.class)
-        @ResponseStatus(HttpStatus.UNAUTHORIZED)
-        ApiError handleAuthentication(AuthenticationException ex) {
-                return new ApiError(
-                                HttpStatus.UNAUTHORIZED.value(),
-                                "Unauthorized",
-                                null,
-                                Instant.now());
-        }
-
-        @ExceptionHandler(AccessDeniedException.class)
-        @ResponseStatus(HttpStatus.FORBIDDEN)
-        ApiError handleAccessDenied(AccessDeniedException ex) {
-                return new ApiError(
-                                HttpStatus.FORBIDDEN.value(),
-                                "Forbidden",
-                                null,
-                                Instant.now());
-        }
-
-        @ExceptionHandler(ResponseStatusException.class)
-        ResponseEntity<ApiError> handleResponseStatusException(ResponseStatusException ex) {
-                HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
-                ApiError apiError = new ApiError(
-                                status.value(),
-                                ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(),
-                                null,
-                                Instant.now());
-                return ResponseEntity.status(status).body(apiError);
-        }
-
-        @ExceptionHandler(Exception.class)
-        @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-        ApiError handleGenericException(Exception ex) {
-                return new ApiError(
-                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                "Internal server error",
-                                shouldExposeInternalErrors() ? buildInternalErrors(ex) : null,
-                                Instant.now());
-        }
-
-        private boolean shouldExposeInternalErrors() {
-                for (String profile : environment.getActiveProfiles()) {
-                        if ("dev".equals(profile) || "test".equals(profile)) {
-                                return true;
-                        }
-                }
-
-                return false;
-        }
-
-        private Map<String, String> buildInternalErrors(Exception ex) {
-                Throwable rootCause = getRootCause(ex);
-
-                Map<String, String> errors = new LinkedHashMap<>();
-                errors.put("exception", ex.getClass().getName());
-                errors.put("message", ex.getMessage() != null ? ex.getMessage() : "");
-
-                if (rootCause != ex) {
-                        errors.put("rootException", rootCause.getClass().getName());
-                        errors.put("rootMessage", rootCause.getMessage() != null ? rootCause.getMessage() : "");
-                }
-
-                return errors;
-        }
-
-        private Throwable getRootCause(Throwable throwable) {
-                Throwable current = throwable;
-
-                while (current.getCause() != null) {
-                        current = current.getCause();
-                }
-
-                return current;
-        }
+        return current;
+    }
 }

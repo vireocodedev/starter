@@ -21,8 +21,13 @@ class OfflineHeartbeatServiceTest {
         assertNotNull(emitter);
 
         assertFalse(service.getCurrentHeartbeat().syncInProgress());
-        service.markSyncInProgress(true);
+        service.beginSync();
         assertTrue(service.getCurrentHeartbeat().syncInProgress());
+        service.beginSync();
+        service.endSync();
+        assertTrue(service.getCurrentHeartbeat().syncInProgress());
+        service.endSync();
+        assertFalse(service.getCurrentHeartbeat().syncInProgress());
     }
 
     @Test

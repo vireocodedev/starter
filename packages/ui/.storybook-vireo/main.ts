@@ -11,6 +11,8 @@ const config: StorybookConfig = {
     "../../queryengine/docs/storybook/**/*.mdx",
     "../../shell/docs/storybook/**/*.mdx",
     "../../sqlite/docs/storybook/**/*.mdx",
+    "../../../jvm/docs/storybook/**/*.mdx",
+    "../../../jvm/*/docs/storybook/**/*.mdx",
     "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: ["@storybook/addon-docs"],

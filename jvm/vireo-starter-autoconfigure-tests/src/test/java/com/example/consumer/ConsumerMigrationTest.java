@@ -62,11 +62,11 @@ class ConsumerMigrationTest {
     }
 
     @Test
-    void eachModuleAppliedItsOwnBaselineAndNothingElse() {
+    void eachModuleAppliedOnlyItsOwnMigrations() {
         assertThat(appliedIn("auth")).containsExactly("auth baseline");
-        assertThat(appliedIn("history")).containsExactly("history baseline");
+        assertThat(appliedIn("history")).containsExactly("history baseline", "neutral actor contract");
         assertThat(appliedIn("queryengine")).containsExactly("saved filter baseline");
-        assertThat(appliedIn("offline")).containsExactly("offline baseline");
+        assertThat(appliedIn("offline")).containsExactly("offline baseline", "decouple sync actor");
     }
 
     private List<String> appliedIn(String module) {

@@ -1,6 +1,7 @@
 package com.vireocode.starter.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -40,8 +43,30 @@ class RestUtilsTest {
         SearchablePageable desc = RestUtils.makePageable(0, 10, "id", "desc", null);
         assertEquals(Sort.Direction.DESC, desc.getPageable().getSort().getOrderFor("id").getDirection());
 
+        SearchablePageable uppercase = RestUtils.makePageable(0, 10, "id", "DESC", null);
+        assertEquals(Sort.Direction.DESC, uppercase.getPageable().getSort().getOrderFor("id").getDirection());
+
         SearchablePageable maxRows = RestUtils.makePageable(0, -1, "id", "asc", null);
         assertEquals(Integer.MAX_VALUE, maxRows.getPageable().getPageSize());
+    }
+
+    @Test
+    void makePageable_RejectsInvalidPublicRequestParametersAsBadRequests() {
+        assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(-1, 10, "id", "asc", null)), 400,
+                "page must be greater than or equal to zero");
+        assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(0, 0, "id", "asc", null)), 400,
+                "rowsPerPage must be greater than zero or exactly -1");
+        assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(0, -2, "id", "asc", null)), 400,
+                "rowsPerPage must be greater than zero or exactly -1");
+        assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(0, 10, " ", "asc", null)), 400,
+                "sortBy must not be blank");
+        assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(0, 10, "id", "sideways", null)), 400,
+                "sortDirection must be asc or desc");
     }
 
     @Test
@@ -56,6 +81,11 @@ class RestUtilsTest {
         Optional<String> unauthenticated = RestUtils.getCurrentPrincipal(String.class);
         assertTrue(unauthenticated.isEmpty());
 
+        AnonymousAuthenticationToken anonymous = new AnonymousAuthenticationToken(
+                "key", "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
+        SecurityContextHolder.getContext().setAuthentication(anonymous);
+        assertTrue(RestUtils.getCurrentPrincipal(String.class).isEmpty());
+
         TestingAuthenticationToken wrongType = new TestingAuthenticationToken(123, "x", "ROLE_USER");
         SecurityContextHolder.getContext().setAuthentication(wrongType);
         Optional<String> wrong = RestUtils.getCurrentPrincipal(String.class);
@@ -66,6 +96,8 @@ class RestUtilsTest {
         Optional<String> found = RestUtils.getCurrentPrincipal(String.class);
         assertTrue(found.isPresent());
         assertEquals("demo", found.get());
+
+        assertThrows(IllegalArgumentException.class, () -> RestUtils.getCurrentPrincipal(null));
     }
 
     private void assertStatus(ResponseStatusException exception, int status, String message) {

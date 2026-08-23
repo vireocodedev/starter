@@ -44,6 +44,7 @@ public final record com.vireocode.starter.queryengine.QueryEngineEntitiesConfig
 public class com.vireocode.starter.queryengine.QueryEngineFilterSpecificationBuilder
     implements com.vireocode.starter.spi.FilterSpecificationBuilder
     public com.vireocode.starter.queryengine.QueryEngineFilterSpecificationBuilder(com.vireocode.starter.queryengine.QueryEngineRegistry)
+    public com.vireocode.starter.queryengine.QueryEngineFilterSpecificationBuilder(com.vireocode.starter.queryengine.QueryEngineRegistry,com.vireocode.starter.queryengine.QueryEngineMetadataGenerator,java.util.List<com.vireocode.starter.queryengine.QueryCustomFieldResolver<?>>)
     public com.vireocode.starter.queryengine.QueryEngineFilterSpecificationBuilder(com.vireocode.starter.queryengine.QueryEngineRegistry,java.util.List<com.vireocode.starter.queryengine.QueryCustomFieldResolver<?>>)
     public <DOMAIN> org.springframework.data.jpa.domain.Specification<DOMAIN> com.vireocode.starter.queryengine.QueryEngineFilterSpecificationBuilder.build(java.lang.Class<DOMAIN>,com.vireocode.starter.spi.QueryFilterCriteria)
 
@@ -62,6 +63,7 @@ public class com.vireocode.starter.queryengine.QueryEngineRegistry
 
 public class com.vireocode.starter.queryengine.QueryEngineRelationOptionService
     public com.vireocode.starter.queryengine.QueryEngineRelationOptionService(com.vireocode.starter.queryengine.QueryEngineRegistry,com.vireocode.starter.queryengine.QueryEngineMetadataGenerator)
+    public com.vireocode.starter.queryengine.QueryEngineRelationOptionService(com.vireocode.starter.queryengine.QueryEngineRegistry,com.vireocode.starter.queryengine.QueryEngineMetadataGenerator,com.vireocode.starter.queryengine.StarterQueryEngineProperties)
     public java.util.List<com.vireocode.starter.queryengine.QueryRelationOption> com.vireocode.starter.queryengine.QueryEngineRelationOptionService.listOptions(java.lang.String,java.lang.String,java.lang.String)
 
 public final record com.vireocode.starter.queryengine.QueryEntityDefinition
@@ -208,6 +210,20 @@ public final enum com.vireocode.starter.queryengine.RelationFilterMode
 public class com.vireocode.starter.queryengine.StarterQueryEngineAutoConfiguration
     public com.vireocode.starter.queryengine.StarterQueryEngineAutoConfiguration()
 
+public class com.vireocode.starter.queryengine.StarterQueryEngineProperties
+    public com.vireocode.starter.queryengine.StarterQueryEngineProperties()
+    public boolean com.vireocode.starter.queryengine.StarterQueryEngineProperties.isEndpointEnabled()
+    public boolean com.vireocode.starter.queryengine.StarterQueryEngineProperties.isEndpointPathsDistinct()
+    public boolean com.vireocode.starter.queryengine.StarterQueryEngineProperties.isSavedFiltersEndpointEnabled()
+    public int com.vireocode.starter.queryengine.StarterQueryEngineProperties.getRelationOptionsLimit()
+    public java.lang.String com.vireocode.starter.queryengine.StarterQueryEngineProperties.getEndpointPath()
+    public java.lang.String com.vireocode.starter.queryengine.StarterQueryEngineProperties.getSavedFiltersEndpointPath()
+    public void com.vireocode.starter.queryengine.StarterQueryEngineProperties.setEndpointEnabled(boolean)
+    public void com.vireocode.starter.queryengine.StarterQueryEngineProperties.setEndpointPath(java.lang.String)
+    public void com.vireocode.starter.queryengine.StarterQueryEngineProperties.setRelationOptionsLimit(int)
+    public void com.vireocode.starter.queryengine.StarterQueryEngineProperties.setSavedFiltersEndpointEnabled(boolean)
+    public void com.vireocode.starter.queryengine.StarterQueryEngineProperties.setSavedFiltersEndpointPath(java.lang.String)
+
 public class com.vireocode.starter.queryengine.savedfilter.SavedFilter
     extends com.vireocode.starter.base.BaseEntity
     public com.vireocode.starter.queryengine.savedfilter.SavedFilter()
@@ -285,7 +301,13 @@ public abstract interface com.vireocode.starter.queryengine.savedfilter.SavedFil
 public class com.vireocode.starter.queryengine.savedfilter.SavedFilterService
     extends com.vireocode.starter.base.BaseService<java.lang.Long, com.vireocode.starter.queryengine.savedfilter.SavedFilter, com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO>
     public com.vireocode.starter.queryengine.savedfilter.SavedFilterService(com.vireocode.starter.queryengine.savedfilter.SavedFilterRepository,com.vireocode.starter.queryengine.savedfilter.SavedFilterMapper,com.vireocode.starter.auth.StarterUserRepository,com.vireocode.starter.queryengine.QueryEngineRegistry)
+    public com.vireocode.starter.queryengine.savedfilter.SavedFilterService(com.vireocode.starter.queryengine.savedfilter.SavedFilterRepository,com.vireocode.starter.queryengine.savedfilter.SavedFilterMapper,com.vireocode.starter.auth.StarterUserRepository,com.vireocode.starter.queryengine.QueryEngineRegistry,com.vireocode.starter.queryengine.QueryEngineFilterSpecificationBuilder)
+    protected com.vireocode.starter.queryengine.savedfilter.SavedFilter com.vireocode.starter.queryengine.savedfilter.SavedFilterService.findDeleteDomain(java.lang.Long)
+    protected com.vireocode.starter.queryengine.savedfilter.SavedFilter com.vireocode.starter.queryengine.savedfilter.SavedFilterService.findUpdateDomain(java.lang.Long)
     protected void com.vireocode.starter.queryengine.savedfilter.SavedFilterService.applyRelations(com.vireocode.starter.queryengine.savedfilter.SavedFilter,com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO)
     protected void com.vireocode.starter.queryengine.savedfilter.SavedFilterService.validateCreateRequest(com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO)
     protected void com.vireocode.starter.queryengine.savedfilter.SavedFilterService.validateUpdateRequest(java.lang.Long,com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO)
     public com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO com.vireocode.starter.queryengine.savedfilter.SavedFilterService.findDefaultByEntityName(java.lang.String)
+    public com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO com.vireocode.starter.queryengine.savedfilter.SavedFilterService.getById(java.lang.Long)
+    public org.springframework.data.domain.Page<com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO> com.vireocode.starter.queryengine.savedfilter.SavedFilterService.findAll(com.vireocode.starter.web.SearchablePageable)
+    public org.springframework.data.domain.Page<com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO> com.vireocode.starter.queryengine.savedfilter.SavedFilterService.findAll(com.vireocode.starter.web.SearchablePageable,com.vireocode.starter.spi.QueryFilterCriteria)

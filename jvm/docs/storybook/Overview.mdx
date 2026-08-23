@@ -1,0 +1,49 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Overview" />
+
+# JVM
+
+Vireo Starter JVM is an aligned family of Spring Boot libraries for the backend contracts shared by Vireo applications.
+
+## Why it exists
+
+Application backends repeatedly need the same web errors, persistence foundations, replaceable authentication, filtering, audit history, and offline synchronization semantics. The JVM family centralizes those contracts without becoming an application framework: consumers select capabilities through ordinary dependencies and continue to own their domain model, business rules, security policy, database, and deployment.
+
+## Choose capabilities
+
+| Artifact | Install it when the application needs | Vireo dependencies |
+| --- | --- | --- |
+| `vireo-starter-bom` | One version boundary for the complete JVM family | None |
+| `vireo-starter-core` | Shared CRUD, web, SPI, or migration foundations directly | None |
+| `vireo-starter-auth` | Starter authentication and account contracts | Core |
+| `vireo-starter-queryengine` | Metadata-driven filtering or saved filters | Core and Auth |
+| `vireo-starter-history` | Append-only entity audit records | Core; Auth at runtime for the V1 migration |
+| `vireo-starter-offline` | Offline replay, hydration, versions, or SSE heartbeats | Core and Query Engine; Auth internally |
+
+Optional libraries bring their required Vireo dependencies transitively. Importing the BOM alone installs no runtime capability.
+
+## Install
+
+```groovy
+dependencies {
+    implementation platform("com.vireocode:vireo-starter-bom:0.2.0")
+
+    implementation "com.vireocode:vireo-starter-auth"
+    implementation "com.vireocode:vireo-starter-history"
+}
+```
+
+Each artifact is an ordinary library JAR. Adding a capability activates replaceable Spring Boot auto-configuration when its conditions are satisfied; it does not create an executable application or take ownership of application configuration.
+
+## Verification model
+
+The JVM family is proved at four boundaries:
+
+1. module tests verify isolated behavior and failure policy;
+2. consumer-context tests verify auto-configuration, replacements, security, and migrations from outside each module;
+3. API snapshots and doclint protect the published surface and generated reference;
+4. a standalone build imports the published BOM and resolves every versionless module from Maven JARs.
+
+Run `./gradlew clean check aggregateJavadoc --no-build-cache` for the source gate and `./scripts/verify-publication-consumer.sh` for the publication boundary. Storybook explains the contracts but never claims to execute Java in the browser; every displayed Java example is compiled by Gradle from its exact source file.
+

@@ -1,0 +1,52 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/BOM/Overview" />
+
+# JVM BOM
+
+`vireo-starter-bom` aligns every published Vireo Starter JVM module and the Spring Boot dependency line behind them. It contains no runtime classes and installs no capability by itself.
+
+## Why it exists
+
+Independent version pins allow mixed Vireo releases and accidental third-party drift. The BOM gives Gradle and Maven consumers one upgrade boundary while leaving module selection explicit: import it once, then declare only the capabilities the application uses.
+
+## Gradle
+
+```groovy
+dependencies {
+    implementation platform("com.vireocode:vireo-starter-bom:0.2.0")
+
+    implementation "com.vireocode:vireo-starter-core"
+    implementation "com.vireocode:vireo-starter-auth"
+    implementation "com.vireocode:vireo-starter-queryengine"
+    implementation "com.vireocode:vireo-starter-history"
+    implementation "com.vireocode:vireo-starter-offline"
+}
+```
+
+Every module declaration is intentionally versionless. Remove any capability the application does not need; importing the BOM does not add it transitively.
+
+## Maven
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.vireocode</groupId>
+      <artifactId>vireo-starter-bom</artifactId>
+      <version>0.2.0</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <dependency>
+    <groupId>com.vireocode</groupId>
+    <artifactId>vireo-starter-core</artifactId>
+  </dependency>
+</dependencies>
+```
+
+The BOM also imports the Spring Boot dependency BOM used by the release. It supplies dependency constraints; it does not apply plugins, create an executable application, or configure Spring beans.

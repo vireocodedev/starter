@@ -2,10 +2,14 @@ package com.vireocode.starter.offline;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestClient;
+
+import java.time.Clock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.starter.flyway.StarterFlywayModule;
@@ -24,6 +28,7 @@ import com.vireocode.starter.spi.OfflineRevisionTracker;
  * {@code BaseService} picks it up without knowing the difference.
  */
 @AutoConfiguration
+@EnableConfigurationProperties(StarterOfflineProperties.class)
 public class StarterOfflineAutoConfiguration {
 
     @Bean
@@ -38,8 +43,9 @@ public class StarterOfflineAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    OfflineEntityVersionService starterOfflineEntityVersionService(OfflineEntityVersionRepository repository) {
-        return new OfflineEntityVersionService(repository);
+    OfflineEntityVersionService starterOfflineEntityVersionService(OfflineEntityVersionRepository repository,
+            Clock clock) {
+        return new OfflineEntityVersionService(repository, clock);
     }
 
     /**
@@ -51,8 +57,8 @@ public class StarterOfflineAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    OfflineHeartbeatService starterOfflineHeartbeatService() {
-        return new OfflineHeartbeatService();
+    OfflineHeartbeatService starterOfflineHeartbeatService(Clock clock) {
+        return new OfflineHeartbeatService(clock);
     }
 
     /**
@@ -62,9 +68,8 @@ public class StarterOfflineAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(OfflineActorResolver.class)
-    StarterOfflineActorResolver starterOfflineActorResolver(
-            @Value("${vireo.starter.offline.privileged-role:SUPERADMIN}") String privilegedRole) {
-        return new StarterOfflineActorResolver(privilegedRole);
+    StarterOfflineActorResolver starterOfflineActorResolver(StarterOfflineProperties properties) {
+        return new StarterOfflineActorResolver(properties.getPrivilegedRole());
     }
 
     @Bean
@@ -72,27 +77,31 @@ public class StarterOfflineAutoConfiguration {
     OfflineSyncService starterOfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
             OfflineSyncCommandRepository repository, ObjectMapper objectMapper, OfflineActorResolver actorResolver,
             List<OfflineSyncReplayHandler> replayHandlers,
-            QueryEngineFilterSpecificationBuilder filterSpecificationBuilder) {
+            QueryEngineFilterSpecificationBuilder filterSpecificationBuilder, StarterOfflineProperties properties,
+            Clock clock) {
         return new OfflineSyncService(offlineHeartbeatService, repository, objectMapper, actorResolver, replayHandlers,
-                filterSpecificationBuilder);
+                filterSpecificationBuilder, properties, clock, RestClient.builder());
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "vireo.starter.offline", name = "sync-endpoint-enabled", havingValue = "true", matchIfMissing = true)
     OfflineSyncController starterOfflineSyncController(OfflineSyncService offlineSyncService) {
         return new OfflineSyncController(offlineSyncService);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "vireo.starter.offline", name = "heartbeat-endpoint-enabled", havingValue = "true", matchIfMissing = true)
     OfflineHeartbeatController starterOfflineHeartbeatController(OfflineHeartbeatService offlineHeartbeatService) {
         return new OfflineHeartbeatController(offlineHeartbeatService);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "vireo.starter.offline", name = "hydration-endpoint-enabled", havingValue = "true", matchIfMissing = true)
     OfflineHydrationController starterOfflineHydrationController(
-            OfflineEntityVersionService offlineEntityVersionService) {
-        return new OfflineHydrationController(offlineEntityVersionService);
+            OfflineEntityVersionService offlineEntityVersionService, StarterOfflineProperties properties) {
+        return new OfflineHydrationController(offlineEntityVersionService, properties);
     }
 }

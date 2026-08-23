@@ -12,46 +12,42 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vireocode.starter.security.SecurityExpressions;
-import com.vireocode.starter.web.RestUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 @RestController
-@RequestMapping("/api/history")
+@RequestMapping("${vireo.starter.history.endpoint-path:/api/history}")
 @Tag(name = "History")
-@Slf4j
-@PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
-public class HistoryController {
-
-    /**
-     * Applied when the caller omits {@code limit}, preserving the pre-existing
-     * unbounded-looking response shape for the vast majority of entities while
-     * still protecting against unbounded history growth.
-     */
-    private static final int DEFAULT_LIMIT = 200;
-
-    /**
-     * Hard ceiling regardless of what the caller requests via {@code limit}.
-     */
-    private static final int MAX_LIMIT = 500;
+class HistoryController {
 
     private final HistoryRepository repository;
+    private final ObjectMapper objectMapper;
+    private final StarterHistoryProperties properties;
 
-    public HistoryController(HistoryRepository repository) {
+    HistoryController(HistoryRepository repository, ObjectMapper objectMapper,
+            StarterHistoryProperties properties) {
         this.repository = repository;
+        this.objectMapper = objectMapper;
+        this.properties = properties;
     }
 
     @GetMapping
-    public List<HistoryEntryDTO> find(@RequestParam("entity") String entity,
-            @RequestParam("entityId") String entityId,
-            @RequestParam(value = "limit", required = false) String limitParam) {
-        int limit = resolveLimit(limitParam);
+    @PreAuthorize("@historyReadAuthorizer.canRead(authentication, #entity, #entityId)")
+    public List<HistoryRecord> find(
+            @RequestParam("entity") @NotBlank @Size(max = 32) String entity,
+            @RequestParam("entityId") @NotBlank @Size(max = 64) String entityId,
+            @RequestParam(value = "limit", required = false) @Positive Integer requestedLimit) {
+        int limit = resolveLimit(requestedLimit);
         Pageable mostRecentFirst = PageRequest.of(0, limit);
 
         List<HistoryEntry> mostRecentDescending = repository
-                .findByEntityAndEntityIdOrderByOccurredAtDesc(entity, entityId, mostRecentFirst);
+                .findByEntityAndEntityIdOrderByOccurredAtDescIdDesc(entity.trim(), entityId.trim(), mostRecentFirst);
 
         List<HistoryEntry> ascending = new ArrayList<>(mostRecentDescending);
         Collections.reverse(ascending);
@@ -61,35 +57,34 @@ public class HistoryController {
                 .toList();
     }
 
-    private int resolveLimit(String limitParam) {
-        if (limitParam == null || limitParam.isBlank()) {
-            return DEFAULT_LIMIT;
-        }
-
-        int requestedLimit;
-        try {
-            requestedLimit = Integer.parseInt(limitParam.trim());
-        } catch (NumberFormatException exception) {
-            throw RestUtils.badRequest("limit must be a positive integer");
-        }
-
-        if (requestedLimit <= 0) {
-            throw RestUtils.badRequest("limit must be a positive integer");
-        }
-
-        return Math.min(requestedLimit, MAX_LIMIT);
+    private int resolveLimit(Integer requestedLimit) {
+        return requestedLimit == null
+                ? properties.getDefaultLimit()
+                : Math.min(requestedLimit, properties.getMaxLimit());
     }
 
-    private HistoryEntryDTO toDto(HistoryEntry entry) {
-        HistoryEntryDTO dto = new HistoryEntryDTO();
-        dto.setId(entry.getId());
-        dto.setTimestamp(entry.getOccurredAt());
-        dto.setOwnerId(entry.getOwnerId());
-        dto.setOwnerUsername(entry.getOwnerUsername());
-        dto.setEntity(entry.getEntity());
-        dto.setEntityId(entry.getEntityId());
-        dto.setSnapshotPrevious(entry.getSnapshotPrevious());
-        dto.setSnapshotCurrent(entry.getSnapshotCurrent());
-        return dto;
+    private HistoryRecord toDto(HistoryEntry entry) {
+        HistoryActor actor = entry.getActorLabel() == null
+                ? null
+                : new HistoryActor(entry.getActorId(), entry.getActorLabel());
+        return new HistoryRecord(
+                entry.getId(),
+                entry.getOccurredAt(),
+                actor,
+                entry.getEntity(),
+                entry.getEntityId(),
+                parseSnapshot(entry.getSnapshotPrevious()),
+                parseSnapshot(entry.getSnapshotCurrent()));
+    }
+
+    private JsonNode parseSnapshot(String snapshot) {
+        if (snapshot == null) {
+            return null;
+        }
+        try {
+            return objectMapper.readTree(snapshot);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Persisted history snapshot is not valid JSON", exception);
+        }
     }
 }

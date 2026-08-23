@@ -64,6 +64,14 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
 
+      # Release is a separate workflow from CI and may run concurrently with it.
+      # Prove the exact source and publication descriptors here before anything
+      # can reach the registry.
+      - name: Verify the JVM release candidate
+        run: |
+          ./gradlew clean check aggregateJavadoc --no-build-cache
+          ./scripts/verify-publication-consumer.sh
+
       # A release that only touched packages/ leaves the JVM version untouched,
       # and GitHub Packages rejects a re-publish of an existing release version.
       # Skipping is the correct outcome there; failing would make every npm-only
@@ -136,51 +144,11 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
           version="$(sed -n 's/^version=//p' jvm/gradle.properties)"
-          consumer="$RUNNER_TEMP/consumer"
-          mkdir -p "$consumer"
-
-          # The repo's own wrapper, so the check runs on the Gradle version the
-          # library is built with. GRADLE_USER_HOME is empty, so even the
-          # distribution is fetched fresh.
-          cp -r jvm/gradle jvm/gradlew "$consumer/"
-
-          cat > "$consumer/settings.gradle" <<'EOF'
-          rootProject.name = 'vireo-starter-consumption-check'
-          EOF
-
-          cat > "$consumer/build.gradle" <<EOF
-          plugins { id 'java' }
-
-          repositories {
-              mavenCentral()
-              maven {
-                  url = 'https://maven.pkg.github.com/vireocodedev/starter'
-                  credentials {
-                      username = System.getenv('GITHUB_ACTOR')
-                      password = System.getenv('GITHUB_TOKEN')
-                  }
-              }
-          }
-
-          dependencies {
-              implementation platform('com.vireocode:vireo-starter-bom:$version')
-              implementation 'com.vireocode:vireo-starter-core'
-              implementation 'com.vireocode:vireo-starter-auth'
-              implementation 'com.vireocode:vireo-starter-queryengine'
-              implementation 'com.vireocode:vireo-starter-offline'
-              implementation 'com.vireocode:vireo-starter-history'
-          }
-
-          // The BOM has to supply every version, so nothing above is pinned.
-          tasks.register('resolve') {
-              def classpath = configurations.runtimeClasspath
-              doLast {
-                  println "Resolved \${classpath.files.size()} jars"
-              }
-          }
-          EOF
-
-          cd "$consumer"
-          GRADLE_USER_HOME="$RUNNER_TEMP/cold-gradle-home" ./gradlew resolve --no-daemon
+          GRADLE_USER_HOME="$RUNNER_TEMP/cold-gradle-home" ./jvm/gradlew \
+            -p jvm/vireo-starter-publication-tests \
+            -PvireoRepository=https://maven.pkg.github.com/vireocodedev/starter \
+            -PvireoVersion="$version" \
+            clean check \
+            --no-daemon \
+            --no-build-cache

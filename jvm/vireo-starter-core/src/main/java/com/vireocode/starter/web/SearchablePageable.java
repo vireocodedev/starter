@@ -1,5 +1,7 @@
 package com.vireocode.starter.web;
 
+import java.util.Objects;
+
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -13,7 +15,7 @@ public class SearchablePageable {
     private final String searchText;
 
     public SearchablePageable(Pageable pageable, String searchText) {
-        this.pageable = pageable;
+        this.pageable = Objects.requireNonNull(pageable, "pageable must not be null");
         this.searchText = searchText;
     }
 

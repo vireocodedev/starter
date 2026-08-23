@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,10 +18,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.vireocode.starter.base.HistoryEntityType;
-import com.vireocode.starter.history.HistoryEntry;
-import com.vireocode.starter.history.HistoryRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,7 +35,7 @@ class HistoryControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private HistoryRepository historyRepository;
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     @DisplayName("GET " + API_BASE_URL
@@ -43,7 +43,7 @@ class HistoryControllerTest {
     @WithMockUser(username = "demo", roles = "USER")
     void find_WithMatchingEntityAndEntityId_ReturnsMappedEntries() throws Exception {
         String entityId = "42";
-        HistoryEntry entry = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, Instant.now(),
+        UUID entryId = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, Instant.now(),
                 "{\"name\":\"Widget\"}", null);
         // Entries for a different entityId must not leak into the result.
         saveEntry(ConsumerHistoryEntityType.ITEM, "999", Instant.now(), "{\"name\":\"Other\"}", null);
@@ -54,8 +54,9 @@ class HistoryControllerTest {
                 .queryParam("entityId", entityId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(entry.getId().toString()))
-                .andExpect(jsonPath("$[0].ownerUsername").value(entry.getOwnerUsername()))
+                .andExpect(jsonPath("$[0].id").value(entryId.toString()))
+                .andExpect(jsonPath("$[0].actor.id").doesNotExist())
+                .andExpect(jsonPath("$[0].actor.label").value("demo"))
                 .andExpect(jsonPath("$[0].entity").value("ITEM"))
                 .andExpect(jsonPath("$[0].entityId").value(entityId))
                 .andExpect(jsonPath("$[0].snapshotPrevious.name").value("Widget"))
@@ -68,10 +69,10 @@ class HistoryControllerTest {
     void find_WithMultipleEntries_OrdersChronologicallyAscending() throws Exception {
         String entityId = "7";
         Instant now = Instant.now();
-        HistoryEntry newest = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now, null, "{\"v\":3}");
-        HistoryEntry oldest = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(2, ChronoUnit.HOURS), null,
+        UUID newest = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now, null, "{\"v\":3}");
+        UUID oldest = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(2, ChronoUnit.HOURS), null,
                 "{\"v\":1}");
-        HistoryEntry middle = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(1, ChronoUnit.HOURS), null,
+        UUID middle = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(1, ChronoUnit.HOURS), null,
                 "{\"v\":2}");
 
         mockMvc.perform(get(API_BASE_URL)
@@ -80,9 +81,9 @@ class HistoryControllerTest {
                 .queryParam("entityId", entityId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].id").value(oldest.getId().toString()))
-                .andExpect(jsonPath("$[1].id").value(middle.getId().toString()))
-                .andExpect(jsonPath("$[2].id").value(newest.getId().toString()));
+                .andExpect(jsonPath("$[0].id").value(oldest.toString()))
+                .andExpect(jsonPath("$[1].id").value(middle.toString()))
+                .andExpect(jsonPath("$[2].id").value(newest.toString()));
     }
 
     @Test
@@ -92,9 +93,9 @@ class HistoryControllerTest {
         String entityId = "99";
         Instant now = Instant.now();
         saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(3, ChronoUnit.HOURS), null, "{\"v\":1}");
-        HistoryEntry secondNewest = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(2, ChronoUnit.HOURS),
+        UUID secondNewest = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(2, ChronoUnit.HOURS),
                 null, "{\"v\":2}");
-        HistoryEntry mostRecent = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(1, ChronoUnit.HOURS), null,
+        UUID mostRecent = saveEntry(ConsumerHistoryEntityType.ITEM, entityId, now.minus(1, ChronoUnit.HOURS), null,
                 "{\"v\":3}");
 
         mockMvc.perform(get(API_BASE_URL)
@@ -104,8 +105,8 @@ class HistoryControllerTest {
                 .queryParam("limit", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(secondNewest.getId().toString()))
-                .andExpect(jsonPath("$[1].id").value(mostRecent.getId().toString()));
+                .andExpect(jsonPath("$[0].id").value(secondNewest.toString()))
+                .andExpect(jsonPath("$[1].id").value(mostRecent.toString()));
     }
 
     @Test
@@ -130,6 +131,31 @@ class HistoryControllerTest {
                 .queryParam("entityId", "1")
                 .queryParam("limit", "0"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET " + API_BASE_URL + " - Rejects blank entity identity")
+    @WithMockUser(username = "demo", roles = "USER")
+    void find_WithBlankEntity_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(get(API_BASE_URL)
+                .with(csrf())
+                .queryParam("entity", " ")
+                .queryParam("entityId", "1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET " + API_BASE_URL + " - Fails explicitly for a corrupt persisted snapshot")
+    @WithMockUser(username = "demo", roles = "USER")
+    void find_WithCorruptSnapshot_ReturnsInternalServerError() throws Exception {
+        saveEntry(ConsumerHistoryEntityType.ITEM, "corrupt", Instant.now(), "not-json", null);
+
+        mockMvc.perform(get(API_BASE_URL)
+                .with(csrf())
+                .queryParam("entity", "ITEM")
+                .queryParam("entityId", "corrupt"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Internal server error"));
     }
 
     @Test
@@ -167,15 +193,13 @@ class HistoryControllerTest {
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
-    private HistoryEntry saveEntry(HistoryEntityType entity, String entityId, Instant occurredAt,
+    private UUID saveEntry(HistoryEntityType entity, String entityId, Instant occurredAt,
             String snapshotPrevious, String snapshotCurrent) {
-        HistoryEntry entry = new HistoryEntry();
-        entry.setOccurredAt(occurredAt);
-        entry.setOwnerUsername("demo");
-        entry.setEntity(entity.name());
-        entry.setEntityId(entityId);
-        entry.setSnapshotPrevious(snapshotPrevious);
-        entry.setSnapshotCurrent(snapshotCurrent);
-        return historyRepository.saveAndFlush(entry);
+        UUID id = UUID.randomUUID();
+        jdbcTemplate.update("INSERT INTO history"
+                        + " (id, occurred_at, actor_label, entity, entity_id, snapshot_previous, snapshot_current)"
+                        + " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                id, occurredAt, "demo", entity.name(), entityId, snapshotPrevious, snapshotCurrent);
+        return id;
     }
 }

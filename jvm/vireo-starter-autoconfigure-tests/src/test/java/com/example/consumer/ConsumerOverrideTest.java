@@ -2,6 +2,9 @@ package com.example.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -20,17 +23,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.vireocode.starter.auth.AuthController;
-import com.vireocode.starter.auth.DatabaseUserDetailsService;
 import com.vireocode.starter.base.HistoryEntityType;
-import com.vireocode.starter.base.HistoryEventsRecorder;
-import com.vireocode.starter.history.HistoryController;
-import com.vireocode.starter.history.HistoryRecorder;
+import com.vireocode.starter.spi.HistoryEventsRecorder;
+import com.vireocode.starter.history.HistoryActor;
+import com.vireocode.starter.history.HistoryActorResolver;
+import com.vireocode.starter.history.HistoryReadAuthorizer;
 import com.vireocode.starter.offline.OfflineActor;
 import com.vireocode.starter.offline.OfflineActorResolver;
 import com.vireocode.starter.offline.OfflineSyncService;
 import com.vireocode.starter.offline.StarterOfflineActorResolver;
 import com.vireocode.starter.queryengine.QueryEngineRegistry;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A default is only a default if it gets out of the way.
@@ -52,7 +56,8 @@ class ConsumerOverrideTest {
     @DisplayName("replaces the user store")
     void replacesTheUserStore() {
         assertThat(context.getBean(UserDetailsService.class)).isInstanceOf(InMemoryUserDetailsManager.class);
-        assertThat(context.getBeansOfType(DatabaseUserDetailsService.class)).isEmpty();
+        assertThat(context.containsBean("starterUserDetailsService")).isFalse();
+        assertThat(context.containsBean("starterAccountController")).isFalse();
     }
 
     @Test
@@ -70,10 +75,23 @@ class ConsumerOverrideTest {
     }
 
     @Test
+    @DisplayName("replaces Core infrastructure defaults")
+    void replacesCoreInfrastructureDefaults() {
+        assertThat(context.getBean(Clock.class).instant()).isEqualTo(Instant.parse("2026-01-01T00:00:00Z"));
+        assertThat(context.getBean(ObjectMapper.class)).isSameAs(context.getBean("consumerObjectMapper"));
+    }
+
+    @Test
     @DisplayName("replaces the history sink")
     void replacesTheHistorySink() {
         assertThat(context.getBean(HistoryEventsRecorder.class)).isInstanceOf(RecordingHistorySink.class);
-        assertThat(context.getBeansOfType(HistoryRecorder.class)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("replaces history actor and read policies")
+    void replacesHistoryPolicies() {
+        assertThat(context.getBean(HistoryActorResolver.class)).isInstanceOf(FixedHistoryActorResolver.class);
+        assertThat(context.getBean(HistoryReadAuthorizer.class)).isInstanceOf(FixedHistoryReadAuthorizer.class);
     }
 
     @Test
@@ -91,8 +109,8 @@ class ConsumerOverrideTest {
     void keepsEverythingItDidNotReplace() {
         assertThat(context.getBean(QueryEngineRegistry.class)).isNotNull();
         assertThat(context.getBean(OfflineSyncService.class)).isNotNull();
-        assertThat(context.getBean(HistoryController.class)).isNotNull();
-        assertThat(context.getBean(AuthController.class)).isNotNull();
+        assertThat(context.containsBean("starterHistoryController")).isTrue();
+        assertThat(context.containsBean("starterAuthController")).isTrue();
     }
 
     @TestConfiguration(proxyBeanMethods = false)
@@ -121,8 +139,28 @@ class ConsumerOverrideTest {
         }
 
         @Bean
+        HistoryActorResolver consumerHistoryActorResolver() {
+            return new FixedHistoryActorResolver();
+        }
+
+        @Bean("historyReadAuthorizer")
+        HistoryReadAuthorizer consumerHistoryReadAuthorizer() {
+            return new FixedHistoryReadAuthorizer();
+        }
+
+        @Bean
         OfflineActorResolver consumerActorResolver() {
             return new FixedActorResolver();
+        }
+
+        @Bean
+        Clock consumerClock() {
+            return Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+        }
+
+        @Bean
+        ObjectMapper consumerObjectMapper() {
+            return new ObjectMapper();
         }
     }
 
@@ -147,6 +185,23 @@ class ConsumerOverrideTest {
         @Override
         public Optional<OfflineActor> resolveCurrentActor() {
             return Optional.empty();
+        }
+    }
+
+    static class FixedHistoryActorResolver implements HistoryActorResolver {
+
+        @Override
+        public Optional<HistoryActor> resolveCurrentActor() {
+            return Optional.of(new HistoryActor("consumer-1", "Consumer"));
+        }
+    }
+
+    static class FixedHistoryReadAuthorizer implements HistoryReadAuthorizer {
+
+        @Override
+        public boolean canRead(org.springframework.security.core.Authentication authentication,
+                String entity, String entityId) {
+            return true;
         }
     }
 }

@@ -6,10 +6,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
-public class RestUtils {
+public final class RestUtils {
+    private RestUtils() {
+    }
+
     public static ResponseStatusException notFound(String param, String value) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity with " + param + "=" + value + " not found");
     }
@@ -40,15 +44,37 @@ public class RestUtils {
 
     public static SearchablePageable makePageable(int page, int rowsPerPage, String sortBy, String sortDirection,
             String searchText) {
-        Sort sort = "desc".equals(sortDirection) ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, rowsPerPage < 0 ? Integer.MAX_VALUE : rowsPerPage, sort);
+        if (page < 0) {
+            throw badRequest("page must be greater than or equal to zero");
+        }
+        if (rowsPerPage == 0 || rowsPerPage < -1) {
+            throw badRequest("rowsPerPage must be greater than zero or exactly -1");
+        }
+        if (sortBy == null || sortBy.isBlank()) {
+            throw badRequest("sortBy must not be blank");
+        }
+
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.fromString(sortDirection);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw badRequest("sortDirection must be asc or desc");
+        }
+
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, rowsPerPage == -1 ? Integer.MAX_VALUE : rowsPerPage, sort);
         return new SearchablePageable(pageable, searchText);
     }
 
     public static <T> Optional<T> getCurrentPrincipal(Class<T> principalType) {
+        if (principalType == null) {
+            throw new IllegalArgumentException("principalType must not be null");
+        }
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
             return Optional.empty();
         }
 

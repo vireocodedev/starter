@@ -2,12 +2,15 @@ package com.vireocode.starter.auth;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.function.Supplier;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
@@ -21,6 +24,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -28,6 +33,10 @@ import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.starter.flyway.StarterFlywayModule;
@@ -60,6 +69,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(StarterAuthProperties.class)
+@SecurityScheme(name = "cookieAuth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.COOKIE,
+        paramName = "JSESSIONID")
 public class StarterAuthAutoConfiguration {
 
     /**
@@ -79,12 +90,17 @@ public class StarterAuthAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    AuthController starterAuthController(AuthenticationManager authenticationManager) {
-        return new AuthController(authenticationManager);
+    @ConditionalOnProperty(prefix = "vireo.starter.auth", name = "endpoints-enabled", matchIfMissing = true)
+    AuthController starterAuthController(AuthenticationManager authenticationManager,
+            SessionAuthenticationStrategy sessionAuthenticationStrategy) {
+        return new AuthController(authenticationManager, sessionAuthenticationStrategy);
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(name = "starterUserDetailsService")
+    @ConditionalOnProperty(prefix = "vireo.starter.auth", name = {
+            "endpoints-enabled", "account-endpoints-enabled" }, matchIfMissing = true)
     AccountController starterAccountController(StarterUserRepository userRepository, PasswordEncoder passwordEncoder) {
         return new AccountController(userRepository, passwordEncoder);
     }
@@ -102,6 +118,13 @@ public class StarterAuthAutoConfiguration {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    /** Applies Spring Security's session-fixation protection to manual JSON login. */
+    @Bean
+    @ConditionalOnMissingBean
+    SessionAuthenticationStrategy starterSessionAuthenticationStrategy() {
+        return new ChangeSessionIdAuthenticationStrategy();
+    }
+
     /**
      * The default chain: session cookies, CSRF tokens a single-page application
      * can read, JSON error bodies instead of a redirect to a login form.
@@ -116,9 +139,15 @@ public class StarterAuthAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     SecurityFilterChain starterSecurityFilterChain(HttpSecurity http, StarterAuthProperties properties,
-            ObjectMapper objectMapper, List<StarterHttpSecurityCustomizer> customizers) throws Exception {
+            ObjectMapper objectMapper, List<StarterHttpSecurityCustomizer> customizers, Clock clock) throws Exception {
 
         String[] docsMatchers = properties.getDocsMatchers().toArray(String[]::new);
+
+        // Custom rules must run before the library's final anyRequest rule.
+        // Spring Security rejects request matchers registered after anyRequest.
+        for (StarterHttpSecurityCustomizer customizer : customizers) {
+            customizer.customize(http);
+        }
 
         http
                 .authorizeHttpRequests(auth -> {
@@ -144,9 +173,9 @@ public class StarterAuthAutoConfiguration {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> writeError(objectMapper,
-                                response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+                                response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized", clock))
                         .accessDeniedHandler((request, response, accessDeniedException) -> writeError(objectMapper,
-                                response, HttpServletResponse.SC_FORBIDDEN, "Forbidden")))
+                                response, HttpServletResponse.SC_FORBIDDEN, "Forbidden", clock)))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .csrf(csrf -> {
@@ -160,19 +189,15 @@ public class StarterAuthAutoConfiguration {
                 })
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
 
-        for (StarterHttpSecurityCustomizer customizer : customizers) {
-            customizer.customize(http);
-        }
-
         return http.build();
     }
 
-    private static void writeError(ObjectMapper objectMapper, HttpServletResponse response, int status, String message)
-            throws IOException {
+    private static void writeError(ObjectMapper objectMapper, HttpServletResponse response, int status,
+            String message, Clock clock) throws IOException {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        objectMapper.writeValue(response.getWriter(), new ApiError(status, message, null, Instant.now()));
+        objectMapper.writeValue(response.getWriter(), new ApiError(status, message, null, Instant.now(clock)));
     }
 
     private static final class SpaCsrfTokenRequestHandler extends CsrfTokenRequestAttributeHandler {

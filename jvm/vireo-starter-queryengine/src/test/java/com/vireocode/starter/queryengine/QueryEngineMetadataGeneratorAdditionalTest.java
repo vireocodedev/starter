@@ -28,12 +28,13 @@ class QueryEngineMetadataGeneratorAdditionalTest {
     }
 
     @Test
-    void generate_InstantiatesProviderWhenBeanIsNotInjected() {
+    void generate_RequiresCustomProviderToBeAContainerBean() {
         QueryEngineMetadataGenerator generator = new QueryEngineMetadataGenerator(new TestRegistry(), List.of());
 
-        QueryEntityDefinition definition = generator.generate("KEY", EntityWithInstantiatedProvider.class);
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> generator.generate("KEY", EntityWithInstantiatedProvider.class));
 
-        assertTrue(definition.fields().stream().anyMatch(field -> field.path().equals("instantiated.path")));
+        assertTrue(exception.getMessage().contains("Missing query custom field provider bean"));
     }
 
     @Test
@@ -63,6 +64,7 @@ class QueryEngineMetadataGeneratorAdditionalTest {
         QueryFieldDefinition amount = require(definition.fields(), "amount");
         assertEquals(QueryFieldType.NUMBER, amount.type());
         assertTrue(amount.operators().contains(QueryOperator.GREATER_OR_EQUAL));
+        assertFalse(amount.operators().contains(QueryOperator.DATE_RANGE));
 
         QueryFieldDefinition date = require(definition.fields(), "date");
         assertEquals(QueryFieldType.DATE, date.type());

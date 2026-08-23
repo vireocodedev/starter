@@ -4,11 +4,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import com.vireocode.starter.security.SecurityExpressions;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/api/offline/heartbeat")
+@RequestMapping("${vireo.starter.offline.heartbeat-endpoint-path:/api/offline/heartbeat}")
 public class OfflineHeartbeatController {
 
     private final OfflineHeartbeatService offlineHeartbeatService;
@@ -18,11 +21,13 @@ public class OfflineHeartbeatController {
     }
 
     @GetMapping
+    @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
     public OfflineHeartbeatPayload getCurrent() {
         return offlineHeartbeatService.getCurrentHeartbeat();
     }
 
     @GetMapping("/stream")
+    @PreAuthorize(SecurityExpressions.IS_AUTHENTICATED)
     public SseEmitter stream(HttpServletResponse response) {
         response.setHeader("X-Accel-Buffering", "no");
         response.setHeader("Cache-Control", "no-cache");

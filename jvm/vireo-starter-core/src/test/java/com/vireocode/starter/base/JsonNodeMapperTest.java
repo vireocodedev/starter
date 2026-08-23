@@ -2,6 +2,7 @@ package com.vireocode.starter.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class JsonNodeMapperTest {
 
     @Test
-    void toNode_ReturnsNullForNullBlankAndInvalidJson() throws Exception {
+    void toNode_ReturnsNullForNullAndBlankButRejectsInvalidJson() throws Exception {
         TestJsonNodeMapper mapper = new TestJsonNodeMapper();
         ObjectMapper objectMapper = mock(ObjectMapper.class);
         mapper.objectMapper = objectMapper;
@@ -24,7 +25,8 @@ class JsonNodeMapperTest {
 
         assertNull(mapper.toNode(null));
         assertNull(mapper.toNode("   "));
-        assertNull(mapper.toNode("invalid"));
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> mapper.toNode("invalid"));
+        assertEquals("Could not parse persisted JSON", error.getMessage());
     }
 
     @Test

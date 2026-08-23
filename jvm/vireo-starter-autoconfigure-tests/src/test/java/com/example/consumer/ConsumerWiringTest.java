@@ -2,6 +2,8 @@ package com.example.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vireocode.starter.auth.AccountController;
-import com.vireocode.starter.auth.AuthController;
-import com.vireocode.starter.auth.DatabaseUserDetailsService;
 import com.vireocode.starter.auth.StarterUserRepository;
 import com.vireocode.starter.base.JsonNodeMapper;
 import com.vireocode.starter.base.JsonNullableMapper;
-import com.vireocode.starter.history.HistoryController;
-import com.vireocode.starter.history.HistoryRepository;
 import com.vireocode.starter.offline.OfflineEntityVersionRepository;
 import com.vireocode.starter.offline.OfflineHeartbeatController;
 import com.vireocode.starter.offline.OfflineHydrationController;
@@ -60,16 +57,18 @@ class ConsumerWiringTest {
         assertThat(context.getBean(GlobalExceptionHandler.class)).isNotNull();
         assertThat(context.getBean(JsonNodeMapper.class)).isNotNull();
         assertThat(context.getBean(JsonNullableMapper.class)).isNotNull();
+        assertThat(context.getBeansOfType(Clock.class)).hasSize(1).containsKey("starterClock");
     }
 
     @Test
     @DisplayName("gets the authentication stack")
     void getsTheAuthenticationStack() {
-        assertThat(context.getBean(UserDetailsService.class)).isInstanceOf(DatabaseUserDetailsService.class);
+        assertThat(context.getBean(UserDetailsService.class).getClass().getSimpleName())
+                .isEqualTo("DatabaseUserDetailsService");
         assertThat(context.getBean(PasswordEncoder.class)).isNotNull();
         assertThat(context.getBean(SecurityFilterChain.class)).isNotNull();
-        assertThat(context.getBean(AuthController.class)).isNotNull();
-        assertThat(context.getBean(AccountController.class)).isNotNull();
+        assertThat(context.containsBean("starterAuthController")).isTrue();
+        assertThat(context.containsBean("starterAccountController")).isTrue();
     }
 
     @Test
@@ -94,7 +93,7 @@ class ConsumerWiringTest {
     @Test
     @DisplayName("gets the history stack")
     void getsTheHistoryStack() {
-        assertThat(context.getBean(HistoryController.class)).isNotNull();
+        assertThat(context.containsBean("starterHistoryController")).isTrue();
     }
 
     /**
@@ -120,7 +119,7 @@ class ConsumerWiringTest {
     void getsTheLibraryRepositories() {
         assertThat(context.getBean(StarterUserRepository.class)).isNotNull();
         assertThat(context.getBean(SavedFilterRepository.class)).isNotNull();
-        assertThat(context.getBean(HistoryRepository.class)).isNotNull();
+        assertThat(context.containsBean("historyRepository")).isTrue();
         assertThat(context.getBean(OfflineEntityVersionRepository.class)).isNotNull();
     }
 

@@ -28,7 +28,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class HistoryEntry {
+class HistoryEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -37,11 +37,11 @@ public class HistoryEntry {
     @Column(name = "occurred_at", nullable = false)
     private Instant occurredAt;
 
-    @Column(name = "owner_id")
-    private UUID ownerId;
+    @Column(name = "actor_id", length = 128)
+    private String actorId;
 
-    @Column(name = "owner_username", nullable = false, length = 100)
-    private String ownerUsername;
+    @Column(name = "actor_label", length = 100)
+    private String actorLabel;
 
     @Column(name = "entity", nullable = false, length = 32)
     private String entity;

@@ -2,7 +2,10 @@ package com.vireocode.starter.web;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Schema(name = "ApiError", description = "API error response")
 public record ApiError(
@@ -12,4 +15,9 @@ public record ApiError(
         Map<String, String> errors,
         @Schema(description = "Timestamp of error", example = "2026-06-25T12:34:56Z") Instant timestamp
 ) {
+    public ApiError {
+        message = Objects.requireNonNull(message, "message must not be null");
+        timestamp = Objects.requireNonNull(timestamp, "timestamp must not be null");
+        errors = errors == null ? null : Collections.unmodifiableMap(new LinkedHashMap<>(errors));
+    }
 }

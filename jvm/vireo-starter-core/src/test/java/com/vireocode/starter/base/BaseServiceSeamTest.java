@@ -1,6 +1,7 @@
 package com.vireocode.starter.base;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
@@ -52,14 +52,15 @@ class BaseServiceSeamTest {
     }
 
     @Test
-    void findAll_WithNoFilterBuilderOnTheClasspath_IgnoresTheFilter() {
+    void findAll_WithNoFilterBuilderOnTheClasspath_RejectsTheFilter() {
         WidgetService service = serviceWithEmptyPage();
         QueryFilterCriteria criteria = new QueryFilterCriteria() {
         };
 
-        Page<WidgetDto> page = service.findAll(new SearchablePageable(Pageable.unpaged(), null), criteria);
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> service.findAll(new SearchablePageable(Pageable.unpaged(), null), criteria));
 
-        assertThat(page).isEmpty();
+        assertThat(error).hasMessageContaining("no FilterSpecificationBuilder bean");
     }
 
     @Test

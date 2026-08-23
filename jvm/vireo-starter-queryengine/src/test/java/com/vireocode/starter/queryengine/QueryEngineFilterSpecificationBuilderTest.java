@@ -89,6 +89,30 @@ class QueryEngineFilterSpecificationBuilderTest {
     }
 
     @Test
+    void build_RejectsPathsAndOperatorsOutsideGeneratedMetadata() {
+        QueryEngineRegistry registry = mock(QueryEngineRegistry.class);
+        QueryEngineMetadataGenerator generator = mock(QueryEngineMetadataGenerator.class);
+        QueryFieldDefinition name = new QueryFieldDefinition(
+                "name", "Name", QueryFieldType.STRING, null, List.of(), List.of(QueryOperator.CONTAINS), false,
+                null, RelationFilterMode.CHILD, false, List.of(), false, 0, List.of());
+        when(registry.requireEntityKey(TestEntity.class)).thenReturn("ENTITY");
+        when(generator.generate("ENTITY", TestEntity.class)).thenReturn(
+                new QueryEntityDefinition("ENTITY", "Entity", TestEntity.class.getName(), List.of(name)));
+        QueryEngineFilterSpecificationBuilder builder = new QueryEngineFilterSpecificationBuilder(
+                registry, generator, List.of());
+
+        QueryFilterRequest unknownPath = new QueryFilterRequest("ENTITY", null,
+                List.of(new QueryFilterRow("leaf", "secret", QueryOperator.EQUALS, "x", false, List.of())));
+        QueryFilterRequest forbiddenOperator = new QueryFilterRequest("ENTITY", null,
+                List.of(new QueryFilterRow("leaf", "name", QueryOperator.GREATER_THAN, "x", false, List.of())));
+
+        assertEquals(400, assertThrows(ResponseStatusException.class,
+                () -> builder.build(TestEntity.class, unknownPath)).getStatusCode().value());
+        assertEquals(400, assertThrows(ResponseStatusException.class,
+                () -> builder.build(TestEntity.class, forbiddenOperator)).getStatusCode().value());
+    }
+
+    @Test
     void convertValue_CoversSupportedTypesAndFallback() throws Exception {
         QueryEngineFilterSpecificationBuilder builder = new QueryEngineFilterSpecificationBuilder(mock(QueryEngineRegistry.class));
 

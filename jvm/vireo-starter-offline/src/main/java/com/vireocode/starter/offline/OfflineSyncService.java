@@ -1,6 +1,7 @@
 package com.vireocode.starter.offline;
 
 import java.net.URI;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -37,16 +40,12 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class OfflineSyncService {
 
-    private static final String API_PREFIX = "/api/";
-    private static final String OFFLINE_PREFIX = "/api/offline/";
+    private static final Logger log = LoggerFactory.getLogger(OfflineSyncService.class);
     private static final String HEADER_COOKIE = "Cookie";
     private static final String HEADER_XSRF = "X-XSRF-TOKEN";
     private static final String ALREADY_PROCESSED_MESSAGE = "Command already processed.";
     private static final String REJECTED_MESSAGE = "Command was permanently rejected by the server.";
     private static final String CONCURRENT_REPLAY_MESSAGE = "Command is already being replayed by a concurrent batch.";
-
-    /** Maximum number of server-side replay attempts before a command is rejected. */
-    static final int MAX_REPLAY_ATTEMPTS = 5;
 
     private final RestClient restClient;
     private final OfflineHeartbeatService offlineHeartbeatService;
@@ -55,6 +54,8 @@ public class OfflineSyncService {
     private final OfflineActorResolver offlineActorResolver;
     private final List<OfflineSyncReplayHandler> replayHandlers;
     private final QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder;
+    private final StarterOfflineProperties properties;
+    private final Clock clock;
 
     public OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
             OfflineSyncCommandRepository offlineSyncCommandRepository,
@@ -62,27 +63,54 @@ public class OfflineSyncService {
             OfflineActorResolver offlineActorResolver,
             List<OfflineSyncReplayHandler> replayHandlers,
             QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder) {
-        this.restClient = RestClient.builder().build();
+        this(offlineHeartbeatService, offlineSyncCommandRepository, objectMapper, offlineActorResolver, replayHandlers,
+                queryEngineFilterSpecificationBuilder, new StarterOfflineProperties(), Clock.systemUTC(),
+                RestClient.builder());
+    }
+
+    OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
+            OfflineSyncCommandRepository offlineSyncCommandRepository,
+            ObjectMapper objectMapper,
+            OfflineActorResolver offlineActorResolver,
+            List<OfflineSyncReplayHandler> replayHandlers,
+            QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder,
+            StarterOfflineProperties properties,
+            Clock clock,
+            RestClient.Builder restClientBuilder) {
+        this.restClient = java.util.Objects.requireNonNull(restClientBuilder, "restClientBuilder").build();
         this.offlineHeartbeatService = offlineHeartbeatService;
         this.offlineSyncCommandRepository = offlineSyncCommandRepository;
         this.objectMapper = objectMapper;
         this.offlineActorResolver = offlineActorResolver;
-        this.replayHandlers = replayHandlers;
+        this.replayHandlers = replayHandlers == null ? List.of() : List.copyOf(replayHandlers);
         this.queryEngineFilterSpecificationBuilder = queryEngineFilterSpecificationBuilder;
+        this.properties = java.util.Objects.requireNonNull(properties, "properties");
+        this.clock = java.util.Objects.requireNonNull(clock, "clock");
     }
 
     @Transactional
     public OfflineSyncBatchResponseDto processBatch(OfflineSyncBatchRequestDto request,
             HttpServletRequest sourceRequest) {
+        java.util.Objects.requireNonNull(request, "request");
+        java.util.Objects.requireNonNull(sourceRequest, "sourceRequest");
         if (request.commands().isEmpty()) {
             return new OfflineSyncBatchResponseDto(0, 0, List.of());
         }
+        if (request.commands().size() > properties.getMaxBatchSize()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "At most " + properties.getMaxBatchSize() + " offline commands may be replayed per batch.");
+        }
+        long uniqueCommandIds = request.commands().stream().map(OfflineSyncCommandDto::commandId).distinct().count();
+        if (uniqueCommandIds != request.commands().size()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Offline command IDs must be unique within a batch.");
+        }
 
-        offlineHeartbeatService.markSyncInProgress(true);
+        offlineHeartbeatService.beginSync();
         try {
             return processBatchInternal(request, sourceRequest);
         } finally {
-            offlineHeartbeatService.markSyncInProgress(false);
+            offlineHeartbeatService.endSync();
         }
     }
 
@@ -105,12 +133,20 @@ public class OfflineSyncService {
     }
 
     private Specification<OfflineSyncCommandEntity> scopeByCurrentUser(OfflineActor currentUser) {
-        if (currentUser.superadmin()) {
+        if (currentUser.privileged()) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
         }
 
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("ownerUsername"),
-                currentUser.username());
+        return (root, query, criteriaBuilder) -> {
+            if (currentUser.id() == null) {
+                return criteriaBuilder.equal(root.get("ownerUsername"), currentUser.username());
+            }
+            return criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get("ownerId"), currentUser.id()),
+                    criteriaBuilder.and(
+                            criteriaBuilder.isNull(root.get("ownerId")),
+                            criteriaBuilder.equal(root.get("ownerUsername"), currentUser.username())));
+        };
     }
 
     private Specification<OfflineSyncCommandEntity> searchSpecification(String rawSearchText) {
@@ -200,7 +236,7 @@ public class OfflineSyncService {
                     OfflineSyncResultReason.REJECTED);
         }
 
-        if (existing.getRetryCount() >= MAX_REPLAY_ATTEMPTS) {
+        if (existing.getRetryCount() >= properties.getMaxReplayAttempts()) {
             return rejectExhaustedCommand(command, existing);
         }
 
@@ -213,10 +249,10 @@ public class OfflineSyncService {
 
     private OfflineSyncCommandResultDto rejectExhaustedCommand(OfflineSyncCommandDto command,
             OfflineSyncCommandEntity existing) {
-        String message = "Command replay abandoned after " + MAX_REPLAY_ATTEMPTS + " failed attempts.";
+        String message = "Command replay abandoned after " + properties.getMaxReplayAttempts() + " failed attempts.";
         existing.setStatus(OfflineSyncCommandStatus.REJECTED);
         existing.setErrorMessage(message);
-        existing.setProcessedAt(Instant.now());
+        existing.setProcessedAt(Instant.now(clock));
         offlineSyncCommandRepository.save(existing);
         return new OfflineSyncCommandResultDto(command.commandId(), false,
                 existing.getResponseStatus() == null ? 500 : existing.getResponseStatus(),
@@ -245,7 +281,7 @@ public class OfflineSyncService {
     private OfflineSyncCommandResultDto replayCommand(OfflineSyncCommandDto command, OfflineSyncCommandEntity entity,
             HttpServletRequest sourceRequest, String baseUrl) {
         if (!isReplayableApiUrl(command.url())) {
-            return markRejected(command, entity, 400, "Only non-offline /api/** urls can be replayed.");
+            return markRejected(command, entity, 400, "The command URL is outside the configured replay policy.");
         }
 
         HttpMethod method;
@@ -254,11 +290,20 @@ public class OfflineSyncService {
         } catch (IllegalArgumentException ex) {
             return markRejected(command, entity, 400, "Unsupported HTTP method.");
         }
+        if (!properties.getReplayMethods().stream().anyMatch(allowed -> allowed.equalsIgnoreCase(method.name()))) {
+            return markRejected(command, entity, 400, "The HTTP method is not enabled for offline replay.");
+        }
 
         try {
             OfflineSyncReplayHandler replayHandler = findReplayHandler(command, method);
             if (replayHandler != null) {
-                return replayHandler.process(command, entity);
+                OfflineSyncCommandResultDto result = java.util.Objects.requireNonNull(replayHandler.process(command),
+                        "Offline replay handlers must return a result");
+                if (!command.commandId().equals(result.commandId())) {
+                    throw new IllegalStateException("Offline replay handler returned a different command ID.");
+                }
+                persistHandlerResult(entity, result);
+                return result;
             }
 
             URI uri = URI.create(baseUrl + command.url());
@@ -290,7 +335,7 @@ public class OfflineSyncService {
             entity.setStatus(success ? OfflineSyncCommandStatus.DONE : OfflineSyncCommandStatus.FAILED);
             entity.setResponseStatus(statusCode.value());
             entity.setErrorMessage(success ? null : "Command replay failed with non-success status.");
-            entity.setProcessedAt(Instant.now());
+            entity.setProcessedAt(Instant.now(clock));
             offlineSyncCommandRepository.save(entity);
             return new OfflineSyncCommandResultDto(
                     command.commandId(),
@@ -299,14 +344,29 @@ public class OfflineSyncService {
                     success ? null : "Command replay failed with non-success status.",
                     success ? OfflineSyncResultReason.APPLIED : OfflineSyncResultReason.RETRYABLE);
         } catch (RestClientResponseException ex) {
+            String safeMessage = "Replay target returned HTTP " + ex.getStatusCode().value() + ".";
             if (isPermanentFailure(ex.getStatusCode())) {
-                return markRejected(command, entity, ex.getStatusCode().value(), ex.getMessage());
+                return markRejected(command, entity, ex.getStatusCode().value(), safeMessage);
             }
 
-            return markFailed(command, entity, ex.getStatusCode().value(), ex.getMessage());
+            return markFailed(command, entity, ex.getStatusCode().value(), safeMessage);
         } catch (Exception ex) {
-            return markFailed(command, entity, 500, ex.getMessage());
+            log.warn("Offline command {} replay failed.", command.commandId(), ex);
+            return markFailed(command, entity, 500, "Command replay failed.");
         }
+    }
+
+    private void persistHandlerResult(OfflineSyncCommandEntity entity, OfflineSyncCommandResultDto result) {
+        entity.setStatus(result.success()
+                ? OfflineSyncCommandStatus.DONE
+                : switch (result.reason()) {
+                    case REJECTED, RETRY_LIMIT_EXCEEDED -> OfflineSyncCommandStatus.REJECTED;
+                    case APPLIED, ALREADY_APPLIED, RETRYABLE -> OfflineSyncCommandStatus.FAILED;
+                });
+        entity.setResponseStatus(result.status());
+        entity.setErrorMessage(result.success() ? null : result.error());
+        entity.setProcessedAt(Instant.now(clock));
+        offlineSyncCommandRepository.save(entity);
     }
 
     private OfflineSyncCommandResultDto markRejected(OfflineSyncCommandDto command, OfflineSyncCommandEntity entity,
@@ -314,7 +374,7 @@ public class OfflineSyncService {
         entity.setStatus(OfflineSyncCommandStatus.REJECTED);
         entity.setResponseStatus(status);
         entity.setErrorMessage(errorMessage);
-        entity.setProcessedAt(Instant.now());
+        entity.setProcessedAt(Instant.now(clock));
         offlineSyncCommandRepository.save(entity);
         return new OfflineSyncCommandResultDto(command.commandId(), false, status, errorMessage,
                 OfflineSyncResultReason.REJECTED);
@@ -325,7 +385,7 @@ public class OfflineSyncService {
         entity.setStatus(OfflineSyncCommandStatus.FAILED);
         entity.setResponseStatus(status);
         entity.setErrorMessage(errorMessage);
-        entity.setProcessedAt(Instant.now());
+        entity.setProcessedAt(Instant.now(clock));
         offlineSyncCommandRepository.save(entity);
         return new OfflineSyncCommandResultDto(command.commandId(), false, status, errorMessage,
                 OfflineSyncResultReason.RETRYABLE);
@@ -357,8 +417,8 @@ public class OfflineSyncService {
         entity.setHttpMethod(command.method().toUpperCase(Locale.ROOT));
         entity.setUrl(command.url());
         entity.setRequestBody(toJson(command.body()));
-        entity.setRequestHeaders(toJson(command.headers()));
-        entity.setCreatedAt(Instant.now());
+        entity.setRequestHeaders(toJson(sanitizeReplayHeaders(command.headers())));
+        entity.setCreatedAt(Instant.now(clock));
         Optional<OfflineActor> currentActor = offlineActorResolver.resolveCurrentActor();
         entity.setOwnerUsername(currentActor.map(OfflineActor::username).orElse("system"));
         entity.setOwnerId(currentActor.map(OfflineActor::id).orElse(null));
@@ -396,9 +456,45 @@ public class OfflineSyncService {
     }
 
     private boolean isReplayableApiUrl(String url) {
-        return StringUtils.hasText(url)
-                && url.startsWith(API_PREFIX)
-                && !url.startsWith(OFFLINE_PREFIX);
+        if (!StringUtils.hasText(url)) {
+            return false;
+        }
+        try {
+            URI parsed = URI.create(url);
+            String lowerRawPath = parsed.getRawPath() == null ? "" : parsed.getRawPath().toLowerCase(Locale.ROOT);
+            if (parsed.isAbsolute() || parsed.getRawAuthority() != null || parsed.getRawFragment() != null
+                    || parsed.getRawPath() == null || !parsed.getRawPath().equals(parsed.normalize().getRawPath())
+                    || lowerRawPath.contains("%2e") || lowerRawPath.contains("%2f") || lowerRawPath.contains("%5c")
+                    || lowerRawPath.contains("\\")) {
+                return false;
+            }
+            String path = parsed.getPath();
+            return path.startsWith(properties.getReplayApiPrefix())
+                    && properties.getExcludedReplayPathPrefixes().stream().noneMatch(path::startsWith)
+                    && !isOfflineEndpointPath(path);
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+    }
+
+    private boolean isOfflineEndpointPath(String path) {
+        return java.util.stream.Stream.of(properties.getSyncEndpointPath(), properties.getHeartbeatEndpointPath(),
+                properties.getHydrationEndpointPath())
+                .anyMatch(endpoint -> path.equals(endpoint) || path.startsWith(endpoint + "/"));
+    }
+
+    private Map<String, String> sanitizeReplayHeaders(Map<String, String> commandHeaders) {
+        if (commandHeaders == null || commandHeaders.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, String> sanitized = new java.util.LinkedHashMap<>();
+        commandHeaders.forEach((name, value) -> {
+            if (StringUtils.hasText(name) && StringUtils.hasText(value)
+                    && properties.getReplayHeaders().stream().anyMatch(allowed -> allowed.equalsIgnoreCase(name))) {
+                sanitized.put(name, value);
+            }
+        });
+        return Map.copyOf(sanitized);
     }
 
     private void copyHeaders(HttpHeaders target, Map<String, String> commandHeaders, HttpServletRequest sourceRequest) {
@@ -416,7 +512,7 @@ public class OfflineSyncService {
             return;
         }
 
-        commandHeaders.forEach((name, value) -> {
+        sanitizeReplayHeaders(commandHeaders).forEach((name, value) -> {
             if (!StringUtils.hasText(name) || !StringUtils.hasText(value)) {
                 return;
             }

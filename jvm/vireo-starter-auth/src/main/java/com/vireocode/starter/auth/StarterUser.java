@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** Mutable JPA model for applications opting into Vireo's default user store. */
 @Entity
 @Table(name = "app_user")
 @Getter

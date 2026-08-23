@@ -1,0 +1,16 @@
+import { Meta, Source } from "@storybook/addon-docs/blocks";
+import configurationSource from "../../../vireo-starter-documentation-examples/src/main/java/com/vireocode/starter/docs/auth/AuthSecurityConfigurationExample.java?raw";
+
+<Meta title="JVM/Auth/Primary Workflow" />
+
+# Primary workflow
+
+The default dependency secures `/api/**`. Add application-specific public or restricted routes through a customizer when the session model remains appropriate.
+
+## Why it exists
+
+Copying the complete starter security chain to add one route forfeits future security fixes. `StarterHttpSecurityCustomizer` keeps the application-owned rule explicit while retaining Vireo's session, CSRF, error, and endpoint defaults. Replace `SecurityFilterChain` instead when the authentication mechanism genuinely differs.
+
+The exact source below is compiled by `vireo-starter-documentation-examples` during the JVM build.
+
+<Source language="java" code={configurationSource} />

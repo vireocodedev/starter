@@ -8,6 +8,12 @@ describe("vireoStorySort", () => {
   it("keeps monorepo documentation first and each library at the root", () => {
     const titles = [
       "History/Overview",
+      "JVM/History/Overview",
+      "JVM/Offline/Overview",
+      "JVM/Auth/Overview",
+      "JVM/Core/Overview",
+      "JVM/BOM/Overview",
+      "JVM/Overview",
       "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
@@ -29,12 +35,65 @@ describe("vireoStorySort", () => {
       "UI/Core/Data Display/VireoIcon",
       "UI/Capabilities/Forms/VireoForm",
       "UI/Integrations/TanStack Query/VireoQueryBoundary",
+      "JVM/Overview",
+      "JVM/BOM/Overview",
+      "JVM/Core/Overview",
+      "JVM/Auth/Overview",
+      "JVM/History/Overview",
+      "JVM/Offline/Overview",
       "History/Overview",
       "Infrastructure/Overview",
       "Localization/Overview",
       "Query Engine/Overview",
       "SQLite/Overview",
       "Shell/Overview",
+    ]);
+  });
+
+  it("keeps audited JVM artifacts and pages in their learning order", () => {
+    const titles = [
+      "JVM/Overview",
+      "JVM/History/Security and Actors",
+      "JVM/BOM/Consumption and Release Semantics",
+      "JVM/BOM/Overview",
+      "JVM/Offline/Configuration, Security, and Persistence",
+      "JVM/Offline/Primary Workflow",
+      "JVM/Offline/Overview",
+      "JVM/Query Engine/Configuration, Security, and Persistence",
+      "JVM/Query Engine/Primary Workflow",
+      "JVM/Query Engine/Overview",
+      "JVM/Core/Web, Migrations, and Extensions",
+      "JVM/Auth/Configuration and Security",
+      "JVM/Core/Primary Workflow",
+      "JVM/History/Overview",
+      "JVM/Core/Overview",
+      "JVM/Auth/Primary Workflow",
+      "JVM/Auth/Overview",
+    ];
+
+    expect(
+      titles
+        .map(title => ({ title }))
+        .sort(vireoStorySort)
+        .map(entry => entry.title),
+    ).toEqual([
+      "JVM/Overview",
+      "JVM/BOM/Overview",
+      "JVM/BOM/Consumption and Release Semantics",
+      "JVM/Core/Overview",
+      "JVM/Core/Primary Workflow",
+      "JVM/Core/Web, Migrations, and Extensions",
+      "JVM/Auth/Overview",
+      "JVM/Auth/Primary Workflow",
+      "JVM/Auth/Configuration and Security",
+      "JVM/Query Engine/Overview",
+      "JVM/Query Engine/Primary Workflow",
+      "JVM/Query Engine/Configuration, Security, and Persistence",
+      "JVM/History/Overview",
+      "JVM/History/Security and Actors",
+      "JVM/Offline/Overview",
+      "JVM/Offline/Primary Workflow",
+      "JVM/Offline/Configuration, Security, and Persistence",
     ]);
   });
 

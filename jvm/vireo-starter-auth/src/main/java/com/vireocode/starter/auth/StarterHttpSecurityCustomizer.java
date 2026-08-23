@@ -13,7 +13,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
  * move when all that is wanted is one more public path, and forcing that choice
  * is how library security configuration ends up copy-pasted and then drifting.
  * Every customizer bean is applied to the default chain in
- * {@code @Order} sequence, after the library's own rules.
+ * {@code @Order} sequence before the library's authenticated API matcher and
+ * permissive final fallback. This lets an application publish a narrower API
+ * route without replacing the complete chain.
  */
 @FunctionalInterface
 public interface StarterHttpSecurityCustomizer {
