@@ -1,0 +1,25 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Query Engine/Configuration, Security, and Persistence" />
+
+# Configuration, security, and persistence
+
+Query Engine exposes two independently disableable HTTP surfaces, bounded relation lookups, and a user-owned saved-filter table.
+
+## Why it exists
+
+Metadata endpoints, saved filters, and relation searches have different deployment and security concerns. Validated configuration lets applications retain the underlying services while replacing or withdrawing either controller, and explicit ownership rules prevent one authenticated user from mutating another user's saved views.
+
+```properties
+vireo.starter.query-engine.endpoint-enabled=true
+vireo.starter.query-engine.saved-filters-endpoint-enabled=true
+vireo.starter.query-engine.endpoint-path=/api/queryengine
+vireo.starter.query-engine.saved-filters-endpoint-path=/api/filters
+vireo.starter.query-engine.relation-options-limit=20
+```
+
+Paths must begin with `/` and be distinct. Relation lookup is limited to 1–1000 results and searches the configured label fields rather than assuming application-specific `keywords`, `deleted`, or `createdAt` columns.
+
+All default endpoints require authentication. Saved-filter reads include the current user's records and other users' public records; update and delete remain owner-only. `userId` and `username` are response-only fields. Applications still authorize access to the domain records returned after a filter is applied.
+
+The module owns `saved_filter` through its isolated `flyway_schema_history_vireo_queryengine` history. Its existing baseline remains immutable for installed databases.
