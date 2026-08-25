@@ -13,21 +13,21 @@ independent jobs. Keeping them in one repository makes a change that spans both
 halves a single reviewable pull request, which is the only reason they are
 neighbours. See [jvm/](jvm) and [docs/BACKEND_PARITY.md](docs/BACKEND_PARITY.md).
 
-Note that the two halves reuse names for different things: the npm package
-`@vireocodedev/starter-core` is the React app shell, whereas the Maven artifact
-`com.vireocode:vireo-starter-core` is the backend's base entity/service layer.
+The frontend application-shell package is `@vireocodedev/starter-shell`. The
+similarly named Maven artifact `com.vireocode:vireo-starter-core` is the
+backend's base entity/service layer; they are separate contracts.
 
 ## Frontend packages
 
-| Package                                                           | Version | Description                                                                                                                                             |
-| ----------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@vireocodedev/starter-ui`](packages/ui)                         | 2.1.0   | MUI-based component library: responsive cards, mobile tables, overlays, providers, hooks, formatters.                                                   |
-| [`@vireocodedev/starter-queryengine`](packages/queryengine)       | 1.1.0   | Framework-agnostic query engine client (models, api, react-query, signals) for server-driven filtering/sorting/paging.                                  |
-| [`@vireocodedev/starter-core`](packages/core)                     | 0.9.0   | App-shell framework: config/sitemap/routing scaffolding, route guards, the responsive shell + navigation, and layout presets.                           |
-| [`@vireocodedev/starter-localization`](packages/localization)     | 0.8.0   | Foundation i18n toolkit + shared `platform` translations.                                                                                               |
-| [`@vireocodedev/starter-sqlite`](packages/sqlite)                 | 0.5.0   | SQLite worker/client runtime primitives for offline persistence (OPFS).                                                                                 |
-| [`@vireocodedev/starter-history`](packages/history)               | 1.0.0   | Framework-free entity history definitions, diff nodes, and transport-neutral record schemas.                                                            |
-| [`@vireocodedev/starter-infrastructure`](packages/infrastructure) | 0.4.0   | Frontend infrastructure utilities: network status, persistent signals, date/array helpers, session-expiry events, axios helpers, tanstack query client. |
+| Package                                                           | Version | Description                                                                                                  |
+| ----------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| [`@vireocodedev/starter-ui`](packages/ui)                         | 7.0.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.     |
+| [`@vireocodedev/starter-queryengine`](packages/queryengine)       | 5.0.0   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                   |
+| [`@vireocodedev/starter-shell`](packages/shell)                   | 4.0.0   | React application shell, initialization, sitemap, routing, responsive navigation, and page-layout contracts. |
+| [`@vireocodedev/starter-localization`](packages/localization)     | 3.0.0   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations.    |
+| [`@vireocodedev/starter-sqlite`](packages/sqlite)                 | 3.0.0   | SQLite worker/client runtime primitives for offline persistence and synchronization.                         |
+| [`@vireocodedev/starter-history`](packages/history)               | 3.0.0   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.           |
+| [`@vireocodedev/starter-infrastructure`](packages/infrastructure) | 3.0.0   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.                 |
 
 Versions above are the currently published ones; `packages/*/package.json` is the source of truth.
 
@@ -36,7 +36,7 @@ Versions above are the currently published ones; `packages/*/package.json` is th
 Only two packages depend on siblings — the rest are leaves and can be consumed on their own:
 
 ```txt
-core  ->  ui, localization, infrastructure
+shell ->  ui, localization, infrastructure
 ui    ->  history, localization
 
 history · localization · infrastructure · queryengine · sqlite   (no starter dependencies)
@@ -59,6 +59,8 @@ npm install            # installs all workspaces, generates package-lock.json
 npm run typecheck
 npm run test
 npm run build
+npm run verify          # authoritative TypeScript gate
+npm run verify:all      # TypeScript + JVM, including aggregate Javadoc
 ```
 
 ### Live documentation
@@ -150,3 +152,9 @@ JVM library work follows the repository's
 [JVM package-authoring](docs/package-authoring/JVM_PACKAGES.md) and
 [JVM live-documentation](docs/package-authoring/JVM_LIVE_DOCUMENTATION.md)
 contracts.
+
+## Contributing and security
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the supported toolchain and pull
+request gate. Please report vulnerabilities according to
+[SECURITY.md](SECURITY.md), rather than opening a public issue.

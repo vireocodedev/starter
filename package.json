@@ -12,6 +12,7 @@
   },
   "scripts": {
     "verify": "sh scripts/verify.sh",
+    "verify:all": "sh scripts/verify-all.sh",
     "storybook": "npm run storybook --workspace=@vireocodedev/starter-ui",
     "build-storybook": "npm run build-storybook --workspace=@vireocodedev/starter-ui",
     "build": "turbo run build",
