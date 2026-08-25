@@ -34,7 +34,6 @@ export default function DefaultExample() {
             )}
           </form.Field>
           <form.Actions>
-            <form.ResetButton>Reset</form.ResetButton>
             <form.SubmitButton>Save strategy</form.SubmitButton>
           </form.Actions>
           {savedStrategy && <Typography color="success.main">Saved {savedStrategy}</Typography>}

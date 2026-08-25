@@ -52,6 +52,7 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
       message,
       onClose,
       onConfirm,
+      onExited,
       open,
       slotProps = {},
       slots = {},
@@ -85,6 +86,7 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
         ownerState={ownerState}
         open={open}
         onClose={loading ? undefined : onClose}
+        onTransitionExited={onExited}
         maxWidth={maxWidth}
         fullWidth
         className={joinClassNames(classes.root, className, rootClassName)}

@@ -24,7 +24,6 @@ export default function DefaultExample() {
           </form.Field>
           <form.Actions>
             <form.SubmitButton variant="contained">Save capacity</form.SubmitButton>
-            <form.ResetButton>Reset</form.ResetButton>
           </form.Actions>
           {savedSeats !== undefined && <Typography color="success.main">Saved {savedSeats} seats</Typography>}
         </form.Section>

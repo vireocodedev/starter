@@ -3,7 +3,7 @@ import defaultExampleSource from "@/integrations/event-source/hooks/useVireoEven
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "UI/Integrations/Event Source/useVireoEventSource",
+  title: "TypeScript/UI/Integrations/Event Source/useVireoEventSource",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },

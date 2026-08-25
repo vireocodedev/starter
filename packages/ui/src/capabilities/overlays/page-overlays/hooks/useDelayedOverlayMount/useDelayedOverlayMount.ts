@@ -19,40 +19,18 @@ export function useDelayedOverlayMount(): UseDelayedOverlayMountReturn {
   const [mounted, setMounted] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const openRef = React.useRef(open);
-  const animationFrameRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     openRef.current = open;
   }, [open]);
 
-  React.useEffect(() => {
-    return () => {
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
-
   const openOverlay = React.useCallback(() => {
-    if (animationFrameRef.current !== null) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-
+    openRef.current = true;
     setMounted(true);
-    animationFrameRef.current = requestAnimationFrame(() => {
-      animationFrameRef.current = null;
-      openRef.current = true;
-      setOpen(true);
-    });
+    setOpen(true);
   }, []);
 
   const closeOverlay = React.useCallback(() => {
-    if (animationFrameRef.current !== null) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-      setMounted(false);
-    }
-
     openRef.current = false;
     setOpen(false);
   }, []);

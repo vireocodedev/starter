@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/addon-docs/blocks";
 
-<Meta title="UI/Documentation/Guides/Notifications" />
+<Meta title="TypeScript/UI/Documentation/Guides/Notifications" />
 
 # Notifications guide
 
@@ -36,12 +36,39 @@ export function App() {
 
 The default contract is:
 
-| Behavior        | Mobile, below `sm`         | Desktop      |
-| --------------- | -------------------------- | ------------ |
-| Position        | Top center                 | Bottom right |
-| Close button    | Hidden                     | Shown        |
-| Swipe dismissal | Up                         | Right        |
-| Offset          | 8px plus the top safe area | 24px         |
+<table>
+  <thead>
+    <tr>
+      <th>Behavior</th>
+      <th>
+        Mobile, below <code>sm</code>
+      </th>
+      <th>Desktop</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Position</td>
+      <td>Top center</td>
+      <td>Bottom right</td>
+    </tr>
+    <tr>
+      <td>Close button</td>
+      <td>Hidden</td>
+      <td>Shown</td>
+    </tr>
+    <tr>
+      <td>Swipe dismissal</td>
+      <td>Up</td>
+      <td>Right</td>
+    </tr>
+    <tr>
+      <td>Offset</td>
+      <td>8px plus the top safe area</td>
+      <td>24px</td>
+    </tr>
+  </tbody>
+</table>
 
 Both modes use a 3000ms duration, three visible notifications, a 14px gap, collapsed stacking, rich semantic colors, the MUI theme direction, the accessible label `Notifications`, and Sonner's `Alt+T` focus shortcut.
 

@@ -75,9 +75,10 @@ vi.mock("@mui/material", async importOriginal => {
   return {
     ...actual,
     useMediaQuery: () => testState.variant === "mobile",
-    Dialog: ({ children, maxWidth, onClose, slotProps }: Record<string, unknown>) => (
+    Dialog: ({ children, fullScreen, maxWidth, onClose, slotProps }: Record<string, unknown>) => (
       <section
         data-testid="desktop-dialog"
+        data-full-screen={String(fullScreen === true)}
         data-max-width={maxWidth}
         data-custom-paper={String(slotProps !== undefined)}
       >
@@ -136,13 +137,29 @@ describe(VIREO_RESPONSIVE_OVERLAY_FRAME_NAME, () => {
 
   it("selects the mobile bottom sheet and applies height precedence", () => {
     testState.variant = "mobile";
-    const { rerender } = render(<VireoResponsiveOverlayFrame {...requiredProps} />);
+    const { rerender } = render(<VireoResponsiveOverlayFrame {...requiredProps} mobileSurface="bottomDrawer" />);
 
     expect(screen.getByTestId("mobile-drawer")).toHaveAttribute("data-max-height", "92dvh");
 
-    rerender(<VireoResponsiveOverlayFrame {...requiredProps} mobileHeight="70dvh" mobileMaxHeight="80dvh" />);
+    rerender(
+      <VireoResponsiveOverlayFrame
+        {...requiredProps}
+        mobileSurface="bottomDrawer"
+        mobileHeight="70dvh"
+        mobileMaxHeight="80dvh"
+      />,
+    );
     expect(screen.getByTestId("mobile-drawer")).toHaveAttribute("data-height", "70dvh");
     expect(screen.getByTestId("mobile-drawer")).not.toHaveAttribute("data-max-height");
+  });
+
+  it("selects a full-screen dialog by default on mobile", () => {
+    testState.variant = "mobile";
+    render(<VireoResponsiveOverlayFrame {...requiredProps} />);
+
+    expect(screen.getByTestId("desktop-dialog")).toHaveAttribute("data-full-screen", "true");
+    expect(screen.getByTestId("desktop-dialog")).toHaveTextContent("Overlay content");
+    expect(screen.queryByTestId("mobile-drawer")).not.toBeInTheDocument();
   });
 
   it("wires close and exit callbacks through the selected surface", () => {
@@ -168,8 +185,13 @@ describe(VIREO_RESPONSIVE_OVERLAY_FRAME_NAME, () => {
     );
 
     expect(screen.getByTestId("desktop-drawer")).toHaveAttribute("data-anchor", "right");
-    const paper = (testState.drawerProps?.slotProps as { paper: { sx: unknown } }).paper;
+    const drawerSlotProps = testState.drawerProps?.slotProps as {
+      paper: { sx: unknown };
+      transition: { appear?: boolean };
+    };
+    const paper = drawerSlotProps.paper;
     expect(paper.sx).toBeDefined();
+    expect(drawerSlotProps.transition.appear).toBe(true);
     expect(screen.queryByTestId("resize-handle")).not.toBeInTheDocument();
   });
 

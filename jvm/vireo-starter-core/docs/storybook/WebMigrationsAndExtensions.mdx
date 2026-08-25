@@ -30,12 +30,37 @@ The consumer's `flyway_schema_history` remains separate and receives only applic
 
 ## Optional-module SPIs
 
-| Core SPI | Default provider | Behavior when required but absent |
-| --- | --- | --- |
-| `FilterSpecificationBuilder` | Query Engine | A supplied filter payload fails explicitly. |
-| `HistoryEventsRecorder` | History | A history-enabled write fails before persistence. |
-| `OfflineRevisionTracker` | Offline | No revision is assigned. |
-| `OfflineChangeBroadcaster` | Offline | No change notification is published. |
+<table>
+  <thead>
+    <tr>
+      <th>Core SPI</th>
+      <th>Default provider</th>
+      <th>Behavior when required but absent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>FilterSpecificationBuilder</code></td>
+      <td>Query Engine</td>
+      <td>A supplied filter payload fails explicitly.</td>
+    </tr>
+    <tr>
+      <td><code>HistoryEventsRecorder</code></td>
+      <td>History</td>
+      <td>A history-enabled write fails before persistence.</td>
+    </tr>
+    <tr>
+      <td><code>OfflineRevisionTracker</code></td>
+      <td>Offline</td>
+      <td>No revision is assigned.</td>
+    </tr>
+    <tr>
+      <td><code>OfflineChangeBroadcaster</code></td>
+      <td>Offline</td>
+      <td>No change notification is published.</td>
+    </tr>
+  </tbody>
+</table>
 
 Filtering and history are request/entity opt-ins, so missing required providers are errors. Offline publication is additive and remains a no-op when the Offline artifact is not installed.
 

@@ -80,6 +80,8 @@ export type VireoConfirmationDialogOwnProps = VireoConfirmationDialogSlotsAndSlo
   message: React.ReactNode;
   onClose: () => void;
   onConfirm: () => void;
+  /** Called after the dialog's exit transition has fully completed. */
+  onExited?: () => void;
   closeLabel?: string;
   cancelLabel?: string;
   confirmLabel?: string;
@@ -91,7 +93,7 @@ export type VireoConfirmationDialogOwnProps = VireoConfirmationDialogSlotsAndSlo
 /** Props VireoConfirmationDialog inherits from MUI Dialog after excluding component-owned props. */
 export type VireoConfirmationDialogInheritedProps = Omit<
   DialogProps,
-  "children" | "open" | "onClose" | "slots" | "slotProps" | "title"
+  "children" | "open" | "onClose" | "onTransitionExited" | "slots" | "slotProps" | "title"
 >;
 export type VireoConfirmationDialogProps = VireoConfirmationDialogOwnProps & VireoConfirmationDialogInheritedProps;
 

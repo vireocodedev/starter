@@ -36,7 +36,9 @@ function TestForm({ fieldProps, initialValue = false, onSubmit = vi.fn(() => und
         {field => <field.SwitchField helperText="Optional preference" label="Enabled" {...fieldProps} />}
       </form.Field>
       <form.SubmitButton>Submit</form.SubmitButton>
-      <form.ResetButton>Reset</form.ResetButton>
+      <button type="button" onClick={() => form.reset()}>
+        Reset
+      </button>
     </form.Form>
   );
 }
@@ -68,7 +70,7 @@ describe(VIREO_FORM_SWITCH_FIELD_NAME, () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: { enabled: true } }));
   });
 
-  it("restores the boolean default through form.ResetButton", async () => {
+  it("reflects a programmatic form reset", async () => {
     const user = userEvent.setup();
     render(<TestForm initialValue />);
 

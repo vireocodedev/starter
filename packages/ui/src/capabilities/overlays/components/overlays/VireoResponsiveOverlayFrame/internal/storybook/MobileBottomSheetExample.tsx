@@ -13,7 +13,7 @@ export default function MobileBottomSheetExample() {
   return (
     <VireoStorybookProvider>
       <VireoResponsiveOverlayFrameWorkspace onOpen={() => setOpen(true)}>
-        <VireoResponsiveOverlayFrame open={open} onClose={close} mobileMaxHeight="88dvh">
+        <VireoResponsiveOverlayFrame open={open} onClose={close} mobileSurface="bottomDrawer" mobileMaxHeight="88dvh">
           <VireoResponsiveOverlayFrameCustomerDetails
             header={<VireoOverlayHeader title="Customer details" closeLabel="Close customer details" onClose={close} />}
             onClose={close}

@@ -4,7 +4,7 @@ import type {
   VireoResponsiveOverlayFrameProps,
 } from "@/capabilities/overlays/public";
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
-import type { DialogActions, DialogContent } from "@mui/material";
+import type { Box, DialogActions, DialogContent } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -20,12 +20,16 @@ export type VireoResponsiveFormOverlayOwnerState = {
   open: boolean;
   closeDisabled: boolean;
   hasActions: boolean;
+  hasFormWrapper: boolean;
 };
 
 export interface VireoResponsiveFormOverlayRootSlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;
 }
 export interface VireoResponsiveFormOverlayHeaderSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
+export interface VireoResponsiveFormOverlayBodySlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;
 }
 export interface VireoResponsiveFormOverlayContentSlotPropsOverrides {
@@ -56,6 +60,8 @@ export type VireoResponsiveFormOverlaySlotsAndSlotProps = CreateSlotsAndSlotProp
       VireoResponsiveFormOverlayHeaderSlotPropsOverrides,
       VireoResponsiveFormOverlayOwnerState
     >;
+    /** @default Box */
+    body: SlotProps<typeof Box, VireoResponsiveFormOverlayBodySlotPropsOverrides, VireoResponsiveFormOverlayOwnerState>;
     /** @default DialogContent */
     content: SlotProps<
       typeof DialogContent,
@@ -71,6 +77,16 @@ export type VireoResponsiveFormOverlaySlotsAndSlotProps = CreateSlotsAndSlotProp
   }
 >;
 
+/** Guarded actions available to a rendered overlay action row. */
+export type VireoResponsiveFormOverlayActionContext = {
+  /** Requests closure through close disabling and the current unsaved-changes scope. */
+  requestClose: () => void;
+};
+
+/** Static actions or a render callback that receives the guarded close request. */
+export type VireoResponsiveFormOverlayActions =
+  React.ReactNode | ((context: VireoResponsiveFormOverlayActionContext) => React.ReactNode);
+
 /** Props owned by {@link VireoResponsiveFormOverlay}. */
 export type VireoResponsiveFormOverlayOwnProps = VireoResponsiveFormOverlaySlotsAndSlotProps & {
   /** Visible overlay heading. */
@@ -81,8 +97,13 @@ export type VireoResponsiveFormOverlayOwnProps = VireoResponsiveFormOverlaySlots
   closeDisabled?: boolean;
   /** Form content rendered inside the responsive surface. */
   children: React.ReactNode;
-  /** Optional action row rendered after the content. */
-  actions?: React.ReactNode;
+  /** Optional persistent action row rendered after the scrolling content. */
+  actions?: VireoResponsiveFormOverlayActions;
+  /**
+   * Wraps the content and action regions in one semantic form boundary.
+   * The returned wrapper is normalized to fill the responsive overlay body.
+   */
+  renderForm?: (children: React.ReactNode) => React.ReactNode;
   /** Whether close requests participate in the nearest unsaved-changes scope. @default true */
   guardUnsavedChanges?: boolean;
   /** Override or extend the utility classes applied to each slot. */

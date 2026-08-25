@@ -17,7 +17,7 @@ import { VireoFormFreeSoloAutocompleteMultipleField } from "./VireoFormFreeSoloA
 
 const source = (code: string) => ({ docs: { source: { code, language: "tsx" } } });
 const meta = {
-  title: "UI/Capabilities/Forms/Fields/VireoFormFreeSoloAutocompleteMultipleField",
+  title: "TypeScript/UI/Capabilities/Forms/Fields/VireoFormFreeSoloAutocompleteMultipleField",
   component: VireoFormFreeSoloAutocompleteMultipleField,
   parameters: {
     controls: { disable: true },

@@ -7,6 +7,7 @@ export const VIREO_RESPONSIVE_FORM_OVERLAY_NAME = "VireoResponsiveFormOverlay";
 export const VIREO_RESPONSIVE_FORM_OVERLAY_SLOTS = [
   "root",
   "header",
+  "body",
   "content",
   "actions",
 ] as const satisfies VireoSlotNameTuple;

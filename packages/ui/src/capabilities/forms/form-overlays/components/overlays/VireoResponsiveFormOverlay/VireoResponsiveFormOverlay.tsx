@@ -1,5 +1,4 @@
 import { useUnsavedChangesRequestDiscard, UnsavedChangesScope } from "@/capabilities/unsaved-changes/public";
-import { VireoOverlayHeader } from "@/capabilities/overlays/public";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
 import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
@@ -15,7 +14,10 @@ import {
 } from "./VireoResponsiveFormOverlay.identity";
 import {
   VireoResponsiveFormOverlayActions,
+  VireoResponsiveFormOverlayBody,
   VireoResponsiveFormOverlayContent as VireoResponsiveFormOverlayContentSlot,
+  VireoResponsiveFormOverlayFormRegions,
+  VireoResponsiveFormOverlayHeader,
   VireoResponsiveFormOverlayRoot,
 } from "./VireoResponsiveFormOverlay.styled";
 import {
@@ -31,6 +33,7 @@ function useUtilityClasses(
     {
       root: ["root"],
       header: ["header"],
+      body: ["body"],
       content: ["content"],
       actions: ["actions"],
     } as const satisfies UtilityClassSlotMap<VireoResponsiveFormOverlaySlotName, VireoResponsiveFormOverlayClassKey>,
@@ -52,6 +55,7 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
       guardUnsavedChanges = true,
       onClose,
       open,
+      renderForm,
       slotProps = {},
       slots = {},
       style,
@@ -59,7 +63,12 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
       title,
       ...other
     } = props;
-    const ownerState: VireoResponsiveFormOverlayOwnerState = { open, closeDisabled, hasActions: actions != null };
+    const ownerState: VireoResponsiveFormOverlayOwnerState = {
+      open,
+      closeDisabled,
+      hasActions: actions != null,
+      hasFormWrapper: renderForm != null,
+    };
     const classes = useUtilityClasses(ownerState, classesProp);
     const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
     const {
@@ -71,6 +80,7 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
     } = resolvedRootSlotProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
     const { className: headerSlotClassName, ...headerSlotOther } = resolveSlotProps(slotProps.header, ownerState);
+    const { className: bodySlotClassName, ...bodySlotOther } = resolveSlotProps(slotProps.body, ownerState);
     const { className: contentSlotClassName, ...contentSlotOther } = resolveSlotProps(slotProps.content, ownerState);
     const { className: actionsSlotClassName, ...actionsSlotOther } = resolveSlotProps(slotProps.actions, ownerState);
     const guardedClose = useUnsavedChangesRequestDiscard(onClose, { disabled: closeDisabled || !guardUnsavedChanges });
@@ -78,9 +88,32 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
       if (!closeDisabled) onClose();
     }, [closeDisabled, onClose]);
     const requestClose = guardUnsavedChanges ? guardedClose : directClose;
-    const Header = slots.header ?? VireoOverlayHeader;
+    const resolvedActions = typeof actions === "function" ? actions({ requestClose }) : actions;
+    const Header = slots.header ?? VireoResponsiveFormOverlayHeader;
+    const Body = slots.body ?? VireoResponsiveFormOverlayBody;
     const Content = slots.content ?? VireoResponsiveFormOverlayContentSlot;
     const Actions = slots.actions ?? VireoResponsiveFormOverlayActions;
+    const bodyRegions = (
+      <>
+        <Content
+          {...contentSlotOther}
+          ownerState={ownerState}
+          className={joinClassNames(classes.content, contentSlotClassName)}
+        >
+          {children}
+        </Content>
+        {resolvedActions != null && (
+          <Actions
+            {...actionsSlotOther}
+            ownerState={ownerState}
+            className={joinClassNames(classes.actions, actionsSlotClassName)}
+          >
+            {resolvedActions}
+          </Actions>
+        )}
+      </>
+    );
+    const formRegions = <VireoResponsiveFormOverlayFormRegions>{bodyRegions}</VireoResponsiveFormOverlayFormRegions>;
 
     return (
       <VireoResponsiveFormOverlayRoot
@@ -104,28 +137,15 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
           closeDisabled={closeDisabled}
           onClose={requestClose}
         />
-        <Content
-          {...contentSlotOther}
-          ownerState={ownerState}
-          className={joinClassNames(classes.content, contentSlotClassName)}
-        >
-          {children}
-        </Content>
-        {actions != null && (
-          <Actions
-            {...actionsSlotOther}
-            ownerState={ownerState}
-            className={joinClassNames(classes.actions, actionsSlotClassName)}
-          >
-            {actions}
-          </Actions>
-        )}
+        <Body {...bodySlotOther} ownerState={ownerState} className={joinClassNames(classes.body, bodySlotClassName)}>
+          {renderForm ? renderForm(formRegions) : bodyRegions}
+        </Body>
       </VireoResponsiveFormOverlayRoot>
     );
   },
 );
 
-/** Coordinates a guarded form across mobile bottom-sheet and desktop overlay surfaces. */
+/** Coordinates a guarded form across mobile full-screen-dialog and desktop overlay surfaces. */
 export const VireoResponsiveFormOverlay = React.forwardRef<HTMLDivElement, VireoResponsiveFormOverlayProps>(
   function VireoResponsiveFormOverlay(props, forwardedRef) {
     return (

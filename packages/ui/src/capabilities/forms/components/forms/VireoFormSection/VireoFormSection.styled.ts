@@ -13,13 +13,19 @@ export const VireoFormSectionRoot: VireoFormSectionStyledSlotComponent<BoxProps>
   name: VIREO_FORM_SECTION_NAME,
   slot: "Root",
   overridesResolver: (_p, s) => s.root,
-})<VireoFormSectionStyledSlotProps>(({ theme }) => ({
+})<VireoFormSectionStyledSlotProps>(({ theme, ownerState }) => ({
   containerName: "vireo-form-section",
   containerType: "inline-size",
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(2),
   minWidth: 0,
+  ...(ownerState.variant === "divided" && {
+    [`&[data-variant="divided"] + &[data-variant="divided"]`]: {
+      borderTop: `1px solid ${theme.palette.divider}`,
+      paddingTop: theme.spacing(3),
+    },
+  }),
 }));
 
 export const VireoFormSectionHeader: VireoFormSectionStyledSlotComponent<BoxProps> = styled(Box, {
@@ -54,7 +60,7 @@ export const VireoFormSectionContent: VireoFormSectionStyledSlotComponent<BoxPro
   containerType: "inline-size",
   minWidth: 0,
   ...(ownerState.variant === "outlined" && {
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: `var(--mui-palette-surface-base, ${theme.palette.background.paper})`,
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
     padding: theme.spacing(2),

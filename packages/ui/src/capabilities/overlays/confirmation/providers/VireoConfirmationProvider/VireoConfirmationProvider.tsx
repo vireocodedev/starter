@@ -26,14 +26,19 @@ export function VireoConfirmationProvider({
   defaultConfirmLabel = "Confirm",
 }: VireoConfirmationProviderProps) {
   const [active, setActive] = React.useState<ActiveConfirmation | null>(null);
+  const [open, setOpen] = React.useState(false);
   const activeRef = React.useRef<ActiveConfirmation | null>(null);
 
   const settle = React.useCallback((confirmed: boolean) => {
     const current = activeRef.current;
     if (!current) return;
     activeRef.current = null;
-    setActive(null);
+    setOpen(false);
     current.resolve(confirmed);
+  }, []);
+
+  const handleExited = React.useCallback(() => {
+    if (activeRef.current == null) setActive(null);
   }, []);
 
   const confirm = React.useCallback<VireoConfirm>(options => {
@@ -42,6 +47,7 @@ export function VireoConfirmationProvider({
       const next = { options, resolve };
       activeRef.current = next;
       setActive(next);
+      setOpen(true);
     });
   }, []);
 
@@ -51,7 +57,7 @@ export function VireoConfirmationProvider({
     <VireoConfirmationContext.Provider value={confirm}>
       {children}
       <VireoConfirmationDialog
-        open={active != null}
+        open={open}
         title={active?.options.title ?? ""}
         message={active?.options.message ?? ""}
         closeLabel={active?.options.closeLabel ?? defaultCloseLabel}
@@ -61,6 +67,7 @@ export function VireoConfirmationProvider({
         maxWidth={active?.options.maxWidth}
         onClose={() => settle(false)}
         onConfirm={() => settle(true)}
+        onExited={handleExited}
       />
     </VireoConfirmationContext.Provider>
   );

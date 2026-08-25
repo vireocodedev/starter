@@ -28,7 +28,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "UI/Capabilities/Forms/Fields/VireoFormToggleButtonGroupField",
+  title: "TypeScript/UI/Capabilities/Forms/Fields/VireoFormToggleButtonGroupField",
   component: VireoFormToggleButtonGroupField,
   tags: ["autodocs"],
   parameters: {

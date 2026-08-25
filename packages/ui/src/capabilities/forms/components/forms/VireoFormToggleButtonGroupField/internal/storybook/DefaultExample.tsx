@@ -29,7 +29,6 @@ export default function DefaultExample() {
             )}
           </form.Field>
           <form.Actions>
-            <form.ResetButton>Reset</form.ResetButton>
             <form.SubmitButton>Save density</form.SubmitButton>
           </form.Actions>
           <Typography color="success.main">{saved ? `Saved ${saved}` : "No saved density"}</Typography>

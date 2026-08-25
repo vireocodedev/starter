@@ -22,9 +22,6 @@ export default function DateTimeModeExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.Actions>
-            <form.ResetButton variant="outlined">Reset date and time</form.ResetButton>
-          </form.Actions>
         </form.Section>
       </form.Form>
     </VireoStorybookProvider>

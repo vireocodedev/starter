@@ -27,7 +27,7 @@ function source(code: string, description?: string) {
 }
 
 const meta = {
-  title: "UI/Integrations/Localization/VireoTemporalLocalizationProvider",
+  title: "TypeScript/UI/Integrations/Localization/VireoTemporalLocalizationProvider",
   component: VireoTemporalLocalizationProvider,
   tags: ["autodocs"],
   args: { children: null, locale: "en" },

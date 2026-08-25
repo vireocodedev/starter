@@ -39,75 +39,76 @@ const storybookManagerFile = join(packageRoot, ".storybook-vireo", "manager.ts")
 
 const EXPECTED_DOCUMENTATION_ROUTES = [
   "Documentation/Overview",
-  "UI/Overview",
-  "UI/Documentation/Installation",
-  "UI/Documentation/Guides/Common Patterns",
-  "UI/Documentation/Guides/Theming",
-  "UI/Documentation/Guides/Providers",
-  "UI/Documentation/Guides/Augmentable Interfaces",
-  "UI/Documentation/Guides/Notifications",
-  "UI/Documentation/Guides/Table Patterns",
-  "UI/Documentation/Guides/TanStack Query",
-  "UI/Documentation/Guides/Drag and Drop",
+  "TypeScript/Overview",
+  "TypeScript/UI/Overview",
+  "TypeScript/UI/Documentation/Installation",
+  "TypeScript/UI/Documentation/Guides/Common Patterns",
+  "TypeScript/UI/Documentation/Guides/Theming",
+  "TypeScript/UI/Documentation/Guides/Providers",
+  "TypeScript/UI/Documentation/Guides/Augmentable Interfaces",
+  "TypeScript/UI/Documentation/Guides/Notifications",
+  "TypeScript/UI/Documentation/Guides/Table Patterns",
+  "TypeScript/UI/Documentation/Guides/TanStack Query",
+  "TypeScript/UI/Documentation/Guides/Drag and Drop",
 ] as const;
 
 const EXPECTED_HISTORY_ROUTES = [
-  "History/Overview",
-  "History/Primary Workflow",
-  "History/Nested Definitions",
-  "History/Collections",
-  "History/Formatting and Comparison",
-  "History/Node Model",
-  "History/Record Validation",
-  "History/Failure Semantics",
+  "TypeScript/History/Overview",
+  "TypeScript/History/Primary Workflow",
+  "TypeScript/History/Nested Definitions",
+  "TypeScript/History/Collections",
+  "TypeScript/History/Formatting and Comparison",
+  "TypeScript/History/Node Model",
+  "TypeScript/History/Record Validation",
+  "TypeScript/History/Failure Semantics",
 ] as const;
 
 const EXPECTED_LOCALIZATION_ROUTES = [
-  "Localization/Overview",
-  "Localization/Primary Workflow",
-  "Localization/Late Registration",
-  "Localization/Custom Namespaces",
-  "Localization/Number Formatting",
-  "Localization/Failure Semantics",
+  "TypeScript/Localization/Overview",
+  "TypeScript/Localization/Primary Workflow",
+  "TypeScript/Localization/Late Registration",
+  "TypeScript/Localization/Custom Namespaces",
+  "TypeScript/Localization/Number Formatting",
+  "TypeScript/Localization/Failure Semantics",
 ] as const;
 
 const EXPECTED_INFRASTRUCTURE_ROUTES = [
-  "Infrastructure/Overview",
-  "Infrastructure/Primary Workflow",
-  "Infrastructure/HTTP and Pagination",
-  "Infrastructure/Connectivity",
-  "Infrastructure/Persistent State",
-  "Infrastructure/Session Expiry",
-  "Infrastructure/Failure Semantics",
+  "TypeScript/Infrastructure/Overview",
+  "TypeScript/Infrastructure/Primary Workflow",
+  "TypeScript/Infrastructure/HTTP and Pagination",
+  "TypeScript/Infrastructure/Connectivity",
+  "TypeScript/Infrastructure/Persistent State",
+  "TypeScript/Infrastructure/Session Expiry",
+  "TypeScript/Infrastructure/Failure Semantics",
 ] as const;
 
 const EXPECTED_SQLITE_ROUTES = [
-  "SQLite/Overview",
-  "SQLite/Primary Workflow",
-  "SQLite/Managed Runtime",
-  "SQLite/Offline Replay",
-  "SQLite/Hydration State",
-  "SQLite/Offline Utilities",
-  "SQLite/Failure Semantics",
+  "TypeScript/SQLite/Overview",
+  "TypeScript/SQLite/Primary Workflow",
+  "TypeScript/SQLite/Managed Runtime",
+  "TypeScript/SQLite/Offline Replay",
+  "TypeScript/SQLite/Hydration State",
+  "TypeScript/SQLite/Offline Utilities",
+  "TypeScript/SQLite/Failure Semantics",
 ] as const;
 
 const EXPECTED_QUERY_ENGINE_ROUTES = [
-  "Query Engine/Overview",
-  "Query Engine/Primary Workflow",
-  "Query Engine/Filter Compilation",
-  "Query Engine/SQLite Execution",
-  "Query Engine/Config Persistence",
-  "Query Engine/Failure Semantics",
+  "TypeScript/Query Engine/Overview",
+  "TypeScript/Query Engine/Primary Workflow",
+  "TypeScript/Query Engine/Filter Compilation",
+  "TypeScript/Query Engine/SQLite Execution",
+  "TypeScript/Query Engine/Config Persistence",
+  "TypeScript/Query Engine/Failure Semantics",
 ] as const;
 
 const EXPECTED_SHELL_ROUTES = [
-  "Shell/Overview",
-  "Shell/Primary Workflow",
-  "Shell/Sitemap and Paths",
-  "Shell/Navigation and Config",
-  "Shell/Auth Redirects",
-  "Shell/Overlay History",
-  "Shell/Failure Semantics",
+  "TypeScript/Shell/Overview",
+  "TypeScript/Shell/Primary Workflow",
+  "TypeScript/Shell/Sitemap and Paths",
+  "TypeScript/Shell/Navigation and Config",
+  "TypeScript/Shell/Auth Redirects",
+  "TypeScript/Shell/Overlay History",
+  "TypeScript/Shell/Failure Semantics",
 ] as const;
 
 const EXPECTED_JVM_AUTH_ROUTES = [
@@ -141,10 +142,10 @@ const EXPECTED_JVM_QUERY_ENGINE_ROUTES = [
 ] as const;
 
 const APPROVED_STORY_ROUTES = [
-  /^UI\/Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
-  /^UI\/Capabilities\/(?:Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
-  /^UI\/Capabilities\/Forms\/(?:(?:Fields|Multi-Step|Overlays)\/)?(?:Vireo|useVireo)/u,
-  /^UI\/Integrations\/(?:Drag and Drop · Hello Pangea DND|Event Source|Localization|Notifications · Sonner|TanStack Query)\/(?:Vireo|useVireo)/u,
+  /^TypeScript\/UI\/Core\/(?:Behavior|Controls|Data Display|Feedback|Hooks|Layout|Navigation|Providers|Surfaces)\/(?:Vireo|useVireo)/u,
+  /^TypeScript\/UI\/Capabilities\/(?:Application Navigation|Application Preferences|Countries|History|Infinite Canvas|Overlays|Page Layout|Tables)\/(?:Vireo|useVireo)/u,
+  /^TypeScript\/UI\/Capabilities\/Forms\/(?:(?:Fields|Multi-Step|Overlays)\/)?(?:Vireo|useVireo)/u,
+  /^TypeScript\/UI\/Integrations\/(?:Drag and Drop · Hello Pangea DND|Event Source|Localization|Notifications · Sonner|TanStack Query)\/(?:Vireo|useVireo)/u,
 ] as const;
 
 function findFiles(root: string, predicate: (file: string) => boolean): string[] {
@@ -186,6 +187,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     const managerSource = readFileSync(storybookManagerFile, "utf8");
 
     expect(managerSource).toContain("Documentation: BookIcon");
+    expect(managerSource).toContain("TypeScript: ComponentDrivenIcon");
     expect(managerSource).toContain("UI: ComponentIcon");
     expect(managerSource).toContain("JVM: BoxIcon");
     expect(managerSource).toContain("BOM: BranchIcon");
@@ -210,7 +212,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
     expect(violations).toEqual([]);
   });
 
-  it("indexes monorepo documentation and UI-owned guides under their library roots", () => {
+  it("indexes monorepo documentation, the TypeScript overview, and UI-owned guides under their runtime roots", () => {
     const actualRoutes = findFiles(docsRoot, file => extname(file) === ".mdx")
       .map(documentationTitle)
       .sort();

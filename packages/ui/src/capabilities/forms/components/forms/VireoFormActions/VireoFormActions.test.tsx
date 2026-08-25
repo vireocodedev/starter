@@ -1,7 +1,7 @@
 import { VireoFormActions } from "./VireoFormActions";
 import { vireoFormActionsClasses } from "./VireoFormActions.classes";
 import { VIREO_FORM_ACTIONS_NAME } from "./VireoFormActions.identity";
-import { Button, ThemeProvider, createTheme } from "@mui/material";
+import { Button, IconButton, ThemeProvider, createTheme } from "@mui/material";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";
@@ -10,16 +10,16 @@ describe(VIREO_FORM_ACTIONS_NAME, () => {
   it("renders its essential default output with only required props", () => {
     render(
       <VireoFormActions>
-        <Button>Reset</Button>
+        <Button>Cancel</Button>
         <Button>Save</Button>
       </VireoFormActions>,
     );
 
-    const reset = screen.getByRole("button", { name: "Reset" });
+    const cancel = screen.getByRole("button", { name: "Cancel" });
     const save = screen.getByRole("button", { name: "Save" });
-    expect(reset.parentElement).toBe(save.parentElement);
-    expect(reset.parentElement).toHaveClass(vireoFormActionsClasses.layout);
-    expect(reset.parentElement?.parentElement).toHaveClass(vireoFormActionsClasses.root);
+    expect(cancel.parentElement).toBe(save.parentElement);
+    expect(cancel.parentElement).toHaveClass(vireoFormActionsClasses.layout);
+    expect(cancel.parentElement?.parentElement).toHaveClass(vireoFormActionsClasses.root);
   });
 
   it("forwards refs and merges root customization", () => {
@@ -52,11 +52,11 @@ describe(VIREO_FORM_ACTIONS_NAME, () => {
     expect(root).toHaveStyle({ paddingLeft: "10px", paddingRight: "12px" });
   });
 
-  it("supports a replacement root and owner-state slot props", () => {
+  it("supports a replacement layout and slot props", () => {
     render(
       <VireoFormActions
         slots={{ layout: "nav" }}
-        slotProps={{ layout: () => ({ "aria-label": "Customer actions", "data-slot": "layout" }) }}
+        slotProps={{ layout: { "aria-label": "Customer actions", "data-slot": "layout" } }}
       >
         <Button>Save</Button>
       </VireoFormActions>,
@@ -65,6 +65,22 @@ describe(VIREO_FORM_ACTIONS_NAME, () => {
     const layout = screen.getByRole("navigation", { name: "Customer actions" });
     expect(layout).toHaveAttribute("data-slot", "layout");
     expect(layout).toHaveClass(vireoFormActionsClasses.layout);
+  });
+
+  it("keeps ordinary actions and an overflow icon action in one row", () => {
+    render(
+      <VireoFormActions>
+        <IconButton aria-label="More actions" />
+        <Button>Cancel</Button>
+        <Button>Save</Button>
+      </VireoFormActions>,
+    );
+
+    const layout = screen.getByRole("button", { name: "Save" }).parentElement;
+    expect(layout?.children).toHaveLength(3);
+    expect(layout?.children[0]).toBe(screen.getByRole("button", { name: "More actions" }));
+    expect(layout?.children[1]).toBe(screen.getByRole("button", { name: "Cancel" }));
+    expect(layout?.children[2]).toBe(screen.getByRole("button", { name: "Save" }));
   });
 
   it("uses theme default props and root style overrides", () => {

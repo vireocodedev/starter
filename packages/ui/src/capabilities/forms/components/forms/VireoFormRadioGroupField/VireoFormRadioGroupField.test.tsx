@@ -51,7 +51,9 @@ function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(() => unde
         )}
       </form.Field>
       <form.SubmitButton>Submit</form.SubmitButton>
-      <form.ResetButton>Reset</form.ResetButton>
+      <button type="button" onClick={() => form.reset()}>
+        Reset
+      </button>
     </form.Form>
   );
 }
@@ -132,7 +134,7 @@ describe(VIREO_FORM_RADIO_GROUP_FIELD_NAME, () => {
     expect(canary).toBeChecked();
   });
 
-  it("restores the nullable default through form.ResetButton", async () => {
+  it("reflects a programmatic form reset", async () => {
     const user = userEvent.setup();
     render(<TestForm />);
 

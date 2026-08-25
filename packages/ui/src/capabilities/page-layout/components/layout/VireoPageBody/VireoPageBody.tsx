@@ -71,11 +71,12 @@ export const VireoPageBody = React.forwardRef<HTMLDivElement, VireoPageBodyProps
       >
         <Content {...content} ownerState={ownerState} className={joinClassNames(classes.content, content.className)}>
           <Container
+            disableGutters
             {...container}
             ownerState={ownerState}
             maxWidth={maxWidth}
             className={joinClassNames(classes.container, container.className)}
-            sx={mergeSx({ p: `${padding} !important` }, container.sx)}
+            sx={mergeSx({ p: padding }, container.sx)}
           >
             {children}
           </Container>

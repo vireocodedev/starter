@@ -37,7 +37,6 @@ export default function DefaultExample() {
             )}
           </form.Field>
           <form.Actions>
-            <form.ResetButton>Reset</form.ResetButton>
             <form.SubmitButton variant="contained">Save teams</form.SubmitButton>
           </form.Actions>
           {savedTeams.length > 0 && <Typography color="success.main">Saved {savedTeams.join(", ")}</Typography>}

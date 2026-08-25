@@ -19,7 +19,7 @@ type StoryArgs = VireoOverlayHeaderOwnProps & {
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta: Meta<typeof VireoOverlayHeader> = {
-  title: "UI/Capabilities/Overlays/VireoOverlayHeader",
+  title: "TypeScript/UI/Capabilities/Overlays/VireoOverlayHeader",
   component: VireoOverlayHeader,
   tags: ["autodocs"],
   args: { title: "Edit invoice" },

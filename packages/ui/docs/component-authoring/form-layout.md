@@ -25,7 +25,7 @@ return (
     </form.Section>
 
     <form.Actions>
-      <form.ResetButton>Discard changes</form.ResetButton>
+      <Button onClick={onCancel}>Cancel</Button>
       <form.SubmitButton variant="contained">Save profile</form.SubmitButton>
     </form.Actions>
   </form.Form>
@@ -57,13 +57,13 @@ All presets retain `width: 100%`, `min-width: 0`, automatic inline centering, an
   headingLevel={2}
   layout="grid"
   maxColumns={3}
-  variant="outlined"
+  variant="divided"
 >
   {/* fields */}
 </form.Section>
 ```
 
-Defaults are `headingLevel={2}`, `layout="grid"`, `maxColumns={2}`, and `variant="outlined"`.
+Defaults are `headingLevel={2}`, `layout="grid"`, `maxColumns={2}`, and `variant="divided"`.
 
 The grid responds to usable section-content width, not viewport width:
 
@@ -73,7 +73,9 @@ The grid responds to usable section-content width, not viewport width:
 
 `maxColumns` is a ceiling, never a forced count. Use `layout="stack"` when the content must remain one vertical sequence.
 
-The outlined variant supplies a paper background, divider border, theme radius, `16px` narrow padding, and `24px` padding from `30rem`. The plain variant retains semantics and layout while removing the surface background, border, and padding.
+The divided variant is the standard form presentation. It keeps fields directly on the owning form or overlay canvas and places one semantic divider plus consistent vertical rhythm between adjacent divided sections. It does not introduce a nested background, outline, radius, or field-area padding.
+
+The outlined variant is an explicit opt-in for a genuinely independent subgroup. It supplies the Vireo base surface (falling back to the MUI paper background), divider border, theme radius, `16px` narrow padding, and `24px` padding from `30rem`. The plain variant retains semantics and layout while removing both the outlined surface and automatic sibling dividers. Do not use outlined sections merely to group ordinary fields inside a dialog, drawer, side panel, or page form.
 
 ## Section items
 
@@ -107,14 +109,49 @@ Prefer sibling top-level sections when the content does not logically belong to 
 
 ```tsx
 <form.Actions>
-  <form.ResetButton>Discard changes</form.ResetButton>
+  <Button onClick={onCancel}>Cancel</Button>
   <form.SubmitButton variant="contained">Save customer</form.SubmitButton>
 </form.Actions>
 ```
 
-Below `30rem` of container width, actions stack vertically at full width. At `30rem` and above, they use natural widths in an end-aligned row. Do not use CSS ordering: visual, reading, and keyboard order must remain the same.
+Actions always remain in one full-width horizontal row on every surface. Every ordinary direct action receives the same share of the available width, so the standard Cancel and Submit pair is an equal `50 / 50` composition after accounting for the gap. Actions never wrap or stack at narrow widths.
 
-The action component does not assign button types, inspect children, or add landmark roles. Bound submit and reset buttons continue to own their form-state behavior.
+Whole-form Reset actions are intentionally unsupported. A standard form exposes Cancel followed by Submit. If a workflow needs more than those two actions, keep the row intact and place exceptional secondary commands in a compact `IconButton` that opens a menu or popover; direct MUI icon buttons retain their intrinsic width while the ordinary actions continue to share the remaining space equally.
+
+Keep direct children ordered from least prominent to most prominent and do not use CSS ordering: visual, reading, and keyboard order must remain the same. The action component does not assign button types, inspect action semantics, or add landmark roles. The bound submit button continues to own its form-state behavior; Cancel remains an application or overlay-close decision.
+
+## Responsive overlay forms
+
+`VireoResponsiveFormOverlay` owns the standard overlay-form chrome: a raised header, a sunken independently scrolling content canvas, and an optional persistent raised action footer. Compose fields inside `form.Section`; pass global actions to the overlay rather than placing them inside a section.
+
+Use `renderForm` to place the content and footer inside one semantic form and use the functional `actions` form when Cancel must participate in guarded close behavior:
+
+```tsx
+<VireoResponsiveFormOverlay
+  open={open}
+  onClose={onClose}
+  title="Create customer"
+  closeLabel="Close customer form"
+  closeDisabled={saving}
+  renderForm={children => (
+    <form.Form layoutWidth="full" unsavedChangesGuard>
+      {children}
+    </form.Form>
+  )}
+  actions={({ requestClose }) => (
+    <form.Actions>
+      <Button onClick={requestClose}>Cancel</Button>
+      <form.SubmitButton variant="contained">Create customer</form.SubmitButton>
+    </form.Actions>
+  )}
+>
+  <form.Section label="Customer details">{/* fields */}</form.Section>
+</VireoResponsiveFormOverlay>
+```
+
+The header remains outside the form. The form wrapper contains one internal zero-gap layout region that owns the scrolling content and footer, so the form's normal section gap cannot create space between those surfaces. Dialogs remain content-sized until constrained; desktop side panels fill their available height; mobile sheets grow until their configured maximum. In every surface, only the content canvas scrolls while the header and footer remain visible.
+
+Static action nodes remain supported for non-form decisions. Form-bound submit buttons require `renderForm`. Use the supplied `requestClose` for Cancel so header close, backdrop click, Escape, Cancel, and responsive surface transitions share the same unsaved-change confirmation. `closeDisabled` blocks those overlay-owned exits; submission and post-success reset or closure remain application responsibilities.
 
 ## Multi-step forms
 

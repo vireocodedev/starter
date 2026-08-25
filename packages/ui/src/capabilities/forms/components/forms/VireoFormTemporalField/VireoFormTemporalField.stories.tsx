@@ -27,7 +27,7 @@ function createSourceParameters(code: string, description?: string) {
 }
 
 const meta = {
-  title: "UI/Capabilities/Forms/Fields/VireoFormTemporalField",
+  title: "TypeScript/UI/Capabilities/Forms/Fields/VireoFormTemporalField",
   component: VireoFormTemporalField,
   tags: ["autodocs"],
   args: { mode: "date" },

@@ -170,6 +170,7 @@ export function DesktopResponsiveTable<
                             body
                           ) : (
                             <VireoTruncatedContent
+                              collapsedHeight={48}
                               collapseLabel={labels.showLess}
                               expandLabel={labels.showMore}
                               stopPropagation

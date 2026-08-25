@@ -5,7 +5,7 @@ import * as dockedSidePanelStories from "./VireoDockedSidePanel.stories";
 import { DOCKED_SIDE_PANEL_TRANSITION_EVENT } from "@/capabilities/overlays/constants/overlay.constants";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { composeStories } from "@storybook/react-vite";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -112,7 +112,7 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
     expect(forwardedRef.current).toHaveStyle({ paddingLeft: "10px", paddingRight: "12px" });
   });
 
-  it("supports replacement slots and owner-state slot props", () => {
+  it("supports replacement slots and enters smoothly when initially mounted open", async () => {
     render(
       <VireoDockedSidePanel
         {...requiredProps}
@@ -136,7 +136,8 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
     expect(root.tagName).toBe("SECTION");
     expect(root).toHaveAttribute("data-resizing", "true");
     expect(surface.tagName).toBe("ARTICLE");
-    expect(surface).toHaveAttribute("data-entered", "true");
+    expect(surface).toHaveAttribute("data-entered", "false");
+    await waitFor(() => expect(surface).toHaveAttribute("data-entered", "true"));
   });
 
   it("applies custom utility classes to their matching slots", () => {

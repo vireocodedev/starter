@@ -1,4 +1,6 @@
 export * from "@/core/public";
+export * from "@/capabilities/application-navigation/public";
+export * from "@/capabilities/application-preferences/public";
 export * from "@/capabilities/country/public";
 export * from "@/capabilities/overlays/public";
 export * from "@/capabilities/page-layout/public";

@@ -14,22 +14,28 @@ export function useGuardedOverlayModeSwitch<TPayloadByMode extends Record<string
   openMode: (mode: keyof TPayloadByMode, payload: TPayloadByMode[keyof TPayloadByMode]) => void,
 ): GuardedOverlayModeSwitch<TPayloadByMode> {
   const { requestDiscard } = useUnsavedChanges();
+  const openModeRef = React.useRef(openMode);
+  const overlayOpenRef = React.useRef(overlayOpen);
+  const requestDiscardRef = React.useRef(requestDiscard);
 
-  return React.useMemo(
-    () =>
-      ((mode, payload, beforeOpen) => {
-        const commitOpen = () => {
-          beforeOpen?.();
-          openMode(mode, payload);
-        };
+  openModeRef.current = openMode;
+  overlayOpenRef.current = overlayOpen;
+  requestDiscardRef.current = requestDiscard;
 
-        if (!overlayOpen) {
-          commitOpen();
-          return;
-        }
+  return React.useCallback(
+    ((mode, payload, beforeOpen) => {
+      const commitOpen = () => {
+        beforeOpen?.();
+        openModeRef.current(mode, payload);
+      };
 
-        requestDiscard({ onDiscard: commitOpen });
-      }) as GuardedOverlayModeSwitch<TPayloadByMode>,
-    [openMode, overlayOpen, requestDiscard],
+      if (!overlayOpenRef.current) {
+        commitOpen();
+        return;
+      }
+
+      requestDiscardRef.current({ onDiscard: commitOpen });
+    }) as GuardedOverlayModeSwitch<TPayloadByMode>,
+    [],
   );
 }

@@ -19,7 +19,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "UI/Capabilities/Forms/VireoFormSubmitButton",
+  title: "TypeScript/UI/Capabilities/Forms/VireoFormSubmitButton",
   component: VireoFormSubmitButton,
   tags: ["autodocs"],
   parameters: {

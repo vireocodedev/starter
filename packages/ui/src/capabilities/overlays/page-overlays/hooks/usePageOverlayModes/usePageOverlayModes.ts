@@ -37,29 +37,35 @@ export type UsePageOverlayModesReturn<TMap extends OverlayPayloadMap> = {
 export function usePageOverlayModes<TMap extends OverlayPayloadMap>(
   renderers: OverlayRenderers<TMap>,
 ): UsePageOverlayModesReturn<TMap> {
-  const delayedOverlay = useDelayedOverlayMount();
+  const {
+    closeOverlay,
+    onExited: onOverlayExited,
+    open: overlayOpen,
+    openOverlay,
+    render: renderMountedOverlay,
+  } = useDelayedOverlayMount();
   const [state, setState] = React.useState<OverlayState<TMap>>({ mode: "none" });
 
   const open = React.useCallback(
     <K extends keyof TMap>(mode: K, payload: TMap[K]) => {
       setState({ mode, payload } as OverlayState<TMap>);
-      delayedOverlay.openOverlay();
+      openOverlay();
     },
-    [delayedOverlay],
+    [openOverlay],
   );
 
   const close = React.useCallback(() => {
-    delayedOverlay.closeOverlay();
-  }, [delayedOverlay]);
+    closeOverlay();
+  }, [closeOverlay]);
 
   const onExited = React.useCallback(() => {
     setState({ mode: "none" });
-    delayedOverlay.onExited();
-  }, [delayedOverlay]);
+    onOverlayExited();
+  }, [onOverlayExited]);
 
   const render = React.useCallback(
     () =>
-      delayedOverlay.render((overlayProps: DelayedOverlayRenderProps) => {
+      renderMountedOverlay((overlayProps: DelayedOverlayRenderProps) => {
         if (!("payload" in state)) {
           return null;
         }
@@ -78,15 +84,15 @@ export function usePageOverlayModes<TMap extends OverlayPayloadMap>(
           state.payload as TMap[keyof TMap],
         );
       }),
-    [delayedOverlay, onExited, renderers, state],
+    [onExited, renderMountedOverlay, renderers, state],
   );
 
   const overlay = React.useMemo(
     () => ({
-      open: delayedOverlay.open,
+      open: overlayOpen,
       render,
     }),
-    [delayedOverlay.open, render],
+    [overlayOpen, render],
   );
 
   return React.useMemo(

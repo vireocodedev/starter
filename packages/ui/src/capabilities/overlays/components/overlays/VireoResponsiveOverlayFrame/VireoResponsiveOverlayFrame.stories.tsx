@@ -7,6 +7,8 @@ import DockedSidePanelExample from "@/capabilities/overlays/components/overlays/
 import dockedSidePanelExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/DockedSidePanelExample.tsx?raw";
 import MobileBottomSheetExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/MobileBottomSheetExample";
 import mobileBottomSheetExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/MobileBottomSheetExample.tsx?raw";
+import MobileFullScreenDialogExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/MobileFullScreenDialogExample";
+import mobileFullScreenDialogExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/MobileFullScreenDialogExample.tsx?raw";
 import OverlaySidePanelExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/OverlaySidePanelExample";
 import overlaySidePanelExampleSource from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/OverlaySidePanelExample.tsx?raw";
 import ResizableDockedSidePanelExample from "@/capabilities/overlays/components/overlays/VireoResponsiveOverlayFrame/internal/storybook/ResizableDockedSidePanelExample";
@@ -16,7 +18,7 @@ import { VireoResponsiveOverlayFrame } from "./VireoResponsiveOverlayFrame";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "UI/Capabilities/Overlays/VireoResponsiveOverlayFrame",
+  title: "TypeScript/UI/Capabilities/Overlays/VireoResponsiveOverlayFrame",
   component: VireoResponsiveOverlayFrame,
   tags: ["autodocs"],
   args: { open: false, onClose: fn(), children: null },
@@ -26,7 +28,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Coordinates one content flow across a mobile bottom sheet and configurable desktop dialog or side-panel surfaces.\n\n### Why it exists\n\nResponsive workflows otherwise duplicate breakpoint selection, panel sizing, resize behavior, docked-space fallback, and exit lifecycle wiring every time the same content needs mobile and desktop presentation. Vireo owns that orchestration so consumers can choose intent while the frame keeps surface behavior consistent. Use it when one overlay flow genuinely changes surface by viewport; use a direct dialog, drawer, or docked panel when the surface never needs responsive coordination.",
+          "Coordinates one content flow across mobile bottom-sheet or full-screen-dialog surfaces and configurable desktop dialog or side-panel surfaces.\n\n### Why it exists\n\nResponsive workflows otherwise duplicate breakpoint selection, panel sizing, resize behavior, docked-space fallback, and exit lifecycle wiring every time the same content needs mobile and desktop presentation. Vireo owns that orchestration so consumers can choose intent while the frame keeps surface behavior consistent. Use it when one overlay flow genuinely changes surface by viewport; use a direct dialog, drawer, or docked panel when the surface never needs responsive coordination.",
       },
     },
   },
@@ -50,6 +52,11 @@ export const Default: Story = {
 export const MobileBottomSheet: Story = {
   render: () => <MobileBottomSheetExample />,
   parameters: { ...source(mobileBottomSheetExampleSource), viewport: { defaultViewport: "mobile1" } },
+};
+
+export const MobileFullScreenDialog: Story = {
+  render: () => <MobileFullScreenDialogExample />,
+  parameters: { ...source(mobileFullScreenDialogExampleSource), viewport: { defaultViewport: "mobile1" } },
 };
 
 export const OverlaySidePanel: Story = {

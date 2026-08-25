@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/addon-docs/blocks";
 
-<Meta title="UI/Documentation/Guides/Table Patterns" />
+<Meta title="TypeScript/UI/Documentation/Guides/Table Patterns" />
 
 # Table patterns
 
@@ -52,7 +52,7 @@ function CustomerTable({ rows, totalCount }) {
 ## Ownership rules
 
 - Fetching, caching, filters, and mutations stay in the consuming application.
-- The table owns responsive presentation, desktop pagination controls, mobile disclosure rows, sorting interactions, loading/empty states, virtualization, and scroll restoration.
+- The table owns responsive presentation, desktop pagination controls, mobile disclosure rows, sorting interactions, loading/empty states, incremental page loading, and scroll restoration.
 - Use `layout="desktop"` or `layout="mobile"` only when an enclosing capability already owns the layout decision; otherwise let the table measure its container.
 - Column renderers receive a third `context` argument whose `placement` is `desktop`, `mobile-summary`, or `mobile-detail` when presentation genuinely needs to differ.
 - Use `actionsColumn`, `titleColumn`, and title-adornment column IDs to describe mobile anatomy without duplicating a second column model.

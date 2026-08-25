@@ -24,7 +24,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "UI/Capabilities/Tables/VireoResponsiveTable",
+  title: "TypeScript/UI/Capabilities/Tables/VireoResponsiveTable",
   component: VireoResponsiveTable,
   tags: ["autodocs"],
   parameters: {
@@ -35,7 +35,7 @@ const meta = {
 
 ### Why it exists
 
-Responsive data-heavy screens otherwise duplicate breakpoint selection, sticky-column geometry, sorting and pagination wiring, mobile disclosure rows, filters, virtualization, loading states, and scroll restoration. Vireo owns that coordination while consumers retain typed columns, rendered cells, server state, labels, and filters. Use it when the same records genuinely need both dense desktop and compact mobile presentation; use an ordinary MUI table when only one fixed layout is required.`,
+Responsive data-heavy screens otherwise duplicate breakpoint selection, sticky-column geometry, sorting and pagination wiring, mobile disclosure rows, filters, incremental loading, loading states, and scroll restoration. Vireo owns that coordination while consumers retain typed columns, rendered cells, server state, labels, and filters. Use it when the same records genuinely need both dense desktop and compact mobile presentation; use an ordinary MUI table when only one fixed layout is required.`,
       },
     },
   },

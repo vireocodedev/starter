@@ -36,7 +36,7 @@ export const VireoDockedSidePanelSurface: VireoDockedSidePanelStyledSlotComponen
   flexDirection: "column",
   overflow: "hidden",
   backgroundColor: theme.palette.background.paper,
-  borderLeft: `1px solid ${theme.palette.grey[300]}`,
+  borderLeft: `1px solid ${theme.palette.divider}`,
   transform: ownerState.isPanelEntered ? "translateX(0)" : "translateX(24px)",
   opacity: ownerState.isPanelEntered ? 1 : 0,
   transition: ownerState.isResizing

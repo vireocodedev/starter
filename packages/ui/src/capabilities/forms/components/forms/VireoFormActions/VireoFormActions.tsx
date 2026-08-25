@@ -20,7 +20,7 @@ function useUtilityClasses(_ownerState: VireoFormActionsOwnerState, classes?: Vi
 }
 
 /**
- * Arranges form actions consistently across narrow and wide containing surfaces.
+ * Keeps form actions in one horizontal row across every containing surface.
  */
 export const VireoFormActions = React.forwardRef<HTMLDivElement, VireoFormActionsProps>(
   function VireoFormActions(inProps, forwardedRef) {

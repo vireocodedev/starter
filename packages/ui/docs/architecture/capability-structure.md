@@ -239,6 +239,8 @@ The initial migration target is:
 
 ```text
 capabilities/
+  application-navigation/
+  application-preferences/
   country/
   forms/
     form-overlays/
@@ -254,7 +256,7 @@ capabilities/
   unsaved-changes/
 ```
 
-Do not add `layout`, `navigation`, `feedback`, `inputs`, `providers`, `api`, `video`, or `events` merely to mirror current folder names. Generic instances of these artifacts are core-owned, capability-specific instances follow their owner, and integrations remain deferred.
+Do not add generic `layout`, `navigation`, `feedback`, `inputs`, `providers`, `api`, `video`, or `events` capabilities merely to mirror current folder names. The application-navigation capability is intentionally narrower: it owns the cooperating shell surface, compact-mode, destination-item, and mobile quick-navigation contracts. Generic artifacts remain core-owned, capability-specific instances follow their owner, and integrations remain deferred.
 
 ## Review checklist
 

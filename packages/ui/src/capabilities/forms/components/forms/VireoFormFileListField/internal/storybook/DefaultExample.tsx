@@ -27,7 +27,6 @@ export default function DefaultExample() {
           </form.Field>
           <form.Actions>
             <form.SubmitButton variant="contained">Save attachments</form.SubmitButton>
-            <form.ResetButton>Reset</form.ResetButton>
           </form.Actions>
           {savedCount !== undefined && <Typography color="success.main">Saved {savedCount} files</Typography>}
         </form.Section>

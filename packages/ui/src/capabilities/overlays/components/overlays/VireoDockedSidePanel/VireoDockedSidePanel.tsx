@@ -52,8 +52,8 @@ export const VireoDockedSidePanel = React.forwardRef<HTMLDivElement, VireoDocked
     } = props;
 
     const [isPanelPresent, setIsPanelPresent] = React.useState(open);
-    const [isPanelEntered, setIsPanelEntered] = React.useState(open);
-    const previousOpenRef = React.useRef(open);
+    const [isPanelEntered, setIsPanelEntered] = React.useState(false);
+    const previousOpenRef = React.useRef(false);
     const exitedRef = React.useRef(false);
     const exitTimerRef = React.useRef<number | null>(null);
     const transitionTimerRef = React.useRef<number | null>(null);
@@ -136,6 +136,7 @@ export const VireoDockedSidePanel = React.forwardRef<HTMLDivElement, VireoDocked
         return;
       }
 
+      clearTransitionRaf();
       if (!wasOpen || typeof window === "undefined") {
         setIsPanelEntered(false);
         setIsPanelPresent(false);
@@ -155,6 +156,7 @@ export const VireoDockedSidePanel = React.forwardRef<HTMLDivElement, VireoDocked
 
     React.useEffect(
       () => () => {
+        previousOpenRef.current = false;
         clearExitTimer();
         clearTransitionTimer();
         clearTransitionRaf();

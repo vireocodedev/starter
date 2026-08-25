@@ -3,7 +3,7 @@ import defaultExampleSource from "@/integrations/tanstack-query/hooks/useVireoMu
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "UI/Integrations/TanStack Query/useVireoMutation",
+  title: "TypeScript/UI/Integrations/TanStack Query/useVireoMutation",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
