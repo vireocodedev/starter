@@ -43,6 +43,7 @@ const EXPECTED_DOCUMENTATION_ROUTES = [
   "TypeScript/UI/Overview",
   "TypeScript/UI/Documentation/Installation",
   "TypeScript/UI/Documentation/Guides/Common Patterns",
+  "TypeScript/UI/Documentation/Guides/Motion and Interaction",
   "TypeScript/UI/Documentation/Guides/Theming",
   "TypeScript/UI/Documentation/Guides/Providers",
   "TypeScript/UI/Documentation/Guides/Augmentable Interfaces",
