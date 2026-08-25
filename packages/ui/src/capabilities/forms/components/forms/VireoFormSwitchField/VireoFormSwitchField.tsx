@@ -75,7 +75,7 @@ export const VireoFormSwitchField = React.forwardRef<HTMLDivElement, VireoFormSw
       errorDisplay: errorDisplayProp,
       formatError: formatErrorProp,
       fullWidth = true,
-      helperText,
+      helperText = " ",
       inputRef,
       label,
       labelPlacement = "end",

@@ -84,7 +84,7 @@ export const VireoFormCheckboxField = React.forwardRef<HTMLDivElement, VireoForm
       errorDisplay: errorDisplayProp,
       formatError: formatErrorProp,
       fullWidth = true,
-      helperText,
+      helperText = " ",
       inputRef,
       label,
       labelPlacement = "end",

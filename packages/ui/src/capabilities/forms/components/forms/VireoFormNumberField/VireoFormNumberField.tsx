@@ -93,7 +93,7 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
       errorDisplay: errorDisplayProp,
       formatError: formatErrorProp,
       fullWidth = true,
-      helperText,
+      helperText = " ",
       inputRef,
       max,
       min,

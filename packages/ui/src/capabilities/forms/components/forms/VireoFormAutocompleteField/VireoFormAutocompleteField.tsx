@@ -132,7 +132,7 @@ function VireoFormAutocompleteFieldImpl<TOption, TValue extends VireoFormAutocom
     getOptionValue,
     getUnresolvedValueLabel,
     groupBy,
-    helperText,
+    helperText = " ",
     inputRef,
     inputValue: inputValueProp,
     label,

@@ -139,7 +139,7 @@ export const VireoFormCounterField = React.forwardRef<HTMLDivElement, VireoFormC
       errorDisplay: errorDisplayProp,
       formatError: formatErrorProp,
       fullWidth = true,
-      helperText,
+      helperText = " ",
       incrementLabel = "Increase",
       inputRef,
       max,

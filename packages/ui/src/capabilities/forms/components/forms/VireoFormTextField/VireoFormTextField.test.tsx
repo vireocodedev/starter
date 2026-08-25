@@ -61,6 +61,24 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
     expect(root).toHaveClass(vireoFormTextFieldClasses.dirty);
   });
 
+  it("reserves helper-text space by default and allows consumers to remove it", () => {
+    function ReservedHelperForm({ helperText }: { helperText?: React.ReactNode }) {
+      const form = useVireoForm({ defaultValues: { name: "" }, onSubmit: () => undefined });
+      return (
+        <form.Form data-testid="reserved-helper-form">
+          <form.Field name="name">{field => <field.TextField label="Name" helperText={helperText} />}</form.Field>
+        </form.Form>
+      );
+    }
+
+    const { rerender } = render(<ReservedHelperForm />);
+    const form = screen.getByTestId("reserved-helper-form");
+    expect(form.querySelector(".MuiFormHelperText-root")).toBeInTheDocument();
+
+    rerender(<ReservedHelperForm helperText={null} />);
+    expect(form.querySelector(".MuiFormHelperText-root")).not.toBeInTheDocument();
+  });
+
   it("preserves MUI's native-input reset when the html-input slot is not replaced", () => {
     render(<TestForm initialValue="Northstar" />);
 

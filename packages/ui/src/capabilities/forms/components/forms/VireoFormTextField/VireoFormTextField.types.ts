@@ -118,7 +118,7 @@ export type VireoFormTextFieldOwnProps = VireoFormTextFieldSlotsAndSlotProps & {
   formatError?: VireoFormErrorFormatter;
   /** @default true */
   fullWidth?: boolean;
-  /** Shown when no visible form validation error takes precedence. */
+  /** Shown when no visible validation error takes precedence. Defaults to a reserved line; pass `null` to remove it. @default ' ' */
   helperText?: React.ReactNode;
   /** Ref forwarded to the native input or textarea. */
   inputRef?: React.Ref<HTMLElement>;

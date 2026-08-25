@@ -11,6 +11,7 @@ export type VireoMultiStepDescriptor<TFormData, TStepId extends string = string>
 };
 
 export type VireoMultiStepStatus = "upcoming" | "visited" | "complete" | "error";
+export type VireoMultiStepDirection = "forward" | "backward";
 
 /** Public state for one configured multi-step form step. */
 export type VireoMultiStepStepState<TStepId extends string = string> = {
@@ -36,6 +37,8 @@ export type VireoMultiStepState<TStepId extends string = string> = {
   currentStep: VireoMultiStepStepState<TStepId>;
   currentStepId: TStepId;
   currentStepIndex: number;
+  /** Direction of the most recent current-step change. */
+  direction: VireoMultiStepDirection;
   activeStepCount: number;
   completedStepCount: number;
   isFirstStep: boolean;
@@ -53,7 +56,7 @@ export type VireoMultiStepChangeEvent<TStepId extends string = string> = {
   stepId: TStepId;
   previousStepIndex: number;
   stepIndex: number;
-  direction: "forward" | "backward";
+  direction: VireoMultiStepDirection;
   reason: VireoMultiStepChangeReason;
 };
 

@@ -287,7 +287,7 @@ export type VireoFormFileListFieldOwnProps = VireoFormFileListFieldSlotsAndSlotP
   formatFileSize?: (bytes: number) => React.ReactNode;
   /** Resolves duplicate identity. Defaults to name, size, lastModified, and type. */
   getFileKey?: (file: File) => string;
-  /** Shown beneath local rejections and the list. */
+  /** Shown beneath local rejections and the list. Defaults to a reserved line; pass `null` to remove it. @default ' ' */
   helperText?: React.ReactNode;
   /** Hides the clear-all action. @default false */
   hideClearAll?: boolean;

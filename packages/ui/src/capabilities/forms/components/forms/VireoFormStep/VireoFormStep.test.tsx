@@ -52,6 +52,18 @@ describe(VIREO_FORM_STEP_NAME, () => {
     await waitFor(() => expect(screen.getByRole("region", { name: "Review" })).toHaveFocus());
   });
 
+  it("exposes navigation direction to root slot customization", async () => {
+    render(
+      <Harness
+        reviewProps={{
+          slotProps: { root: ownerState => ({ "data-direction": ownerState.direction }) },
+        }}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Next test step" }));
+    expect(await screen.findByRole("region", { name: "Review" })).toHaveAttribute("data-direction", "forward");
+  });
+
   it("supports root and label slot customization", async () => {
     const ref = React.createRef<HTMLElement>();
     render(

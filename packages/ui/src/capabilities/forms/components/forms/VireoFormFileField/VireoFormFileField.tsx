@@ -144,7 +144,7 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
       fileTooLargeText = (_file: File, maximum: number) => `File must be ${formatVireoFileSize(maximum)} or smaller.`,
       formatError: formatErrorProp,
       formatFileSize = formatVireoFileSize,
-      helperText,
+      helperText = " ",
       hideFileSize = false,
       inputRef,
       maxSize,

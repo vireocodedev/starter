@@ -35,6 +35,7 @@ export const VireoFormStep = React.forwardRef<HTMLElement, VireoFormStepProps>(
     const ownerState: VireoFormStepOwnerState = {
       active: step?.isActive ?? false,
       current: step?.isCurrent ?? false,
+      direction: state.direction,
       keepMounted,
     };
     const classes = useUtilityClasses(ownerState, classesProp);

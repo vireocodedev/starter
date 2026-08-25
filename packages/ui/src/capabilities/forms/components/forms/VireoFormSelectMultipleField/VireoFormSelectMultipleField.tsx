@@ -126,7 +126,7 @@ function VireoFormSelectMultipleFieldImpl<TOption, TValue extends VireoFormSelec
     fullWidth = true,
     getOptionDisabled,
     getOptionValue,
-    helperText,
+    helperText = " ",
     inputRef,
     label,
     maxDisplayedOptions: maxDisplayedOptionsProp = 2,

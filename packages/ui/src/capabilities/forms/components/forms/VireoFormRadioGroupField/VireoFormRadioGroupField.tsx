@@ -95,7 +95,7 @@ function VireoFormRadioGroupFieldImpl<TOption, TValue extends VireoFormRadioGrou
     fullWidth = true,
     getOptionDisabled,
     getOptionValue,
-    helperText,
+    helperText = " ",
     labelPlacement = "end",
     onBlur,
     onChange,

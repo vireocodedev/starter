@@ -164,6 +164,7 @@ export type VireoFormToggleButtonGroupFieldSharedProps<TValue extends VireoFormT
     formatError?: VireoFormErrorFormatter;
     /** @default true */
     fullWidth?: boolean;
+    /** Defaults to a reserved line; pass `null` to remove it. @default ' ' */
     helperText?: React.ReactNode;
     orientation?: ToggleButtonGroupProps["orientation"];
     readOnly?: boolean;

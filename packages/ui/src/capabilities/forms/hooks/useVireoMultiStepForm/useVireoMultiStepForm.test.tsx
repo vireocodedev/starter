@@ -25,6 +25,9 @@ function NavigationHarness({ onStepChange }: { onStepChange?: (event: { stepId: 
       <form.MultiStepSubscribe selector={state => state.currentStepId}>
         {stepId => <output>Current: {stepId}</output>}
       </form.MultiStepSubscribe>
+      <form.MultiStepSubscribe selector={state => state.direction}>
+        {direction => <output>Direction: {direction}</output>}
+      </form.MultiStepSubscribe>
       <button type="button" onClick={() => void form.goToNextStep()}>
         Next
       </button>
@@ -83,11 +86,14 @@ describe("useVireoMultiStepForm", () => {
   it("navigates in order and publishes reactive state", async () => {
     render(<NavigationHarness />);
     expect(screen.getByText("Current: account")).toBeInTheDocument();
+    expect(screen.getByText("Direction: forward")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByText("Billing content");
     expect(screen.getByText("Current: billing")).toBeInTheDocument();
+    expect(screen.getByText("Direction: forward")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Previous" }));
     await screen.findByText("Account content");
+    expect(screen.getByText("Direction: backward")).toBeInTheDocument();
   });
 
   it("stops direct forward navigation at the first incomplete intermediate step", async () => {
