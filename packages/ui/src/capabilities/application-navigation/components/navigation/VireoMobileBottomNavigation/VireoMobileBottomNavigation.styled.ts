@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
+import { VIREO_MOTION_TOKENS, type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -51,14 +51,42 @@ export const VireoMobileBottomNavigationAction: VireoMobileBottomNavigationStyle
     name: VIREO_MOBILE_BOTTOM_NAVIGATION_NAME,
     slot: "Action",
     overridesResolver: (_props, styles) => styles.action,
-  })<VireoMobileBottomNavigationStyledSlotProps>({
+  })<VireoMobileBottomNavigationStyledSlotProps>(({ theme }) => ({
     minWidth: 0,
     overflow: "hidden",
     paddingInline: 4,
+    position: "relative",
+    transition: theme.transitions.create(["color", "transform"], {
+      duration: VIREO_MOTION_TOKENS.duration.micro,
+      easing: VIREO_MOTION_TOKENS.easing.standard,
+    }),
+    "&::after": {
+      backgroundColor: "currentColor",
+      borderRadius: 999,
+      content: '""',
+      height: 3,
+      insetBlockStart: 3,
+      insetInlineStart: "calc(50% - 14px)",
+      opacity: 0,
+      position: "absolute",
+      transform: "scaleX(0)",
+      transition: theme.transitions.create(["opacity", "transform"], {
+        duration: VIREO_MOTION_TOKENS.duration.standard,
+        easing: VIREO_MOTION_TOKENS.easing.standard,
+      }),
+      width: 28,
+    },
+    "&.Mui-selected::after": { opacity: 1, transform: "scaleX(1)" },
+    "&:active:not(.Mui-disabled)": { transform: `scale(${VIREO_MOTION_TOKENS.scale.pressed})` },
     "& .MuiBottomNavigationAction-label": {
       maxWidth: "100%",
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
     },
-  });
+    "@media (prefers-reduced-motion: reduce)": {
+      transitionDuration: "0ms",
+      "&::after": { transitionDuration: "0ms" },
+      "&:active:not(.Mui-disabled)": { transform: "none" },
+    },
+  }));

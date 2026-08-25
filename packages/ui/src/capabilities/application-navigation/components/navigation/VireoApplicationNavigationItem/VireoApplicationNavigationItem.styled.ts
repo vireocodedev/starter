@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
+import { VIREO_MOTION_TOKENS, type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
 import {
   Box,
   ListItemButton,
@@ -31,9 +31,40 @@ export const VireoApplicationNavigationItemRoot: VireoApplicationNavigationItemS
     justifyContent: ownerState.mode === "compact" ? "center" : "flex-start",
     minHeight: ownerState.mode === "compact" ? 64 : 48,
     padding: ownerState.mode === "compact" ? theme.spacing(1, 0.5) : theme.spacing(1, 1.5),
-    transition: theme.transitions.create(["background-color", "color", "padding"], {
-      duration: theme.transitions.duration.shortest,
+    position: "relative",
+    transition: theme.transitions.create(["background-color", "color", "padding", "transform"], {
+      duration: VIREO_MOTION_TOKENS.duration.micro,
+      easing: VIREO_MOTION_TOKENS.easing.standard,
     }),
+    "&::before": {
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: 999,
+      content: '""',
+      insetBlock: ownerState.mode === "compact" ? "auto 4px" : "12px",
+      insetInlineStart: ownerState.mode === "compact" ? "25%" : 3,
+      opacity: 0,
+      position: "absolute",
+      transform: ownerState.mode === "compact" ? "scaleX(0)" : "scaleY(0)",
+      transformOrigin: "center",
+      transition: theme.transitions.create(["opacity", "transform"], {
+        duration: VIREO_MOTION_TOKENS.duration.standard,
+        easing: VIREO_MOTION_TOKENS.easing.standard,
+      }),
+      width: ownerState.mode === "compact" ? "50%" : 3,
+      height: ownerState.mode === "compact" ? 3 : "auto",
+    },
+    "&.Mui-selected::before": {
+      opacity: 1,
+      transform: "scale(1)",
+    },
+    "&:active:not(.Mui-disabled)": {
+      transform: "translateY(1px)",
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      transitionDuration: "0ms",
+      "&::before": { transitionDuration: "0ms" },
+      "&:active:not(.Mui-disabled)": { transform: "none" },
+    },
   }));
 
 export const VireoApplicationNavigationItemIcon: VireoApplicationNavigationItemStyledSlotComponent<BoxProps> = styled(
