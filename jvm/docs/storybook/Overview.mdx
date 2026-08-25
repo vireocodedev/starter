@@ -12,14 +12,47 @@ Application backends repeatedly need the same web errors, persistence foundation
 
 ## Choose capabilities
 
-| Artifact | Install it when the application needs | Vireo dependencies |
-| --- | --- | --- |
-| `vireo-starter-bom` | One version boundary for the complete JVM family | None |
-| `vireo-starter-core` | Shared CRUD, web, SPI, or migration foundations directly | None |
-| `vireo-starter-auth` | Starter authentication and account contracts | Core |
-| `vireo-starter-queryengine` | Metadata-driven filtering or saved filters | Core and Auth |
-| `vireo-starter-history` | Append-only entity audit records | Core; Auth at runtime for the V1 migration |
-| `vireo-starter-offline` | Offline replay, hydration, versions, or SSE heartbeats | Core and Query Engine; Auth internally |
+<table>
+  <thead>
+    <tr>
+      <th>Artifact</th>
+      <th>Install it when the application needs</th>
+      <th>Vireo dependencies</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>vireo-starter-bom</code></td>
+      <td>One version boundary for the complete JVM family</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td><code>vireo-starter-core</code></td>
+      <td>Shared CRUD, web, SPI, or migration foundations directly</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td><code>vireo-starter-auth</code></td>
+      <td>Starter authentication and account contracts</td>
+      <td>Core</td>
+    </tr>
+    <tr>
+      <td><code>vireo-starter-queryengine</code></td>
+      <td>Metadata-driven filtering or saved filters</td>
+      <td>Core and Auth</td>
+    </tr>
+    <tr>
+      <td><code>vireo-starter-history</code></td>
+      <td>Append-only entity audit records</td>
+      <td>Core; Auth at runtime for the V1 migration</td>
+    </tr>
+    <tr>
+      <td><code>vireo-starter-offline</code></td>
+      <td>Offline replay, hydration, versions, or SSE heartbeats</td>
+      <td>Core and Query Engine; Auth internally</td>
+    </tr>
+  </tbody>
+</table>
 
 Optional libraries bring their required Vireo dependencies transitively. Importing the BOM alone installs no runtime capability.
 
@@ -46,4 +79,3 @@ The JVM family is proved at four boundaries:
 4. a standalone build imports the published BOM and resolves every versionless module from Maven JARs.
 
 Run `./gradlew clean check aggregateJavadoc --no-build-cache` for the source gate and `./scripts/verify-publication-consumer.sh` for the publication boundary. Storybook explains the contracts but never claims to execute Java in the browser; every displayed Java example is compiled by Gradle from its exact source file.
-

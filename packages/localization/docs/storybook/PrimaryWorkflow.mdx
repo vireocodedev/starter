@@ -3,12 +3,76 @@ import { ExecutablePackageExample } from "@vireo-storybook/documentation";
 import { runPrimaryWorkflowExample } from "../examples/primaryWorkflow.example";
 import primaryWorkflowSource from "../examples/primaryWorkflow.example.ts?raw";
 
-<Meta title="Localization/Primary Workflow" />
+<Meta title="TypeScript/Localization/Primary Workflow" />
 
 # Primary workflow
 
-One factory builds every Starter-owned namespace for every requested locale. Shipped locales use their localized resources; unshipped locales start from `seedFrom` (`"en"` by default) and receive deeply merged overrides.
+Install the application-owned runtime dependencies directly. Starter UI declares the React bindings as optional peers, so relying on another package to install them is not a stable application contract.
+
+```bash
+npm install @vireocodedev/starter-localization i18next react-i18next
+```
+
+One factory builds every Starter-owned namespace for every requested locale. The application then adds its own namespace per locale and passes the combined resources to its own i18next instance. Keep the namespaces separate: do not copy Starter keys into the application namespace.
+
+The executable example below demonstrates the complete framework-neutral setup. It uses a dedicated instance, registers both application and Starter namespaces, and proves that each translates independently. With i18next 26, use `initAsync: false` when initialization must complete synchronously from bundled resources; the removed pre-26 option was named `initImmediate`.
 
 The returned trees are isolated: changing one generated locale cannot mutate a shipped resource or a sibling locale.
 
 <ExecutablePackageExample run={runPrimaryWorkflowExample} source={primaryWorkflowSource} />
+
+## React binding
+
+For a React application, install `initReactI18next` on the dedicated instance before its single initialization call, then provide that same instance at the application root. The `appI18n` and `resources` values below are the instance and combined resource tree created in the framework-neutral setup above:
+
+```tsx
+import type { PropsWithChildren } from "react";
+import { I18nextProvider, initReactI18next } from "react-i18next";
+
+void appI18n.use(initReactI18next).init({
+  defaultNS: "app",
+  fallbackLng: "en",
+  initAsync: false,
+  lng: "en",
+  resources,
+});
+
+export function AppLocalizationProvider({ children }: PropsWithChildren) {
+  return <I18nextProvider i18n={appI18n}>{children}</I18nextProvider>;
+}
+```
+
+Application code binds `useTranslation` to its own namespace. Shared Vireo UI text uses the typed namespace hooks from `@vireocodedev/starter-ui/react-i18next`:
+
+```tsx
+import { useTranslation } from "react-i18next";
+import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
+
+const { t: tApp } = useTranslation("app");
+const { t: tPlatform } = usePlatformTranslation();
+
+tApp("home.introduction");
+tPlatform("common.cancel");
+```
+
+Augment i18next's `CustomTypeOptions` with the application namespace and the exported `PlatformResources`, `QueryEngineResources`, and `HistoryResources` types to get strict keys and autocomplete:
+
+```ts
+import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/starter-localization";
+import type { AppTranslationResources } from "./appLocalization";
+
+declare module "i18next" {
+  interface CustomTypeOptions {
+    defaultNS: "app";
+    strictKeyChecks: true;
+    resources: {
+      app: AppTranslationResources;
+      history: HistoryResources;
+      platform: PlatformResources;
+      queryengine: QueryEngineResources;
+    };
+  }
+}
+```
+
+Keep this augmentation in an included `.d.ts` file. Every React hook and the provider must resolve the same installed `i18next` and `react-i18next` instances; source-linked monorepo development may therefore need bundler deduplication for those packages. Locale selection, persistence, document-language synchronization, and synchronization with date/number formatting remain application policy.

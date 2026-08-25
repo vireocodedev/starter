@@ -1,6 +1,7 @@
 import type {
   ResponsiveOverlayFrameDesktopSidePanelWidth,
   ResponsiveOverlayFrameDesktopSurface,
+  ResponsiveOverlayFrameMobileSurface,
 } from "@/capabilities/overlays/types/overlay.types";
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps, DialogProps, SxProps, Theme } from "@mui/material";
@@ -21,9 +22,13 @@ export type VireoResponsiveOverlayFrameDesktopSidePanelWidth = ResponsiveOverlay
 /** Desktop surface coordinated by the responsive frame. */
 export type VireoResponsiveOverlayFrameDesktopSurface = ResponsiveOverlayFrameDesktopSurface;
 
+/** Mobile surface coordinated by the responsive frame. */
+export type VireoResponsiveOverlayFrameMobileSurface = ResponsiveOverlayFrameMobileSurface;
+
 export type VireoResponsiveOverlayFrameOwnerState = {
   open: boolean;
   isMobile: boolean;
+  mobileSurface: VireoResponsiveOverlayFrameMobileSurface;
   desktopSurface: VireoResponsiveOverlayFrameDesktopSurface;
   effectiveDesktopSurface: VireoResponsiveOverlayFrameDesktopSurface;
   allowSidePanelResize: boolean;
@@ -59,9 +64,11 @@ export type VireoResponsiveOverlayFrameOwnProps = VireoResponsiveOverlayFrameSlo
   onExited?: () => void;
   /** Maximum width of the desktop dialog surface. @default 'lg' */
   maxWidth?: DialogProps["maxWidth"];
-  /** Fixed height of the mobile bottom sheet. */
+  /** Surface used on mobile. @default 'fullScreenDialog' */
+  mobileSurface?: VireoResponsiveOverlayFrameMobileSurface;
+  /** Fixed height of the mobile bottom sheet. Ignored by the full-screen dialog surface. */
   mobileHeight?: string;
-  /** Maximum height of a content-sized mobile bottom sheet. @default '92dvh' */
+  /** Maximum height of a content-sized mobile bottom sheet. Ignored by the full-screen dialog surface. @default '92dvh' */
   mobileMaxHeight?: string;
   /** MUI system customization for the desktop dialog paper. */
   desktopPaperSx?: SxProps<Theme>;

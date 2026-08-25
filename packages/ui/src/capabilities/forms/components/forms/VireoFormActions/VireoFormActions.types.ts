@@ -5,7 +5,7 @@ import type React from "react";
 import { type VireoFormActionsClasses, type VireoFormActionsClassKey } from "./VireoFormActions.classes";
 import type { VIREO_FORM_ACTIONS_NAME, VireoFormActionsSlotName } from "./VireoFormActions.identity";
 
-export type VireoFormActionsOwnerState = Record<never, never>;
+export type VireoFormActionsOwnerState = Record<string, never>;
 
 export interface VireoFormActionsRootSlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;

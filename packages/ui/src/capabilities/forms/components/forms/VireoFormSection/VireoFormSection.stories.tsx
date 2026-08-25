@@ -2,6 +2,8 @@ import ContainerResponsiveColumnsExample from "@/capabilities/forms/components/f
 import containerResponsiveColumnsExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/ContainerResponsiveColumnsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/DefaultExample.tsx?raw";
+import OutlinedExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/OutlinedExample";
+import outlinedExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/OutlinedExample.tsx?raw";
 import PlainStackExample from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/PlainStackExample";
 import plainStackExampleSource from "@/capabilities/forms/components/forms/VireoFormSection/internal/storybook/PlainStackExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -20,7 +22,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "UI/Capabilities/Forms/VireoFormSection",
+  title: "TypeScript/UI/Capabilities/Forms/VireoFormSection",
   component: VireoFormSection,
   tags: ["autodocs"],
   parameters: {
@@ -31,7 +33,7 @@ const meta = {
 
 ### Why it exists
 
-Complex forms repeatedly need a clear hierarchy, a labelled group relationship, and shared spacing and surface treatment around related controls. The forms capability owns that composition. Use it for meaningful groups within a form; avoid it for a single field or purely decorative cards.`,
+Complex forms repeatedly need a clear hierarchy, a labelled group relationship, container-responsive fields, and consistent separation between related controls. The forms capability owns that composition without nesting ordinary sections inside unnecessary cards. Use it for meaningful groups within a form; avoid it for a single field or purely decorative cards.`,
       },
     },
   },
@@ -54,6 +56,11 @@ export const Default: Story = {
 export const PlainStack: Story = {
   render: () => <PlainStackExample />,
   parameters: createSourceParameters(plainStackExampleSource),
+};
+
+export const Outlined: Story = {
+  render: () => <OutlinedExample />,
+  parameters: createSourceParameters(outlinedExampleSource),
 };
 
 export const ContainerResponsiveColumns: Story = {

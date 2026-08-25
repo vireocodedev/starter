@@ -25,7 +25,7 @@ scope and authenticate with a token that has `read:packages`:
 ```
 
 ```bash
-npm install @vireocodedev/starter-localization i18next
+npm install @vireocodedev/starter-localization i18next react-i18next
 ```
 
 `i18next` is the only peer dependency. The package runs against the consuming
@@ -33,25 +33,26 @@ application's instance and never bundles its own copy.
 
 ## Primary workflow
 
-Create every Starter namespace for the locales your app supports, then pass the
-result to the app-owned i18next instance:
+Create every Starter namespace for the locales your app supports, add the
+application's own namespace, then pass the combined resources to an app-owned
+i18next instance:
 
 ```ts
 import { createStarterResources } from "@vireocodedev/starter-localization";
-import i18next from "i18next";
+import { createInstance } from "i18next";
 
-const resources = createStarterResources({
-  locales: ["en", "hr", "de"] as const,
-  overrides: {
-    de: {
-      platform: { common: { save: "Speichern" } },
-      history: { title: "Verlauf" },
-    },
-  },
-});
+const locales = ["en", "hr"] as const;
+const starterResources = createStarterResources({ locales });
+const resources = {
+  en: { app: { home: { title: "Overview" } }, ...starterResources.en },
+  hr: { app: { home: { title: "Pregled" } }, ...starterResources.hr },
+};
 
+const i18next = createInstance();
 await i18next.init({
-  lng: "de",
+  defaultNS: "app",
+  initAsync: false,
+  lng: "hr",
   fallbackLng: "en",
   resources,
 });
@@ -82,10 +83,28 @@ available when a consumer intentionally needs only one namespace.
 
 ## React consumption
 
-React adapters belong to Starter UI:
+React adapters belong to Starter UI. In a React application, install
+`initReactI18next` on the same app-owned instance **before its single call to
+`init`**, then expose that instance through `I18nextProvider`; Starter UI's
+hooks read that provider:
 
 ```tsx
+import type { PropsWithChildren } from "react";
+import { I18nextProvider, initReactI18next } from "react-i18next";
 import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
+
+const reactI18next = createInstance();
+void reactI18next.use(initReactI18next).init({
+  defaultNS: "app",
+  fallbackLng: "en",
+  initAsync: false,
+  lng: "en",
+  resources,
+});
+
+export function AppLocalizationProvider({ children }: PropsWithChildren) {
+  return <I18nextProvider i18n={reactI18next}>{children}</I18nextProvider>;
+}
 
 export function SaveButton() {
   const { t } = usePlatformTranslation();

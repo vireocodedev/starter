@@ -59,7 +59,7 @@ export const VireoSlidingScreenStack = React.forwardRef<HTMLDivElement, VireoSli
     const screenSlotProps = resolveSlotProps(slotProps.screen, ownerState);
     const { className: rootClassName, ref: rootRef, style: rootStyle, sx: rootSx, ...rootOther } = rootSlotProps;
     const { className: trackClassName, ...trackOther } = trackSlotProps;
-    const { className: screenClassName, ...screenOther } = screenSlotProps;
+    const { className: screenClassName, style: screenStyle, ...screenOther } = screenSlotProps;
     const ref = useForkRef(forwardedRef, rootRef);
 
     return (
@@ -87,6 +87,12 @@ export const VireoSlidingScreenStack = React.forwardRef<HTMLDivElement, VireoSli
               as={slots.screen ?? "div"}
               ownerState={ownerState}
               className={joinClassNames(classes.screen, screenClassName)}
+              style={{
+                ...screenStyle,
+                pointerEvents: index === activeScreenIndex ? undefined : "none",
+                transform: `translateX(${(index - activeScreenIndex) * 100}%)`,
+                visibility: index === activeScreenIndex ? "visible" : "hidden",
+              }}
               aria-hidden={index !== activeScreenIndex}
               data-screen-id={screen.id}
             >

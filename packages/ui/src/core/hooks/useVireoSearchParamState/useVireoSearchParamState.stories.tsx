@@ -15,7 +15,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "UI/Core/Hooks/useVireoSearchParamState",
+  title: "TypeScript/UI/Core/Hooks/useVireoSearchParamState",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },

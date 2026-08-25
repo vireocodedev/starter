@@ -9,7 +9,6 @@ import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   Accordion,
   AccordionDetails,
@@ -31,6 +30,127 @@ import {
 import { VireoBottomDrawer } from "@/capabilities/overlays/public";
 import { VireoLabelBox } from "@/core/public";
 import React, { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+
+type MobileResponsiveTableRowProps<TItem> = {
+  endAdornmentColumn?: VireoResponsiveTableColumn<TItem, string>;
+  helperColumn?: VireoResponsiveTableColumn<TItem, string>;
+  initialExpandedMobileRowKey: React.Key | null;
+  item: TItem;
+  mobileDetailColumns: readonly VireoResponsiveTableColumn<TItem, string>[];
+  mobileViewport: HTMLDivElement | null;
+  onExpandedMobileRowKeyChange?: (rowKey: React.Key | null) => void;
+  renderTitleEndAdornment?: (item: TItem, rowIndex: number) => ReactNode;
+  requestNextPageIfNeeded: (viewport: HTMLDivElement) => void;
+  resolvedActionsColumn?: VireoResponsiveTableColumn<TItem, string>;
+  resolvedTitleColumn?: VireoResponsiveTableColumn<TItem, string>;
+  rowIndex: number;
+  rowKey: React.Key;
+};
+
+function MobileResponsiveTableRow<TItem>({
+  endAdornmentColumn,
+  helperColumn,
+  initialExpandedMobileRowKey,
+  item,
+  mobileDetailColumns,
+  mobileViewport,
+  onExpandedMobileRowKeyChange,
+  renderTitleEndAdornment,
+  requestNextPageIfNeeded,
+  resolvedActionsColumn,
+  resolvedTitleColumn,
+  rowIndex,
+  rowKey,
+}: MobileResponsiveTableRowProps<TItem>) {
+  return (
+    <Box data-index={rowIndex} data-responsive-table-mobile-row={String(rowKey)}>
+      <Accordion
+        square
+        disableGutters
+        elevation={0}
+        defaultExpanded={initialExpandedMobileRowKey === rowKey}
+        onChange={(_, expanded) => {
+          onExpandedMobileRowKeyChange?.(expanded ? rowKey : null);
+          window.requestAnimationFrame(() => {
+            if (mobileViewport) requestNextPageIfNeeded(mobileViewport);
+          });
+        }}
+        slotProps={{ transition: { unmountOnExit: true } }}
+        sx={{
+          overflow: "visible",
+          backgroundColor: "transparent",
+          backgroundImage: "none",
+          borderTop: rowIndex > 0 ? 1 : undefined,
+          borderColor: "divider",
+          "&::before": { display: "none" },
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreRoundedIcon />}
+          sx={{
+            minHeight: 68,
+            px: 2,
+            bgcolor: "surface.raised",
+            "& .MuiAccordionSummary-content": {
+              minWidth: 0,
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+            },
+          }}
+        >
+          <Box sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {resolvedTitleColumn?.renderBody(item, rowIndex, { placement: "mobile-summary" })}
+          </Box>
+          {renderTitleEndAdornment || endAdornmentColumn || helperColumn ? (
+            <Stack spacing={0.25} sx={{ flexShrink: 0, alignItems: "flex-end", textAlign: "right" }}>
+              {renderTitleEndAdornment || endAdornmentColumn ? (
+                <Box sx={{ fontSize: "0.875rem", fontWeight: 700 }}>
+                  {renderTitleEndAdornment
+                    ? renderTitleEndAdornment(item, rowIndex)
+                    : endAdornmentColumn?.renderBody(item, rowIndex, { placement: "mobile-summary" })}
+                </Box>
+              ) : null}
+              {helperColumn ? (
+                <Box sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
+                  {helperColumn.renderBody(item, rowIndex, { placement: "mobile-summary" })}
+                </Box>
+              ) : null}
+            </Stack>
+          ) : null}
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            overflow: "hidden",
+            borderTop: 1,
+            borderColor: "divider",
+            bgcolor: "surface.sunken",
+            p: 0,
+          }}
+        >
+          <Stack>
+            {mobileDetailColumns.map(column => (
+              <MobileDataRow
+                key={column.id}
+                label={column.renderHeader()}
+                value={column.renderBody(item, rowIndex, { placement: "mobile-detail" })}
+              />
+            ))}
+          </Stack>
+          {resolvedActionsColumn ? (
+            <MobileDataRow
+              label={resolvedActionsColumn.renderHeader()}
+              value={resolvedActionsColumn.renderBody(item, rowIndex, { placement: "mobile-detail" })}
+              actions
+            />
+          ) : null}
+        </AccordionDetails>
+      </Accordion>
+    </Box>
+  );
+}
+
+const MemoizedMobileResponsiveTableRow = React.memo(MobileResponsiveTableRow) as typeof MobileResponsiveTableRow;
 
 export function MobileResponsiveTable<
   TItem,
@@ -81,18 +201,9 @@ export function MobileResponsiveTable<
   } = state;
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const restoredMobileScrollRef = useRef(false);
-  const [expandedMobileRowKey, setExpandedMobileRowKey] = useState<React.Key | null>(initialExpandedMobileRowKey);
   const [mobileViewport, setMobileViewport] = useState<HTMLDivElement | null>(null);
   const [mobileToolbar, setMobileToolbar] = useState<HTMLDivElement | null>(null);
   const [mobileToolbarHeightPx, setMobileToolbarHeightPx] = useState(0);
-  const mobileRowVirtualizer = useVirtualizer({
-    count: skeleton ? 0 : data.length,
-    getScrollElement: () => mobileViewport,
-    estimateSize: () => 69,
-    getItemKey: index => getRowKey?.(data[index], index) ?? index,
-    overscan: 5,
-    useAnimationFrameWithResizeObserver: true,
-  });
 
   useEffect(() => {
     if (!mobileToolbar) {
@@ -107,21 +218,20 @@ export function MobileResponsiveTable<
     return () => observer.disconnect();
   }, [mobileToolbar]);
 
-  const mobileVirtualRows = mobileRowVirtualizer.getVirtualItems();
-  const lastMobileVirtualRow = mobileVirtualRows.at(-1);
+  const requestNextPageIfNeeded = useCallback(
+    (viewport: HTMLDivElement) => {
+      if (!hasNextPage || isFetchingNextPage || !onLoadNextPage) return;
+      const remainingScrollDistance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      if (remainingScrollDistance <= 200) onLoadNextPage();
+    },
+    [hasNextPage, isFetchingNextPage, onLoadNextPage],
+  );
 
   useEffect(() => {
-    if (
-      !lastMobileVirtualRow ||
-      lastMobileVirtualRow.index < data.length - 1 ||
-      !hasNextPage ||
-      isFetchingNextPage ||
-      !onLoadNextPage
-    ) {
-      return;
-    }
-    onLoadNextPage();
-  }, [data.length, hasNextPage, isFetchingNextPage, lastMobileVirtualRow, onLoadNextPage]);
+    if (!mobileViewport || skeleton) return;
+    const frame = window.requestAnimationFrame(() => requestNextPageIfNeeded(mobileViewport));
+    return () => window.cancelAnimationFrame(frame);
+  }, [data.length, mobileViewport, requestNextPageIfNeeded, skeleton]);
 
   useEffect(() => {
     if (!mobileViewport || restoredMobileScrollRef.current) return;
@@ -142,7 +252,6 @@ export function MobileResponsiveTable<
         return;
       }
 
-      mobileRowVirtualizer.scrollToIndex(anchorIndex, { align: "start" });
       window.requestAnimationFrame(() => {
         const anchorRow = mobileViewport.querySelector<HTMLElement>(`[data-index="${anchorIndex}"]`);
         if (anchorRow) {
@@ -165,7 +274,6 @@ export function MobileResponsiveTable<
     initialMobileScrollAnchor,
     initialMobileScrollTop,
     isFetchingNextPage,
-    mobileRowVirtualizer,
     mobileViewport,
     onLoadNextPage,
   ]);
@@ -174,24 +282,22 @@ export function MobileResponsiveTable<
     (event: React.UIEvent<HTMLDivElement>) => {
       const viewport = event.currentTarget;
       const viewportTop = viewport.getBoundingClientRect().top;
-      const firstVisibleItem = mobileRowVirtualizer.getVirtualItems().find(item => {
-        const row = viewport.querySelector<HTMLElement>(`[data-index="${item.index}"]`);
-        return row ? row.getBoundingClientRect().bottom > viewportTop + mobileToolbarHeightPx : false;
-      });
-      const row = firstVisibleItem
-        ? viewport.querySelector<HTMLElement>(`[data-index="${firstVisibleItem.index}"]`)
-        : null;
+      const row = Array.from(viewport.querySelectorAll<HTMLElement>("[data-responsive-table-mobile-row]")).find(
+        candidate => candidate.getBoundingClientRect().bottom > viewportTop + mobileToolbarHeightPx,
+      );
+      const rowIndex = row ? Number(row.dataset.index) : undefined;
       const anchor: VireoResponsiveTableMobileScrollAnchor | undefined =
-        firstVisibleItem && row
+        row && rowIndex !== undefined && Number.isInteger(rowIndex)
           ? {
-              rowKey: getRowKey?.(data[firstVisibleItem.index], firstVisibleItem.index) ?? firstVisibleItem.index,
-              rowIndex: firstVisibleItem.index,
+              rowKey: getRowKey?.(data[rowIndex], rowIndex) ?? rowIndex,
+              rowIndex,
               offsetTop: row.getBoundingClientRect().top - viewportTop,
             }
           : undefined;
       onMobileScrollTopChange?.(viewport.scrollTop, anchor);
+      requestNextPageIfNeeded(viewport);
     },
-    [data, getRowKey, mobileRowVirtualizer, mobileToolbarHeightPx, onMobileScrollTopChange],
+    [data, getRowKey, mobileToolbarHeightPx, onMobileScrollTopChange, requestNextPageIfNeeded],
   );
 
   return (
@@ -335,8 +441,6 @@ export function MobileResponsiveTable<
       ) : (
         <Card
           sx={{
-            position: "relative",
-            height: data.length === 0 ? "auto" : `${mobileRowVirtualizer.getTotalSize()}px`,
             overflow: "clip",
             flexShrink: 0,
             borderRadius: 0,
@@ -359,107 +463,25 @@ export function MobileResponsiveTable<
               <Typography color="text.secondary">{labels.noData}</Typography>
             </Box>
           ) : (
-            mobileVirtualRows.map(virtualRow => {
-              const item = data[virtualRow.index];
-              const rowIndex = virtualRow.index;
+            data.map((item, rowIndex) => {
               const rowKey = getRowKey?.(item, rowIndex) ?? rowIndex;
               return (
-                <Box
-                  key={virtualRow.key}
-                  ref={mobileRowVirtualizer.measureElement}
-                  data-index={virtualRow.index}
-                  data-responsive-table-mobile-row={String(rowKey)}
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  <Accordion
-                    square
-                    disableGutters
-                    elevation={0}
-                    slotProps={{ transition: { timeout: 0, unmountOnExit: true } }}
-                    expanded={expandedMobileRowKey === rowKey}
-                    onChange={(_, expanded) => {
-                      const nextRowKey = expanded ? rowKey : null;
-                      setExpandedMobileRowKey(nextRowKey);
-                      onExpandedMobileRowKeyChange?.(nextRowKey);
-                      window.requestAnimationFrame(() => mobileRowVirtualizer.measure());
-                    }}
-                    sx={{
-                      overflow: "visible",
-                      backgroundColor: "transparent",
-                      backgroundImage: "none",
-                      borderTop: rowIndex > 0 ? 1 : undefined,
-                      borderColor: "divider",
-                      "&::before": { display: "none" },
-                    }}
-                  >
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreRoundedIcon />}
-                      sx={{
-                        minHeight: 68,
-                        px: 2,
-                        bgcolor: "surface.raised",
-                        "& .MuiAccordionSummary-content": {
-                          minWidth: 0,
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          gap: 2,
-                        },
-                      }}
-                    >
-                      <Box sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {resolvedTitleColumn?.renderBody(item, rowIndex, { placement: "mobile-summary" })}
-                      </Box>
-                      {renderTitleEndAdornment || endAdornmentColumn || helperColumn ? (
-                        <Stack spacing={0.25} sx={{ flexShrink: 0, alignItems: "flex-end", textAlign: "right" }}>
-                          {renderTitleEndAdornment || endAdornmentColumn ? (
-                            <Box sx={{ fontSize: "0.875rem", fontWeight: 700 }}>
-                              {renderTitleEndAdornment
-                                ? renderTitleEndAdornment(item, rowIndex)
-                                : endAdornmentColumn?.renderBody(item, rowIndex, { placement: "mobile-summary" })}
-                            </Box>
-                          ) : null}
-                          {helperColumn ? (
-                            <Box sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
-                              {helperColumn.renderBody(item, rowIndex, { placement: "mobile-summary" })}
-                            </Box>
-                          ) : null}
-                        </Stack>
-                      ) : null}
-                    </AccordionSummary>
-                    <AccordionDetails
-                      sx={{
-                        overflow: "hidden",
-                        borderTop: 1,
-                        borderColor: "divider",
-                        bgcolor: "surface.sunken",
-                        p: 0,
-                      }}
-                    >
-                      <Stack>
-                        {mobileDetailColumns.map(column => (
-                          <MobileDataRow
-                            key={column.id}
-                            label={column.renderHeader()}
-                            value={column.renderBody(item, rowIndex, { placement: "mobile-detail" })}
-                          />
-                        ))}
-                      </Stack>
-                      {resolvedActionsColumn ? (
-                        <MobileDataRow
-                          label={resolvedActionsColumn.renderHeader()}
-                          value={resolvedActionsColumn.renderBody(item, rowIndex, { placement: "mobile-detail" })}
-                          actions
-                        />
-                      ) : null}
-                    </AccordionDetails>
-                  </Accordion>
-                </Box>
+                <MemoizedMobileResponsiveTableRow
+                  key={rowKey}
+                  endAdornmentColumn={endAdornmentColumn}
+                  helperColumn={helperColumn}
+                  initialExpandedMobileRowKey={initialExpandedMobileRowKey}
+                  item={item}
+                  mobileDetailColumns={mobileDetailColumns}
+                  mobileViewport={mobileViewport}
+                  onExpandedMobileRowKeyChange={onExpandedMobileRowKeyChange}
+                  renderTitleEndAdornment={renderTitleEndAdornment}
+                  requestNextPageIfNeeded={requestNextPageIfNeeded}
+                  resolvedActionsColumn={resolvedActionsColumn}
+                  resolvedTitleColumn={resolvedTitleColumn}
+                  rowIndex={rowIndex}
+                  rowKey={rowKey}
+                />
               );
             })
           )}
@@ -566,14 +588,14 @@ function MobileDataRow({ label, value, actions = false }: { label: ReactNode; va
           py: 0.75,
           borderTop: 1,
           borderColor: "divider",
-          "& > .MuiBox-root": {
+          "& > :is(.MuiBox-root, .MuiStack-root)": {
             display: "grid",
             gridAutoFlow: "column",
             gridAutoColumns: "minmax(0, 1fr)",
             width: "100%",
             gap: 0.5,
           },
-          "& > .MuiBox-root > *": { display: "flex", minWidth: 0 },
+          "& > :is(.MuiBox-root, .MuiStack-root) > *": { display: "flex", minWidth: 0 },
           "& .MuiIconButton-root": {
             width: "100%",
             minWidth: 0,

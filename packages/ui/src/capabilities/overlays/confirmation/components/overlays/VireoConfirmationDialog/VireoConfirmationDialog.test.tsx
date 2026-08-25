@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -64,7 +64,10 @@ describe("VireoConfirmationDialog", () => {
       </VireoConfirmationProvider>,
     );
     await userEvent.click(screen.getByRole("button", { name: "Open" }));
+    const message = screen.getByText("Review changes.");
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
     expect(screen.getByText("true")).toBeInTheDocument();
+    expect(message).toBeInTheDocument();
+    await waitForElementToBeRemoved(message);
   });
 });

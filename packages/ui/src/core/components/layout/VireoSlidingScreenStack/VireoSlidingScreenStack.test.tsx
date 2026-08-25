@@ -20,6 +20,23 @@ describe(VIREO_SLIDING_SCREEN_STACK_NAME, () => {
     expect(container.querySelector("[data-active-index='1']")).toBeInTheDocument();
   });
 
+  it("keeps every screen at one viewport width while translating by the active viewport", () => {
+    const { container } = render(<VireoSlidingScreenStack activeScreen="details" screens={screens} />);
+    const track = container.querySelector(`.${vireoSlidingScreenStackClasses.track}`);
+    const renderedScreens = container.querySelectorAll(`.${vireoSlidingScreenStackClasses.screen}`);
+
+    expect(container.firstElementChild).toHaveStyle({ maxWidth: "100%", overflow: "hidden", width: "100%" });
+    expect(track).toHaveStyle({ display: "grid", maxWidth: "100%", width: "100%" });
+    expect(renderedScreens).toHaveLength(2);
+    expect(renderedScreens[0]).toHaveStyle({
+      pointerEvents: "none",
+      transform: "translateX(-100%)",
+      visibility: "hidden",
+      width: "100%",
+    });
+    expect(renderedScreens[1]).toHaveStyle({ transform: "translateX(0%)", visibility: "visible", width: "100%" });
+  });
+
   it("falls back to the first screen for an unknown id", () => {
     render(<VireoSlidingScreenStack activeScreen="missing" screens={screens} />);
     expect(screen.getByText("Overview screen").parentElement).toHaveAttribute("aria-hidden", "false");

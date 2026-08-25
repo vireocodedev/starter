@@ -10,6 +10,8 @@ export { default as Autocomplete, createFilterOptions } from "@mui/material/Auto
 export { default as Avatar } from "@mui/material/Avatar";
 export { default as Badge } from "@mui/material/Badge";
 export { default as Box } from "@mui/material/Box";
+export { default as BottomNavigation } from "@mui/material/BottomNavigation";
+export { default as BottomNavigationAction } from "@mui/material/BottomNavigationAction";
 export { default as Button } from "@mui/material/Button";
 export { default as ButtonBase } from "@mui/material/ButtonBase";
 export { default as ButtonGroup } from "@mui/material/ButtonGroup";

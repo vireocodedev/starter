@@ -28,7 +28,7 @@ const source = (code: string, description?: string) => ({
   },
 });
 const meta = {
-  title: "UI/Capabilities/Forms/Fields/VireoFormAutocompleteField",
+  title: "TypeScript/UI/Capabilities/Forms/Fields/VireoFormAutocompleteField",
   component: VireoFormAutocompleteField,
   tags: ["autodocs"],
   parameters: {

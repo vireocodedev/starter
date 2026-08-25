@@ -10,35 +10,37 @@ export const VireoSlidingScreenStackRoot: Slot = styled(Box, {
   name: VIREO_SLIDING_SCREEN_STACK_NAME,
   slot: "Root",
   overridesResolver: (_props, styles) => styles.root,
-})<Owner>({ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" });
+})<Owner>({ display: "flex", flex: 1, maxWidth: "100%", minHeight: 0, minWidth: 0, overflow: "hidden", width: "100%" });
 
 export const VireoSlidingScreenStackTrack: Slot = styled(Box, {
   name: VIREO_SLIDING_SCREEN_STACK_NAME,
   slot: "Track",
   overridesResolver: (_props, styles) => styles.track,
-})<Owner>(({ ownerState, theme }) => ({
-  display: "flex",
-  flex: `0 0 ${ownerState.screenCount * 100}%`,
-  width: `${ownerState.screenCount * 100}%`,
-  maxWidth: `${ownerState.screenCount * 100}%`,
+})<Owner>({
+  display: "grid",
+  flex: "1 1 auto",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  width: "100%",
+  maxWidth: "100%",
   height: "100%",
   minHeight: 0,
-  transform: `translateX(-${(ownerState.activeScreenIndex * 100) / ownerState.screenCount}%)`,
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.standard,
-    easing: theme.transitions.easing.easeInOut,
-  }),
-}));
+  minWidth: 0,
+});
 
 export const VireoSlidingScreenStackScreen: Slot = styled(Box, {
   name: VIREO_SLIDING_SCREEN_STACK_NAME,
   slot: "Screen",
   overridesResolver: (_props, styles) => styles.screen,
-})<Owner>(({ ownerState }) => ({
+})<Owner>(({ theme }) => ({
   display: "flex",
-  flex: `0 0 ${100 / ownerState.screenCount}%`,
   flexDirection: "column",
-  maxWidth: `${100 / ownerState.screenCount}%`,
+  gridArea: "1 / 1",
+  width: "100%",
+  maxWidth: "100%",
   minWidth: 0,
   minHeight: 0,
+  transition: theme.transitions.create("transform", {
+    duration: theme.transitions.duration.standard,
+    easing: theme.transitions.easing.easeInOut,
+  }),
 }));

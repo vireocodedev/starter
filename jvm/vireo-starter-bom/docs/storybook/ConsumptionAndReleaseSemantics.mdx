@@ -12,14 +12,40 @@ Dependency platforms are easy to misuse as hidden bundles or absolute locks. Vir
 
 ## What is aligned
 
-| Coordinate | Role |
-| --- | --- |
-| `com.vireocode:vireo-starter-core` | Shared foundations |
-| `com.vireocode:vireo-starter-auth` | Authentication defaults |
-| `com.vireocode:vireo-starter-queryengine` | Query Engine capability |
-| `com.vireocode:vireo-starter-history` | History capability |
-| `com.vireocode:vireo-starter-offline` | Offline capability |
-| `org.springframework.boot:spring-boot-dependencies` | Compatible third-party dependency line |
+<table>
+  <thead>
+    <tr>
+      <th>Coordinate</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>com.vireocode:vireo-starter-core</code></td>
+      <td>Shared foundations</td>
+    </tr>
+    <tr>
+      <td><code>com.vireocode:vireo-starter-auth</code></td>
+      <td>Authentication defaults</td>
+    </tr>
+    <tr>
+      <td><code>com.vireocode:vireo-starter-queryengine</code></td>
+      <td>Query Engine capability</td>
+    </tr>
+    <tr>
+      <td><code>com.vireocode:vireo-starter-history</code></td>
+      <td>History capability</td>
+    </tr>
+    <tr>
+      <td><code>com.vireocode:vireo-starter-offline</code></td>
+      <td>Offline capability</td>
+    </tr>
+    <tr>
+      <td><code>org.springframework.boot:spring-boot-dependencies</code></td>
+      <td>Compatible third-party dependency line</td>
+    </tr>
+  </tbody>
+</table>
 
 All Vireo modules resolve to the BOM's version. Importing it does not add those modules, apply Spring Boot's Gradle plugin, or publish a transitive application architecture.
 

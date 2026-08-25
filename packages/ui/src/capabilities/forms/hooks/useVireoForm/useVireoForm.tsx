@@ -12,7 +12,6 @@ import { VireoFormFileField } from "@/capabilities/forms/components/forms/VireoF
 import { VireoFormFileListField } from "@/capabilities/forms/components/forms/VireoFormFileListField/VireoFormFileListField";
 import { VireoFormNumberField } from "@/capabilities/forms/components/forms/VireoFormNumberField/VireoFormNumberField";
 import { VireoFormRadioGroupField } from "@/capabilities/forms/components/forms/VireoFormRadioGroupField/VireoFormRadioGroupField";
-import { VireoFormResetButton } from "@/capabilities/forms/components/forms/VireoFormResetButton/VireoFormResetButton";
 import { VireoFormSection } from "@/capabilities/forms/components/forms/VireoFormSection/VireoFormSection";
 import { VireoFormSectionItem } from "@/capabilities/forms/components/forms/VireoFormSectionItem/VireoFormSectionItem";
 import { VireoFormSelectField } from "@/capabilities/forms/components/forms/VireoFormSelectField/VireoFormSelectField";
@@ -58,7 +57,6 @@ const { useAppForm } = createFormHook({
   formComponents: {
     Actions: VireoFormActions,
     ErrorSummary: VireoFormErrorSummary,
-    ResetButton: VireoFormResetButton,
     Section: VireoFormSection,
     SectionItem: VireoFormSectionItem,
     SubmitButton: VireoFormSubmitButton,
@@ -123,7 +121,6 @@ type BaseVireoFormApi<
   {
     Actions: typeof VireoFormActions;
     ErrorSummary: typeof VireoFormErrorSummary;
-    ResetButton: typeof VireoFormResetButton;
     Section: typeof VireoFormSection;
     SectionItem: typeof VireoFormSectionItem;
     SubmitButton: typeof VireoFormSubmitButton;

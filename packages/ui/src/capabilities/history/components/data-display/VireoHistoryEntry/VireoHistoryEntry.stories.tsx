@@ -25,7 +25,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta: Meta<typeof VireoHistoryEntry> = {
-  title: "UI/Capabilities/History/VireoHistoryEntry",
+  title: "TypeScript/UI/Capabilities/History/VireoHistoryEntry",
   component: VireoHistoryEntry,
   tags: ["autodocs"],
   parameters: {

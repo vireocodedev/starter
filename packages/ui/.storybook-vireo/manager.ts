@@ -38,6 +38,7 @@ type SidebarIcon = React.ComponentType<{ "aria-hidden"?: boolean; size?: number 
 
 const SIDEBAR_ICONS: Readonly<Record<string, SidebarIcon>> = {
   Documentation: BookIcon,
+  TypeScript: ComponentDrivenIcon,
   Guides: DocumentIcon,
   UI: ComponentIcon,
   JVM: BoxIcon,

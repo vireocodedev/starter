@@ -13,7 +13,7 @@ import { VireoBottomDrawer } from "./VireoBottomDrawer";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta = {
-  title: "UI/Capabilities/Overlays/VireoBottomDrawer",
+  title: "TypeScript/UI/Capabilities/Overlays/VireoBottomDrawer",
   component: VireoBottomDrawer,
   tags: ["autodocs"],
   args: { open: false, onClose: fn(), children: null },

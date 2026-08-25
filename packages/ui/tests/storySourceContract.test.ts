@@ -158,13 +158,16 @@ describe("Vireo executable story-source contract", () => {
     expect(storyCount).toBeGreaterThan(50);
   });
 
-  it("groups bound form-field components under UI/Capabilities/Forms/Fields", () => {
+  it("groups bound form-field components under TypeScript/UI/Capabilities/Forms/Fields", () => {
     const violations = storyFiles
       .filter(file => FORM_FIELD_STORY_FILE_PATTERN.test(file))
       .filter(
-        file => !/title:\s*"UI\/Capabilities\/Forms\/Fields\/VireoForm[A-Z]\w*Field"/u.test(readFileSync(file, "utf8")),
+        file =>
+          !/title:\s*"TypeScript\/UI\/Capabilities\/Forms\/Fields\/VireoForm[A-Z]\w*Field"/u.test(
+            readFileSync(file, "utf8"),
+          ),
       )
-      .map(file => `${relative(packageRoot, file)}: expected a UI/Capabilities/Forms/Fields story title`);
+      .map(file => `${relative(packageRoot, file)}: expected a TypeScript/UI/Capabilities/Forms/Fields story title`);
 
     expect(violations).toEqual([]);
   });

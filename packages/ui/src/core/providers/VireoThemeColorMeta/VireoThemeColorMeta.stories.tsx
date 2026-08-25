@@ -3,7 +3,7 @@ import defaultExampleSource from "@/core/providers/VireoThemeColorMeta/internal/
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "UI/Core/Providers/VireoThemeColorMeta",
+  title: "TypeScript/UI/Core/Providers/VireoThemeColorMeta",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },

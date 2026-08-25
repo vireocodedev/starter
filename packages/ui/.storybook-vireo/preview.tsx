@@ -22,10 +22,11 @@ const preview: Preview = {
       // @ts-expect-error Storybook statically evaluates this inline JavaScript comparator before Preview typing applies.
       storySort: (a, b) => {
         const orderedChildren = {
-          "": [
-            "Documentation",
+          "": ["Documentation", "TypeScript", "JVM"],
+          Documentation: ["Overview"],
+          TypeScript: [
+            "Overview",
             "UI",
-            "JVM",
             "History",
             "Infrastructure",
             "Localization",
@@ -33,8 +34,7 @@ const preview: Preview = {
             "SQLite",
             "Shell",
           ],
-          Documentation: ["Overview"],
-          UI: ["Overview", "Documentation", "Core", "Capabilities", "Integrations"],
+          "TypeScript/UI": ["Overview", "Documentation", "Core", "Capabilities", "Integrations"],
           JVM: ["Overview", "BOM", "Core", "Auth", "Query Engine", "History", "Offline"],
           "JVM/BOM": ["Overview", "Consumption and Release Semantics"],
           "JVM/Core": ["Overview", "Primary Workflow", "Web, Migrations, and Extensions"],
@@ -42,8 +42,8 @@ const preview: Preview = {
           "JVM/Query Engine": ["Overview", "Primary Workflow", "Configuration, Security, and Persistence"],
           "JVM/History": ["Overview", "Security and Actors"],
           "JVM/Offline": ["Overview", "Primary Workflow", "Configuration, Security, and Persistence"],
-          "UI/Documentation": ["Installation", "Guides"],
-          "UI/Documentation/Guides": [
+          "TypeScript/UI/Documentation": ["Installation", "Guides"],
+          "TypeScript/UI/Documentation/Guides": [
             "Common Patterns",
             "Theming",
             "Providers",
@@ -53,7 +53,7 @@ const preview: Preview = {
             "TanStack Query",
             "Drag and Drop",
           ],
-          History: [
+          "TypeScript/History": [
             "Overview",
             "Primary Workflow",
             "Nested Definitions",
@@ -63,7 +63,7 @@ const preview: Preview = {
             "Record Validation",
             "Failure Semantics",
           ],
-          Infrastructure: [
+          "TypeScript/Infrastructure": [
             "Overview",
             "Primary Workflow",
             "HTTP and Pagination",
@@ -72,7 +72,7 @@ const preview: Preview = {
             "Session Expiry",
             "Failure Semantics",
           ],
-          Localization: [
+          "TypeScript/Localization": [
             "Overview",
             "Primary Workflow",
             "Late Registration",
@@ -80,7 +80,7 @@ const preview: Preview = {
             "Number Formatting",
             "Failure Semantics",
           ],
-          "Query Engine": [
+          "TypeScript/Query Engine": [
             "Overview",
             "Primary Workflow",
             "Filter Compilation",
@@ -88,7 +88,7 @@ const preview: Preview = {
             "Config Persistence",
             "Failure Semantics",
           ],
-          SQLite: [
+          "TypeScript/SQLite": [
             "Overview",
             "Primary Workflow",
             "Managed Runtime",
@@ -97,7 +97,7 @@ const preview: Preview = {
             "Offline Utilities",
             "Failure Semantics",
           ],
-          Shell: [
+          "TypeScript/Shell": [
             "Overview",
             "Primary Workflow",
             "Sitemap and Paths",

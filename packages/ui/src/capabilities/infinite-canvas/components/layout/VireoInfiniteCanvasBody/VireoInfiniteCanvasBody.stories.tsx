@@ -3,7 +3,7 @@ import defaultSource from "@/capabilities/infinite-canvas/components/layout/Vire
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoInfiniteCanvasBody } from "./VireoInfiniteCanvasBody";
 const meta = {
-  title: "UI/Capabilities/Infinite Canvas/VireoInfiniteCanvasBody",
+  title: "TypeScript/UI/Capabilities/Infinite Canvas/VireoInfiniteCanvasBody",
   component: VireoInfiniteCanvasBody,
   parameters: {
     controls: { disable: true },

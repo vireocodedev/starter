@@ -15,7 +15,7 @@ const requiredArgs = {
 };
 
 const meta = {
-  title: "UI/Capabilities/Forms/Overlays/VireoResponsiveFormOverlay",
+  title: "TypeScript/UI/Capabilities/Forms/Overlays/VireoResponsiveFormOverlay",
   component: VireoResponsiveFormOverlay,
   tags: ["autodocs"],
   parameters: {
@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Coordinates a form across Vireo's mobile bottom sheet and desktop overlay surfaces.\n\n### Why it exists\n\nResponsive form workflows otherwise repeat surface selection, header anatomy, action placement, close disabling, and unsaved-change scoping. Use this coordinator when one form moves between mobile and desktop overlays; use a direct overlay when the surface never changes.",
+          "Coordinates a form across Vireo's mobile full-screen dialog and desktop overlay surfaces.\n\n### Why it exists\n\nResponsive form workflows otherwise repeat surface selection, header anatomy, action placement, close disabling, and unsaved-change scoping. Use this coordinator when one form moves between mobile and desktop overlays; use a direct overlay when the surface never changes.",
       },
     },
   },

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { revalidateLogic } from "@tanstack/react-form";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
@@ -45,10 +46,16 @@ function NavigationHarness({ onStepChange }: { onStepChange?: (event: { stepId: 
 
 function ValidationHarness() {
   const form = useVireoMultiStepForm({
-    defaultValues: { name: "" },
-    validators: { onSubmit: z.object({ name: z.string().min(1, "Enter a name") }) },
+    defaultValues: { email: "", name: "" },
+    validationLogic: revalidateLogic(),
+    validators: {
+      onDynamic: z.object({
+        email: z.email("Enter an email"),
+        name: z.string().min(1, "Enter a name"),
+      }),
+    },
     steps: [
-      { id: "profile", label: "Profile", fields: ["name"] },
+      { id: "profile", label: "Profile", fields: ["name", "email"] },
       { id: "review", label: "Review" },
     ],
   });
@@ -58,6 +65,9 @@ function ValidationHarness() {
         <form.Step id="profile">
           <form.Field name="name">
             {field => <field.TextField slotProps={{ htmlInput: { "aria-label": "Name" } }} />}
+          </form.Field>
+          <form.Field name="email">
+            {field => <field.TextField slotProps={{ htmlInput: { "aria-label": "Email" } }} />}
           </form.Field>
         </form.Step>
         <form.Step id="review">Ready to review</form.Step>
@@ -98,11 +108,22 @@ describe("useVireoMultiStepForm", () => {
   });
 
   it("validates owned fields, reveals errors, and advances after correction", async () => {
-    render(<ValidationHarness />);
+    render(
+      <React.StrictMode>
+        <ValidationHarness />
+      </React.StrictMode>,
+    );
+    expect(screen.queryByText("Enter a name")).not.toBeInTheDocument();
+    expect(screen.queryByText("Enter an email")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(await screen.findByText("Enter a name")).toBeInTheDocument();
+    expect(screen.getByText("Enter an email")).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Profile" })).toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Name" }), { target: { value: "Northstar" } });
+    await waitFor(() => expect(screen.queryByText("Enter a name")).not.toBeInTheDocument());
+    expect(screen.getByText("Enter an email")).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: "Email" }), { target: { value: "owner@example.com" } });
+    await waitFor(() => expect(screen.queryByText("Enter an email")).not.toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     await screen.findByText("Ready to review");
   });

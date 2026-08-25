@@ -21,7 +21,7 @@ npm install @vireocodedev/starter-ui
 
 Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,
-`@tanstack/react-query`, `@tanstack/react-virtual`, `i18next`,
+`@tanstack/react-query`, `i18next`,
 `react-i18next`, `zod`, `sonner`, `dayjs`. Depends on
 `@vireocodedev/starter-localization`, which owns the `platform` and `history`
 translation namespaces this package renders.
@@ -39,7 +39,7 @@ compatibility contract.
   `VireoResponsiveFormOverlay`.
 - **Tables** — `VireoResponsiveTable`, the typed container-aware desktop table
   and mobile accordion contract with controlled sorting, pagination, loading,
-  filtering surfaces, virtualization, and scroll restoration.
+  filtering surfaces, incremental mobile loading, and scroll restoration.
 - **Providers** — `VireoConfirmationProvider`, `VireoIconRegistryProvider`,
   `VireoProviderComposer`, and `VireoThemeColorMeta`.
 - **Localization integrations** — temporal picker localization under

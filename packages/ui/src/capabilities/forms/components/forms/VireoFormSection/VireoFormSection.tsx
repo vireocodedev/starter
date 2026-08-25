@@ -47,7 +47,7 @@ export const VireoFormSection = React.forwardRef<HTMLElement, VireoFormSectionPr
       slots = {},
       style,
       sx,
-      variant = "outlined",
+      variant = "divided",
       ...other
     } = props;
     const ownerState: VireoFormSectionOwnerState = {
@@ -98,6 +98,7 @@ export const VireoFormSection = React.forwardRef<HTMLElement, VireoFormSectionPr
         ownerState={ownerState}
         aria-labelledby={headingId}
         aria-describedby={ownerState.hasDescription ? descriptionId : undefined}
+        data-variant={variant}
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         style={{ ...style, ...rootSlotStyle }}
         sx={mergeSx(sx, rootSlotSx)}

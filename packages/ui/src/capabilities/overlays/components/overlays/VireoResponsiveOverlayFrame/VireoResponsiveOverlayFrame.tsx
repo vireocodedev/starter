@@ -68,6 +68,7 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
       maxWidth = "lg",
       mobileHeight,
       mobileMaxHeight = "92dvh",
+      mobileSurface = "fullScreenDialog",
       onClose,
       onExited,
       open,
@@ -121,6 +122,7 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
     const ownerState: VireoResponsiveOverlayFrameOwnerState = {
       open,
       isMobile,
+      mobileSurface,
       desktopSurface,
       effectiveDesktopSurface,
       allowSidePanelResize,
@@ -178,7 +180,7 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
                 desktopSidePanelSx,
               ),
             },
-            transition: { onExited: handleExited },
+            transition: { appear: true, onExited: handleExited },
           }}
         >
           {sidePanelResizeHandle}
@@ -219,19 +221,32 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
       );
     }
 
-    const frame = isMobile ? (
-      <VireoBottomDrawer
-        open={open}
-        onClose={onClose}
-        onExited={onExited}
-        height={mobileHeight}
-        maxHeight={drawerMaxHeight}
-      >
-        {children}
-      </VireoBottomDrawer>
-    ) : (
-      desktopFrame
-    );
+    const mobileFrame =
+      mobileSurface === "fullScreenDialog" ? (
+        <Dialog
+          open={open}
+          onClose={onClose}
+          fullScreen
+          slotProps={{
+            paper: { sx: { overflow: "hidden" } },
+            transition: { onExited: handleExited },
+          }}
+        >
+          {children}
+        </Dialog>
+      ) : (
+        <VireoBottomDrawer
+          open={open}
+          onClose={onClose}
+          onExited={onExited}
+          height={mobileHeight}
+          maxHeight={drawerMaxHeight}
+        >
+          {children}
+        </VireoBottomDrawer>
+      );
+
+    const frame = isMobile ? mobileFrame : desktopFrame;
 
     return (
       <VireoResponsiveOverlayFrameRoot

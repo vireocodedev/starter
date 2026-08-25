@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/addon-docs/blocks";
 
-<Meta title="Localization/Overview" />
+<Meta title="TypeScript/Localization/Overview" />
 
 # Localization
 
@@ -12,7 +12,9 @@ It deliberately does not initialize i18next, select or persist an application's 
 
 1. Choose the complete set of application locales.
 2. Build Starter's namespaces with `createStarterResources`.
-3. Add typed partial overrides for locales Starter does not ship or copy the application needs to customize.
-4. Pass the result to the application-owned i18next instance.
+3. Add the application's own namespace to every locale without flattening Starter keys into it.
+4. Initialize a dedicated application-owned i18next instance and provide that same instance to React.
+5. Add strict i18next resource augmentation, then bind app and Starter callsites to their respective namespaces.
+6. Add typed partial overrides for locales Starter does not ship or copy the application needs to customize.
 
-Continue with **Primary Workflow**, then review late registration, custom namespaces, formatting, and deliberate failure behavior.
+Continue with **Primary Workflow** for the full application setup, including required direct dependencies and React binding. Then review late registration, custom namespaces, formatting, and deliberate failure behavior.

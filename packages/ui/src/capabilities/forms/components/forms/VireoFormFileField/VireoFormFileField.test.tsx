@@ -29,7 +29,9 @@ function TestForm({ fieldProps, initialValue = null, onSubmit = vi.fn(() => unde
         )}
       </form.Field>
       <form.SubmitButton>Submit</form.SubmitButton>
-      <form.ResetButton>Reset</form.ResetButton>
+      <button type="button" onClick={() => form.reset()}>
+        Reset
+      </button>
     </form.Form>
   );
 }

@@ -15,9 +15,6 @@ export default function YearModeExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.Actions>
-            <form.ResetButton variant="outlined">Reset year</form.ResetButton>
-          </form.Actions>
         </form.Section>
       </form.Form>
     </VireoStorybookProvider>

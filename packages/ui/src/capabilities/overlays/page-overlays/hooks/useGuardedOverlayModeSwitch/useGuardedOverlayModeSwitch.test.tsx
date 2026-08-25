@@ -4,7 +4,7 @@ import {
   type UnsavedChangesContextValue,
   type UnsavedChangesDiscardRequest,
 } from "@/capabilities/unsaved-changes/public";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -71,5 +71,33 @@ describe("useGuardedOverlayModeSwitch", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open filters" }));
 
     expect(onOpen).toHaveBeenCalledWith("filters", { value: "filters" });
+  });
+
+  it("keeps a stable callback while using the latest overlay state and opener", () => {
+    const requestDiscard = vi.fn((request: UnsavedChangesDiscardRequest) => request.onDiscard());
+    const context: UnsavedChangesContextValue = {
+      removeRegistration: vi.fn(),
+      requestDiscard,
+      runWithoutNavigationBlock: action => action(),
+      upsertRegistration: vi.fn(),
+    };
+    const wrapper = ({ children }: React.PropsWithChildren) => (
+      <UnsavedChangesContext.Provider value={context}>{children}</UnsavedChangesContext.Provider>
+    );
+    const firstOnOpen = vi.fn<(mode: keyof TestModes, payload: { value: string }) => void>();
+    const latestOnOpen = vi.fn<(mode: keyof TestModes, payload: { value: string }) => void>();
+    const { result, rerender } = renderHook(
+      ({ open, onOpen }) => useGuardedOverlayModeSwitch<TestModes>(open, onOpen),
+      { initialProps: { open: false, onOpen: firstOnOpen }, wrapper },
+    );
+    const initialCallback = result.current;
+
+    rerender({ open: true, onOpen: latestOnOpen });
+
+    expect(result.current).toBe(initialCallback);
+    act(() => result.current("filters", { value: "latest" }));
+    expect(requestDiscard).toHaveBeenCalledOnce();
+    expect(firstOnOpen).not.toHaveBeenCalled();
+    expect(latestOnOpen).toHaveBeenCalledWith("filters", { value: "latest" });
   });
 });

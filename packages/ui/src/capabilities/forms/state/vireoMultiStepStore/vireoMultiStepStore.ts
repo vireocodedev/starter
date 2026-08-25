@@ -34,6 +34,9 @@ export class VireoMultiStepStore {
   private visited = new Set<string>();
   private completed = new Set<string>();
   private errored = new Set<string>();
+  private erroredStepValues = new Map<string, readonly unknown[]>();
+  private pendingRevalidationFields = new Set<string>();
+  private revalidationScheduled = false;
   private registeredSteps = new Map<string, HTMLElement>();
   private errorSummaryElement?: HTMLElement;
   private currentStepId: string;
@@ -70,15 +73,21 @@ export class VireoMultiStepStore {
     this.visited.add(this.currentStepId);
     this.onStepChange = onStepChange;
     this.rebuildSnapshot();
-    this.unsubscribeForm = form.store.subscribe(() => this.handleFormChange());
   }
 
-  dispose(): void {
-    this.transitionVersion += 1;
-    this.pendingFocusStepId = undefined;
-    this.unsubscribeForm?.unsubscribe();
-    this.unsubscribeForm = undefined;
-    this.listeners.clear();
+  mount(): () => void {
+    if (!this.unsubscribeForm) {
+      this.lastValues = this.form.state.values;
+      this.unsubscribeForm = this.form.store.subscribe(() => this.handleFormChange());
+    }
+    return () => {
+      this.transitionVersion += 1;
+      this.pendingFocusStepId = undefined;
+      this.unsubscribeForm?.unsubscribe();
+      this.unsubscribeForm = undefined;
+      this.pendingRevalidationFields.clear();
+      this.revalidationScheduled = false;
+    };
   }
 
   update(
@@ -193,6 +202,8 @@ export class VireoMultiStepStore {
     this.visited.clear();
     this.completed.clear();
     this.errored.clear();
+    this.erroredStepValues.clear();
+    this.pendingRevalidationFields.clear();
     const active = this.getActiveDescriptors();
     this.currentStepId = active.some(step => step.id === this.initialStepId) ? this.initialStepId : active[0].id;
     this.visited.add(this.currentStepId);
@@ -249,13 +260,13 @@ export class VireoMultiStepStore {
       if (validation.cancelled)
         return { status: "cancelled", stepId: this.currentStepId, requestedStepId, reason: validation.reason };
       if (validation.errorPaths.length > 0) {
-        this.errored.add(this.currentStepId);
+        this.setStepErrored(this.currentStepId, true);
         this.completed.delete(this.currentStepId);
         this.rebuildSnapshot();
         this.emit();
         return { status: "invalid", stepId: this.currentStepId, requestedStepId, errorPaths: validation.errorPaths };
       }
-      this.errored.delete(this.currentStepId);
+      this.setStepErrored(this.currentStepId, false);
       this.completed.add(this.currentStepId);
       const active = this.getActiveDescriptors();
       const currentIndex = active.findIndex(step => step.id === this.currentStepId);
@@ -333,10 +344,12 @@ export class VireoMultiStepStore {
   }
 
   private handleFormChange(): void {
-    if (this.form.state.values !== this.lastValues) {
+    const valuesChanged = this.form.state.values !== this.lastValues;
+    if (valuesChanged) {
       this.lastValues = this.form.state.values;
       this.valueRevision += 1;
     }
+    this.revalidateChangedErroredSteps();
     for (const step of this.descriptors) {
       if (
         this.completed.has(step.id) &&
@@ -352,11 +365,61 @@ export class VireoMultiStepStore {
     this.emit();
   }
 
+  private revalidateChangedErroredSteps(): void {
+    const changedSteps = this.descriptors.filter(step => {
+      if (!this.errored.has(step.id)) return false;
+      const values = this.getStepValues(step);
+      const previousValues = this.erroredStepValues.get(step.id);
+      if (previousValues && values.every((value, index) => Object.is(value, previousValues[index]))) return false;
+      this.erroredStepValues.set(step.id, values);
+      return true;
+    });
+    const fields = new Set(changedSteps.flatMap(step => step.fields ?? []));
+    if (fields.size === 0) return;
+    fields.forEach(field => this.pendingRevalidationFields.add(field));
+    this.scheduleErroredStepRevalidation();
+  }
+
+  private scheduleErroredStepRevalidation(): void {
+    if (this.revalidationScheduled) return;
+    this.revalidationScheduled = true;
+    queueMicrotask(() => {
+      this.revalidationScheduled = false;
+      if (!this.unsubscribeForm || this.pendingRevalidationFields.size === 0) return;
+      const fields = [...this.pendingRevalidationFields];
+      this.pendingRevalidationFields.clear();
+      // Field.handleChange performs its ordinary change validation after updating
+      // the form store. Run the step's submit validation in the next microtask so
+      // that this post-attempt revalidation is the final result for the new value.
+      void this.form.validate("submit", {
+        filterFieldNames: field => fields.some(owner => ownsPath(owner, String(field))),
+      });
+    });
+  }
+
   private refreshErrors(): void {
     for (const step of this.descriptors) {
-      if ((step.fields ?? []).some(field => this.collectErrorPaths([field]).length > 0)) this.errored.add(step.id);
-      else this.errored.delete(step.id);
+      this.setStepErrored(
+        step.id,
+        (step.fields ?? []).some(field => this.collectErrorPaths([field]).length > 0),
+      );
     }
+  }
+
+  private setStepErrored(stepId: string, hasError: boolean): void {
+    if (!hasError) {
+      this.errored.delete(stepId);
+      this.erroredStepValues.delete(stepId);
+      return;
+    }
+    this.errored.add(stepId);
+    if (this.erroredStepValues.has(stepId)) return;
+    const step = this.descriptors.find(descriptor => descriptor.id === stepId);
+    if (step) this.erroredStepValues.set(stepId, this.getStepValues(step));
+  }
+
+  private getStepValues(step: VireoMultiStepRuntimeDescriptor): readonly unknown[] {
+    return (step.fields ?? []).map(field => this.form.getFieldValue(field as never));
   }
 
   private reconcileActiveStep(reason: "condition"): void {

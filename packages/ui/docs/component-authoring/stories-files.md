@@ -41,7 +41,7 @@ Connect Storybook directly to the public component type:
 
 ```tsx
 const meta = {
-  title: "UI/Core/Data Display/VireoComponent",
+  title: "TypeScript/UI/Core/Data Display/VireoComponent",
   component: VireoComponent,
   tags: ["autodocs"],
   parameters: {
@@ -99,7 +99,7 @@ the distinction. Integrations use a developer-facing task label and may retain
 the external runtime name when it materially helps discovery.
 
 ```text
-UI/Documentation/[Documentation page]
+TypeScript/UI/Documentation/[Documentation page]
 UI/Core/[Category]/VireoComponent
 UI/Capabilities/[Capability]/VireoComponent
 UI/Capabilities/[Capability]/[Purposeful group]/VireoComponent
@@ -110,9 +110,9 @@ History/[Documentation page]
 For example:
 
 ```ts
-title: "UI/Core/Behavior/VireoDelayedRender";
-title: "UI/Capabilities/Tables/VireoResponsiveTable";
-title: "UI/Integrations/Notifications · Sonner/VireoToaster";
+title: "TypeScript/UI/Core/Behavior/VireoDelayedRender";
+title: "TypeScript/UI/Capabilities/Tables/VireoResponsiveTable";
+title: "TypeScript/UI/Integrations/Notifications · Sonner/VireoToaster";
 ```
 
 Each framework-free package owns its top-level documentation section but does not own the React host. Those packages own their MDX and executable TypeScript examples while UI owns the shared React-based Storybook runtime. See [`NON_REACT_LIVE_DOCUMENTATION.md`](../../../../docs/package-authoring/NON_REACT_LIVE_DOCUMENTATION.md).
@@ -127,11 +127,11 @@ architecture continues to govern filesystem placement.
 Components exposed through the `useVireoForm` `field.*` facade intentionally use one additional `Fields` navigation directory beneath the forms component category:
 
 ```ts
-title: "UI/Capabilities/Forms/Fields/VireoFormTextField";
+title: "TypeScript/UI/Capabilities/Forms/Fields/VireoFormTextField";
 ```
 
 This grouping contains every component bound through `field.*`. Form-level
-components such as `VireoForm`, `VireoFormActions`, `VireoFormResetButton`,
+components such as `VireoForm`, `VireoFormActions`,
 `VireoFormSection`, `VireoFormSectionItem`, and `VireoFormSubmitButton` remain
 directly under `UI/Capabilities/Forms`. Multi-step contracts use the sibling
 `UI/Capabilities/Forms/Multi-Step` group and form overlays use

@@ -18,9 +18,6 @@ export default function YearMonthModeExample() {
               </VireoLabelBox>
             )}
           </form.Field>
-          <form.Actions>
-            <form.ResetButton variant="outlined">Reset period</form.ResetButton>
-          </form.Actions>
         </form.Section>
       </form.Form>
     </VireoStorybookProvider>

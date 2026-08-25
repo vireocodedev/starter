@@ -7,7 +7,7 @@ import type { VIREO_FORM_SECTION_NAME, VireoFormSectionSlotName } from "./VireoF
 export type VireoFormSectionHeadingLevel = 2 | 3 | 4 | 5 | 6;
 export type VireoFormSectionLayout = "grid" | "stack";
 export type VireoFormSectionMaxColumns = 1 | 2 | 3;
-export type VireoFormSectionVariant = "outlined" | "plain";
+export type VireoFormSectionVariant = "divided" | "outlined" | "plain";
 
 export type VireoFormSectionOwnerState = {
   hasDescription: boolean;
@@ -70,7 +70,7 @@ export type VireoFormSectionOwnProps = VireoFormSectionSlotsAndSlotProps & {
   label: React.ReactNode;
   /** Maximum number of responsive grid columns. @default 2 */
   maxColumns?: VireoFormSectionMaxColumns;
-  /** Controls whether the field area owns an outlined surface. @default 'outlined' */
+  /** Controls the section's visual separation from surrounding form content. @default 'divided' */
   variant?: VireoFormSectionVariant;
 };
 export type VireoFormSectionInheritedProps = Omit<BoxProps<"section">, "children" | "component" | "ref">;

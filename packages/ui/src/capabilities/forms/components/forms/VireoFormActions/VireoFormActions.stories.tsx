@@ -1,7 +1,7 @@
-import ContainerResponsiveLayoutExample from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/ContainerResponsiveLayoutExample";
-import containerResponsiveLayoutExampleSource from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/ContainerResponsiveLayoutExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/DefaultExample.tsx?raw";
+import HorizontalLayoutExample from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/HorizontalLayoutExample";
+import horizontalLayoutExampleSource from "@/capabilities/forms/components/forms/VireoFormActions/internal/storybook/HorizontalLayoutExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormActions } from "./VireoFormActions";
 
@@ -18,18 +18,18 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "UI/Capabilities/Forms/VireoFormActions",
+  title: "TypeScript/UI/Capabilities/Forms/VireoFormActions",
   component: VireoFormActions,
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
-        component: `VireoFormActions arranges secondary and primary form actions according to the width of their containing surface.
+        component: `VireoFormActions keeps form actions in one stable horizontal row and shares the available width equally between ordinary action buttons.
 
 ### Why it exists
 
-Forms otherwise repeat action ordering, spacing, alignment, mobile stacking, and full-width button rules in every page, dialog, and drawer. Vireo owns that responsive action layout so the same action list adapts to its actual container rather than the viewport. Use it for form-level actions; use an ordinary button group for unrelated commands.`,
+Forms otherwise repeat action ordering, spacing, alignment, and narrow-surface wrapping rules in every page, dialog, and drawer. Vireo owns one predictable contract: Cancel precedes Submit, both share the row equally, and optional overflow commands use an intrinsic-width icon button. Use it for form-level actions; use an ordinary button group for unrelated commands.`,
       },
     },
   },
@@ -49,7 +49,7 @@ export const Default: Story = {
   parameters: createSourceParameters(defaultExampleSource),
 };
 
-export const ContainerResponsiveLayout: Story = {
-  render: () => <ContainerResponsiveLayoutExample />,
-  parameters: createSourceParameters(containerResponsiveLayoutExampleSource),
+export const HorizontalLayout: Story = {
+  render: () => <HorizontalLayoutExample />,
+  parameters: createSourceParameters(horizontalLayoutExampleSource),
 };

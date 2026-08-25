@@ -15,8 +15,6 @@ export const VireoFormActionsRoot: VireoFormActionsStyledSlotComponent<BoxProps>
   slot: "Root",
   overridesResolver: (_props, styles) => styles.root,
 })<VireoFormActionsStyledSlotProps>({
-  containerName: "vireo-form-actions",
-  containerType: "inline-size",
   minWidth: 0,
   width: "100%",
 });
@@ -28,18 +26,16 @@ export const VireoFormActionsLayout: VireoFormActionsStyledSlotComponent<BoxProp
 })<VireoFormActionsStyledSlotProps>(({ theme }) => ({
   alignItems: "stretch",
   display: "flex",
-  flexDirection: "column",
+  flexDirection: "row",
+  flexWrap: "nowrap",
   gap: theme.spacing(1),
   minWidth: 0,
-  "& > *": {
-    width: "100%",
+  width: "100%",
+  "& > :not(.MuiIconButton-root)": {
+    flex: "1 1 0",
+    minWidth: 0,
   },
-  "@container vireo-form-actions (min-width: 30rem)": {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    "& > *": {
-      width: "auto",
-    },
+  "& > .MuiIconButton-root": {
+    flex: "0 0 auto",
   },
 }));

@@ -4,3 +4,5 @@ export type ResponsiveOverlayFrameDesktopSidePanelWidth =
   number | string | Partial<Record<Breakpoint, number | string>>;
 
 export type ResponsiveOverlayFrameDesktopSurface = "dialog" | "overlaySidePanel" | "dockedSidePanel";
+
+export type ResponsiveOverlayFrameMobileSurface = "bottomDrawer" | "fullScreenDialog";

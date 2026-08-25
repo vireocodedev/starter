@@ -12,7 +12,7 @@ function createSourceParameters(code: string) {
 }
 
 const meta = {
-  title: "UI/Core/Data Display/VireoIcon",
+  title: "TypeScript/UI/Core/Data Display/VireoIcon",
   component: VireoIcon,
   tags: ["autodocs"],
   parameters: {

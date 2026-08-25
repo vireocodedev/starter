@@ -3,7 +3,7 @@ import defaultExampleSource from "@/core/hooks/useVireoOnlineStatus/internal/sto
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
-  title: "UI/Core/Hooks/useVireoOnlineStatus",
+  title: "TypeScript/UI/Core/Hooks/useVireoOnlineStatus",
   tags: ["autodocs"],
   parameters: {
     controls: { disable: true },

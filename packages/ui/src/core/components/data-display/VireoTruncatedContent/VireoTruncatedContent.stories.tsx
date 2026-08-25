@@ -17,7 +17,7 @@ import { VireoTruncatedContent } from "./VireoTruncatedContent";
 const source = (code: string) => ({ docs: { source: { code, language: "tsx", type: "code" as const } } });
 
 const meta: Meta<typeof VireoTruncatedContent> = {
-  title: "UI/Core/Data Display/VireoTruncatedContent",
+  title: "TypeScript/UI/Core/Data Display/VireoTruncatedContent",
   component: VireoTruncatedContent,
   tags: ["autodocs"],
   args: { children: null, expandLabel: "Show more", collapseLabel: "Show less" },

@@ -193,7 +193,7 @@ export function useVireoMultiStepForm<
     steps as readonly VireoMultiStepDescriptor<unknown, string>[],
     onStepChange as ((event: VireoMultiStepChangeEvent<string>) => void) | undefined,
   );
-  React.useEffect(() => () => controller.dispose(), [controller]);
+  React.useEffect(() => controller.mount(), [controller]);
 
   const BoundForm = React.useMemo(() => {
     const Component = React.forwardRef<HTMLFormElement, VireoFormProps>((props, ref) => (
