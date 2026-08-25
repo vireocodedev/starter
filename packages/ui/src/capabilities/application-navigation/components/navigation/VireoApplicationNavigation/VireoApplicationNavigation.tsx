@@ -1,6 +1,6 @@
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
 import { VireoApplicationNavigationContext } from "@/capabilities/application-navigation/contexts/VireoApplicationNavigationContext/VireoApplicationNavigationContext";
-import { VireoSidePanelResizeHandle } from "@/capabilities/overlays/public";
+import { SIDE_PANEL_RESIZE_KEYBOARD_STEP, VireoSidePanelResizeHandle } from "@/capabilities/overlays/public";
 import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
@@ -144,7 +144,7 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
         document.body.style.userSelect = "none";
         setPreview({ mode: activeMode, width });
 
-        const handleMouseMove = (moveEvent: MouseEvent) => {
+        const handlePointerMove = (moveEvent: PointerEvent) => {
           const candidate = startWidth + moveEvent.clientX - startX;
           if (candidate < resolvedCollapseThreshold) {
             nextMode = "compact";
@@ -156,14 +156,15 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
           setPreview({ mode: nextMode, width: nextWidth });
         };
         const cleanup = () => {
-          window.removeEventListener("mousemove", handleMouseMove);
-          window.removeEventListener("mouseup", handleMouseUp);
+          window.removeEventListener("pointermove", handlePointerMove);
+          window.removeEventListener("pointerup", handlePointerUp);
+          window.removeEventListener("pointercancel", handlePointerUp);
           document.body.style.cursor = previousCursor;
           document.body.style.userSelect = previousUserSelect;
           cleanupResizeRef.current = null;
           setPreview(null);
         };
-        const handleMouseUp = () => {
+        const handlePointerUp = () => {
           cleanup();
           if (nextMode !== resolvedMode) onModeChange?.(nextMode);
           if (nextMode === "expanded" && nextWidth !== controlledExpandedWidth) {
@@ -172,8 +173,9 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
         };
 
         cleanupResizeRef.current = cleanup;
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
+        window.addEventListener("pointercancel", handlePointerUp);
       },
       [
         activeMode,
@@ -197,6 +199,50 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
         onExpandedWidthChange?.(clampExpandedWidth(defaultExpandedWidth));
       },
       [clampExpandedWidth, defaultExpandedWidth, effectiveResizable, onExpandedWidthChange, onModeChange, resolvedMode],
+    );
+
+    const handleResizeKeyDown = React.useCallback<React.KeyboardEventHandler<HTMLDivElement>>(
+      event => {
+        if (!effectiveResizable) return;
+
+        const step = event.shiftKey ? SIDE_PANEL_RESIZE_KEYBOARD_STEP * 2 : SIDE_PANEL_RESIZE_KEYBOARD_STEP;
+        let nextMode = resolvedMode;
+        let nextWidth = controlledWidth;
+
+        if (event.key === "Home") {
+          nextMode = "compact";
+          nextWidth = compactWidth;
+        } else if (event.key === "End") {
+          nextMode = "expanded";
+          nextWidth = maxExpandedWidth;
+        } else if (event.key === "ArrowRight") {
+          nextMode = "expanded";
+          nextWidth = resolvedMode === "compact" ? minExpandedWidth : clampExpandedWidth(controlledWidth + step);
+        } else if (event.key === "ArrowLeft") {
+          const candidate = controlledWidth - step;
+          nextMode = resolvedMode === "compact" || candidate < resolvedCollapseThreshold ? "compact" : "expanded";
+          nextWidth = nextMode === "compact" ? compactWidth : clampExpandedWidth(candidate);
+        } else {
+          return;
+        }
+
+        event.preventDefault();
+        if (nextMode !== resolvedMode) onModeChange?.(nextMode);
+        if (nextMode === "expanded" && nextWidth !== controlledExpandedWidth) onExpandedWidthChange?.(nextWidth);
+      },
+      [
+        clampExpandedWidth,
+        compactWidth,
+        controlledExpandedWidth,
+        controlledWidth,
+        effectiveResizable,
+        maxExpandedWidth,
+        minExpandedWidth,
+        onExpandedWidthChange,
+        onModeChange,
+        resolvedCollapseThreshold,
+        resolvedMode,
+      ],
     );
 
     const SurfaceSlot = slots.surface ?? VireoApplicationNavigationSurface;
@@ -245,7 +291,11 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
                   enabled={effectiveResizable}
                   isResizing={isResizing}
                   onResizeStart={handleResizeStart}
+                  onResizeKeyDown={handleResizeKeyDown}
                   onResizeDoubleClick={handleResizeDoubleClick}
+                  valueMin={compactWidth}
+                  valueMax={maxExpandedWidth}
+                  valueNow={width}
                   className={joinClassNames(classes.resizeHandle, resizeHandleSlotClassName)}
                   sx={mergeSx(
                     {

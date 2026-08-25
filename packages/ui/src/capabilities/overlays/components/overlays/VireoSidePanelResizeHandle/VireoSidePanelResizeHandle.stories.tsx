@@ -21,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Provides the standard pointer interaction target and visual feedback for resizing Vireo side panels.\n\n### Why it exists\n\nResizable overlay panels need a forgiving hit area, consistent hover and active feedback, and predictable event composition without each frame rebuilding those details. Vireo owns that shared overlay anatomy so panels behave and theme consistently. Use it with Vireo side-panel resizing; use a keyboard-operable separator or full split-pane control when resizing is itself a standalone accessible interaction.",
+          "Provides the standard pointer target, optional keyboard separator semantics, and visual feedback for resizing Vireo side panels.\n\n### Why it exists\n\nResizable overlay panels need a forgiving hit area, consistent hover, focus, and active feedback, and predictable event composition without each frame rebuilding those details. Vireo owns that shared overlay anatomy so panels behave and theme consistently. Pair it with useSidePanelResize and value metadata for pointer and keyboard access; use a full split-pane control when resizing owns more complex layout behavior.",
       },
     },
   },

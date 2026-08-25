@@ -1,4 +1,7 @@
-import { SIDE_PANEL_WIDTH_CSS_VAR } from "@/capabilities/overlays/constants/overlay.constants";
+import {
+  SIDE_PANEL_RESIZE_KEYBOARD_STEP,
+  SIDE_PANEL_WIDTH_CSS_VAR,
+} from "@/capabilities/overlays/constants/overlay.constants";
 import { clampSidePanelWidth } from "@/capabilities/overlays/utils/overlay.utils";
 import React from "react";
 
@@ -23,6 +26,7 @@ export function useSidePanelResize({
   const hasUserResizedRef = React.useRef(false);
   const resizeRafRef = React.useRef<number | null>(null);
   const pendingWidthRef = React.useRef<number | null>(null);
+  const cleanupResizeRef = React.useRef<(() => void) | null>(null);
 
   const setCssWidth = React.useCallback((nextWidth: number) => {
     rootRef.current?.style.setProperty(SIDE_PANEL_WIDTH_CSS_VAR, `${nextWidth}px`);
@@ -57,12 +61,25 @@ export function useSidePanelResize({
 
   React.useEffect(() => {
     return () => {
+      cleanupResizeRef.current?.();
       if (resizeRafRef.current !== null && typeof window !== "undefined") {
         window.cancelAnimationFrame(resizeRafRef.current);
         resizeRafRef.current = null;
       }
     };
   }, []);
+
+  const commitWidth = React.useCallback(
+    (candidate: number, userResized = true) => {
+      const nextWidth = clampSidePanelWidth(candidate, minWidthRef.current, maxWidthRef.current);
+      pendingWidthRef.current = null;
+      widthRef.current = nextWidth;
+      hasUserResizedRef.current = userResized;
+      setCssWidth(nextWidth);
+      setWidth(nextWidth);
+    },
+    [setCssWidth],
+  );
 
   const onResizeStart = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -97,7 +114,9 @@ export function useSidePanelResize({
         setCssWidth(pendingWidthRef.current);
       };
 
-      const onMouseMove = (moveEvent: MouseEvent) => {
+      cleanupResizeRef.current?.();
+
+      const onPointerMove = (moveEvent: PointerEvent) => {
         const nextWidth = clampSidePanelWidth(
           startWidth - (moveEvent.clientX - startX),
           minWidthRef.current,
@@ -111,7 +130,7 @@ export function useSidePanelResize({
         }
       };
 
-      const onMouseUp = () => {
+      const finishResize = () => {
         setIsResizing(false);
         document.body.style.cursor = previousBodyCursor;
         document.body.style.userSelect = previousBodyUserSelect;
@@ -121,26 +140,19 @@ export function useSidePanelResize({
           resizeRafRef.current = null;
         }
 
-        const nextWidth = clampSidePanelWidth(
-          pendingWidthRef.current ?? widthRef.current,
-          minWidthRef.current,
-          maxWidthRef.current,
-        );
-
-        pendingWidthRef.current = null;
-        widthRef.current = nextWidth;
-        hasUserResizedRef.current = true;
-        setCssWidth(nextWidth);
-        setWidth(nextWidth);
-
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
+        commitWidth(pendingWidthRef.current ?? widthRef.current);
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", finishResize);
+        window.removeEventListener("pointercancel", finishResize);
+        cleanupResizeRef.current = null;
       };
 
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
+      cleanupResizeRef.current = finishResize;
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", finishResize);
+      window.addEventListener("pointercancel", finishResize);
     },
-    [enabled, setCssWidth],
+    [commitWidth, enabled, setCssWidth],
   );
 
   const onResizeDoubleClick = React.useCallback(
@@ -151,19 +163,38 @@ export function useSidePanelResize({
 
       event.preventDefault();
 
-      const nextWidth = clampSidePanelWidth(initialWidthRef.current, minWidthRef.current, maxWidthRef.current);
-      pendingWidthRef.current = null;
-      widthRef.current = nextWidth;
-      hasUserResizedRef.current = false;
-      setCssWidth(nextWidth);
-      setWidth(nextWidth);
+      commitWidth(initialWidthRef.current, false);
     },
-    [enabled, setCssWidth],
+    [commitWidth, enabled],
+  );
+
+  const onResizeKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!enabled) return;
+
+      const step = event.shiftKey ? SIDE_PANEL_RESIZE_KEYBOARD_STEP * 2 : SIDE_PANEL_RESIZE_KEYBOARD_STEP;
+      const nextWidth =
+        event.key === "ArrowLeft"
+          ? widthRef.current + step
+          : event.key === "ArrowRight"
+            ? widthRef.current - step
+            : event.key === "Home"
+              ? minWidthRef.current
+              : event.key === "End"
+                ? maxWidthRef.current
+                : null;
+
+      if (nextWidth === null) return;
+      event.preventDefault();
+      commitWidth(nextWidth);
+    },
+    [commitWidth, enabled],
   );
 
   return {
     isResizing,
     onResizeDoubleClick,
+    onResizeKeyDown,
     onResizeStart,
     rootRef: setRootElement,
     width,

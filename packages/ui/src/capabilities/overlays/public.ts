@@ -51,6 +51,7 @@ export {
   SIDE_PANEL_RESIZE_HANDLE_WIDTH,
   SIDE_PANEL_RESIZE_HITBOX_WIDTH,
   SIDE_PANEL_RESIZE_HOVER_OPACITY,
+  SIDE_PANEL_RESIZE_KEYBOARD_STEP,
   SIDE_PANEL_WIDTH_CSS_VAR,
   type DockedSidePanelTransitionEventDetail,
 } from "./constants/overlay.constants";

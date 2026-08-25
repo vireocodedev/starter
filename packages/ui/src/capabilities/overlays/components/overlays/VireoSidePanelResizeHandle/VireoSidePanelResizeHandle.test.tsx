@@ -37,17 +37,40 @@ describe(VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME, () => {
       />,
     );
 
-    fireEvent.mouseDown(screen.getByRole("presentation"));
+    fireEvent.pointerDown(screen.getByRole("presentation"));
     fireEvent.doubleClick(screen.getByRole("presentation"));
     expect(preventDefault).toHaveBeenCalledTimes(2);
     expect(onResizeStart).not.toHaveBeenCalled();
     expect(onResizeDoubleClick).not.toHaveBeenCalled();
 
     rerender(<VireoSidePanelResizeHandle onResizeStart={onResizeStart} onResizeDoubleClick={onResizeDoubleClick} />);
-    fireEvent.mouseDown(screen.getByRole("presentation"));
+    fireEvent.pointerDown(screen.getByRole("presentation"));
     fireEvent.doubleClick(screen.getByRole("presentation"));
     expect(onResizeStart).toHaveBeenCalledOnce();
     expect(onResizeDoubleClick).toHaveBeenCalledOnce();
+  });
+
+  it("becomes an accessible separator when keyboard resizing is configured", () => {
+    const onResizeKeyDown = vi.fn();
+    render(
+      <VireoSidePanelResizeHandle
+        {...getRequiredProps()}
+        onResizeKeyDown={onResizeKeyDown}
+        valueMin={280}
+        valueMax={620}
+        valueNow={420}
+      />,
+    );
+
+    const handle = screen.getByRole("separator", { name: "Resize panel" });
+    expect(handle).toHaveAttribute("tabindex", "0");
+    expect(handle).toHaveAttribute("aria-orientation", "vertical");
+    expect(handle).toHaveAttribute("aria-valuemin", "280");
+    expect(handle).toHaveAttribute("aria-valuemax", "620");
+    expect(handle).toHaveAttribute("aria-valuenow", "420");
+
+    fireEvent.keyDown(handle, { key: "ArrowLeft" });
+    expect(onResizeKeyDown).toHaveBeenCalledOnce();
   });
 
   it("forwards refs and merges root customization", () => {

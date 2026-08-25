@@ -31,22 +31,27 @@ function useUtilityClasses(
 }
 
 /**
- * Renders the pointer interaction target for resizing a Vireo side panel.
+ * Renders the pointer and keyboard interaction target for resizing a Vireo side panel.
  */
 export const VireoSidePanelResizeHandle = React.forwardRef<HTMLDivElement, VireoSidePanelResizeHandleProps>(
   function VireoSidePanelResizeHandle(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME });
     const {
+      "aria-label": ariaLabel = "Resize panel",
       className,
       classes: classesProp,
       enabled = true,
       isResizing = false,
       onResizeDoubleClick,
+      onResizeKeyDown,
       onResizeStart,
       slotProps = {},
       slots = {},
       style,
       sx,
+      valueMax,
+      valueMin,
+      valueNow,
       ...other
     } = props;
 
@@ -57,7 +62,9 @@ export const VireoSidePanelResizeHandle = React.forwardRef<HTMLDivElement, Vireo
     const {
       className: rootSlotClassName,
       onDoubleClick: rootSlotOnDoubleClick,
+      onKeyDown: rootSlotOnKeyDown,
       onMouseDown: rootSlotOnMouseDown,
+      onPointerDown: rootSlotOnPointerDown,
       ref: rootSlotRef,
       style: rootSlotStyle,
       sx: rootSlotSx,
@@ -65,12 +72,20 @@ export const VireoSidePanelResizeHandle = React.forwardRef<HTMLDivElement, Vireo
     } = resolvedRootSlotProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
 
-    const handleMouseDown = React.useCallback<React.MouseEventHandler<HTMLDivElement>>(
+    const handlePointerDown = React.useCallback<React.PointerEventHandler<HTMLDivElement>>(
       event => {
-        rootSlotOnMouseDown?.(event);
+        rootSlotOnPointerDown?.(event);
+        if (!event.defaultPrevented) rootSlotOnMouseDown?.(event);
         if (!event.defaultPrevented) onResizeStart(event);
       },
-      [onResizeStart, rootSlotOnMouseDown],
+      [onResizeStart, rootSlotOnMouseDown, rootSlotOnPointerDown],
+    );
+    const handleKeyDown = React.useCallback<React.KeyboardEventHandler<HTMLDivElement>>(
+      event => {
+        rootSlotOnKeyDown?.(event);
+        if (!event.defaultPrevented) onResizeKeyDown?.(event);
+      },
+      [onResizeKeyDown, rootSlotOnKeyDown],
     );
     const handleDoubleClick = React.useCallback<React.MouseEventHandler<HTMLDivElement>>(
       event => {
@@ -81,6 +96,8 @@ export const VireoSidePanelResizeHandle = React.forwardRef<HTMLDivElement, Vireo
     );
 
     if (!ownerState.enabled) return null;
+    const keyboardEnabled =
+      Boolean(onResizeKeyDown) && valueMin !== undefined && valueMax !== undefined && valueNow !== undefined;
 
     return (
       <VireoSidePanelResizeHandleRoot
@@ -92,8 +109,15 @@ export const VireoSidePanelResizeHandle = React.forwardRef<HTMLDivElement, Vireo
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         style={{ ...style, ...rootSlotStyle }}
         sx={mergeSx(sx, rootSlotSx)}
-        role="presentation"
-        onMouseDown={handleMouseDown}
+        role={keyboardEnabled ? "separator" : "presentation"}
+        tabIndex={keyboardEnabled ? 0 : undefined}
+        aria-label={keyboardEnabled ? ariaLabel : undefined}
+        aria-orientation={keyboardEnabled ? "vertical" : undefined}
+        aria-valuemin={keyboardEnabled ? valueMin : undefined}
+        aria-valuemax={keyboardEnabled ? valueMax : undefined}
+        aria-valuenow={keyboardEnabled ? valueNow : undefined}
+        onPointerDown={handlePointerDown}
+        onKeyDown={handleKeyDown}
         onDoubleClick={handleDoubleClick}
       />
     );

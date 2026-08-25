@@ -158,7 +158,11 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
         enabled={sidePanelResizeEnabled}
         isResizing={sidePanelResize.isResizing}
         onResizeStart={sidePanelResize.onResizeStart}
+        onResizeKeyDown={sidePanelResize.onResizeKeyDown}
         onResizeDoubleClick={sidePanelResize.onResizeDoubleClick}
+        valueMin={desktopSidePanelMinWidth}
+        valueMax={sidePanelResizeMaxWidth}
+        valueNow={sidePanelResize.width}
       />
     );
     const sidePanelResizeStyle = sidePanelResizeEnabled

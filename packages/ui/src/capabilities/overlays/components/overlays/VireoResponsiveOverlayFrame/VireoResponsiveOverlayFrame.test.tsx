@@ -15,6 +15,7 @@ const testState = vi.hoisted(() => ({
   resize: {
     isResizing: false,
     onResizeDoubleClick: vi.fn(),
+    onResizeKeyDown: vi.fn(),
     onResizeStart: vi.fn(),
     rootRef: vi.fn(),
     width: 500,
@@ -58,11 +59,17 @@ vi.mock("@/capabilities/overlays/components/overlays/VireoDockedSidePanel", asyn
 });
 
 vi.mock("@/capabilities/overlays/components/overlays/VireoSidePanelResizeHandle", () => ({
-  VireoSidePanelResizeHandle: ({ enabled, onResizeDoubleClick, onResizeStart }: Record<string, unknown>) =>
+  VireoSidePanelResizeHandle: ({
+    enabled,
+    onResizeDoubleClick,
+    onResizeKeyDown,
+    onResizeStart,
+  }: Record<string, unknown>) =>
     enabled ? (
       <button
         data-testid="resize-handle"
         onMouseDown={onResizeStart as React.MouseEventHandler<HTMLButtonElement>}
+        onKeyDown={onResizeKeyDown as React.KeyboardEventHandler<HTMLButtonElement>}
         onDoubleClick={onResizeDoubleClick as React.MouseEventHandler<HTMLButtonElement>}
       >
         Resize
@@ -122,6 +129,7 @@ describe(VIREO_RESPONSIVE_OVERLAY_FRAME_NAME, () => {
     testState.resize.isResizing = false;
     testState.resize.width = 500;
     testState.resize.onResizeDoubleClick.mockClear();
+    testState.resize.onResizeKeyDown.mockClear();
     testState.resize.onResizeStart.mockClear();
     testState.resize.rootRef.mockClear();
     vi.mocked(requiredProps.onClose).mockClear();
@@ -235,9 +243,11 @@ describe(VIREO_RESPONSIVE_OVERLAY_FRAME_NAME, () => {
     );
 
     fireEvent.mouseDown(screen.getByTestId("resize-handle"));
+    fireEvent.keyDown(screen.getByTestId("resize-handle"), { key: "ArrowLeft" });
     fireEvent.doubleClick(screen.getByTestId("resize-handle"));
 
     expect(testState.resize.onResizeStart).toHaveBeenCalledOnce();
+    expect(testState.resize.onResizeKeyDown).toHaveBeenCalledOnce();
     expect(testState.resize.onResizeDoubleClick).toHaveBeenCalledOnce();
     expect(testState.dockedProps?.width).toBe("var(--responsive-overlay-side-panel-width)");
     expect(testState.dockedProps?.style).toMatchObject({ "--responsive-overlay-side-panel-width": "500px" });

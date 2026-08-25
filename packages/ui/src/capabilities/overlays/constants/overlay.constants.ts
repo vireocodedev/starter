@@ -11,6 +11,7 @@ export const SIDE_PANEL_RESIZE_HANDLE_WIDTH = 6;
 export const SIDE_PANEL_RESIZE_HITBOX_WIDTH = 14;
 export const SIDE_PANEL_RESIZE_HOVER_OPACITY = 0.35;
 export const SIDE_PANEL_RESIZE_ACTIVE_OPACITY = 0.7;
+export const SIDE_PANEL_RESIZE_KEYBOARD_STEP = 16;
 
 export type DockedSidePanelTransitionEventDetail = {
   animating: boolean;

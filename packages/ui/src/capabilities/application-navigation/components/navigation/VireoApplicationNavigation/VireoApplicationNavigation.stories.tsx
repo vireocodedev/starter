@@ -33,7 +33,7 @@ const meta = {
 
 ### Why it exists
 
-Application shells otherwise duplicate width persistence, compact-mode transitions, pointer resizing, mobile drawer behavior, and accessibility wiring. Vireo owns those mechanics while applications retain routes, branding, account controls, and persistence.`,
+Application shells otherwise duplicate width persistence, compact-mode transitions, pointer and keyboard resizing, mobile drawer behavior, and accessibility wiring. Vireo owns those mechanics while applications retain routes, branding, account controls, and persistence.`,
       },
     },
   },

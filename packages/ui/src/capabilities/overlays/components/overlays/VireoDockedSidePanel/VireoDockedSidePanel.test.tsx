@@ -192,11 +192,11 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
     window.removeEventListener(DOCKED_SIDE_PANEL_TRANSITION_EVENT, listener);
   });
 
-  it("keeps the composed pointer-resize story functional", async () => {
+  it("keeps the composed pointer and keyboard resize story functional", async () => {
     const { container } = render(<Default />);
 
     await Default.play?.({ canvasElement: container });
 
-    expect(screen.getByText("420px wide")).toBeInTheDocument();
+    expect(screen.getByText("436px wide")).toBeInTheDocument();
   });
 });

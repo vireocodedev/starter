@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
+import { VIREO_MOTION_TOKENS, type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
 import {
   SIDE_PANEL_RESIZE_ACTIVE_OPACITY,
   SIDE_PANEL_RESIZE_HANDLE_WIDTH,
@@ -30,6 +30,7 @@ export const VireoSidePanelResizeHandleRoot: VireoSidePanelResizeHandleStyledSlo
     width: SIDE_PANEL_RESIZE_HITBOX_WIDTH,
     height: "100%",
     cursor: "col-resize",
+    touchAction: "none",
     zIndex: 1300,
     backgroundColor: "transparent",
     "&::after": {
@@ -42,12 +43,19 @@ export const VireoSidePanelResizeHandleRoot: VireoSidePanelResizeHandleStyledSlo
       backgroundColor: ownerState.isResizing ? activeColor : "transparent",
       opacity: ownerState.isResizing ? SIDE_PANEL_RESIZE_ACTIVE_OPACITY : 0,
       transition: theme.transitions.create(["opacity", "background-color"], {
-        duration: theme.transitions.duration.shortest,
+        duration: VIREO_MOTION_TOKENS.duration.micro,
       }),
     },
     "&:hover::after": {
       backgroundColor: activeColor,
       opacity: ownerState.isResizing ? SIDE_PANEL_RESIZE_ACTIVE_OPACITY : SIDE_PANEL_RESIZE_HOVER_OPACITY,
+    },
+    "&:focus-visible::after": {
+      backgroundColor: activeColor,
+      opacity: SIDE_PANEL_RESIZE_HOVER_OPACITY,
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      "&::after": { transition: "none" },
     },
   };
 });
