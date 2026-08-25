@@ -235,6 +235,25 @@ describe(VIREO_RESPONSIVE_TABLE_NAME, () => {
     expect(screen.getByText("No accounts")).toBeInTheDocument();
   });
 
+  it("supports actionable empty content and shared per-row visual feedback", () => {
+    const { rerender } = render(
+      <VireoResponsiveTable
+        {...requiredProps}
+        getRowSx={item => (item.id === 1 ? { backgroundColor: "rgb(245, 250, 255)" } : undefined)}
+      />,
+    );
+    expect(screen.getByText("Northstar").closest("tr")).toHaveStyle({ backgroundColor: "rgb(245, 250, 255)" });
+
+    rerender(
+      <VireoResponsiveTable
+        {...requiredProps}
+        data={[]}
+        renderEmptyState={() => <button type="button">Create account</button>}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Create account" })).toBeInTheDocument();
+  });
+
   it("forwards refs and merges root slot customization with owner state", () => {
     const forwardedRef = React.createRef<HTMLDivElement>();
     const slotRef = React.createRef<HTMLDivElement>();

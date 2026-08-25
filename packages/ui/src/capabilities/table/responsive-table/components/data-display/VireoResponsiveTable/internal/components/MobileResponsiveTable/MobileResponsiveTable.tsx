@@ -28,7 +28,8 @@ import {
   Typography,
 } from "@mui/material";
 import { VireoBottomDrawer } from "@/capabilities/overlays/public";
-import { VireoLabelBox } from "@/core/public";
+import { mergeSx, VireoLabelBox } from "@/core/public";
+import type { SxProps, Theme } from "@mui/material/styles";
 import React, { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 type MobileResponsiveTableRowProps<TItem> = {
@@ -45,6 +46,7 @@ type MobileResponsiveTableRowProps<TItem> = {
   resolvedTitleColumn?: VireoResponsiveTableColumn<TItem, string>;
   rowIndex: number;
   rowKey: React.Key;
+  rowSx?: SxProps<Theme>;
 };
 
 function MobileResponsiveTableRow<TItem>({
@@ -61,6 +63,7 @@ function MobileResponsiveTableRow<TItem>({
   resolvedTitleColumn,
   rowIndex,
   rowKey,
+  rowSx,
 }: MobileResponsiveTableRowProps<TItem>) {
   return (
     <Box data-index={rowIndex} data-responsive-table-mobile-row={String(rowKey)}>
@@ -76,14 +79,17 @@ function MobileResponsiveTableRow<TItem>({
           });
         }}
         slotProps={{ transition: { unmountOnExit: true } }}
-        sx={{
-          overflow: "visible",
-          backgroundColor: "transparent",
-          backgroundImage: "none",
-          borderTop: rowIndex > 0 ? 1 : undefined,
-          borderColor: "divider",
-          "&::before": { display: "none" },
-        }}
+        sx={mergeSx(
+          {
+            overflow: "visible",
+            backgroundColor: "transparent",
+            backgroundImage: "none",
+            borderTop: rowIndex > 0 ? 1 : undefined,
+            borderColor: "divider",
+            "&::before": { display: "none" },
+          },
+          rowSx,
+        )}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreRoundedIcon />}
@@ -170,6 +176,7 @@ export function MobileResponsiveTable<
     filtersDoneLabel = tableProps.labels.filtersDone,
     filtersLabel = tableProps.labels.filters,
     getRowKey,
+    getRowSx,
     hasNextPage = false,
     initialExpandedMobileRowKey = null,
     initialMobileScrollAnchor,
@@ -185,6 +192,7 @@ export function MobileResponsiveTable<
     onOpenFilters,
     renderMobileFilters,
     renderMobileSearch,
+    renderEmptyState,
     renderTitleEndAdornment,
     skeleton = false,
   } = tableProps;
@@ -460,7 +468,7 @@ export function MobileResponsiveTable<
                 bgcolor: "surface.sunken",
               }}
             >
-              <Typography color="text.secondary">{labels.noData}</Typography>
+              {renderEmptyState?.() ?? <Typography color="text.secondary">{labels.noData}</Typography>}
             </Box>
           ) : (
             data.map((item, rowIndex) => {
@@ -481,6 +489,7 @@ export function MobileResponsiveTable<
                   resolvedTitleColumn={resolvedTitleColumn}
                   rowIndex={rowIndex}
                   rowKey={rowKey}
+                  rowSx={getRowSx?.(item, rowIndex, "mobile")}
                 />
               );
             })

@@ -1,6 +1,6 @@
 import { VireoResponsiveTable, type VireoResponsiveTableLabels } from "@vireocodedev/starter-ui";
 import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 
 const columns = [
   { id: "customer", renderHeader: () => "Customer", renderBody: (row: { customer: string }) => row.customer },
@@ -71,6 +71,12 @@ export default function LoadingAndEmptyExample() {
             onFiltersChange={() => undefined}
             labels={labels}
             layers={{ stickyToolbar: 4, stickyRowHeader: 3 }}
+            renderEmptyState={() => (
+              <Stack spacing={1} sx={{ alignItems: "center" }}>
+                <Typography color="text.secondary">No matching customers</Typography>
+                <Button size="small">Clear search</Button>
+              </Stack>
+            )}
           />
         </Box>
       </Stack>

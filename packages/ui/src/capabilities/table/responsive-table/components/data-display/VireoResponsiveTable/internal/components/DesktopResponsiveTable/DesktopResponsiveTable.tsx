@@ -1,4 +1,4 @@
-import { VireoTruncatedContent } from "@/core/public";
+import { mergeSx, VireoTruncatedContent } from "@/core/public";
 import type {
   VireoResponsiveTableColumn,
   VireoResponsiveTableProps,
@@ -31,9 +31,11 @@ export function DesktopResponsiveTable<
     data,
     filters,
     getRowKey,
+    getRowSx,
     labels,
     onFiltersChange,
     renderFilters,
+    renderEmptyState,
     size = "small",
     skeleton = false,
     totalCount,
@@ -152,7 +154,7 @@ export function DesktopResponsiveTable<
                     align="center"
                     sx={{ height: size === "small" ? 52 : 72, color: "text.secondary", borderBottom: 0 }}
                   >
-                    {labels.noData}
+                    {renderEmptyState?.() ?? labels.noData}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -160,7 +162,7 @@ export function DesktopResponsiveTable<
                   <TableRow
                     hover
                     key={getRowKey?.(item, rowIndex) ?? rowIndex}
-                    sx={{ "&:last-child td": { borderBottom: 0 } }}
+                    sx={mergeSx({ "&:last-child td": { borderBottom: 0 } }, getRowSx?.(item, rowIndex, "desktop"))}
                   >
                     {orderedColumns.map(column => {
                       const body = column.renderBody(item, rowIndex, { placement: "desktop" });

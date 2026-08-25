@@ -1,5 +1,6 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import type { Key, ReactNode } from "react";
@@ -93,6 +94,8 @@ export type VireoResponsiveTableOwnProps<
   labels: VireoResponsiveTableLabels;
   layers: VireoResponsiveTableLayers;
   renderFilters?: () => ReactNode;
+  /** Replaces the default empty-state label in both layouts. */
+  renderEmptyState?: () => ReactNode;
   renderMobileFilters?: () => ReactNode;
   skeleton?: boolean;
   titleColumn?: VireoResponsiveTableColumnId<TColumns>;
@@ -100,6 +103,8 @@ export type VireoResponsiveTableOwnProps<
   titleEndAdornmentHelperColumn?: VireoResponsiveTableColumnId<TColumns>;
   actionsColumn?: VireoResponsiveTableColumnId<TColumns>;
   getRowKey?: (item: TItem, rowIndex: number) => Key;
+  /** Adds per-row visual feedback without replacing responsive row anatomy. */
+  getRowSx?: (item: TItem, rowIndex: number, layout: VireoResponsiveTableLayout) => SxProps<Theme> | undefined;
   totalCount?: number;
   renderMobileSearch?: () => ReactNode;
   filtersCount?: number;
