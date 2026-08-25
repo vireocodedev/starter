@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
+import { VIREO_MOTION_TOKENS, type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
 import { Box, type BoxProps } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { VIREO_HISTORY_ENTRY_NAME } from "./VireoHistoryEntry.identity";
@@ -46,7 +46,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     gap: theme.spacing(1),
     textAlign: "left",
     borderRadius: theme.shape.borderRadius,
-    transition: theme.transitions.create("background-color", { duration: 150 }),
+    transition: theme.transitions.create("background-color", { duration: VIREO_MOTION_TOKENS.duration.micro }),
     "&:focus-visible": {
       outline: `2px solid ${theme.palette.primary.main}`,
       outlineOffset: -2,
@@ -60,7 +60,7 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     flex: "0 0 auto",
     color: theme.palette.text.secondary,
     transform: "rotate(-90deg)",
-    transition: theme.transitions.create("transform", { duration: 150 }),
+    transition: theme.transitions.create("transform", { duration: VIREO_MOTION_TOKENS.duration.standard }),
   },
   "& [data-expanded] > * > * > .VireoHistoryEntry-summaryChevron, & [data-expanded] > * > .VireoHistoryEntry-summaryChevron":
     {
