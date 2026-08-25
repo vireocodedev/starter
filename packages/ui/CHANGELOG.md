@@ -1,5 +1,29 @@
 # @vireocodedev/starter-ui
 
+## 7.0.0
+
+### Major Changes
+
+- 28b66bd: Use a full-screen dialog as the default mobile responsive-overlay surface while retaining the bottom drawer as an explicit option.
+- 28b66bd: Remove the whole-form `form.ResetButton` contract and make `VireoFormActions` keep actions in one horizontal row. Ordinary action buttons now share the available width equally, while optional overflow icon buttons retain their intrinsic width.
+
+### Minor Changes
+
+- 28b66bd: Add the searchable, container-responsive VireoPreferencePanel application-preferences capability.
+- 28b66bd: Add the router-agnostic `VireoMobileBottomNavigation` primitive with labelled controlled destinations, safe-area-aware shell presentation, public slots, theme integration, tests, and executable documentation.
+- 28b66bd: Add the application-navigation capability with lockable, continuously resizable expanded and compact surfaces, full-width temporary mobile navigation, and mode-aware destination items.
+- 28b66bd: Add persistent, form-aware responsive overlay actions with guarded cancellation, standardized scrolling, and semantic light/dark surface boundaries. Form sections now default to a flat divided presentation while retaining outlined and plain opt-in variants.
+
+### Patch Changes
+
+- 28b66bd: Fix `VireoSlidingScreenStack` so every retained screen occupies exactly one viewport width in flex and container-aware layouts.
+- 28b66bd: Render every loaded mobile responsive-table row directly, restore independently stateful animated accordions without whole-list rerenders, and remove the TanStack Virtual peer dependency while preserving incremental loading and scroll restoration.
+- 28b66bd: Fix `VireoPageBody` to apply its responsive theme spacing on every side while owning the underlying MUI container gutters.
+- 28b66bd: Open page overlays without a mandatory animation-frame delay, preserve smooth initial desktop side-panel transitions, keep guarded overlay callbacks stable, and reduce hidden mobile responsive-table work.
+- 28b66bd: Prevent ordinary two-line desktop table cells from showing a false `Show more` truncation action.
+- 28b66bd: Keep confirmation dialog content mounted until its exit transition completes.
+- 28b66bd: Keep every action visible in responsive table mobile rows when actions are grouped with MUI Stack.
+
 ## 6.0.0
 
 ### Major Changes
