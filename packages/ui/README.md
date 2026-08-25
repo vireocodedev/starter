@@ -74,6 +74,7 @@ code must follow the target structure.
 - [Migration and current-source inventory](./docs/architecture/migration.md)
 - [Vireo component authoring](./docs/component-authoring/component-files.md)
 - [Vireo story coverage rulebook](./docs/component-authoring/story-coverage-rulebook.md)
+- [Motion and interaction language](./docs/storybook/MotionGuide.mdx)
 
 ## Versioning contract
 

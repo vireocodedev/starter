@@ -56,5 +56,7 @@ function CustomerTable({ rows, totalCount }) {
 - Use `layout="desktop"` or `layout="mobile"` only when an enclosing capability already owns the layout decision; otherwise let the table measure its container.
 - Column renderers receive a third `context` argument whose `placement` is `desktop`, `mobile-summary`, or `mobile-detail` when presentation genuinely needs to differ.
 - Use `actionsColumn`, `titleColumn`, and title-adornment column IDs to describe mobile anatomy without duplicating a second column model.
+- Use `renderEmptyState` for contextual guidance and a relevant action rather than replacing the surrounding table workflow.
+- Use `getRowSx` for brief, targeted mutation feedback. Do not animate every row during ordinary loading, pagination, sorting, or filtering.
 
 The VireoResponsiveTable stories are the executable, copy-pasteable source of truth for complete desktop, mobile, loading, slot, and theme examples.
