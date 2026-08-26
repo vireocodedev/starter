@@ -1,5 +1,25 @@
 # @vireocodedev/starter-ui
 
+## 7.1.0
+
+### Minor Changes
+
+- c5ecd0a: Add `VireoActionPreviewButton` for consequence-aware actions that show users the scope or result of a command before commitment.
+- 4c8245a: Allow `VireoConfirmationProvider` requests to execute asynchronous confirmation actions while preserving and locking the dialog until success, with retry after rejection.
+- ef4d32b: Add shared semantic motion tokens, preserve motion policy when deriving dark themes, and align navigation, history, docked-panel, and responsive full-screen transitions with the shared accessible timing language. Navigation destinations now provide immediate pressed feedback, animated selected indicators, and an intrinsic `aria-current` state.
+- ccc7225: Give `VireoInitializationBoundary` a shared delayed Level C loading treatment, one accessible announcement, a default decorative progress indicator, and explicit `announceLoading`, `loadingLabel`, and `loadingRevealDelay` controls. Add a customizable `loadingIndicator` slot.
+- f7ebfd2: Add `VireoSkeleton` for silent geometry-preserving placeholders and `VireoLoadingRegion` for shared reveal timing, busy semantics, and a single polite loading announcement.
+- 1b13373: Add shared semantic loading timing tokens and align `VireoDelayedRender` with the standard 150 ms reveal delay.
+- 5380547: Route the default `VireoQueryBoundary` loading fallback through the shared delayed loading-region contract. Add `announceLoading` for nested-boundary ownership and `loadingRevealDelay` for explicit timing overrides; custom fallbacks continue to own their own semantics.
+- 8e83df4: Align responsive-table loading with the shared Vireo contract: delayed skeleton reveal, one accessible busy region, silent leaves, and real desktop row and mobile accordion anatomy.
+- 7a8b19d: Add a boundary-coordinated loading state to `VireoHistoryEntry` that preserves its real responsive anatomy with silent skeleton leaves.
+
+### Patch Changes
+
+- d64bdc9: Standardize accessible busy-action ownership by applying `aria-busy` to pending form submit and confirmation controls while keeping decorative confirmation progress hidden from the accessibility tree.
+- 7d91bef: Remove the empty desktop gap above `VireoResponsiveTable` when no table-owned filter renderer is provided.
+- 4848d5b: Prevent `VireoBottomDrawer` from throwing when MUI completes a swipe gesture without passing an event to its close or open callback.
+
 ## 7.0.0
 
 ### Major Changes
