@@ -37,8 +37,8 @@ and completion.
 | Milestone | Scope                                                  | Exit evidence                                                                     | Status   |
 | --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | -------- |
 | Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete |
-| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Next     |
-| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Pending  |
+| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete |
+| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Next     |
 | Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Pending  |
 | Phase 0E  | External evidence                                      | Interviews and observed clean-room onboarding                                     | Pending  |
 | Phase 0F  | Phase 0 gate review                                    | Dated Phase 1 backlog with reliable estimates                                     | Pending  |
@@ -57,6 +57,13 @@ and completion.
 - [Prerequisites and credentials](phase-0/prerequisites-and-credentials.md)
 - [Decision queue](phase-0/decisions.md)
 
+## Phase 0B evidence set
+
+- [Product strategy hypothesis](phase-0/product-strategy.md)
+- [Competitive gap matrix](phase-0/competitive-gap-matrix.md)
+- [Audience and positioning validation protocol](phase-0/validation-protocol.md)
+- [Updated decision queue](phase-0/decisions.md)
+
 ## Measurement policy
 
 Measurements record the commit, machine, toolchain, cache state, command, and
@@ -64,17 +71,18 @@ limitations. A local result outside the supported toolchain is diagnostic eviden
 not supported-platform proof. Performance numbers are baselines, not promises or
 budgets, until the support matrix and CI measurement policy are approved.
 
-## Next milestone: Phase 0B
+## Next milestone: Phase 0C
 
-Phase 0B should produce:
+Phase 0C should produce:
 
-1. A precise primary persona and excluded personas.
-2. The painful job Vireo is hired to perform.
-3. Three ranked product claims, each paired with required proof.
-4. Explicit non-goals and supported scale boundaries.
-5. Three candidate positioning messages for external testing.
-6. An interview script and participant criteria for Phase 0E.
+1. A collision and availability report for Vireo, domains, organizations, package
+   coordinates, and relevant handles.
+2. An approved public identity and migration decision for npm and Maven coordinates.
+3. A repository-topology decision covering framework, Template, CLI, site, examples,
+   contracts, and fixtures.
+4. An ownership and release boundary for every proposed repository.
+5. A reversal and compatibility plan for every externally visible rename or move.
 
-The working hypothesis is a small full-stack team building operational business
-software with React and Spring Boot, where responsive polish and intermittent
-connectivity materially affect the product. It remains a hypothesis until tested.
+The Phase 0B audience and claim hierarchy remain hypotheses until Phase 0E executes
+the validation protocol. Completing the strategy artifact is not equivalent to
+passing the master roadmap's positioning gate.

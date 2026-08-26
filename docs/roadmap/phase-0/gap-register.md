@@ -6,16 +6,16 @@ not an assigned person.
 
 ## Phase 0 blockers
 
-| ID    | Gap                                                         | Evidence                                                                                    | Owner                  | Exit evidence                                                                   |
-| ----- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------- |
-| G-001 | Primary persona and painful job are unvalidated             | No unfamiliar target-developer interviews or observed onboarding                            | Product/Phase 0B       | Approved persona, excluded personas, jobs, and interview evidence               |
-| G-002 | Product identity and coordinates are unresolved             | No approved name/domain/package/group policy or search evidence                             | Product/Phase 0C       | Naming decision with collision, domain, handle, npm, and Maven checks           |
-| G-003 | Canonical public repository topology is unresolved          | Framework and Template exist; CLI/site/examples/fixtures ownership is undecided             | Architecture/Phase 0C  | Approved repository and release-boundary record                                 |
-| G-004 | Supported platform matrix is absent                         | Versions are pinned, but OS/browser/database support and windows are not promised or proven | Engineering/Phase 0D   | Published matrix with CI/clean-room proof obligations                           |
-| G-005 | Competitor gap matrix is missing                            | Internal demos are not target-job competitive evidence                                      | Product/Phase 0B       | Current comparison against selected alternatives and user jobs                  |
-| G-006 | External interviews and clean-room onboarding are missing   | No independent-user evidence is recorded                                                    | Product/Phase 0E       | Interview notes and observed setup/change sessions meeting participant criteria |
-| G-007 | Public adoption requires private credentials                | Both repos and all audited npm/Maven artifacts are private; no-token Template installs fail | Release/Phase 1        | Credential-free clone and dependency installation from public destinations      |
-| G-008 | Minimal Template versus kitchen-sink boundary is unresolved | Fifteen dev-tool/example pages coexist with the golden-path Item slice                      | Template/Phase 0 and 2 | Approved responsibility split validated through onboarding                      |
+| ID    | Gap                                                         | Evidence                                                                                                                       | Owner                  | Exit evidence                                                                   |
+| ----- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------- |
+| G-001 | Primary persona and painful job are unvalidated             | [Working persona/job hypothesis](product-strategy.md) exists; no unfamiliar target-developer interviews or observed onboarding | Product/Phase 0B/0E    | Approved persona, excluded personas, jobs, and interview evidence               |
+| G-002 | Product identity and coordinates are unresolved             | No approved name/domain/package/group policy or search evidence                                                                | Product/Phase 0C       | Naming decision with collision, domain, handle, npm, and Maven checks           |
+| G-003 | Canonical public repository topology is unresolved          | Framework and Template exist; CLI/site/examples/fixtures ownership is undecided                                                | Architecture/Phase 0C  | Approved repository and release-boundary record                                 |
+| G-004 | Supported platform matrix is absent                         | Versions are pinned, but OS/browser/database support and windows are not promised or proven                                    | Engineering/Phase 0D   | Published matrix with CI/clean-room proof obligations                           |
+| G-005 | Competitor developer-experience evidence is incomplete      | An [official-source outcome matrix](competitive-gap-matrix.md) exists; equivalent hands-on scenarios have not run              | Product/Phase 0B/0E    | Hands-on comparison against selected alternatives and target-user jobs          |
+| G-006 | External interviews and clean-room onboarding are missing   | A [validation protocol](validation-protocol.md) is ready; no independent-user session is recorded                              | Product/Phase 0E       | Interview notes and observed setup/change sessions meeting participant criteria |
+| G-007 | Public adoption requires private credentials                | Both repos and all audited npm/Maven artifacts are private; no-token Template installs fail                                    | Release/Phase 1        | Credential-free clone and dependency installation from public destinations      |
+| G-008 | Minimal Template versus kitchen-sink boundary is unresolved | Fifteen dev-tool/example pages coexist with the golden-path Item slice                                                         | Template/Phase 0 and 2 | Approved responsibility split validated through onboarding                      |
 
 ## Public-foundation gaps
 
@@ -60,11 +60,11 @@ not an assigned person.
 
 ## Immediate sequence
 
-1. Phase 0B resolves G-001 and G-005 and defines the evidence collection for G-006.
-2. Phase 0C resolves G-002 and G-003.
-3. Phase 0D resolves G-004 and turns existing measurements into enforceable policy.
-4. Phase 0E performs G-006 and validates the proposed response to G-008.
-5. The Phase 0 gate then converts G-007 and G-101–G-110 into an estimated Phase 1
+1. Phase 0C resolves G-002 and G-003.
+2. Phase 0D resolves G-004 and turns existing measurements into enforceable policy.
+3. Phase 0E performs G-006, validates G-001, runs the hands-on follow-up for G-005,
+   and tests the proposed response to G-008.
+4. The Phase 0 gate then converts G-007 and G-101–G-110 into an estimated Phase 1
    backlog without prematurely building Phase 2/3 features.
 
 Closed gaps remain in this register with a closure date and evidence link; IDs are

@@ -27,7 +27,7 @@ make Phase 0 and public-foundation work more important than adding breadth.
 | ----------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1. Purpose and definition of success                        | Partial          | The roadmap defines outcomes; telemetry, baselines, and public-adoption evidence do not exist.                                                              |
 | 2. Current baseline and strategic interpretation            | Partial          | This evidence set establishes the first reproducible audit. Supported OS/browser clean rooms and human studies remain.                                      |
-| 3. Product strategy and positioning                         | Needs validation | A plausible small-team React/Spring Boot audience exists only as a maintainer hypothesis.                                                                   |
+| 3. Product strategy and positioning                         | Needs validation | A precise persona, job, claim hierarchy, non-goals, scale envelope, and test protocol now exist; no unfamiliar-user session has validated them.             |
 | 4. Naming, brand, identity, and discoverability             | Missing          | No approved product name, domain, package-coordinate policy, trademark evidence, or discovery surface.                                                      |
 | 5. Repository and project topology                          | Partial          | Starter and Template boundaries work technically; canonical public repo/CLI/site/examples topology is unresolved.                                           |
 | 6. Framework contract and extension model                   | Partial          | Published packages and replaceable Template adapters demonstrate a kernel, but capability, extension, and escape-hatch policy is not one explicit contract. |
@@ -60,7 +60,7 @@ make Phase 0 and public-foundation work more important than adding breadth.
 | 33. Launch and growth strategy                              | Missing          | The roadmap proposes stages, but there is no public alpha, launch package, distribution experiment, or adoption evidence.                                   |
 | 34. Product analytics, research, and feedback loops         | Missing          | No privacy-respecting activation telemetry, research cadence, target-developer interviews, or feedback taxonomy is recorded.                                |
 | 35. Maintainer sustainability and project economics         | Missing          | No published support capacity, funding model, bus-factor plan, or maintenance-cost baseline.                                                                |
-| 36. Competitive strategy and recurring review               | Missing          | Internal comparison apps exist, but no current competitor matrix grounded in target-user jobs or recurring review process.                                  |
+| 36. Competitive strategy and recurring review               | Partial          | A current official-source outcome matrix exists; hands-on scenario results and a sustained twice-yearly review remain.                                      |
 
 Sections 37–43 of the roadmap define execution, gates, risks, definition of done,
 and references rather than additional product surfaces. The
