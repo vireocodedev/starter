@@ -41,7 +41,7 @@ and completion.
 | Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete    |
 | Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete    |
 | Phase 0E  | External evidence                                      | Interviews and observed clean-room onboarding                                     | In progress |
-| Phase 0F  | Phase 0 gate review                                    | Dated Phase 1 backlog with reliable estimates                                     | Pending     |
+| Phase 0F  | Phase 0 gate review                                    | Dated Phase 1 backlog with reliable estimates                                     | In progress |
 | Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Pending     |
 | Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Pending     |
 | Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Pending     |
@@ -102,6 +102,18 @@ Zero unfamiliar participants have been recruited or observed, and zero competito
 benchmark runs have been completed. D-101 and D-102 remain open until the stated
 external thresholds—not maintainer intuition—are met.
 
+## Phase 0F gate-preparation set
+
+- [Dated Phase 0 gate review](phase-0/phase-0-gate-review.md)
+- [Dependency-ordered Phase 1 backlog](phase-1/backlog.md)
+- [Updated decision queue](phase-0/decisions.md)
+- [Updated gap register](phase-0/gap-register.md)
+
+The first formal review returns **NO-GO**. Phase 0F is in progress, not complete:
+the backlog is decomposed, but reliable elapsed estimates require a chosen
+distribution path, actual owner capacity, Phase 0E findings, and observed
+throughput. No Phase 1 implementation is authorized by this preparation work.
+
 ## Measurement policy
 
 Measurements record the commit, machine, toolchain, cache state, command, and
@@ -109,7 +121,7 @@ limitations. A local result outside the supported toolchain is diagnostic eviden
 not supported-platform proof. Performance numbers are baselines, not promises or
 budgets, until the support matrix and CI measurement policy are approved.
 
-## Next milestone: Phase 0E
+## Blocking milestone: Phase 0E
 
 Phase 0E should produce:
 

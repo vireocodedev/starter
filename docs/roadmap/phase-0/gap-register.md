@@ -66,8 +66,10 @@ not an assigned person.
    without changing source coordinates prematurely.
 2. Phase 0E performs G-006, validates G-001, runs the hands-on follow-up for G-005,
    and tests the proposed response to G-008.
-3. The Phase 0 gate then converts G-007 and G-101–G-112 into an estimated Phase 1
-   backlog without prematurely building Phase 2/3 features.
+3. The [Phase 0 gate review](phase-0-gate-review.md) remains **NO-GO** while those
+   external conditions are open. Its [provisional Phase 1 backlog](../phase-1/backlog.md)
+   converts G-007 and G-101–G-112 into dependency-ordered work without authorizing
+   public migration or prematurely building Phase 2/3 features.
 
 Closed gaps remain in this register with a closure date and evidence link; IDs are
 never reused.
