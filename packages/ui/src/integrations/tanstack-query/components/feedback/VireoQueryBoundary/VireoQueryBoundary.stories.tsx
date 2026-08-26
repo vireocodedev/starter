@@ -35,7 +35,7 @@ const meta = {
 
 ### Why it exists
 
-Suspense query surfaces otherwise repeat loading semantics, safe error presentation, retry wiring, reset-key handling, and optional diagnostic disclosure. Vireo owns that integration contract while leaving QueryClient creation and query options native to TanStack Query. Use it around one independently recoverable query region; use upstream boundaries directly when an application needs different orchestration.`,
+Suspense query surfaces otherwise repeat delayed loading semantics, safe error presentation, retry wiring, reset-key handling, and optional diagnostic disclosure. Vireo owns that Level C boundary contract while leaving QueryClient creation and query options native to TanStack Query. Its default fallback owns one delayed busy region and announcement; a custom fallback owns its own presentation and accessibility. Use it around one independently recoverable query region, and set \`announceLoading={false}\` when an ancestor already announces the same work.`,
       },
     },
   },

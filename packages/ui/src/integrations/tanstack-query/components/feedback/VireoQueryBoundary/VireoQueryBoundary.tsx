@@ -1,6 +1,13 @@
 "use client";
 
-import { VireoJsonViewer, type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
+import {
+  VireoJsonViewer,
+  VireoLoadingRegion,
+  type UtilityClassSlotMap,
+  joinClassNames,
+  mergeSx,
+  resolveSlotProps,
+} from "@/core/public";
 import Close from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import {
@@ -93,6 +100,8 @@ const VireoQueryBoundaryFallback = React.forwardRef<HTMLDivElement, FallbackProp
       errorMessage = "The requested content could not be loaded.",
       errorTitle = "Something went wrong",
       loadingLabel = "Loading",
+      loadingRevealDelay,
+      announceLoading = true,
       onRetry,
       retry,
       retryLabel = "Retry",
@@ -186,20 +195,27 @@ const VireoQueryBoundaryFallback = React.forwardRef<HTMLDivElement, FallbackProp
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         style={{ ...style, ...rootSlotStyle }}
         sx={mergeSx(sx, rootSlotSx)}
-        role={status === "loading" ? "status" : undefined}
-        aria-live={status === "loading" ? "polite" : undefined}
-        aria-label={status === "loading" ? loadingLabel : undefined}
-        aria-busy={status === "loading" ? true : undefined}
       >
         {status === "loading" ? (
-          <VireoQueryBoundaryLoadingIndicator
-            {...loadingOther}
-            as={slots.loadingIndicator}
-            ownerState={ownerState}
-            className={joinClassNames(classes.loadingIndicator, loadingClassName)}
-            size={loadingSize ?? "3rem"}
-            aria-hidden="true"
-          />
+          <VireoLoadingRegion
+            announce={announceLoading}
+            loading
+            loadingLabel={loadingLabel}
+            revealDelay={loadingRevealDelay}
+          >
+            {({ loadingVisible }) =>
+              loadingVisible ? (
+                <VireoQueryBoundaryLoadingIndicator
+                  {...loadingOther}
+                  as={slots.loadingIndicator}
+                  ownerState={ownerState}
+                  className={joinClassNames(classes.loadingIndicator, loadingClassName)}
+                  size={loadingSize ?? "3rem"}
+                  aria-hidden="true"
+                />
+              ) : null
+            }
+          </VireoLoadingRegion>
         ) : (
           <VireoQueryBoundaryErrorAlert
             severity="error"

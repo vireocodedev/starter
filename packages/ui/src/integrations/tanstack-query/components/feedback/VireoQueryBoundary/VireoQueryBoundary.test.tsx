@@ -1,6 +1,6 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { QueryClient, QueryClientProvider, useSuspenseQuery } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { vireoQueryBoundaryClasses } from "./VireoQueryBoundary.classes";
@@ -26,17 +26,25 @@ function Failure({ error = new Error("Boom") }: { error?: Error }): never {
 describe(VIREO_QUERY_BOUNDARY_NAME, () => {
   beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => undefined));
 
-  it("renders the accessible default loading fallback", () => {
+  it("delays the accessible default loading fallback through one shared boundary", () => {
+    vi.useFakeTimers();
     renderWithClient(
       <VireoQueryBoundary>
         <Pending />
       </VireoQueryBoundary>,
     );
 
-    const root = screen.getByRole("status", { name: "Loading" });
-    expect(root).toHaveAttribute("aria-busy", "true");
+    const root = document.querySelector(`.${vireoQueryBoundaryClasses.root}`);
     expect(root).toHaveClass(vireoQueryBoundaryClasses.root, vireoQueryBoundaryClasses.loading);
     expect(root).toHaveStyle({ minHeight: "160px" });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(150));
+    expect(screen.getByRole("status")).toHaveTextContent("Loading");
+    expect(root?.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    vi.useRealTimers();
   });
 
   it("renders successful children directly without a permanent wrapper", () => {
@@ -235,6 +243,7 @@ describe(VIREO_QUERY_BOUNDARY_NAME, () => {
     const ref = React.createRef<HTMLDivElement>();
     renderWithClient(
       <VireoQueryBoundary
+        loadingRevealDelay={0}
         ref={ref}
         classes={{ root: "custom-root", loadingIndicator: "custom-spinner" }}
         slots={{ root: "section" }}
@@ -243,11 +252,24 @@ describe(VIREO_QUERY_BOUNDARY_NAME, () => {
         <Pending />
       </VireoQueryBoundary>,
     );
-    const root = screen.getByRole("status");
+    const root = document.querySelector("section");
+    if (!(root instanceof HTMLElement)) throw new Error("Missing query boundary fallback root");
+    expect(screen.getByRole("status")).toHaveTextContent("Loading");
     expect(root.tagName).toBe("SECTION");
     expect(root).toHaveClass("custom-root", vireoQueryBoundaryClasses.root);
     expect(root).toHaveAttribute("data-status", "loading");
     expect(ref.current).toBe(root);
+  });
+
+  it("lets an announcing ancestor silence the default loading announcement", () => {
+    renderWithClient(
+      <VireoQueryBoundary announceLoading={false} loadingRevealDelay={0}>
+        <Pending />
+      </VireoQueryBoundary>,
+    );
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(document.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
   });
 
   it("supports MUI theme defaults, style overrides, and variants", () => {
@@ -267,7 +289,7 @@ describe(VIREO_QUERY_BOUNDARY_NAME, () => {
         </VireoQueryBoundary>
       </ThemeProvider>,
     );
-    expect(screen.getByRole("status", { name: "Fetching records" })).toHaveStyle({
+    expect(document.querySelector(`.${vireoQueryBoundaryClasses.root}`)).toHaveStyle({
       border: "2px solid rgb(1, 2, 3)",
       borderRadius: "11px",
     });

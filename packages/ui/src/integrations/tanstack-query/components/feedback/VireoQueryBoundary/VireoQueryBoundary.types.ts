@@ -90,10 +90,14 @@ export type VireoQueryBoundarySlotsAndSlotProps = CreateSlotsAndSlotProps<
 /** Props owned by {@link VireoQueryBoundary}. */
 export type VireoQueryBoundaryOwnProps = VireoQueryBoundarySlotsAndSlotProps & {
   children: React.ReactNode;
+  /** Whether the default loading fallback announces prolonged loading. Disable for a boundary covered by an announcing ancestor. @default true */
+  announceLoading?: boolean;
   loadingFallback?: React.ReactNode;
   errorFallback?: (context: VireoQueryErrorFallbackContext) => React.ReactNode;
   /** @default 'Loading' */
   loadingLabel?: string;
+  /** Delay before the default loading indicator and announcement become visible. @default VIREO_LOADING_TOKENS.revealDelay */
+  loadingRevealDelay?: number;
   /** @default 'Something went wrong' */
   errorTitle?: React.ReactNode;
   /** @default 'The requested content could not be loaded.' */
