@@ -21,14 +21,13 @@ import {
   IconButton,
   MenuItem,
   Select,
-  Skeleton,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { VireoBottomDrawer } from "@/capabilities/overlays/public";
-import { mergeSx, VireoLabelBox } from "@/core/public";
+import { mergeSx, VireoLabelBox, VireoSkeleton } from "@/core/public";
 import type { SxProps, Theme } from "@mui/material/styles";
 import React, { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
@@ -48,6 +47,32 @@ type MobileResponsiveTableRowProps<TItem> = {
   rowKey: React.Key;
   rowSx?: SxProps<Theme>;
 };
+
+const MOBILE_SUMMARY_SX = {
+  minHeight: 68,
+  px: 2,
+  bgcolor: "surface.raised",
+  "& .MuiAccordionSummary-content": {
+    minWidth: 0,
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 2,
+  },
+} as const;
+
+function getMobileAccordionSx(rowIndex: number, rowSx?: SxProps<Theme>) {
+  return mergeSx(
+    {
+      overflow: "visible",
+      backgroundColor: "transparent",
+      backgroundImage: "none",
+      borderTop: rowIndex > 0 ? 1 : undefined,
+      borderColor: "divider",
+      "&::before": { display: "none" },
+    },
+    rowSx,
+  );
+}
 
 function MobileResponsiveTableRow<TItem>({
   endAdornmentColumn,
@@ -79,32 +104,9 @@ function MobileResponsiveTableRow<TItem>({
           });
         }}
         slotProps={{ transition: { unmountOnExit: true } }}
-        sx={mergeSx(
-          {
-            overflow: "visible",
-            backgroundColor: "transparent",
-            backgroundImage: "none",
-            borderTop: rowIndex > 0 ? 1 : undefined,
-            borderColor: "divider",
-            "&::before": { display: "none" },
-          },
-          rowSx,
-        )}
+        sx={getMobileAccordionSx(rowIndex, rowSx)}
       >
-        <AccordionSummary
-          expandIcon={<ExpandMoreRoundedIcon />}
-          sx={{
-            minHeight: 68,
-            px: 2,
-            bgcolor: "surface.raised",
-            "& .MuiAccordionSummary-content": {
-              minWidth: 0,
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
-            },
-          }}
-        >
+        <AccordionSummary expandIcon={<ExpandMoreRoundedIcon />} sx={MOBILE_SUMMARY_SX}>
           <Box sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {resolvedTitleColumn?.renderBody(item, rowIndex, { placement: "mobile-summary" })}
           </Box>
@@ -164,9 +166,11 @@ export function MobileResponsiveTable<
 >({
   tableProps,
   state,
+  skeletonVisible,
 }: {
   tableProps: VireoResponsiveTableProps<TItem, TColumns>;
   state: VireoResponsiveTableState<TItem>;
+  skeletonVisible: boolean;
 }) {
   const {
     clearFiltersLabel = tableProps.labels.clearFilters,
@@ -312,7 +316,6 @@ export function MobileResponsiveTable<
     <Box
       ref={setMobileViewport}
       data-responsive-table-mobile-viewport
-      aria-busy={skeleton}
       onScroll={handleMobileScroll}
       sx={{ height: "100%", overflow: "auto", overflowAnchor: "none" }}
     >
@@ -443,8 +446,7 @@ export function MobileResponsiveTable<
           cardCount={skeletonPlaceholderCount}
           hasEndAdornment={Boolean(renderTitleEndAdornment ?? endAdornmentColumn)}
           hasHelper={Boolean(helperColumn)}
-          label={labels.loadingTable}
-          stickyRowHeaderLayer={layers.stickyRowHeader}
+          visible={skeletonVisible}
         />
       ) : (
         <Card
@@ -510,78 +512,37 @@ function MobileResponsiveTableSkeleton({
   cardCount,
   hasEndAdornment,
   hasHelper,
-  label,
-  stickyRowHeaderLayer,
+  visible,
 }: {
   cardCount: number;
   hasEndAdornment: boolean;
   hasHelper: boolean;
-  label: string;
-  stickyRowHeaderLayer: number;
+  visible: boolean;
 }) {
   return (
-    <Card aria-busy="true" aria-label={label} sx={{ overflow: "clip", flexShrink: 0, borderRadius: 0 }}>
+    <Card
+      aria-hidden="true"
+      sx={{ overflow: "clip", flexShrink: 0, borderRadius: 0, visibility: visible ? "visible" : "hidden" }}
+    >
       {Array.from({ length: cardCount }).map((_, cardIndex) => (
-        <Box
-          key={`mobile-skeleton-${cardIndex}`}
-          sx={{
-            position: "relative",
-            overflow: "visible",
-            "&:not(:first-of-type)": { borderTop: 1, borderColor: "divider" },
-          }}
-        >
-          <Box
-            sx={{
-              position: "sticky",
-              top: 0,
-              zIndex: stickyRowHeaderLayer,
-              display: "flex",
-              minHeight: 68,
-              alignItems: "center",
-              gap: 2,
-              px: 2,
-              bgcolor: "surface.raised",
-            }}
-          >
-            <Skeleton
-              animation="wave"
-              variant="rounded"
-              sx={{
-                height: 22,
-                width: `${42 + ((cardIndex * 13) % 24)}%`,
-              }}
-            />
-            {hasEndAdornment || hasHelper ? (
-              <Stack spacing={0.5} sx={{ ml: "auto", alignItems: "flex-end" }}>
-                {hasEndAdornment ? (
-                  <Skeleton
-                    animation="wave"
-                    sx={{
-                      height: 18,
-                      width: 72,
-                    }}
-                  />
-                ) : null}
-                {hasHelper ? (
-                  <Skeleton
-                    animation="wave"
-                    sx={{
-                      height: 14,
-                      width: 48,
-                    }}
-                  />
-                ) : null}
-              </Stack>
-            ) : null}
-            <Skeleton
-              animation="wave"
-              variant="circular"
-              sx={{
-                height: 24,
-                width: 24,
-              }}
-            />
-          </Box>
+        <Box key={`mobile-skeleton-${cardIndex}`} data-responsive-table-mobile-skeleton-row>
+          <Accordion square disableGutters elevation={0} expanded={false} sx={getMobileAccordionSx(cardIndex)}>
+            <AccordionSummary
+              tabIndex={-1}
+              expandIcon={<VireoSkeleton variant="circular" width={24} height={24} />}
+              sx={MOBILE_SUMMARY_SX}
+            >
+              <Box sx={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
+                <VireoSkeleton variant="rounded" height={22} width={`${42 + ((cardIndex * 13) % 24)}%`} />
+              </Box>
+              {hasEndAdornment || hasHelper ? (
+                <Stack spacing={0.25} sx={{ flexShrink: 0, alignItems: "flex-end", textAlign: "right" }}>
+                  {hasEndAdornment ? <VireoSkeleton height={18} width={72} /> : null}
+                  {hasHelper ? <VireoSkeleton height={14} width={48} /> : null}
+                </Stack>
+              ) : null}
+            </AccordionSummary>
+          </Accordion>
         </Box>
       ))}
     </Card>

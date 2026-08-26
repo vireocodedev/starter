@@ -1,4 +1,4 @@
-import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
+import { type UtilityClassSlotMap, VireoLoadingRegion, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
 import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
@@ -180,14 +180,23 @@ function VireoResponsiveTableImpl<
       as={slots.root ?? "div"}
       ref={rootRef}
       ownerState={ownerState}
-      aria-busy={skeleton || undefined}
       data-container-layout={layout ?? undefined}
       className={joinClassNames(classes.root, className, rootSlotClassName)}
       style={{ ...style, ...rootSlotStyle }}
       sx={mergeSx(sx, rootSlotSx)}
     >
-      {layout === "mobile" && <MobileResponsiveTable tableProps={tableProps} state={state} />}
-      {layout === "desktop" && <DesktopResponsiveTable tableProps={tableProps} state={state} />}
+      <VireoLoadingRegion loading={skeleton} loadingLabel={labels.loadingTable} sx={{ height: "100%", minHeight: 0 }}>
+        {({ loadingVisible }) => (
+          <>
+            {layout === "mobile" && (
+              <MobileResponsiveTable tableProps={tableProps} state={state} skeletonVisible={loadingVisible} />
+            )}
+            {layout === "desktop" && (
+              <DesktopResponsiveTable tableProps={tableProps} state={state} skeletonVisible={loadingVisible} />
+            )}
+          </>
+        )}
+      </VireoLoadingRegion>
     </VireoResponsiveTableRoot>
   );
 }

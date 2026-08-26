@@ -1,7 +1,9 @@
 # Loading-State and Skeleton Audit
 
-**Phase:** 2 — repository audit  
-**Status:** Baseline  
+**Phase:** 3 — foundation remediation
+
+**Status:** Foundation and responsive-table pilot remediated
+
 **Audited against:** [Vireo Loading-State and Skeleton Standard](LOADING_STATE_STANDARD.md)  
 **Scope:** `@vireocodedev/starter-ui` public loading primitives and async-capable visual components
 
@@ -39,71 +41,77 @@ The audit found four cross-cutting gaps:
 
 ## Public surface inventory
 
-| Surface                                                  | Category                                 | Current treatment                                                                                                                                             | Geometry target                                     | Rating        | Priority | Owner                       |
-| -------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------- | -------- | --------------------------- |
-| `VireoDelayedRender`                                     | `boundary` helper                        | Defers mounting with a component-local 200 ms default. It owns timing only.                                                                                   | Not applicable                                      | Partial       | P0       | Core behavior               |
-| `VireoQueryBoundary`                                     | `boundary`                               | Suspense fallback uses an accessible centered progress indicator; consumers may replace it. Error and retry behavior is local and recoverable.                | C by default; consumer-declared for custom fallback | Partial       | P1       | TanStack Query integration  |
-| `VireoInitializationBoundary`                            | `boundary`                               | Replaces a gated subtree with a consumer fallback and throws initialization errors to an ancestor.                                                            | C by default; consumer-declared for fallback        | Partial       | P1       | Core behavior               |
-| `VireoResponsiveTable`                                   | `skeleton-capable`, `content-preserving` | Keeps table headers and pagination, renders desktop skeleton rows, renders a separate mobile skeleton card tree, and preserves rows during next-page loading. | B; A for stable outer anchors                       | Non-compliant | P0       | Responsive table capability |
-| Four autocomplete field variants                         | `content-preserving`                     | Retain the control and selected values while MUI presents loading text and a local progress adornment.                                                        | A control frame                                     | Partial       | P2       | Forms capability            |
-| `VireoFormSubmitButton`                                  | `busy-action`                            | Tracks form submission, presents MUI loading feedback, and prevents duplicate submission through button loading/disabled behavior.                            | A                                                   | Partial       | P1       | Forms capability            |
-| `VireoFormNextStepButton`                                | `busy-action`                            | Tracks asynchronous step transition, sets `aria-busy`, disables unsafe repetition, and retains the workflow.                                                  | A                                                   | Aligned       | P2       | Forms capability            |
-| `VireoConfirmationDialog`                                | `busy-action`                            | Retains target context, disables closing and actions, and adds a progress indicator to the confirm action.                                                    | A                                                   | Partial       | P1       | Confirmation capability     |
-| `VireoForm` and `VireoFormFileListField` lifecycle flags | `static` for loading classification      | Expose submitting/validating owner state for presentation and safety; they do not independently render a loading treatment.                                   | Not applicable                                      | Aligned       | P2       | Forms capability            |
-| `VireoFormStepProgress`                                  | Not loading                              | Represents known multi-step completion rather than an asynchronous wait.                                                                                      | Not applicable                                      | Not loading   | —        | Forms capability            |
+| Surface                                                  | Category                                 | Current treatment                                                                                                                                                | Geometry target                                     | Rating      | Priority | Owner                       |
+| -------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ----------- | -------- | --------------------------- |
+| `VireoDelayedRender`                                     | `boundary` helper                        | Defers mounting with the shared semantic 150 ms reveal token. It owns timing only.                                                                               | Not applicable                                      | Aligned     | —        | Core behavior               |
+| `VireoQueryBoundary`                                     | `boundary`                               | Suspense fallback uses an accessible centered progress indicator; consumers may replace it. Error and retry behavior is local and recoverable.                   | C by default; consumer-declared for custom fallback | Partial     | P1       | TanStack Query integration  |
+| `VireoInitializationBoundary`                            | `boundary`                               | Replaces a gated subtree with a consumer fallback and throws initialization errors to an ancestor.                                                               | C by default; consumer-declared for fallback        | Partial     | P1       | Core behavior               |
+| `VireoResponsiveTable`                                   | `skeleton-capable`, `content-preserving` | Keeps stable controls, delays silent skeleton leaves through one boundary, reuses real row anatomy in both layouts, and preserves rows during next-page loading. | B; A for stable outer anchors                       | Aligned     | —        | Responsive table capability |
+| Four autocomplete field variants                         | `content-preserving`                     | Retain the control and selected values while MUI presents loading text and a local progress adornment.                                                           | A control frame                                     | Partial     | P2       | Forms capability            |
+| `VireoFormSubmitButton`                                  | `busy-action`                            | Tracks form submission, presents MUI loading feedback, and prevents duplicate submission through button loading/disabled behavior.                               | A                                                   | Partial     | P1       | Forms capability            |
+| `VireoFormNextStepButton`                                | `busy-action`                            | Tracks asynchronous step transition, sets `aria-busy`, disables unsafe repetition, and retains the workflow.                                                     | A                                                   | Aligned     | P2       | Forms capability            |
+| `VireoConfirmationDialog`                                | `busy-action`                            | Retains target context, disables closing and actions, and adds a progress indicator to the confirm action.                                                       | A                                                   | Partial     | P1       | Confirmation capability     |
+| `VireoForm` and `VireoFormFileListField` lifecycle flags | `static` for loading classification      | Expose submitting/validating owner state for presentation and safety; they do not independently render a loading treatment.                                      | Not applicable                                      | Aligned     | P2       | Forms capability            |
+| `VireoFormStepProgress`                                  | Not loading                              | Represents known multi-step completion rather than an asynchronous wait.                                                                                         | Not applicable                                      | Not loading | —        | Forms capability            |
 
 The autocomplete row covers `VireoFormAutocompleteField`, `VireoFormAutocompleteMultipleField`, `VireoFormFreeSoloAutocompleteField`, and `VireoFormFreeSoloAutocompleteMultipleField`.
 
 ## Detailed findings
 
-### F-01 — semantic loading tokens are absent
+### F-01 — semantic loading tokens
 
-**Rating:** Non-compliant  
-**Priority:** P0
+**Rating:** Aligned
 
-`VIREO_MOTION_TOKENS` supplies general interaction durations, but there is no loading-specific contract for the 150 ms reveal delay, 120 ms content transition, 1,400 ms calm pulse, skeleton colors, or skeleton radius. `VireoDelayedRender` defaults to 200 ms, while consuming code already uses separate 150 ms literals or unrelated motion tokens.
+**Priority:** Remediated in Phase 3
 
-**Required remediation:** Add public semantic loading tokens and make public loading behavior consume them. Theme integration must provide the base/highlight colors and radius without forcing consumers to style raw MUI skeletons independently.
+`VIREO_LOADING_TOKENS` now owns reveal, content-transition, and skeleton-animation timing. `VireoDelayedRender`, `VireoLoadingRegion`, and `VireoSkeleton` consume that contract, while skeleton colors and radius resolve through the active MUI theme.
 
-### F-02 — skeleton leaves have no shared primitive
+**Remediation record:** Public semantic tokens and theme-resolved visual values now replace component-local loading literals.
 
-**Rating:** Non-compliant  
-**Priority:** P0
+### F-02 — shared skeleton leaves
 
-Production skeletons currently use raw MUI `Skeleton`. Animation style, duration, reduced-motion behavior, accessible hiding, and represented-leaf radius are therefore repeated or implicit.
+**Rating:** Aligned
 
-**Required remediation:** Introduce a first-class skeleton leaf or an equivalent centralized theme contract. It must remain visual-only, be hidden from assistive technology, inherit semantic loading tokens, and disable nonessential animation under reduced motion.
+**Priority:** Remediated in Phase 3
 
-### F-03 — responsive-table announcement ownership is duplicated
+`VireoSkeleton` centralizes silent semantics, calm shared animation timing, reduced-motion behavior, shapes, and geometry-preserving child wrapping.
 
-**Rating:** Non-compliant  
-**Priority:** P0
+**Remediation record:** The public leaf contract and focused accessibility, theme, shape, and reduced-motion behavior now live in one component.
 
-The responsive-table root applies `aria-busy` during initial loading. The desktop layout applies it again. The mobile viewport applies it again, and the mobile skeleton card adds another busy state and label for the same operation.
+### F-03 — responsive-table announcement ownership
 
-**Required remediation:** Make the public table root the single announcing/busy boundary. Descendant skeleton leaves and layout implementations must be silent.
+**Rating:** Aligned
 
-### F-04 — the mobile table skeleton independently reproduces row layout
+**Priority:** Remediated in Phase 3
 
-**Rating:** Non-compliant  
-**Priority:** P0
+`VireoResponsiveTable` delegates initial-loading timing, `aria-busy`, and its one polite announcement to a single `VireoLoadingRegion`. Desktop and mobile descendants are silent.
 
-Desktop loading uses the real table, row, and cell elements. Mobile loading instead renders a separate card/box tree that imitates the accordion summary. That tree duplicates row height, spacing, sticky behavior, and adornment layout, violating the structural invariant.
+**Remediation record:** Focused desktop and mobile tests assert exactly one busy boundary and one delayed status.
 
-**Required remediation:** Render mobile skeleton leaves through the same summary/frame structure as loaded mobile rows. Declare bounded dimensions for unknown title and metadata lengths and add compact/regular alignment coverage.
+### F-04 — mobile table skeleton row anatomy
+
+**Rating:** Aligned
+
+**Priority:** Remediated in Phase 3
+
+Desktop skeleton leaves render inside real table rows and cells. Mobile skeleton leaves render inside the same shared accordion and summary anatomy, including the same summary sizing and adornment layout. Placeholder widths are deterministic and bounded.
+
+**Remediation record:** Both responsive modes use real repeated-item anatomy and are exercised by the public `AlignmentContract` story.
 
 ### F-05 — responsive-table state semantics are compressed into one boolean
 
-**Rating:** Partial  
-**Priority:** P1
+**Rating:** Aligned
 
-The `skeleton` flag is suitable for initial loading, while `isFetchingNextPage` correctly preserves existing mobile rows. The component contract does not explicitly prohibit using `skeleton` for refresh, does not declare a geometry level, and has no shared refresh treatment for desktop consumers.
+**Priority:** Remediated in Phase 3
 
-**Required remediation:** Document `skeleton` as initial/no-usable-content only, document incremental loading separately, and decide whether refresh remains application-owned or becomes an explicit table slot/state. Preserve the existing content-first behavior.
+The public contract documents `skeleton` as initial/no-usable-content only and keeps incremental mobile pagination content-preserving. General refresh remains application-owned so usable `data` stays visible rather than being replaced by skeletons. Geometry is Level B with Level A stable outer anchors.
+
+**Remediation record:** Initial loading and incremental pagination are explicit; retained-content refresh feedback remains application-owned.
 
 ### F-06 — query and initialization boundaries lack standard timing contracts
 
-**Rating:** Partial  
+**Rating:** Partial
+
 **Priority:** P1
 
 `VireoQueryBoundary` mounts its default progress fallback immediately and invents a generic minimum-height region. `VireoInitializationBoundary` delegates all fallback semantics to consumers and defaults to no feedback. Neither exposes a documented semantic reveal policy. The query boundary has strong single-region status semantics; the initialization boundary has none by default.
@@ -112,7 +120,8 @@ The `skeleton` flag is suitable for initial loading, while `isFetchingNextPage` 
 
 ### F-07 — busy-action semantics are inconsistent
 
-**Rating:** Partial  
+**Rating:** Partial
+
 **Priority:** P1
 
 `VireoFormNextStepButton` explicitly applies `aria-busy`; `VireoFormSubmitButton` relies on MUI loading behavior without the same explicit contract. `VireoConfirmationDialog` preserves context and blocks unsafe exits, but neither the dialog region nor confirm action has an explicit busy announcement contract.
@@ -130,10 +139,11 @@ The autocomplete variants correctly retain the field frame, input, and selected 
 
 ### F-09 — canonical state and geometry verification is incomplete
 
-**Rating:** Non-compliant  
+**Rating:** Partial
+
 **Priority:** P0
 
-Current unit and Storybook coverage proves important behavior, including delayed rendering, table loading/empty output, form action pending states, and query/initialization retries. It does not provide the full standard matrix. The responsive table has no `AlignmentContract`; public boundaries and busy actions do not consistently expose canonical `Loaded`, `Loading`, `Refreshing`, `Empty`, and `Error` stories where applicable.
+The responsive-table pilot now covers delayed loading, single-boundary announcements, desktop/mobile anatomy, and an `AlignmentContract` story. The remaining public boundaries and busy actions do not yet consistently expose the full applicable canonical matrix.
 
 **Required remediation:** Add canonical stories and browser-level contracts after each component is remediated. Tests must include responsive modes, density, reduced motion, themes, representative localization, announcements, recovery, and CLS/anchor limits appropriate to the declared geometry level.
 
@@ -164,4 +174,5 @@ Current unit and Storybook coverage proves important behavior, including delayed
 - [x] Geometry targets assigned.
 - [x] Accessibility and announcement ownership gaps recorded.
 - [x] Remediation priorities and repository owners assigned.
-- [ ] Findings remediated. This begins in the next implementation phase.
+- [x] Phase 3 foundation and responsive-table pilot findings remediated.
+- [ ] Remaining boundary, action, widget, and cross-surface verification findings remediated in later phases.

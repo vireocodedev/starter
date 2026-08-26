@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "A stable loading boundary that owns delayed placeholder reveal, aria-busy, and one polite status announcement. Children may use its render state to preserve their real layout before and during loading.",
+          "A stable loading boundary that owns delayed placeholder reveal, aria-busy, and one polite status announcement. Children may use its render state to preserve their real layout before and during loading. Refreshing, empty, error, and alignment states remain the responsibility of the surface composed inside the boundary.",
       },
     },
   },
@@ -30,6 +30,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: { children: null, loading: false, loadingLabel: "Loading" },
+  render: () => <DefaultExample />,
+  parameters: createSourceParameters(defaultExampleSource),
+};
+
+export const Loaded: Story = {
   args: { children: null, loading: false, loadingLabel: "Loading" },
   render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),

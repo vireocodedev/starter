@@ -1,7 +1,8 @@
 import { IconButton, Stack, ThemeProvider, createTheme } from "@mui/material";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { VIREO_LOADING_TOKENS } from "@/core/public";
 import { VireoResponsiveTable } from "./VireoResponsiveTable";
 import { vireoResponsiveTableClasses } from "./VireoResponsiveTable.classes";
 import { VIREO_RESPONSIVE_TABLE_NAME } from "./VireoResponsiveTable.identity";
@@ -53,6 +54,8 @@ const requiredProps = {
 } satisfies VireoResponsiveTableProps<(typeof rows)[number], typeof columns>;
 
 describe(VIREO_RESPONSIVE_TABLE_NAME, () => {
+  afterEach(() => vi.useRealTimers());
+
   it("renders typed columns and rows in desktop layout", () => {
     render(<VireoResponsiveTable {...requiredProps} />);
     expect(screen.getByRole("table", { name: "Accounts" })).toBeInTheDocument();
@@ -245,6 +248,43 @@ describe(VIREO_RESPONSIVE_TABLE_NAME, () => {
     expect(screen.getByRole("table", { name: "Accounts" })).toBeInTheDocument();
     rerender(<VireoResponsiveTable {...requiredProps} data={[]} />);
     expect(screen.getByText("No accounts")).toBeInTheDocument();
+  });
+
+  it("owns one delayed loading boundary while preserving desktop row geometry", () => {
+    vi.useFakeTimers();
+    const { container } = render(<VireoResponsiveTable {...requiredProps} data={[]} skeleton />);
+
+    const skeletonRow = container.querySelector<HTMLElement>("tbody tr");
+    expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+    expect(skeletonRow).toHaveStyle({ visibility: "hidden" });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(VIREO_LOADING_TOKENS.revealDelay));
+
+    expect(skeletonRow).toHaveStyle({ visibility: "visible" });
+    expect(screen.getByRole("status")).toHaveTextContent("Loading accounts");
+    expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+  });
+
+  it("uses the loaded accordion anatomy for delayed mobile skeleton rows", () => {
+    vi.useFakeTimers();
+    const { container } = render(
+      <VireoResponsiveTable {...requiredProps} data={[]} layout="mobile" skeleton titleColumn="name" />,
+    );
+
+    const skeletonCard = container.querySelector<HTMLElement>(
+      "[data-responsive-table-mobile-skeleton-row]",
+    )?.parentElement;
+    expect(
+      container.querySelectorAll("[data-responsive-table-mobile-skeleton-row] .MuiAccordionSummary-root"),
+    ).toHaveLength(requiredProps.filters.rowsPerPage);
+    expect(skeletonCard).toHaveStyle({ visibility: "hidden" });
+    expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+
+    act(() => vi.advanceTimersByTime(VIREO_LOADING_TOKENS.revealDelay));
+
+    expect(skeletonCard).toHaveStyle({ visibility: "visible" });
+    expect(screen.getByRole("status")).toHaveTextContent("Loading accounts");
   });
 
   it("supports actionable empty content and shared per-row visual feedback", () => {

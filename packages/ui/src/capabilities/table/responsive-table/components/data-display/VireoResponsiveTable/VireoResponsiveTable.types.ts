@@ -97,6 +97,11 @@ export type VireoResponsiveTableOwnProps<
   /** Replaces the default empty-state label in both layouts. */
   renderEmptyState?: () => ReactNode;
   renderMobileFilters?: () => ReactNode;
+  /**
+   * Shows geometry-preserving placeholder rows for an initial load with no usable records.
+   * Do not enable this during refresh; keep existing `data` visible and present refresh feedback outside the table.
+   * @default false
+   */
   skeleton?: boolean;
   titleColumn?: VireoResponsiveTableColumnId<TColumns>;
   titleEndAdornmentColumn?: VireoResponsiveTableColumnId<TColumns>;
@@ -113,6 +118,7 @@ export type VireoResponsiveTableOwnProps<
   onMobileFiltersDone?: () => void;
   renderTitleEndAdornment?: (item: TItem, rowIndex: number) => ReactNode;
   hasNextPage?: boolean;
+  /** Preserves loaded mobile rows and adds local progress while the next incremental page is fetched. */
   isFetchingNextPage?: boolean;
   onLoadNextPage?: () => void;
   filtersLabel?: string;
