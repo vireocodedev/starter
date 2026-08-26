@@ -99,6 +99,12 @@ retains structured commit/toolchain/environment/result metadata. These rows rema
 unactivated until recurring CI records are green; branded/physical browsers,
 installed PWA checks, and hosted OS clean rooms remain separate follow-ups.
 
+Template also now owns one production-like deployment path: independent unprivileged
+frontend/backend images and PostgreSQL 18 are digest-pinned, Compose keeps backend
+and database ports internal, and CI checks the static PWA, same-origin API proxy,
+backend readiness, and database health. Database upgrade/backup/restore/rollback and
+multi-architecture evidence remain release follow-ups.
+
 ## Coordinate-unblock sequence
 
 Once the B0 decisions are complete:
