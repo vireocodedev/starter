@@ -70,16 +70,13 @@ These cannot be safely inferred or completed only in source:
 This order minimizes rework and does not require public packages or another
 developer's implementation input:
 
-1. **API reduction review** — reduce accidental UI barrels (currently 1,364
-   distinct symbols), decide the four Storybook exports, and classify the 111 JVM
-   public types before first public compatibility expectations harden.
-2. **Package portability/documentation** — explicitly document TypeScript Bundler
+1. **Package portability/documentation** — explicitly document TypeScript Bundler
    resolution, decide whether source maps remain public, and make installation docs
    distribution-neutral until coordinates land.
-3. **Release-pipeline preparation** — build provider-independent verification,
+2. **Release-pipeline preparation** — build provider-independent verification,
    provenance/signing assertions, rollback/non-republication rules, and dry-run
    release evidence without embedding final namespaces or secrets.
-4. **Support evidence lanes** — implement the code-owned portions of D-105:
+3. **Support evidence lanes** — implement the code-owned portions of D-105:
    Java 25 compatibility, PostgreSQL 17/18, Firefox/WebKit, clean container builds,
    and recurring evidence metadata. Physical devices and external OS machines stay
    manual/hosted follow-ups.

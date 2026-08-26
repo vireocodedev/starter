@@ -43,37 +43,125 @@
     "@vireocodedev/starter-ui": {
       "role": "react-design-system",
       "entryPoints": {
-        ".": { "audience": "application", "environment": ["browser"] },
-        "./country": { "audience": "application", "environment": ["browser"] },
-        "./event-source": { "audience": "application", "environment": ["browser"] },
-        "./forms": { "audience": "application", "environment": ["browser"] },
-        "./hello-pangea-dnd": { "audience": "optional-integration", "environment": ["browser"] },
-        "./localization": { "audience": "optional-integration", "environment": ["browser"] },
-        "./react-i18next": { "audience": "optional-integration", "environment": ["browser"] },
-        "./sonner": { "audience": "optional-integration", "environment": ["browser"] },
-        "./tanstack-query": { "audience": "optional-integration", "environment": ["browser"] },
-        "./storybook": { "audience": "authoring-tooling", "environment": ["browser"] },
+        ".": {
+          "audience": "application",
+          "environment": ["browser"],
+          "symbolBudget": 757,
+          "disposition": "freeze-growth"
+        },
+        "./country": {
+          "audience": "application",
+          "environment": ["browser"],
+          "symbolBudget": 21,
+          "disposition": "retain"
+        },
+        "./event-source": {
+          "audience": "application",
+          "environment": ["browser"],
+          "symbolBudget": 7,
+          "disposition": "retain"
+        },
+        "./forms": {
+          "audience": "application",
+          "environment": ["browser"],
+          "symbolBudget": 539,
+          "disposition": "freeze-growth"
+        },
+        "./hello-pangea-dnd": {
+          "audience": "optional-integration",
+          "environment": ["browser"],
+          "symbolBudget": 56,
+          "disposition": "retain"
+        },
+        "./localization": {
+          "audience": "optional-integration",
+          "environment": ["browser"],
+          "symbolBudget": 5,
+          "disposition": "retain"
+        },
+        "./react-i18next": {
+          "audience": "optional-integration",
+          "environment": ["browser"],
+          "symbolBudget": 3,
+          "disposition": "retain"
+        },
+        "./sonner": {
+          "audience": "optional-integration",
+          "environment": ["browser"],
+          "symbolBudget": 19,
+          "disposition": "retain"
+        },
+        "./tanstack-query": {
+          "audience": "optional-integration",
+          "environment": ["browser"],
+          "symbolBudget": 30,
+          "disposition": "retain"
+        },
+        "./storybook": {
+          "audience": "authoring-tooling",
+          "environment": ["browser"],
+          "symbolBudget": 5,
+          "disposition": "extract-next-major"
+        },
         "./storybook/VireoDockedSidePanel": {
           "audience": "authoring-tooling",
-          "environment": ["browser"]
+          "environment": ["browser"],
+          "symbolBudget": 2,
+          "disposition": "extract-next-major"
         },
         "./storybook/VireoIconContainer": {
           "audience": "authoring-tooling",
-          "environment": ["browser"]
+          "environment": ["browser"],
+          "symbolBudget": 2,
+          "disposition": "extract-next-major"
         },
         "./storybook/VireoResponsiveOverlayFrame": {
           "audience": "authoring-tooling",
-          "environment": ["browser"]
+          "environment": ["browser"],
+          "symbolBudget": 4,
+          "disposition": "extract-next-major"
         }
       }
     }
   },
   "maven": {
-    "com.vireocode:vireo-starter-core": { "audience": "application", "role": "server-foundation" },
-    "com.vireocode:vireo-starter-auth": { "audience": "application", "role": "default-authentication" },
-    "com.vireocode:vireo-starter-queryengine": { "audience": "application", "role": "server-query-engine" },
-    "com.vireocode:vireo-starter-offline": { "audience": "application", "role": "offline-sync-server" },
-    "com.vireocode:vireo-starter-history": { "audience": "application", "role": "server-history" },
+    "com.vireocode:vireo-starter-core": {
+      "audience": "application",
+      "role": "server-foundation",
+      "declarationBudget": 29,
+      "packageIntents": {
+        "com.vireocode.starter.base": "domain-base-and-mapping-api",
+        "com.vireocode.starter.config": "spring-auto-configuration-api",
+        "com.vireocode.starter.flyway": "migration-extension-api",
+        "com.vireocode.starter.security": "security-expression-api",
+        "com.vireocode.starter.spi": "consumer-extension-points",
+        "com.vireocode.starter.web": "http-and-error-contracts"
+      }
+    },
+    "com.vireocode:vireo-starter-auth": {
+      "audience": "application",
+      "role": "default-authentication",
+      "declarationBudget": 13,
+      "packageIntents": { "com.vireocode.starter.auth": "authentication-http-and-configuration-api" }
+    },
+    "com.vireocode:vireo-starter-queryengine": {
+      "audience": "application",
+      "role": "server-query-engine",
+      "declarationBudget": 33,
+      "packageIntents": { "com.vireocode.starter.queryengine": "query-language-and-persistence-api" }
+    },
+    "com.vireocode:vireo-starter-offline": {
+      "audience": "application",
+      "role": "offline-sync-server",
+      "declarationBudget": 29,
+      "packageIntents": { "com.vireocode.starter.offline": "offline-protocol-and-persistence-api" }
+    },
+    "com.vireocode:vireo-starter-history": {
+      "audience": "application",
+      "role": "server-history",
+      "declarationBudget": 7,
+      "packageIntents": { "com.vireocode.starter.history": "history-recording-and-query-api" }
+    },
     "com.vireocode:vireo-starter-bom": { "audience": "build-tooling", "role": "version-alignment" }
   }
 }

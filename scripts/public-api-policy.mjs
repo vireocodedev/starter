@@ -9,6 +9,7 @@ const policy = JSON.parse(readFileSync(join(repoRoot, "contracts/public-api-poli
 const allowedNpmAudiences = new Set(["application", "optional-integration", "authoring-tooling"]);
 const allowedEnvironments = new Set(["browser", "worker"]);
 const allowedMavenAudiences = new Set(["application", "build-tooling"]);
+const allowedSurfaceDispositions = new Set(["retain", "freeze-growth", "extract-next-major"]);
 const problems = [];
 
 function compareSets(label, expected, actual) {
@@ -64,6 +65,19 @@ for (const { directory, manifest } of publishedPackages) {
     if (entryPolicy.environment.includes("worker") && surface.entryPoints?.[subpath]?.workerSafe !== true) {
       problems.push(`${manifest.name} ${subpath} claims worker support without a worker-safe surface snapshot`);
     }
+    if (manifest.name === "@vireocodedev/starter-ui") {
+      const symbolCount = surface.entryPoints?.[subpath]?.exports?.length;
+      if (!Number.isInteger(entryPolicy.symbolBudget) || entryPolicy.symbolBudget < 0) {
+        problems.push(`${manifest.name} ${subpath} must declare a non-negative symbol budget`);
+      } else if (symbolCount > entryPolicy.symbolBudget) {
+        problems.push(
+          `${manifest.name} ${subpath} exports ${symbolCount} symbols, exceeding budget ${entryPolicy.symbolBudget}`,
+        );
+      }
+      if (!allowedSurfaceDispositions.has(entryPolicy.disposition)) {
+        problems.push(`${manifest.name} ${subpath} has invalid surface disposition ${entryPolicy.disposition}`);
+      }
+    }
   }
 }
 
@@ -73,12 +87,46 @@ const publishedJvmModules = readdirSync(jvmRoot, { withFileTypes: true })
   .map(entry => `com.vireocode:${entry.name}`);
 compareSets("Maven module policy", new Set(publishedJvmModules), new Set(Object.keys(policy.maven ?? {})));
 
+let classifiedJvmDeclarations = 0;
 for (const [coordinate, modulePolicy] of Object.entries(policy.maven ?? {})) {
   if (!allowedMavenAudiences.has(modulePolicy.audience)) {
     problems.push(`${coordinate} has invalid audience ${modulePolicy.audience}`);
   }
   if (typeof modulePolicy.role !== "string" || modulePolicy.role.trim() === "") {
     problems.push(`${coordinate} has no API role`);
+  }
+  const moduleName = coordinate.split(":")[1];
+  const surfacePath = join(jvmRoot, moduleName, "api-surface.txt");
+  if (!existsSync(surfacePath)) continue;
+
+  const declarations = readFileSync(surfacePath, "utf8")
+    .split(/\r?\n/)
+    .filter(line => line.startsWith("public "));
+  classifiedJvmDeclarations += declarations.length;
+  if (!Number.isInteger(modulePolicy.declarationBudget) || modulePolicy.declarationBudget < 0) {
+    problems.push(`${coordinate} must declare a non-negative public declaration budget`);
+  } else if (declarations.length > modulePolicy.declarationBudget) {
+    problems.push(
+      `${coordinate} has ${declarations.length} public declarations, exceeding budget ${modulePolicy.declarationBudget}`,
+    );
+  }
+
+  const packageIntents = Object.entries(modulePolicy.packageIntents ?? {});
+  if (packageIntents.length === 0) problems.push(`${coordinate} has no public package-intent classification`);
+  for (const [packageName, intent] of packageIntents) {
+    if (typeof intent !== "string" || intent.trim() === "") {
+      problems.push(`${coordinate} package ${packageName} has no API intent`);
+    }
+  }
+  for (const declaration of declarations) {
+    const declaredType = declaration.match(/\b(com\.vireocode(?:\.[A-Za-z_$][\w$]*)+)/)?.[1];
+    if (!declaredType) {
+      problems.push(`${coordinate} has an unreadable public declaration: ${declaration}`);
+      continue;
+    }
+    if (!packageIntents.some(([packageName]) => declaredType.startsWith(`${packageName}.`))) {
+      problems.push(`${coordinate} public declaration ${declaredType} has no package-intent classification`);
+    }
   }
 }
 
@@ -95,5 +143,5 @@ console.log(
   `npm: ${publishedPackages.length} packages, ${Object.values(npmSummary).reduce((sum, count) => sum + count, 0)} entry points (${npmSummary.application} application, ${npmSummary["optional-integration"]} optional integration, ${npmSummary["authoring-tooling"]} authoring tooling).`,
 );
 console.log(
-  `Maven: ${publishedJvmModules.length} classified modules; five code-module API snapshots remain authoritative.`,
+  `Maven: ${publishedJvmModules.length} classified modules and ${classifiedJvmDeclarations} package-intent-classified public declarations.`,
 );

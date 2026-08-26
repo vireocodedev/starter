@@ -2,7 +2,7 @@
 
 Classification date: 2026-08-26
 
-Status: **entry-point policy enforced; surface-reduction decisions remain**
+Status: **entry-point and surface-growth policy enforced; breaking reductions scheduled by semver**
 
 The repository now has one machine-readable classification at
 `contracts/public-api-policy.json`. `corepack npm run api:policy` compares it with every
@@ -78,16 +78,17 @@ The current 22 entry points classify as:
 
 ## Surface observations requiring follow-up
 
-| ID      | Severity | Finding                                                                                                                                                                                                                             | Required disposition                                                                                                                                                                                                  |
-| ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API-001 | Major    | The UI package exposes 13 entry points and 1,364 distinct symbols; its root alone lists 757 exports and `./forms` lists 539. That is a very large compatibility and documentation obligation.                                       | Before public 1.0, identify genuine consumer tasks, remove accidental barrels, prefer cohesive component/type exports, and publish a reviewed major if an already-released private surface is intentionally narrowed. |
-| API-002 | Major    | Four Storybook/documentation entry points are public from the production UI package. They are now honestly classified and semver-protected, but they expand production package size and couple authoring fixtures to UI releases.   | Decide whether they remain a supported authoring API, move to a dedicated package, or become repository-only fixtures before the final public coordinates are created.                                                |
-| API-003 | Major    | The five JVM snapshots contain 111 public top-level types. Spring configuration, controllers, persistence entities/repositories, DTOs, SPI seams, and intended extension points currently share the same binary-compatibility tier. | Classify type/package intent in Javadoc, introduce internal package boundaries where safe, and run a compatibility review before the first public release freezes expectations.                                       |
-| API-004 | Minor    | TypeScript declarations are verified with the supported Vite/TypeScript `Bundler` resolution profile; NodeNext declaration resolution is not promised.                                                                              | State the resolver requirement in public installation docs. Add NodeNext only after declaration imports are emitted with compatible extensions and a dedicated consumer passes.                                       |
+| ID      | Severity   | Finding                                                                                                                                                                           | Required disposition                                                                                                                                                            |
+| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API-001 | Controlled | The UI package exposes 13 entry points and 1,364 distinct symbols; its root lists 757 exports and `./forms` lists 539. The published 7.1.0 line makes immediate removal breaking. | Growth is now capped per entry point. Curate and migrate the barrels through a reviewed major rather than deleting published symbols in place.                                  |
+| API-002 | Decided    | Four Storybook/documentation entry points are public from the production UI package.                                                                                              | Retain them through 7.x; extract them into a dedicated authoring package with deprecation/migration guidance and a major release.                                               |
+| API-003 | Controlled | The five JVM snapshots contain 111 public declarations across framework, configuration, persistence, HTTP, DTO, and SPI packages.                                                 | Every declaration now maps to an enforced package intent and module budget. Hide generated/internal types only through reviewed compatibility work.                             |
+| API-004 | Minor      | TypeScript declarations are verified with the supported Vite/TypeScript `Bundler` resolution profile; NodeNext declaration resolution is not promised.                            | State the resolver requirement in public installation docs. Add NodeNext only after declaration imports are emitted with compatible extensions and a dedicated consumer passes. |
 
 ## Gate result
 
 No publishable module or npm entry point is unclassified, no wildcard export exists,
-and all worker claims agree with the runtime graph. The policy is ready to guard
-ongoing work. The large UI/JVM surfaces and Storybook placement remain explicit
-public-release design decisions rather than hidden enforcement gaps.
+and all worker claims agree with the runtime graph. UI growth budgets, the Storybook
+next-major extraction decision, and package intent for all 111 JVM declarations are
+enforced. The migration procedure lives in
+[`PUBLIC_API_GOVERNANCE.md`](../package-authoring/PUBLIC_API_GOVERNANCE.md).
