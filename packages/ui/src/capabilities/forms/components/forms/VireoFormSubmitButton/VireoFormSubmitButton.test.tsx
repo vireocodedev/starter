@@ -39,15 +39,18 @@ describe(VIREO_FORM_SUBMIT_BUTTON_NAME, () => {
       vireoFormSubmitButtonClasses.loading,
       vireoFormSubmitButtonClasses.submitting,
     );
+    expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute("aria-busy", "true");
 
     finishSubmission?.();
     await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).toBeEnabled());
+    expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute("aria-busy");
   });
 
   it("merges an explicit loading condition without claiming the form is submitting", () => {
     render(<Harness buttonProps={{ loading: true }} />);
     const button = screen.getByRole("button", { name: "Save" });
     expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
     expect(button).toHaveClass(vireoFormSubmitButtonClasses.loading);
     expect(button).not.toHaveClass(vireoFormSubmitButtonClasses.submitting);
   });

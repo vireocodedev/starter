@@ -40,7 +40,10 @@ describe("VireoConfirmationDialog", () => {
     );
     expect(screen.getByRole("button", { name: "Close" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    const confirm = screen.getByRole("button", { name: "Confirm" });
+    expect(confirm).toBeDisabled();
+    expect(confirm).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
   it("provides a promise-based confirmation decision", async () => {

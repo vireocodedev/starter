@@ -131,8 +131,9 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
             variant="contained"
             color={confirmColor}
             disabled={loading}
+            aria-busy={loading || undefined}
             onClick={onConfirm}
-            startIcon={loading ? <CircularProgress color="inherit" size={16} /> : undefined}
+            startIcon={loading ? <CircularProgress aria-hidden color="inherit" size={16} /> : undefined}
           >
             {confirmLabel}
           </ConfirmButton>
