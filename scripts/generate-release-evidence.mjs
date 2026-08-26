@@ -2,14 +2,18 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   closeSync,
+  copyFileSync,
   existsSync,
+  mkdtempSync,
   mkdirSync,
   openSync,
   readFileSync,
   readdirSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -25,6 +29,11 @@ const outputRoot = resolve(repoRoot, outputArgument);
 if (existsSync(outputRoot)) {
   throw new Error(`Release evidence output already exists: ${outputRoot}`);
 }
+
+let complete = false;
+process.on("exit", () => {
+  if (!complete && existsSync(outputRoot)) rmSync(outputRoot, { recursive: true, force: true });
+});
 
 function command(commandName, args, options = {}) {
   const output = execFileSync(commandName, args, {
@@ -77,9 +86,19 @@ mkdirSync(sbomRoot, { recursive: true });
 
 console.log("Building and packing npm release candidates...");
 command("corepack", ["npm", "run", "build"], { stdio: "inherit" });
-command("corepack", ["npm", "pack", "--workspaces", "--pack-destination", npmRoot, "--ignore-scripts", "--silent"], {
-  stdio: "ignore",
-});
+const npmPackRoot = mkdtempSync(join(tmpdir(), "vireo-release-pack-"));
+try {
+  command(
+    "corepack",
+    ["npm", "pack", "--workspaces", "--pack-destination", npmPackRoot, "--ignore-scripts", "--silent"],
+    { stdio: "ignore" },
+  );
+  for (const tarball of readdirSync(npmPackRoot).filter(file => file.endsWith(".tgz"))) {
+    copyFileSync(join(npmPackRoot, tarball), join(npmRoot, tarball));
+  }
+} finally {
+  rmSync(npmPackRoot, { recursive: true, force: true });
+}
 
 console.log("Generating the npm CycloneDX SBOM...");
 const npmSbomPath = join(sbomRoot, "npm.cdx.json");
@@ -175,6 +194,8 @@ writeFileSync(
   join(outputRoot, "checksums.sha256"),
   `${subjects.map(subject => `${subject.sha256}  ${subject.path}`).join("\n")}\n`,
 );
+
+complete = true;
 
 console.log(
   `Release evidence generated for ${subjects.length} subjects (${npmSubjectCount} npm, ${mavenSubjectCount} Maven, one SBOM).`,
