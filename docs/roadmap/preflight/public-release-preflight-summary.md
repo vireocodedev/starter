@@ -34,14 +34,13 @@ no coordinate was reserved, and no Git history was rewritten.
 The complete command is now:
 
 ```bash
-npm run verify:all -- silent
+corepack npm run verify:all -- silent
 ```
 
-The recorded run used Node `24.18.1`, npm `11.16.0`, Java 21, Gradle 9.7.1,
-TypeScript 6, and Vite 8. It completed successfully on 2026-08-26. The TypeScript
-gate's nine checks took 2m 42.200s; the JVM source/integration suite and publication
-consumer then passed. npm 11 is evidence for current correctness, not activation of
-the accepted npm 12 support row.
+The toolchain is now enforced at Node `24.18.1` and npm `12.0.2`; Corepack and a
+temporary task-graph shim prevent workspace subprocesses from falling back to the
+host npm. Java 21, Gradle 9.7.1, TypeScript 6, and Vite 8 remain the verified
+repository lines. The exact locked consumer and required peer-floor consumer pass.
 
 ## Release-readiness decision
 
@@ -52,7 +51,7 @@ the accepted npm 12 support row.
 | Make the GitHub repository public       | **Blocked**       | Author-email disclosure decision, legal identity, and provider security/recovery controls are unresolved                   |
 | Publish packages anonymously consumable | **Blocked**       | Final npm/Maven coordinates and public registries are unresolved; current GitHub Packages require authentication           |
 | Publish to npmjs/Maven Central          | **Blocked**       | Trusted publishing/provenance, verified Maven namespace, signing, protected environments, and migrated metadata are absent |
-| Claim the D-105 support matrix publicly | **Blocked**       | npm 12, pinned OS, peer-floor/range, browser, database, clean-room, and device evidence is incomplete                      |
+| Claim the D-105 support matrix publicly | **Blocked**       | Browser, database, cross-OS clean-room, optional-integration, and physical-device evidence remains incomplete              |
 
 ## Blocking decisions and external actions
 
@@ -71,19 +70,16 @@ These cannot be safely inferred or completed only in source:
 This order minimizes rework and does not require public packages or another
 developer's implementation input:
 
-1. **Toolchain policy activation** — run npm 12 exactly, pin canonical Ubuntu
-   rather than relying only on `ubuntu-latest`, narrow over-broad React/MUI peers,
-   and add the admitted peer-floor fixture.
-2. **API reduction review** — reduce accidental UI barrels (currently 1,364
+1. **API reduction review** — reduce accidental UI barrels (currently 1,364
    distinct symbols), decide the four Storybook exports, and classify the 111 JVM
    public types before first public compatibility expectations harden.
-3. **Package portability/documentation** — explicitly document TypeScript Bundler
+2. **Package portability/documentation** — explicitly document TypeScript Bundler
    resolution, decide whether source maps remain public, and make installation docs
    distribution-neutral until coordinates land.
-4. **Release-pipeline preparation** — build provider-independent verification,
+3. **Release-pipeline preparation** — build provider-independent verification,
    provenance/signing assertions, rollback/non-republication rules, and dry-run
    release evidence without embedding final namespaces or secrets.
-5. **Support evidence lanes** — implement the code-owned portions of D-105:
+4. **Support evidence lanes** — implement the code-owned portions of D-105:
    Java 25 compatibility, PostgreSQL 17/18, Firefox/WebKit, clean container builds,
    and recurring evidence metadata. Physical devices and external OS machines stay
    manual/hosted follow-ups.

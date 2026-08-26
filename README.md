@@ -56,11 +56,11 @@ export NODE_AUTH_TOKEN=<github-token>
 
 ```bash
 npm install            # installs all workspaces, generates package-lock.json
-npm run typecheck
-npm run test
-npm run build
-npm run verify          # authoritative TypeScript gate
-npm run verify:all      # TypeScript + JVM, including aggregate Javadoc
+corepack npm run typecheck
+corepack npm run test
+corepack npm run build
+corepack npm run verify          # authoritative TypeScript gate
+corepack npm run verify:all      # TypeScript + JVM, including aggregate Javadoc
 ```
 
 ### Live documentation
@@ -70,8 +70,8 @@ One repository-wide Vireo Starter Storybook hosts the complete UI component cata
 **[Open the Vireo Starter documentation](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs)**
 
 ```bash
-npm run storybook
-npm run build-storybook
+corepack npm run storybook
+corepack npm run build-storybook
 ```
 
 Monorepo-level material lives under `Documentation`. Each library then owns a top-level section: UI contains its `Documentation`, `Core`, `Capabilities`, and `Integrations` groups, while History owns its executable package guides directly under `History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
@@ -92,9 +92,9 @@ artifact-only emit without checking the same source graph twice. CI and the
 release command always run both, followed by strict checks of the emitted
 declarations.
 
-`npm run dev` watches every package. Note that watch mode never deletes from
+`corepack npm run dev` watches every package. Note that watch mode never deletes from
 `dist` — deleting or renaming a source file leaves its old output behind, so take
-a one-shot `npm run build` whenever a file disappears.
+a one-shot `corepack npm run build` whenever a file disappears.
 
 To try a change in a consuming app before publishing it, that app aliases the
 package specifiers to these `dist` directories. The consumer side of that loop —
@@ -120,8 +120,8 @@ Versioning is a contract per package:
 Contract tests guard the surfaces, so a change that breaks a contract fails CI
 until the bump is made deliberately rather than by accident.
 
-> First-time setup: run `npm install` once and commit the generated
-> `package-lock.json` so CI's `npm ci` has a lockfile.
+> First-time setup: run `corepack npm install` once and commit the generated
+> `package-lock.json` so CI's `corepack npm ci` has a lockfile.
 
 ## Release (JVM)
 

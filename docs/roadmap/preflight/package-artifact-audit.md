@@ -10,7 +10,7 @@ registry, reserve coordinates, or configure signing credentials.
 
 ## npm contract
 
-The authoritative TypeScript gate now runs `npm run release:smoke` after building
+The authoritative TypeScript gate now runs `corepack npm run release:smoke` after building
 all workspaces. The check creates real tarballs in a throwaway directory and
 requires every public workspace to have:
 

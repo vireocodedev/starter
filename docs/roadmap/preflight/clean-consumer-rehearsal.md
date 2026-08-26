@@ -11,7 +11,7 @@ the final public coordinates.
 
 ## npm consumer
 
-`npm run release:smoke`, which is part of the authoritative TypeScript merge gate,
+`corepack npm run release:smoke`, which is part of the authoritative TypeScript merge gate,
 now performs the following clean installation:
 
 1. packs all seven workspaces into real npm tarballs;
@@ -59,25 +59,25 @@ workflow separately performs a post-publication run with an empty Gradle home.
 
 ## Evidence result
 
-| Surface                  | Result | Evidence                                                                                       |
-| ------------------------ | ------ | ---------------------------------------------------------------------------------------------- |
-| npm tarball installation | Pass   | Seven real tarballs installed into a temporary project through a fresh npm cache               |
-| npm dependency graph     | Pass   | Strict peer resolution and `npm ls --all`                                                      |
-| Type declarations        | Pass   | 22 entry points, TypeScript 6, bundler resolution, `skipLibCheck: false`                       |
-| Native ESM runtime       | Pass   | Nine framework-free entry points resolve inside the temporary consumer and import successfully |
-| Browser bundling         | Pass   | 13 UI entry points bundle with the temporary consumer's Vite installation                      |
-| Maven repository         | Pass   | Exactly six locally published modules and the enforced artifact contract                       |
-| BOM/versionless use      | Pass   | Five code modules compile and test without individual versions                                 |
-| JAR provenance           | Pass   | Each sampled public class loads from its expected `0.2.0` JAR                                  |
+| Surface                  | Result | Evidence                                                                                                  |
+| ------------------------ | ------ | --------------------------------------------------------------------------------------------------------- |
+| npm tarball installation | Pass   | Seven real tarballs installed into a temporary project through a fresh npm cache                          |
+| npm dependency graph     | Pass   | Strict peer resolution and `npm ls --all`                                                                 |
+| Type declarations        | Pass   | 22 entry points, TypeScript 6, bundler resolution, `skipLibCheck: false`                                  |
+| Native ESM runtime       | Pass   | Nine framework-free entry points resolve inside the temporary consumer and import successfully            |
+| Browser bundling         | Pass   | 13 UI entry points bundle with the temporary consumer's Vite installation                                 |
+| Required peer floors     | Pass   | npm 12 clean install and strict TypeScript compile at React 19.2.0, MUI 9.0.0, and required peer minimums |
+| Maven repository         | Pass   | Exactly six locally published modules and the enforced artifact contract                                  |
+| BOM/versionless use      | Pass   | Five code modules compile and test without individual versions                                            |
+| JAR provenance           | Pass   | Each sampled public class loads from its expected `0.2.0` JAR                                             |
 
 ## Remaining clean-room work
 
-- The repository currently executes npm 11 locally even though the accepted support
-  floor is npm 12. Activate npm 12 in local and CI toolchain setup, then retain an
-  npm 12 evidence record.
-- The current npm fixture tests the exact locked dependency set. The separate
-  peer-floor and admitted-range matrix required by the support policy remains a
-  nightly/release follow-up.
+- npm 12.0.2 is now selected through Corepack in repository commands and CI, and
+  the task graph installs a temporary npm shim so Turbo workspace subprocesses
+  cannot fall back to a host npm version.
+- The locked dependency consumer and required-peer-floor consumer are green. A
+  recurring admitted-range/optional-integration matrix remains a nightly follow-up.
 - Canonical Ubuntu 24.04/26.04, macOS, and Windows 11/WSL2 empty-machine rehearsals
   remain recurring support evidence, not a per-commit local package check.
 - Public registry rehearsals remain blocked on final npm/Maven coordinates and

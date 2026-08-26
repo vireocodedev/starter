@@ -33,12 +33,12 @@ static assets.
 Build the exact directory uploaded by the workflow:
 
 ```bash
-npm ci
-npm run build-storybook
+corepack npm ci
+corepack npm run build-storybook
 ```
 
 The generated site is written to `packages/ui/storybook-static` and ignored by
-Git. `npm run verify` also builds this production Storybook as its final step.
+Git. `corepack npm run verify` also builds this production Storybook as its final step.
 
 ## Custom domain
 

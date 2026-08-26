@@ -199,15 +199,15 @@ Vireo may publish measurements with methodology but not capacity promises.
 
 As of 2026-08-26:
 
-| Concern              | Evidence today                                                                                                      | Missing before public support activation                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Node/npm             | Node 24 is used locally and in CI; manifests declare npm 12, while the recorded authoritative local run used npm 11 | Install and enforce npm 12 exactly in both repositories and clean consumers                          |
-| Java/Boot            | Java 21, Boot 4.1.1, and each repository wrapper pass Ubuntu CI                                                     | Add Java 25 compatibility lane and machine-check wrapper/BOM policy                                  |
-| React/MUI/TypeScript | React 19.2, MUI 9, and TypeScript 6 pass current checks                                                             | Narrow over-broad React/MUI peer ranges and add peer-floor consumer fixtures                         |
-| PostgreSQL           | Framework has a Docker-conditional PostgreSQL 17 upgrade fixture; Template Compose selects 18                       | Make 17/18 non-optional CI/release lanes and test Template migrations/queries against both           |
-| Browsers             | Playwright checks desktop/mobile Chromium profiles on Ubuntu                                                        | Add Firefox/WebKit/branded browsers, macOS Safari, physical devices, and installed-PWA flows         |
-| Operating systems    | CI uses floating `ubuntu-latest`; local baseline is one Linux host                                                  | Pin canonical image and add recurring Ubuntu, macOS, and Windows/WSL clean rooms                     |
-| Deployment           | Template validates Compose syntax and builds an amd64-oriented image                                                | Run production-like PostgreSQL deployment, health, upgrade, rollback, and independent frontend smoke |
+| Concern              | Evidence today                                                                                                                        | Missing before public support activation                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Node/npm             | Starter pins Node 24.18.1 in CI and enforces npm 12.0.2 through Corepack, manifests, lockfile, task subprocesses, and clean consumers | Repeat the same activation in Starter Template and keep patch updates inside the admitted lines      |
+| Java/Boot            | Java 21, Boot 4.1.1, and each repository wrapper pass Ubuntu CI                                                                       | Add Java 25 compatibility lane and machine-check wrapper/BOM policy                                  |
+| React/MUI/TypeScript | React 19.2/MUI 9 ranges are bounded; TypeScript 6 and a strict packed root peer-floor consumer pass                                   | Add recurring optional-integration and admitted-range lanes                                          |
+| PostgreSQL           | Framework has a Docker-conditional PostgreSQL 17 upgrade fixture; Template Compose selects 18                                         | Make 17/18 non-optional CI/release lanes and test Template migrations/queries against both           |
+| Browsers             | Playwright checks desktop/mobile Chromium profiles on Ubuntu                                                                          | Add Firefox/WebKit/branded browsers, macOS Safari, physical devices, and installed-PWA flows         |
+| Operating systems    | Every Starter workflow pins the canonical Ubuntu 24.04 runner; local baseline is one Linux host                                       | Add recurring Ubuntu 26.04, macOS, and Windows/WSL clean rooms                                       |
+| Deployment           | Template validates Compose syntax and builds an amd64-oriented image                                                                  | Run production-like PostgreSQL deployment, health, upgrade, rollback, and independent frontend smoke |
 
 These gaps do not reopen the policy decision. They block use of the **supported**
 label and are tracked by G-112 plus the existing browser, database, deployment, and

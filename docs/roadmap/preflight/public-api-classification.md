@@ -5,7 +5,7 @@ Classification date: 2026-08-26
 Status: **entry-point policy enforced; surface-reduction decisions remain**
 
 The repository now has one machine-readable classification at
-`contracts/public-api-policy.json`. `npm run api:policy` compares it with every
+`contracts/public-api-policy.json`. `corepack npm run api:policy` compares it with every
 publishable workspace, npm export map, worker-safety snapshot, Maven module, and
 JVM API snapshot. It runs inside the authoritative `npm test` chain.
 

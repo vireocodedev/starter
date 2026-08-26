@@ -7,17 +7,18 @@
 - Java 21
 
 Enable Corepack when available, then install the frontend workspace with
-`npm ci`. GitHub Packages requires `NODE_AUTH_TOKEN` with `read:packages`.
+`corepack npm ci`. Corepack reads the exact npm version from `package.json`; the
+Starter workspace itself does not require a package-read token.
 
 ## Development gate
 
 Run the same complete cross-language gate used for release review:
 
 ```bash
-npm run verify:all
+corepack npm run verify:all
 ```
 
-Frontend-only work may iterate with `npm run verify -- silent`; JVM-only work
+Frontend-only work may iterate with `corepack npm run verify -- silent`; JVM-only work
 may iterate with `./jvm/gradlew -p jvm build aggregateJavadoc`.
 
 Public API changes require updated surface snapshots and the appropriate

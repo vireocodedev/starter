@@ -14,7 +14,7 @@ change, public-coordinate migration, or package release.
 Run:
 
 ```bash
-npm run public:audit
+corepack npm run public:audit
 ```
 
 The audit reports paths rather than matched values so a possible credential is not
@@ -27,7 +27,7 @@ copied into logs. It checks:
 - current tracked absolute workstation paths; and
 - commit-author email domains while suppressing complete addresses.
 
-The narrow audit is complemented by `npm run security:secrets`, which runs the
+The narrow audit is complemented by `corepack npm run security:secrets`, which runs the
 digest-pinned Gitleaks CLI across complete reachable Git history with redacted
 findings. Neither scanner replaces GitHub secret scanning/push protection,
 provider-side token revocation, or manual review.

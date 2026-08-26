@@ -26,6 +26,11 @@ that contract.
 | Docker     | Optional                                      | Optional for PostgreSQL and container validation      | Docker-free H2 development remains available.                                              |
 | Browsers   | Storybook/browser checks                      | Playwright Chromium desktop and mobile                | Target rows are defined; Firefox, WebKit, installed PWA, and real-device evidence remains. |
 
+Post-baseline activation: Starter now pins Node 24.18.1 and Ubuntu 24.04 in CI,
+enforces npm 12.0.2 through Corepack across Turbo subprocesses, and verifies a
+packed required-peer-floor consumer. Starter Template still needs the equivalent
+activation before the cross-repository row is complete.
+
 ## Credential matrix
 
 | Workflow                          | Credential today                                                   | Why                                                                                                         | Desired public state                                             |
@@ -84,7 +89,7 @@ decisions.
 ## Clean-room evidence still required
 
 - the Ubuntu, macOS, and Windows/WSL environments defined by the support policy;
-- the declared npm 12 toolchain rather than the local npm 11 audit host;
+- the declared npm 12 toolchain in Starter Template and external clean-room hosts;
 - production PostgreSQL and backup/restore validation;
 - Firefox, WebKit/Safari, installed PWA, and representative mobile hardware;
 - credential-free installs from the intended public registries.

@@ -10,7 +10,7 @@ administrator must enable. A source change cannot prove a provider setting.
 
 Every external action is pinned to a full commit SHA and carries its human-readable
 release tag as a comment. The accepted mapping lives in
-`contracts/github-actions-policy.json`; `npm run security:workflow` fails when a
+`contracts/github-actions-policy.json`; `corepack npm run security:workflow` fails when a
 workflow uses a floating tag, an unapproved SHA, or a stale version comment.
 
 Dependabot proposes GitHub Actions updates weekly. An update must:
@@ -19,7 +19,7 @@ Dependabot proposes GitHub Actions updates weekly. An update must:
 2. resolve the proposed release tag to its commit independently;
 3. review release notes and material source/permission changes;
 4. update both the workflow reference and the policy contract; and
-5. pass `npm run security:workflow` and the authoritative repository gate.
+5. pass `corepack npm run security:workflow` and the authoritative repository gate.
 
 The Gitleaks CLI container is likewise pinned to a reviewed multi-architecture
 manifest digest. Its tag and digest are recorded in the same policy contract.
@@ -49,7 +49,7 @@ treated as permission to publish.
 
 ### Secret detection
 
-`npm run security:secrets` scans the complete reachable Git history with Gitleaks
+`corepack npm run security:secrets` scans the complete reachable Git history with Gitleaks
 and redacts detected values. The Security workflow runs it for pull requests,
 pushes to `main`, weekly, and on demand. Its checkout is credential-free and the
 scanner receives no GitHub token or repository write permission.
