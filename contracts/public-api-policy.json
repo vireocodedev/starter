@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "npm": {
+    "@vireocodedev/starter-history": {
+      "role": "history-domain",
+      "entryPoints": {
+        ".": { "audience": "application", "environment": ["browser", "worker"] }
+      }
+    },
+    "@vireocodedev/starter-infrastructure": {
+      "role": "browser-infrastructure",
+      "entryPoints": {
+        ".": { "audience": "application", "environment": ["browser"] },
+        "./network-status": { "audience": "application", "environment": ["browser", "worker"] },
+        "./pagination": { "audience": "application", "environment": ["browser", "worker"] }
+      }
+    },
+    "@vireocodedev/starter-localization": {
+      "role": "localization-resources",
+      "entryPoints": {
+        ".": { "audience": "application", "environment": ["browser", "worker"] }
+      }
+    },
+    "@vireocodedev/starter-queryengine": {
+      "role": "query-contracts",
+      "entryPoints": {
+        ".": { "audience": "application", "environment": ["browser", "worker"] }
+      }
+    },
+    "@vireocodedev/starter-shell": {
+      "role": "application-shell-contracts",
+      "entryPoints": {
+        ".": { "audience": "application", "environment": ["browser", "worker"] }
+      }
+    },
+    "@vireocodedev/starter-sqlite": {
+      "role": "offline-persistence",
+      "entryPoints": {
+        ".": { "audience": "application", "environment": ["browser", "worker"] },
+        "./offline": { "audience": "application", "environment": ["browser", "worker"] }
+      }
+    },
+    "@vireocodedev/starter-ui": {
+      "role": "react-design-system",
+      "entryPoints": {
+        ".": { "audience": "application", "environment": ["browser"] },
+        "./country": { "audience": "application", "environment": ["browser"] },
+        "./event-source": { "audience": "application", "environment": ["browser"] },
+        "./forms": { "audience": "application", "environment": ["browser"] },
+        "./hello-pangea-dnd": { "audience": "optional-integration", "environment": ["browser"] },
+        "./localization": { "audience": "optional-integration", "environment": ["browser"] },
+        "./react-i18next": { "audience": "optional-integration", "environment": ["browser"] },
+        "./sonner": { "audience": "optional-integration", "environment": ["browser"] },
+        "./tanstack-query": { "audience": "optional-integration", "environment": ["browser"] },
+        "./storybook": { "audience": "authoring-tooling", "environment": ["browser"] },
+        "./storybook/VireoDockedSidePanel": {
+          "audience": "authoring-tooling",
+          "environment": ["browser"]
+        },
+        "./storybook/VireoIconContainer": {
+          "audience": "authoring-tooling",
+          "environment": ["browser"]
+        },
+        "./storybook/VireoResponsiveOverlayFrame": {
+          "audience": "authoring-tooling",
+          "environment": ["browser"]
+        }
+      }
+    }
+  },
+  "maven": {
+    "com.vireocode:vireo-starter-core": { "audience": "application", "role": "server-foundation" },
+    "com.vireocode:vireo-starter-auth": { "audience": "application", "role": "default-authentication" },
+    "com.vireocode:vireo-starter-queryengine": { "audience": "application", "role": "server-query-engine" },
+    "com.vireocode:vireo-starter-offline": { "audience": "application", "role": "offline-sync-server" },
+    "com.vireocode:vireo-starter-history": { "audience": "application", "role": "server-history" },
+    "com.vireocode:vireo-starter-bom": { "audience": "build-tooling", "role": "version-alignment" }
+  }
+}
