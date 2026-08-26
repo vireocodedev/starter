@@ -12,8 +12,9 @@ the [validation protocol](validation-protocol.md) meets its thresholds.
 
 ## Category statement
 
-> Vireo is an opinionated full-stack framework for small teams building polished,
-> offline-capable operational PWAs with React and Spring Boot.
+> Vireo Framework, by Vireo Code, is an opinionated full-stack framework for small
+> teams building polished, offline-capable operational PWAs with React and Spring
+> Boot.
 
 “Opinionated” means Vireo selects and integrates one golden path for application
 structure, responsive UI, data access, loading and error behavior, localization,
@@ -192,9 +193,14 @@ must not imply support without evidence.
 
 ## Terminology
 
+Public identity follows [D-103](identity-and-coordinates.md): first references use
+**Vireo Framework** and show the qualified **Vireo Code** publisher identity. That
+direction remains conditional on professional clearance, domain acquisition, and
+registry reservation.
+
 | Term                       | Meaning                                                                                                              |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Vireo framework**        | The complete supported product contract: packages, CLI, golden-path Template, docs, verification, and release policy |
+| **Vireo Framework**        | The complete supported product contract: packages, CLI, golden-path Template, docs, verification, and release policy |
 | **Vireo Starter packages** | Independently versioned TypeScript and JVM libraries consumed by applications                                        |
 | **Vireo Template**         | The minimal generated or cloned golden-path application proving package composition                                  |
 | **Vireo CLI**              | The future create, doctor, generate, and upgrade lifecycle interface                                                 |
