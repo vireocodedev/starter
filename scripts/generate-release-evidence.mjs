@@ -91,7 +91,10 @@ try {
   command(
     "corepack",
     ["npm", "pack", "--workspaces", "--pack-destination", npmPackRoot, "--ignore-scripts", "--silent"],
-    { stdio: "ignore" },
+    {
+      env: { ...process.env, npm_config_cache: join(npmPackRoot, "npm-cache") },
+      stdio: "ignore",
+    },
   );
   for (const tarball of readdirSync(npmPackRoot).filter(file => file.endsWith(".tgz"))) {
     copyFileSync(join(npmPackRoot, tarball), join(npmRoot, tarball));
