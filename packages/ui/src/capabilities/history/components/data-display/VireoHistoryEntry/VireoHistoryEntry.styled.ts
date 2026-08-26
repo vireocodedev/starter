@@ -20,6 +20,11 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
   color: theme.palette.text.primary,
   fontFamily: theme.typography.fontFamily,
 
+  "&.VireoHistoryEntry-loading": {
+    pointerEvents: "none",
+    userSelect: "none",
+  },
+
   "& .VireoHistoryEntry-rootGroup": {
     minWidth: 0,
     overflow: "hidden",
