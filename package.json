@@ -33,6 +33,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release:smoke": "node scripts/release-pack-smoke.mjs",
+    "public:audit": "sh scripts/public-repository-audit.sh",
     "release": "npm run verify -- silent && npm run release:smoke && changeset publish"
   },
   "devDependencies": {
