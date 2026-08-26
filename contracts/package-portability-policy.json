@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "typescriptConsumer": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "skipLibCheck": false
+  },
+  "sourceMaps": {
+    "allowSourcesContent": true,
+    "requireRelativeSources": true,
+    "packages": {
+      "@vireocodedev/starter-history": "required",
+      "@vireocodedev/starter-infrastructure": "required",
+      "@vireocodedev/starter-localization": "required",
+      "@vireocodedev/starter-queryengine": "required",
+      "@vireocodedev/starter-shell": "required",
+      "@vireocodedev/starter-sqlite": "required",
+      "@vireocodedev/starter-ui": "forbidden"
+    }
+  }
+}

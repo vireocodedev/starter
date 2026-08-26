@@ -16,20 +16,20 @@ React consumers import namespace hooks from
 
 ## Install
 
-Published to GitHub Packages under the `@vireocodedev` scope. Configure the
-scope and authenticate with a token that has `read:packages`:
-
-```ini
-@vireocodedev:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
 ```bash
 npm install @vireocodedev/starter-localization i18next react-i18next
 ```
 
+The package name is stable; registry selection and authentication belong to the
+consumer's approved release-channel configuration and are intentionally not
+embedded here.
+
 `i18next` is the only peer dependency. The package runs against the consuming
 application's instance and never bundles its own copy.
+
+TypeScript declarations are verified from the packed artifact with TypeScript
+6, `moduleResolution: "Bundler"`, and `skipLibCheck: false`. Relative source
+maps with embedded source content are published intentionally for debugging.
 
 ## Primary workflow
 

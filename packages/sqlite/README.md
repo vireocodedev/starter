@@ -10,6 +10,13 @@ The package owns reusable storage mechanics. An application still owns its schem
 npm install @vireocodedev/starter-sqlite @sqlite.org/sqlite-wasm
 ```
 
+The package name is stable; registry selection and authentication belong to the
+consumer's approved release-channel configuration and are intentionally not
+embedded here. TypeScript declarations are verified from the packed artifact
+with TypeScript 6, `moduleResolution: "Bundler"`, and `skipLibCheck: false`.
+Relative source maps with embedded source content are published intentionally
+for debugging.
+
 ## Entry points
 
 | Entry point                            | Responsibility                                                                                                                |

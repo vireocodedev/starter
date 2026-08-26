@@ -9,15 +9,13 @@ typed integrations, foundational providers, hooks, and formatters.
 
 ## Install
 
-Published to **GitHub Packages** under the `@vireocodedev` scope:
-
-```
-@vireocodedev:registry=https://npm.pkg.github.com
-```
-
 ```bash
 npm install @vireocodedev/starter-ui
 ```
+
+The package name is stable; registry selection and authentication belong to the
+consumer's approved release-channel configuration and are intentionally not
+embedded here.
 
 Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,
@@ -30,6 +28,11 @@ The package ships unbundled: `dist` mirrors `src` file-for-file. Supported
 consumer entry points are nevertheless limited to the package root and the
 subpaths declared in `package.json`; undeclared implementation paths are not a
 compatibility contract.
+
+TypeScript declarations are verified from the packed artifact with TypeScript
+6, `moduleResolution: "Bundler"`, and `skipLibCheck: false`. This file-for-file
+package intentionally omits source maps; its public source remains available in
+the repository.
 
 ## What's included
 

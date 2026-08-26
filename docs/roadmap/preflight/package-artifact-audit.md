@@ -23,6 +23,8 @@ requires every public workspace to have:
   path;
 - no high-confidence credential, private key, or absolute workstation path in
   packed text;
+- source-map presence matching the reviewed per-package policy, with valid v3
+  maps and relative source paths;
 - an existing target for every declared export; and
 - a successful import from an extracted, isolated consumer directory.
 
@@ -47,7 +49,13 @@ Recorded package shape after remediation:
 | `@vireocodedev/starter-sqlite`         |       2 |    49 |       59.7 |        244.4 |
 | `@vireocodedev/starter-ui`             |      13 | 1,123 |      295.6 |      1,617.7 |
 
-Sizes are observations, not frozen budgets. Boundary, metadata, license,
+Sizes are observations, not frozen budgets. The Vite-bundled packages retain
+source maps with embedded public source for production debugging. Starter UI's
+file-for-file output remains map-free to avoid duplicating its already-large
+artifact. This decision is machine-enforced by
+`contracts/package-portability-policy.json`.
+
+Boundary, metadata, license,
 integrity, and executable-consumer checks are the release gates; normal compiled
 output growth should remain reviewable rather than requiring arbitrary budget
 updates.
@@ -80,13 +88,13 @@ sidecars.
 
 ## Remaining public-distribution work
 
-| ID      | Severity | Finding                                                                                                                                                      | Required disposition                                                                                                                                       |
-| ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PAA-001 | Blocker  | npm packages still target authenticated GitHub Packages.                                                                                                     | After the final npm scope is approved, migrate metadata/workflows to npmjs, set public access explicitly, and configure trusted publishing/provenance.     |
-| PAA-002 | Blocker  | Maven artifacts still use the unverified `com.vireocode` group and GitHub Packages destination.                                                              | Acquire/verify the final namespace, migrate all coordinates atomically, and configure the approved Maven Central publisher.                                |
-| PAA-003 | Blocker  | Local Maven artifacts have checksum sidecars but no PGP signatures.                                                                                          | Configure release-only in-memory signing after the final publisher account and protected signing material exist; require `.asc` artifacts in release CI.   |
-| PAA-004 | Major    | npm tarballs include source maps, and the UI tarball contains 1,123 compiled files because all supported subpath implementations are emitted beneath `dist`. | Resolve intended public entry points in the API-classification checkpoint; retain source maps only if their public debugging value is explicitly accepted. |
-| PAA-005 | Major    | Artifact identity metadata still uses the provisional repository, developer, and copyright wording.                                                          | Update it only after the Phase 0 identity/legal-owner decisions are final, then rerun both artifact audits and clean-consumer rehearsals.                  |
+| ID      | Severity | Finding                                                                                                                                                      | Required disposition                                                                                                                                     |
+| ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PAA-001 | Blocker  | npm packages still target authenticated GitHub Packages.                                                                                                     | After the final npm scope is approved, migrate metadata/workflows to npmjs, set public access explicitly, and configure trusted publishing/provenance.   |
+| PAA-002 | Blocker  | Maven artifacts still use the unverified `com.vireocode` group and GitHub Packages destination.                                                              | Acquire/verify the final namespace, migrate all coordinates atomically, and configure the approved Maven Central publisher.                              |
+| PAA-003 | Blocker  | Local Maven artifacts have checksum sidecars but no PGP signatures.                                                                                          | Configure release-only in-memory signing after the final publisher account and protected signing material exist; require `.asc` artifacts in release CI. |
+| PAA-004 | Resolved | npm tarballs include source maps, and the UI tarball contains 1,123 compiled files because all supported subpath implementations are emitted beneath `dist`. | API growth is now governed by symbol budgets; bundled packages intentionally retain audited maps while UI remains map-free.                              |
+| PAA-005 | Major    | Artifact identity metadata still uses the provisional repository, developer, and copyright wording.                                                          | Update it only after the Phase 0 identity/legal-owner decisions are final, then rerun both artifact audits and clean-consumer rehearsals.                |
 
 ## Gate result
 

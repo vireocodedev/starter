@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   existsSync,
   lstatSync,
@@ -8,6 +9,7 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -20,6 +22,7 @@ const rootNodeModules = join(repoRoot, "node_modules");
 const rootLicense = readFileSync(join(repoRoot, "LICENSE"), "utf8");
 const expectedRepositoryUrl = "git+https://github.com/vireocodedev/starter.git";
 const expectedRegistry = "https://npm.pkg.github.com";
+const portabilityPolicy = JSON.parse(readFileSync(join(repoRoot, "contracts/package-portability-policy.json"), "utf8"));
 const installLifecycleScripts = ["preinstall", "install", "postinstall", "prepare", "prepublish", "prepublishOnly"];
 const forbiddenPackedPath =
   /(?:^|\/)(?:\.env(?:\.|$)|\.git(?:\/|$)|\.npmrc$|__tests__(?:\/|$)|coverage(?:\/|$)|node_modules(?:\/|$)|src(?:\/|$)|storybook-static(?:\/|$)|tests?(?:\/|$))/iu;
@@ -62,6 +65,23 @@ function walkFiles(directory) {
     const path = join(directory, entry.name);
     return entry.isDirectory() ? walkFiles(path) : [path];
   });
+}
+
+function createPackMetadata(packageDirectory, tarballPath, manifest) {
+  const files = walkFiles(packageDirectory).map(file => ({
+    path: relative(packageDirectory, file).replaceAll("\\", "/"),
+    size: statSync(file).size,
+  }));
+  const tarball = readFileSync(tarballPath);
+  return {
+    name: manifest.name,
+    size: tarball.length,
+    unpackedSize: files.reduce((total, file) => total + file.size, 0),
+    shasum: createHash("sha1").update(tarball).digest("hex"),
+    integrity: `sha512-${createHash("sha512").update(tarball).digest("base64")}`,
+    files,
+    entryCount: files.length,
+  };
 }
 
 function validateManifest(sourceDirectory, sourceManifest, packedManifest) {
@@ -118,12 +138,57 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
   if (forbiddenPaths.length > 0) {
     throw new Error(`${manifest.name} publishes forbidden paths: ${forbiddenPaths.join(", ")}`);
   }
-  for (const file of walkFiles(packageDirectory)) {
+  const packedFiles = walkFiles(packageDirectory);
+  for (const file of packedFiles) {
     const contents = readFileSync(file);
     if (contents.includes(0)) continue;
     const text = contents.toString("utf8");
     if (sensitivePackedContent.some(pattern => pattern.test(text))) {
       throw new Error(`${manifest.name} publishes sensitive content in ${relative(packageDirectory, file)}.`);
+    }
+  }
+
+  const sourceMaps = packedFiles.filter(file => file.endsWith(".map"));
+  const sourceMapDisposition = portabilityPolicy.sourceMaps.packages[sourceManifest.name];
+  if (!sourceMapDisposition) {
+    throw new Error(`${sourceManifest.name} has no source-map disposition in the portability policy.`);
+  }
+  if (sourceMapDisposition === "required" && sourceMaps.length === 0) {
+    throw new Error(`${sourceManifest.name} must publish its reviewed source maps.`);
+  }
+  if (sourceMapDisposition === "forbidden" && sourceMaps.length > 0) {
+    throw new Error(`${sourceManifest.name} must not publish source maps.`);
+  }
+  for (const sourceMapPath of sourceMaps) {
+    let sourceMap;
+    try {
+      sourceMap = JSON.parse(readFileSync(sourceMapPath, "utf8"));
+    } catch {
+      throw new Error(
+        `${sourceManifest.name} publishes an invalid source map at ${relative(packageDirectory, sourceMapPath)}.`,
+      );
+    }
+    if (sourceMap.version !== 3 || !Array.isArray(sourceMap.sources) || sourceMap.sources.length === 0) {
+      throw new Error(
+        `${sourceManifest.name} publishes a malformed v3 source map at ${relative(packageDirectory, sourceMapPath)}.`,
+      );
+    }
+    if (
+      portabilityPolicy.sourceMaps.requireRelativeSources &&
+      sourceMap.sources.some(
+        source =>
+          typeof source !== "string" ||
+          source.startsWith("/") ||
+          source.startsWith("file:") ||
+          /^[A-Za-z]:[\\/]/u.test(source),
+      )
+    ) {
+      throw new Error(
+        `${sourceManifest.name} publishes an absolute source path in ${relative(packageDirectory, sourceMapPath)}.`,
+      );
+    }
+    if (!portabilityPolicy.sourceMaps.allowSourcesContent && sourceMap.sourcesContent != null) {
+      throw new Error(`${sourceManifest.name} embeds source content contrary to the portability policy.`);
     }
   }
 
@@ -173,18 +238,15 @@ try {
   mkdirSync(tarballRoot, { recursive: true });
   mkdirSync(consumerRoot, { recursive: true });
 
-  const packOutput = execFileSync(
+  execFileSync(
     "corepack",
-    ["npm", "pack", "--workspaces", "--pack-destination", tarballRoot, "--json", "--ignore-scripts"],
+    ["npm", "pack", "--workspaces", "--pack-destination", tarballRoot, "--ignore-scripts", "--silent"],
     {
       cwd: repoRoot,
-      encoding: "utf8",
       env: { ...process.env, npm_config_cache: join(auditRoot, "npm-cache") },
-      stdio: ["ignore", "pipe", "inherit"],
+      stdio: "ignore",
     },
   );
-  const packResult = JSON.parse(packOutput);
-  const packMetadata = Array.isArray(packResult) ? packResult : Object.values(packResult);
 
   const packages = publishedPackages();
   const tarballs = readdirSync(tarballRoot).filter(file => file.endsWith(".tgz"));
@@ -244,14 +306,13 @@ try {
     mkdirSync(packageDirectory, { recursive: true });
     execFileSync("tar", ["-xzf", join(tarballRoot, tarball), "-C", packageDirectory, "--strip-components=1"]);
 
-    const metadata = packMetadata.find(item => item.name === sourceManifest.name);
-    if (!metadata) throw new Error(`npm did not report pack metadata for ${sourceManifest.name}.`);
     if (lstatSync(packageDirectory).isSymbolicLink()) {
       throw new Error(`${sourceManifest.name} was linked rather than installed from its tarball.`);
     }
     if (!realpathSync(packageDirectory).startsWith(`${realpathSync(consumerRoot)}/`)) {
       throw new Error(`${sourceManifest.name} resolved outside the isolated consumer.`);
     }
+    const metadata = createPackMetadata(packageDirectory, join(tarballRoot, tarball), sourceManifest);
     const packedManifest = validatePackageContents(packageDirectory, sourceDirectory, sourceManifest, metadata);
     const packageEntries = packageSpecifiers(packedManifest);
     if (packedManifest.name === "@vireocodedev/starter-ui") browserSpecifiers.push(...packageEntries);
@@ -300,12 +361,12 @@ try {
         compilerOptions: {
           jsx: "react-jsx",
           lib: ["ES2022", "DOM", "DOM.Iterable"],
-          module: "ESNext",
-          moduleResolution: "Bundler",
+          module: portabilityPolicy.typescriptConsumer.module,
+          moduleResolution: portabilityPolicy.typescriptConsumer.moduleResolution,
           noEmit: true,
-          skipLibCheck: false,
+          skipLibCheck: portabilityPolicy.typescriptConsumer.skipLibCheck,
           strict: true,
-          target: "ES2022",
+          target: portabilityPolicy.typescriptConsumer.target,
         },
         files: [typecheckEntry],
       },
@@ -353,6 +414,7 @@ try {
   console.log(
     "The clean install resolved a valid dependency tree and compiled every entry point with skipLibCheck disabled.",
   );
+  console.log("Source-map publication and portable source paths match the reviewed package policy.");
   console.log("npm supplied a content integrity digest for every tarball.");
 } finally {
   rmSync(auditRoot, { recursive: true, force: true });

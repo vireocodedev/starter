@@ -10,6 +10,13 @@ The package owns reusable query contracts. An application still owns its entity-
 npm install @vireocodedev/starter-queryengine zod
 ```
 
+The package name is stable; registry selection and authentication belong to the
+consumer's approved release-channel configuration and are intentionally not
+embedded here. TypeScript declarations are verified from the packed artifact
+with TypeScript 6, `moduleResolution: "Bundler"`, and `skipLibCheck: false`.
+Relative source maps with embedded source content are published intentionally
+for debugging.
+
 The sole peer dependency is Zod 3. The root entry point is React-free, browser-global-free, and worker-safe.
 
 React Query integration lives in `@vireocodedev/starter-ui/tanstack-query`:
