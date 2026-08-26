@@ -11,6 +11,7 @@ export * from "./components/feedback/VireoStatusDot";
 export * from "./components/layout/VireoSlidingScreenStack";
 export * from "./components/navigation/VireoTabs";
 export * from "./components/surfaces/VireoIconContainer";
+export * from "./constants/loading.constants";
 export * from "./constants/motion.constants";
 export * from "./hooks/useVireoDebouncedCallback/useVireoDebouncedCallback";
 export * from "./hooks/useVireoFullscreen/useVireoFullscreen";

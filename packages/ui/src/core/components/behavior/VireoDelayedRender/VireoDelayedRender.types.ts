@@ -32,7 +32,7 @@ export type VireoDelayedRenderSlotsAndSlotProps = CreateSlotsAndSlotProps<
 export type VireoDelayedRenderOwnProps = VireoDelayedRenderSlotsAndSlotProps & {
   /** Content mounted after the delay elapses. */
   children: React.ReactNode;
-  /** Time in milliseconds to wait before mounting the content. @default 200 */
+  /** Time in milliseconds to wait before mounting the content. @default VIREO_LOADING_TOKENS.revealDelay */
   delay?: number;
   /** Override or extend the utility classes applied to each slot. */
   classes?: Partial<VireoDelayedRenderClasses>;
