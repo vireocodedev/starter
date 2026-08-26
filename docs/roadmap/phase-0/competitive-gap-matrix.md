@@ -63,7 +63,10 @@ exist.
 
 ## Hands-on follow-up
 
-Before final positioning, run the same public scenario against each alternative:
+The [hands-on benchmark protocol](competitor-benchmark-protocol.md) defines the
+controlled conditions, shared equipment-inspection scenario, scoring, evidence,
+bias controls, and publication gate. Before final positioning, run the same public
+scenario against each alternative:
 
 1. create a React/Spring inventory application;
 2. add one related entity with validation and authorization;

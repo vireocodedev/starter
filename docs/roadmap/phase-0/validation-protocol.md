@@ -4,11 +4,13 @@ Protocol version: 1.0
 
 Prepared: 2026-08-26
 
-Status: ready to recruit; no sessions completed
+Status: fieldwork-ready; no participants recruited and no sessions completed
 
 This protocol tests the [product strategy](product-strategy.md) rather than seeking
 agreement with it. It separates problem interviews, message comprehension, and
 observed onboarding so a compelling pitch cannot hide a weak product experience.
+Recruitment, consent, scheduling, facilitation, and checkpoint operations are in the
+[Phase 0E research runbook](research-operations.md).
 
 ## Research questions
 
@@ -222,7 +224,11 @@ After sessions 5, 10, and the final session:
 
 Do not average away a severe security, data-loss, accessibility, or lock-in concern.
 
-## Session record template
+## External raw session record template
+
+Copy this template into the approved restricted research system. Never commit a
+completed participant record, identity mapping, raw note, or recording to this
+repository.
 
 ```text
 Participant: P__
@@ -252,5 +258,7 @@ Maintainer interpretation (kept separate from participant evidence):
 -
 ```
 
-Research summaries should live under `docs/roadmap/research/YYYY-MM/` once sessions
-exist. Empty or invented participant records must never be committed.
+Aggregate research summaries follow the
+[research evidence rules](../research/README.md) and should live under
+`docs/roadmap/research/YYYY-MM/` once the minimum checkpoint sample exists. Empty,
+individual, or invented participant records must never be committed.

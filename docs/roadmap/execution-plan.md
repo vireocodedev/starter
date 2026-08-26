@@ -34,20 +34,20 @@ and completion.
 
 ## Execution sequence
 
-| Milestone | Scope                                                  | Exit evidence                                                                     | Status   |
-| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | -------- |
-| Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete |
-| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete |
-| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete |
-| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete |
-| Phase 0E  | External evidence                                      | Interviews and observed clean-room onboarding                                     | Next     |
-| Phase 0F  | Phase 0 gate review                                    | Dated Phase 1 backlog with reliable estimates                                     | Pending  |
-| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Pending  |
-| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Pending  |
-| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Pending  |
-| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Pending  |
-| Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Pending  |
-| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Pending  |
+| Milestone | Scope                                                  | Exit evidence                                                                     | Status      |
+| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | ----------- |
+| Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete    |
+| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete    |
+| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete    |
+| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete    |
+| Phase 0E  | External evidence                                      | Interviews and observed clean-room onboarding                                     | In progress |
+| Phase 0F  | Phase 0 gate review                                    | Dated Phase 1 backlog with reliable estimates                                     | Pending     |
+| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Pending     |
+| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Pending     |
+| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Pending     |
+| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Pending     |
+| Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Pending     |
+| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Pending     |
 
 ## Phase 0A evidence set
 
@@ -89,6 +89,18 @@ Phase 0D defines the intended public contract and the evidence required to activ
 each supported row. It does not relabel currently untested combinations as
 supported. Matrix automation, cross-platform clean rooms, real PostgreSQL lanes,
 cross-browser coverage, and device/PWA evidence remain Phase 1–4 execution work.
+
+## Phase 0E fieldwork launch set
+
+- [Audience and positioning validation protocol](phase-0/validation-protocol.md)
+- [Recruitment, consent, and fieldwork operations](phase-0/research-operations.md)
+- [Hands-on competitor benchmark protocol](phase-0/competitor-benchmark-protocol.md)
+- [Aggregate research evidence rules and checkpoint template](research/README.md)
+
+Phase 0E is operationally ready but cannot complete from repository work alone.
+Zero unfamiliar participants have been recruited or observed, and zero competitor
+benchmark runs have been completed. D-101 and D-102 remain open until the stated
+external thresholds—not maintainer intuition—are met.
 
 ## Measurement policy
 

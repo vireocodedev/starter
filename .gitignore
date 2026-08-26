@@ -6,6 +6,14 @@ storybook-static/
 *.log
 .turbo
 
+# Research evidence committed under docs/roadmap/research/ is aggregate only.
+# Raw participant material and identity mappings must remain in an approved,
+# access-controlled system outside this repository.
+docs/roadmap/research/raw/
+docs/roadmap/research/participants/
+docs/roadmap/research/recordings/
+docs/roadmap/research/transcripts/
+
 # jvm/ is a separate Gradle build. turbo never invokes Gradle and Gradle never
 # invokes npm; the only thing they share is this repository.
 jvm/build/
