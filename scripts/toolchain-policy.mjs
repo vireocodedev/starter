@@ -19,7 +19,7 @@ const expected = {
     "@mui/material": ">=9 <10",
     "@mui/x-date-pickers": ">=9 <10",
     "@tanstack/react-form": ">=1.33 <2",
-    "@tanstack/react-query": ">=5.62 <6",
+    "@tanstack/react-query": ">=5.80 <6",
     react: ">=19.2 <20",
     "react-dom": ">=19.2 <20",
   },
