@@ -1,8 +1,8 @@
 # Loading-State and Skeleton Audit
 
-**Phase:** 3 — foundation remediation
+**Phase:** 7 — reusable-owner rollout support
 
-**Status:** Foundation and responsive-table pilot remediated
+**Status:** Foundation, responsive table, history entry, and async confirmation contracts remediated
 
 **Audited against:** [Vireo Loading-State and Skeleton Standard](LOADING_STATE_STANDARD.md)  
 **Scope:** `@vireocodedev/starter-ui` public loading primitives and async-capable visual components
@@ -47,10 +47,11 @@ The audit found four cross-cutting gaps:
 | `VireoQueryBoundary`                                     | `boundary`                               | Suspense fallback uses an accessible centered progress indicator; consumers may replace it. Error and retry behavior is local and recoverable.                   | C by default; consumer-declared for custom fallback | Partial     | P1       | TanStack Query integration  |
 | `VireoInitializationBoundary`                            | `boundary`                               | Replaces a gated subtree with a consumer fallback and throws initialization errors to an ancestor.                                                               | C by default; consumer-declared for fallback        | Partial     | P1       | Core behavior               |
 | `VireoResponsiveTable`                                   | `skeleton-capable`, `content-preserving` | Keeps stable controls, delays silent skeleton leaves through one boundary, reuses real row anatomy in both layouts, and preserves rows during next-page loading. | B; A for stable outer anchors                       | Aligned     | —        | Responsive table capability |
+| `VireoHistoryEntry`                                      | `skeleton-capable`                       | Exposes loaded and loading modes through one entry anatomy; the parent boundary owns reveal timing and announcements.                                            | B; A for stable entry anchors                       | Aligned     | —        | History capability          |
 | Four autocomplete field variants                         | `content-preserving`                     | Retain the control and selected values while MUI presents loading text and a local progress adornment.                                                           | A control frame                                     | Partial     | P2       | Forms capability            |
 | `VireoFormSubmitButton`                                  | `busy-action`                            | Tracks form submission, presents MUI loading feedback, and prevents duplicate submission through button loading/disabled behavior.                               | A                                                   | Partial     | P1       | Forms capability            |
 | `VireoFormNextStepButton`                                | `busy-action`                            | Tracks asynchronous step transition, sets `aria-busy`, disables unsafe repetition, and retains the workflow.                                                     | A                                                   | Aligned     | P2       | Forms capability            |
-| `VireoConfirmationDialog`                                | `busy-action`                            | Retains target context, disables closing and actions, and adds a progress indicator to the confirm action.                                                       | A                                                   | Partial     | P1       | Confirmation capability     |
+| `VireoConfirmationDialog`                                | `busy-action`                            | Retains target context, awaits an optional async confirmation action, disables unsafe exits, and restores retry/cancel after rejection.                          | A                                                   | Partial     | P1       | Confirmation capability     |
 | `VireoForm` and `VireoFormFileListField` lifecycle flags | `static` for loading classification      | Expose submitting/validating owner state for presentation and safety; they do not independently render a loading treatment.                                      | Not applicable                                      | Aligned     | P2       | Forms capability            |
 | `VireoFormStepProgress`                                  | Not loading                              | Represents known multi-step completion rather than an asynchronous wait.                                                                                         | Not applicable                                      | Not loading | —        | Forms capability            |
 
@@ -147,16 +148,26 @@ The responsive-table pilot now covers delayed loading, single-boundary announcem
 
 **Required remediation:** Add canonical stories and browser-level contracts after each component is remediated. Tests must include responsive modes, density, reduced motion, themes, representative localization, announcements, recovery, and CLS/anchor limits appropriate to the declared geometry level.
 
+### F-10 — history entries need shared loaded/loading anatomy
+
+**Rating:** Aligned
+
+**Priority:** Remediated in Phase 7
+
+`VireoHistoryEntry` now exposes a discriminated loading mode that reuses the real entry frame, header, expanded body, column headings, and field-row anatomy. Unknown leaves use `VireoSkeleton`; the entry starts no timer and emits no independent status.
+
+**Remediation record:** Focused tests cover the loading contract, public stories use `Loaded`, `Loading`, and `AlignmentContract`, and the consuming overlay supplies one enclosing `VireoLoadingRegion`.
+
 ## State-transition coverage baseline
 
-| Transition                                    | Shared support today                                         | Gap                                                     |
-| --------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
-| Initial loading → content                     | Query boundary, initialization boundary, responsive table    | Timing and geometry contracts are not unified.          |
-| Initial loading → empty                       | Responsive table and consumer rendering                      | No canonical transition/alignment contract.             |
-| Initial loading → error                       | Query boundary; consumer-owned initialization error boundary | Initialization ownership and geometry are not explicit. |
-| Content → refresh → updated                   | Consumer-owned; table supports retained next-page rows       | General refresh contract is undocumented.               |
-| Content → refresh error with retained content | Consumer-owned                                               | No reusable presentation contract.                      |
-| Mutation → success/error                      | Form buttons and confirmation dialog preserve context        | Busy semantics and announcements are inconsistent.      |
+| Transition                                    | Shared support today                                         | Gap                                                                                           |
+| --------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Initial loading → content                     | Query boundary, initialization boundary, responsive table    | Timing and geometry contracts are not unified.                                                |
+| Initial loading → empty                       | Responsive table and consumer rendering                      | No canonical transition/alignment contract.                                                   |
+| Initial loading → error                       | Query boundary; consumer-owned initialization error boundary | Initialization ownership and geometry are not explicit.                                       |
+| Content → refresh → updated                   | Consumer-owned; table supports retained next-page rows       | General refresh contract is undocumented.                                                     |
+| Content → refresh error with retained content | Consumer-owned                                               | No reusable presentation contract.                                                            |
+| Mutation → success/error                      | Form buttons and confirmation dialog preserve context        | Async confirmation execution and recovery are covered; shared busy announcements remain open. |
 
 ## Remediation order
 
@@ -175,4 +186,5 @@ The responsive-table pilot now covers delayed loading, single-boundary announcem
 - [x] Accessibility and announcement ownership gaps recorded.
 - [x] Remediation priorities and repository owners assigned.
 - [x] Phase 3 foundation and responsive-table pilot findings remediated.
+- [x] Phase 7 history-entry anatomy and async-confirmation execution contracts delivered for application rollout.
 - [ ] Remaining boundary, action, widget, and cross-surface verification findings remediated in later phases.
