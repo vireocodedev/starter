@@ -1,12 +1,13 @@
 import { execFileSync } from "node:child_process";
 import {
   existsSync,
+  lstatSync,
   mkdtempSync,
   mkdirSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
-  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -139,11 +140,27 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
   return manifest;
 }
 
-function linkExternalDependencies(consumerNodeModules) {
-  for (const entry of readdirSync(rootNodeModules, { withFileTypes: true })) {
-    if (entry.name === ".bin" || entry.name === ".package-lock.json" || entry.name === "@vireocodedev") continue;
-    symlinkSync(join(rootNodeModules, entry.name), join(consumerNodeModules, entry.name), "dir");
+function installedVersion(name, packageDirectories = []) {
+  const manifestPath = [rootNodeModules, ...packageDirectories.map(directory => join(directory, "node_modules"))]
+    .map(nodeModules => join(nodeModules, name, "package.json"))
+    .find(existsSync);
+  if (!manifestPath) {
+    throw new Error(`The clean-consumer fixture requires ${name}; run npm ci first.`);
   }
+  return JSON.parse(readFileSync(manifestPath, "utf8")).version;
+}
+
+function externalRuntimeVersions(packages) {
+  const names = new Set();
+  const packageDirectories = packages.map(({ directory }) => directory);
+  for (const { manifest } of packages) {
+    for (const field of ["dependencies", "peerDependencies", "optionalDependencies"]) {
+      for (const name of Object.keys(manifest[field] ?? {})) {
+        if (!name.startsWith("@vireocodedev/")) names.add(name);
+      }
+    }
+  }
+  return Object.fromEntries([...names].sort().map(name => [name, installedVersion(name, packageDirectories)]));
 }
 
 const auditRoot = mkdtempSync(join(tmpdir(), "starter-release-smoke-"));
@@ -154,8 +171,7 @@ const consumerScope = join(consumerNodeModules, "@vireocodedev");
 
 try {
   mkdirSync(tarballRoot, { recursive: true });
-  mkdirSync(consumerScope, { recursive: true });
-  linkExternalDependencies(consumerNodeModules);
+  mkdirSync(consumerRoot, { recursive: true });
 
   const packOutput = execFileSync(
     "npm",
@@ -175,6 +191,46 @@ try {
     throw new Error(`Expected ${packages.length} tarballs, but npm produced ${tarballs.length}.`);
   }
 
+  const localPackages = Object.fromEntries(
+    packages.map(({ manifest }) => {
+      const filename = `${manifest.name.replace(/^@/u, "").replaceAll("/", "-")}-${manifest.version}.tgz`;
+      return [manifest.name, `file:${join(tarballRoot, filename)}`];
+    }),
+  );
+  const packageDirectories = packages.map(({ directory }) => directory);
+  writeFileSync(
+    join(consumerRoot, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "vireo-packed-consumer",
+        private: true,
+        type: "module",
+        dependencies: { ...externalRuntimeVersions(packages), ...localPackages },
+        devDependencies: {
+          "@types/react-transition-group": installedVersion("@types/react-transition-group", packageDirectories),
+          typescript: installedVersion("typescript", packageDirectories),
+          vite: installedVersion("vite", packageDirectories),
+        },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  execFileSync(
+    "npm",
+    ["install", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false", "--strict-peer-deps"],
+    {
+      cwd: consumerRoot,
+      env: { ...process.env, npm_config_cache: join(auditRoot, "consumer-npm-cache") },
+      stdio: "inherit",
+    },
+  );
+  execFileSync("npm", ["ls", "--all", "--silent"], {
+    cwd: consumerRoot,
+    env: { ...process.env, npm_config_cache: join(auditRoot, "consumer-npm-cache") },
+    stdio: "ignore",
+  });
+
   const nodeSpecifiers = [];
   const browserSpecifiers = [];
   const summary = [];
@@ -189,6 +245,12 @@ try {
 
     const metadata = packMetadata.find(item => item.name === sourceManifest.name);
     if (!metadata) throw new Error(`npm did not report pack metadata for ${sourceManifest.name}.`);
+    if (lstatSync(packageDirectory).isSymbolicLink()) {
+      throw new Error(`${sourceManifest.name} was linked rather than installed from its tarball.`);
+    }
+    if (!realpathSync(packageDirectory).startsWith(`${realpathSync(consumerRoot)}/`)) {
+      throw new Error(`${sourceManifest.name} resolved outside the isolated consumer.`);
+    }
     const packedManifest = validatePackageContents(packageDirectory, sourceDirectory, sourceManifest, metadata);
     const packageEntries = packageSpecifiers(packedManifest);
     if (packedManifest.name === "@vireocodedev/starter-ui") browserSpecifiers.push(...packageEntries);
@@ -221,6 +283,40 @@ try {
     stdio: "inherit",
   });
 
+  const typecheckEntry = join(consumerRoot, "consumer.ts");
+  const typecheckConfig = join(consumerRoot, "tsconfig.json");
+  const allSpecifiers = [...nodeSpecifiers, ...browserSpecifiers];
+  writeFileSync(
+    typecheckEntry,
+    allSpecifiers
+      .map((specifier, index) => `import type * as Package${index} from ${JSON.stringify(specifier)};`)
+      .join("\n"),
+  );
+  writeFileSync(
+    typecheckConfig,
+    `${JSON.stringify(
+      {
+        compilerOptions: {
+          jsx: "react-jsx",
+          lib: ["ES2022", "DOM", "DOM.Iterable"],
+          module: "ESNext",
+          moduleResolution: "Bundler",
+          noEmit: true,
+          skipLibCheck: false,
+          strict: true,
+          target: "ES2022",
+        },
+        files: [typecheckEntry],
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  execFileSync("node", [join(consumerNodeModules, "typescript/bin/tsc"), "--project", typecheckConfig], {
+    cwd: consumerRoot,
+    stdio: "inherit",
+  });
+
   const browserEntry = join(consumerRoot, "browser-entry.mjs");
   const viteConfig = join(consumerRoot, "vite.config.mjs");
   writeFileSync(browserEntry, browserSpecifiers.map(specifier => `import ${JSON.stringify(specifier)};`).join("\n"));
@@ -236,12 +332,12 @@ try {
       }
     };`,
   );
-  execFileSync("node", [join(rootNodeModules, "vite/bin/vite.js"), "build", "--config", viteConfig], {
+  execFileSync("node", [join(consumerNodeModules, "vite/bin/vite.js"), "build", "--config", viteConfig], {
     cwd: consumerRoot,
     stdio: "inherit",
   });
 
-  console.log("Packed release smoke test passed.");
+  console.log("Packed release and isolated consumer smoke test passed.");
   console.log("Package                                      Exports  Files  Packed KiB  Unpacked KiB");
   console.log("-------------------------------------------  -------  -----  ----------  ------------");
   for (const item of summary) {
@@ -252,6 +348,9 @@ try {
   console.log("");
   console.log(
     `Validated ${summary.length} licensed packages and ${nodeSpecifiers.length + browserSpecifiers.length} public runtime entry points (${nodeSpecifiers.length} native ESM, ${browserSpecifiers.length} browser-bundled).`,
+  );
+  console.log(
+    "The clean install resolved a valid dependency tree and compiled every entry point with skipLibCheck disabled.",
   );
   console.log("npm supplied a content integrity digest for every tarball.");
 } finally {
