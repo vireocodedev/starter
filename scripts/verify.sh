@@ -39,7 +39,7 @@ trap 'exit 143' TERM
 
 cd "$REPOSITORY_ROOT" || exit 1
 
-TOTAL_STEPS=9
+TOTAL_STEPS=10
 CURRENT_STEP=0
 SUITE_STARTED_AT=$(node -p 'Date.now()')
 RESULTS=""
@@ -164,14 +164,15 @@ printf 'npm:        %s\n' "$(npm --version)"
 printf 'Output:     %s\n' "$([ "$SILENT" = 'true' ] && printf 'failures only' || printf 'full')"
 printf 'Steps:      %s\n' "$TOTAL_STEPS"
 
-run_step 'Lint' npm run lint
-run_step 'Formatting' npm run format:check
-run_step 'Package builds' npm run build
-run_step 'Type checking' npm run typecheck
-run_step 'Tests and contract checks' npm run test
-run_step 'Strict consumer declarations' npm run types:strict
-run_step 'Generator tests' npm run generate:test
-run_step 'Packed release artifacts' npm run release:smoke
-run_step 'Vireo Starter Storybook build' npm run build-storybook
+run_step 'Toolchain policy' corepack npm run toolchain:check
+run_step 'Lint' corepack npm run lint
+run_step 'Formatting' corepack npm run format:check
+run_step 'Package builds' corepack npm run build
+run_step 'Type checking' corepack npm run typecheck
+run_step 'Tests and contract checks' corepack npm run test
+run_step 'Strict consumer declarations' corepack npm run types:strict
+run_step 'Generator tests' corepack npm run generate:test
+run_step 'Packed release artifacts' corepack npm run release:smoke
+run_step 'Vireo Starter Storybook build' corepack npm run build-storybook
 
 print_summary 'PASSED'

@@ -12,7 +12,7 @@ permissions: {}
 jobs:
   build:
     name: TypeScript
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read
@@ -22,17 +22,17 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: 24
+          node-version: 24.18.1
           registry-url: https://npm.pkg.github.com
           scope: "@vireocodedev"
-      - run: npm ci
+      - run: corepack npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # This is the same ordered merge gate developers run locally. It includes
       # linting, formatting, package builds, type checking, tests and contract
       # checks, strict consumer declarations, generator tests, and the Vireo
       # Storybook production build.
-      - run: npm run verify
+      - run: corepack npm run verify
 
   # Deliberately a sibling of the TypeScript job rather than a step inside it.
   # The two halves of the starter are released together because they live in one
@@ -40,7 +40,7 @@ jobs:
   # other's toolchain, and neither needs to.
   jvm:
     name: JVM
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read

@@ -174,8 +174,8 @@ try {
   mkdirSync(consumerRoot, { recursive: true });
 
   const packOutput = execFileSync(
-    "npm",
-    ["pack", "--workspaces", "--pack-destination", tarballRoot, "--json", "--ignore-scripts"],
+    "corepack",
+    ["npm", "pack", "--workspaces", "--pack-destination", tarballRoot, "--json", "--ignore-scripts"],
     {
       cwd: repoRoot,
       encoding: "utf8",
@@ -183,7 +183,8 @@ try {
       stdio: ["ignore", "pipe", "inherit"],
     },
   );
-  const packMetadata = JSON.parse(packOutput);
+  const packResult = JSON.parse(packOutput);
+  const packMetadata = Array.isArray(packResult) ? packResult : Object.values(packResult);
 
   const packages = publishedPackages();
   const tarballs = readdirSync(tarballRoot).filter(file => file.endsWith(".tgz"));
@@ -217,15 +218,15 @@ try {
     )}\n`,
   );
   execFileSync(
-    "npm",
-    ["install", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false", "--strict-peer-deps"],
+    "corepack",
+    ["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false", "--strict-peer-deps"],
     {
       cwd: consumerRoot,
       env: { ...process.env, npm_config_cache: join(auditRoot, "consumer-npm-cache") },
       stdio: "inherit",
     },
   );
-  execFileSync("npm", ["ls", "--all", "--silent"], {
+  execFileSync("corepack", ["npm", "ls", "--all", "--silent"], {
     cwd: consumerRoot,
     env: { ...process.env, npm_config_cache: join(auditRoot, "consumer-npm-cache") },
     stdio: "ignore",

@@ -15,7 +15,7 @@ permissions: {}
 jobs:
   verify-typescript:
     name: Verify TypeScript release candidate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read
@@ -25,17 +25,17 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: 24
+          node-version: 24.18.1
           registry-url: https://npm.pkg.github.com
           scope: "@vireocodedev"
-      - run: npm ci
+      - run: corepack npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm run verify -- silent
+      - run: corepack npm run verify -- silent
 
   verify-jvm:
     name: Verify JVM release candidate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read
@@ -57,7 +57,7 @@ jobs:
   release-npm:
     name: Release npm packages
     needs: [verify-typescript, verify-jvm]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       packages: write
@@ -70,20 +70,20 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: 24
+          node-version: 24.18.1
           registry-url: https://npm.pkg.github.com
           scope: "@vireocodedev"
       # Dependency lifecycle scripts do not need release credentials. Package
       # lifecycle hooks still run later, as part of the deliberate publish.
-      - run: npm ci --ignore-scripts
+      - run: corepack npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release PR or publish to GitHub Packages
         id: changesets
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
-          publish: npm run release:publish
-          version: npm run version-packages
+          publish: corepack npm run release:publish
+          version: corepack npm run version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -93,7 +93,7 @@ jobs:
   publish-jvm:
     name: Publish JVM artifacts
     needs: [verify-jvm, release-npm]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -146,7 +146,7 @@ jobs:
   tag-jvm:
     name: Tag JVM release
     needs: publish-jvm
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -168,7 +168,7 @@ jobs:
   verify-consumption:
     name: Verify published JVM artifacts
     needs: publish-jvm
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read

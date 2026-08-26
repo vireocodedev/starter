@@ -109,6 +109,20 @@ for (const fileName of workflowFiles) {
   if (!lines.includes("permissions: {}")) {
     problems.push(`${fileName} must deny permissions at workflow level with permissions: {}`);
   }
+  if (source.includes("ubuntu-latest")) {
+    problems.push(`${fileName} may not use floating ubuntu-latest runners`);
+  }
+  for (const [lineNumber, line] of lines.entries()) {
+    if (/^\s+runs-on: ubuntu-/.test(line) && line.trim() !== "runs-on: ubuntu-24.04") {
+      problems.push(`${fileName}:${lineNumber + 1} must use the canonical ubuntu-24.04 runner`);
+    }
+    if (/^\s+node-version:/.test(line) && line.trim() !== "node-version: 24.18.1") {
+      problems.push(`${fileName}:${lineNumber + 1} must pin Node 24.18.1`);
+    }
+    if (/^\s+run: npm(?:\s|$)/.test(line)) {
+      problems.push(`${fileName}:${lineNumber + 1} must invoke the declared npm through Corepack`);
+    }
+  }
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const match = lines[lineNumber].match(/\buses:\s+([^\s@]+)@([^\s#]+)(?:\s+#\s+([^\s]+))?/);

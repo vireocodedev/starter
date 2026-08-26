@@ -9,9 +9,9 @@ cd "$REPOSITORY_ROOT"
 
 printf '[1/3] TypeScript libraries, packed consumers, and documentation\n'
 if [ "$#" -gt 0 ]; then
-  npm run verify -- "$1"
+  corepack npm run verify -- "$1"
 else
-  npm run verify
+  corepack npm run verify
 fi
 
 printf '\n[2/3] JVM libraries and aggregate Javadoc\n'
