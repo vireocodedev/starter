@@ -76,8 +76,9 @@ workflow separately performs a post-publication run with an empty Gradle home.
 - npm 12.0.2 is now selected through Corepack in repository commands and CI, and
   the task graph installs a temporary npm shim so Turbo workspace subprocesses
   cannot fall back to a host npm version.
-- The locked dependency consumer and required-peer-floor consumer are green. A
-  recurring admitted-range/optional-integration matrix remains a nightly follow-up.
+- The locked dependency consumer and required/optional peer-floor consumer are
+  green. A recurring support lane now repeats that packed floor test; the remainder
+  of each admitted range still needs representative sampling.
 - Canonical Ubuntu 24.04/26.04, macOS, and Windows 11/WSL2 empty-machine rehearsals
   remain recurring support evidence, not a per-commit local package check.
 - Public registry rehearsals remain blocked on final npm/Maven coordinates and

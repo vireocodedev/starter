@@ -90,6 +90,16 @@ configure(subprojects.findAll { it.name != 'vireo-starter-bom' }) {
 
     tasks.named('test') {
         useJUnitPlatform()
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(
+                    rootProject.providers.gradleProperty('vireoTestJavaVersion').getOrElse('21') as Integer)
+        }
+        ['vireo.postgres.enabled', 'vireo.postgres.image'].each { propertyName ->
+            def propertyValue = System.getProperty(propertyName)
+            if (propertyValue != null) {
+                systemProperty propertyName, propertyValue
+            }
+        }
     }
 
     // Public binary artifacts carry the license with the compiled code rather

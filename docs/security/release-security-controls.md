@@ -29,18 +29,19 @@ manifest digest. Its tag and digest are recorded in the same policy contract.
 All workflows start with `permissions: {}`. Each job opts into only its required
 scopes:
 
-| Workflow/job               | Access                                   | Reason                                       |
-| -------------------------- | ---------------------------------------- | -------------------------------------------- |
-| CI TypeScript/JVM          | `contents: read`, `packages: read`       | Checkout, install, build, and verify         |
-| Security secret scan       | `contents: read`                         | Fetch and scan complete history              |
-| Storybook build            | `contents: read`, `packages: read`       | Build the deployment artifact                |
-| Storybook deploy           | `pages: write`, `id-token: write`        | Deploy through GitHub Pages OIDC             |
-| Release verification       | `contents: read`, `packages: read`       | Verify the exact candidate without writes    |
-| Release evidence           | `contents: read`, `packages: read`       | Build checksums, SBOM, and dry-run artifacts |
-| npm release                | `contents/packages/pull-requests: write` | Release PR, tags, and package publication    |
-| JVM publication            | `contents: read`, `packages: write`      | Query and publish Maven artifacts            |
-| JVM tag                    | `contents: write`                        | Create the version marker only               |
-| Published JVM verification | `contents: read`, `packages: read`       | Resolve artifacts as an external consumer    |
+| Workflow/job               | Access                                      | Reason                                       |
+| -------------------------- | ------------------------------------------- | -------------------------------------------- |
+| CI TypeScript/JVM          | `contents: read`, `packages: read`          | Checkout, install, build, and verify         |
+| Security secret scan       | `contents: read`                            | Fetch and scan complete history              |
+| Storybook build            | `contents: read`, `packages: read`          | Build the deployment artifact                |
+| Storybook deploy           | `pages: write`, `id-token: write`           | Deploy through GitHub Pages OIDC             |
+| Scheduled support evidence | `contents: read`, optional `packages: read` | Build matrix evidence and retain metadata    |
+| Release verification       | `contents: read`, `packages: read`          | Verify the exact candidate without writes    |
+| Release evidence           | `contents: read`, `packages: read`          | Build checksums, SBOM, and dry-run artifacts |
+| npm release                | `contents/packages/pull-requests: write`    | Release PR, tags, and package publication    |
+| JVM publication            | `contents: read`, `packages: write`         | Query and publish Maven artifacts            |
+| JVM tag                    | `contents: write`                           | Create the version marker only               |
+| Published JVM verification | `contents: read`, `packages: read`          | Resolve artifacts as an external consumer    |
 
 Checkout credentials are disabled everywhere except the isolated JVM tag job.
 Dependency lifecycle scripts are disabled during installation in the npm write

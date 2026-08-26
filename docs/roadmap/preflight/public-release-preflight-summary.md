@@ -89,6 +89,16 @@ public registry can sign/attest the exact published bytes. Exact-byte promotion,
 JVM dependency SBOM generation, and registry verification remain part of the
 coordinate/provider unblock.
 
+The code-owned Starter portion of item 3 is also source-complete: a nightly/manual
+workflow runs tests on a Java 25 launcher while retaining Java 21 bytecode,
+requires the real migration suite against rolling PostgreSQL 17 and 18 images,
+compiles all required and optional UI integrations at their peer floors, and runs
+the complete TypeScript gate in a digest-pinned clean Node container. Every lane
+retains structured commit/toolchain/environment/result metadata. These rows remain
+unactivated until recurring CI records are green; Template browser and database
+coverage, branded/physical browsers, and hosted OS clean rooms remain separate
+follow-ups.
+
 ## Coordinate-unblock sequence
 
 Once the B0 decisions are complete:

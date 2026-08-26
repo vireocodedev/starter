@@ -44,6 +44,12 @@
       "digest": "sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
     }
   },
+  "workflowContainerImages": {
+    "node": {
+      "version": "24.18.1-bookworm-slim",
+      "digest": "sha256:a09aabc645e86e81e23dab78e0c0f2eaa233cab4277c7188232181a1a8bd5d39"
+    }
+  },
   "writePermissionJobs": {
     "release.yml:release-npm": ["contents", "packages", "pull-requests"],
     "release.yml:publish-jvm": ["packages"],

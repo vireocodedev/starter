@@ -3,6 +3,7 @@ package com.example.consumer;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.junit.jupiter.Container;
@@ -15,14 +16,17 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * differ from H2's, so passing there proves nothing about here.
  *
  * <p>
- * Skipped rather than failed where Docker is unavailable, so a contributor
- * without it still gets a usable build.
+ * Disabled in the ordinary unit suite so a contributor without Docker still
+ * gets a usable build. The support workflow opts in explicitly; once enabled,
+ * unavailable Docker is a failure rather than a skip.
  */
-@Testcontainers(disabledWithoutDocker = true)
+@EnabledIfSystemProperty(named = "vireo.postgres.enabled", matches = "true")
+@Testcontainers
 class PostgresLibraryUpgradeTest extends AbstractLibraryUpgradeTest {
 
     @Container
-    private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17-alpine");
+    private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer(
+            System.getProperty("vireo.postgres.image", "postgres:17-alpine"));
 
     private DataSource dataSource;
 

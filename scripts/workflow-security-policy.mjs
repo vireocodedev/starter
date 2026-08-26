@@ -8,6 +8,7 @@ const policy = JSON.parse(readFileSync(join(repoRoot, "contracts", "github-actio
 const problems = [];
 const observedActions = new Set();
 const observedWriteJobs = new Set();
+const observedWorkflowImages = new Set();
 
 function indentation(line) {
   return line.length - line.trimStart().length;
@@ -122,6 +123,15 @@ for (const fileName of workflowFiles) {
     if (/^\s+run: npm(?:\s|$)/.test(line)) {
       problems.push(`${fileName}:${lineNumber + 1} must invoke the declared npm through Corepack`);
     }
+    const imageMatch = line.match(/^\s+image:\s+([^\s]+)\s*$/);
+    if (imageMatch) {
+      const reference = imageMatch[1];
+      const approved = Object.entries(policy.workflowContainerImages ?? {}).find(
+        ([image, expected]) => reference === `${image}:${expected.version}@${expected.digest}`,
+      );
+      if (!approved) problems.push(`${fileName}:${lineNumber + 1} uses an unapproved or unpinned job container`);
+      else observedWorkflowImages.add(approved[0]);
+    }
   }
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
@@ -177,6 +187,9 @@ for (const action of Object.keys(policy.actions ?? {})) {
 }
 for (const key of Object.keys(policy.writePermissionJobs ?? {})) {
   if (!observedWriteJobs.has(key)) problems.push(`Write-permission policy contains unused entry ${key}`);
+}
+for (const image of Object.keys(policy.workflowContainerImages ?? {})) {
+  if (!observedWorkflowImages.has(image)) problems.push(`Workflow image policy contains unused entry ${image}`);
 }
 
 const secretScan = readFileSync(join(repoRoot, "scripts", "secret-scan.sh"), "utf8");
