@@ -9,19 +9,21 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
-permissions:
-  contents: write
-  packages: write
-  pull-requests: write
+# Write access is granted only to jobs that create release state.
+permissions: {}
 
 jobs:
-  release:
+  verify-typescript:
+    name: Verify TypeScript release candidate
     runs-on: ubuntu-latest
-    outputs:
-      published: ${{ steps.changesets.outputs.published }}
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
           registry-url: https://npm.pkg.github.com
@@ -29,80 +31,111 @@ jobs:
       - run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm run verify -- silent
+
+  verify-jvm:
+    name: Verify JVM release candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    defaults:
+      run:
+        working-directory: jvm
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@da187c8e6ffbd3802e00f2477aa5a822b25f2dda # v4.4.4
+      - run: ./gradlew clean check aggregateJavadoc --no-build-cache
+      - run: ./scripts/verify-publication-consumer.sh
+
+  release-npm:
+    name: Release npm packages
+    needs: [verify-typescript, verify-jvm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: "@vireocodedev"
+      # Dependency lifecycle scripts do not need release credentials. Package
+      # lifecycle hooks still run later, as part of the deliberate publish.
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release PR or publish to GitHub Packages
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@3841a0683d3cfa6dae0f9bb335290003010fe3f0 # v1.9.0
         with:
-          publish: npm run release
+          publish: npm run release:publish
           version: npm run version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # The two halves are versioned independently - changesets bumps each npm
-  # package on its own line, jvm/gradle.properties carries one version for all
-  # six artifacts - and they release independently too. `version=` is the whole
-  # signal: bump it and this job publishes, leave it and the registry check
-  # below turns the job into a no-op.
-  #
-  # This deliberately does not gate on the npm release having published. The
-  # lockstep rule in docs/BACKEND_PARITY.md is about the query-engine wire
-  # contract moving on both sides in one PR, which is a review constraint, not
-  # something CI can check - and gating here would make a backend-only release
-  # impossible, which is exactly what the extraction itself was.
-  jvm:
-    needs: release
+  # The two halves are versioned independently. A JVM version already present
+  # in the registry is a safe no-op, so npm-only releases remain possible.
+  publish-jvm:
+    name: Publish JVM artifacts
+    needs: [verify-jvm, release-npm]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.registry.outputs.version }}
     defaults:
       run:
         working-directory: jvm
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@da187c8e6ffbd3802e00f2477aa5a822b25f2dda # v4.4.4
 
-      # Release is a separate workflow from CI and may run concurrently with it.
-      # Prove the exact source and publication descriptors here before anything
-      # can reach the registry.
-      - name: Verify the JVM release candidate
-        run: |
-          ./gradlew clean check aggregateJavadoc --no-build-cache
-          ./scripts/verify-publication-consumer.sh
-
-      # A release that only touched packages/ leaves the JVM version untouched,
-      # and GitHub Packages rejects a re-publish of an existing release version.
-      # Skipping is the correct outcome there; failing would make every npm-only
-      # release look broken.
       - name: Decide whether this version is already published
         id: registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           version="$(./gradlew -q properties --property version | awk '/^version:/ {print $2}')"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           url="https://maven.pkg.github.com/vireocodedev/starter/com/vireocode/vireo-starter-bom/$version/vireo-starter-bom-$version.pom"
-          status="$(curl -s -o /dev/null -w '%{http_code}' -u "x:${{ secrets.GITHUB_TOKEN }}" "$url")"
-          # An artifact that exists answers 302, redirecting to blob storage;
-          # only a missing one answers 404. Treating 302 as "absent" is what
-          # made this job publish an existing version and die on the 409 the
-          # check was written to avoid. Redirects are deliberately not followed
-          # with -L: the target is a pre-signed URL on another host, curl drops
-          # the credentials crossing that hop, and a 403 there would read as
-          # "absent" all over again.
+          status="$(curl -s -o /dev/null -w '%{http_code}' -u "x:$GITHUB_TOKEN" "$url")"
           case "$status" in
             200 | 302)
               echo "Version $version is already in GitHub Packages; nothing to publish."
               echo "publish=false" >> "$GITHUB_OUTPUT"
               ;;
-            *)
-              echo "Version $version is not published yet (HTTP $status)."
+            404)
+              echo "Version $version is not published yet."
               echo "publish=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Could not determine publication state (HTTP $status)." >&2
+              exit 1
               ;;
           esac
 
-      # `publish` depends on apiSurfaceCheck, so a widened public surface with a
-      # stale snapshot cannot reach the registry.
       - name: Publish to GitHub Packages
         if: steps.registry.outputs.publish == 'true'
         run: ./gradlew publish
@@ -110,14 +143,19 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Deliberately not gated on the publish having run. 0.1.0 reached the
-      # registry before this step existed, so the marker 3.8 assumes exists is
-      # missing and would otherwise never appear. Creating the tag only when it
-      # is absent keeps the step safe to re-run on every push.
-      - name: Tag the JVM release
-        working-directory: .
+  tag-jvm:
+    name: Tag JVM release
+    needs: publish-jvm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Create the release tag when absent
+        env:
+          VERSION: ${{ needs.publish-jvm.outputs.version }}
         run: |
-          tag="jvm-v${{ steps.registry.outputs.version }}"
+          tag="jvm-v$VERSION"
           if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
             echo "$tag already exists; nothing to tag."
           else
@@ -126,29 +164,32 @@ jobs:
           fi
 
   # Publishing succeeding is not the same as the artifacts being usable. This
-  # resolves them the way a real consumer would - from the registry, with an
-  # empty Gradle home, with no project substitution available - which is the
-  # only thing that proves the extraction actually landed.
+  # resolves them the way a real consumer would, from an empty Gradle home.
   verify-consumption:
-    needs: jvm
+    name: Verify published JVM artifacts
+    needs: publish-jvm
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: temurin
           java-version: 21
-
       - name: Resolve the published artifacts with a cold Gradle cache
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.publish-jvm.outputs.version }}
         run: |
-          version="$(sed -n 's/^version=//p' jvm/gradle.properties)"
           GRADLE_USER_HOME="$RUNNER_TEMP/cold-gradle-home" ./jvm/gradlew \
             -p jvm/vireo-starter-publication-tests \
             -PvireoRepository=https://maven.pkg.github.com/vireocodedev/starter \
-            -PvireoVersion="$version" \
+            -PvireoVersion="$VERSION" \
             clean check \
             --no-daemon \
             --no-build-cache
