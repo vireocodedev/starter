@@ -91,6 +91,15 @@ configure(subprojects.findAll { it.name != 'vireo-starter-bom' }) {
     tasks.named('test') {
         useJUnitPlatform()
     }
+
+    // Public binary artifacts carry the license with the compiled code rather
+    // than relying on a consumer to find the repository-level file.
+    tasks.named('processResources') {
+        from(rootProject.file('../LICENSE')) {
+            into 'META-INF'
+            rename { 'LICENSE' }
+        }
+    }
 }
 
 // One browsable documentation tree for the complete published Java API. The

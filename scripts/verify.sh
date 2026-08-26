@@ -39,7 +39,7 @@ trap 'exit 143' TERM
 
 cd "$REPOSITORY_ROOT" || exit 1
 
-TOTAL_STEPS=8
+TOTAL_STEPS=9
 CURRENT_STEP=0
 SUITE_STARTED_AT=$(node -p 'Date.now()')
 RESULTS=""
@@ -171,6 +171,7 @@ run_step 'Type checking' npm run typecheck
 run_step 'Tests and contract checks' npm run test
 run_step 'Strict consumer declarations' npm run types:strict
 run_step 'Generator tests' npm run generate:test
+run_step 'Packed release artifacts' npm run release:smoke
 run_step 'Vireo Starter Storybook build' npm run build-storybook
 
 print_summary 'PASSED'

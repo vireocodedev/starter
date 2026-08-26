@@ -16,6 +16,9 @@ echo "Publishing JVM $version artifacts to an isolated local repository..."
     publishMavenPublicationToVerificationRepository \
     --no-build-cache
 
+echo "Auditing published JVM artifact contents and metadata..."
+"$script_directory/audit-publication-artifacts.sh" "$publication_repository" "$version"
+
 echo "Compiling and testing a standalone versionless consumer..."
 "$jvm_directory/gradlew" \
     -p "$jvm_directory/vireo-starter-publication-tests" \
