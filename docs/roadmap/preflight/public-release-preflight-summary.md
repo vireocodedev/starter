@@ -81,6 +81,14 @@ developer's implementation input:
    and recurring evidence metadata. Physical devices and external OS machines stay
    manual/hosted follow-ups.
 
+The code-owned part of item 1 is complete. Item 2 now produces an audited,
+commit-bound release manifest, SHA-256/SHA-512 checksums, an npm CycloneDX SBOM,
+and retained dry-run npm/Maven artifacts before publication. It intentionally
+labels that bundle unsigned and blocks any claim of provenance until the selected
+public registry can sign/attest the exact published bytes. Exact-byte promotion,
+JVM dependency SBOM generation, and registry verification remain part of the
+coordinate/provider unblock.
+
 ## Coordinate-unblock sequence
 
 Once the B0 decisions are complete:

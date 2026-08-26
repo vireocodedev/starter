@@ -47,6 +47,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release:smoke": "node scripts/release-pack-smoke.mjs",
+    "release:evidence": "node scripts/generate-release-evidence.mjs .release-evidence",
     "peer-floor:check": "node scripts/peer-floor-consumer.mjs",
     "public:audit": "sh scripts/public-repository-audit.sh",
     "security:secrets": "sh scripts/secret-scan.sh",

@@ -21,6 +21,10 @@
       "version": "v6.5.0",
       "sha": "249970729cb0ef3589644e2896645e5dc5ba9c38"
     },
+    "actions/upload-artifact": {
+      "version": "v7.0.1",
+      "sha": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+    },
     "actions/upload-pages-artifact": {
       "version": "v4.0.0",
       "sha": "7b1f4a764d45c48632c6b24a0339c27f5614fb0b"
