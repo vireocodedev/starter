@@ -63,7 +63,7 @@ export function DesktopResponsiveTable<
           flexDirection: "column",
           flex: 1,
           minHeight: 0,
-          marginTop: "calc(3 * var(--mui-spacing))",
+          marginTop: renderFilters ? "calc(3 * var(--mui-spacing))" : 0,
           border: 1,
           borderColor: "divider",
           borderRadius: 1,

@@ -60,6 +60,18 @@ describe(VIREO_RESPONSIVE_TABLE_NAME, () => {
     expect(screen.getByText("Maya")).toBeInTheDocument();
   });
 
+  it("adds desktop table spacing only when it renders table-owned filters", () => {
+    const { rerender } = render(<VireoResponsiveTable {...requiredProps} />);
+    const tableSurface = screen.getByRole("table", { name: "Accounts" }).parentElement?.parentElement;
+
+    expect(tableSurface).toHaveStyle({ marginTop: 0 });
+
+    rerender(<VireoResponsiveTable {...requiredProps} renderFilters={() => <div>Table filters</div>} />);
+
+    expect(screen.getByText("Table filters")).toBeInTheDocument();
+    expect(tableSurface).toHaveStyle({ marginTop: "calc(3 * var(--mui-spacing))" });
+  });
+
   it("keeps every Stack-wrapped row action visible in the mobile action grid", async () => {
     const mobileColumns = [
       ...columns,
