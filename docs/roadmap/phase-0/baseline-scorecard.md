@@ -17,9 +17,10 @@ full-stack Template slice, release automation, and publication-consumer tests.
 
 It is not yet a public product. Both repositories and every audited package are
 private, external positioning and onboarding have not been validated, the minimal
-Template boundary is unresolved, the public support matrix is undefined, and the
-create/doctor/full-stack generation experience does not exist. Those dependencies
-make Phase 0 and public-foundation work more important than adding breadth.
+Template boundary is unresolved, the public support matrix is defined but not yet
+enforced, and the create/doctor/full-stack generation experience does not exist.
+Those dependencies make Phase 0 and public-foundation work more important than
+adding breadth.
 
 ## Roadmap coverage
 
@@ -47,13 +48,13 @@ make Phase 0 and public-foundation work more important than adding breadth.
 | 20. Localization and internationalization                   | Strong partial   | A substantial localization package and Template integration exist; locale policy, extraction workflow, and external validation remain.                                                                                        |
 | 21. Testing and quality strategy                            | Strong partial   | Unit, integration, Storybook, E2E, API, architecture, consumer, and JVM checks are mature; OS/browser/device/visual matrices and budgets remain.                                                                              |
 | 22. Security engineering and software supply chain          | Partial          | Security policy and automated scans are partial; threat modeling, action pinning, SBOM/provenance, hardening, and independent review remain.                                                                                  |
-| 23. Packaging, versioning, compatibility, and releases      | Partial          | Changesets, JVM versioning, release-pack smoke, publication consumers, and fixtures exist; public trusted releases and support windows do not.                                                                                |
+| 23. Packaging, versioning, compatibility, and releases      | Partial          | Changesets, JVM versioning, release-pack smoke, publication consumers, fixtures, and [platform lifecycle windows](platform-support-policy.md) exist; public trusted releases and artifact-level compatibility policy remain.  |
 | 24. Documentation information architecture                  | Partial          | Extensive package and Template docs exist; version, deployment, and credential drift plus comprehensive executable-doc coverage remain.                                                                                       |
 | 25. README and GitHub conversion surface                    | Partial          | READMEs and community files exist; private repos, stale metadata, and no public conversion/quick-start proof prevent completion.                                                                                              |
 | 26. Demo and proof applications                             | Partial          | Template is a rich proof application, but it is private, unhosted, and its minimal-versus-kitchen-sink boundary is unresolved.                                                                                                |
 | 27. Developer experience beyond the happy path              | Partial          | Errors, async states, local-source modes, and extensive examples exist; doctor, upgrade, recovery diagnostics, and unfamiliar-user proof do not.                                                                              |
 | 28. Deployment and production operations                    | Partial          | Independent frontend/backend artifacts, container, health check, and deployment guide exist; canonical hosting, observability, and runbooks remain.                                                                           |
-| 29. Browser, platform, and compatibility policy             | Missing          | Chromium desktop/mobile checks exist, but no approved support policy or Firefox/WebKit/Safari/device matrix.                                                                                                                  |
+| 29. Browser, platform, and compatibility policy             | Partial          | An explicit [toolchain, OS, browser, installed-PWA, lifecycle, and evidence policy](platform-support-policy.md) is approved; most cross-platform, database, browser, and device lanes are not implemented.                    |
 | 30. Open-source governance and community health             | Missing          | Community basics exist, but `SUPPORT.md`, `GOVERNANCE.md`, issue forms, response policy, and public ownership model do not.                                                                                                   |
 | 31. Legal, licensing, intellectual property, and compliance | Partial          | MIT license, security policy, contributor code of conduct, and [preliminary naming-collision evidence](identity-and-coordinates.md) exist; professional clearance, dependency-license policy, and compliance guidance remain. |
 | 32. Website, content, and education                         | Missing          | Repository Markdown and generated Javadocs exist; no public site, domain, searchable guides, or education cadence.                                                                                                            |

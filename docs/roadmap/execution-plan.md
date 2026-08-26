@@ -39,8 +39,8 @@ and completion.
 | Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete |
 | Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete |
 | Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete |
-| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Next     |
-| Phase 0E  | External evidence                                      | Interviews and observed clean-room onboarding                                     | Pending  |
+| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete |
+| Phase 0E  | External evidence                                      | Interviews and observed clean-room onboarding                                     | Next     |
 | Phase 0F  | Phase 0 gate review                                    | Dated Phase 1 backlog with reliable estimates                                     | Pending  |
 | Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Pending  |
 | Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Pending  |
@@ -77,6 +77,19 @@ activation remains blocked on professional clearance, domain acquisition, and
 registry reservation; repository and source-coordinate changes are deliberately
 deferred to the coordinated Phase 1 migration.
 
+## Phase 0D evidence set
+
+- [Platform support and lifecycle policy](phase-0/platform-support-policy.md)
+- [Resolved decision D-105](phase-0/decisions.md)
+- [Updated prerequisites baseline](phase-0/prerequisites-and-credentials.md)
+- [Updated baseline](phase-0/baseline-scorecard.md)
+- [Updated gap register](phase-0/gap-register.md)
+
+Phase 0D defines the intended public contract and the evidence required to activate
+each supported row. It does not relabel currently untested combinations as
+supported. Matrix automation, cross-platform clean rooms, real PostgreSQL lanes,
+cross-browser coverage, and device/PWA evidence remain Phase 1–4 execution work.
+
 ## Measurement policy
 
 Measurements record the commit, machine, toolchain, cache state, command, and
@@ -84,19 +97,23 @@ limitations. A local result outside the supported toolchain is diagnostic eviden
 not supported-platform proof. Performance numbers are baselines, not promises or
 budgets, until the support matrix and CI measurement policy are approved.
 
-## Next milestone: Phase 0D
+## Next milestone: Phase 0E
 
-Phase 0D should produce:
+Phase 0E should produce:
 
-1. An explicit support matrix for Node, npm, Java, Spring Boot, React, MUI,
-   PostgreSQL, Gradle, operating systems, and browsers.
-2. Version-window, end-of-life, deprecation, and emergency-drop policies.
-3. CI and clean-room proof obligations for every supported combination.
-4. Unambiguous `supported`, `compatible`, `experimental`, and `untested` labels.
-5. A decision on which parts of the provisional scale envelope become supported
-   claims and which remain Phase 4 validation targets.
+1. Recruit the participant cohorts in the validation protocol and run the first
+   five-session checkpoint before treating the strategy as validated.
+2. Run randomized problem interviews and blind message-comprehension tests for the
+   three candidate claims.
+3. Execute equivalent hands-on competitor scenarios and record outcome, friction,
+   maintenance, and lock-in evidence.
+4. Observe current Template setup and first-change sessions, labeling private
+   distribution and missing generation as known constraints rather than hiding them.
+5. Publish anonymized findings and accept, revise, or reject D-101 and D-102 without
+   committing participant identities or confidential raw research.
 
 The Phase 0B audience and claim hierarchy remain hypotheses until Phase 0E executes
-the validation protocol. Completing internal identity and topology decisions does
-not authorize domain purchases, public renames, or package publication before the
-activation prerequisites in the identity decision pass.
+the validation protocol. The Phase 0D matrix also remains inactive as a public
+support claim until its enforcement evidence passes. Completing internal decisions
+does not authorize domain purchases, public renames, or package publication before
+the identity activation prerequisites pass.

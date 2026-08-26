@@ -8,18 +8,23 @@ This inventory distinguishes development prerequisites from credentials that exi
 only because the current distribution is private. Removing avoidable credentials is
 a Phase 1 requirement.
 
+The [platform support policy](platform-support-policy.md) now defines the intended
+public contract. This file remains the point-in-time implementation baseline and
+therefore continues to show where repository declarations and evidence differ from
+that contract.
+
 ## Toolchain
 
-| Concern    | Starter                              | Starter Template                                      | Baseline finding                                                              |
-| ---------- | ------------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Node.js    | `>=24.15.0`                          | `>=24.15.0`                                           | Local audit used `24.18.1`.                                                   |
-| npm        | `12.0.2` package manager declaration | `12.0.2` package manager declaration                  | Local audit used `11.16.0`; timing is diagnostic, not supported-matrix proof. |
-| Java       | 21                                   | 21                                                    | Local audit used Temurin `21.0.2`.                                            |
-| Gradle     | Wrapper `9.7.1`                      | Wrapper `9.5.1`                                       | No system Gradle is required.                                                 |
-| Git        | Required                             | Required                                              | Version policy is not yet published.                                          |
-| PostgreSQL | Used by JVM verification fixtures    | Production database; README says 16+, Compose uses 18 | The version policy is inconsistent and must be settled in Phase 0D.           |
-| Docker     | Optional                             | Optional for PostgreSQL and container validation      | Docker-free H2 development remains available.                                 |
-| Browsers   | Storybook/browser checks             | Playwright Chromium desktop and mobile                | Firefox, WebKit, installed PWA, and real-device support are not yet proven.   |
+| Concern    | Starter                                       | Starter Template                                      | Baseline finding                                                                           |
+| ---------- | --------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Node.js    | `>=24.15.0`                                   | `>=24.15.0`                                           | Local audit used `24.18.1`.                                                                |
+| npm        | `12.0.2` package manager declaration          | `12.0.2` package manager declaration                  | Local audit used `11.16.0`; timing is diagnostic, not supported-matrix proof.              |
+| Java       | 21                                            | 21                                                    | Local audit used Temurin `21.0.2`.                                                         |
+| Gradle     | Wrapper `9.7.1`                               | Wrapper `9.5.1`                                       | No system Gradle is required.                                                              |
+| Git        | Required                                      | Required                                              | Version policy is not yet published.                                                       |
+| PostgreSQL | Docker-conditional version 17 upgrade fixture | Production database; README says 16+, Compose uses 18 | Policy targets current minors of 17 and 18; required Template/CI evidence remains.         |
+| Docker     | Optional                                      | Optional for PostgreSQL and container validation      | Docker-free H2 development remains available.                                              |
+| Browsers   | Storybook/browser checks                      | Playwright Chromium desktop and mobile                | Target rows are defined; Firefox, WebKit, installed PWA, and real-device evidence remains. |
 
 ## Credential matrix
 
@@ -78,7 +83,7 @@ decisions.
 
 ## Clean-room evidence still required
 
-- supported Windows, macOS, Linux, and WSL environments;
+- the Ubuntu, macOS, and Windows/WSL environments defined by the support policy;
 - the declared npm 12 toolchain rather than the local npm 11 audit host;
 - production PostgreSQL and backup/restore validation;
 - Firefox, WebKit/Safari, installed PWA, and representative mobile hardware;

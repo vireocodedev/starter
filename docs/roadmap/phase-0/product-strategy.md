@@ -152,9 +152,10 @@ direction until the generator exists.
 
 ## Initial design envelope
 
-These are validation and test targets, not a published support promise. Phase 0D
-must accept, narrow, or reject them, and Phase 4 must produce load and recovery
-evidence.
+These are validation and test targets, not a published support promise. The
+[Phase 0D support decision](platform-support-policy.md#scale-claim-decision) keeps
+every numeric capacity target provisional; Phase 4 must produce representative load,
+resource, failure, and recovery evidence before any becomes a supported claim.
 
 | Dimension                  | Initial target envelope                                                                                                                | Outside the initial target                                                                  |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
