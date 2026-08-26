@@ -1,0 +1,85 @@
+# Phase 0 prerequisites and credentials baseline
+
+Audited on 2026-08-26 at Starter commit
+`9cb167cb736c9930bf85a88be725163b0453536a` and Starter Template commit
+`f73df577a0568a4a6aaedb7d39b0e21c37c38160`.
+
+This inventory distinguishes development prerequisites from credentials that exist
+only because the current distribution is private. Removing avoidable credentials is
+a Phase 1 requirement.
+
+## Toolchain
+
+| Concern    | Starter                              | Starter Template                                      | Baseline finding                                                              |
+| ---------- | ------------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Node.js    | `>=24.15.0`                          | `>=24.15.0`                                           | Local audit used `24.18.1`.                                                   |
+| npm        | `12.0.2` package manager declaration | `12.0.2` package manager declaration                  | Local audit used `11.16.0`; timing is diagnostic, not supported-matrix proof. |
+| Java       | 21                                   | 21                                                    | Local audit used Temurin `21.0.2`.                                            |
+| Gradle     | Wrapper `9.7.1`                      | Wrapper `9.5.1`                                       | No system Gradle is required.                                                 |
+| Git        | Required                             | Required                                              | Version policy is not yet published.                                          |
+| PostgreSQL | Used by JVM verification fixtures    | Production database; README says 16+, Compose uses 18 | The version policy is inconsistent and must be settled in Phase 0D.           |
+| Docker     | Optional                             | Optional for PostgreSQL and container validation      | Docker-free H2 development remains available.                                 |
+| Browsers   | Storybook/browser checks             | Playwright Chromium desktop and mobile                | Firefox, WebKit, installed PWA, and real-device support are not yet proven.   |
+
+## Credential matrix
+
+| Workflow                          | Credential today                                                   | Why                                                                                                         | Desired public state                                             |
+| --------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Clone either repository           | Repository access                                                  | Both repositories are private.                                                                              | No credential for public source.                                 |
+| Contributor `npm ci` in Starter   | None in the audited checkout                                       | Workspace dependencies resolve locally. Existing docs incorrectly imply a package token is always required. | No credential.                                                   |
+| Starter JVM build                 | None for repository modules                                        | All modules resolve inside the included build.                                                              | No credential.                                                   |
+| Starter Template frontend install | `NODE_AUTH_TOKEN` with `read:packages`                             | Vireo npm packages are private GitHub Packages.                                                             | No credential for public releases.                               |
+| Starter Template JVM build        | `GITHUB_ACTOR` plus `GITHUB_TOKEN`, or Gradle `gpr.user`/`gpr.key` | Vireo Maven artifacts and BOM are private GitHub Packages.                                                  | No credential for public releases.                               |
+| CI consumption of Vireo packages  | `VIREO_PACKAGES_TOKEN`                                             | Cross-repository private package access.                                                                    | Built-in public registry access without a long-lived read token. |
+| Publish npm and Maven artifacts   | GitHub identity with `write:packages`                              | Current release destination is GitHub Packages.                                                             | Trusted publishing/provenance with least privilege.              |
+| GitHub administration             | Maintainer repository/org permissions                              | Repository metadata, visibility, topics, security, releases, and branch protection.                         | Maintainer-only; adopters need none.                             |
+
+An empty-cache Starter Template frontend install without a token failed with `E401`.
+An empty-cache Template JVM build without a GitHub actor/token could not resolve the
+BOM. These are confirmed adoption blockers, not documentation assumptions.
+
+## Runtime configuration
+
+| Variable or port             | Scope                | Purpose/default                                   |
+| ---------------------------- | -------------------- | ------------------------------------------------- |
+| `SPRING_DATASOURCE_URL`      | Backend              | Database JDBC URL.                                |
+| `SPRING_DATASOURCE_USERNAME` | Backend              | Database user.                                    |
+| `SPRING_DATASOURCE_PASSWORD` | Backend              | Database password.                                |
+| `SESSION_COOKIE_SECURE`      | Backend              | Secure-cookie behavior outside local development. |
+| `POSTGRES_PASSWORD`          | Compose              | PostgreSQL container password.                    |
+| `VITE_API_BASE_URL`          | Frontend             | API base URL; defaults to `/api`.                 |
+| `VITE_APP_NAME`              | Frontend             | Application display name.                         |
+| `USE_LOCAL_STARTER`          | Template development | Select locally published Starter artifacts.       |
+| `USE_LOCAL_STARTER_SOURCE`   | Template development | Select Starter source integration.                |
+| `STORYBOOK`                  | Frontend tooling     | Storybook-specific runtime behavior.              |
+| `CI`                         | Verification         | Enables CI-specific behavior.                     |
+| `3000`                       | Frontend             | Development/preview and Playwright web server.    |
+| `8080`                       | Backend              | Spring Boot and Playwright API server.            |
+| `6007`                       | Storybook            | Storybook server.                                 |
+| `5432`                       | PostgreSQL           | Container database port.                          |
+
+## Documentation discrepancies found
+
+1. Starter contributor documentation overstates the need for a GitHub Packages
+   token: a clean Starter workspace install succeeded without one.
+2. Starter README lists `@vireocodedev/starter-ui` `7.0.0`; the audited package is
+   `7.1.0`.
+3. Starter Template compatibility documentation says UI `^7.0.0`; its dependency is
+   `^7.1.0`.
+4. Starter Template README says PostgreSQL 16+, while Compose currently selects
+   PostgreSQL 18.
+5. Starter Template `frontend/.env.example` says Spring Boot serves the production
+   frontend. The deployment guide and build correctly use independent frontend and
+   backend artifacts.
+
+These are tracked in the gap register. They are not silently corrected during the
+baseline because the supported-version and deployment policies remain open Phase 0
+decisions.
+
+## Clean-room evidence still required
+
+- supported Windows, macOS, Linux, and WSL environments;
+- the declared npm 12 toolchain rather than the local npm 11 audit host;
+- production PostgreSQL and backup/restore validation;
+- Firefox, WebKit/Safari, installed PWA, and representative mobile hardware;
+- credential-free installs from the intended public registries.

@@ -1,0 +1,71 @@
+# Phase 0 prioritized gap register
+
+Baseline date: 2026-08-26. Priority reflects dependency order and roadmap impact,
+not implementation difficulty. Owners identify the repository or decision forum,
+not an assigned person.
+
+## Phase 0 blockers
+
+| ID    | Gap                                                         | Evidence                                                                                    | Owner                  | Exit evidence                                                                   |
+| ----- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------- |
+| G-001 | Primary persona and painful job are unvalidated             | No unfamiliar target-developer interviews or observed onboarding                            | Product/Phase 0B       | Approved persona, excluded personas, jobs, and interview evidence               |
+| G-002 | Product identity and coordinates are unresolved             | No approved name/domain/package/group policy or search evidence                             | Product/Phase 0C       | Naming decision with collision, domain, handle, npm, and Maven checks           |
+| G-003 | Canonical public repository topology is unresolved          | Framework and Template exist; CLI/site/examples/fixtures ownership is undecided             | Architecture/Phase 0C  | Approved repository and release-boundary record                                 |
+| G-004 | Supported platform matrix is absent                         | Versions are pinned, but OS/browser/database support and windows are not promised or proven | Engineering/Phase 0D   | Published matrix with CI/clean-room proof obligations                           |
+| G-005 | Competitor gap matrix is missing                            | Internal demos are not target-job competitive evidence                                      | Product/Phase 0B       | Current comparison against selected alternatives and user jobs                  |
+| G-006 | External interviews and clean-room onboarding are missing   | No independent-user evidence is recorded                                                    | Product/Phase 0E       | Interview notes and observed setup/change sessions meeting participant criteria |
+| G-007 | Public adoption requires private credentials                | Both repos and all audited npm/Maven artifacts are private; no-token Template installs fail | Release/Phase 1        | Credential-free clone and dependency installation from public destinations      |
+| G-008 | Minimal Template versus kitchen-sink boundary is unresolved | Fifteen dev-tool/example pages coexist with the golden-path Item slice                      | Template/Phase 0 and 2 | Approved responsibility split validated through onboarding                      |
+
+## Public-foundation gaps
+
+| ID    | Gap                                                       | Evidence                                                                                                        | Owner                     | Exit evidence                                                                                    |
+| ----- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| G-101 | Repository public metadata and discovery are incomplete   | Private repos, stale Starter description, no homepage/topics/discussions, repos not marked as templates         | Repository governance     | Approved visibility plus accurate descriptions, topics, links, and template settings             |
+| G-102 | Governance/support contract is incomplete                 | No `SUPPORT.md`, `GOVERNANCE.md`, structured issue forms, or response policy                                    | Governance                | Published support, governance, issue, and ownership contracts                                    |
+| G-103 | Public release provenance is incomplete                   | Robust internal releases target private GitHub Packages; trusted publishing/provenance policy is absent         | Release                   | Public npm/Maven releases with provenance, least privilege, and consumer verification            |
+| G-104 | Compatibility and support policy is incomplete            | Package snapshots exist, but support windows and cross-version policy are not public                            | Release/architecture      | Compatibility table, semver policy, deprecation window, and tested matrix                        |
+| G-105 | Documentation contains known drift                        | UI versions, contributor credentials, PostgreSQL version, and production-serving comments disagree with reality | Starter and Template docs | Corrected docs plus automation for facts that can be checked                                     |
+| G-106 | Documentation is not comprehensively executable           | Strong contract tests exist, but setup/deploy/version claims can drift                                          | Docs/CI                   | Executable snippets, link checks, version checks, and clean-room docs verification               |
+| G-107 | CI supply-chain policy is incomplete                      | CodeQL/dependency review are partial; pinning/provenance/security posture is not yet a published gate           | CI/security               | Pinned trusted actions, least-privilege permissions, scanning, SBOM/provenance policy            |
+| G-108 | Verification duration/resource budgets are absent         | Template verification baseline is 112 s and 4.02 GiB max RSS on one host                                        | CI/performance            | Approved per-stage budgets, trend reporting, and regression policy                               |
+| G-109 | UI public surface needs intentional review                | 1,364 of 1,745 named TypeScript exports come from Starter UI                                                    | Starter UI                | Classified supported surface, documented entry points, and removal/deprecation plan where needed |
+| G-110 | Public docs site and searchable API experience are absent | Repository Markdown and generated Javadocs exist; no public site/domain                                         | Docs/product              | Versioned public docs, search, API references, guides, and release links                         |
+
+## Golden-path developer-experience gaps
+
+| ID    | Gap                                                   | Evidence                                                                            | Owner                | Exit evidence                                                                  |
+| ----- | ----------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------ |
+| G-201 | No project create workflow                            | Generator lists only `react-component`                                              | CLI/Phase 2          | Supported create command proven from an empty directory                        |
+| G-202 | No doctor workflow                                    | Prerequisite/credential failures require manual diagnosis                           | CLI/Phase 2          | Stable diagnostic codes and actionable checks for the supported matrix         |
+| G-203 | No supported upgrade workflow                         | Releases exist without a project migration command/contract                         | CLI/release          | Version-aware upgrade path with dry run, migrations, and rollback guidance     |
+| G-204 | No full-stack entity generator                        | Item is handwritten and React generator is component-only                           | CLI/Phase 3          | Schema-to-migration/backend/frontend/tests/docs vertical slice                 |
+| G-205 | Shared wire-contract coverage is narrow               | Only history has a repository-level JSON contract fixture                           | Architecture/Phase 3 | Canonical schema/fixtures and drift checks for generated cross-stack contracts |
+| G-206 | Generated-code ownership model is unresolved          | No decisions for overwrite boundaries, regeneration, or customization               | Architecture/Phase 3 | Approved ownership markers, idempotence, conflict, and escape-hatch contracts  |
+| G-207 | Reusable Template candidates lack extraction criteria | Filters/layout/loading compositions could move to Starter without a second consumer | Architecture         | Written criteria plus independent-use proof before extraction                  |
+
+## Production and adoption gaps
+
+| ID    | Gap                                                  | Evidence                                                                                             | Owner               | Exit evidence                                                                      |
+| ----- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------- |
+| G-301 | Security posture is not externally validated         | Security policy and scans exist; threat model, hardening guide, and independent review do not        | Security/Phase 4    | Threat model, hardening guide, remediation SLA, and independent review             |
+| G-302 | Offline guarantees are not explicit                  | Strong offline/SQLite code exists; supported failure, sync, and conflict semantics are not published | Offline/Phase 4     | Tested guarantees, limits, conflict policy, recovery, and observability            |
+| G-303 | Browser/device/accessibility matrices are incomplete | Chromium desktop/mobile and Storybook a11y exist; other engines/devices/manual AT do not             | UI/QA               | Approved matrix with automated and manual evidence                                 |
+| G-304 | Field performance baseline is absent                 | Bundle sizes are known; Lighthouse, CWV, low-end runtime, and budgets are not                        | Performance         | Repeatable budgets and representative lab/field measurements                       |
+| G-305 | Production database operations are unproven          | Migrations/tests exist; upgrade, backup, restore, and production Postgres runbooks do not            | Backend/operations  | Tested runbooks and supported upgrade/restore evidence                             |
+| G-306 | Container build context is unnecessarily large       | Docker sends 168.1 MB because the build tree contains the copied JAR                                 | Template/operations | Narrow reproducible context or staged artifact with enforced image/context budgets |
+| G-307 | Canonical frontend deployment path needs proof       | Frontend/backend artifacts are intentionally independent; one `.env.example` comment says otherwise  | Template/operations | One documented, automated, production-like frontend/backend deployment             |
+| G-308 | No public flagship or uptime contract                | Template is private and not hosted as a maintained demo                                              | Product/Phase 5     | Public seeded demo, monitoring, reset policy, and deployment source                |
+| G-309 | No independent adopters or pilots                    | No unfamiliar team has completed and maintained a deployment                                         | Product/Phase 5     | Three active independent teams and one production-like deployment per roadmap gate |
+
+## Immediate sequence
+
+1. Phase 0B resolves G-001 and G-005 and defines the evidence collection for G-006.
+2. Phase 0C resolves G-002 and G-003.
+3. Phase 0D resolves G-004 and turns existing measurements into enforceable policy.
+4. Phase 0E performs G-006 and validates the proposed response to G-008.
+5. The Phase 0 gate then converts G-007 and G-101–G-110 into an estimated Phase 1
+   backlog without prematurely building Phase 2/3 features.
+
+Closed gaps remain in this register with a closure date and evidence link; IDs are
+never reused.
