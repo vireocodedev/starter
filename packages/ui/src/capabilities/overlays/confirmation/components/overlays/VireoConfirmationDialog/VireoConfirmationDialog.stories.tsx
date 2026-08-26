@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import AsyncLoadingExample from "@/capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/internal/storybook/AsyncLoadingExample";
-import asyncLoadingSource from "@/capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/internal/storybook/AsyncLoadingExample.tsx?raw";
+import LoadingExample from "@/capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/internal/storybook/LoadingExample";
+import loadingSource from "@/capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/internal/storybook/LoadingExample.tsx?raw";
 import DefaultExample from "@/capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/internal/storybook/DefaultExample";
 import defaultSource from "@/capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/internal/storybook/DefaultExample.tsx?raw";
 import ProviderHookExample from "@/capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/internal/storybook/ProviderHookExample";
@@ -33,7 +33,7 @@ export const ProviderHook: Story = {
   render: () => <ProviderHookExample />,
   parameters: { docs: { source: { code: providerHookSource } } },
 };
-export const AsyncLoading: Story = {
-  render: () => <AsyncLoadingExample />,
-  parameters: { docs: { source: { code: asyncLoadingSource } } },
+export const Loading: Story = {
+  render: () => <LoadingExample />,
+  parameters: { docs: { source: { code: loadingSource } } },
 };

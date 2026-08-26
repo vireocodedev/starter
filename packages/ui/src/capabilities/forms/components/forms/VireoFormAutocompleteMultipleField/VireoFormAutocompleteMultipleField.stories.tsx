@@ -10,6 +10,8 @@ import DefaultExample from "@/capabilities/forms/components/forms/VireoFormAutoc
 import defaultSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/DefaultExample.tsx?raw";
 import GroupedOptionsExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/GroupedOptionsExample";
 import groupedOptionsSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/GroupedOptionsExample.tsx?raw";
+import LoadingExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/LoadingExample";
+import loadingSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/LoadingExample.tsx?raw";
 import MaximumSelectedOptionsExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/MaximumSelectedOptionsExample";
 import maximumSelectedOptionsSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/MaximumSelectedOptionsExample.tsx?raw";
 import StatesAndInteractionsExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/internal/storybook/StatesAndInteractionsExample";
@@ -45,6 +47,7 @@ Multiple searchable choices add collection ordering, duplicate prevention, compa
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultSource) };
+export const Loading: Story = { render: () => <LoadingExample />, parameters: source(loadingSource) };
 export const StatesAndInteractions: Story = {
   render: () => <StatesAndInteractionsExample />,
   parameters: source(statesAndInteractionsSource),

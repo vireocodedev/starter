@@ -6,8 +6,8 @@ import DefaultExample from "@/capabilities/forms/components/forms/VireoFormAutoc
 import defaultSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/DefaultExample.tsx?raw";
 import GroupedOptionsExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/GroupedOptionsExample";
 import groupedOptionsSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/GroupedOptionsExample.tsx?raw";
-import ServerFilteringAndLoadingExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/ServerFilteringAndLoadingExample";
-import serverFilteringAndLoadingSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/ServerFilteringAndLoadingExample.tsx?raw";
+import LoadingExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/LoadingExample";
+import loadingSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/LoadingExample.tsx?raw";
 import StatesAndInteractionsExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/StatesAndInteractionsExample";
 import statesAndInteractionsSource from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/StatesAndInteractionsExample.tsx?raw";
 import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormAutocompleteField/internal/storybook/ThemeCustomizationExample";
@@ -58,9 +58,9 @@ export const AsyncSelectedOptionHydration: Story = {
   render: () => <AsyncSelectedOptionHydrationExample />,
   parameters: source(asyncSelectedOptionHydrationSource),
 };
-export const ServerFilteringAndLoading: Story = {
-  render: () => <ServerFilteringAndLoadingExample />,
-  parameters: source(serverFilteringAndLoadingSource),
+export const Loading: Story = {
+  render: () => <LoadingExample />,
+  parameters: source(loadingSource),
 };
 export const UnresolvedValue: Story = {
   render: () => <UnresolvedValueExample />,

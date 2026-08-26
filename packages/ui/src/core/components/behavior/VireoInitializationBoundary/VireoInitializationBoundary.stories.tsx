@@ -1,7 +1,7 @@
 import DefaultExample from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/DefaultExample.tsx?raw";
-import FailureAndRetryExample from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/FailureAndRetryExample";
-import failureAndRetryExampleSource from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/FailureAndRetryExample.tsx?raw";
+import ErrorExample from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/ErrorExample";
+import errorExampleSource from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/ErrorExample.tsx?raw";
 import LoadingExample from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/LoadingExample";
 import loadingExampleSource from "@/core/components/behavior/VireoInitializationBoundary/internal/storybook/LoadingExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -44,12 +44,12 @@ export const Loading: Story = {
   parameters: source(loadingExampleSource),
 };
 
-export const FailureAndRetry: Story = {
-  render: () => <FailureAndRetryExample />,
+export const Error: Story = {
+  render: () => <ErrorExample />,
   parameters: {
-    ...source(failureAndRetryExampleSource),
+    ...source(errorExampleSource),
     docs: {
-      ...source(failureAndRetryExampleSource).docs,
+      ...source(errorExampleSource).docs,
       description: { story: "Lets the nearest error boundary own failure presentation and retry by remounting." },
     },
   },

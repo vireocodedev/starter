@@ -4,8 +4,8 @@ import CustomizedSlotsExample from "@/integrations/tanstack-query/components/fee
 import customizedSlotsSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/DefaultExample";
 import defaultSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/DefaultExample.tsx?raw";
-import ErrorAndRetryExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorAndRetryExample";
-import errorAndRetrySource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorAndRetryExample.tsx?raw";
+import ErrorExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorExample";
+import errorSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorExample.tsx?raw";
 import ErrorDetailsExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorDetailsExample";
 import errorDetailsSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorDetailsExample.tsx?raw";
 import LoadingExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/LoadingExample";
@@ -47,9 +47,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultSource) };
 export const Loading: Story = { render: () => <LoadingExample />, parameters: source(loadingSource) };
-export const ErrorAndRetry: Story = {
-  render: () => <ErrorAndRetryExample />,
-  parameters: source(errorAndRetrySource),
+export const Error: Story = {
+  render: () => <ErrorExample />,
+  parameters: source(errorSource),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(await canvas.findByRole("button", { name: "Retry" }));

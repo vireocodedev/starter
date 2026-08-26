@@ -11,7 +11,9 @@ Run the command from the repository root with an unprefixed PascalCase name:
 ```bash
 npm run generate -- react-component Badge \
   --owner core \
-  --category data-display
+  --category data-display \
+  --loading-category static \
+  --loading-geometry none
 ```
 
 This creates:
@@ -50,11 +52,15 @@ Examples:
 ```bash
 npm run generate -- react-component TableHeader \
   --owner capabilities/table \
-  --category data-display
+  --category data-display \
+  --loading-category static \
+  --loading-geometry none
 
 npm run generate -- react-component MobileToolbar \
   --owner capabilities/table/management-table \
-  --category controls
+  --category controls \
+  --loading-category static \
+  --loading-geometry none
 ```
 
 Owner names use kebab-case. Capability nesting is limited to one child level. Reserved structural names such as `components`, `hooks`, and `types` cannot be used as child capability names.
@@ -110,6 +116,8 @@ Inspect every destination without writing files:
 npm run generate -- react-component Badge \
   --owner core \
   --category data-display \
+  --loading-category static \
+  --loading-geometry none \
   --dry-run
 ```
 
@@ -125,6 +133,7 @@ Before writing, the generator validates:
 
 - the owner form, depth, existence, and public boundary;
 - the approved component category;
+- the declared loading category and geometry level;
 - the template definition and declared inputs;
 - every placeholder in contents and destination paths;
 - output-root containment and duplicate destinations;
@@ -149,6 +158,7 @@ Before considering it complete:
 - Replace each generated example's temporary `@/` component import with the public `@vireocodedev/starter-ui` import after adding the completed component to its owner boundary. The temporary import keeps the unfinished scaffold type-checkable; it is not valid final code-panel output.
 - Keep each executable example as the single source for both its story render and `docs.source.code`; do not introduce duplicate source strings.
 - Decide whether the public Vireo abstraction is justified.
+- Replace the generated loading classification if implementation work makes the component async-capable. `static` pairs with `none`; every async category pairs with geometry `A`, `B`, or `C`, enters `loading-state-contracts.json`, and documents every applicable canonical story or omission.
 - Choose the correct native root semantics and inherited props.
 - Define the real props, owner state, slots, accessibility, behavior, and styling.
 - Replace or extend baseline tests and stories with capability-driven coverage.

@@ -4,7 +4,7 @@ import { Alert, Button, CircularProgress, Stack } from "@mui/material";
 import React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-export default function FailureAndRetryExample() {
+export default function ErrorExample() {
   const [attempt, setAttempt] = React.useState(0);
   const initialize = React.useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 500));

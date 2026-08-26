@@ -60,6 +60,22 @@ export default {
         if (value.trim() === "") return "provide a non-empty category.";
       },
     },
+    loadingCategory: {
+      required: true,
+      validate(value) {
+        if (!LOADING_CATEGORIES.has(value)) {
+          return `use a loading category: ${[...LOADING_CATEGORIES].join(", ")}.`;
+        }
+      },
+    },
+    loadingGeometry: {
+      required: true,
+      validate(value) {
+        if (!LOADING_GEOMETRY_LEVELS.has(value)) {
+          return `use a loading geometry level: ${[...LOADING_GEOMETRY_LEVELS].join(", ")}.`;
+        }
+      },
+    },
   },
   allowedOutputRoots: ["packages/ui/src/core", "packages/ui/src/capabilities", "packages/ui/src/integrations"],
   outputDirectory: "components/{{componentCategory}}/{{componentName}}",
@@ -89,6 +105,14 @@ export default {
     return `packages/ui/src/${inputs.owner}`;
   },
   prepareData(inputs, context) {
+    if (inputs.loadingCategory === "static" && inputs.loadingGeometry !== "none") {
+      throw new Error('A "static" component must use loadingGeometry="none".');
+    }
+    if (inputs.loadingCategory !== "static" && inputs.loadingGeometry === "none") {
+      throw new Error(
+        `An async-capable "${inputs.loadingCategory}" component must declare loading geometry A, B, or C.`,
+      );
+    }
     const componentName = `Vireo${inputs.name}`;
     const ownerSegments = inputs.owner.split("/");
     const ownerDisplayName =
@@ -115,6 +139,8 @@ export default {
       componentVariableName: `${componentName.charAt(0).toLowerCase()}${componentName.slice(1)}`,
       componentConstantName: `VIREO_${toScreamingSnakeCase(inputs.name)}`,
       coreUtilitiesModule: inputs.owner === "core" ? "@/core/utils/muiutils" : "@/core/public",
+      loadingCategory: inputs.loadingCategory,
+      loadingGeometry: inputs.loadingGeometry === "none" ? "null" : `"${inputs.loadingGeometry}"`,
       storybookCategory: inputs.storybookCategory ?? ownerDisplayName,
     };
   },
@@ -150,3 +176,7 @@ const STRUCTURAL_FOLDERS = new Set([
   "types",
   "utils",
 ]);
+
+const LOADING_CATEGORIES = new Set(["static", "content-preserving", "skeleton-capable", "busy-action", "boundary"]);
+
+const LOADING_GEOMETRY_LEVELS = new Set(["none", "A", "B", "C"]);

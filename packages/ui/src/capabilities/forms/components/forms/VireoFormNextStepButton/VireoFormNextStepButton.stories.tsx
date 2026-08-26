@@ -1,5 +1,7 @@
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormNextStepButton/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormNextStepButton/internal/storybook/DefaultExample.tsx?raw";
+import LoadingExample from "@/capabilities/forms/components/forms/VireoFormNextStepButton/internal/storybook/LoadingExample";
+import loadingExampleSource from "@/capabilities/forms/components/forms/VireoFormNextStepButton/internal/storybook/LoadingExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoFormNextStepButton } from "./VireoFormNextStepButton";
 
@@ -44,4 +46,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),
+};
+
+export const Loading: Story = {
+  render: () => <LoadingExample />,
+  parameters: createSourceParameters(loadingExampleSource),
 };
