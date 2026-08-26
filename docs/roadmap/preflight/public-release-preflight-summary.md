@@ -28,6 +28,8 @@ no coordinate was reserved, and no Git history was rewritten.
 | Maven installed consumer         | Pass   | Independent Gradle build, versionless BOM consumption, five modules resolved from expected versioned JARs                                        |
 | JVM public-surface policy        | Pass   | Six classified modules and five publishing-blocking Java API snapshots                                                                           |
 | Complete repository verification | Pass   | TypeScript nine-step gate, Storybook production build, JVM build/aggregate Javadoc, Maven repository audit, and external JVM consumer            |
+| Release workflow security        | Pass   | Immutable action/image pins, deny-by-default permissions, isolated write jobs, credential-free checkouts, and executable workflow policy         |
+| Full-history secret scan         | Pass   | Digest-pinned Gitleaks v8.30.1 scanned 518 commits/about 11 MB clean; PR/main/weekly tokenless CI gate                                           |
 
 The complete command is now:
 
@@ -43,14 +45,14 @@ the accepted npm 12 support row.
 
 ## Release-readiness decision
 
-| Target                                  | Decision          | Reason                                                                                                                           |
-| --------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Continue private development/review     | Ready             | Complete local authoritative verification is green and all changes are committed in reviewable checkpoints                       |
-| Publish another private GitHub Package  | Technically ready | Existing destinations and credentials are unchanged; strengthened artifact/consumer gates run before publication                 |
-| Make the GitHub repository public       | **Blocked**       | Author-email disclosure decision, legal identity, comprehensive secret scan, and provider security controls are unresolved       |
-| Publish packages anonymously consumable | **Blocked**       | Final npm/Maven coordinates and public registries are unresolved; current GitHub Packages require authentication                 |
-| Publish to npmjs/Maven Central          | **Blocked**       | Trusted publishing/provenance, verified Maven namespace, signing, least-privilege environments, and migrated metadata are absent |
-| Claim the D-105 support matrix publicly | **Blocked**       | npm 12, pinned OS, peer-floor/range, browser, database, clean-room, and device evidence is incomplete                            |
+| Target                                  | Decision          | Reason                                                                                                                     |
+| --------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Continue private development/review     | Ready             | Complete local authoritative verification is green and all changes are committed in reviewable checkpoints                 |
+| Publish another private GitHub Package  | Technically ready | Existing destinations and credentials are unchanged; strengthened artifact/consumer gates run before publication           |
+| Make the GitHub repository public       | **Blocked**       | Author-email disclosure decision, legal identity, and provider security/recovery controls are unresolved                   |
+| Publish packages anonymously consumable | **Blocked**       | Final npm/Maven coordinates and public registries are unresolved; current GitHub Packages require authentication           |
+| Publish to npmjs/Maven Central          | **Blocked**       | Trusted publishing/provenance, verified Maven namespace, signing, protected environments, and migrated metadata are absent |
+| Claim the D-105 support matrix publicly | **Blocked**       | npm 12, pinned OS, peer-floor/range, browser, database, clean-room, and device evidence is incomplete                      |
 
 ## Blocking decisions and external actions
 
@@ -69,22 +71,19 @@ These cannot be safely inferred or completed only in source:
 This order minimizes rework and does not require public packages or another
 developer's implementation input:
 
-1. **Release security hardening** — pin every action to a reviewed commit, reduce
-   job permissions, separate verification from publication, add a dedicated
-   full-history/ongoing secret scanner, and document environment/recovery controls.
-2. **Toolchain policy activation** — run npm 12 exactly, pin canonical Ubuntu
+1. **Toolchain policy activation** — run npm 12 exactly, pin canonical Ubuntu
    rather than relying only on `ubuntu-latest`, narrow over-broad React/MUI peers,
    and add the admitted peer-floor fixture.
-3. **API reduction review** — reduce accidental UI barrels (currently 1,364
+2. **API reduction review** — reduce accidental UI barrels (currently 1,364
    distinct symbols), decide the four Storybook exports, and classify the 111 JVM
    public types before first public compatibility expectations harden.
-4. **Package portability/documentation** — explicitly document TypeScript Bundler
+3. **Package portability/documentation** — explicitly document TypeScript Bundler
    resolution, decide whether source maps remain public, and make installation docs
    distribution-neutral until coordinates land.
-5. **Release-pipeline preparation** — build provider-independent verification,
+4. **Release-pipeline preparation** — build provider-independent verification,
    provenance/signing assertions, rollback/non-republication rules, and dry-run
    release evidence without embedding final namespaces or secrets.
-6. **Support evidence lanes** — implement the code-owned portions of D-105:
+5. **Support evidence lanes** — implement the code-owned portions of D-105:
    Java 25 compatibility, PostgreSQL 17/18, Firefox/WebKit, clean container builds,
    and recurring evidence metadata. Physical devices and external OS machines stay
    manual/hosted follow-ups.
@@ -107,8 +106,9 @@ Once the B0 decisions are complete:
 
 ## Final preflight disposition
 
-The code-owned publication boundary is materially stronger and fully green. The
-remaining blockers are now explicit: identity/ownership, history privacy, provider
-accounts/settings, release security, and support activation. Public visibility or
-publication before those B0/B1 items close would be a governance and distribution
-failure, not a missing test that this repository can safely bypass.
+The code-owned publication and release-security boundaries are materially stronger
+and fully green. The remaining blockers are explicit: identity/ownership, history
+privacy, provider accounts/settings and recovery, public-registry provenance, and
+support activation. Public visibility or publication before those B0/B1 items close
+would be a governance and distribution failure, not a missing test that this
+repository can safely bypass.

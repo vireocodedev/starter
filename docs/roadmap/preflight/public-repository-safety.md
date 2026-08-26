@@ -27,9 +27,10 @@ copied into logs. It checks:
 - current tracked absolute workstation paths; and
 - commit-author email domains while suppressing complete addresses.
 
-The scan is deliberately narrow enough to avoid printing or normalizing candidate
-secrets. It does not replace GitHub secret scanning, a dedicated scanner such as
-Gitleaks, provider-side token revocation, or manual review.
+The narrow audit is complemented by `npm run security:secrets`, which runs the
+digest-pinned Gitleaks CLI across complete reachable Git history with redacted
+findings. Neither scanner replaces GitHub secret scanning/push protection,
+provider-side token revocation, or manual review.
 
 ## Findings
 
@@ -37,8 +38,8 @@ Gitleaks, provider-side token revocation, or manual review.
 | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | PRS-001 | Blocker  | Git history contains at least 533 commits authored with a personal Gmail address and 29 with GitHub's no-reply domain. Public visibility would expose the complete author address embedded in every affected commit.                               | Repository owner explicitly accepts disclosure or approves a coordinated history rewrite before publication. Do not infer consent.                                                              |
 | PRS-002 | Blocker  | Professional clearance and final ownership for “Vireo Code” and “Vireo Framework” remain pending. The root MIT license currently attributes copyright to `vireocodedev`, which may not be the final legal owner wording.                           | Record the cleared identity/owner and review license attribution before visibility changes.                                                                                                     |
-| PRS-003 | Blocker  | No dedicated provider-aware secret scanner is installed or enforced in CI. The reproducible narrow scan found no high-confidence token/private-key match, but absence from that pattern set is not comprehensive proof.                            | Run a dedicated full-history scan in a protected environment, review results without committing a report containing secrets, revoke any real credential found, and add ongoing secret scanning. |
-| PRS-004 | Major    | Release and CI workflows use floating major action tags and broad release permissions; package publication still targets private GitHub Packages.                                                                                                  | Pin reviewed actions, minimize job permissions, separate verification/publication, and complete the release-security preflight before public release.                                           |
+| PRS-003 | Resolved | The digest-pinned Gitleaks CLI scanned 518 commits (about 11 MB) without a finding on 2026-08-26. A tokenless read-only workflow now scans pull requests, `main`, weekly, and on demand.                                                           | Keep the scanner/policy required and enable provider secret scanning and push protection before public release.                                                                                 |
+| PRS-004 | Resolved | Every external action is pinned to a reviewed commit; workflow-level access defaults to none; candidate verification is read-only; and npm publication, Maven publication, JVM tagging, and Pages deployment have isolated write scopes.           | Enforce the required branch/action/environment settings in `docs/security/release-security-controls.md`; complete public-registry provenance/signing work before changing distribution targets. |
 | PRS-005 | Major    | `SECURITY.md` directs reporters to GitHub private vulnerability reporting, but the repository setting and backup access cannot be verified from source.                                                                                            | Enable and test private vulnerability reporting when the repository becomes public; document a monitored fallback contact and recovery owner.                                                   |
 | PRS-006 | Major    | Repository/package metadata and documentation intentionally contain current private GitHub Package endpoints and the pre-public `starter` coordinates. They are configuration history, not leaked credentials, but would confuse public consumers. | Replace them only in the coordinated coordinate/distribution migration; do not publish the current consumer instructions as the public path.                                                    |
 | PRS-007 | Minor    | The only tracked binary/media-like file is the Gradle wrapper JAR. No first-party raster image, font, audio, or video asset is tracked.                                                                                                            | Verify the wrapper checksum/source policy and retain upstream license handling; repeat the asset audit if branding files are added.                                                             |
@@ -66,11 +67,11 @@ The repository may move to a final manual/public-provider review only after:
 
 1. PRS-001 has an explicit owner decision;
 2. identity and copyright-owner wording are approved;
-3. a dedicated protected full-history secret scan is clean or all findings are
-   revoked and removed;
-4. workflow permissions and public release boundaries are hardened;
-5. private vulnerability reporting and recovery access are verified; and
-6. the package-coordinate migration is ready to land atomically with public
+3. provider secret scanning/push protection and the source-owned full-history gate
+   are required checks;
+4. private vulnerability reporting, branch/environment protection, and recovery
+   access are verified; and
+5. the package-coordinate migration is ready to land atomically with public
    documentation and clean-consumer checks.
 
 Even after those conditions pass, changing repository visibility remains an
