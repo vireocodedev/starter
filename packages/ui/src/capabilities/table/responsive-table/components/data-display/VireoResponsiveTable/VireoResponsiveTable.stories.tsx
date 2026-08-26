@@ -8,6 +8,8 @@ import EmptyExample from "@/capabilities/table/responsive-table/components/data-
 import emptyExampleSource from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/EmptyExample.tsx?raw";
 import LoadingExample from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/LoadingExample";
 import loadingExampleSource from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/LoadingExample.tsx?raw";
+import LoadedExample from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/LoadedExample";
+import loadedExampleSource from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/LoadedExample.tsx?raw";
 import MobileWorkflowExample from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/MobileWorkflowExample";
 import mobileWorkflowExampleSource from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/MobileWorkflowExample.tsx?raw";
 import ThemeCustomizationExample from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/storybook/ThemeCustomizationExample";
@@ -89,8 +91,8 @@ export const Default: Story = {
 };
 
 export const Loaded: Story = {
-  render: () => <DefaultExample />,
-  parameters: createSourceParameters(defaultExampleSource),
+  render: () => <LoadedExample />,
+  parameters: createSourceParameters(loadedExampleSource),
 };
 
 export const MobileWorkflow: Story = {

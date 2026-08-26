@@ -4,6 +4,8 @@ import LoadingExample from "@/core/components/feedback/VireoLoadingRegion/intern
 import loadingExampleSource from "@/core/components/feedback/VireoLoadingRegion/internal/storybook/LoadingExample.tsx?raw";
 import LoadingTransitionExample from "@/core/components/feedback/VireoLoadingRegion/internal/storybook/LoadingTransitionExample";
 import loadingTransitionExampleSource from "@/core/components/feedback/VireoLoadingRegion/internal/storybook/LoadingTransitionExample.tsx?raw";
+import LoadedExample from "@/core/components/feedback/VireoLoadingRegion/internal/storybook/LoadedExample";
+import loadedExampleSource from "@/core/components/feedback/VireoLoadingRegion/internal/storybook/LoadedExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { VireoLoadingRegion } from "./VireoLoadingRegion";
 
@@ -37,8 +39,8 @@ export const Default: Story = {
 
 export const Loaded: Story = {
   args: { children: null, loading: false, loadingLabel: "Loading" },
-  render: () => <DefaultExample />,
-  parameters: createSourceParameters(defaultExampleSource),
+  render: () => <LoadedExample />,
+  parameters: createSourceParameters(loadedExampleSource),
 };
 
 export const Loading: Story = {
