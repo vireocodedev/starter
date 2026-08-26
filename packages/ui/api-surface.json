@@ -816,6 +816,7 @@
         "country-flag-icons/react/3x2",
         "dayjs",
         "react",
+        "react-dom",
         "zod"
       ],
       "workerSafe": false
@@ -1530,6 +1531,7 @@
         "@mui/material/utils",
         "dayjs",
         "react",
+        "react-dom",
         "sonner"
       ],
       "workerSafe": false
@@ -1577,6 +1579,7 @@
         "@tanstack/react-query",
         "dayjs",
         "react",
+        "react-dom",
         "react-error-boundary",
         "sonner",
         "zod"

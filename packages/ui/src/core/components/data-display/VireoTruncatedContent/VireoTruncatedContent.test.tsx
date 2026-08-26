@@ -207,6 +207,7 @@ describe(VIREO_TRUNCATED_CONTENT_NAME, () => {
   });
 
   it("shares one observer, batches resize checks, and cancels pending work after the last unmount", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { unmount } = render(
       <>
         <VireoTruncatedContent {...requiredProps}>First content</VireoTruncatedContent>
@@ -223,6 +224,7 @@ describe(VIREO_TRUNCATED_CONTENT_NAME, () => {
     expect(requestAnimationFrameMock).toHaveBeenCalledOnce();
     act(flushAnimationFrames);
     expect(screen.getAllByRole("button", { name: "Show more" })).toHaveLength(2);
+    expect(consoleError.mock.calls.flat().join(" ")).not.toContain("Cannot update a component");
 
     act(() => observer.emit(contents));
     const pendingHandle = requestAnimationFrameMock.mock.results.at(-1)?.value;

@@ -3,6 +3,7 @@ import { unstable_composeClasses as composeClasses, type ButtonProps } from "@mu
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
 import React from "react";
+import { unstable_batchedUpdates as batchUpdates } from "react-dom";
 import {
   type VireoTruncatedContentClassKey,
   getVireoTruncatedContentUtilityClass,
@@ -33,7 +34,9 @@ function observeContent(element: Element, checkOverflow: OverflowCheck) {
         overflowAnimationFrame = null;
         const elements = [...pendingOverflowChecks];
         pendingOverflowChecks.clear();
-        for (const observedElement of elements) overflowChecks.get(observedElement)?.();
+        batchUpdates(() => {
+          for (const observedElement of elements) overflowChecks.get(observedElement)?.();
+        });
       });
     });
   }
