@@ -3,7 +3,7 @@ import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import { Button } from "@mui/material";
 import React from "react";
 
-export default function AsyncLoadingExample() {
+export default function LoadingExample() {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const confirm = () => {

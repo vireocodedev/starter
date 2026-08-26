@@ -24,7 +24,7 @@ export default function DefaultExample() {
                 alignItems: "center",
               }}
             >
-              <CircularProgress size={20} />
+              <CircularProgress aria-hidden size={20} />
               <Typography>Preparing customer workspace…</Typography>
             </Stack>
           }

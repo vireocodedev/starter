@@ -16,7 +16,7 @@ export default function LockedModeExample() {
         <Box sx={{ flex: 1, p: 3 }}>
           <Typography variant="h6">Locked compact navigation</Typography>
           <Typography color="text.secondary">
-            Locking preserves the selected mode while disabling toggles and pointer resizing.
+            Locking preserves the selected mode while disabling toggles and resizing.
           </Typography>
         </Box>
       </Box>

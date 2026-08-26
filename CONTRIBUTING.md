@@ -28,5 +28,6 @@ Changeset or JVM version bump. Follow the package-authoring documentation under
 
 - Keep commits focused and preserve unrelated worktree changes.
 - Describe user-visible behavior and verification performed.
+- Classify every new or changed async visual surface under the loading-state standard, declare its geometry level, and include the applicable canonical stories or documented omissions.
 - Do not commit credentials, generated build output, or local caches.
 - Obtain review before merging to `main`.

@@ -134,7 +134,7 @@ function VireoFormFreeSoloAutocompleteFieldImpl<TOption>(
     getOptionLabel,
     getOptionValue,
     groupBy,
-    helperText,
+    helperText = " ",
     inputRef,
     inputValue: inputValueProp,
     label,

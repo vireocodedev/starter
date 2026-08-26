@@ -28,7 +28,11 @@ export default function DefaultExample() {
             <VireoSidePanelResizeHandle
               isResizing={resize.isResizing}
               onResizeStart={resize.onResizeStart}
+              onResizeKeyDown={resize.onResizeKeyDown}
               onResizeDoubleClick={resize.onResizeDoubleClick}
+              valueMin={280}
+              valueMax={620}
+              valueNow={resize.width}
             />
           }
         >
@@ -39,7 +43,7 @@ export default function DefaultExample() {
           <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", p: 3 }}>
             <Typography variant="h5">Northstar Analytics</Typography>
             <Typography color="text.secondary" sx={{ mt: 1 }}>
-              Drag the panel edge to resize it. Double-click the handle to restore its initial width.
+              Drag the panel edge or focus it and use the arrow keys to resize. Double-click restores its initial width.
             </Typography>
           </Box>
         </VireoDockedSidePanel>

@@ -83,7 +83,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
       errorDisplay: errorDisplayProp,
       formatError: formatErrorProp,
       fullWidth = true,
-      helperText,
+      helperText = " ",
       inputRef,
       onBlur,
       onChange,

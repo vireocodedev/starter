@@ -2,6 +2,7 @@ import type {
   VireoMultiStepChangeEvent,
   VireoMultiStepChangeReason,
   VireoMultiStepDescriptor,
+  VireoMultiStepDirection,
   VireoMultiStepNavigationResult,
   VireoMultiStepState,
   VireoMultiStepStepState,
@@ -40,6 +41,7 @@ export class VireoMultiStepStore {
   private registeredSteps = new Map<string, HTMLElement>();
   private errorSummaryElement?: HTMLElement;
   private currentStepId: string;
+  private direction: VireoMultiStepDirection = "forward";
   private initialStepId: string;
   private transitioning = false;
   private transitionVersion = 0;
@@ -206,6 +208,7 @@ export class VireoMultiStepStore {
     this.pendingRevalidationFields.clear();
     const active = this.getActiveDescriptors();
     this.currentStepId = active.some(step => step.id === this.initialStepId) ? this.initialStepId : active[0].id;
+    this.direction = this.getDirection(previous, this.currentStepId);
     this.visited.add(this.currentStepId);
     this.rebuildSnapshot();
     this.emit();
@@ -227,6 +230,7 @@ export class VireoMultiStepStore {
     }
     const previous = this.currentStepId;
     if (owner.id !== previous) {
+      this.direction = this.getDirection(previous, owner.id);
       this.setCurrent(owner.id);
       this.emitStepChange(previous, owner.id, "validation-error");
     }
@@ -316,6 +320,7 @@ export class VireoMultiStepStore {
   ): VireoMultiStepNavigationResult<string> {
     const previous = this.currentStepId;
     this.pendingFocusStepId = stepId;
+    this.direction = this.getDirection(previous, stepId);
     this.setCurrent(stepId);
     this.emitStepChange(previous, stepId, eventReason);
     window.requestAnimationFrame(() => this.focusStep(stepId));
@@ -439,6 +444,7 @@ export class VireoMultiStepStore {
       active.find(step => this.descriptors.findIndex(item => item.id === step.id) > declaredIndex) ??
       active[0];
     const old = this.currentStepId;
+    this.direction = this.getDirection(old, destination.id);
     this.currentStepId = destination.id;
     this.visited.add(destination.id);
     this.emitStepChange(old, destination.id, reason);
@@ -490,6 +496,7 @@ export class VireoMultiStepStore {
       currentStep,
       currentStepId: currentStep.id,
       currentStepIndex,
+      direction: this.direction,
       activeStepCount: activeSteps.length,
       completedStepCount: activeSteps.filter(step => step.isComplete).length,
       isFirstStep: currentStepIndex <= 0,
@@ -514,9 +521,15 @@ export class VireoMultiStepStore {
       stepId,
       previousStepIndex,
       stepIndex,
-      direction: stepIndex >= previousStepIndex ? "forward" : "backward",
+      direction: this.getDirection(previousStepId, stepId),
       reason,
     });
+  }
+
+  private getDirection(previousStepId: string, stepId: string): VireoMultiStepDirection {
+    const previousIndex = this.descriptors.findIndex(step => step.id === previousStepId);
+    const stepIndex = this.descriptors.findIndex(step => step.id === stepId);
+    return stepIndex >= previousIndex ? "forward" : "backward";
   }
 
   private normalizeFields(step: VireoMultiStepRuntimeDescriptor): readonly string[] {

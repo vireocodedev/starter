@@ -24,6 +24,13 @@ const meta = {
   component: {{componentName}},
   tags: ["autodocs"],
   parameters: {
+    controls: { disable: true },
+    vireo: {
+      loading: {
+        categories: ["{{loadingCategory}}"],
+        geometry: {{loadingGeometry}},
+      },
+    },
     docs: {
       description: {
         component: `TODO(component-author): Summarize what {{componentName}} represents.

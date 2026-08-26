@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
+import { VIREO_MOTION_TOKENS, type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
 import {
   Alert,
   Box,
@@ -9,7 +9,7 @@ import {
   type ButtonBaseProps,
   type TypographyProps,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { keyframes, styled } from "@mui/material/styles";
 import { VIREO_FORM_ERROR_SUMMARY_NAME } from "./VireoFormErrorSummary.identity";
 import { type VireoFormErrorSummaryOwnerState } from "./VireoFormErrorSummary.types";
 
@@ -19,11 +19,21 @@ type VireoFormErrorSummaryStyledSlotComponent<TProps extends object> = StyledSlo
   VireoFormErrorSummaryOwnerState
 >;
 
+const enterErrorSummary = keyframes({
+  from: { opacity: 0, transform: `translateY(-${VIREO_MOTION_TOKENS.distance.micro}px)` },
+  to: { opacity: 1, transform: "translateY(0)" },
+});
+
 export const VireoFormErrorSummaryRoot: VireoFormErrorSummaryStyledSlotComponent<AlertProps> = styled(Alert, {
   name: VIREO_FORM_ERROR_SUMMARY_NAME,
   slot: "Root",
   overridesResolver: (_props, styles) => styles.root,
-})<VireoFormErrorSummaryStyledSlotProps>({});
+})<VireoFormErrorSummaryStyledSlotProps>({
+  animation: `${enterErrorSummary} ${VIREO_MOTION_TOKENS.duration.enter}ms ${VIREO_MOTION_TOKENS.easing.enter}`,
+  "@media (prefers-reduced-motion: reduce)": {
+    animation: "none",
+  },
+});
 
 export const VireoFormErrorSummaryIcon: VireoFormErrorSummaryStyledSlotComponent<BoxProps> = styled(Box, {
   name: VIREO_FORM_ERROR_SUMMARY_NAME,

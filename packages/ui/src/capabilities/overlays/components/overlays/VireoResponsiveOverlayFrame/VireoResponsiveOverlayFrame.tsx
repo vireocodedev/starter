@@ -16,8 +16,9 @@ import {
   resolveDockedSidePanelWidth,
 } from "@/capabilities/overlays/utils/overlay.utils";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
-import { Dialog, Drawer, unstable_composeClasses as composeClasses, useMediaQuery } from "@mui/material";
+import { Dialog, Drawer, Slide, unstable_composeClasses as composeClasses, useMediaQuery } from "@mui/material";
 import { useTheme, useThemeProps } from "@mui/material/styles";
+import { type TransitionProps } from "@mui/material/transitions";
 import { useForkRef } from "@mui/material/utils";
 import React from "react";
 import {
@@ -33,6 +34,13 @@ import {
   type VireoResponsiveOverlayFrameOwnerState,
   type VireoResponsiveOverlayFrameProps,
 } from "./VireoResponsiveOverlayFrame.types";
+
+const MobileFullScreenTransition = React.forwardRef<
+  unknown,
+  TransitionProps & { children: React.ReactElement<unknown> }
+>(function MobileFullScreenTransition(transitionProps, ref) {
+  return <Slide direction="up" ref={ref} {...transitionProps} />;
+});
 
 function useUtilityClasses(
   _ownerState: VireoResponsiveOverlayFrameOwnerState,
@@ -150,7 +158,11 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
         enabled={sidePanelResizeEnabled}
         isResizing={sidePanelResize.isResizing}
         onResizeStart={sidePanelResize.onResizeStart}
+        onResizeKeyDown={sidePanelResize.onResizeKeyDown}
         onResizeDoubleClick={sidePanelResize.onResizeDoubleClick}
+        valueMin={desktopSidePanelMinWidth}
+        valueMax={sidePanelResizeMaxWidth}
+        valueNow={sidePanelResize.width}
       />
     );
     const sidePanelResizeStyle = sidePanelResizeEnabled
@@ -227,6 +239,7 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
           open={open}
           onClose={onClose}
           fullScreen
+          slots={{ transition: MobileFullScreenTransition }}
           slotProps={{
             paper: { sx: { overflow: "hidden" } },
             transition: { onExited: handleExited },

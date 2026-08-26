@@ -151,7 +151,7 @@ function VireoFormFreeSoloAutocompleteMultipleFieldImpl<TOption>(
     getOptionValue,
     getRemoveOptionLabel = selection => `Remove ${selection.label}`,
     groupBy,
-    helperText,
+    helperText = " ",
     hideOptionCheckbox = false,
     inputRef,
     inputValue: inputValueProp,

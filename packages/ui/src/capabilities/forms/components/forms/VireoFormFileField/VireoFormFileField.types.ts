@@ -145,7 +145,7 @@ export type VireoFormFileFieldOwnProps = VireoFormFileFieldSlotsAndSlotProps & {
   formatError?: VireoFormErrorFormatter;
   /** Formats the selected file's byte size. Uses decimal units by default. */
   formatFileSize?: (bytes: number) => React.ReactNode;
-  /** Shown when neither a local rejection nor a visible form error takes precedence. */
+  /** Shown when neither a local rejection nor a visible form error takes precedence. Defaults to a reserved line; pass `null` to remove it. @default ' ' */
   helperText?: React.ReactNode;
   /** Hides selected-file size metadata. @default false */
   hideFileSize?: boolean;

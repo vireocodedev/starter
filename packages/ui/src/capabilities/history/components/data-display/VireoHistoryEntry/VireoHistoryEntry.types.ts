@@ -32,6 +32,7 @@ export type VireoHistoryEntryOwnerState = {
   expanded: boolean;
   hasUnchanged: boolean;
   hasRootMeta: boolean;
+  loading: boolean;
   showRootEntityLabel: boolean;
 };
 
@@ -61,10 +62,6 @@ export type VireoHistoryEntryOwnProps<TEntity extends object = Record<string, un
   VireoHistoryEntrySlotsAndSlotProps & {
     /** Typed history definition used to validate, render, and diff both snapshots. */
     definition: HistoryDefinition<TEntity>;
-    /** Snapshot before the recorded change. Use `null` for a newly added entity. */
-    previous: NoInfer<TEntity> | null;
-    /** Snapshot after the recorded change. Use `null` for a removed entity. */
-    current: NoInfer<TEntity> | null;
     /** Content rendered for nullish or otherwise empty field values. */
     emptyValue?: React.ReactNode;
     /** Metadata displayed beside the root expansion control. */
@@ -81,12 +78,31 @@ export type VireoHistoryEntryOwnProps<TEntity extends object = Record<string, un
     classes?: Partial<VireoHistoryEntryClasses>;
   };
 
+/** Loaded snapshot or boundary-coordinated loading state rendered by VireoHistoryEntry. */
+export type VireoHistoryEntryContentProps<TEntity extends object> =
+  | {
+      /** Renders the real entry anatomy with silent skeleton leaves. */
+      loading: true;
+      /** Visibility supplied by the owning VireoLoadingRegion after its reveal delay. */
+      loadingVisible: boolean;
+      current?: never;
+      previous?: never;
+    }
+  | {
+      loading?: false;
+      loadingVisible?: never;
+      /** Snapshot before the recorded change. Use `null` for a newly added entity. */
+      previous: NoInfer<TEntity> | null;
+      /** Snapshot after the recorded change. Use `null` for a removed entity. */
+      current: NoInfer<TEntity> | null;
+    };
+
 /** Props VireoHistoryEntry inherits from its default root after excluding component-owned props. */
 export type VireoHistoryEntryInheritedProps = Omit<BoxProps<"div">, "children" | "component">;
 
 /** Props accepted by {@link VireoHistoryEntry}. */
 export type VireoHistoryEntryProps<TEntity extends object = Record<string, unknown>> =
-  VireoHistoryEntryOwnProps<TEntity> & VireoHistoryEntryInheritedProps;
+  VireoHistoryEntryOwnProps<TEntity> & VireoHistoryEntryContentProps<TEntity> & VireoHistoryEntryInheritedProps;
 
 declare module "@mui/material/styles" {
   interface Components<Theme = unknown> {

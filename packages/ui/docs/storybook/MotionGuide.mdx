@@ -1,0 +1,85 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="TypeScript/UI/Documentation/Guides/Motion and Interaction" />
+
+# Motion and interaction
+
+Vireo motion is calm, immediate, and explanatory. Input acknowledgement happens without waiting for business logic; larger transitions communicate where content came from or went; loading preserves useful content whenever possible.
+
+## Standard tokens
+
+Import `VIREO_MOTION_TOKENS` from `@vireocodedev/starter-ui`. Do not copy token values into reusable components.
+
+| Token                 |  Value | Intended use                                |
+| --------------------- | -----: | ------------------------------------------- |
+| `duration.instant`    |   0 ms | State that must be immediately available    |
+| `duration.micro`      | 110 ms | Press, hover, focus, and selection feedback |
+| `duration.exit`       | 150 ms | Removing a transient surface                |
+| `duration.standard`   | 180 ms | Ordinary component transitions              |
+| `duration.enter`      | 210 ms | Introducing a component or route            |
+| `duration.emphasized` | 270 ms | Infrequent, meaningful emphasis             |
+| `distance.micro`      |   4 px | Local status and error entry                |
+| `distance.component`  |   8 px | Step and component continuity               |
+| `distance.surface`    |  16 px | Large overlay travel                        |
+| `scale.pressed`       |   0.98 | Tactile press feedback where size permits   |
+
+Use `easing.standard` for state changes, `easing.enter` for arrivals, and `easing.exit` for departures. Exits are normally faster than entrances.
+
+## Interaction principles
+
+1. A control acknowledges pointer-down or key activation immediately; async completion feedback is a separate state.
+2. State changes never wait for an animation to finish.
+3. Motion communicates direction, hierarchy, selection, or causality. Decorative motion does not belong in business workflows.
+4. Preserve the shell, stale query data, scroll position, and stable layout while smaller subtrees load or update.
+5. Prefer `transform` and `opacity`. Animate color for small feedback regions; avoid layout animation in large tables and lists.
+6. Entrances may establish location. Repeated content and high-frequency updates normally appear without choreography.
+7. Consequential actions name their target before confirmation and in completion feedback.
+
+## Reduced motion
+
+Every authored transition or keyframe needs a `prefers-reduced-motion` path. Remove travel and scale; make state immediate. Progress remains semantically available, but an indeterminate animation should become a static determinate indicator when practical.
+
+```tsx
+sx={{
+  transition: `transform ${VIREO_MOTION_TOKENS.duration.micro}ms ${VIREO_MOTION_TOKENS.easing.standard}`,
+  "&:active": { transform: `scale(${VIREO_MOTION_TOKENS.scale.pressed})` },
+  "@media (prefers-reduced-motion: reduce)": {
+    transition: "none",
+    "&:active": { transform: "none" },
+  },
+}}
+```
+
+Motion must never be the only representation of current, selected, expanded, loading, error, or success state. Preserve focus management, ARIA state, live-region behavior, and keyboard operation independently of visual movement.
+
+## Loading and data changes
+
+- Use shape-matched skeletons for an initial empty load, delayed long enough to avoid flashing during fast work.
+- Keep stale rows visible during refetch and add a thin contextual progress indicator instead of returning to a full skeleton.
+- Optimistic changes require cancellation, a complete cache snapshot, exact rollback, and eventual invalidation.
+- Use `renderEmptyState` for contextual guidance and an appropriate next action.
+- Use `getRowSx` for a small changed-row cue. Do not animate every row during pagination, sorting, filtering, or realtime updates.
+
+## Spatial transitions
+
+- Route transitions are short crossfades unless navigation direction or hierarchy is reliable.
+- Multi-step forms use the actual forward/backward direction and no more than component-distance travel.
+- Mobile full-screen overlays enter from the bottom; drawers and side panels use the surface's physical edge.
+- Expand/collapse motion keeps content clipped and preserves focus. Do not delay the expanded semantic state.
+
+## Sensory feedback
+
+Sound is intentionally absent from the default business-application language. Haptics are experimental and application-owned: use them only for a rare, meaningful direct manipulation or confirmation, behind capability and user-preference checks. Neither is a substitute for visible or assistive-technology feedback.
+
+## Do not animate
+
+- Initial controls becoming enabled when animation would delay use.
+- Every row in a large or virtualized data set.
+- High-frequency counters, live telemetry, cursor position, or resize geometry.
+- Error replacement that would hide usable stale content.
+- Focus movement, keyboard navigation state, or screen-reader announcements.
+- Width, height, top, or left during continuous drag when a direct CSS variable or transform can update instead.
+
+## Verification
+
+Test default and reduced-motion modes with mouse, touch, and keyboard. Exercise lower-end mobile hardware, large data sets, installed PWA startup, navigation back/forward, offline recovery, async success and failure, and cancellation during overlay exit. Look for dropped frames, long tasks, layout shifts, focus loss, content flashes, and bundle growth.

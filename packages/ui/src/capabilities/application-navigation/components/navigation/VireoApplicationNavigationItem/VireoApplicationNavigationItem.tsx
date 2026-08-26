@@ -92,6 +92,7 @@ export const VireoApplicationNavigationItem = React.forwardRef<HTMLDivElement, V
         as={slots.root}
         ref={rootRef}
         ownerState={ownerState}
+        aria-current={selected ? "page" : undefined}
         disabled={disabled}
         selected={selected}
         className={joinClassNames(classes.root, className, rootSlotClassName)}

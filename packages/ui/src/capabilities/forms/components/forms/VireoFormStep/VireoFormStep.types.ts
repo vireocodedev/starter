@@ -1,4 +1,5 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
+import type { VireoMultiStepDirection } from "@/capabilities/forms/types/vireoMultiStep.types";
 import type { BoxProps, Typography } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
@@ -8,6 +9,7 @@ import type { VIREO_FORM_STEP_NAME, VireoFormStepSlotName } from "./VireoFormSte
 export type VireoFormStepOwnerState = {
   active: boolean;
   current: boolean;
+  direction: VireoMultiStepDirection;
   keepMounted: boolean;
 };
 

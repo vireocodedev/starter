@@ -6,6 +6,8 @@ import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoF
 import customizedSlotsSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/DefaultExample";
 import defaultSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/DefaultExample.tsx?raw";
+import LoadingExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/LoadingExample";
+import loadingSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/LoadingExample.tsx?raw";
 import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/ThemeCustomizationExample";
 import themeCustomizationSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/internal/storybook/ZodFieldValidationExample";
@@ -36,6 +38,7 @@ Multi-value free-solo fields otherwise repeat normalization, duplicate preventio
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultSource) };
+export const Loading: Story = { render: () => <LoadingExample />, parameters: source(loadingSource) };
 export const CreationAndLimits: Story = {
   render: () => <CreationAndLimitsExample />,
   parameters: source(creationAndLimitsSource),

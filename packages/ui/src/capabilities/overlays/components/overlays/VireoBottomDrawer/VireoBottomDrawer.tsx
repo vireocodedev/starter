@@ -67,15 +67,15 @@ export const VireoBottomDrawer = React.forwardRef<HTMLDivElement, VireoBottomDra
 
     const handleClose = React.useCallback<NonNullable<SwipeableDrawerProps["onClose"]>>(
       event => {
-        rootSlotOnClose?.(event);
-        if (!event.defaultPrevented) onClose();
+        if (event) rootSlotOnClose?.(event);
+        if (!event?.defaultPrevented) onClose();
       },
       [onClose, rootSlotOnClose],
     );
     const handleOpen = React.useCallback<NonNullable<SwipeableDrawerProps["onOpen"]>>(
       event => {
-        rootSlotOnOpen?.(event);
-        if (!event.defaultPrevented) onOpen?.();
+        if (event) rootSlotOnOpen?.(event);
+        if (!event?.defaultPrevented) onOpen?.();
       },
       [onOpen, rootSlotOnOpen],
     );

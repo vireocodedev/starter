@@ -163,7 +163,7 @@ export type VireoFormRadioGroupFieldOwnProps<
   formatError?: VireoFormErrorFormatter;
   /** @default true */
   fullWidth?: boolean;
-  /** Shown when no visible form validation error takes precedence. */
+  /** Shown when no visible validation error takes precedence. Defaults to a reserved line; pass `null` to remove it. @default ' ' */
   helperText?: React.ReactNode;
   /** Places option controls horizontally. @default false */
   row?: boolean;

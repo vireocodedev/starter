@@ -3,6 +3,7 @@ import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { VireoDelayedRender } from "./VireoDelayedRender";
+import { VIREO_LOADING_TOKENS } from "@/core/constants/loading.constants";
 import { vireoDelayedRenderClasses } from "./VireoDelayedRender.classes";
 import { VIREO_DELAYED_RENDER_NAME } from "./VireoDelayedRender.identity";
 
@@ -11,7 +12,7 @@ describe(VIREO_DELAYED_RENDER_NAME, () => {
     vi.useRealTimers();
   });
 
-  it("mounts its children after the default 200ms delay", () => {
+  it("mounts its children after the shared loading reveal delay", () => {
     vi.useFakeTimers();
     const { container } = render(
       <VireoDelayedRender>
@@ -21,7 +22,7 @@ describe(VIREO_DELAYED_RENDER_NAME, () => {
 
     expect(container).toBeEmptyDOMElement();
 
-    act(() => vi.advanceTimersByTime(199));
+    act(() => vi.advanceTimersByTime(VIREO_LOADING_TOKENS.revealDelay - 1));
     expect(screen.queryByText("Loaded content")).not.toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(1));

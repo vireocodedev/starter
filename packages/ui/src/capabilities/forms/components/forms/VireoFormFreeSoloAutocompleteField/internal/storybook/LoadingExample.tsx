@@ -4,7 +4,7 @@ import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
 import React from "react";
 
 const catalog = ["Amsterdam", "Athens", "Barcelona", "Berlin", "Zagreb"];
-export default function ServerFilteringAndLoadingExample() {
+export default function LoadingExample() {
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState(catalog);

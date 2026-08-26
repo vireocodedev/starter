@@ -324,6 +324,10 @@ The dark review theme is the baseline, but semantic tokens are still preferred s
 
 The Default story is the minimum, not the complete documentation for every component. Audit all twelve questions in the [story coverage rulebook](./story-coverage-rulebook.md), then add only the public distinctions a consumer needs to see or exercise.
 
+### Loading-state declaration
+
+Every generated component declares its initial loading classification in `parameters.vireo.loading`. A synchronous component uses `categories: ["static"]` and `geometry: null`. If the completed component owns asynchronous visual state, replace that baseline with one or more normative categories and geometry `A`, `B`, or `C`, then add the component to `packages/ui/loading-state-contracts.json`. The registry names every applicable canonical story and records an evidence-based reason for each omission; architecture verification rejects missing stories, incomplete omissions, and loading-like public props without a registry entry.
+
 ### Bound form-field validation
 
 Every form input exposed through a `useVireoForm` field façade, such as `field.TextField` or `field.NumberField`, includes both of these executable stories:
@@ -442,6 +446,7 @@ Do not add invisible edge cases solely to inflate story coverage. Conversely, do
 - Fixtures use semantic theme tokens and remain coherent with the shared dark Storybook theme.
 - Theme-customization decorators extend the outer theme instead of replacing it with a standalone light theme.
 - The twelve coverage questions have been audited with Covered, Needs improvement, Missing, or N/A statuses.
+- The loading category and geometry are declared; async-capable components have a complete registry entry with canonical stories or intentional omission reasons.
 - The final stories form a minimum sufficient set with one distinct consumer-facing purpose per story.
 - Slot and theme stories exist only when their component-specific extension contracts justify them.
 - Every bound `field.*` input includes executable `ZodFieldValidation` and `ZodFormValidation` stories.

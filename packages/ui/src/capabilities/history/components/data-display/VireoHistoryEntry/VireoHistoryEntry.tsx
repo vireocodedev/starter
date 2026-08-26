@@ -9,6 +9,7 @@ import { VireoHistoryEntryRoot } from "./VireoHistoryEntry.styled";
 import { type VireoHistoryEntryOwnerState, type VireoHistoryEntryProps } from "./VireoHistoryEntry.types";
 import { HistoryNodeView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryNodeView/HistoryNodeView";
 import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
+import { HistoryEntryLoadingView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryEntryLoadingView/HistoryEntryLoadingView";
 import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
 import { createHistoryNodes, type HistoryNode, type HistoryPath } from "@vireocodedev/starter-history";
 
@@ -48,10 +49,10 @@ function containsUnchangedHistoryNode(node: HistoryNode): boolean {
   return node.type === "unchanged";
 }
 
-function useUtilityClasses(_ownerState: VireoHistoryEntryOwnerState, classes?: VireoHistoryEntryProps["classes"]) {
+function useUtilityClasses(ownerState: VireoHistoryEntryOwnerState, classes?: VireoHistoryEntryProps["classes"]) {
   return composeClasses(
     {
-      root: ["root"],
+      root: ["root", ownerState.loading && "loading"],
     } as const satisfies UtilityClassSlotMap<VireoHistoryEntrySlotName, VireoHistoryEntryClassKey>,
     getVireoHistoryEntryUtilityClass,
     classes,
@@ -72,6 +73,8 @@ function VireoHistoryEntryImpl<TEntity extends object>(
     definition,
     emptyValue,
     labels: labelsProp,
+    loading = false,
+    loadingVisible = false,
     previous,
     rootMeta,
     showRootEntityLabel = true,
@@ -83,17 +86,18 @@ function VireoHistoryEntryImpl<TEntity extends object>(
   } = props;
   const labels = { ...DEFAULT_LABELS, ...labelsProp };
   const nodes = React.useMemo(
-    () => createHistoryNodes(definition, previous, current, { showUnchanged: true }),
-    [current, definition, previous],
+    () => (loading ? [] : createHistoryNodes(definition, previous ?? null, current ?? null, { showUnchanged: true })),
+    [current, definition, loading, previous],
   );
 
   const hasChanges = nodes.some(containsChangedHistoryNode);
   const hasUnchanged = nodes.some(containsUnchangedHistoryNode);
   const entryIdentity = React.useMemo(() => {
     const snapshot = current ?? previous;
+    if (loading) return `${definition.options.label}:loading`;
     if (snapshot == null) return `${definition.options.label}:empty`;
     return `${definition.options.label}:${String(definition.options.key(snapshot))}`;
-  }, [current, definition, previous]);
+  }, [current, definition, loading, previous]);
   const [expandedByPath, setExpandedByPath] = React.useState<Record<string, boolean>>({});
   const [showUnchanged, setShowUnchanged] = React.useState(defaultShowUnchanged);
 
@@ -117,7 +121,7 @@ function VireoHistoryEntryImpl<TEntity extends object>(
     [defaultExpandedDepth],
   );
   const rootNode = nodes[0];
-  const expanded = rootNode?.type === "group" ? isExpanded(rootNode.path, 1) : true;
+  const expanded = loading || (rootNode?.type === "group" ? isExpanded(rootNode.path, 1) : true);
   const disclosure: HistoryEntryDisclosure = {
     defaultExpandedDepth,
     isExpanded,
@@ -133,6 +137,7 @@ function VireoHistoryEntryImpl<TEntity extends object>(
     expanded,
     hasUnchanged,
     hasRootMeta: rootMeta != null,
+    loading,
     showRootEntityLabel,
   };
   const classes = useUtilityClasses(ownerState, classesProp);
@@ -147,7 +152,7 @@ function VireoHistoryEntryImpl<TEntity extends object>(
   } = resolvedRootSlotProps;
   const rootRef = useForkRef(forwardedRef, rootSlotRef);
 
-  if (nodes.length === 0 || (!hasChanges && !defaultShowUnchanged)) return null;
+  if (!loading && (nodes.length === 0 || (!hasChanges && !defaultShowUnchanged))) return null;
 
   return (
     <VireoHistoryEntryRoot
@@ -160,17 +165,21 @@ function VireoHistoryEntryImpl<TEntity extends object>(
       style={{ ...style, ...rootSlotStyle }}
       sx={mergeSx(sx, rootSlotSx)}
     >
-      {nodes.map(node => (
-        <HistoryNodeView
-          key={getHistoryPathKey(node.path)}
-          disclosure={disclosure}
-          emptyValue={emptyValue}
-          hasUnchanged={hasUnchanged}
-          node={node}
-          rootMeta={rootMeta}
-          showRootEntityLabel={showRootEntityLabel}
-        />
-      ))}
+      {loading ? (
+        <HistoryEntryLoadingView labels={labels} visible={loadingVisible} />
+      ) : (
+        nodes.map(node => (
+          <HistoryNodeView
+            key={getHistoryPathKey(node.path)}
+            disclosure={disclosure}
+            emptyValue={emptyValue}
+            hasUnchanged={hasUnchanged}
+            node={node}
+            rootMeta={rootMeta}
+            showRootEntityLabel={showRootEntityLabel}
+          />
+        ))
+      )}
     </VireoHistoryEntryRoot>
   );
 }

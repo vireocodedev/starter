@@ -25,7 +25,9 @@ vi.mock("@mui/material", async importOriginal => {
             data-hide-backdrop={String(props.hideBackdrop)}
           >
             <button onClick={props.onClose as React.MouseEventHandler<HTMLButtonElement>}>Close drawer</button>
+            <button onClick={() => (props.onClose as () => void)()}>Swipe drawer closed</button>
             <button onClick={props.onOpen as React.MouseEventHandler<HTMLButtonElement>}>Open drawer</button>
+            <button onClick={() => (props.onOpen as () => void)()}>Swipe drawer open</button>
             <button
               onClick={
                 (props.slotProps as { transition?: { onExited?: () => void } } | undefined)?.transition?.onExited
@@ -70,6 +72,29 @@ describe(VIREO_BOTTOM_DRAWER_NAME, () => {
     expect(onClose).toHaveBeenCalledOnce();
     expect(onOpen).toHaveBeenCalledOnce();
     expect(onExited).toHaveBeenCalledOnce();
+  });
+
+  it("handles swipe lifecycle callbacks that do not include an event", () => {
+    const onClose = vi.fn();
+    const onOpen = vi.fn();
+    const slotOnClose = vi.fn();
+    const slotOnOpen = vi.fn();
+    render(
+      <VireoBottomDrawer
+        {...requiredProps}
+        onClose={onClose}
+        onOpen={onOpen}
+        slotProps={{ root: { onClose: slotOnClose, onOpen: slotOnOpen } }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Swipe drawer closed" }));
+    fireEvent.click(screen.getByRole("button", { name: "Swipe drawer open" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(onOpen).toHaveBeenCalledOnce();
+    expect(slotOnClose).not.toHaveBeenCalled();
+    expect(slotOnOpen).not.toHaveBeenCalled();
   });
 
   it("lets a root slot handler prevent the component close callback", () => {

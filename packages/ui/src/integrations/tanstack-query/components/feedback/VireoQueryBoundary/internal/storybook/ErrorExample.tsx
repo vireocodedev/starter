@@ -4,7 +4,7 @@ import { Alert, Typography } from "@mui/material";
 import { QueryClient, QueryClientProvider, useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";
 
-export default function ErrorAndRetryExample() {
+export default function ErrorExample() {
   const attempts = React.useRef(0);
   const [client] = React.useState(() => new QueryClient({ defaultOptions: { queries: { retry: false } } }));
   return (

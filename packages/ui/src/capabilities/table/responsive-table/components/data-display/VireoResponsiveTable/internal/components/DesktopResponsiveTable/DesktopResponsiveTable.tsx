@@ -1,4 +1,4 @@
-import { VireoTruncatedContent } from "@/core/public";
+import { mergeSx, VireoSkeleton, VireoTruncatedContent } from "@/core/public";
 import type {
   VireoResponsiveTableColumn,
   VireoResponsiveTableProps,
@@ -6,7 +6,6 @@ import type {
 import type { VireoResponsiveTableState } from "@/capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/internal/hooks/useVireoResponsiveTableState/useVireoResponsiveTableState";
 import {
   Box,
-  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -23,17 +22,21 @@ export function DesktopResponsiveTable<
 >({
   tableProps,
   state,
+  skeletonVisible,
 }: {
   tableProps: VireoResponsiveTableProps<TItem, TColumns>;
   state: VireoResponsiveTableState<TItem>;
+  skeletonVisible: boolean;
 }) {
   const {
     data,
     filters,
     getRowKey,
+    getRowSx,
     labels,
     onFiltersChange,
     renderFilters,
+    renderEmptyState,
     size = "small",
     skeleton = false,
     totalCount,
@@ -50,10 +53,7 @@ export function DesktopResponsiveTable<
   } = state;
 
   return (
-    <Box
-      aria-busy={skeleton}
-      sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, minWidth: 0 }}
-    >
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, minWidth: 0 }}>
       {renderFilters?.()}
       <Box
         sx={{
@@ -61,7 +61,7 @@ export function DesktopResponsiveTable<
           flexDirection: "column",
           flex: 1,
           minHeight: 0,
-          marginTop: "calc(3 * var(--mui-spacing))",
+          marginTop: renderFilters ? "calc(3 * var(--mui-spacing))" : 0,
           border: 1,
           borderColor: "divider",
           borderRadius: 1,
@@ -124,17 +124,20 @@ export function DesktopResponsiveTable<
             <TableBody>
               {skeleton ? (
                 Array.from({ length: skeletonPlaceholderCount }).map((_, rowIndex) => (
-                  <TableRow key={`skeleton-row-${rowIndex}`}>
+                  <TableRow
+                    key={`skeleton-row-${rowIndex}`}
+                    aria-hidden="true"
+                    sx={{ visibility: skeletonVisible ? "visible" : "hidden" }}
+                  >
                     {orderedColumns.map((column, columnIndex) => {
                       const isActionsColumn = column.id === resolvedActionsColumn?.id;
                       const skeletonWidth = isActionsColumn ? 62 : `${58 + ((rowIndex * 17 + columnIndex * 11) % 34)}%`;
                       return (
                         <TableCell align={column.align} key={column.id} sx={{ ...getStickyCellSx(column, false) }}>
-                          <Skeleton
-                            animation="wave"
+                          <VireoSkeleton
                             variant="rounded"
                             sx={{
-                              height: isActionsColumn ? 30 : 18,
+                              height: isActionsColumn ? 30 : size === "small" ? 20 : 24,
                               width: skeletonWidth,
                               ml: column.align === "right" || column.align === "center" ? "auto" : 0,
                               mr: column.align === "center" ? "auto" : 0,
@@ -152,7 +155,7 @@ export function DesktopResponsiveTable<
                     align="center"
                     sx={{ height: size === "small" ? 52 : 72, color: "text.secondary", borderBottom: 0 }}
                   >
-                    {labels.noData}
+                    {renderEmptyState?.() ?? labels.noData}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -160,7 +163,7 @@ export function DesktopResponsiveTable<
                   <TableRow
                     hover
                     key={getRowKey?.(item, rowIndex) ?? rowIndex}
-                    sx={{ "&:last-child td": { borderBottom: 0 } }}
+                    sx={mergeSx({ "&:last-child td": { borderBottom: 0 } }, getRowSx?.(item, rowIndex, "desktop"))}
                   >
                     {orderedColumns.map(column => {
                       const body = column.renderBody(item, rowIndex, { placement: "desktop" });

@@ -100,6 +100,7 @@ export const VireoFormSubmitButton = React.forwardRef<HTMLButtonElement, VireoFo
         as={slots.root}
         ref={rootRef}
         ownerState={ownerState}
+        aria-busy={ownerState.loading || undefined}
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         disabled={ownerState.disabled}
         loading={ownerState.loading}

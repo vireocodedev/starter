@@ -53,6 +53,7 @@ export { default as Radio } from "@mui/material/Radio";
 export { default as RadioGroup } from "@mui/material/RadioGroup";
 export { default as Select } from "@mui/material/Select";
 export { default as Skeleton } from "@mui/material/Skeleton";
+export { default as Slide } from "@mui/material/Slide";
 export { default as Stack } from "@mui/material/Stack";
 export { default as SvgIcon } from "@mui/material/SvgIcon";
 export { default as SwipeableDrawer } from "@mui/material/SwipeableDrawer";

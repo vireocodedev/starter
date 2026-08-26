@@ -3,6 +3,7 @@ import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
 import React from "react";
+import { VIREO_LOADING_TOKENS } from "@/core/constants/loading.constants";
 import { type VireoDelayedRenderClassKey, getVireoDelayedRenderUtilityClass } from "./VireoDelayedRender.classes";
 import { VIREO_DELAYED_RENDER_NAME, type VireoDelayedRenderSlotName } from "./VireoDelayedRender.identity";
 import { VireoDelayedRenderRoot } from "./VireoDelayedRender.styled";
@@ -28,7 +29,7 @@ export const VireoDelayedRender = React.forwardRef<HTMLDivElement, VireoDelayedR
       children,
       className,
       classes: classesProp,
-      delay = 200,
+      delay = VIREO_LOADING_TOKENS.revealDelay,
       slotProps = {},
       slots = {},
       style,

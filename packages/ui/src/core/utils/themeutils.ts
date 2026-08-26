@@ -41,7 +41,7 @@ export function reverseNumericScale<T extends Record<string, unknown>>(scale: T)
  * Creates a dark MUI theme derived from an existing light theme.
  *
  * The function:
- * 1. Copies `shape`, `typography`, `cssVariables`, and `components` from the light theme.
+ * 1. Copies `shape`, `typography`, `cssVariables`, `components`, `motion`, and transitions from the light theme.
  * 2. Reverses numeric palette scales (50–950) on primary, grey, success, warning, info, and error
  *    so that lighter shades map to darker values and vice-versa.
  * 3. Sets `palette.mode` to `"dark"`, letting MUI apply its standard dark-mode defaults
@@ -86,9 +86,14 @@ export function createDarkTheme(lightTheme: Theme, overrides?: ThemeOptions): Th
   // all CSS variable channels (paperChannel, defaultChannel, mainChannel, etc.)
   // from the definitive values in one pass — no stale channels survive.
   return createTheme({
-    cssVariables: true,
+    cssVariables: lightTheme.cssVariables,
     components: lightTheme.components,
+    motion: { ...lightTheme.motion },
     shape: { ...lightTheme.shape },
+    transitions: {
+      duration: { ...lightTheme.transitions.duration },
+      easing: { ...lightTheme.transitions.easing },
+    },
     typography: { ...lightTheme.typography },
     // Spread non-palette overrides (components, shape, typography, etc.)
     ...overrides,

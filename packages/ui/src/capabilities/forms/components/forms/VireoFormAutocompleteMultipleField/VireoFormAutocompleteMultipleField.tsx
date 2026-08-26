@@ -152,7 +152,7 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
     getRemoveOptionLabel = selection => `Remove ${selection.label}`,
     getUnresolvedValueLabel,
     groupBy,
-    helperText,
+    helperText = " ",
     hideOptionCheckbox = false,
     inputRef,
     inputValue: inputValueProp,

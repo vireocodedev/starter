@@ -1,5 +1,5 @@
-import ConsumerLoadingExample from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/ConsumerLoadingExample";
-import consumerLoadingExampleSource from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/ConsumerLoadingExample.tsx?raw";
+import LoadingExample from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/LoadingExample";
+import loadingExampleSource from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/LoadingExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/DefaultExample";
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoFormSubmitButton/internal/storybook/DefaultExample.tsx?raw";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -56,7 +56,7 @@ export const Default: Story = {
   },
 };
 
-export const ConsumerLoading: Story = {
-  render: () => <ConsumerLoadingExample />,
-  parameters: createSourceParameters(consumerLoadingExampleSource),
+export const Loading: Story = {
+  render: () => <LoadingExample />,
+  parameters: createSourceParameters(loadingExampleSource),
 };

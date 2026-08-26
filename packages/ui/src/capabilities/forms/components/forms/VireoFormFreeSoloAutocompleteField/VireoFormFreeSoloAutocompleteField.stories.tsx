@@ -4,8 +4,8 @@ import CustomizedSlotsExample from "@/capabilities/forms/components/forms/VireoF
 import customizedSlotsSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/DefaultExample";
 import defaultSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/DefaultExample.tsx?raw";
-import ServerFilteringAndLoadingExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/ServerFilteringAndLoadingExample";
-import serverFilteringAndLoadingSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/ServerFilteringAndLoadingExample.tsx?raw";
+import LoadingExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/LoadingExample";
+import loadingSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/LoadingExample.tsx?raw";
 import ThemeCustomizationExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/ThemeCustomizationExample";
 import themeCustomizationSource from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/ThemeCustomizationExample.tsx?raw";
 import ZodFieldValidationExample from "@/capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/internal/storybook/ZodFieldValidationExample";
@@ -40,9 +40,9 @@ export const CreationAndNormalization: Story = {
   render: () => <CreationAndNormalizationExample />,
   parameters: source(creationAndNormalizationSource),
 };
-export const ServerFilteringAndLoading: Story = {
-  render: () => <ServerFilteringAndLoadingExample />,
-  parameters: source(serverFilteringAndLoadingSource),
+export const Loading: Story = {
+  render: () => <LoadingExample />,
+  parameters: source(loadingSource),
 };
 export const ZodFieldValidation: Story = {
   render: () => <ZodFieldValidationExample />,

@@ -1,4 +1,5 @@
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/utils/muiutils";
+import { VireoLoadingRegion } from "@/core/components/feedback/VireoLoadingRegion";
 import { unstable_composeClasses as composeClasses } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
@@ -11,7 +12,10 @@ import {
   VIREO_INITIALIZATION_BOUNDARY_NAME,
   type VireoInitializationBoundarySlotName,
 } from "./VireoInitializationBoundary.identity";
-import { VireoInitializationBoundaryRoot } from "./VireoInitializationBoundary.styled";
+import {
+  VireoInitializationBoundaryLoadingIndicator,
+  VireoInitializationBoundaryRoot,
+} from "./VireoInitializationBoundary.styled";
 import {
   type VireoInitializationBoundaryOwnerState,
   type VireoInitializationBoundaryProps,
@@ -34,6 +38,7 @@ function useUtilityClasses(
   return composeClasses(
     {
       root: ["root", ownerState.status],
+      loadingIndicator: ["loadingIndicator"],
     } as const satisfies UtilityClassSlotMap<VireoInitializationBoundarySlotName, VireoInitializationBoundaryClassKey>,
     getVireoInitializationBoundaryUtilityClass,
     classes,
@@ -48,8 +53,11 @@ export const VireoInitializationBoundary = React.forwardRef<HTMLDivElement, Vire
       children,
       className,
       classes: classesProp,
-      fallback = null,
+      announceLoading = true,
+      fallback,
       initialize,
+      loadingLabel = "Initializing",
+      loadingRevealDelay,
       slotProps = {},
       slots = {},
       style,
@@ -97,6 +105,7 @@ export const VireoInitializationBoundary = React.forwardRef<HTMLDivElement, Vire
     const classes = useUtilityClasses(ownerState, classesProp);
 
     const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
+    const resolvedLoadingIndicatorSlotProps = resolveSlotProps(slotProps.loadingIndicator, ownerState);
     const {
       className: rootSlotClassName,
       ref: rootSlotRef,
@@ -104,7 +113,9 @@ export const VireoInitializationBoundary = React.forwardRef<HTMLDivElement, Vire
       sx: rootSlotSx,
       ...rootSlotOther
     } = resolvedRootSlotProps;
+    const { className: loadingIndicatorClassName, ...loadingIndicatorOther } = resolvedLoadingIndicatorSlotProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
+    const LoadingIndicator = slots.loadingIndicator ?? VireoInitializationBoundaryLoadingIndicator;
 
     return (
       <VireoInitializationBoundaryRoot
@@ -118,7 +129,29 @@ export const VireoInitializationBoundary = React.forwardRef<HTMLDivElement, Vire
         sx={mergeSx(sx, rootSlotSx)}
         data-vireo-initialization-state={ownerState.status}
       >
-        {ownerState.status === "ready" ? children : fallback}
+        {ownerState.status === "ready" ? (
+          children
+        ) : (
+          <VireoLoadingRegion
+            announce={announceLoading}
+            loading
+            loadingLabel={loadingLabel}
+            revealDelay={loadingRevealDelay}
+          >
+            {({ loadingVisible }) => {
+              if (!loadingVisible) return null;
+              if (fallback !== undefined) return fallback;
+              return (
+                <LoadingIndicator
+                  {...loadingIndicatorOther}
+                  ownerState={ownerState}
+                  className={joinClassNames(classes.loadingIndicator, loadingIndicatorClassName)}
+                  aria-hidden="true"
+                />
+              );
+            }}
+          </VireoLoadingRegion>
+        )}
       </VireoInitializationBoundaryRoot>
     );
   },

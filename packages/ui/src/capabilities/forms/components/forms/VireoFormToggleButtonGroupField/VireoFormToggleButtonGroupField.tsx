@@ -114,7 +114,7 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
     formatError: formatErrorProp,
     fullWidth = true,
     getOptionProps,
-    helperText,
+    helperText = " ",
     multiple = false,
     onBlur,
     onChange,

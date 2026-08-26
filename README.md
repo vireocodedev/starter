@@ -80,6 +80,12 @@ Every push to `main` publishes the production Storybook to GitHub Pages. See
 [Storybook deployment](docs/STORYBOOK_DEPLOYMENT.md) for repository setup,
 permissions, local verification, custom-domain guidance, and failure handling.
 
+The normative [loading-state and skeleton standard](docs/LOADING_STATE_STANDARD.md)
+defines loading classification, structural skeleton behavior, geometry guarantees,
+accessibility, motion, and verification across Starter UI and consuming applications.
+The [Phase 2 loading-state audit](docs/LOADING_STATE_AUDIT.md) records the current
+Starter UI baseline and prioritized remediation queue.
+
 `build` is artifact generation; `typecheck` owns full semantic source checking.
 Keeping those responsibilities separate lets the UI package use TypeScript's
 artifact-only emit without checking the same source graph twice. CI and the

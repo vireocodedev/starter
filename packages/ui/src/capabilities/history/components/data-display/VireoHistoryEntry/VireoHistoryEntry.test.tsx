@@ -237,6 +237,36 @@ describe(VIREO_HISTORY_ENTRY_NAME, () => {
     expect(screen.getByRole("button", { name: "Exclude unchanged values" })).toBeInTheDocument();
   });
 
+  it("renders boundary-coordinated loading through the real entry anatomy with silent leaves", () => {
+    const { container, rerender } = render(
+      <VireoHistoryEntry
+        definition={profileHistoryDefinition}
+        loading
+        loadingVisible={false}
+        slotProps={{ root: ownerState => ({ "data-loading": ownerState.loading }) }}
+      />,
+    );
+
+    const root = container.querySelector<HTMLElement>(`.${vireoHistoryEntryClasses.root}`);
+    const skeletons = container.querySelectorAll<HTMLElement>(".MuiSkeleton-root");
+    expect(root).toHaveClass(vireoHistoryEntryClasses.loading);
+    expect(root).toHaveAttribute("data-loading", "true");
+    expect(container.querySelector(".VireoHistoryEntry-rootGroup")).not.toBeNull();
+    expect(container.querySelector(".VireoHistoryEntry-rootHeader")).not.toBeNull();
+    expect(container.querySelectorAll("[data-history-entry-loading-row]")).toHaveLength(2);
+    expect(screen.getByText("Field")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    skeletons.forEach(skeleton => {
+      expect(skeleton).toHaveAttribute("aria-hidden", "true");
+      expect(skeleton).toHaveStyle({ visibility: "hidden" });
+    });
+
+    rerender(<VireoHistoryEntry definition={profileHistoryDefinition} loading loadingVisible />);
+    container.querySelectorAll<HTMLElement>(".MuiSkeleton-root").forEach(skeleton => {
+      expect(skeleton).toHaveStyle({ visibility: "visible" });
+    });
+  });
+
   it("forwards refs and composes root classes, props, and owner state", () => {
     const forwardedRef = React.createRef<HTMLDivElement>();
     const rootSlotRef = React.createRef<HTMLDivElement>();

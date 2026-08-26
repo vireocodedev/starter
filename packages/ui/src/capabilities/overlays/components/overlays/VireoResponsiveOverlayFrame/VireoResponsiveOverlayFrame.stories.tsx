@@ -75,11 +75,11 @@ export const ResizableDockedSidePanel: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole("button", { name: "View customer details" }));
     const overlayCanvas = within(canvasElement.ownerDocument.body);
-    const handle = overlayCanvas.getByRole("presentation");
+    const handle = overlayCanvas.getByRole("separator", { name: "Resize panel" });
     const surface = overlayCanvas.getByRole("complementary");
-    fireEvent.mouseDown(handle, { clientX: 800, detail: 1 });
-    fireEvent.mouseMove(window, { clientX: 700 });
-    fireEvent.mouseUp(window);
+    fireEvent.pointerDown(handle, { clientX: 800, detail: 1 });
+    fireEvent.pointerMove(window, { clientX: 700 });
+    fireEvent.pointerUp(window);
     await waitFor(() => expect(surface.parentElement?.style.getPropertyValue(SIDE_PANEL_WIDTH_CSS_VAR)).toBe("520px"));
     fireEvent.doubleClick(handle);
     await waitFor(() => expect(surface.parentElement?.style.getPropertyValue(SIDE_PANEL_WIDTH_CSS_VAR)).toBe("420px"));

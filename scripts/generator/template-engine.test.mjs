@@ -36,7 +36,13 @@ test("the registered React component template derives an architectural destinati
   const { config, templateDirectory } = await loadRegisteredTemplate("react-component");
   const plan = await createGenerationPlan({
     config,
-    rawInputs: { name: "GeneratorExample", owner: "core", category: "overlays" },
+    rawInputs: {
+      name: "GeneratorExample",
+      owner: "core",
+      category: "overlays",
+      loadingCategory: "static",
+      loadingGeometry: "none",
+    },
     repoRoot: temporaryRoot,
     templateDirectory: fileURLToPath(templateDirectory),
   });
@@ -70,6 +76,10 @@ test("the registered React component template derives an architectural destinati
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
     /DefaultExample\.tsx\?raw/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
+    /categories: \["static"\],[\s\S]*geometry: null/,
   );
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("DefaultExample.tsx")).contents,
@@ -140,9 +150,48 @@ test("the React component template rejects invalid names, owners, categories, an
     createGenerationPlan({
       ...common,
       output: "packages/ui/src/core",
-      rawInputs: { name: "Badge", owner: "core", category: "data-display" },
+      rawInputs: {
+        name: "Badge",
+        owner: "core",
+        category: "data-display",
+        loadingCategory: "static",
+        loadingGeometry: "none",
+      },
     }),
     /do not use --output/,
+  );
+  await assert.rejects(
+    createGenerationPlan({
+      ...common,
+      rawInputs: { name: "Badge", owner: "core", category: "data-display" },
+    }),
+    /Missing required input "loadingCategory"/,
+  );
+  await assert.rejects(
+    createGenerationPlan({
+      ...common,
+      rawInputs: {
+        name: "Badge",
+        owner: "core",
+        category: "data-display",
+        loadingCategory: "static",
+        loadingGeometry: "A",
+      },
+    }),
+    /A "static" component must use loadingGeometry="none"/,
+  );
+  await assert.rejects(
+    createGenerationPlan({
+      ...common,
+      rawInputs: {
+        name: "Badge",
+        owner: "core",
+        category: "data-display",
+        loadingCategory: "busy-action",
+        loadingGeometry: "none",
+      },
+    }),
+    /An async-capable "busy-action" component must declare loading geometry A, B, or C/,
   );
 });
 
@@ -158,6 +207,8 @@ test("the React component template supports one child-capability level and requi
       name: "ResponsiveHeader",
       owner: "capabilities/table/responsive-table",
       category: "data-display",
+      loadingCategory: "static",
+      loadingGeometry: "none",
     },
     repoRoot: temporaryRoot,
     templateDirectory: fileURLToPath(templateDirectory),
@@ -194,6 +245,8 @@ test("the React component template supports an integration-owned public componen
       name: "Toaster",
       owner: "integrations/sonner",
       category: "feedback",
+      loadingCategory: "boundary",
+      loadingGeometry: "C",
       storybookCategory: "UI/Integrations/Notifications · Sonner",
     },
     repoRoot: temporaryRoot,
@@ -208,6 +261,10 @@ test("the React component template supports an integration-owned public componen
   assert.match(
     plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
     /title: "UI\/Integrations\/Notifications · Sonner\/VireoToaster"/,
+  );
+  assert.match(
+    plan.files.find(file => file.relativeDestination.endsWith("stories.tsx")).contents,
+    /categories: \["boundary"\],[\s\S]*geometry: "C"/,
   );
 });
 

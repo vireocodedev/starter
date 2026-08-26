@@ -189,7 +189,7 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
       errorDisplay: errorDisplayProp,
       formatError: formatErrorProp,
       fullWidth = true,
-      helperText,
+      helperText = " ",
       inputRef,
       max,
       min,

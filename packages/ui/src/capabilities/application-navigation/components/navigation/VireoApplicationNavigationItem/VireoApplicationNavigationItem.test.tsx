@@ -48,6 +48,7 @@ describe(VIREO_APPLICATION_NAVIGATION_ITEM_NAME, () => {
     expect(onClick).toHaveBeenCalledOnce();
     expect(ref.current).toBe(button);
     expect(button).toHaveClass(vireoApplicationNavigationItemClasses.root, "Mui-selected");
+    expect(button).toHaveAttribute("aria-current", "page");
 
     rerender(<VireoApplicationNavigationItem icon={<span>I</span>} label="Overview" disabled onClick={onClick} />);
     fireEvent.click(screen.getByRole("button", { name: /Overview/ }));

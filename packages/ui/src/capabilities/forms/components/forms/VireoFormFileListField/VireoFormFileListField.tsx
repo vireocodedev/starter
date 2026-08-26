@@ -256,7 +256,7 @@ export const VireoFormFileListField = React.forwardRef<HTMLDivElement, VireoForm
       formatFileSize = formatVireoFileSize,
       fullWidth = true,
       getFileKey = defaultFileKey,
-      helperText,
+      helperText = " ",
       hideClearAll = false,
       hideFileSize = false,
       inputRef,

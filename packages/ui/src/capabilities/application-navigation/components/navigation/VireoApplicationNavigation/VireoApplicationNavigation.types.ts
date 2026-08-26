@@ -107,13 +107,13 @@ export type VireoApplicationNavigationOwnProps = VireoApplicationNavigationSlots
   defaultExpandedWidth?: number;
   /** Width below which resizing snaps to compact mode. @default minExpandedWidth */
   collapseThreshold?: number;
-  /** Enables pointer resizing for a permanent surface. @default true */
+  /** Enables pointer and keyboard resizing for a permanent surface. @default true */
   resizable?: boolean;
-  /** Locks the current mode and width by disabling mode toggles and pointer resizing. @default false */
+  /** Locks the current mode and width by disabling mode toggles and resizing. @default false */
   locked?: boolean;
   /** Called when the requested desktop mode changes. */
   onModeChange?: (mode: VireoApplicationNavigationMode) => void;
-  /** Called when pointer resizing or a reset commits a new expanded width. */
+  /** Called when resizing or a reset commits a new expanded width. */
   onExpandedWidthChange?: (width: number) => void;
   /** Navigation contents, optionally rendered from the resolved navigation state. */
   children: React.ReactNode | ((state: VireoApplicationNavigationRenderState) => React.ReactNode);

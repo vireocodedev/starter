@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "contracts": [
+    {
+      "component": "capabilities/forms/components/forms/VireoFormAutocompleteField/VireoFormAutocompleteField",
+      "categories": ["content-preserving"],
+      "geometry": "A",
+      "requiredStories": ["Loading"],
+      "omittedStates": {
+        "Loaded": "Default documents the ordinary loaded field; a duplicate canonical story would add no distinct contract.",
+        "Refreshing": "The field receives one loading flag and does not distinguish initial option loading from refresh ownership.",
+        "Empty": "No-options presentation is exercised through existing interaction stories and remains MUI popup behavior.",
+        "Error": "Option request errors and retry controls are owned by the consuming query region adjacent to the retained field.",
+        "AlignmentContract": "The retained control frame is Level A and protected by the representative autocomplete loading test rather than a duplicate family story."
+      }
+    },
+    {
+      "component": "capabilities/forms/components/forms/VireoFormAutocompleteMultipleField/VireoFormAutocompleteMultipleField",
+      "categories": ["content-preserving"],
+      "geometry": "A",
+      "requiredStories": ["Loading"],
+      "omittedStates": {
+        "Loaded": "Default documents the ordinary loaded field; a duplicate canonical story would add no distinct contract.",
+        "Refreshing": "The field receives one loading flag and does not distinguish initial option loading from refresh ownership.",
+        "Empty": "No-options presentation is exercised through existing interaction stories and remains MUI popup behavior.",
+        "Error": "Option request errors and retry controls are owned by the consuming query region adjacent to the retained field.",
+        "AlignmentContract": "The retained control frame is Level A and protected by the representative autocomplete loading test rather than a duplicate family story."
+      }
+    },
+    {
+      "component": "capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/VireoFormFreeSoloAutocompleteField",
+      "categories": ["content-preserving"],
+      "geometry": "A",
+      "requiredStories": ["Loading"],
+      "omittedStates": {
+        "Loaded": "Default documents the ordinary loaded field; a duplicate canonical story would add no distinct contract.",
+        "Refreshing": "The field receives one loading flag and does not distinguish initial option loading from refresh ownership.",
+        "Empty": "Free-solo input remains valid without suggestions, so empty options are not an independent surface state.",
+        "Error": "Option request errors and retry controls are owned by the consuming query region adjacent to the retained field.",
+        "AlignmentContract": "The retained control frame is Level A and protected by the representative autocomplete loading test rather than a duplicate family story."
+      }
+    },
+    {
+      "component": "capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/VireoFormFreeSoloAutocompleteMultipleField",
+      "categories": ["content-preserving"],
+      "geometry": "A",
+      "requiredStories": ["Loading"],
+      "omittedStates": {
+        "Loaded": "Default documents the ordinary loaded field; a duplicate canonical story would add no distinct contract.",
+        "Refreshing": "The field receives one loading flag and does not distinguish initial option loading from refresh ownership.",
+        "Empty": "Free-solo input remains valid without suggestions, so empty options are not an independent surface state.",
+        "Error": "Option request errors and retry controls are owned by the consuming query region adjacent to the retained field.",
+        "AlignmentContract": "The retained control frame is Level A and protected by the representative autocomplete loading test rather than a duplicate family story."
+      }
+    },
+    {
+      "component": "capabilities/forms/components/forms/VireoFormNextStepButton/VireoFormNextStepButton",
+      "categories": ["busy-action"],
+      "geometry": "A",
+      "requiredStories": ["Loading"],
+      "omittedStates": {
+        "Loaded": "Default documents the idle action and its transition to the next step.",
+        "Refreshing": "Busy actions do not own refresh state.",
+        "Empty": "Actions do not own an empty state.",
+        "Error": "Step validation errors remain owned by the form and field error surfaces.",
+        "AlignmentContract": "MUI Button preserves the action footprint while loading and focused tests protect the retained button contract."
+      }
+    },
+    {
+      "component": "capabilities/forms/components/forms/VireoFormSubmitButton/VireoFormSubmitButton",
+      "categories": ["busy-action"],
+      "geometry": "A",
+      "requiredStories": ["Loading"],
+      "omittedStates": {
+        "Loaded": "Default documents the idle submit action and real form submission lifecycle.",
+        "Refreshing": "Busy actions do not own refresh state.",
+        "Empty": "Actions do not own an empty state.",
+        "Error": "Submission errors remain owned by the form or consuming mutation surface.",
+        "AlignmentContract": "MUI Button preserves the action footprint while loading and focused tests protect the retained button contract."
+      }
+    },
+    {
+      "component": "capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry",
+      "categories": ["skeleton-capable"],
+      "geometry": "B",
+      "requiredStories": ["Loaded", "Loading", "AlignmentContract"],
+      "omittedStates": {
+        "Refreshing": "The consuming history collection retains loaded entries and owns refresh feedback.",
+        "Empty": "An individual history entry cannot represent an empty collection.",
+        "Error": "History request failure and recovery belong to the consuming collection boundary."
+      }
+    },
+    {
+      "component": "capabilities/overlays/confirmation/components/overlays/VireoConfirmationDialog/VireoConfirmationDialog",
+      "categories": ["busy-action"],
+      "geometry": "A",
+      "requiredStories": ["Loading"],
+      "omittedStates": {
+        "Loaded": "Default documents the idle confirmation decision.",
+        "Refreshing": "Busy actions do not own refresh state.",
+        "Empty": "A confirmation requires target context and therefore has no empty state.",
+        "Error": "Mutation errors are owned by the provider or consuming mutation while the dialog restores retry and cancel.",
+        "AlignmentContract": "The dialog frame and target context remain mounted; focused tests protect its pending geometry and exit locks."
+      }
+    },
+    {
+      "component": "capabilities/table/responsive-table/components/data-display/VireoResponsiveTable/VireoResponsiveTable",
+      "categories": ["skeleton-capable", "content-preserving"],
+      "geometry": "B",
+      "requiredStories": ["Loaded", "Loading", "Empty", "AlignmentContract"],
+      "omittedStates": {
+        "Refreshing": "General retained refresh is application-owned; the table owns only content-preserving incremental pagination.",
+        "Error": "The application supplies recoverable error presentation through the table content-region contract."
+      }
+    },
+    {
+      "component": "core/components/behavior/VireoInitializationBoundary/VireoInitializationBoundary",
+      "categories": ["boundary"],
+      "geometry": "C",
+      "requiredStories": ["Loading", "Error"],
+      "omittedStates": {
+        "Loaded": "Default demonstrates the complete pending-to-ready lifecycle and restart behavior.",
+        "Refreshing": "Initialization gates first readiness and does not model background refresh.",
+        "Empty": "Initialization readiness has no data-empty state.",
+        "AlignmentContract": "Unknown initialized descendants require a declared Level C progress treatment rather than invented geometry."
+      }
+    },
+    {
+      "component": "core/components/feedback/VireoLoadingRegion/VireoLoadingRegion",
+      "categories": ["boundary"],
+      "geometry": "C",
+      "requiredStories": ["Loaded", "Loading"],
+      "omittedStates": {
+        "Refreshing": "The boundary exposes a generic loading flag; the consumer decides whether retained content represents refresh.",
+        "Empty": "Empty presentation belongs to the content owner inside the region.",
+        "Error": "Error and recovery presentation belongs to the content owner inside the region.",
+        "AlignmentContract": "The boundary owns no content geometry and therefore cannot declare anchors for arbitrary children."
+      }
+    },
+    {
+      "component": "integrations/tanstack-query/components/feedback/VireoQueryBoundary/VireoQueryBoundary",
+      "categories": ["boundary"],
+      "geometry": "C",
+      "requiredStories": ["Loading", "Error"],
+      "omittedStates": {
+        "Loaded": "Default demonstrates the successful Suspense transition and real query content.",
+        "Refreshing": "Suspense initial loading is owned here; retained query refresh remains consumer-owned.",
+        "Empty": "Query result emptiness is domain-specific and belongs to the successful child content.",
+        "AlignmentContract": "Unknown Suspense descendants require a declared Level C progress treatment rather than invented geometry."
+      }
+    }
+  ]
+}

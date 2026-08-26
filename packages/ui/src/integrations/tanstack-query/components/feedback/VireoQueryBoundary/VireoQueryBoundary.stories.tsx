@@ -4,8 +4,8 @@ import CustomizedSlotsExample from "@/integrations/tanstack-query/components/fee
 import customizedSlotsSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/CustomizedSlotsExample.tsx?raw";
 import DefaultExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/DefaultExample";
 import defaultSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/DefaultExample.tsx?raw";
-import ErrorAndRetryExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorAndRetryExample";
-import errorAndRetrySource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorAndRetryExample.tsx?raw";
+import ErrorExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorExample";
+import errorSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorExample.tsx?raw";
 import ErrorDetailsExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorDetailsExample";
 import errorDetailsSource from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/ErrorDetailsExample.tsx?raw";
 import LoadingExample from "@/integrations/tanstack-query/components/feedback/VireoQueryBoundary/internal/storybook/LoadingExample";
@@ -35,7 +35,7 @@ const meta = {
 
 ### Why it exists
 
-Suspense query surfaces otherwise repeat loading semantics, safe error presentation, retry wiring, reset-key handling, and optional diagnostic disclosure. Vireo owns that integration contract while leaving QueryClient creation and query options native to TanStack Query. Use it around one independently recoverable query region; use upstream boundaries directly when an application needs different orchestration.`,
+Suspense query surfaces otherwise repeat delayed loading semantics, safe error presentation, retry wiring, reset-key handling, and optional diagnostic disclosure. Vireo owns that Level C boundary contract while leaving QueryClient creation and query options native to TanStack Query. Its default fallback owns one delayed busy region and announcement; a custom fallback owns its own presentation and accessibility. Use it around one independently recoverable query region, and set \`announceLoading={false}\` when an ancestor already announces the same work.`,
       },
     },
   },
@@ -47,9 +47,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { render: () => <DefaultExample />, parameters: source(defaultSource) };
 export const Loading: Story = { render: () => <LoadingExample />, parameters: source(loadingSource) };
-export const ErrorAndRetry: Story = {
-  render: () => <ErrorAndRetryExample />,
-  parameters: source(errorAndRetrySource),
+export const Error: Story = {
+  render: () => <ErrorExample />,
+  parameters: source(errorSource),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(await canvas.findByRole("button", { name: "Retry" }));

@@ -28,7 +28,11 @@ export default function ActiveResizeFeedbackExample() {
             <VireoSidePanelResizeHandle
               isResizing
               onResizeStart={resize.onResizeStart}
+              onResizeKeyDown={resize.onResizeKeyDown}
               onResizeDoubleClick={resize.onResizeDoubleClick}
+              valueMin={280}
+              valueMax={620}
+              valueNow={resize.width}
             />
           }
         >

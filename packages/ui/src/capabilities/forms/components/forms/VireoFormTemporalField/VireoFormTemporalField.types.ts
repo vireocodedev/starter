@@ -150,6 +150,7 @@ type VireoFormTemporalFieldCommonProps = VireoFormTemporalFieldSlotsAndSlotProps
   formatError?: VireoFormErrorFormatter;
   /** @default true */
   fullWidth?: boolean;
+  /** Defaults to a reserved line; pass `null` to remove it. @default ' ' */
   helperText?: React.ReactNode;
   inputRef?: React.Ref<HTMLInputElement>;
   /** Inclusive canonical lower bound matching the selected mode. */

@@ -103,9 +103,9 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
     const handle = container.querySelector(`.${vireoApplicationNavigationClasses.resizeHandle}`);
     expect(handle).not.toBeNull();
 
-    fireEvent.mouseDown(handle!, { clientX: 280 });
-    fireEvent.mouseMove(window, { clientX: 219 });
-    fireEvent.mouseUp(window);
+    fireEvent.pointerDown(handle!, { clientX: 280 });
+    fireEvent.pointerMove(window, { clientX: 219 });
+    fireEvent.pointerUp(window);
 
     expect(onModeChange).toHaveBeenCalledWith("compact");
   });
@@ -125,14 +125,14 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
     );
     const handle = container.querySelector(`.${vireoApplicationNavigationClasses.resizeHandle}`);
 
-    fireEvent.mouseDown(handle!, { clientX: 80 });
-    fireEvent.mouseMove(window, { clientX: 230 });
+    fireEvent.pointerDown(handle!, { clientX: 80 });
+    fireEvent.pointerMove(window, { clientX: 230 });
     expect(container.firstElementChild).toHaveStyle({ width: "230px" });
 
-    fireEvent.mouseMove(window, { clientX: 260 });
+    fireEvent.pointerMove(window, { clientX: 260 });
     expect(container.firstElementChild).toHaveStyle({ width: "260px" });
 
-    fireEvent.mouseUp(window);
+    fireEvent.pointerUp(window);
 
     expect(onModeChange).toHaveBeenCalledWith("expanded");
     expect(onExpandedWidthChange).toHaveBeenCalledWith(260);
@@ -149,6 +149,28 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
 
     fireEvent.doubleClick(handle!);
     expect(onExpandedWidthChange).toHaveBeenCalledWith(264);
+  });
+
+  it("supports keyboard resizing and exposes the current width", () => {
+    const onExpandedWidthChange = vi.fn();
+    const onModeChange = vi.fn();
+    render(
+      <VireoApplicationNavigation
+        expandedWidth={280}
+        onExpandedWidthChange={onExpandedWidthChange}
+        onModeChange={onModeChange}
+      >
+        Navigation
+      </VireoApplicationNavigation>,
+    );
+
+    const handle = screen.getByRole("separator", { name: "Resize panel" });
+    expect(handle).toHaveAttribute("aria-valuenow", "280");
+    fireEvent.keyDown(handle, { key: "ArrowRight" });
+    expect(onExpandedWidthChange).toHaveBeenCalledWith(296);
+
+    fireEvent.keyDown(handle, { key: "Home" });
+    expect(onModeChange).toHaveBeenCalledWith("compact");
   });
 
   it("merges root slot props and forwards its ref", () => {

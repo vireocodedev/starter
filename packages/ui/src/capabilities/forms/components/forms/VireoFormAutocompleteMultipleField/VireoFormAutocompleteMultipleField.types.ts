@@ -232,6 +232,7 @@ export type VireoFormAutocompleteMultipleFieldOwnProps<
     error?: boolean;
     errorDisplay?: VireoFormErrorDisplay;
     formatError?: VireoFormErrorFormatter;
+    /** Defaults to a reserved line; pass `null` to remove it. @default ' ' */
     helperText?: React.ReactNode;
     fullWidth?: boolean;
     placeholder?: string;

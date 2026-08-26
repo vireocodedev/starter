@@ -82,7 +82,7 @@ export type VireoResponsiveOverlayFrameOwnProps = VireoResponsiveOverlayFrameSlo
   desktopSidePanelSx?: SxProps<Theme>;
   /** Surface used on desktop. @default 'dialog' */
   desktopSurface?: VireoResponsiveOverlayFrameDesktopSurface;
-  /** Enables pointer resizing for desktop side-panel surfaces. @default false */
+  /** Enables pointer and keyboard resizing for desktop side-panel surfaces. @default false */
   allowSidePanelResize?: boolean;
   /** Width reserved by desktop navigation when deciding whether a docked panel fits. @default 0 */
   desktopNavWidth?: number;

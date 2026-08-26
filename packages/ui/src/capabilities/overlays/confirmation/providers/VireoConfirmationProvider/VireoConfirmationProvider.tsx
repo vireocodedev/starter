@@ -26,6 +26,7 @@ export function VireoConfirmationProvider({
   defaultConfirmLabel = "Confirm",
 }: VireoConfirmationProviderProps) {
   const [active, setActive] = React.useState<ActiveConfirmation | null>(null);
+  const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const activeRef = React.useRef<ActiveConfirmation | null>(null);
 
@@ -33,6 +34,7 @@ export function VireoConfirmationProvider({
     const current = activeRef.current;
     if (!current) return;
     activeRef.current = null;
+    setLoading(false);
     setOpen(false);
     current.resolve(confirmed);
   }, []);
@@ -43,6 +45,7 @@ export function VireoConfirmationProvider({
 
   const confirm = React.useCallback<VireoConfirm>(options => {
     activeRef.current?.resolve(false);
+    setLoading(false);
     return new Promise<boolean>(resolve => {
       const next = { options, resolve };
       activeRef.current = next;
@@ -50,6 +53,23 @@ export function VireoConfirmationProvider({
       setOpen(true);
     });
   }, []);
+
+  const handleConfirm = React.useCallback(async () => {
+    const current = activeRef.current;
+    if (!current) return;
+    if (!current.options.onConfirm) {
+      settle(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await current.options.onConfirm();
+      if (activeRef.current === current) settle(true);
+    } catch {
+      if (activeRef.current === current) setLoading(false);
+    }
+  }, [settle]);
 
   React.useEffect(() => () => activeRef.current?.resolve(false), []);
 
@@ -64,9 +84,10 @@ export function VireoConfirmationProvider({
         cancelLabel={active?.options.cancelLabel ?? defaultCancelLabel}
         confirmLabel={active?.options.confirmLabel ?? defaultConfirmLabel}
         confirmColor={active?.options.confirmColor}
+        loading={loading}
         maxWidth={active?.options.maxWidth}
         onClose={() => settle(false)}
-        onConfirm={() => settle(true)}
+        onConfirm={() => void handleConfirm()}
         onExited={handleExited}
       />
     </VireoConfirmationContext.Provider>

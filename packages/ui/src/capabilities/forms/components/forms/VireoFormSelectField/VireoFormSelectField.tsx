@@ -107,7 +107,7 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
     fullWidth = true,
     getOptionDisabled,
     getOptionValue,
-    helperText,
+    helperText = " ",
     inputRef,
     label,
     onBlur,

@@ -1,4 +1,4 @@
-import { type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
+import { VIREO_MOTION_TOKENS, type StyledSlotComponent, type StyledSlotProps } from "@/core/public";
 import { Box, Drawer, type BoxProps, type DrawerProps } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { VIREO_APPLICATION_NAVIGATION_NAME } from "./VireoApplicationNavigation.identity";
@@ -20,7 +20,9 @@ export const VireoApplicationNavigationRoot: VireoApplicationNavigationStyledSlo
   minHeight: 0,
   position: "relative",
   width: ownerState.variant === "permanent" ? ownerState.width : 0,
-  transition: ownerState.isResizing ? "none" : "width 160ms ease",
+  transition: ownerState.isResizing
+    ? "none"
+    : `width ${VIREO_MOTION_TOKENS.duration.standard}ms ${VIREO_MOTION_TOKENS.easing.standard}`,
 }));
 
 export const VireoApplicationNavigationSurface: VireoApplicationNavigationStyledSlotComponent<DrawerProps> = styled(
@@ -41,7 +43,12 @@ export const VireoApplicationNavigationSurface: VireoApplicationNavigationStyled
     maxWidth: ownerState.variant === "temporary" ? "100vw" : undefined,
     overflowX: "hidden",
     borderRight: `1px solid ${theme.palette.divider}`,
-    transition: ownerState.isResizing ? "none" : theme.transitions.create("width", { duration: 160 }),
+    transition: ownerState.isResizing
+      ? "none"
+      : theme.transitions.create("width", {
+          duration: VIREO_MOTION_TOKENS.duration.standard,
+          easing: VIREO_MOTION_TOKENS.easing.standard,
+        }),
   },
 }));
 

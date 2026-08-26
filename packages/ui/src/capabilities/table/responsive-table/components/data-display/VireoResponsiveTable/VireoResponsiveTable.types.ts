@@ -1,5 +1,6 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import type { Key, ReactNode } from "react";
@@ -93,13 +94,22 @@ export type VireoResponsiveTableOwnProps<
   labels: VireoResponsiveTableLabels;
   layers: VireoResponsiveTableLayers;
   renderFilters?: () => ReactNode;
+  /** Replaces the default empty-state label in both layouts. */
+  renderEmptyState?: () => ReactNode;
   renderMobileFilters?: () => ReactNode;
+  /**
+   * Shows geometry-preserving placeholder rows for an initial load with no usable records.
+   * Do not enable this during refresh; keep existing `data` visible and present refresh feedback outside the table.
+   * @default false
+   */
   skeleton?: boolean;
   titleColumn?: VireoResponsiveTableColumnId<TColumns>;
   titleEndAdornmentColumn?: VireoResponsiveTableColumnId<TColumns>;
   titleEndAdornmentHelperColumn?: VireoResponsiveTableColumnId<TColumns>;
   actionsColumn?: VireoResponsiveTableColumnId<TColumns>;
   getRowKey?: (item: TItem, rowIndex: number) => Key;
+  /** Adds per-row visual feedback without replacing responsive row anatomy. */
+  getRowSx?: (item: TItem, rowIndex: number, layout: VireoResponsiveTableLayout) => SxProps<Theme> | undefined;
   totalCount?: number;
   renderMobileSearch?: () => ReactNode;
   filtersCount?: number;
@@ -108,6 +118,7 @@ export type VireoResponsiveTableOwnProps<
   onMobileFiltersDone?: () => void;
   renderTitleEndAdornment?: (item: TItem, rowIndex: number) => ReactNode;
   hasNextPage?: boolean;
+  /** Preserves loaded mobile rows and adds local progress while the next incremental page is fetched. */
   isFetchingNextPage?: boolean;
   onLoadNextPage?: () => void;
   filtersLabel?: string;
