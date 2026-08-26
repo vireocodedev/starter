@@ -19,7 +19,11 @@ describe(VIREO_INITIALIZATION_BOUNDARY_NAME, () => {
   it("shows the fallback until initialization resolves", async () => {
     const initialization = deferred<void>();
     render(
-      <VireoInitializationBoundary initialize={() => initialization.promise} fallback="Preparing workspace">
+      <VireoInitializationBoundary
+        initialize={() => initialization.promise}
+        fallback="Preparing workspace"
+        loadingRevealDelay={0}
+      >
         Workspace ready
       </VireoInitializationBoundary>,
     );
@@ -27,6 +31,22 @@ describe(VIREO_INITIALIZATION_BOUNDARY_NAME, () => {
     expect(screen.queryByText("Workspace ready")).not.toBeInTheDocument();
     await act(async () => initialization.resolve());
     expect(screen.getByText("Workspace ready")).toBeInTheDocument();
+  });
+
+  it("delays one accessible default Level C loading treatment", () => {
+    vi.useFakeTimers();
+    render(
+      <VireoInitializationBoundary initialize={() => new Promise(() => undefined)}>Ready</VireoInitializationBoundary>,
+    );
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(document.querySelector(".MuiCircularProgress-root")).toBeNull();
+    act(() => vi.advanceTimersByTime(150));
+    expect(screen.getByRole("status")).toHaveTextContent("Initializing");
+    expect(document.querySelector(".MuiCircularProgress-root")).not.toBeNull();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(document.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+    vi.useRealTimers();
   });
 
   it("aborts and cleans up an initialized lifecycle on unmount", async () => {
@@ -72,7 +92,7 @@ describe(VIREO_INITIALIZATION_BOUNDARY_NAME, () => {
     );
     await screen.findByText("Ready");
     rerender(
-      <VireoInitializationBoundary initialize={second} fallback="Pending">
+      <VireoInitializationBoundary initialize={second} fallback="Pending" loadingRevealDelay={0}>
         Ready again
       </VireoInitializationBoundary>,
     );

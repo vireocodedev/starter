@@ -302,6 +302,7 @@
         "VireoInitializationBoundaryClassKey",
         "VireoInitializationBoundaryClasses",
         "VireoInitializationBoundaryInheritedProps",
+        "VireoInitializationBoundaryLoadingIndicatorSlotPropsOverrides",
         "VireoInitializationBoundaryOwnProps",
         "VireoInitializationBoundaryOwnerState",
         "VireoInitializationBoundaryProps",

@@ -4,7 +4,7 @@ import type { VireoSlotNameTuple } from "@/core/utils/muiutils";
 export const VIREO_INITIALIZATION_BOUNDARY_NAME = "VireoInitializationBoundary";
 
 /** Canonical public slots exposed by VireoInitializationBoundary, in rendered DOM order. */
-export const VIREO_INITIALIZATION_BOUNDARY_SLOTS = ["root"] as const satisfies VireoSlotNameTuple;
+export const VIREO_INITIALIZATION_BOUNDARY_SLOTS = ["root", "loadingIndicator"] as const satisfies VireoSlotNameTuple;
 
 /** Lifecycle state classes exposed by VireoInitializationBoundary. */
 export const VIREO_INITIALIZATION_BOUNDARY_STATES = ["pending", "ready"] as const;

@@ -1,5 +1,5 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/utils/muiutils";
-import type { BoxProps } from "@mui/material";
+import type { BoxProps, CircularProgress } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -26,6 +26,9 @@ export type VireoInitializer = (
 export interface VireoInitializationBoundaryRootSlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;
 }
+export interface VireoInitializationBoundaryLoadingIndicatorSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
 
 /** Replaceable semantic regions exposed by {@link VireoInitializationBoundary}. */
 export type VireoInitializationBoundarySlots = {
@@ -38,6 +41,12 @@ export type VireoInitializationBoundarySlotsAndSlotProps = CreateSlotsAndSlotPro
   {
     /** @default 'div' */
     root: SlotProps<"div", VireoInitializationBoundaryRootSlotPropsOverrides, VireoInitializationBoundaryOwnerState>;
+    /** @default CircularProgress */
+    loadingIndicator: SlotProps<
+      typeof CircularProgress,
+      VireoInitializationBoundaryLoadingIndicatorSlotPropsOverrides,
+      VireoInitializationBoundaryOwnerState
+    >;
   }
 >;
 
@@ -45,8 +54,14 @@ export type VireoInitializationBoundarySlotsAndSlotProps = CreateSlotsAndSlotPro
 export type VireoInitializationBoundaryOwnProps = VireoInitializationBoundarySlotsAndSlotProps & {
   children: React.ReactNode;
   initialize: VireoInitializer;
-  /** Content rendered while initialization is pending. @default null */
+  /** Whether prolonged initialization is announced. Disable for a boundary covered by an announcing ancestor. @default true */
+  announceLoading?: boolean;
+  /** Content rendered after the shared reveal delay. When omitted, a decorative Level C progress indicator is used. */
   fallback?: React.ReactNode;
+  /** Concise status announced after the reveal delay. @default 'Initializing' */
+  loadingLabel?: React.ReactNode;
+  /** Delay before fallback content and the loading announcement become visible. @default VIREO_LOADING_TOKENS.revealDelay */
+  loadingRevealDelay?: number;
   /** Override or extend the utility classes applied to each slot. */
   classes?: Partial<VireoInitializationBoundaryClasses>;
 };
