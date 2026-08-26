@@ -8,6 +8,8 @@ export * from "./components/data-display/VireoIcon";
 export * from "./components/data-display/VireoStopwatch";
 export * from "./components/data-display/VireoTruncatedContent";
 export * from "./components/feedback/VireoStatusDot";
+export * from "./components/feedback/VireoLoadingRegion";
+export * from "./components/feedback/VireoSkeleton";
 export * from "./components/layout/VireoSlidingScreenStack";
 export * from "./components/navigation/VireoTabs";
 export * from "./components/surfaces/VireoIconContainer";
