@@ -17,6 +17,7 @@ function DecisionButton() {
         ),
         confirmLabel: "Delete",
         confirmColor: "error",
+        onConfirm: () => new Promise<void>(resolve => window.setTimeout(resolve, 1200)),
       }),
     );
   return (
@@ -30,7 +31,7 @@ function DecisionButton() {
         Delete customer
       </Button>
       {decision != null && (
-        <Alert severity={decision ? "success" : "info"}>{decision ? "Deletion confirmed" : "Deletion cancelled"}</Alert>
+        <Alert severity={decision ? "success" : "info"}>{decision ? "Customer deleted" : "Deletion cancelled"}</Alert>
       )}
     </Stack>
   );
