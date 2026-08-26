@@ -18,7 +18,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "typecheck": "turbo run typecheck --concurrency=5",
-    "test": "npm run test:architecture && turbo run test && npm run surface && npm run api:policy",
+    "test": "npm run security:workflow && npm run test:architecture && turbo run test && npm run surface && npm run api:policy",
     "test:architecture": "node --test scripts/ui-architecture.test.mjs && node scripts/ui-architecture.mjs && node scripts/ui-loading-contracts.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -36,6 +36,7 @@
     "release:smoke": "node scripts/release-pack-smoke.mjs",
     "public:audit": "sh scripts/public-repository-audit.sh",
     "security:secrets": "sh scripts/secret-scan.sh",
+    "security:workflow": "node scripts/workflow-security-policy.mjs",
     "release": "npm run verify -- silent && npm run release:publish",
     "release:publish": "changeset publish"
   },
