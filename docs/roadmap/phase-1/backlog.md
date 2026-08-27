@@ -34,24 +34,24 @@ elapsed-date commitment.
 
 ## Backlog
 
-| ID    | Outcome                                                                                 | Current state    | Remaining estimate    | Confidence |
-| ----- | --------------------------------------------------------------------------------------- | ---------------- | --------------------- | ---------- |
-| P1-00 | Freeze the passed Phase 0 scope and Phase 1 acceptance set                              | Complete         | 0 d                   | High       |
-| P1-01 | Activate and professionally clear the identity across canonical public surfaces         | Partial          | 1–3 d + external wait | Low        |
-| P1-02 | Productionize the accepted npm/Maven distribution and provenance architecture           | Complete         | 0 d                   | High       |
-| P1-03 | Finish repository migration and publish compatibility sequencing                        | Partial          | 2–4 d                 | Medium     |
-| P1-04 | Publish credential-free npm artifacts through the selected trusted path                 | Complete         | 0 d                   | High       |
-| P1-05 | Publish credential-free Maven artifacts/BOM through the selected trusted path           | Complete         | 0 d                   | High       |
-| P1-06 | Correct repository metadata, topics, links, and public settings                         | Partial          | 1–2 d                 | High       |
-| P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Ready to publish | 0–1 d                 | High       |
-| P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Ready to publish | 0–1 d                 | High       |
-| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial          | 3–6 d                 | Low        |
-| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Partial          | 2–5 d                 | Medium     |
-| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Pending          | 5–9 d                 | Low        |
-| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Partial          | 7–12 d                | Low        |
-| P1-13 | Classify and document the supported Starter UI public surface                           | Pending          | 4–8 d                 | Low        |
-| P1-14 | Establish verification duration/resource baselines and regression policy                | Partial          | 2–4 d                 | Medium     |
-| P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial          | 3–6 d                 | Low        |
+| ID    | Outcome                                                                                 | Current state                | Remaining estimate     | Confidence |
+| ----- | --------------------------------------------------------------------------------------- | ---------------------------- | ---------------------- | ---------- |
+| P1-00 | Freeze the passed Phase 0 scope and Phase 1 acceptance set                              | Complete                     | 0 d                    | High       |
+| P1-01 | Activate and professionally clear the identity across canonical public surfaces         | Partial                      | 1–3 d + external wait  | Low        |
+| P1-02 | Productionize the accepted npm/Maven distribution and provenance architecture           | Complete                     | 0 d                    | High       |
+| P1-03 | Finish repository migration and publish compatibility sequencing                        | Partial                      | 2–4 d                  | Medium     |
+| P1-04 | Publish credential-free npm artifacts through the selected trusted path                 | Complete                     | 0 d                    | High       |
+| P1-05 | Publish credential-free Maven artifacts/BOM through the selected trusted path           | Complete                     | 0 d                    | High       |
+| P1-06 | Correct repository metadata, topics, links, and public settings                         | Blocked on visibility choice | 0–1 d + owner decision | High       |
+| P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Partial                      | 0–1 d                  | High       |
+| P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Partial                      | 0–1 d                  | High       |
+| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial                      | 3–6 d                  | Low        |
+| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Partial                      | 2–5 d                  | Medium     |
+| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Pending                      | 5–9 d                  | Low        |
+| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Partial                      | 7–12 d                 | Low        |
+| P1-13 | Classify and document the supported Starter UI public surface                           | Pending                      | 4–8 d                  | Low        |
+| P1-14 | Establish verification duration/resource baselines and regression policy                | Partial                      | 2–4 d                  | Medium     |
+| P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial                      | 3–6 d                  | Low        |
 
 ## Implementation status — 2026-08-27
 
@@ -61,18 +61,24 @@ elapsed-date commitment.
   `com.vireocode:vireo-{bom,core,auth,query,history,offline}` and public Java APIs
   live beneath `com.vireocode.vireo.*`; the Template and all JVM fixtures consume
   them together. The approved repository rename/compatibility sequence remains.
-- **P1-06: partial.** Both repositories are publicly readable. The Starter's
-  externally hosted description is stale and homepage/topics/discussions/template
-  settings remain incomplete; these cannot be corrected by a local-only commit.
-- **P1-07: ready to publish.** Both repositories now define honest best-effort
+- **P1-06: blocked on an owner visibility choice.** Live descriptions,
+  documentation homepages, topics, Discussions, and Template designation are now
+  correct in both repositories. Starter is public and passes anonymous checks.
+  Contrary to the previous roadmap record, `starter-template` is private and
+  returns 404 anonymously; changing visibility requires explicit owner acceptance
+  of GitHub's visibility-change consequences.
+- **P1-07: partial.** Both repositories now define honest best-effort
   support boundaries, maintainer authority, CODEOWNERS semantics, contribution
-  routing, and structured bug/feature/security intake. The local contract check
-  requires those surfaces and README links; public verification follows push.
-- **P1-08: ready to publish.** Starter now defines independent npm/JVM release
+  routing, and structured bug/feature/security intake. Both branches are pushed and
+  the Starter policy/issue surfaces return 200 anonymously. Template verification
+  remains blocked by its private visibility.
+- **P1-08: partial.** Starter now defines independent npm/JVM release
   families, SemVer and peer-floor rules, supported public surfaces, schema and
   cross-stack compatibility, deprecation windows, and manual migrations. The
   Template records its exact six npm ranges plus JVM version and application-owned
-  upgrade/deployment procedure. Verification derives those values from manifests.
+  upgrade/deployment procedure. Both branches are pushed and verification derives
+  those values from manifests; the Starter policy returns 200 anonymously, while
+  the private Template policy returns 404.
 - **P1-09: partial.** Workflow permissions are least-privilege, actions are pinned,
   signing is protected, and npm/Maven provenance exists. Complete scanning, SBOM
   policy, and recovery evidence remain.
@@ -83,9 +89,10 @@ elapsed-date commitment.
   local Markdown links; introducing the check found and fixed 11 stale Starter
   links. Executable setup/deploy snippets, public temporal examples, and recurring
   clean-room documentation verification still remain G-106.
-- **P1-15: partial.** Anonymous artifact consumers and one isolated AI clean-room
-  Template evaluation exist. The full admitted environment matrix and the human
-  public-alpha adoption decision still remain.
+- **P1-15: partial.** Anonymous artifact consumers and one earlier isolated AI
+  clean-room Template evaluation exist, but the current live Template visibility
+  blocks a new anonymous clone. The full admitted environment matrix and the human
+  public-alpha adoption decision also remain.
 
 ## Dependency waves
 
