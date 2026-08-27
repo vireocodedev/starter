@@ -72,7 +72,7 @@ jobs:
         run: >-
           ./jvm/gradlew -p jvm
           :vireo-starter-autoconfigure-tests:test
-          --tests com.example.consumer.PostgresLibraryUpgradeTest
+          --tests com.vireocode.consumer.PostgresLibraryUpgradeTest
           -Dvireo.postgres.enabled=true
           -Dvireo.postgres.image=postgres:${{ matrix.postgresql }}-alpine
           --no-build-cache
@@ -176,6 +176,8 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
+      - name: Install GNU time for resource evidence
+        run: apt-get update && apt-get install --yes --no-install-recommends time
       - run: corepack npm ci
       - run: corepack npm run verify -- silent
       - name: Record evidence
