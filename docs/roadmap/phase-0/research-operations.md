@@ -2,7 +2,13 @@
 
 Prepared: 2026-08-26
 
-Status: fieldwork-ready; zero participants recruited and zero sessions completed
+Status: fieldwork-ready and deferred to public beta; zero participants recruited and
+zero sessions completed
+
+The 2026-08-27 owner-approved Phase 0 AI-proxy variance did not execute or satisfy
+this human-research runbook. Retain it for the public-beta demand gate and the D-101
+and D-102 revisit after the first three independent adopters or before a 1.0
+commitment, whichever comes first.
 
 This runbook operationalizes the [validation protocol](validation-protocol.md). It
 does not replace participant evidence, legal/privacy review, or the threshold rules

@@ -1,14 +1,15 @@
 # Phase 0 product strategy hypothesis
 
-Status: **provisional and ready for external testing**
+Status: **provisionally accepted by AI proxy; human demand validation deferred**
 
 Baseline date: 2026-08-26
 
 Decision owners: D-101 and D-102
 
-This document makes the working product strategy precise enough to test. It is not
-evidence that target developers agree. Public positioning remains provisional until
-the [validation protocol](validation-protocol.md) meets its thresholds.
+This document makes the working product strategy precise enough to test. The
+2026-08-27 AI-proxy evaluation supports provisional comprehension and positioning;
+it is not evidence that target developers agree or intend to adopt Vireo. Human
+demand validation is deferred to public beta under D-110.
 
 ## Category statement
 
@@ -127,9 +128,15 @@ drift—not a low-code abstraction or a replacement for React and Spring Boot.
 
 **Ship polished operational apps without rebuilding the React/Spring foundation.**
 
-Vireo combines one production-shaped application path with responsive business UI,
-explicit contracts, offline building blocks, and verification—while leaving you
-with ordinary React and Spring Boot code.
+Vireo Framework is an opinionated full-stack framework for small teams building
+operational business apps with React and Spring Boot. It supplies a
+production-shaped application path, responsive UI, explicit cross-stack contracts,
+and offline building blocks so teams avoid rebuilding integration foundations.
+Applications remain ordinary React and Spring Boot code: teams own domain rules,
+authorization policy, and conflict resolution, and can replace subsystems.
+Offline-capable means selected workflows can read local data and queue and replay
+work through temporary network loss; it does not mean arbitrary workflows
+synchronize or resolve conflicts automatically.
 
 ### B — intermittent-connectivity wedge
 
@@ -149,6 +156,24 @@ foundation.
 
 Candidate C describes the intended Phase 3 experience and must be labeled as a
 direction until the generator exists.
+
+### Provisional message decision — 2026-08-27
+
+Revised candidate A is the provisional lead. Six isolated first-round AI evaluators
+showed that the original A conveyed the broad foundation better than B or C but
+underspecified category, audience, ownership, and offline limits. Five fresh
+evaluators then scored the revised A `10/10` under the Phase 0 comprehension rubric.
+
+Candidate B explains reconnect mechanics most clearly but makes Vireo sound like an
+offline library and leaves broader ownership unclear. Candidate C explains
+cross-stack coherence, but it implies a generator that does not exist and says
+nothing about offline behavior. The revised A therefore best balances
+comprehension, honesty, differentiation, and current evidence.
+
+This is an AI proxy for message comprehension, not market validation. “Polished,”
+“production-shaped,” subsystem replacement cost, and reduced integration work still
+need concrete public proof. No demand, adoption intent, product-market fit, or
+comparative superiority is established.
 
 ## Initial design envelope
 

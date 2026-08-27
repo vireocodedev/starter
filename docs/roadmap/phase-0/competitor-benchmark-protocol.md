@@ -2,7 +2,14 @@
 
 Prepared: 2026-08-26
 
-Status: protocol ready; no benchmark runs completed
+Status: bounded AI-proxy quickstarts completed 2026-08-27; full controlled human
+replication deferred to public beta
+
+The Phase 0 AI-proxy run inspected every official quickstart and ownership model and
+performed bounded hands-on checks where practical. It did not use the frozen neutral
+API fixture, exhaust the 180-minute scenario for every alternative, or satisfy the
+human/independent replication publication gate below. Comparative superiority claims
+therefore remain prohibited.
 
 This protocol converts the [desk-research comparison](competitive-gap-matrix.md)
 into reproducible hands-on evidence. Maintainer runs inform product strategy but do

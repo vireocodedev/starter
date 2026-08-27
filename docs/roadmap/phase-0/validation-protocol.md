@@ -4,7 +4,14 @@ Protocol version: 1.0
 
 Prepared: 2026-08-26
 
-Status: fieldwork-ready; no participants recruited and no sessions completed
+Status: human fieldwork deferred to public beta; no participants recruited and no
+sessions completed
+
+> Owner-approved variance — 2026-08-27: Phase 0 used isolated AI evaluators as a
+> proxy for message comprehension, public onboarding, documentation, positioning
+> plausibility, and technical feasibility. That evidence does not satisfy the human
+> demand thresholds below. The protocol remains the future public-beta gate and no
+> human session is recorded as complete.
 
 This protocol tests the [product strategy](product-strategy.md) rather than seeking
 agreement with it. It separates problem interviews, message comprehension, and

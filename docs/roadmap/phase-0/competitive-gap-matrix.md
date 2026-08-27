@@ -4,7 +4,38 @@ Research date: 2026-08-26
 
 Method: current official product and documentation sources
 
-Status: desk-research baseline; hands-on workflow benchmarking remains required
+Status: desk-research baseline plus bounded 2026-08-27 AI hands-on review; complete
+controlled replication remains a public-beta requirement
+
+## 2026-08-27 adversarial update
+
+An isolated research evaluator used current official sources and bounded clean
+quickstarts. This is an AI proxy, not the protocol's independent human replication:
+
+- Hilla generated a TypeScript endpoint client from Java and remains stronger than
+  Vireo's manually duplicated Java DTO, TypeScript/Zod model, and Axios client.
+- JHipster generated the broadest Spring/React application foundation and documents
+  entity plus branch/merge upgrade generators; Vireo has neither full-stack entity
+  generation nor a Template upgrade command.
+- Refine remains stronger at headless provider/UI flexibility. Its exact documented
+  v5 starter failed on a missing registry version during this bounded run; that is a
+  version-specific result, not a universal product claim.
+- react-admin's current official data-provider guidance includes persisted queries
+  and resumable standard mutations. Vireo must not claim that frontend resumable
+  CRUD is unique; its narrower distinction is coordinated browser/server
+  idempotency and hydration primitives, which the public Template does not yet wire
+  together.
+- The manual Vite baseline was extremely fast and small, while leaving all
+  full-stack integration decisions to the application.
+- Vireo's best-evidenced distinction is its public, independently deployable
+  React/Spring product baseline and unusually explicit responsive, loading, error,
+  and application-ownership conventions.
+
+Counterevidence remains explicit: “contract” must not imply generated Java-to-
+TypeScript types, the former Template “Offline-first CRUD” page was only a
+`localStorage` state simulation, app-owned code also means manual Template upgrade
+work, and production/offline/bundle claims remain narrower than the architecture's
+ambition.
 
 This matrix compares target-developer outcomes, not component counts. It records
 where established alternatives are stronger and where Vireo may earn a distinct
