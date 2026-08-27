@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 2,
+  "canonicalHost": { "os": "ubuntu-24.04", "architecture": "x64", "runnerClass": "github-hosted" },
+  "measurement": {
+    "duration": "single-run wall clock in milliseconds",
+    "peakRss": "GNU time maximum resident set size in KiB for each stage process tree",
+    "cacheState": "clean checkout and npm ci; ordinary tool caches may be restored by the hosted runner",
+    "baselineMethod": "initial verified reference; review the median of the latest five successful canonical-host runs",
+    "reviewWindowRuns": 5
+  },
+  "stages": {
+    "toolchain": {
+      "label": "Toolchain policy",
+      "baselineMs": 250,
+      "warningMs": 5000,
+      "failureMs": 10000,
+      "baselineRssKiB": 80000,
+      "warningRssKiB": 262144,
+      "failureRssKiB": 524288
+    },
+    "public-contract": {
+      "label": "Public contract policy",
+      "baselineMs": 250,
+      "warningMs": 5000,
+      "failureMs": 10000,
+      "baselineRssKiB": 80000,
+      "warningRssKiB": 262144,
+      "failureRssKiB": 524288
+    },
+    "lint": {
+      "label": "Lint",
+      "baselineMs": 13500,
+      "warningMs": 30000,
+      "failureMs": 60000,
+      "baselineRssKiB": 900000,
+      "warningRssKiB": 1572864,
+      "failureRssKiB": 2097152
+    },
+    "format": {
+      "label": "Formatting",
+      "baselineMs": 11000,
+      "warningMs": 30000,
+      "failureMs": 60000,
+      "baselineRssKiB": 600000,
+      "warningRssKiB": 1048576,
+      "failureRssKiB": 1572864
+    },
+    "build": {
+      "label": "Package builds",
+      "baselineMs": 3000,
+      "warningMs": 30000,
+      "failureMs": 60000,
+      "baselineRssKiB": 1800000,
+      "warningRssKiB": 3145728,
+      "failureRssKiB": 4194304
+    },
+    "typecheck": {
+      "label": "Type checking",
+      "baselineMs": 9000,
+      "warningMs": 45000,
+      "failureMs": 90000,
+      "baselineRssKiB": 3000000,
+      "warningRssKiB": 4718592,
+      "failureRssKiB": 6291456
+    },
+    "tests": {
+      "label": "Tests and contract checks",
+      "baselineMs": 62000,
+      "warningMs": 150000,
+      "failureMs": 210000,
+      "baselineRssKiB": 7298089,
+      "warningRssKiB": 8388608,
+      "failureRssKiB": 10485760
+    },
+    "strict-types": {
+      "label": "Strict consumer declarations",
+      "baselineMs": 11000,
+      "warningMs": 60000,
+      "failureMs": 90000,
+      "baselineRssKiB": 3000000,
+      "warningRssKiB": 4718592,
+      "failureRssKiB": 6291456
+    },
+    "generator": {
+      "label": "Generator tests",
+      "baselineMs": 750,
+      "warningMs": 10000,
+      "failureMs": 20000,
+      "baselineRssKiB": 100000,
+      "warningRssKiB": 524288,
+      "failureRssKiB": 1048576
+    },
+    "release-smoke": {
+      "label": "Packed release artifacts",
+      "baselineMs": 31000,
+      "warningMs": 90000,
+      "failureMs": 150000,
+      "baselineRssKiB": 3500000,
+      "warningRssKiB": 5242880,
+      "failureRssKiB": 7340032
+    },
+    "storybook": {
+      "label": "Vireo Starter Storybook build",
+      "baselineMs": 25000,
+      "warningMs": 90000,
+      "failureMs": 150000,
+      "baselineRssKiB": 3000000,
+      "warningRssKiB": 5242880,
+      "failureRssKiB": 7340032
+    }
+  },
+  "total": {
+    "baselineMs": 165000,
+    "warningMs": 270000,
+    "failureMs": 360000,
+    "baselineRssKiB": 7298089,
+    "warningRssKiB": 8388608,
+    "failureRssKiB": 10485760
+  }
+}

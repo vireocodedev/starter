@@ -28,9 +28,16 @@ if [ "$#" -ne 0 ]; then
 fi
 
 COMMAND_OUTPUT_FILE=$(mktemp "${TMPDIR:-/tmp}/starter-verify.XXXXXX") || exit 1
+RESOURCE_OUTPUT_FILE=$(mktemp "${TMPDIR:-/tmp}/starter-verify-rss.XXXXXX") || exit 1
+
+if [ ! -x /usr/bin/time ] || ! /usr/bin/time --version 2>&1 | grep -q 'GNU Time'; then
+  printf 'GNU time is required to record comparable peak-RSS evidence.\n' >&2
+  rm -f -- "$COMMAND_OUTPUT_FILE" "$RESOURCE_OUTPUT_FILE"
+  exit 1
+fi
 
 cleanup() {
-  rm -f -- "$COMMAND_OUTPUT_FILE"
+  rm -f -- "$COMMAND_OUTPUT_FILE" "$RESOURCE_OUTPUT_FILE"
 }
 
 trap cleanup 0
@@ -45,6 +52,9 @@ SUITE_STARTED_AT=$(node -p 'Date.now()')
 RESULTS=""
 SLOWEST_LABEL=""
 SLOWEST_MILLISECONDS=0
+MAX_RSS_LABEL=""
+MAX_RSS_KIB=0
+METRIC_ARGUMENTS=""
 
 format_duration() {
   duration_milliseconds=$1
@@ -60,16 +70,23 @@ format_duration() {
 }
 
 record_result() {
-  result_label=$1
-  result_status=$2
-  result_milliseconds=$3
+  result_id=$1
+  result_label=$2
+  result_status=$3
+  result_milliseconds=$4
+  result_rss_kib=$5
 
   RESULTS="${RESULTS}
-${result_label}|${result_status}|${result_milliseconds}"
+${result_label}|${result_status}|${result_milliseconds}|${result_rss_kib}"
+  METRIC_ARGUMENTS="${METRIC_ARGUMENTS} duration.${result_id}=${result_milliseconds} rss.${result_id}=${result_rss_kib}"
 
   if [ "$result_milliseconds" -gt "$SLOWEST_MILLISECONDS" ]; then
     SLOWEST_LABEL=$result_label
     SLOWEST_MILLISECONDS=$result_milliseconds
+  fi
+  if [ "$result_rss_kib" -gt "$MAX_RSS_KIB" ]; then
+    MAX_RSS_LABEL=$result_label
+    MAX_RSS_KIB=$result_rss_kib
   fi
 }
 
@@ -79,18 +96,19 @@ print_summary() {
   suite_milliseconds=$((suite_finished_at - SUITE_STARTED_AT))
 
   printf '\nVerification summary\n'
-  printf '%-3s  %-34s  %-7s  %s\n' '#' 'Verification' 'Result' 'Time'
-  printf '%-3s  %-34s  %-7s  %s\n' '---' '----------------------------------' '-------' '--------'
+  printf '%-3s  %-34s  %-7s  %-12s  %s\n' '#' 'Verification' 'Result' 'Time' 'Peak RSS'
+  printf '%-3s  %-34s  %-7s  %-12s  %s\n' '---' '----------------------------------' '-------' '------------' '--------'
 
   summary_index=0
-  printf '%s\n' "$RESULTS" | while IFS='|' read -r summary_label summary_status summary_milliseconds; do
+  printf '%s\n' "$RESULTS" | while IFS='|' read -r summary_label summary_status summary_milliseconds summary_rss_kib; do
     [ -n "$summary_label" ] || continue
     summary_index=$((summary_index + 1))
-    printf '%-3s  %-34s  %-7s  %s\n' \
+    printf '%-3s  %-34s  %-7s  %-12s  %s MiB\n' \
       "$summary_index" \
       "$summary_label" \
       "$summary_status" \
-      "$(format_duration "$summary_milliseconds")"
+      "$(format_duration "$summary_milliseconds")" \
+      "$((summary_rss_kib / 1024))"
   done
 
   printf '\nStatus:       %s\n' "$suite_status"
@@ -100,11 +118,15 @@ print_summary() {
   if [ -n "$SLOWEST_LABEL" ]; then
     printf 'Slowest step: %s (%s)\n' "$SLOWEST_LABEL" "$(format_duration "$SLOWEST_MILLISECONDS")"
   fi
+  if [ -n "$MAX_RSS_LABEL" ]; then
+    printf 'Peak RSS:     %s (%s MiB)\n' "$MAX_RSS_LABEL" "$((MAX_RSS_KIB / 1024))"
+  fi
 }
 
 run_step() {
-  step_label=$1
-  shift
+  step_id=$1
+  step_label=$2
+  shift 2
   CURRENT_STEP=$((CURRENT_STEP + 1))
   step_started_at=$(node -p 'Date.now()')
 
@@ -119,26 +141,36 @@ run_step() {
 
   if [ "$SILENT" = 'true' ]; then
     : > "$COMMAND_OUTPUT_FILE"
-    "$@" > "$COMMAND_OUTPUT_FILE" 2>&1
+    /usr/bin/time --quiet --format=%M --output="$RESOURCE_OUTPUT_FILE" "$@" > "$COMMAND_OUTPUT_FILE" 2>&1
     step_exit_code=$?
   else
-    "$@"
+    /usr/bin/time --quiet --format=%M --output="$RESOURCE_OUTPUT_FILE" "$@"
     step_exit_code=$?
   fi
   step_finished_at=$(node -p 'Date.now()')
   step_milliseconds=$((step_finished_at - step_started_at))
+  step_rss_kib=$(tr -d '[:space:]' < "$RESOURCE_OUTPUT_FILE")
+  case "$step_rss_kib" in
+    ''|*[!0-9]*)
+      printf 'Invalid peak RSS for %s: %s\n' "$step_label" "$step_rss_kib" >&2
+      exit 1
+      ;;
+  esac
 
   if [ "${GITHUB_ACTIONS:-false}" = 'true' ]; then
     printf '::endgroup::\n'
   fi
 
   if [ "$step_exit_code" -eq 0 ]; then
-    record_result "$step_label" 'PASS' "$step_milliseconds"
-    printf 'Passed: %s (%s)\n' "$step_label" "$(format_duration "$step_milliseconds")"
+    record_result "$step_id" "$step_label" 'PASS' "$step_milliseconds" "$step_rss_kib"
+    printf 'Passed: %s (%s, %s MiB peak RSS)\n' \
+      "$step_label" \
+      "$(format_duration "$step_milliseconds")" \
+      "$((step_rss_kib / 1024))"
     return 0
   fi
 
-  record_result "$step_label" 'FAIL' "$step_milliseconds"
+  record_result "$step_id" "$step_label" 'FAIL' "$step_milliseconds" "$step_rss_kib"
   remaining_steps=$((TOTAL_STEPS - CURRENT_STEP))
 
   if [ "$SILENT" = 'true' ]; then
@@ -164,16 +196,21 @@ printf 'npm:        %s\n' "$(npm --version)"
 printf 'Output:     %s\n' "$([ "$SILENT" = 'true' ] && printf 'failures only' || printf 'full')"
 printf 'Steps:      %s\n' "$TOTAL_STEPS"
 
-run_step 'Toolchain policy' corepack npm run toolchain:check
-run_step 'Public contract policy' corepack npm run public:check
-run_step 'Lint' corepack npm run lint
-run_step 'Formatting' corepack npm run format:check
-run_step 'Package builds' corepack npm run build
-run_step 'Type checking' corepack npm run typecheck
-run_step 'Tests and contract checks' corepack npm run test
-run_step 'Strict consumer declarations' corepack npm run types:strict
-run_step 'Generator tests' corepack npm run generate:test
-run_step 'Packed release artifacts' corepack npm run release:smoke
-run_step 'Vireo Starter Storybook build' corepack npm run build-storybook
+run_step 'toolchain' 'Toolchain policy' corepack npm run toolchain:check
+run_step 'public-contract' 'Public contract policy' corepack npm run public:check
+run_step 'lint' 'Lint' corepack npm run lint
+run_step 'format' 'Formatting' corepack npm run format:check
+run_step 'build' 'Package builds' corepack npm run build
+run_step 'typecheck' 'Type checking' corepack npm run typecheck
+run_step 'tests' 'Tests and contract checks' corepack npm run test
+run_step 'strict-types' 'Strict consumer declarations' corepack npm run types:strict
+run_step 'generator' 'Generator tests' corepack npm run generate:test
+run_step 'release-smoke' 'Packed release artifacts' corepack npm run release:smoke
+run_step 'storybook' 'Vireo Starter Storybook build' corepack npm run build-storybook
 
+VERIFY_FINISHED_AT=$(node -p 'Date.now()')
+VERIFY_MILLISECONDS=$((VERIFY_FINISHED_AT - SUITE_STARTED_AT))
+# Metric identifiers and values contain no whitespace by construction.
+# shellcheck disable=SC2086
+node scripts/verification-budget-policy.mjs $METRIC_ARGUMENTS "duration.total=${VERIFY_MILLISECONDS}"
 print_summary 'PASSED'

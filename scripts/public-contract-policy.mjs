@@ -15,6 +15,9 @@ const requiredFiles = [
   "docs/EVALUATION.md",
   "docs/PUBLIC_API.md",
   "docs/TEMPORAL_VALUES.md",
+  "docs/PLATFORM_SUPPORT.md",
+  "docs/VERIFICATION_PERFORMANCE.md",
+  "contracts/platform-support-policy.json",
   "packages/ui/docs/PUBLIC_SURFACE.md",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -43,6 +46,8 @@ requireText("README.md", [
   "docs/PUBLIC_API.md",
   "packages/ui/docs/PUBLIC_SURFACE.md",
   "docs/TEMPORAL_VALUES.md",
+  "docs/PLATFORM_SUPPORT.md",
+  "docs/VERIFICATION_PERFORMANCE.md",
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("GOVERNANCE.md", [".github/CODEOWNERS", "docs/COMPATIBILITY.md"]);

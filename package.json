@@ -55,7 +55,7 @@
     "public:check": "node scripts/public-contract-policy.mjs",
     "security:secrets": "sh scripts/secret-scan.sh",
     "security:workflow": "node scripts/workflow-security-policy.mjs",
-    "toolchain:check": "node scripts/toolchain-policy.mjs",
+    "toolchain:check": "node scripts/toolchain-policy.mjs && node scripts/platform-support-policy.mjs",
     "release": "sh scripts/with-declared-npm.sh sh -c 'npm run verify -- silent && npm run release:publish'",
     "release:publish": "sh scripts/with-declared-npm.sh node scripts/changeset-publish-adapter.mjs"
   },

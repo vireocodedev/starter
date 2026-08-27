@@ -6,22 +6,23 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
 const lockfile = JSON.parse(readFileSync(join(repoRoot, "package-lock.json"), "utf8"));
 const uiManifest = JSON.parse(readFileSync(join(repoRoot, "packages", "ui", "package.json"), "utf8"));
+const platformPolicy = JSON.parse(readFileSync(join(repoRoot, "contracts", "platform-support-policy.json"), "utf8"));
 const problems = [];
 
 const expected = {
-  nodeRange: ">=24.15.0 <25",
-  npmVersion: "12.0.2",
-  packageManager: "npm@12.0.2",
+  nodeRange: platformPolicy.toolchains.node.range,
+  npmVersion: platformPolicy.toolchains.npm.exact,
+  packageManager: `npm@${platformPolicy.toolchains.npm.exact}`,
   peers: {
     "@emotion/react": ">=11.14 <12",
     "@emotion/styled": ">=11.14 <12",
-    "@mui/icons-material": ">=9 <10",
-    "@mui/material": ">=9 <10",
-    "@mui/x-date-pickers": ">=9 <10",
+    "@mui/icons-material": platformPolicy.toolchains.mui,
+    "@mui/material": platformPolicy.toolchains.mui,
+    "@mui/x-date-pickers": platformPolicy.toolchains.mui,
     "@tanstack/react-form": ">=1.33 <2",
     "@tanstack/react-query": ">=5.80 <6",
-    react: ">=19.2 <20",
-    "react-dom": ">=19.2 <20",
+    react: platformPolicy.toolchains.react,
+    "react-dom": platformPolicy.toolchains.react,
   },
 };
 

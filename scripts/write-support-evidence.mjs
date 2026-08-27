@@ -1,10 +1,20 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const declaredPackageManager = JSON.parse(readFileSync(resolve(repoRoot, "package.json"), "utf8")).packageManager;
+const platformPolicy = JSON.parse(readFileSync(resolve(repoRoot, "contracts", "platform-support-policy.json"), "utf8"));
+const npmPackages = Object.fromEntries(
+  readdirSync(resolve(repoRoot, "packages"), { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => join(repoRoot, "packages", entry.name, "package.json"))
+    .map(path => JSON.parse(readFileSync(path, "utf8")))
+    .filter(manifest => manifest.private !== true)
+    .map(manifest => [manifest.name, manifest.version]),
+);
+const jvmVersion = readFileSync(resolve(repoRoot, "jvm", "gradle.properties"), "utf8").match(/^version=(.+)$/mu)?.[1];
 
 const [scenario, result, outputArgument] = process.argv.slice(2);
 if (!scenario || !result || !outputArgument || process.argv.length !== 5) {
@@ -32,6 +42,7 @@ const details = Object.fromEntries(
 );
 const evidence = {
   schemaVersion: 1,
+  platformPolicyVersion: platformPolicy.policyVersion,
   scenario,
   result,
   recordedAt: new Date().toISOString(),
@@ -52,6 +63,10 @@ const evidence = {
     node: process.version,
     npm: version("corepack", ["npm", "--version"]) || `${declaredPackageManager} via Corepack`,
     java: version("java", ["--version"]),
+  },
+  artifacts: {
+    npm: npmPackages,
+    jvm: jvmVersion,
   },
   details,
 };

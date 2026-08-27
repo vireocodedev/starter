@@ -78,7 +78,10 @@ history · infrastructure · localization · query · shell · sqlite   (no Vire
 Node.js, npm, Java, and Gradle versions are declared and checked by the repository.
 Installing the public npm and Maven packages requires no Vireo or GitHub
 credential. Publishing is maintainer-only and isolated behind protected GitHub
-environments.
+environments. Current supported, compatible, experimental, and untested rows are in
+the machine-enforced [platform matrix](docs/PLATFORM_SUPPORT.md).
+Verification duration, peak-RSS thresholds, evidence retention, and exception rules
+are defined by the [performance policy](docs/VERIFICATION_PERFORMANCE.md).
 
 ## Develop
 
