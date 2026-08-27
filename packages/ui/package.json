@@ -4,7 +4,8 @@
   "description": "MUI-based UI component library (responsive cards, mobile tables, overlays, providers, hooks, formatters) for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "./dist/integrations/localization/services/dayjsSetup.js"
   ],
   "license": "MIT",
   "repository": {

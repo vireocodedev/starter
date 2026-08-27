@@ -113,6 +113,12 @@ function validateManifest(sourceDirectory, sourceManifest, packedManifest) {
   if (JSON.stringify(packedManifest.files) !== JSON.stringify(["dist"])) {
     throw new Error(`${sourceManifest.name} must publish only its dist allowlist.`);
   }
+  if (
+    packedManifest.name === "@vireocodedev/ui" &&
+    !packedManifest.sideEffects?.includes("./dist/integrations/localization/services/dayjsSetup.js")
+  ) {
+    throw new Error("@vireocodedev/ui must preserve its Day.js runtime initialization during tree shaking.");
+  }
   const unsafeScripts = installLifecycleScripts.filter(script => packedManifest.scripts?.[script]);
   if (unsafeScripts.length > 0) {
     throw new Error(`${sourceManifest.name} publishes install lifecycle hooks: ${unsafeScripts.join(", ")}`);
@@ -387,7 +393,13 @@ try {
 
   const browserEntry = join(consumerRoot, "browser-entry.mjs");
   const viteConfig = join(consumerRoot, "vite.config.mjs");
-  writeFileSync(browserEntry, browserSpecifiers.map(specifier => `import ${JSON.stringify(specifier)};`).join("\n"));
+  writeFileSync(
+    browserEntry,
+    `${browserSpecifiers.map(specifier => `import ${JSON.stringify(specifier)};`).join("\n")}
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
+globalThis.__vireoTemporalLocalizationProvider = VireoTemporalLocalizationProvider;
+`,
+  );
   writeFileSync(
     viteConfig,
     `export default {
@@ -404,6 +416,10 @@ try {
     cwd: consumerRoot,
     stdio: "inherit",
   });
+  const browserBundle = readFileSync(join(consumerRoot, "dist/browser-smoke.js"), "utf8");
+  if (!browserBundle.includes("dayjs/plugin/utc")) {
+    throw new Error("The packed UI localization bundle tree-shook away Day.js UTC initialization.");
+  }
 
   console.log("Packed release and isolated consumer smoke test passed.");
   console.log("Package                                      Exports  Files  Packed KiB  Unpacked KiB");

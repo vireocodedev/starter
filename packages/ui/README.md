@@ -63,6 +63,11 @@ the repository.
 - The app retains only composition roots that supply app-specific policy and
   routing; the reusable form, overlay, table, and unsaved-change behavior lives
   in this package.
+- `VireoTemporalLocalizationProvider` initializes the bundled Day.js UTC plugin
+  plus English/Croatian locale data. Canonical `time` values use `HH:mm:ss` and
+  canonical `date-time` values use `YYYY-MM-DDTHH:mm:ss`, including `:00` when
+  the field uses its default minute precision. Applications own timezone
+  conversion and must import any additional Day.js locale pack they select.
 
 ## Architecture and authoring
 
