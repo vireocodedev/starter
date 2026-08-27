@@ -18,6 +18,7 @@ const requiredFiles = [
   "docs/PLATFORM_SUPPORT.md",
   "docs/VERIFICATION_PERFORMANCE.md",
   "contracts/platform-support-policy.json",
+  "contracts/public-release-attestation-policy.json",
   "packages/ui/docs/PUBLIC_SURFACE.md",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",

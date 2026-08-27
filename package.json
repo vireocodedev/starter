@@ -50,6 +50,7 @@
     "release:validate": "node scripts/validate-npm-release.mjs",
     "release:verify-public": "node scripts/verify-npm-public-release.mjs",
     "release:evidence": "node scripts/generate-release-evidence.mjs .release-evidence",
+    "release:collect-public-evidence": "node scripts/collect-public-release-evidence.mjs .public-release-evidence",
     "peer-floor:check": "node scripts/peer-floor-consumer.mjs",
     "public:audit": "sh scripts/public-repository-audit.sh",
     "public:check": "node scripts/public-contract-policy.mjs",

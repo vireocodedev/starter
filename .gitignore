@@ -6,6 +6,7 @@ storybook-static/
 *.log
 .turbo
 .release-evidence/
+.public-release-evidence/
 .support-evidence/
 .verification-evidence/
 npm-public-verification.json

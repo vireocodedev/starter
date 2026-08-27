@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "signed-sbom-attestation",
+  "repository": "vireocodedev/starter",
+  "retentionDays": 90,
+  "npm": {
+    "registry": "https://registry.npmjs.org",
+    "packages": [
+      { "directory": "history", "name": "@vireocodedev/history" },
+      { "directory": "infrastructure", "name": "@vireocodedev/infrastructure" },
+      { "directory": "localization", "name": "@vireocodedev/localization" },
+      { "directory": "queryengine", "name": "@vireocodedev/query" },
+      { "directory": "shell", "name": "@vireocodedev/shell" },
+      { "directory": "sqlite", "name": "@vireocodedev/sqlite" },
+      { "directory": "ui", "name": "@vireocodedev/ui" }
+    ],
+    "expectedSubjectCount": 7
+  },
+  "maven": {
+    "registry": "https://repo.maven.apache.org/maven2",
+    "group": "com.vireocode",
+    "modules": [
+      {
+        "name": "vireo-bom",
+        "artifacts": [
+          { "classifier": "", "extension": "module" },
+          { "classifier": "", "extension": "pom" }
+        ]
+      },
+      {
+        "name": "vireo-core",
+        "artifacts": [
+          { "classifier": "-javadoc", "extension": "jar" },
+          { "classifier": "-sources", "extension": "jar" },
+          { "classifier": "", "extension": "jar" },
+          { "classifier": "", "extension": "module" },
+          { "classifier": "", "extension": "pom" }
+        ]
+      },
+      {
+        "name": "vireo-auth",
+        "artifacts": [
+          { "classifier": "-javadoc", "extension": "jar" },
+          { "classifier": "-sources", "extension": "jar" },
+          { "classifier": "", "extension": "jar" },
+          { "classifier": "", "extension": "module" },
+          { "classifier": "", "extension": "pom" }
+        ]
+      },
+      {
+        "name": "vireo-query",
+        "artifacts": [
+          { "classifier": "-javadoc", "extension": "jar" },
+          { "classifier": "-sources", "extension": "jar" },
+          { "classifier": "", "extension": "jar" },
+          { "classifier": "", "extension": "module" },
+          { "classifier": "", "extension": "pom" }
+        ]
+      },
+      {
+        "name": "vireo-history",
+        "artifacts": [
+          { "classifier": "-javadoc", "extension": "jar" },
+          { "classifier": "-sources", "extension": "jar" },
+          { "classifier": "", "extension": "jar" },
+          { "classifier": "", "extension": "module" },
+          { "classifier": "", "extension": "pom" }
+        ]
+      },
+      {
+        "name": "vireo-offline",
+        "artifacts": [
+          { "classifier": "-javadoc", "extension": "jar" },
+          { "classifier": "-sources", "extension": "jar" },
+          { "classifier": "", "extension": "jar" },
+          { "classifier": "", "extension": "module" },
+          { "classifier": "", "extension": "pom" }
+        ]
+      }
+    ],
+    "expectedSubjectCount": 27
+  }
+}
