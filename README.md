@@ -96,20 +96,25 @@ corepack npm run verify:all      # TypeScript + JVM, including aggregate Javadoc
 
 ### Live documentation
 
-One repository-wide Vireo Starter Storybook hosts the complete UI component catalog and package-owned live documentation for framework-free libraries:
+The public Vireo documentation portal searches the complete Storybook guide and
+component catalog together with generated TypeScript and JVM API references:
 
-**[Open the Vireo Starter documentation](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs)**
+**[Open the Vireo Starter documentation](https://vireocodedev.github.io/starter/docs/)**
 
 ```bash
 corepack npm run storybook
 corepack npm run build-storybook
+corepack npm run build-docs
 ```
 
 Monorepo-level material lives under `Documentation`. Each library then owns a top-level section: UI contains its `Documentation`, `Core`, `Capabilities`, and `Integrations` groups, while History owns its executable package guides directly under `History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
 
-Every push to `main` publishes the production Storybook to GitHub Pages. See
-[Storybook deployment](docs/STORYBOOK_DEPLOYMENT.md) for repository setup,
-permissions, local verification, custom-domain guidance, and failure handling.
+Every push to `main` publishes the complete production documentation artifact to
+GitHub Pages. See [documentation deployment](docs/STORYBOOK_DEPLOYMENT.md) for
+repository setup, permissions, local verification, custom-domain guidance, and
+failure handling.
+The [documentation portal contract](docs/DOCUMENTATION_PORTAL.md) defines search,
+version-specific routes, generated API references, and release linkage.
 
 The normative [loading-state and skeleton standard](docs/LOADING_STATE_STANDARD.md)
 defines loading classification, structural skeleton behavior, geometry guarantees,

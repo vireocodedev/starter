@@ -1,14 +1,16 @@
-# Storybook deployment
+# Documentation deployment
 
-The repository-wide Vireo Starter Storybook is published as a static GitHub
-Pages site at <https://vireocodedev.github.io/starter/>.
+The repository-wide Vireo documentation portal is published as a static GitHub
+Pages site at <https://vireocodedev.github.io/starter/docs/>. Storybook remains at
+the site root and is also preserved inside the current version-specific snapshot.
 
 The deployment workflow lives in
 [`storybook-pages.yml`](../.github/workflows/storybook-pages.yml). Every push to
-`main` builds the same Storybook production artifact used by the authoritative
-verification bundle, uploads `packages/ui/storybook-static` as the Pages
-artifact, and deploys it to the `github-pages` environment. Maintainers can also
-start the workflow manually with `workflow_dispatch`.
+`main` builds package declarations, Storybook, aggregate JVM Javadocs, generated
+TypeScript API references, the unified search index, and the versioned portal. It
+validates and uploads `packages/ui/storybook-static` as the Pages artifact, then
+deploys it to the `github-pages` environment. Maintainers can also start the
+workflow manually with `workflow_dispatch`.
 
 ## One-time repository setup
 
@@ -19,10 +21,9 @@ start the workflow manually with `workflow_dispatch`.
    require manual approval.
 4. Merge the deployment workflow into `main` or run it manually after merging.
 
-The workflow uses only `GITHUB_TOKEN`. It needs `contents: read` and
-`packages: read` to install the monorepo, plus `pages: write` and
-`id-token: write` to create the Pages deployment. No long-lived deployment
-secret, publish branch, or generated Storybook output is committed.
+The workflow uses only `GITHUB_TOKEN`. Its build job needs `contents: read`; its
+deployment job needs `pages: write` and `id-token: write`. No long-lived deployment
+secret, publish branch, or generated documentation output is committed.
 
 GitHub Pages is public. Do not put credentials, private payloads, production
 customer data, or other confidential material in stories, MDX, fixtures, or
@@ -34,11 +35,13 @@ Build the exact directory uploaded by the workflow:
 
 ```bash
 corepack npm ci
-corepack npm run build-storybook
+corepack npm run build-docs
 ```
 
 The generated site is written to `packages/ui/storybook-static` and ignored by
-Git. `corepack npm run verify` also builds this production Storybook as its final step.
+Git. `corepack npm run verify` builds the production Storybook; the complete
+`corepack npm run verify:all` gate additionally assembles and validates the
+TypeScript/JVM API portal.
 
 ## Custom domain
 

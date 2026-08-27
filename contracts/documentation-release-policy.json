@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "publicBaseUrl": "https://vireocodedev.github.io/starter",
+  "currentRelease": "npm-0.2.1_jvm-0.2.0",
+  "releases": [
+    {
+      "id": "npm-0.2.1_jvm-0.2.0",
+      "status": "current",
+      "npm": [
+        {
+          "package": "@vireocodedev/history",
+          "version": "0.2.1"
+        },
+        {
+          "package": "@vireocodedev/infrastructure",
+          "version": "0.2.1"
+        },
+        {
+          "package": "@vireocodedev/localization",
+          "version": "0.2.1"
+        },
+        {
+          "package": "@vireocodedev/query",
+          "version": "0.2.1"
+        },
+        {
+          "package": "@vireocodedev/shell",
+          "version": "0.2.1"
+        },
+        {
+          "package": "@vireocodedev/sqlite",
+          "version": "0.2.1"
+        },
+        {
+          "package": "@vireocodedev/ui",
+          "version": "0.2.1"
+        }
+      ],
+      "jvm": {
+        "group": "com.vireocode",
+        "version": "0.2.0",
+        "modules": ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"]
+      },
+      "releaseLinks": {
+        "source": "https://github.com/vireocodedev/starter",
+        "npm": "https://www.npmjs.com/org/vireocodedev",
+        "jvm": "https://central.sonatype.com/namespace/com.vireocode",
+        "jvmTag": "https://github.com/vireocodedev/starter/releases/tag/jvm-v0.2.0",
+        "compatibility": "https://github.com/vireocodedev/starter/blob/main/docs/COMPATIBILITY.md",
+        "migration": "https://github.com/vireocodedev/starter/tree/main/docs/migration"
+      }
+    }
+  ]
+}

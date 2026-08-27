@@ -7,17 +7,21 @@ REPOSITORY_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 
 cd "$REPOSITORY_ROOT"
 
-printf '[1/3] TypeScript libraries, packed consumers, and documentation\n'
+printf '[1/4] TypeScript libraries, packed consumers, and Storybook\n'
 if [ "$#" -gt 0 ]; then
   corepack npm run verify -- "$1"
 else
   corepack npm run verify
 fi
 
-printf '\n[2/3] JVM libraries and aggregate Javadoc\n'
+printf '\n[2/4] JVM libraries and aggregate Javadoc\n'
 ./jvm/gradlew -p jvm build aggregateJavadoc
 
-printf '\n[3/3] JVM publication artifacts and external consumer\n'
+printf '\n[3/4] Versioned documentation portal and API references\n'
+corepack npm run docs:portal
+corepack npm run docs:check:artifact
+
+printf '\n[4/4] JVM publication artifacts and external consumer\n'
 ./jvm/scripts/verify-publication-consumer.sh
 
 printf '\nComplete Starter verification passed.\n'

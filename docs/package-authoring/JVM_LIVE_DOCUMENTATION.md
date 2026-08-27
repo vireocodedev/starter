@@ -115,12 +115,12 @@ test implementation as consumer guidance.
 Javadoc is the detailed API reference and ships with each artifact.
 
 The root `aggregateJavadoc` task combines the public packages of all published
-JVM libraries. Deploy its output beside Storybook when documentation hosting is
-introduced:
+JVM libraries. The Pages workflow deploys its output beside the release-specific
+Storybook snapshot:
 
 ```text
-<docs-root>/                 unified Storybook
-<docs-root>/javadoc/         aggregate JVM API reference
+<release-root>/storybook/    unified Storybook
+<release-root>/api/jvm/      aggregate JVM API reference
 ```
 
 Storybook guides should link to the corresponding aggregate Javadoc package or

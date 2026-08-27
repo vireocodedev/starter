@@ -27,7 +27,9 @@ stability and migration classification is in
 [Starter UI public surface](../packages/ui/docs/PUBLIC_SURFACE.md).
 
 Each package owns detailed runnable documentation in its README and in the public
-[Vireo Storybook](https://vireocodedev.github.io/starter/?path=/docs/documentation-overview--docs).
+[Vireo documentation portal](https://vireocodedev.github.io/starter/docs/). The
+[generated TypeScript reference](https://vireocodedev.github.io/starter/api/typescript/)
+is searchable across every export in these declared entry points.
 
 ## JVM entry points
 
@@ -53,6 +55,9 @@ dependencies {
 Public Java packages and declaration budgets are enforced by API snapshots. Start
 with each module's README under [`jvm/`](../jvm), and use the BOM unless an isolated
 module test deliberately proves a different version arrangement.
+
+The public [aggregate JVM API reference](https://vireocodedev.github.io/starter/api/jvm/)
+is generated from the same Java sources that Gradle compiles and validates.
 
 ## Compatibility boundary
 
