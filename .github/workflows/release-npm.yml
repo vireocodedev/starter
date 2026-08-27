@@ -45,6 +45,7 @@ jobs:
         with:
           name: npm-release-candidate-${{ github.sha }}
           path: .release-evidence
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 
