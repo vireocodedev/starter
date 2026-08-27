@@ -1,0 +1,131 @@
+# Public npm release
+
+The seven `@vireocodedev/*` workspaces publish as public packages on npm. A
+release is deliberately split into three independently observable stages:
+
+1. Changesets prepares a version pull request.
+2. A maintainer approves one protected publication from `main`.
+3. A credential-free workflow installs and verifies the immutable public result.
+
+Local builds, pull requests, ordinary CI, and public consumers require no npm
+credential.
+
+## Published packages
+
+- `@vireocodedev/history`
+- `@vireocodedev/infrastructure`
+- `@vireocodedev/localization`
+- `@vireocodedev/query`
+- `@vireocodedev/shell`
+- `@vireocodedev/sqlite`
+- `@vireocodedev/ui`
+
+Every manifest explicitly selects `https://registry.npmjs.org`, public access,
+and provenance. Package versions are immutable after publication.
+
+## One-time repository and npm setup
+
+1. Confirm that the `vireocodedev` npm organization is controlled by the release
+   owners and that publishing accounts use two-factor authentication.
+2. In GitHub, create an environment named `package-release`. Restrict it to the
+   `main` branch and add the required maintainer reviewers.
+3. Bootstrap the first publication with a short-lived granular npm access token
+   that can publish packages in the `vireocodedev` organization. Store it only as
+   the `NPM_TOKEN` secret on the `package-release` environment.
+4. After the first publication, open each package's npm settings and add this
+   trusted publisher:
+
+   | Field                | Value             |
+   | -------------------- | ----------------- |
+   | Organization or user | `vireocodedev`    |
+   | Repository           | `starter`         |
+   | Workflow filename    | `release-npm.yml` |
+   | Environment          | `package-release` |
+
+5. Remove the GitHub `NPM_TOKEN` environment secret and revoke the bootstrap
+   token. Future releases authenticate through GitHub Actions OIDC. Do not retain
+   a long-lived registry token as a fallback.
+
+The repository must remain public for npm to associate generated provenance with
+its source. The publish job runs on a GitHub-hosted runner with `id-token: write`;
+the other jobs do not receive that permission.
+
+## Prepare a release
+
+For an ordinary change, add a Changeset in the same pull request:
+
+```bash
+corepack npm exec changeset
+corepack npm run verify -- silent
+```
+
+After that pull request merges, **Maintain npm release PR** creates or refreshes
+the version pull request. Review its package versions, changelogs, lockfile, and
+the complete CI result. Merging it updates source metadata but does not publish.
+
+Before starting publication, the release owner can run:
+
+```bash
+corepack npm ci
+corepack npm run release:validate
+corepack npm run release:smoke
+```
+
+`release:validate` fails if a Changeset remains, a coordinate is malformed, a
+version is outside the approved `0.x` line, or there is nothing new to publish.
+`release:smoke` packs every workspace and exercises the isolated tarballs.
+
+## Publish
+
+1. Open GitHub Actions → **Publish npm release** → **Run workflow**.
+2. Select `main`, enter `publish`, and start the run.
+3. Review the retained release-candidate evidence from the verify job.
+4. Approve the `package-release` environment deployment.
+5. Confirm that the publish job reports at least one published package.
+
+The workflow rechecks registry immutability immediately before Changesets calls
+`npm publish`. The first run may use `NPM_TOKEN`; once trusted publishing is
+configured, npm obtains a short-lived OIDC identity and records provenance.
+
+## Verify the public result
+
+Successful publication automatically starts **Verify public npm release**. It:
+
+- waits for every exact manifest version to become anonymously visible;
+- requires npm distribution metadata and a provenance attestation for each;
+- installs all seven packages from an empty cache and token-free npm config;
+- rejects workspace links and non-npm tarball locations;
+- requires a strict peer dependency tree;
+- imports every framework-free entry point;
+- type-checks all public entry points with `skipLibCheck: false`;
+- bundles every UI entry point through Vite; and
+- runs `npm audit signatures` over the installed dependency tree.
+
+The workflow retains `.npm-public-verification.json` for 90 days. It can also be
+rerun manually from `main`; locally, after publication, use:
+
+```bash
+corepack npm run release:verify-public
+```
+
+This stage intentionally uses no protected environment and no npm secret. Its
+success is the proof that an adopter can consume the release, not merely that a
+publisher received a success response.
+
+## Failure and recovery
+
+- If verification times out while npm is propagating a valid release, rerun
+  **Verify public npm release**. Do not republish the same version.
+- If only some workspaces publish, inspect npm first. The validation and
+  Changesets tooling skip already-immutable coordinates, so a reviewed retry may
+  publish only the missing versions from the unchanged commit.
+- If a published artifact is defective, deprecate it with an actionable message,
+  prepare corrected patch versions, and run the normal release path. Never move
+  a tag or attempt to overwrite a published version.
+- Treat token, OIDC, provenance, signature, or unexpected-registry failures as a
+  stopped release. Preserve the evidence and resolve the trust failure before
+  continuing.
+
+Official references: [trusted publishers](https://docs.npmjs.com/trusted-publishers/),
+[provenance statements](https://docs.npmjs.com/generating-provenance-statements/),
+and [public scoped packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).

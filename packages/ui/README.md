@@ -13,9 +13,8 @@ typed integrations, foundational providers, hooks, and formatters.
 npm install @vireocodedev/ui
 ```
 
-The package name is stable; registry selection and authentication belong to the
-consumer's approved release-channel configuration and are intentionally not
-embedded here.
+The package is published publicly on npm; installation requires no registry
+authentication.
 
 Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,

@@ -3,8 +3,8 @@
 Shared libraries for the vireocodedev **starter** product, in two halves that
 ship together because they live in one repository:
 
-- `packages/*` — the frontend libraries. npm workspaces monorepo, published to
-  **GitHub Packages** under the `@vireocodedev` scope.
+- `packages/*` — the frontend libraries. npm workspaces monorepo, published as
+  public npm packages under the `@vireocodedev` scope.
 - `jvm/*` — the Spring Boot backend libraries. A separate Gradle build,
   published as Maven artifacts under the `com.vireocode` group.
 
@@ -19,38 +19,35 @@ backend's base entity/service layer; they are separate contracts.
 
 ## Frontend packages
 
-| Package                                                   | Version | Description                                                                                                  |
-| --------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
-| [`@vireocodedev/ui`](packages/ui)                         | 7.0.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.     |
-| [`@vireocodedev/query`](packages/queryengine)             | 5.0.0   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                   |
-| [`@vireocodedev/shell`](packages/shell)                   | 4.0.0   | React application shell, initialization, sitemap, routing, responsive navigation, and page-layout contracts. |
-| [`@vireocodedev/localization`](packages/localization)     | 3.0.0   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations.    |
-| [`@vireocodedev/sqlite`](packages/sqlite)                 | 3.0.0   | SQLite worker/client runtime primitives for offline persistence and synchronization.                         |
-| [`@vireocodedev/history`](packages/history)               | 3.0.0   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.           |
-| [`@vireocodedev/infrastructure`](packages/infrastructure) | 3.0.0   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.                 |
+| Package                                                   | Version | Description                                                                                               |
+| --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| [`@vireocodedev/ui`](packages/ui)                         | 0.2.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
+| [`@vireocodedev/query`](packages/queryengine)             | 0.2.0   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
+| [`@vireocodedev/shell`](packages/shell)                   | 0.2.0   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
+| [`@vireocodedev/localization`](packages/localization)     | 0.2.0   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
+| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.0   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
+| [`@vireocodedev/history`](packages/history)               | 0.2.0   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
+| [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.0   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
 
-Versions above are the currently published ones; `packages/*/package.json` is the source of truth.
+Versions above are the current release candidates; after publication,
+`packages/*/package.json` remains the source of truth.
 
 ### Dependency graph
 
-Only two packages depend on siblings — the rest are leaves and can be consumed on their own:
+Only UI depends on sibling Vireo packages. The other six can be consumed on their own:
 
 ```txt
-shell ->  ui, localization, infrastructure
-ui    ->  history, localization
+ui -> history, infrastructure, localization, query
 
-history · localization · infrastructure · queryengine · sqlite   (no starter dependencies)
+history · infrastructure · localization · query · shell · sqlite   (no Vireo dependencies)
 ```
 
 ## Prerequisites
 
-Working with (or installing) these packages requires a GitHub token with
-`read:packages` (and `write:packages` to publish). The scope is wired to GitHub
-Packages via [`.npmrc`](.npmrc); provide the token as `NODE_AUTH_TOKEN`:
-
-```bash
-export NODE_AUTH_TOKEN=<github-token>
-```
+Node.js, npm, Java, and Gradle versions are declared and checked by the repository.
+Installing the public npm and Maven packages requires no Vireo or GitHub
+credential. Publishing is maintainer-only and isolated behind protected GitHub
+environments.
 
 ## Develop
 
@@ -103,9 +100,15 @@ in the leather-production repository under `docs/STARTER_WORKFLOW.md`.
 
 ## Release (Changesets)
 
-1. `npx changeset` — describe the change and pick the semver bump per package.
-2. Merge to `main`. The **Release** workflow opens a "Version Packages" PR.
-3. Merge that PR → the workflow builds and publishes to GitHub Packages.
+1. `corepack npm exec changeset` — describe the change and select each package's
+   semver bump.
+2. Merge to `main`. **Maintain npm release PR** opens or refreshes the version PR.
+3. Review and merge that PR. This updates versions and changelogs but does not
+   publish.
+4. Manually run **Publish npm release** on `main`, enter `publish`, and approve
+   the protected `package-release` environment.
+5. Require the automatic **Verify public npm release** workflow to pass its
+   anonymous cold-consumer and provenance checks.
 
 Versioning is a contract per package:
 
@@ -120,8 +123,8 @@ Versioning is a contract per package:
 Contract tests guard the surfaces, so a change that breaks a contract fails CI
 until the bump is made deliberately rather than by accident.
 
-> First-time setup: run `corepack npm install` once and commit the generated
-> `package-lock.json` so CI's `corepack npm ci` has a lockfile.
+The complete bootstrap, trusted-publisher, publication, verification, and
+recovery procedure is in [Public npm release](docs/NPM_RELEASE.md).
 
 ## Release (JVM)
 

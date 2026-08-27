@@ -4,6 +4,12 @@ Review date: 2026-08-26
 
 Status: **not ready to pass; Phase 0E evidence and external activation decisions remain open**
 
+> Activation update — 2026-08-27: D-106 has since been accepted, the Starter
+> repository is public, the Maven Central path has been exercised, and the npm
+> migration is source-complete. The first public npm release and anonymous proof
+> remain pending. This does not change the review's NO-GO: D-101/D-102 and the
+> required unfamiliar-user evidence are still open.
+
 This review tests the Phase 0 exit gate in the
 [master roadmap](../../../VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md) without treating
 prepared protocols as user evidence or an internal naming preference as external

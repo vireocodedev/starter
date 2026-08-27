@@ -110,9 +110,11 @@ external thresholds—not maintainer intuition—are met.
 - [Updated gap register](phase-0/gap-register.md)
 
 The first formal review returns **NO-GO**. Phase 0F is in progress, not complete:
-the backlog is decomposed, but reliable elapsed estimates require a chosen
-distribution path, actual owner capacity, Phase 0E findings, and observed
-throughput. No Phase 1 implementation is authorized by this preparation work.
+the backlog is decomposed and D-106 now selects public npm plus Maven Central, but
+reliable elapsed estimates still require actual owner capacity, Phase 0E findings,
+and observed throughput. The distribution implementation is ahead of the product
+gate; it does not manufacture the missing external evidence or authorize the rest
+of Phase 1.
 
 ## Measurement policy
 
@@ -138,6 +140,7 @@ Phase 0E should produce:
 
 The Phase 0B audience and claim hierarchy remain hypotheses until Phase 0E executes
 the validation protocol. The Phase 0D matrix also remains inactive as a public
-support claim until its enforcement evidence passes. Completing internal decisions
-does not authorize domain purchases, public renames, or package publication before
-the identity activation prerequisites pass.
+support claim until its enforcement evidence passes. Repository visibility and
+distribution activation have moved forward by explicit owner decision; neither is
+evidence that the audience, claims, or supported-platform matrix has passed its
+separate gate.

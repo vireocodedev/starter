@@ -61,6 +61,25 @@ BOM. These are confirmed adoption blockers, not documentation assumptions.
 - The first Central publication and cold public-registry consumer run remain
   external release steps. npm credential removal is tracked separately.
 
+### Post-baseline npm activation — 2026-08-27
+
+- The Starter repository is public and all seven frontend packages use canonical
+  `@vireocodedev/*` names, public npm metadata, and the `0.2.0` release line.
+- Ordinary Starter installs, CI, package consumption, and the public verification
+  workflow do not accept a GitHub Packages token.
+- Changesets versioning is separated from the manual, protected publication job.
+  Publication requests npm provenance and grants OIDC only to that job.
+- The first publish requires one short-lived granular bootstrap token because npm
+  package settings do not exist before their packages do. Afterward, every package
+  must trust `release-npm.yml` with the `package-release` environment; the token is
+  then removed and revoked.
+- The tokenless post-release workflow waits for registry propagation, checks each
+  attestation, installs from an empty cache, verifies the peer tree and public
+  entry points, bundles UI, and runs `npm audit signatures`.
+- The first npm publication and retained anonymous-consumer evidence remain open
+  release steps. Template cannot migrate its lockfile to the new coordinates until
+  those immutable versions exist publicly.
+
 ## Runtime configuration
 
 | Variable or port             | Scope                | Purpose/default                                   |

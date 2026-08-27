@@ -2,7 +2,7 @@
 
 Audit date: 2026-08-26
 
-Status: **artifact boundaries enforced; public-registry migration still blocked**
+Status: **artifact boundaries enforced; npm source migration complete, first public release pending**
 
 This checkpoint inspects what a registry would receive rather than treating a
 successful source build as proof of a safe package. It does not publish, change a
@@ -88,18 +88,18 @@ sidecars.
 
 ## Remaining public-distribution work
 
-| ID      | Severity        | Finding                                                                                                                                                                                       | Required disposition                                                                                                                                   |
-| ------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| PAA-001 | Blocker         | npm packages still target authenticated GitHub Packages.                                                                                                                                      | After the final npm scope is approved, migrate metadata/workflows to npmjs, set public access explicitly, and configure trusted publishing/provenance. |
-| PAA-002 | Release pending | Resolved in source on 2026-08-27: `com.vireocode` is verified, canonical `vireo-*` artifacts and `com.vireocode.vireo.*` packages are migrated atomically, and Central staging is configured. | Complete the first user-managed publication and cold public-consumer proof.                                                                            |
-| PAA-003 | Resolved        | Release-only in-memory signing now emits and cryptographically verifies `.asc` files for every POM, Gradle module, binary, sources, and Javadoc artifact.                                     | Keep signing secrets environment-scoped and rerun the signed-bundle audit for every deployment.                                                        |
-| PAA-004 | Resolved        | npm tarballs include source maps, and the UI tarball contains 1,123 compiled files because all supported subpath implementations are emitted beneath `dist`.                                  | API growth is now governed by symbol budgets; bundled packages intentionally retain audited maps while UI remains map-free.                            |
-| PAA-005 | Major           | Artifact identity metadata still uses the provisional repository, developer, and copyright wording.                                                                                           | Update it only after the Phase 0 identity/legal-owner decisions are final, then rerun both artifact audits and clean-consumer rehearsals.              |
+| ID      | Severity        | Finding                                                                                                                                                                                       | Required disposition                                                                                                                                 |
+| ------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PAA-001 | Release pending | Resolved in source on 2026-08-27: all seven canonical coordinates target public npm with explicit access/provenance, protected publication, and tokenless post-release verification.          | Bootstrap the first release, configure each package's trusted publisher, remove the bootstrap token, and retain the anonymous verification evidence. |
+| PAA-002 | Release pending | Resolved in source on 2026-08-27: `com.vireocode` is verified, canonical `vireo-*` artifacts and `com.vireocode.vireo.*` packages are migrated atomically, and Central staging is configured. | Complete the first user-managed publication and cold public-consumer proof.                                                                          |
+| PAA-003 | Resolved        | Release-only in-memory signing now emits and cryptographically verifies `.asc` files for every POM, Gradle module, binary, sources, and Javadoc artifact.                                     | Keep signing secrets environment-scoped and rerun the signed-bundle audit for every deployment.                                                      |
+| PAA-004 | Resolved        | npm tarballs include source maps, and the UI tarball contains 1,123 compiled files because all supported subpath implementations are emitted beneath `dist`.                                  | API growth is now governed by symbol budgets; bundled packages intentionally retain audited maps while UI remains map-free.                          |
+| PAA-005 | Major           | Artifact identity metadata still uses the provisional repository, developer, and copyright wording.                                                                                           | Update it only after the Phase 0 identity/legal-owner decisions are final, then rerun both artifact audits and clean-consumer rehearsals.            |
 
 ## Gate result
 
-The artifacts have deterministic, executable, CI-enforced content boundaries. The
-Maven implementation is ready for its first user-managed Central deployment;
-public availability remains unproven until that deployment is manually published
-and the cold public-consumer workflow passes. npm registry migration and final
-cross-ecosystem release evidence remain separate blockers.
+The artifacts have deterministic, executable, CI-enforced content boundaries.
+Maven Central and npm use separate protected release paths and separate anonymous
+consumer verification. npm's source migration is complete; the first immutable
+public release, trusted-publisher activation, and retained public-consumer evidence
+remain release operations rather than missing package implementation.

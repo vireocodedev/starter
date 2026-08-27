@@ -10,9 +10,8 @@ The package owns reusable mechanisms. Applications still own configured transpor
 npm install @vireocodedev/infrastructure axios zod @preact/signals-core
 ```
 
-The package name is stable; registry selection and authentication belong to the
-consumer's approved release-channel configuration and are intentionally not
-embedded here. TypeScript declarations are verified from the packed artifact
+The package is published publicly on npm; installation requires no registry
+authentication. TypeScript declarations are verified from the packed artifact
 with TypeScript 6, `moduleResolution: "Bundler"`, and `skipLibCheck: false`.
 Relative source maps with embedded source content are published intentionally
 for debugging.

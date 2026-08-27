@@ -8,9 +8,8 @@ Framework-free contracts for application sitemap construction, navigation metada
 npm install @vireocodedev/shell zod
 ```
 
-The package name is stable; registry selection and authentication belong to the
-consumer's approved release-channel configuration and are intentionally not
-embedded here. TypeScript declarations are verified from the packed artifact
+The package is published publicly on npm; installation requires no registry
+authentication. TypeScript declarations are verified from the packed artifact
 with TypeScript 6, `moduleResolution: "Bundler"`, and `skipLibCheck: false`.
 Relative source maps with embedded source content are published intentionally
 for debugging.

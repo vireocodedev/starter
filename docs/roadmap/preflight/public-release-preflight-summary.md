@@ -4,6 +4,14 @@ Assessment date: 2026-08-26
 
 Status: **private release candidate verified; public release blocked**
 
+> Activation update — 2026-08-27: this remains the historical preflight decision,
+> but the Starter repository is now public, canonical Maven Central publication is
+> configured, and the npm source/workflow migration to seven canonical public
+> coordinates is complete. The first npm publication, per-package trusted-publisher
+> activation, and anonymous registry verification are still pending. Phase 0's
+> external product-validation gate remains open independently of these engineering
+> advances.
+
 This is the consolidated disposition for the work that could proceed before final
 public coordinates, registry accounts, or other developers were available. It
 combines:

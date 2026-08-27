@@ -17,12 +17,11 @@ React consumers import namespace hooks from
 ## Install
 
 ```bash
-npm install @vireocodedev/localization i18next react-i18next
+npm install @vireocodedev/localization i18next
 ```
 
-The package name is stable; registry selection and authentication belong to the
-consumer's approved release-channel configuration and are intentionally not
-embedded here.
+The package is published publicly on npm; installation requires no registry
+authentication.
 
 `i18next` is the only peer dependency. The package runs against the consuming
 application's instance and never bundles its own copy.
