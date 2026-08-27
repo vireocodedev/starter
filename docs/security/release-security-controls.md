@@ -29,19 +29,20 @@ manifest digest. Its tag and digest are recorded in the same policy contract.
 All workflows start with `permissions: {}`. Each job opts into only its required
 scopes:
 
-| Workflow/job               | Access                                      | Reason                                       |
-| -------------------------- | ------------------------------------------- | -------------------------------------------- |
-| CI TypeScript/JVM          | `contents: read`, `packages: read`          | Checkout, install, build, and verify         |
-| Security secret scan       | `contents: read`                            | Fetch and scan complete history              |
-| Storybook build            | `contents: read`, `packages: read`          | Build the deployment artifact                |
-| Storybook deploy           | `pages: write`, `id-token: write`           | Deploy through GitHub Pages OIDC             |
-| Scheduled support evidence | `contents: read`, optional `packages: read` | Build matrix evidence and retain metadata    |
-| Release verification       | `contents: read`, `packages: read`          | Verify the exact candidate without writes    |
-| Release evidence           | `contents: read`, `packages: read`          | Build checksums, SBOM, and dry-run artifacts |
-| npm release                | `contents/packages/pull-requests: write`    | Release PR, tags, and package publication    |
-| JVM publication            | `contents: read`, `packages: write`         | Query and publish Maven artifacts            |
-| JVM tag                    | `contents: write`                           | Create the version marker only               |
-| Published JVM verification | `contents: read`, `packages: read`          | Resolve artifacts as an external consumer    |
+| Workflow/job               | Access                                                                                 | Reason                                        |
+| -------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------- |
+| CI TypeScript/JVM          | `contents: read`, `packages: read`                                                     | Checkout, install, build, and verify          |
+| Security secret scan       | `contents: read`                                                                       | Fetch and scan complete history               |
+| Storybook build            | `contents: read`, `packages: read`                                                     | Build the deployment artifact                 |
+| Storybook deploy           | `pages: write`, `id-token: write`                                                      | Deploy through GitHub Pages OIDC              |
+| Scheduled support evidence | `contents: read`, optional `packages: read`                                            | Build matrix evidence and retain metadata     |
+| Release verification       | `contents: read`, `packages: read`                                                     | Verify the exact candidate without writes     |
+| Release evidence           | `contents: read`, `packages: read`                                                     | Build checksums, SBOM, and dry-run artifacts  |
+| Public SBOM attestation    | `contents: read`, `id-token: write`, `attestations: write`, `artifact-metadata: write` | Sign exact registry subjects with GitHub OIDC |
+| npm release                | `contents/packages/pull-requests: write`                                               | Release PR, tags, and package publication     |
+| JVM publication            | `contents: read`, `packages: write`                                                    | Query and publish Maven artifacts             |
+| JVM tag                    | `contents: write`                                                                      | Create the version marker only                |
+| Published JVM verification | `contents: read`, `packages: read`                                                     | Resolve artifacts as an external consumer     |
 
 Checkout credentials are disabled everywhere except the isolated JVM tag job.
 Dependency lifecycle scripts are disabled during installation in the npm write
@@ -134,12 +135,31 @@ generates npm and JVM CycloneDX SBOMs, and records SHA-256/SHA-512 subjects in a
 manifest bound to the clean Git commit and pinned toolchain. The release workflow
 retains that unsigned candidate evidence before either publisher starts.
 
-This is deliberately classified as **unsigned release-candidate evidence**, not
-provenance. Publication jobs rebuild and therefore do not yet promote these exact
-candidate bytes. npm registry provenance and signed Maven artifacts are verified
-after publication, but the generated SBOMs are not yet attached as signed
-attestations to the published subjects. Source-owned dry runs must not be described
-as cryptographic trust.
+This candidate evidence remains deliberately classified as **unsigned
+release-candidate evidence**, not provenance. Publication jobs rebuild and do not
+promote those candidate bytes.
+
+After public npm or Maven verification succeeds,
+`corepack npm run release:collect-public-evidence` independently downloads the exact
+registry artifacts. It requires registry SRI and a provenance URL for all seven npm
+tarballs, requires Maven Central SHA-256 agreement for all 27 BOM/module artifacts,
+and regenerates populated npm/JVM CycloneDX documents. The
+`Attest public release SBOMs` workflow then uses GitHub OIDC and the public Sigstore
+instance to bind each ecosystem SBOM to those exact public subject digests. It
+verifies every subject against the CycloneDX predicate, exact workflow certificate
+identity, and `main` source ref, then retains subjects, manifests, checksums, SBOMs,
+and signed bundles for 90 days.
+
+Hosted run
+[`33082999406`](https://github.com/vireocodedev/starter/actions/runs/33082999406)
+verified this path for npm attestation
+[`43423367`](https://github.com/vireocodedev/starter/attestations/43423367), Maven
+attestation
+[`43423371`](https://github.com/vireocodedev/starter/attestations/43423371), and
+retained evidence artifact
+[`9651031208`](https://github.com/vireocodedev/starter/actions/runs/33082999406/artifacts/9651031208).
+These SBOM claims supplement, rather than replace, npm registry provenance and
+Maven PGP signatures.
 
 ## Evidence checklist
 
@@ -149,8 +169,9 @@ Before each stable public release, attach or link:
 - green read-only candidate verification and secret scan;
 - protected-environment approval and publisher identity;
 - published-coordinate consumer verification from empty caches;
-- generated npm/JVM SBOM and checksum evidence, plus published provenance and
-  signature verification; and
+- generated candidate and exact-public npm/JVM SBOM/checksum evidence, signed SBOM
+  attestation verification, plus published provenance and signature verification;
+  and
 - the rollback/withdrawal decision owner.
 
 Provider controls not listed in the verified section remain **unverified** until

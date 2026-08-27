@@ -28,7 +28,7 @@ in later phases.
 The original plan totaled **57–104 active engineer-days**. After public activation,
 Phase 0 closure, trust-contract publication, the first P1-09 hardening slice, and
 completion of the enforceable public-promise tranche, the planning remainder is
-**8–17 active engineer-days**, before contingency or external wait. It is a scope
+**7–15 active engineer-days**, before contingency or external wait. It is a scope
 range, not an elapsed-date commitment.
 
 ## Backlog
@@ -44,7 +44,7 @@ range, not an elapsed-date commitment.
 | P1-06 | Correct repository metadata, topics, links, and public settings                         | Complete      | 0 d                   | High       |
 | P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Complete      | 0 d                   | High       |
 | P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Complete      | 0 d                   | High       |
-| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial       | 2–4 d + external wait | Medium     |
+| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial       | 1–2 d + external wait | Medium     |
 | P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Complete      | 0 d                   | High       |
 | P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Complete      | 0 d                   | High       |
 | P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Complete      | 0 d                   | High       |
@@ -67,10 +67,12 @@ range, not an elapsed-date commitment.
 - **P1-09: partial.** Both repositories now have provider secret scanning, push
   protection, validity checks, Dependabot alerts/updates, private vulnerability
   reporting, read-only workflow defaults, and SHA enforcement. Source-owned lanes
-  cover full-history Gitleaks, CodeQL, and dependency review. Release evidence
-  generates npm and JVM CycloneDX SBOMs, and a dated recovery tabletop records the
-  remaining branch/environment protection, provider allowlist, signed-SBOM, and
-  backup-owner gaps.
+  cover full-history Gitleaks, CodeQL, and dependency review. A credential-free
+  collector validates all seven public npm tarballs and 27 Maven Central artifacts
+  against registry hashes; GitHub OIDC/Sigstore attestations bind the exact subjects
+  to populated npm/JVM CycloneDX SBOMs and verify their signer identity. A dated
+  recovery tabletop records the remaining branch/environment protection, provider
+  allowlist, and backup-owner gaps.
 - **P1-10: complete.** Both authoritative public-contract gates bind documented
   setup, verification, Storybook, and deployment commands to the hosted workflow
   steps that execute them. Clean Starter and Template verification now recurs on a

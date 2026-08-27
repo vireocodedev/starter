@@ -41,6 +41,12 @@ sequence without reusing an immutable version.
   below.
 - Release evidence now generates populated npm and JVM CycloneDX documents and
   digests all candidate subjects.
+- Hosted run
+  [`33082999406`](https://github.com/vireocodedev/starter/actions/runs/33082999406)
+  independently downloaded and registry-hash-validated all seven public npm
+  tarballs and 27 Maven Central artifacts, signed two CycloneDX attestations through
+  GitHub OIDC/Sigstore, verified every subject against the exact signer identity,
+  and retained the complete evidence bundle for 90 days.
 
 ## Findings and limitations
 
@@ -52,9 +58,12 @@ sequence without reusing an immutable version.
 - **Open:** only one trusted recovery account is evidenced. This tabletop did not
   prove a backup owner can receive a report, revoke identities, or restore release
   access without the primary maintainer.
-- **Open:** npm/JVM SBOMs are retained candidate artifacts, not signed attestations
-  bound to the exact published bytes.
+- **Closed in source:** npm/JVM CycloneDX SBOMs are signed attestations bound to the
+  exact published bytes. npm attestation
+  [`43423367`](https://github.com/vireocodedev/starter/attestations/43423367) covers
+  seven tarballs; Maven attestation
+  [`43423371`](https://github.com/vireocodedev/starter/attestations/43423371) covers
+  all 27 Central artifacts.
 
 The runbook is technically actionable, but P1-09 remains partial until the open
-provider controls, signed SBOM binding, and human backup-owner recovery exercise are
-completed.
+provider controls and human backup-owner recovery exercise are completed.
