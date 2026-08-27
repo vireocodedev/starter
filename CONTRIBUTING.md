@@ -24,6 +24,9 @@ may iterate with `./jvm/gradlew -p jvm build aggregateJavadoc`.
 Public API changes require updated surface snapshots and the appropriate
 Changeset or JVM version bump. Follow the package-authoring documentation under
 `docs/package-authoring/` and add tests and live documentation with the change.
+Public-contract changes must follow [the compatibility and deprecation
+policy](docs/COMPATIBILITY.md). Use the structured issue forms and the routing in
+[SUPPORT.md](SUPPORT.md) before proposing a substantial change.
 
 ## Pull requests
 
@@ -32,3 +35,7 @@ Changeset or JVM version bump. Follow the package-authoring documentation under
 - Classify every new or changed async visual surface under the loading-state standard, declare its geometry level, and include the applicable canonical stories or documented omissions.
 - Do not commit credentials, generated build output, or local caches.
 - Obtain review before merging to `main`.
+
+Maintainers make final merge and release decisions under
+[GOVERNANCE.md](GOVERNANCE.md). Contributions do not imply a response or delivery
+commitment.

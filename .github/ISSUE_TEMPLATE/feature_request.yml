@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose a broadly reusable Vireo capability or contract change
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and reviewed the framework/application responsibility boundary.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and users
+      description: Describe the concrete job, who encounters it, and why current public APIs are insufficient.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the smallest reusable outcome, not only a preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and compatibility
+      description: Explain workarounds and any API, schema, migration, or Template impact.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting evidence
+      description: Add examples, prototypes, or links without confidential data.

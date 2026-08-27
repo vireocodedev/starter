@@ -181,5 +181,8 @@ contracts.
 ## Contributing and security
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the supported toolchain and pull
-request gate. Please report vulnerabilities according to
-[SECURITY.md](SECURITY.md), rather than opening a public issue.
+request gate. Public support and issue boundaries are in [SUPPORT.md](SUPPORT.md),
+project decision authority is in [GOVERNANCE.md](GOVERNANCE.md), and release and
+upgrade promises are in the [compatibility policy](docs/COMPATIBILITY.md). Please
+report vulnerabilities according to [SECURITY.md](SECURITY.md), rather than
+opening a public issue.
