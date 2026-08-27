@@ -156,6 +156,16 @@ for (const fileName of workflowFiles) {
     if (action === "actions/checkout") {
       inspectCheckoutCredentials(fileName, lines, jobs, lineNumber);
     }
+    if (action === "actions/setup-node") {
+      const job = jobForLine(jobs, lineNumber);
+      if (!job) {
+        problems.push(`${fileName}:${lineNumber + 1} setup-node is outside a job`);
+      } else if (lines.slice(job.start, lineNumber).some(candidate => candidate.includes("actions/checkout@"))) {
+        problems.push(
+          `${fileName}:${job.name} must run setup-node before checkout so the runner's bundled npm does not evaluate the strict devEngines policy`,
+        );
+      }
+    }
   }
 
   for (const job of jobs) {
