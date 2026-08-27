@@ -127,7 +127,7 @@ applied script.
 
 ## Extension boundary
 
-The `com.vireocode.spi` package prevents Core from depending upward on
+The `com.vireocode.vireo.spi` package prevents Core from depending upward on
 optional artifacts:
 
 - Query Engine supplies `FilterSpecificationBuilder`.

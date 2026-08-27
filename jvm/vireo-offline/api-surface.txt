@@ -1,278 +1,278 @@
-public final record com.vireocode.offline.OfflineActor
+public final record com.vireocode.vireo.offline.OfflineActor
     extends java.lang.Record
-    public com.vireocode.offline.OfflineActor(java.util.UUID,java.lang.String,boolean)
-    public boolean com.vireocode.offline.OfflineActor.privileged()
-    public final boolean com.vireocode.offline.OfflineActor.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineActor.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineActor.toString()
-    public java.lang.String com.vireocode.offline.OfflineActor.username()
-    public java.util.UUID com.vireocode.offline.OfflineActor.id()
+    public com.vireocode.vireo.offline.OfflineActor(java.util.UUID,java.lang.String,boolean)
+    public boolean com.vireocode.vireo.offline.OfflineActor.privileged()
+    public final boolean com.vireocode.vireo.offline.OfflineActor.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineActor.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineActor.toString()
+    public java.lang.String com.vireocode.vireo.offline.OfflineActor.username()
+    public java.util.UUID com.vireocode.vireo.offline.OfflineActor.id()
 
-public abstract interface com.vireocode.offline.OfflineActorResolver
-    public abstract java.util.Optional<com.vireocode.offline.OfflineActor> com.vireocode.offline.OfflineActorResolver.resolveCurrentActor()
+public abstract interface com.vireocode.vireo.offline.OfflineActorResolver
+    public abstract java.util.Optional<com.vireocode.vireo.offline.OfflineActor> com.vireocode.vireo.offline.OfflineActorResolver.resolveCurrentActor()
 
-public class com.vireocode.offline.OfflineEntityVersionEntity
-    public com.vireocode.offline.OfflineEntityVersionEntity()
-    public java.lang.String com.vireocode.offline.OfflineEntityVersionEntity.getEntityKey()
-    public java.time.Instant com.vireocode.offline.OfflineEntityVersionEntity.getChangedAt()
-    public long com.vireocode.offline.OfflineEntityVersionEntity.getRevision()
-    public void com.vireocode.offline.OfflineEntityVersionEntity.setChangedAt(java.time.Instant)
-    public void com.vireocode.offline.OfflineEntityVersionEntity.setEntityKey(java.lang.String)
-    public void com.vireocode.offline.OfflineEntityVersionEntity.setRevision(long)
+public class com.vireocode.vireo.offline.OfflineEntityVersionEntity
+    public com.vireocode.vireo.offline.OfflineEntityVersionEntity()
+    public java.lang.String com.vireocode.vireo.offline.OfflineEntityVersionEntity.getEntityKey()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineEntityVersionEntity.getChangedAt()
+    public long com.vireocode.vireo.offline.OfflineEntityVersionEntity.getRevision()
+    public void com.vireocode.vireo.offline.OfflineEntityVersionEntity.setChangedAt(java.time.Instant)
+    public void com.vireocode.vireo.offline.OfflineEntityVersionEntity.setEntityKey(java.lang.String)
+    public void com.vireocode.vireo.offline.OfflineEntityVersionEntity.setRevision(long)
 
-public abstract interface com.vireocode.offline.OfflineEntityVersionRepository
-    implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.offline.OfflineEntityVersionEntity, java.lang.String>
-    public abstract java.util.Optional<com.vireocode.offline.OfflineEntityVersionEntity> com.vireocode.offline.OfflineEntityVersionRepository.findByEntityKey(java.lang.String)
-    public abstract java.util.Optional<com.vireocode.offline.OfflineEntityVersionEntity> com.vireocode.offline.OfflineEntityVersionRepository.findByEntityKeyForUpdate(java.lang.String)
+public abstract interface com.vireocode.vireo.offline.OfflineEntityVersionRepository
+    implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.vireo.offline.OfflineEntityVersionEntity, java.lang.String>
+    public abstract java.util.Optional<com.vireocode.vireo.offline.OfflineEntityVersionEntity> com.vireocode.vireo.offline.OfflineEntityVersionRepository.findByEntityKey(java.lang.String)
+    public abstract java.util.Optional<com.vireocode.vireo.offline.OfflineEntityVersionEntity> com.vireocode.vireo.offline.OfflineEntityVersionRepository.findByEntityKeyForUpdate(java.lang.String)
 
-public class com.vireocode.offline.OfflineEntityVersionService
-    implements com.vireocode.spi.OfflineRevisionTracker
-    public com.vireocode.offline.OfflineEntityVersionService(com.vireocode.offline.OfflineEntityVersionRepository)
-    public com.vireocode.offline.OfflineHydrationVersionsResponseDto com.vireocode.offline.OfflineEntityVersionService.getVersionSnapshot(java.util.List<java.lang.String>)
-    public java.util.List<com.vireocode.offline.OfflineHydrationEntityVersionDto> com.vireocode.offline.OfflineEntityVersionService.getVersions(java.util.List<java.lang.String>)
-    public long com.vireocode.offline.OfflineEntityVersionService.bump(java.lang.String)
+public class com.vireocode.vireo.offline.OfflineEntityVersionService
+    implements com.vireocode.vireo.spi.OfflineRevisionTracker
+    public com.vireocode.vireo.offline.OfflineEntityVersionService(com.vireocode.vireo.offline.OfflineEntityVersionRepository)
+    public com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto com.vireocode.vireo.offline.OfflineEntityVersionService.getVersionSnapshot(java.util.List<java.lang.String>)
+    public java.util.List<com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto> com.vireocode.vireo.offline.OfflineEntityVersionService.getVersions(java.util.List<java.lang.String>)
+    public long com.vireocode.vireo.offline.OfflineEntityVersionService.bump(java.lang.String)
 
-public class com.vireocode.offline.OfflineHeartbeatController
-    public com.vireocode.offline.OfflineHeartbeatController(com.vireocode.offline.OfflineHeartbeatService)
-    public com.vireocode.offline.OfflineHeartbeatPayload com.vireocode.offline.OfflineHeartbeatController.getCurrent()
-    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter com.vireocode.offline.OfflineHeartbeatController.stream(jakarta.servlet.http.HttpServletResponse)
+public class com.vireocode.vireo.offline.OfflineHeartbeatController
+    public com.vireocode.vireo.offline.OfflineHeartbeatController(com.vireocode.vireo.offline.OfflineHeartbeatService)
+    public com.vireocode.vireo.offline.OfflineHeartbeatPayload com.vireocode.vireo.offline.OfflineHeartbeatController.getCurrent()
+    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter com.vireocode.vireo.offline.OfflineHeartbeatController.stream(jakarta.servlet.http.HttpServletResponse)
 
-public final record com.vireocode.offline.OfflineHeartbeatPayload
+public final record com.vireocode.vireo.offline.OfflineHeartbeatPayload
     extends java.lang.Record
-    public com.vireocode.offline.OfflineHeartbeatPayload(java.time.Instant,boolean)
-    public boolean com.vireocode.offline.OfflineHeartbeatPayload.syncInProgress()
-    public final boolean com.vireocode.offline.OfflineHeartbeatPayload.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineHeartbeatPayload.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineHeartbeatPayload.toString()
-    public java.time.Instant com.vireocode.offline.OfflineHeartbeatPayload.serverTime()
+    public com.vireocode.vireo.offline.OfflineHeartbeatPayload(java.time.Instant,boolean)
+    public boolean com.vireocode.vireo.offline.OfflineHeartbeatPayload.syncInProgress()
+    public final boolean com.vireocode.vireo.offline.OfflineHeartbeatPayload.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineHeartbeatPayload.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineHeartbeatPayload.toString()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineHeartbeatPayload.serverTime()
 
-public class com.vireocode.offline.OfflineHeartbeatService
-    implements com.vireocode.spi.OfflineChangeBroadcaster
-    public com.vireocode.offline.OfflineHeartbeatService()
-    public com.vireocode.offline.OfflineHeartbeatPayload com.vireocode.offline.OfflineHeartbeatService.getCurrentHeartbeat()
-    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter com.vireocode.offline.OfflineHeartbeatService.createEmitter()
-    public void com.vireocode.offline.OfflineHeartbeatService.flushBatch()
-    public void com.vireocode.offline.OfflineHeartbeatService.publishCreateEvent(java.lang.String,java.lang.Object,java.lang.Long)
-    public void com.vireocode.offline.OfflineHeartbeatService.publishDeleteEvent(java.lang.String,java.lang.Object,java.lang.Long)
-    public void com.vireocode.offline.OfflineHeartbeatService.publishHeartbeat()
-    public void com.vireocode.offline.OfflineHeartbeatService.publishUpdateEvent(java.lang.String,java.lang.Object,java.lang.Long)
+public class com.vireocode.vireo.offline.OfflineHeartbeatService
+    implements com.vireocode.vireo.spi.OfflineChangeBroadcaster
+    public com.vireocode.vireo.offline.OfflineHeartbeatService()
+    public com.vireocode.vireo.offline.OfflineHeartbeatPayload com.vireocode.vireo.offline.OfflineHeartbeatService.getCurrentHeartbeat()
+    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter com.vireocode.vireo.offline.OfflineHeartbeatService.createEmitter()
+    public void com.vireocode.vireo.offline.OfflineHeartbeatService.flushBatch()
+    public void com.vireocode.vireo.offline.OfflineHeartbeatService.publishCreateEvent(java.lang.String,java.lang.Object,java.lang.Long)
+    public void com.vireocode.vireo.offline.OfflineHeartbeatService.publishDeleteEvent(java.lang.String,java.lang.Object,java.lang.Long)
+    public void com.vireocode.vireo.offline.OfflineHeartbeatService.publishHeartbeat()
+    public void com.vireocode.vireo.offline.OfflineHeartbeatService.publishUpdateEvent(java.lang.String,java.lang.Object,java.lang.Long)
 
-public class com.vireocode.offline.OfflineHydrationController
-    public com.vireocode.offline.OfflineHydrationController(com.vireocode.offline.OfflineEntityVersionService)
-    public com.vireocode.offline.OfflineHydrationVersionsResponseDto com.vireocode.offline.OfflineHydrationController.versions(java.util.List<java.lang.String>)
+public class com.vireocode.vireo.offline.OfflineHydrationController
+    public com.vireocode.vireo.offline.OfflineHydrationController(com.vireocode.vireo.offline.OfflineEntityVersionService)
+    public com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto com.vireocode.vireo.offline.OfflineHydrationController.versions(java.util.List<java.lang.String>)
 
-public final record com.vireocode.offline.OfflineHydrationEntityVersionDto
+public final record com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto
     extends java.lang.Record
-    public com.vireocode.offline.OfflineHydrationEntityVersionDto(java.lang.String,long,java.time.Instant)
-    public final boolean com.vireocode.offline.OfflineHydrationEntityVersionDto.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineHydrationEntityVersionDto.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineHydrationEntityVersionDto.toString()
-    public java.lang.String com.vireocode.offline.OfflineHydrationEntityVersionDto.entity()
-    public java.time.Instant com.vireocode.offline.OfflineHydrationEntityVersionDto.changedAt()
-    public long com.vireocode.offline.OfflineHydrationEntityVersionDto.revision()
+    public com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto(java.lang.String,long,java.time.Instant)
+    public final boolean com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto.toString()
+    public java.lang.String com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto.entity()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto.changedAt()
+    public long com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto.revision()
 
-public final record com.vireocode.offline.OfflineHydrationVersionsResponseDto
+public final record com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto
     extends java.lang.Record
-    public com.vireocode.offline.OfflineHydrationVersionsResponseDto(java.time.Instant,java.util.List<com.vireocode.offline.OfflineHydrationEntityVersionDto>)
-    public final boolean com.vireocode.offline.OfflineHydrationVersionsResponseDto.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineHydrationVersionsResponseDto.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineHydrationVersionsResponseDto.toString()
-    public java.time.Instant com.vireocode.offline.OfflineHydrationVersionsResponseDto.serverTime()
-    public java.util.List<com.vireocode.offline.OfflineHydrationEntityVersionDto> com.vireocode.offline.OfflineHydrationVersionsResponseDto.versions()
+    public com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto(java.time.Instant,java.util.List<com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto>)
+    public final boolean com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.toString()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.serverTime()
+    public java.util.List<com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto> com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.versions()
 
-public final record com.vireocode.offline.OfflineSseBatchEvent
+public final record com.vireocode.vireo.offline.OfflineSseBatchEvent
     extends java.lang.Record
-    public com.vireocode.offline.OfflineSseBatchEvent(java.lang.String,java.util.List<com.vireocode.offline.OfflineSseBatchItem>)
-    public final boolean com.vireocode.offline.OfflineSseBatchEvent.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineSseBatchEvent.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineSseBatchEvent.toString()
-    public java.lang.String com.vireocode.offline.OfflineSseBatchEvent.batchId()
-    public java.util.List<com.vireocode.offline.OfflineSseBatchItem> com.vireocode.offline.OfflineSseBatchEvent.events()
+    public com.vireocode.vireo.offline.OfflineSseBatchEvent(java.lang.String,java.util.List<com.vireocode.vireo.offline.OfflineSseBatchItem>)
+    public final boolean com.vireocode.vireo.offline.OfflineSseBatchEvent.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineSseBatchEvent.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineSseBatchEvent.toString()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSseBatchEvent.batchId()
+    public java.util.List<com.vireocode.vireo.offline.OfflineSseBatchItem> com.vireocode.vireo.offline.OfflineSseBatchEvent.events()
 
-public final record com.vireocode.offline.OfflineSseBatchItem
+public final record com.vireocode.vireo.offline.OfflineSseBatchItem
     extends java.lang.Record
-    public com.vireocode.offline.OfflineSseBatchItem(java.lang.String,java.lang.String,java.lang.Object,java.lang.Long)
-    public final boolean com.vireocode.offline.OfflineSseBatchItem.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineSseBatchItem.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineSseBatchItem.toString()
-    public java.lang.Long com.vireocode.offline.OfflineSseBatchItem.revision()
-    public java.lang.Object com.vireocode.offline.OfflineSseBatchItem.payload()
-    public java.lang.String com.vireocode.offline.OfflineSseBatchItem.action()
-    public java.lang.String com.vireocode.offline.OfflineSseBatchItem.entity()
+    public com.vireocode.vireo.offline.OfflineSseBatchItem(java.lang.String,java.lang.String,java.lang.Object,java.lang.Long)
+    public final boolean com.vireocode.vireo.offline.OfflineSseBatchItem.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineSseBatchItem.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineSseBatchItem.toString()
+    public java.lang.Long com.vireocode.vireo.offline.OfflineSseBatchItem.revision()
+    public java.lang.Object com.vireocode.vireo.offline.OfflineSseBatchItem.payload()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSseBatchItem.action()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSseBatchItem.entity()
 
-public final record com.vireocode.offline.OfflineSyncBatchRequestDto
+public final record com.vireocode.vireo.offline.OfflineSyncBatchRequestDto
     extends java.lang.Record
-    public com.vireocode.offline.OfflineSyncBatchRequestDto(java.util.List<com.vireocode.offline.OfflineSyncCommandDto>)
-    public final boolean com.vireocode.offline.OfflineSyncBatchRequestDto.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineSyncBatchRequestDto.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineSyncBatchRequestDto.toString()
-    public java.util.List<com.vireocode.offline.OfflineSyncCommandDto> com.vireocode.offline.OfflineSyncBatchRequestDto.commands()
+    public com.vireocode.vireo.offline.OfflineSyncBatchRequestDto(java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandDto>)
+    public final boolean com.vireocode.vireo.offline.OfflineSyncBatchRequestDto.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineSyncBatchRequestDto.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineSyncBatchRequestDto.toString()
+    public java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandDto> com.vireocode.vireo.offline.OfflineSyncBatchRequestDto.commands()
 
-public final record com.vireocode.offline.OfflineSyncBatchResponseDto
+public final record com.vireocode.vireo.offline.OfflineSyncBatchResponseDto
     extends java.lang.Record
-    public com.vireocode.offline.OfflineSyncBatchResponseDto(int,int,java.util.List<com.vireocode.offline.OfflineSyncCommandResultDto>)
-    public final boolean com.vireocode.offline.OfflineSyncBatchResponseDto.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineSyncBatchResponseDto.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineSyncBatchResponseDto.toString()
-    public int com.vireocode.offline.OfflineSyncBatchResponseDto.accepted()
-    public int com.vireocode.offline.OfflineSyncBatchResponseDto.failed()
-    public java.util.List<com.vireocode.offline.OfflineSyncCommandResultDto> com.vireocode.offline.OfflineSyncBatchResponseDto.results()
+    public com.vireocode.vireo.offline.OfflineSyncBatchResponseDto(int,int,java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandResultDto>)
+    public final boolean com.vireocode.vireo.offline.OfflineSyncBatchResponseDto.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineSyncBatchResponseDto.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineSyncBatchResponseDto.toString()
+    public int com.vireocode.vireo.offline.OfflineSyncBatchResponseDto.accepted()
+    public int com.vireocode.vireo.offline.OfflineSyncBatchResponseDto.failed()
+    public java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandResultDto> com.vireocode.vireo.offline.OfflineSyncBatchResponseDto.results()
 
-public final class com.vireocode.offline.OfflineSyncBodyNormalizer
-    public static <T> T com.vireocode.offline.OfflineSyncBodyNormalizer.treeToValue(com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.ObjectMapper,java.lang.Class<T>) throws java.lang.Exception
-    public static com.fasterxml.jackson.databind.JsonNode com.vireocode.offline.OfflineSyncBodyNormalizer.normalize(com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.ObjectMapper)
+public final class com.vireocode.vireo.offline.OfflineSyncBodyNormalizer
+    public static <T> T com.vireocode.vireo.offline.OfflineSyncBodyNormalizer.treeToValue(com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.ObjectMapper,java.lang.Class<T>) throws java.lang.Exception
+    public static com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.offline.OfflineSyncBodyNormalizer.normalize(com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.ObjectMapper)
 
-public final record com.vireocode.offline.OfflineSyncCommandDto
+public final record com.vireocode.vireo.offline.OfflineSyncCommandDto
     extends java.lang.Record
-    public com.vireocode.offline.OfflineSyncCommandDto(java.util.UUID,java.lang.String,java.lang.String,com.fasterxml.jackson.databind.JsonNode,java.util.Map<java.lang.String, java.lang.String>)
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.offline.OfflineSyncCommandDto.body()
-    public final boolean com.vireocode.offline.OfflineSyncCommandDto.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineSyncCommandDto.hashCode()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandDto.method()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandDto.toString()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandDto.url()
-    public java.util.Map<java.lang.String, java.lang.String> com.vireocode.offline.OfflineSyncCommandDto.headers()
-    public java.util.UUID com.vireocode.offline.OfflineSyncCommandDto.commandId()
+    public com.vireocode.vireo.offline.OfflineSyncCommandDto(java.util.UUID,java.lang.String,java.lang.String,com.fasterxml.jackson.databind.JsonNode,java.util.Map<java.lang.String, java.lang.String>)
+    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.offline.OfflineSyncCommandDto.body()
+    public final boolean com.vireocode.vireo.offline.OfflineSyncCommandDto.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineSyncCommandDto.hashCode()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandDto.method()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandDto.toString()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandDto.url()
+    public java.util.Map<java.lang.String, java.lang.String> com.vireocode.vireo.offline.OfflineSyncCommandDto.headers()
+    public java.util.UUID com.vireocode.vireo.offline.OfflineSyncCommandDto.commandId()
 
-public class com.vireocode.offline.OfflineSyncCommandEntity
-    public com.vireocode.offline.OfflineSyncCommandEntity()
-    public com.vireocode.offline.OfflineSyncCommandStatus com.vireocode.offline.OfflineSyncCommandEntity.getStatus()
-    public int com.vireocode.offline.OfflineSyncCommandEntity.getRetryCount()
-    public java.lang.Integer com.vireocode.offline.OfflineSyncCommandEntity.getResponseStatus()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandEntity.getErrorMessage()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandEntity.getHttpMethod()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandEntity.getOwnerUsername()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandEntity.getRequestBody()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandEntity.getRequestHeaders()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandEntity.getUrl()
-    public java.time.Instant com.vireocode.offline.OfflineSyncCommandEntity.getCreatedAt()
-    public java.time.Instant com.vireocode.offline.OfflineSyncCommandEntity.getProcessedAt()
-    public java.util.UUID com.vireocode.offline.OfflineSyncCommandEntity.getCommandId()
-    public java.util.UUID com.vireocode.offline.OfflineSyncCommandEntity.getId()
-    public java.util.UUID com.vireocode.offline.OfflineSyncCommandEntity.getOwnerId()
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setCommandId(java.util.UUID)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setCreatedAt(java.time.Instant)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setErrorMessage(java.lang.String)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setHttpMethod(java.lang.String)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setId(java.util.UUID)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setOwnerId(java.util.UUID)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setOwnerUsername(java.lang.String)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setProcessedAt(java.time.Instant)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setRequestBody(java.lang.String)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setRequestHeaders(java.lang.String)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setResponseStatus(java.lang.Integer)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setRetryCount(int)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setStatus(com.vireocode.offline.OfflineSyncCommandStatus)
-    public void com.vireocode.offline.OfflineSyncCommandEntity.setUrl(java.lang.String)
+public class com.vireocode.vireo.offline.OfflineSyncCommandEntity
+    public com.vireocode.vireo.offline.OfflineSyncCommandEntity()
+    public com.vireocode.vireo.offline.OfflineSyncCommandStatus com.vireocode.vireo.offline.OfflineSyncCommandEntity.getStatus()
+    public int com.vireocode.vireo.offline.OfflineSyncCommandEntity.getRetryCount()
+    public java.lang.Integer com.vireocode.vireo.offline.OfflineSyncCommandEntity.getResponseStatus()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandEntity.getErrorMessage()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandEntity.getHttpMethod()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandEntity.getOwnerUsername()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandEntity.getRequestBody()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandEntity.getRequestHeaders()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandEntity.getUrl()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineSyncCommandEntity.getCreatedAt()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineSyncCommandEntity.getProcessedAt()
+    public java.util.UUID com.vireocode.vireo.offline.OfflineSyncCommandEntity.getCommandId()
+    public java.util.UUID com.vireocode.vireo.offline.OfflineSyncCommandEntity.getId()
+    public java.util.UUID com.vireocode.vireo.offline.OfflineSyncCommandEntity.getOwnerId()
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setCommandId(java.util.UUID)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setCreatedAt(java.time.Instant)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setErrorMessage(java.lang.String)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setHttpMethod(java.lang.String)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setId(java.util.UUID)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setOwnerId(java.util.UUID)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setOwnerUsername(java.lang.String)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setProcessedAt(java.time.Instant)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setRequestBody(java.lang.String)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setRequestHeaders(java.lang.String)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setResponseStatus(java.lang.Integer)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setRetryCount(int)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setStatus(com.vireocode.vireo.offline.OfflineSyncCommandStatus)
+    public void com.vireocode.vireo.offline.OfflineSyncCommandEntity.setUrl(java.lang.String)
 
-public final record com.vireocode.offline.OfflineSyncCommandListItemDto
+public final record com.vireocode.vireo.offline.OfflineSyncCommandListItemDto
     extends java.lang.Record
-    public com.vireocode.offline.OfflineSyncCommandListItemDto(java.util.UUID,java.lang.String,java.lang.String,java.lang.String,com.vireocode.offline.OfflineSyncCommandStatus,java.lang.Integer,java.lang.String,java.time.Instant,java.time.Instant)
-    public com.vireocode.offline.OfflineSyncCommandStatus com.vireocode.offline.OfflineSyncCommandListItemDto.status()
-    public final boolean com.vireocode.offline.OfflineSyncCommandListItemDto.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineSyncCommandListItemDto.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineSyncCommandListItemDto.toString()
-    public java.lang.Integer com.vireocode.offline.OfflineSyncCommandListItemDto.responseStatus()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandListItemDto.errorMessage()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandListItemDto.httpMethod()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandListItemDto.requestBody()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandListItemDto.url()
-    public java.time.Instant com.vireocode.offline.OfflineSyncCommandListItemDto.createdAt()
-    public java.time.Instant com.vireocode.offline.OfflineSyncCommandListItemDto.processedAt()
-    public java.util.UUID com.vireocode.offline.OfflineSyncCommandListItemDto.commandId()
+    public com.vireocode.vireo.offline.OfflineSyncCommandListItemDto(java.util.UUID,java.lang.String,java.lang.String,java.lang.String,com.vireocode.vireo.offline.OfflineSyncCommandStatus,java.lang.Integer,java.lang.String,java.time.Instant,java.time.Instant)
+    public com.vireocode.vireo.offline.OfflineSyncCommandStatus com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.status()
+    public final boolean com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.toString()
+    public java.lang.Integer com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.responseStatus()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.errorMessage()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.httpMethod()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.requestBody()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.url()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.createdAt()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.processedAt()
+    public java.util.UUID com.vireocode.vireo.offline.OfflineSyncCommandListItemDto.commandId()
 
-public abstract interface com.vireocode.offline.OfflineSyncCommandRepository
-    implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.offline.OfflineSyncCommandEntity, java.util.UUID>
-    implements org.springframework.data.jpa.repository.JpaSpecificationExecutor<com.vireocode.offline.OfflineSyncCommandEntity>
-    public abstract java.util.List<com.vireocode.offline.OfflineSyncCommandEntity> com.vireocode.offline.OfflineSyncCommandRepository.findAllByCommandIdIn(java.util.Collection<java.util.UUID>)
+public abstract interface com.vireocode.vireo.offline.OfflineSyncCommandRepository
+    implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.vireo.offline.OfflineSyncCommandEntity, java.util.UUID>
+    implements org.springframework.data.jpa.repository.JpaSpecificationExecutor<com.vireocode.vireo.offline.OfflineSyncCommandEntity>
+    public abstract java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandEntity> com.vireocode.vireo.offline.OfflineSyncCommandRepository.findAllByCommandIdIn(java.util.Collection<java.util.UUID>)
 
-public final record com.vireocode.offline.OfflineSyncCommandResultDto
+public final record com.vireocode.vireo.offline.OfflineSyncCommandResultDto
     extends java.lang.Record
-    public com.vireocode.offline.OfflineSyncCommandResultDto(java.util.UUID,boolean,int,java.lang.String)
-    public com.vireocode.offline.OfflineSyncCommandResultDto(java.util.UUID,boolean,int,java.lang.String,com.vireocode.offline.OfflineSyncResultReason)
-    public boolean com.vireocode.offline.OfflineSyncCommandResultDto.success()
-    public com.vireocode.offline.OfflineSyncResultReason com.vireocode.offline.OfflineSyncCommandResultDto.reason()
-    public final boolean com.vireocode.offline.OfflineSyncCommandResultDto.equals(java.lang.Object)
-    public final int com.vireocode.offline.OfflineSyncCommandResultDto.hashCode()
-    public final java.lang.String com.vireocode.offline.OfflineSyncCommandResultDto.toString()
-    public int com.vireocode.offline.OfflineSyncCommandResultDto.status()
-    public java.lang.String com.vireocode.offline.OfflineSyncCommandResultDto.error()
-    public java.util.UUID com.vireocode.offline.OfflineSyncCommandResultDto.commandId()
+    public com.vireocode.vireo.offline.OfflineSyncCommandResultDto(java.util.UUID,boolean,int,java.lang.String)
+    public com.vireocode.vireo.offline.OfflineSyncCommandResultDto(java.util.UUID,boolean,int,java.lang.String,com.vireocode.vireo.offline.OfflineSyncResultReason)
+    public boolean com.vireocode.vireo.offline.OfflineSyncCommandResultDto.success()
+    public com.vireocode.vireo.offline.OfflineSyncResultReason com.vireocode.vireo.offline.OfflineSyncCommandResultDto.reason()
+    public final boolean com.vireocode.vireo.offline.OfflineSyncCommandResultDto.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineSyncCommandResultDto.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandResultDto.toString()
+    public int com.vireocode.vireo.offline.OfflineSyncCommandResultDto.status()
+    public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandResultDto.error()
+    public java.util.UUID com.vireocode.vireo.offline.OfflineSyncCommandResultDto.commandId()
 
-public final enum com.vireocode.offline.OfflineSyncCommandStatus
-    extends java.lang.Enum<com.vireocode.offline.OfflineSyncCommandStatus>
-    public static final com.vireocode.offline.OfflineSyncCommandStatus com.vireocode.offline.OfflineSyncCommandStatus.DONE
-    public static final com.vireocode.offline.OfflineSyncCommandStatus com.vireocode.offline.OfflineSyncCommandStatus.FAILED
-    public static final com.vireocode.offline.OfflineSyncCommandStatus com.vireocode.offline.OfflineSyncCommandStatus.PENDING
-    public static final com.vireocode.offline.OfflineSyncCommandStatus com.vireocode.offline.OfflineSyncCommandStatus.REJECTED
-    public static com.vireocode.offline.OfflineSyncCommandStatus com.vireocode.offline.OfflineSyncCommandStatus.valueOf(java.lang.String)
-    public static com.vireocode.offline.OfflineSyncCommandStatus[] com.vireocode.offline.OfflineSyncCommandStatus.values()
+public final enum com.vireocode.vireo.offline.OfflineSyncCommandStatus
+    extends java.lang.Enum<com.vireocode.vireo.offline.OfflineSyncCommandStatus>
+    public static final com.vireocode.vireo.offline.OfflineSyncCommandStatus com.vireocode.vireo.offline.OfflineSyncCommandStatus.DONE
+    public static final com.vireocode.vireo.offline.OfflineSyncCommandStatus com.vireocode.vireo.offline.OfflineSyncCommandStatus.FAILED
+    public static final com.vireocode.vireo.offline.OfflineSyncCommandStatus com.vireocode.vireo.offline.OfflineSyncCommandStatus.PENDING
+    public static final com.vireocode.vireo.offline.OfflineSyncCommandStatus com.vireocode.vireo.offline.OfflineSyncCommandStatus.REJECTED
+    public static com.vireocode.vireo.offline.OfflineSyncCommandStatus com.vireocode.vireo.offline.OfflineSyncCommandStatus.valueOf(java.lang.String)
+    public static com.vireocode.vireo.offline.OfflineSyncCommandStatus[] com.vireocode.vireo.offline.OfflineSyncCommandStatus.values()
 
-public class com.vireocode.offline.OfflineSyncController
-    public com.vireocode.offline.OfflineSyncController(com.vireocode.offline.OfflineSyncService)
-    public com.vireocode.offline.OfflineSyncBatchResponseDto com.vireocode.offline.OfflineSyncController.sync(com.vireocode.offline.OfflineSyncBatchRequestDto,jakarta.servlet.http.HttpServletRequest)
-    public org.springframework.data.domain.Page<com.vireocode.offline.OfflineSyncCommandListItemDto> com.vireocode.offline.OfflineSyncController.searchCommands(int,int,java.lang.String,java.lang.String,java.lang.String,com.vireocode.queryengine.QueryFilterRequest)
+public class com.vireocode.vireo.offline.OfflineSyncController
+    public com.vireocode.vireo.offline.OfflineSyncController(com.vireocode.vireo.offline.OfflineSyncService)
+    public com.vireocode.vireo.offline.OfflineSyncBatchResponseDto com.vireocode.vireo.offline.OfflineSyncController.sync(com.vireocode.vireo.offline.OfflineSyncBatchRequestDto,jakarta.servlet.http.HttpServletRequest)
+    public org.springframework.data.domain.Page<com.vireocode.vireo.offline.OfflineSyncCommandListItemDto> com.vireocode.vireo.offline.OfflineSyncController.searchCommands(int,int,java.lang.String,java.lang.String,java.lang.String,com.vireocode.vireo.queryengine.QueryFilterRequest)
 
-public abstract interface com.vireocode.offline.OfflineSyncReplayHandler
-    public abstract boolean com.vireocode.offline.OfflineSyncReplayHandler.supports(com.vireocode.offline.OfflineSyncCommandDto,org.springframework.http.HttpMethod)
-    public abstract com.vireocode.offline.OfflineSyncCommandResultDto com.vireocode.offline.OfflineSyncReplayHandler.process(com.vireocode.offline.OfflineSyncCommandDto)
+public abstract interface com.vireocode.vireo.offline.OfflineSyncReplayHandler
+    public abstract boolean com.vireocode.vireo.offline.OfflineSyncReplayHandler.supports(com.vireocode.vireo.offline.OfflineSyncCommandDto,org.springframework.http.HttpMethod)
+    public abstract com.vireocode.vireo.offline.OfflineSyncCommandResultDto com.vireocode.vireo.offline.OfflineSyncReplayHandler.process(com.vireocode.vireo.offline.OfflineSyncCommandDto)
 
-public final enum com.vireocode.offline.OfflineSyncResultReason
-    extends java.lang.Enum<com.vireocode.offline.OfflineSyncResultReason>
-    public static final com.vireocode.offline.OfflineSyncResultReason com.vireocode.offline.OfflineSyncResultReason.ALREADY_APPLIED
-    public static final com.vireocode.offline.OfflineSyncResultReason com.vireocode.offline.OfflineSyncResultReason.APPLIED
-    public static final com.vireocode.offline.OfflineSyncResultReason com.vireocode.offline.OfflineSyncResultReason.REJECTED
-    public static final com.vireocode.offline.OfflineSyncResultReason com.vireocode.offline.OfflineSyncResultReason.RETRYABLE
-    public static final com.vireocode.offline.OfflineSyncResultReason com.vireocode.offline.OfflineSyncResultReason.RETRY_LIMIT_EXCEEDED
-    public static com.vireocode.offline.OfflineSyncResultReason com.vireocode.offline.OfflineSyncResultReason.valueOf(java.lang.String)
-    public static com.vireocode.offline.OfflineSyncResultReason[] com.vireocode.offline.OfflineSyncResultReason.values()
+public final enum com.vireocode.vireo.offline.OfflineSyncResultReason
+    extends java.lang.Enum<com.vireocode.vireo.offline.OfflineSyncResultReason>
+    public static final com.vireocode.vireo.offline.OfflineSyncResultReason com.vireocode.vireo.offline.OfflineSyncResultReason.ALREADY_APPLIED
+    public static final com.vireocode.vireo.offline.OfflineSyncResultReason com.vireocode.vireo.offline.OfflineSyncResultReason.APPLIED
+    public static final com.vireocode.vireo.offline.OfflineSyncResultReason com.vireocode.vireo.offline.OfflineSyncResultReason.REJECTED
+    public static final com.vireocode.vireo.offline.OfflineSyncResultReason com.vireocode.vireo.offline.OfflineSyncResultReason.RETRYABLE
+    public static final com.vireocode.vireo.offline.OfflineSyncResultReason com.vireocode.vireo.offline.OfflineSyncResultReason.RETRY_LIMIT_EXCEEDED
+    public static com.vireocode.vireo.offline.OfflineSyncResultReason com.vireocode.vireo.offline.OfflineSyncResultReason.valueOf(java.lang.String)
+    public static com.vireocode.vireo.offline.OfflineSyncResultReason[] com.vireocode.vireo.offline.OfflineSyncResultReason.values()
 
-public class com.vireocode.offline.OfflineSyncService
-    public com.vireocode.offline.OfflineSyncService(com.vireocode.offline.OfflineHeartbeatService,com.vireocode.offline.OfflineSyncCommandRepository,com.fasterxml.jackson.databind.ObjectMapper,com.vireocode.offline.OfflineActorResolver,java.util.List<com.vireocode.offline.OfflineSyncReplayHandler>,com.vireocode.queryengine.QueryEngineFilterSpecificationBuilder)
-    public com.vireocode.offline.OfflineSyncBatchResponseDto com.vireocode.offline.OfflineSyncService.processBatch(com.vireocode.offline.OfflineSyncBatchRequestDto,jakarta.servlet.http.HttpServletRequest)
-    public org.springframework.data.domain.Page<com.vireocode.offline.OfflineSyncCommandListItemDto> com.vireocode.offline.OfflineSyncService.searchCommands(com.vireocode.web.SearchablePageable,com.vireocode.queryengine.QueryFilterRequest)
+public class com.vireocode.vireo.offline.OfflineSyncService
+    public com.vireocode.vireo.offline.OfflineSyncService(com.vireocode.vireo.offline.OfflineHeartbeatService,com.vireocode.vireo.offline.OfflineSyncCommandRepository,com.fasterxml.jackson.databind.ObjectMapper,com.vireocode.vireo.offline.OfflineActorResolver,java.util.List<com.vireocode.vireo.offline.OfflineSyncReplayHandler>,com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder)
+    public com.vireocode.vireo.offline.OfflineSyncBatchResponseDto com.vireocode.vireo.offline.OfflineSyncService.processBatch(com.vireocode.vireo.offline.OfflineSyncBatchRequestDto,jakarta.servlet.http.HttpServletRequest)
+    public org.springframework.data.domain.Page<com.vireocode.vireo.offline.OfflineSyncCommandListItemDto> com.vireocode.vireo.offline.OfflineSyncService.searchCommands(com.vireocode.vireo.web.SearchablePageable,com.vireocode.vireo.queryengine.QueryFilterRequest)
 
-public class com.vireocode.offline.StarterOfflineActorResolver
-    implements com.vireocode.offline.OfflineActorResolver
-    public com.vireocode.offline.StarterOfflineActorResolver(java.lang.String)
-    public java.util.Optional<com.vireocode.offline.OfflineActor> com.vireocode.offline.StarterOfflineActorResolver.resolveCurrentActor()
+public class com.vireocode.vireo.offline.StarterOfflineActorResolver
+    implements com.vireocode.vireo.offline.OfflineActorResolver
+    public com.vireocode.vireo.offline.StarterOfflineActorResolver(java.lang.String)
+    public java.util.Optional<com.vireocode.vireo.offline.OfflineActor> com.vireocode.vireo.offline.StarterOfflineActorResolver.resolveCurrentActor()
 
-public class com.vireocode.offline.StarterOfflineAutoConfiguration
-    public com.vireocode.offline.StarterOfflineAutoConfiguration()
+public class com.vireocode.vireo.offline.StarterOfflineAutoConfiguration
+    public com.vireocode.vireo.offline.StarterOfflineAutoConfiguration()
 
-public class com.vireocode.offline.StarterOfflineProperties
-    public com.vireocode.offline.StarterOfflineProperties()
-    public boolean com.vireocode.offline.StarterOfflineProperties.isEndpointPathsDistinct()
-    public boolean com.vireocode.offline.StarterOfflineProperties.isHeartbeatEndpointEnabled()
-    public boolean com.vireocode.offline.StarterOfflineProperties.isHeartbeatIntervalValid()
-    public boolean com.vireocode.offline.StarterOfflineProperties.isHydrationEndpointEnabled()
-    public boolean com.vireocode.offline.StarterOfflineProperties.isReplayMethodPolicyValid()
-    public boolean com.vireocode.offline.StarterOfflineProperties.isReplayPathPolicyValid()
-    public boolean com.vireocode.offline.StarterOfflineProperties.isSyncEndpointEnabled()
-    public int com.vireocode.offline.StarterOfflineProperties.getMaxBatchSize()
-    public int com.vireocode.offline.StarterOfflineProperties.getMaxHydrationEntities()
-    public int com.vireocode.offline.StarterOfflineProperties.getMaxReplayAttempts()
-    public java.lang.String com.vireocode.offline.StarterOfflineProperties.getHeartbeatEndpointPath()
-    public java.lang.String com.vireocode.offline.StarterOfflineProperties.getHydrationEndpointPath()
-    public java.lang.String com.vireocode.offline.StarterOfflineProperties.getPrivilegedRole()
-    public java.lang.String com.vireocode.offline.StarterOfflineProperties.getReplayApiPrefix()
-    public java.lang.String com.vireocode.offline.StarterOfflineProperties.getSyncEndpointPath()
-    public java.time.Duration com.vireocode.offline.StarterOfflineProperties.getHeartbeatInterval()
-    public java.util.List<java.lang.String> com.vireocode.offline.StarterOfflineProperties.getExcludedReplayPathPrefixes()
-    public java.util.List<java.lang.String> com.vireocode.offline.StarterOfflineProperties.getReplayHeaders()
-    public java.util.List<java.lang.String> com.vireocode.offline.StarterOfflineProperties.getReplayMethods()
-    public void com.vireocode.offline.StarterOfflineProperties.setExcludedReplayPathPrefixes(java.util.List<java.lang.String>)
-    public void com.vireocode.offline.StarterOfflineProperties.setHeartbeatEndpointEnabled(boolean)
-    public void com.vireocode.offline.StarterOfflineProperties.setHeartbeatEndpointPath(java.lang.String)
-    public void com.vireocode.offline.StarterOfflineProperties.setHeartbeatInterval(java.time.Duration)
-    public void com.vireocode.offline.StarterOfflineProperties.setHydrationEndpointEnabled(boolean)
-    public void com.vireocode.offline.StarterOfflineProperties.setHydrationEndpointPath(java.lang.String)
-    public void com.vireocode.offline.StarterOfflineProperties.setMaxBatchSize(int)
-    public void com.vireocode.offline.StarterOfflineProperties.setMaxHydrationEntities(int)
-    public void com.vireocode.offline.StarterOfflineProperties.setMaxReplayAttempts(int)
-    public void com.vireocode.offline.StarterOfflineProperties.setPrivilegedRole(java.lang.String)
-    public void com.vireocode.offline.StarterOfflineProperties.setReplayApiPrefix(java.lang.String)
-    public void com.vireocode.offline.StarterOfflineProperties.setReplayHeaders(java.util.List<java.lang.String>)
-    public void com.vireocode.offline.StarterOfflineProperties.setReplayMethods(java.util.List<java.lang.String>)
-    public void com.vireocode.offline.StarterOfflineProperties.setSyncEndpointEnabled(boolean)
-    public void com.vireocode.offline.StarterOfflineProperties.setSyncEndpointPath(java.lang.String)
+public class com.vireocode.vireo.offline.StarterOfflineProperties
+    public com.vireocode.vireo.offline.StarterOfflineProperties()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isEndpointPathsDistinct()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isHeartbeatEndpointEnabled()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isHeartbeatIntervalValid()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isHydrationEndpointEnabled()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isReplayMethodPolicyValid()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isReplayPathPolicyValid()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isSyncEndpointEnabled()
+    public int com.vireocode.vireo.offline.StarterOfflineProperties.getMaxBatchSize()
+    public int com.vireocode.vireo.offline.StarterOfflineProperties.getMaxHydrationEntities()
+    public int com.vireocode.vireo.offline.StarterOfflineProperties.getMaxReplayAttempts()
+    public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getHeartbeatEndpointPath()
+    public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getHydrationEndpointPath()
+    public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getPrivilegedRole()
+    public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getReplayApiPrefix()
+    public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getSyncEndpointPath()
+    public java.time.Duration com.vireocode.vireo.offline.StarterOfflineProperties.getHeartbeatInterval()
+    public java.util.List<java.lang.String> com.vireocode.vireo.offline.StarterOfflineProperties.getExcludedReplayPathPrefixes()
+    public java.util.List<java.lang.String> com.vireocode.vireo.offline.StarterOfflineProperties.getReplayHeaders()
+    public java.util.List<java.lang.String> com.vireocode.vireo.offline.StarterOfflineProperties.getReplayMethods()
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setExcludedReplayPathPrefixes(java.util.List<java.lang.String>)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setHeartbeatEndpointEnabled(boolean)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setHeartbeatEndpointPath(java.lang.String)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setHeartbeatInterval(java.time.Duration)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setHydrationEndpointEnabled(boolean)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setHydrationEndpointPath(java.lang.String)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setMaxBatchSize(int)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setMaxHydrationEntities(int)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setMaxReplayAttempts(int)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setPrivilegedRole(java.lang.String)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setReplayApiPrefix(java.lang.String)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setReplayHeaders(java.util.List<java.lang.String>)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setReplayMethods(java.util.List<java.lang.String>)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setSyncEndpointEnabled(boolean)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setSyncEndpointPath(java.lang.String)

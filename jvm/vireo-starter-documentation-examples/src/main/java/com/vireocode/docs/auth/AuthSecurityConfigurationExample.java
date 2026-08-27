@@ -3,7 +3,7 @@ package com.vireocode.docs.auth;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.vireocode.auth.StarterHttpSecurityCustomizer;
+import com.vireocode.vireo.auth.StarterHttpSecurityCustomizer;
 
 @Configuration(proxyBeanMethods = false)
 public class AuthSecurityConfigurationExample {

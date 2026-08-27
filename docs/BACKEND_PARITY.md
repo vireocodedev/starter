@@ -99,7 +99,7 @@ Consequences, all of them simplifications:
 
 ## Artifact shape
 
-Group `com.vireocode`, Java package root `com.vireocode.starter`, mirroring the
+Group `com.vireocode`, Java package root `com.vireocode.vireo`, mirroring the
 npm packages where a real mirror exists:
 
 | Artifact                    | Contents                                | Frontend mirror          |

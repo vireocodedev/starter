@@ -9,13 +9,13 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vireocode.offline.OfflineActor;
-import com.vireocode.offline.OfflineActorResolver;
-import com.vireocode.offline.OfflineSyncBodyNormalizer;
-import com.vireocode.offline.OfflineSyncCommandDto;
-import com.vireocode.offline.OfflineSyncCommandResultDto;
-import com.vireocode.offline.OfflineSyncReplayHandler;
-import com.vireocode.offline.OfflineSyncResultReason;
+import com.vireocode.vireo.offline.OfflineActor;
+import com.vireocode.vireo.offline.OfflineActorResolver;
+import com.vireocode.vireo.offline.OfflineSyncBodyNormalizer;
+import com.vireocode.vireo.offline.OfflineSyncCommandDto;
+import com.vireocode.vireo.offline.OfflineSyncCommandResultDto;
+import com.vireocode.vireo.offline.OfflineSyncReplayHandler;
+import com.vireocode.vireo.offline.OfflineSyncResultReason;
 
 @Configuration(proxyBeanMethods = false)
 public class OfflineReplayConfigurationExample {

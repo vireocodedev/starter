@@ -130,37 +130,37 @@
       "role": "server-foundation",
       "declarationBudget": 29,
       "packageIntents": {
-        "com.vireocode.base": "domain-base-and-mapping-api",
-        "com.vireocode.config": "spring-auto-configuration-api",
-        "com.vireocode.flyway": "migration-extension-api",
-        "com.vireocode.security": "security-expression-api",
-        "com.vireocode.spi": "consumer-extension-points",
-        "com.vireocode.web": "http-and-error-contracts"
+        "com.vireocode.vireo.base": "domain-base-and-mapping-api",
+        "com.vireocode.vireo.config": "spring-auto-configuration-api",
+        "com.vireocode.vireo.flyway": "migration-extension-api",
+        "com.vireocode.vireo.security": "security-expression-api",
+        "com.vireocode.vireo.spi": "consumer-extension-points",
+        "com.vireocode.vireo.web": "http-and-error-contracts"
       }
     },
     "com.vireocode:vireo-auth": {
       "audience": "application",
       "role": "default-authentication",
       "declarationBudget": 13,
-      "packageIntents": { "com.vireocode.auth": "authentication-http-and-configuration-api" }
+      "packageIntents": { "com.vireocode.vireo.auth": "authentication-http-and-configuration-api" }
     },
     "com.vireocode:vireo-query": {
       "audience": "application",
       "role": "server-query-engine",
       "declarationBudget": 33,
-      "packageIntents": { "com.vireocode.queryengine": "query-language-and-persistence-api" }
+      "packageIntents": { "com.vireocode.vireo.queryengine": "query-language-and-persistence-api" }
     },
     "com.vireocode:vireo-offline": {
       "audience": "application",
       "role": "offline-sync-server",
       "declarationBudget": 29,
-      "packageIntents": { "com.vireocode.offline": "offline-protocol-and-persistence-api" }
+      "packageIntents": { "com.vireocode.vireo.offline": "offline-protocol-and-persistence-api" }
     },
     "com.vireocode:vireo-history": {
       "audience": "application",
       "role": "server-history",
       "declarationBudget": 7,
-      "packageIntents": { "com.vireocode.history": "history-recording-and-query-api" }
+      "packageIntents": { "com.vireocode.vireo.history": "history-recording-and-query-api" }
     },
     "com.vireocode:vireo-bom": { "audience": "build-tooling", "role": "version-alignment" }
   }

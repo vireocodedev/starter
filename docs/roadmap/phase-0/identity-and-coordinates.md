@@ -2,8 +2,8 @@
 
 Decision date: 2026-08-26
 
-Status: working identity approved; external activation blocked on reservation and
-professional clearance
+Status: technical publisher namespaces activated; professional clearance remains
+an external owner prerequisite
 
 This is an engineering and product decision, not legal advice or trademark
 clearance. Availability observations are point-in-time and confer no rights.
@@ -14,12 +14,11 @@ clearance. Availability observations are point-in-time and confer no rights.
 - Use **Vireo Framework** on first reference to the product; use **Vireo** only after
   the qualified identity is visible in the same context.
 - Retain the controlled GitHub organization and publisher handle `vireocodedev`.
-- Prefer `vireocode.dev` as the canonical domain if it is acquired and cleared.
+- Retain the controlled `vireocode.com` domain as the package-namespace authority.
 - Do not publish or promote the project as unqualified “Vireo.”
 - Do not use the unscoped npm package `vireo`.
-- Do not publicly publish Maven coordinates under `com.vireocode` unless ownership
-  of `vireocode.com` is established; it was registered to an unknown party during
-  this audit.
+- Publish Maven coordinates under `com.vireocode` only while control of
+  `vireocode.com` and its verified Central namespace is retained.
 
 The public lockup should read **Vireo Framework · by Vireo Code**. Repository cards,
 package pages, documentation titles, social previews, and search descriptions must
@@ -50,16 +49,16 @@ returned at that moment; it is not a reservation guarantee.
 
 ### Domains
 
-| Domain               | RDAP result              | Decision                                           |
-| -------------------- | ------------------------ | -------------------------------------------------- |
-| `vireo.com`          | Registered since 2000    | Reject                                             |
-| `vireo.dev`          | Registered since 2019    | Reject                                             |
-| `getvireo.com`       | Registered since 2024    | Reject                                             |
-| `vireocode.com`      | Registered in June 2026  | Do not base package ownership on it                |
-| `vireocode.dev`      | No registration returned | Preferred acquisition target                       |
-| `vireoframework.dev` | No registration returned | Defensive fallback                                 |
-| `getvireo.dev`       | No registration returned | Defensive redirect only, not the primary identity  |
-| `vireoframework.com` | No registration returned | Optional defensive registration if still available |
+| Domain               | RDAP result                 | Decision                                           |
+| -------------------- | --------------------------- | -------------------------------------------------- |
+| `vireo.com`          | Registered since 2000       | Reject                                             |
+| `vireo.dev`          | Registered since 2019       | Reject                                             |
+| `getvireo.com`       | Registered since 2024       | Reject                                             |
+| `vireocode.com`      | Controlled by the publisher | Canonical package-namespace authority              |
+| `vireocode.dev`      | No registration returned    | Preferred acquisition target                       |
+| `vireoframework.dev` | No registration returned    | Defensive fallback                                 |
+| `getvireo.dev`       | No registration returned    | Defensive redirect only, not the primary identity  |
+| `vireoframework.com` | No registration returned    | Optional defensive registration if still available |
 
 The checks used the official Google Registry RDAP service for `.dev` and Verisign
 RDAP for `.com`.
@@ -91,8 +90,9 @@ The public registry returned the following snapshot:
 ### Maven Central
 
 No artifacts were returned for `com.vireocode`, `dev.vireocode`, `io.vireo`,
-`com.vireo`, or `org.vireo`. Maven Central namespace verification still requires
-proof of control; absence of artifacts is not ownership.
+`com.vireo`, or `org.vireo` during the 2026-08-26 snapshot. On 2026-08-27 the
+publisher verified the `com.vireocode` Central namespace through control of
+`vireocode.com`. Absence of artifacts remains distinct from namespace ownership.
 
 ### Reproducible registry endpoints
 
@@ -133,20 +133,22 @@ The workspace root is private and is not a public framework package.
 
 ### Maven and Java
 
-Preferred coordinates after acquiring `vireocode.dev`:
+Canonical coordinates after verifying `vireocode.com`:
 
 | Current private coordinate                | Canonical public coordinate   |
 | ----------------------------------------- | ----------------------------- |
-| `com.vireocode:vireo-starter-bom`         | `dev.vireocode:vireo-bom`     |
-| `com.vireocode:vireo-starter-core`        | `dev.vireocode:vireo-core`    |
-| `com.vireocode:vireo-starter-auth`        | `dev.vireocode:vireo-auth`    |
-| `com.vireocode:vireo-starter-history`     | `dev.vireocode:vireo-history` |
-| `com.vireocode:vireo-starter-offline`     | `dev.vireocode:vireo-offline` |
-| `com.vireocode:vireo-starter-queryengine` | `dev.vireocode:vireo-query`   |
+| `com.vireocode:vireo-starter-bom`         | `com.vireocode:vireo-bom`     |
+| `com.vireocode:vireo-starter-core`        | `com.vireocode:vireo-core`    |
+| `com.vireocode:vireo-starter-auth`        | `com.vireocode:vireo-auth`    |
+| `com.vireocode:vireo-starter-history`     | `com.vireocode:vireo-history` |
+| `com.vireocode:vireo-starter-offline`     | `com.vireocode:vireo-offline` |
+| `com.vireocode:vireo-starter-queryengine` | `com.vireocode:vireo-query`   |
 
 Canonical Java packages should move from `com.vireocode.starter.*` to
-`dev.vireocode.*` before a public compatibility promise. If the domain cannot be
-acquired and verified, the approved fallback is Maven group
+`com.vireocode.vireo.*` before a public compatibility promise. The product segment
+is intentional: Spring Boot adds this root to entity and repository scanning, so
+using bare `com.vireocode` would also scan publisher-owned consumer applications.
+If domain control or Central verification is lost before release, the approved fallback is Maven group
 `io.github.vireocodedev` and Java prefix `io.github.vireocodedev.vireo`; the project
 must not improvise a third namespace.
 
@@ -158,7 +160,7 @@ Before changing source coordinates or public visibility:
    “Vireo Code” and “Vireo Framework,” including classes 009 and 042;
 2. run and retain official USPTO, EUIPO/TMview, WIPO, company-name, common-law, and
    relevant national searches;
-3. acquire `vireocode.dev` and configure protected registrar access, renewal,
+3. retain `vireocode.com` and configure protected registrar access, renewal,
    recovery, DNSSEC where supported, and more than one trusted administrator;
 4. reserve the npm organization/scope and every canonical package, including the
    create launcher, without publishing misleading functional releases;
@@ -197,8 +199,9 @@ and explicit migration documentation are preferred over silent aliasing.
 - If legal review rejects Vireo Code, keep Vireo as an internal codename, select a
   new coined identity, and repeat this report before public release. No canonical
   coordinates will yet have been promised.
-- If `vireocode.dev` becomes unavailable, use the GitHub-based Maven fallback and
-  select a different cleared domain; do not use `com.vireocode` without control.
+- If control of `vireocode.com` is lost before release, use the GitHub-based Maven
+  fallback and select a different cleared domain; do not use `com.vireocode`
+  without control.
 - If npm package reservation fails, retain the controlled `@vireocodedev` scope and
   choose descriptive scoped package names; never fall back to unscoped lookalikes.
 - If a rename happens after public release, maintain redirects and deprecated

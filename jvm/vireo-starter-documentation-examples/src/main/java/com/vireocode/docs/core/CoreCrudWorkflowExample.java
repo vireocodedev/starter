@@ -7,11 +7,11 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.stereotype.Service;
 
-import com.vireocode.base.BaseEntity;
-import com.vireocode.base.BaseMapper;
-import com.vireocode.base.BaseService;
-import com.vireocode.base.EntityConfig;
-import com.vireocode.base.SearchableRepository;
+import com.vireocode.vireo.base.BaseEntity;
+import com.vireocode.vireo.base.BaseMapper;
+import com.vireocode.vireo.base.BaseService;
+import com.vireocode.vireo.base.EntityConfig;
+import com.vireocode.vireo.base.SearchableRepository;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

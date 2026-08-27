@@ -1,9 +1,0 @@
-package com.vireocode.base;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.NoRepositoryBean;
-
-@NoRepositoryBean
-public interface SearchableRepository<DOMAIN, ID> extends JpaRepository<DOMAIN, ID>, JpaSpecificationExecutor<DOMAIN> {
-}

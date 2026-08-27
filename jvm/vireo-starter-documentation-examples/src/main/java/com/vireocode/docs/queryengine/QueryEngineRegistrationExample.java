@@ -6,12 +6,12 @@ import java.util.Map;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.vireocode.base.BaseEntity;
-import com.vireocode.queryengine.Filterable;
-import com.vireocode.queryengine.FilterableMetadata;
-import com.vireocode.queryengine.QueryEntityKey;
-import com.vireocode.queryengine.QueryEntityTypeResolver;
-import com.vireocode.queryengine.RelationFilterMode;
+import com.vireocode.vireo.base.BaseEntity;
+import com.vireocode.vireo.queryengine.Filterable;
+import com.vireocode.vireo.queryengine.FilterableMetadata;
+import com.vireocode.vireo.queryengine.QueryEntityKey;
+import com.vireocode.vireo.queryengine.QueryEntityTypeResolver;
+import com.vireocode.vireo.queryengine.RelationFilterMode;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

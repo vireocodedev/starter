@@ -9,11 +9,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.vireocode.auth.StarterAuthProperties;
-import com.vireocode.history.HistoryRecord;
-import com.vireocode.offline.OfflineSyncCommandDto;
-import com.vireocode.queryengine.QueryFilterRequest;
-import com.vireocode.web.ApiError;
+import com.vireocode.vireo.auth.StarterAuthProperties;
+import com.vireocode.vireo.history.HistoryRecord;
+import com.vireocode.vireo.offline.OfflineSyncCommandDto;
+import com.vireocode.vireo.queryengine.QueryFilterRequest;
+import com.vireocode.vireo.web.ApiError;
 
 /** Proves consumption through published JARs rather than Gradle project substitution. */
 class PublishedArtifactsTest {
