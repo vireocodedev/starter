@@ -31,7 +31,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - run: ./jvm/gradlew -p jvm clean build aggregateJavadoc -PvireoTestJavaVersion=25 --no-build-cache
       - name: Record evidence
         if: always()
@@ -65,7 +65,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: Require Docker
         run: docker info
       - name: Run the real PostgreSQL upgrade fixture
@@ -142,7 +142,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - run: corepack npm ci --ignore-scripts
       - name: Resolve and authenticate public npm packages from a fresh consumer cache
         run: corepack npm run release:verify-public
