@@ -49,9 +49,6 @@ External repository changes occur only after identity activation prerequisites p
    repositories if any integration does not follow redirects safely;
 7. perform the examples split only when Phase 2 defines the minimal Template.
 
-The local misspelling `starter-tenplate` is a checkout-directory defect and has no
-architectural standing.
-
 ## Why TypeScript and JVM stay together
 
 The framework repository contains two independent build and release graphs because

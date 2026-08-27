@@ -2,7 +2,13 @@
 
 Audit date: 2026-08-26
 
-Status: **not ready to change visibility**
+Historical status: **not ready to change visibility**
+
+> Activation update — 2026-08-27: the repository owner subsequently made Starter
+> public without rewriting history and activated public npm/Maven distribution. The
+> personal author-address exposure is therefore an accepted, irreversible disclosure
+> for existing commits. Professional identity clearance remains an explicit
+> pre-1.0 risk. The findings below are preserved as the historical preflight record.
 
 This audit asks whether the current Starter repository and its history can be made
 public without unintentionally disclosing secrets, personal information, private
@@ -61,7 +67,7 @@ At the audited commit:
 Negative pattern-search evidence is time-bound and incomplete by design. Rerun the
 checks immediately before changing visibility and after any history rewrite.
 
-## Visibility gate
+## Historical visibility gate
 
 The repository may move to a final manual/public-provider review only after:
 
@@ -74,5 +80,6 @@ The repository may move to a final manual/public-provider review only after:
 5. the package-coordinate migration is ready to land atomically with public
    documentation and clean-consumer checks.
 
-Even after those conditions pass, changing repository visibility remains an
-explicit external action requiring repository-owner approval.
+Changing repository visibility was an external owner action. Current public-source,
+artifact, and identity-risk status is recorded in the dated Phase 0 AI-proxy gate
+review rather than by rewriting this historical preflight.

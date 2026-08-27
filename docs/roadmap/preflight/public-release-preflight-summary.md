@@ -2,15 +2,13 @@
 
 Assessment date: 2026-08-26
 
-Status: **private release candidate verified; public release blocked**
+Historical status: **private release candidate verified; public release blocked**
 
-> Activation update — 2026-08-27: this remains the historical preflight decision,
-> but the Starter repository is now public, canonical Maven Central publication is
-> configured, and the npm source/workflow migration to seven canonical public
-> coordinates is complete. The first npm publication, per-package trusted-publisher
-> activation, and anonymous registry verification are still pending. Phase 0's
-> external product-validation gate remains open independently of these engineering
-> advances.
+> Activation update — 2026-08-27: this remains the historical preflight decision.
+> Both repositories are now public; seven `@vireocodedev/*` packages are public at
+> `0.2.1` with provenance attestations; six signed `com.vireocode:vireo-*` artifacts
+> are public at `0.2.0`; and the Template consumes them anonymously. The later Phase
+> 0 AI-proxy gate review governs current roadmap status.
 
 This is the consolidated disposition for the work that could proceed before final
 public coordinates, registry accounts, or other developers were available. It
@@ -21,8 +19,9 @@ combines:
 - [isolated consumer rehearsals](clean-consumer-rehearsal.md); and
 - [public API classification](public-api-classification.md).
 
-No package was published, no repository visibility or provider setting changed,
-no coordinate was reserved, and no Git history was rewritten.
+At the time of this assessment, no package was published, no repository visibility
+or provider setting changed, no coordinate was reserved, and no Git history was
+rewritten.
 
 ## What is green
 
@@ -50,7 +49,7 @@ temporary task-graph shim prevent workspace subprocesses from falling back to th
 host npm. Java 21, Gradle 9.7.1, TypeScript 6, and Vite 8 remain the verified
 repository lines. The exact locked consumer and required peer-floor consumer pass.
 
-## Release-readiness decision
+## Historical release-readiness decision
 
 | Target                                  | Decision          | Reason                                                                                                                     |
 | --------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -113,9 +112,9 @@ and database ports internal, and CI checks the static PWA, same-origin API proxy
 backend readiness, and database health. Database upgrade/backup/restore/rollback and
 multi-architecture evidence remain release follow-ups.
 
-## Coordinate-unblock sequence
+## Historical coordinate-unblock sequence
 
-Once the B0 decisions are complete:
+The activation later followed this sequence:
 
 1. migrate npm names, Maven group, repository URLs, developer/copyright metadata,
    docs, dependency edges, BOM, Template consumers, and fixtures in one coordinated
@@ -129,11 +128,15 @@ Once the B0 decisions are complete:
 6. only then approve repository visibility and stable public release as separate,
    explicit external actions.
 
-## Final preflight disposition
+## Current preflight disposition — 2026-08-27
 
-The code-owned publication and release-security boundaries are materially stronger
-and fully green. The remaining blockers are explicit: identity/ownership, history
-privacy, provider accounts/settings and recovery, public-registry provenance, and
-support activation. Public visibility or publication before those B0/B1 items close
-would be a governance and distribution failure, not a missing test that this
-repository can safely bypass.
+The public repository and package-distribution targets now pass: source is publicly
+cloneable, npm and Maven resolve anonymously, npm exposes provenance, Maven exposes
+signatures and checksums, and the Template consumes registry artifacts. The original
+preflight blockers are closed or overtaken by the owner-authorized activation.
+
+Remaining work is not hidden: professional identity clearance is an accepted
+pre-1.0 risk; provider recovery settings require periodic owner review; complete
+governance/support, compatibility, support-matrix, device, and production-hardening
+evidence remain in the gap register and Phase 1–4 backlog. This current disposition
+does not imply production readiness or human demand validation.

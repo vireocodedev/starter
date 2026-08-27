@@ -2,7 +2,7 @@
 
 Rehearsal date: 2026-08-26
 
-Status: **current local package consumers pass; full support-matrix clean rooms remain pending**
+Status: **local and public-registry consumers pass; full support-matrix clean rooms remain pending**
 
 This checkpoint proves that the built artifacts work without workspace resolution,
 source imports, or Gradle project substitution. It exercises local artifacts only;
@@ -71,6 +71,15 @@ workflow separately performs a post-publication run with an empty Gradle home.
 | BOM/versionless use      | Pass   | Five code modules compile and test without individual versions                                            |
 | JAR provenance           | Pass   | Each sampled public class loads from its expected `0.2.0` JAR                                             |
 
+## Public-registry activation result — 2026-08-27
+
+The public rehearsal resolved all seven npm packages at `0.2.1` from an empty
+task-specific cache and all six Maven artifacts at `0.2.0` from an empty
+task-specific Gradle home. The public Template uses those coordinates without a
+package token, GitHub Packages credential, Maven Local, or Gradle project
+substitution. npm metadata exposes provenance attestations for every package;
+Maven Central exposes signed POMs and checksum sidecars for every module.
+
 ## Remaining clean-room work
 
 - npm 12.0.2 is now selected through Corepack in repository commands and CI, and
@@ -81,12 +90,13 @@ workflow separately performs a post-publication run with an empty Gradle home.
   of each admitted range still needs representative sampling.
 - Canonical Ubuntu 24.04/26.04, macOS, and Windows 11/WSL2 empty-machine rehearsals
   remain recurring support evidence, not a per-commit local package check.
-- Public registry rehearsals remain blocked on final npm/Maven coordinates and
-  registry configuration. When available, repeat these scenarios without `file:`
-  repositories and without registry credentials for public consumption.
+- Keep public-registry verification recurring for every release and retain the
+  evidence. The first public checks are complete; broader OS/browser/device clean
+  rooms remain separate support evidence.
 
 ## Gate result
 
-The current artifacts pass isolated local consumption on both ecosystems. This
-closes the monorepo-substitution risk for pull-request verification; it does not yet
-activate the broader public support labels defined by D-105.
+The local and public artifacts pass isolated consumption on both ecosystems. This
+closes the credential and monorepo-substitution risk for the published boundary; it
+does not activate the broader cross-OS/browser/device support labels defined by
+D-105.

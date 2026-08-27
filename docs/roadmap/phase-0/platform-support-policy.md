@@ -2,6 +2,8 @@
 
 Decision date: 2026-08-26
 
+Evidence reconciled: 2026-08-27
+
 Decision: D-105
 
 Status: policy accepted; public support activation requires the enforcement work
@@ -197,17 +199,17 @@ Vireo may publish measurements with methodology but not capacity promises.
 
 ## Current evidence and activation gaps
 
-As of 2026-08-26:
+As of 2026-08-27:
 
-| Concern              | Evidence today                                                                                                                            | Missing before public support activation                                                            |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Node/npm             | Both repositories pin Node 24.18.1 in CI and enforce npm 12.0.2 through Corepack, manifests, lockfiles, subprocesses, and policy gates    | Obtain recurring clean-host records and keep patch updates inside the admitted lines                |
-| Java/Boot            | Java 21 and Boot 4.1.1 are canonical; both repositories source-enforce Java 25 test-runtime lanes while retaining Java 21 compilation     | Obtain the first green recurring Java 25 records and finish cross-repository BOM admission sampling |
-| React/MUI/TypeScript | React 19.2/MUI 9 ranges are bounded; TypeScript 6 and recurring packed required/optional peer-floor consumers are source-enforced         | Obtain recurring green records and expand admitted-range sampling beyond floors                     |
-| PostgreSQL           | Starter requires its upgrade fixture on 17/18; Template source-enforces Flyway startup and browser-driven CRUD on both majors nightly     | Obtain recurring green records, then add backup/restore and release-line upgrade rehearsals         |
-| Browsers             | Template checks desktop/mobile Chromium per merge and source-enforces nightly Playwright Firefox/WebKit full-stack smoke                  | Obtain recurring green records; add branded browsers, macOS Safari, physical devices, and PWA flows |
-| Operating systems    | Every Starter workflow pins Ubuntu 24.04; a digest-pinned clean Node container runs the full TypeScript gate nightly                      | Obtain recurring green records; add Ubuntu 26.04, macOS, and Windows/WSL clean rooms                |
-| Deployment           | Template source-enforces digest-pinned independent frontend/backend images plus PostgreSQL 18 Compose health, static, and API-proxy smoke | Obtain recurring green records; add upgrade, backup/restore, rollback, and multi-architecture proof |
+| Concern              | Evidence today                                                                                                                                                       | Missing before public support activation                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Node/npm             | Both repositories pin Node 24.18.1/npm 12.0.2; seven npm `0.2.1` packages and the Template pass anonymous public-registry consumption                                | Keep recurring clean-host/release records and patch updates inside the admitted lines               |
+| Java/Boot            | Java 21 and Boot 4.1.1 are canonical; signed Maven `0.2.0` artifacts and the Template pass anonymous Central consumption; Java 25 has a recurring compatibility lane | Keep recurring Java 25 records and broaden cross-repository BOM admission sampling                  |
+| React/MUI/TypeScript | React 19.2/MUI 9 ranges are bounded; TypeScript 6 and recurring packed required/optional peer-floor consumers are source-enforced                                    | Obtain recurring green records and expand admitted-range sampling beyond floors                     |
+| PostgreSQL           | Starter requires its upgrade fixture on 17/18; Template source-enforces Flyway startup and browser-driven CRUD on both majors nightly                                | Obtain recurring green records, then add backup/restore and release-line upgrade rehearsals         |
+| Browsers             | Template checks desktop/mobile Chromium per merge and source-enforces nightly Playwright Firefox/WebKit full-stack smoke                                             | Obtain recurring green records; add branded browsers, macOS Safari, physical devices, and PWA flows |
+| Operating systems    | Every Starter workflow pins Ubuntu 24.04; a digest-pinned clean Node container runs the full TypeScript gate nightly                                                 | Obtain recurring green records; add Ubuntu 26.04, macOS, and Windows/WSL clean rooms                |
+| Deployment           | Template source-enforces digest-pinned independent frontend/backend images plus PostgreSQL 18 Compose health, static, and API-proxy smoke                            | Obtain recurring green records; add upgrade, backup/restore, rollback, and multi-architecture proof |
 
 These gaps do not reopen the policy decision. They block use of the **supported**
 label and are tracked by G-112 plus the existing browser, database, deployment, and

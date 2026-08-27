@@ -1,7 +1,22 @@
-# @vireocodedev/starter
+# Vireo Framework · by Vireo Code
 
-Shared libraries for the vireocodedev **starter** product, in two halves that
-ship together because they live in one repository:
+Vireo is an opinionated full-stack foundation for small teams building operational
+business applications with React and Spring Boot. It supplies reusable responsive
+UI, cross-stack contracts, history, localization, and offline building blocks while
+leaving applications as ordinary React and Spring Boot code.
+
+The application team owns its domain model, authorization policy, data sensitivity,
+offline eligibility, and conflict resolution. Vireo's offline packages provide
+mechanisms for selected disconnected workflows; they do not make arbitrary business
+logic synchronize safely. See the public
+[Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
+current runnable full-stack composition.
+
+This public `0.x` line is production-shaped, not a production-readiness claim. The
+create, doctor, upgrade, and full-stack entity generator workflows do not yet exist;
+current applications clone and customize the Template and hand-write domain slices.
+
+The framework libraries live in two halves:
 
 - `packages/*` — the frontend libraries. npm workspaces monorepo, published as
   public npm packages under the `@vireocodedev` scope.
@@ -21,16 +36,16 @@ backend's base entity/service layer; they are separate contracts.
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`@vireocodedev/ui`](packages/ui)                         | 0.2.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
-| [`@vireocodedev/query`](packages/queryengine)             | 0.2.0   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
-| [`@vireocodedev/shell`](packages/shell)                   | 0.2.0   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
-| [`@vireocodedev/localization`](packages/localization)     | 0.2.0   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
-| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.0   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
-| [`@vireocodedev/history`](packages/history)               | 0.2.0   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
-| [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.0   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
+| [`@vireocodedev/ui`](packages/ui)                         | 0.2.1   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
+| [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
+| [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
+| [`@vireocodedev/localization`](packages/localization)     | 0.2.1   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
+| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.1   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
+| [`@vireocodedev/history`](packages/history)               | 0.2.1   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
+| [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.1   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
 
-Versions above are the current release candidates; after publication,
-`packages/*/package.json` remains the source of truth.
+Versions above are the current public npm releases. `packages/*/package.json`
+remains the source of truth.
 
 ### Dependency graph
 

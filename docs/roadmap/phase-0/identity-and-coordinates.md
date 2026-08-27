@@ -2,8 +2,8 @@
 
 Decision date: 2026-08-26
 
-Status: technical publisher namespaces activated; professional clearance remains
-an external owner prerequisite
+Status: technical publisher namespaces and public artifact coordinates activated;
+professional clearance remains an accepted pre-1.0 identity risk
 
 This is an engineering and product decision, not legal advice or trademark
 clearance. Availability observations are point-in-time and confer no rights.
@@ -79,20 +79,19 @@ and provenance are less risky when the already-controlled publisher remains stab
 
 ### npm
 
-The public registry returned the following snapshot:
-
-- `vireo` exists and cannot represent this project;
-- `create-vireo`, `vireo-cli`, `@vireocodedev/cli`, and the checked
-  `@vireocodedev/*` framework package names had no public package record;
-- checked `@vireocode/*` package names also had no public package record, but the
-  `@vireocode` scope is not controlled and therefore is not selected.
+The 2026-08-26 availability snapshot was superseded on 2026-08-27. All seven
+selected `@vireocodedev/*` framework packages are public at `0.2.1` and expose npm
+provenance attestations linked to `vireocodedev/starter`. `create-vireo`,
+`vireo-cli`, and `@vireocodedev/cli` remain unimplemented; the unscoped `vireo`
+collision remains unchanged.
 
 ### Maven Central
 
-No artifacts were returned for `com.vireocode`, `dev.vireocode`, `io.vireo`,
-`com.vireo`, or `org.vireo` during the 2026-08-26 snapshot. On 2026-08-27 the
-publisher verified the `com.vireocode` Central namespace through control of
-`vireocode.com`. Absence of artifacts remains distinct from namespace ownership.
+No artifacts were returned during the 2026-08-26 snapshot. On 2026-08-27 the
+publisher verified `com.vireocode` through control of `vireocode.com` and published
+the signed `vireo-{bom,core,auth,query,history,offline}` `0.2.0` family to Maven
+Central. Anonymous POM, signature, checksum, and Gradle consumer checks supersede
+the original absence result.
 
 ### Reproducible registry endpoints
 
@@ -144,17 +143,19 @@ Canonical coordinates after verifying `vireocode.com`:
 | `com.vireocode:vireo-starter-offline`     | `com.vireocode:vireo-offline` |
 | `com.vireocode:vireo-starter-queryengine` | `com.vireocode:vireo-query`   |
 
-Canonical Java packages should move from `com.vireocode.starter.*` to
-`com.vireocode.vireo.*` before a public compatibility promise. The product segment
+Canonical Java packages moved from `com.vireocode.starter.*` to
+`com.vireocode.vireo.*` before the first public release. The product segment
 is intentional: Spring Boot adds this root to entity and repository scanning, so
 using bare `com.vireocode` would also scan publisher-owned consumer applications.
-If domain control or Central verification is lost before release, the approved fallback is Maven group
-`io.github.vireocodedev` and Java prefix `io.github.vireocodedev.vireo`; the project
-must not improvise a third namespace.
+If domain control or Central verification is lost, any future coordinate migration
+uses Maven group `io.github.vireocodedev` and Java prefix
+`io.github.vireocodedev.vireo`; the project must not improvise a third namespace.
 
-## Activation checklist
+## Activation and remaining identity checklist
 
-Before changing source coordinates or public visibility:
+Technical activation completed the controlled npm scope, verified Maven namespace,
+canonical package migration, public repositories, and public releases. The
+remaining pre-1.0 and pre-growth work is:
 
 1. obtain professional US/EU/international similarity and goods/services review for
    “Vireo Code” and “Vireo Framework,” including classes 009 and 042;
@@ -162,22 +163,21 @@ Before changing source coordinates or public visibility:
    relevant national searches;
 3. retain `vireocode.com` and configure protected registrar access, renewal,
    recovery, DNSSEC where supported, and more than one trusted administrator;
-4. reserve the npm organization/scope and every canonical package, including the
-   create launcher, without publishing misleading functional releases;
-5. verify the Maven Central namespace using the acquired domain, or activate the
-   documented GitHub-based fallback;
+4. reserve the future create/CLI coordinates without publishing misleading
+   functional releases;
+5. retain the verified Maven Central namespace and documented fallback;
 6. confirm GitHub repository target names and preserve all old names as redirects or
    archived pointers;
 7. reserve consistent documentation, social, and community handles where useful;
-8. rerun the collision report immediately before public launch.
+8. rerun the collision report before 1.0 and any material growth campaign.
 
-No growth campaign, public package release, logo investment, or repository rename
-should precede steps 1–5.
+The public `0.x` source and artifact activation has occurred. Professional clearance
+and the remaining identity controls are disclosed accepted risks, not evidence that
+the name is legally cleared.
 
 ## Migration and compatibility plan
 
-Because current packages and repositories are private, use one coordinated
-pre-public breaking migration:
+The coordinated pre-public breaking migration used this sequence:
 
 1. freeze private releases and inventory every consumer;
 2. reserve/verify target namespaces;
@@ -196,9 +196,9 @@ and explicit migration documentation are preferred over silent aliasing.
 
 ## Reversal plan
 
-- If legal review rejects Vireo Code, keep Vireo as an internal codename, select a
-  new coined identity, and repeat this report before public release. No canonical
-  coordinates will yet have been promised.
+- If legal review rejects Vireo Code, select a new coined identity and publish a
+  versioned migration plan. Existing public coordinates and releases cannot be
+  erased and must remain documented for the supported window.
 - If control of `vireocode.com` is lost before release, use the GitHub-based Maven
   fallback and select a different cleared domain; do not use `com.vireocode`
   without control.
@@ -213,5 +213,7 @@ Search engines and registry APIs do not find every unregistered right, similar m
 private product, reserved namespace, or jurisdictional conflict. [EUIPO's official
 availability guidance](https://www.euipo.europa.eu/en/trade-marks/before-applying/availability)
 explicitly recommends searching identical and similar signs and notes that earlier
-rights may still support opposition. The working identity therefore remains blocked
-from external activation until a qualified professional reviews it.
+rights may still support opposition. The working identity is technically active.
+Professional review remains an explicit accepted risk and is required before a 1.0
+brand commitment or substantial brand investment; this document is not legal
+clearance.

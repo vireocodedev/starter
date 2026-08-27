@@ -1,6 +1,6 @@
 # Starter Template responsibility map
 
-Audited against sibling repository `starter-tenplate` at commit
+Audited against sibling repository `starter-template` at commit
 `f73df577a0568a4a6aaedb7d39b0e21c37c38160` on 2026-08-26. The misspelled local
 directory name is not treated as a public naming decision.
 
