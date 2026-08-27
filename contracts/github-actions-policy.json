@@ -52,9 +52,7 @@
   },
   "writePermissionJobs": {
     "release.yml:release-npm": ["contents", "packages", "pull-requests"],
-    "release.yml:publish-jvm": ["packages"],
-    "release.yml:tag-jvm": ["contents"],
     "storybook-pages.yml:deploy": ["id-token", "pages"]
   },
-  "checkoutCredentialJobs": ["release.yml:tag-jvm"]
+  "checkoutCredentialJobs": []
 }
