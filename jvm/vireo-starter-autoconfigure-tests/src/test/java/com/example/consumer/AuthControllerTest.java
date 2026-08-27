@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vireocode.starter.auth.LoginRequest;
+import com.vireocode.auth.LoginRequest;
 
 @SpringBootTest
 @AutoConfigureMockMvc

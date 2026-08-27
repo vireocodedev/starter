@@ -1,0 +1,18 @@
+import { Meta, Source } from "@storybook/addon-docs/blocks";
+import registrationSource from "../../../vireo-starter-documentation-examples/src/main/java/com/vireocode/docs/queryengine/QueryEngineRegistrationExample.java?raw";
+
+<Meta title="JVM/Query Engine/Primary Workflow" />
+
+# Primary workflow
+
+Register application-owned entity keys, then annotate only the fields that may be exposed to filtering.
+
+## Why it exists
+
+Explicit registration prevents clients from naming arbitrary JPA types, while field annotations form a server-owned allowlist for paths and operators. This keeps frontend metadata discoverable without turning persistence reflection into an unrestricted query API.
+
+The exact source below is compiled by `vireo-starter-documentation-examples` during the JVM build.
+
+<Source language="java" code={registrationSource} />
+
+Entity keys must be unique across all resolver beans. Relation-selection targets must also be registered. A custom metadata provider named by `@FilterableCustomFields` must exist as a Spring bean; Query Engine does not instantiate application classes reflectively.

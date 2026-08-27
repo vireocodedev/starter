@@ -31,14 +31,14 @@ bucket.
 
 The current family is:
 
-| Artifact                    | Responsibility                                                                                 |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `vireo-starter-core`        | Shared base, web, configuration, migration, security-expression, and extension-point contracts |
-| `vireo-starter-auth`        | Replaceable default session authentication and user persistence                                |
-| `vireo-starter-queryengine` | Query metadata, filtering, relation options, and saved filters                                 |
-| `vireo-starter-history`     | Append-only entity-change recording and retrieval                                              |
-| `vireo-starter-offline`     | Offline replay, hydration, revision tracking, and SSE batching                                 |
-| `vireo-starter-bom`         | Compatible version alignment for the complete artifact family                                  |
+| Artifact        | Responsibility                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| `vireo-core`    | Shared base, web, configuration, migration, security-expression, and extension-point contracts |
+| `vireo-auth`    | Replaceable default session authentication and user persistence                                |
+| `vireo-query`   | Query metadata, filtering, relation options, and saved filters                                 |
+| `vireo-history` | Append-only entity-change recording and retrieval                                              |
+| `vireo-offline` | Offline replay, hydration, revision tracking, and SSE batching                                 |
+| `vireo-bom`     | Compatible version alignment for the complete artifact family                                  |
 
 The artifact description in Gradle, its README, package-level Javadoc, public
 surface, and actual behavior must describe the same responsibility.
@@ -293,7 +293,7 @@ Storybook according to [JVM live documentation](./JVM_LIVE_DOCUMENTATION.md).
 
 - Publish the ordinary JAR, sources JAR, and Javadoc JAR.
 - Publish accurate POM dependency scopes and metadata.
-- Align all JVM modules through `vireo-starter-bom`.
+- Align all JVM modules through `vireo-bom`.
 - Never publish consumer tests or documentation-example modules.
 - Before release, publish to a temporary repository and compile a clean external
   Gradle consumer against the BOM and every artifact.

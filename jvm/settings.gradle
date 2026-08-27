@@ -4,12 +4,12 @@
 // not by a shared task graph.
 rootProject.name = 'vireo-starter-jvm'
 
-include 'vireo-starter-bom'
-include 'vireo-starter-core'
-include 'vireo-starter-auth'
-include 'vireo-starter-queryengine'
-include 'vireo-starter-offline'
-include 'vireo-starter-history'
+include 'vireo-bom'
+include 'vireo-core'
+include 'vireo-auth'
+include 'vireo-query'
+include 'vireo-offline'
+include 'vireo-history'
 
 // Compiles the exact Java sources displayed by the unified Storybook. It is a
 // documentation fixture, never a published artifact.

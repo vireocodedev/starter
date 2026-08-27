@@ -22,32 +22,32 @@ Application backends repeatedly need the same web errors, persistence foundation
   </thead>
   <tbody>
     <tr>
-      <td><code>vireo-starter-bom</code></td>
+      <td><code>vireo-bom</code></td>
       <td>One version boundary for the complete JVM family</td>
       <td>None</td>
     </tr>
     <tr>
-      <td><code>vireo-starter-core</code></td>
+      <td><code>vireo-core</code></td>
       <td>Shared CRUD, web, SPI, or migration foundations directly</td>
       <td>None</td>
     </tr>
     <tr>
-      <td><code>vireo-starter-auth</code></td>
+      <td><code>vireo-auth</code></td>
       <td>Starter authentication and account contracts</td>
       <td>Core</td>
     </tr>
     <tr>
-      <td><code>vireo-starter-queryengine</code></td>
+      <td><code>vireo-query</code></td>
       <td>Metadata-driven filtering or saved filters</td>
       <td>Core and Auth</td>
     </tr>
     <tr>
-      <td><code>vireo-starter-history</code></td>
+      <td><code>vireo-history</code></td>
       <td>Append-only entity audit records</td>
       <td>Core; Auth at runtime for the V1 migration</td>
     </tr>
     <tr>
-      <td><code>vireo-starter-offline</code></td>
+      <td><code>vireo-offline</code></td>
       <td>Offline replay, hydration, versions, or SSE heartbeats</td>
       <td>Core and Query Engine; Auth internally</td>
     </tr>
@@ -60,10 +60,10 @@ Optional libraries bring their required Vireo dependencies transitively. Importi
 
 ```groovy
 dependencies {
-    implementation platform("com.vireocode:vireo-starter-bom:0.2.0")
+    implementation platform("com.vireocode:vireo-bom:0.2.0")
 
-    implementation "com.vireocode:vireo-starter-auth"
-    implementation "com.vireocode:vireo-starter-history"
+    implementation "com.vireocode:vireo-auth"
+    implementation "com.vireocode:vireo-history"
 }
 ```
 

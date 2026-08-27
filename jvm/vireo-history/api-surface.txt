@@ -1,0 +1,47 @@
+public final record com.vireocode.history.HistoryActor
+    extends java.lang.Record
+    public com.vireocode.history.HistoryActor(java.lang.String,java.lang.String)
+    public final boolean com.vireocode.history.HistoryActor.equals(java.lang.Object)
+    public final int com.vireocode.history.HistoryActor.hashCode()
+    public final java.lang.String com.vireocode.history.HistoryActor.toString()
+    public java.lang.String com.vireocode.history.HistoryActor.id()
+    public java.lang.String com.vireocode.history.HistoryActor.label()
+
+public abstract interface com.vireocode.history.HistoryActorResolver
+    public abstract java.util.Optional<com.vireocode.history.HistoryActor> com.vireocode.history.HistoryActorResolver.resolveCurrentActor()
+
+public abstract interface com.vireocode.history.HistoryReadAuthorizer
+    public abstract boolean com.vireocode.history.HistoryReadAuthorizer.canRead(org.springframework.security.core.Authentication,java.lang.String,java.lang.String)
+
+public final record com.vireocode.history.HistoryRecord
+    extends java.lang.Record
+    public com.vireocode.history.HistoryRecord(java.util.UUID,java.time.Instant,com.vireocode.history.HistoryActor,java.lang.String,java.lang.String,com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.JsonNode)
+    public com.fasterxml.jackson.databind.JsonNode com.vireocode.history.HistoryRecord.snapshotCurrent()
+    public com.fasterxml.jackson.databind.JsonNode com.vireocode.history.HistoryRecord.snapshotPrevious()
+    public com.vireocode.history.HistoryActor com.vireocode.history.HistoryRecord.actor()
+    public final boolean com.vireocode.history.HistoryRecord.equals(java.lang.Object)
+    public final int com.vireocode.history.HistoryRecord.hashCode()
+    public final java.lang.String com.vireocode.history.HistoryRecord.toString()
+    public java.lang.String com.vireocode.history.HistoryRecord.entity()
+    public java.lang.String com.vireocode.history.HistoryRecord.entityId()
+    public java.time.Instant com.vireocode.history.HistoryRecord.timestamp()
+    public java.util.UUID com.vireocode.history.HistoryRecord.id()
+
+public class com.vireocode.history.HistoryRecordingException
+    extends java.lang.RuntimeException
+    public com.vireocode.history.HistoryRecordingException(java.lang.String,java.lang.Throwable)
+
+public class com.vireocode.history.StarterHistoryAutoConfiguration
+    public com.vireocode.history.StarterHistoryAutoConfiguration()
+
+public class com.vireocode.history.StarterHistoryProperties
+    public com.vireocode.history.StarterHistoryProperties()
+    public boolean com.vireocode.history.StarterHistoryProperties.isDefaultLimitWithinMaximum()
+    public boolean com.vireocode.history.StarterHistoryProperties.isEndpointEnabled()
+    public int com.vireocode.history.StarterHistoryProperties.getDefaultLimit()
+    public int com.vireocode.history.StarterHistoryProperties.getMaxLimit()
+    public java.lang.String com.vireocode.history.StarterHistoryProperties.getEndpointPath()
+    public void com.vireocode.history.StarterHistoryProperties.setDefaultLimit(int)
+    public void com.vireocode.history.StarterHistoryProperties.setEndpointEnabled(boolean)
+    public void com.vireocode.history.StarterHistoryProperties.setEndpointPath(java.lang.String)
+    public void com.vireocode.history.StarterHistoryProperties.setMaxLimit(int)

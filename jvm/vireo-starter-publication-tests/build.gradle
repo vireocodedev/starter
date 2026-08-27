@@ -35,12 +35,12 @@ repositories {
 }
 
 dependencies {
-    implementation platform("com.vireocode:vireo-starter-bom:${vireoVersion.get()}")
-    implementation 'com.vireocode:vireo-starter-core'
-    implementation 'com.vireocode:vireo-starter-auth'
-    implementation 'com.vireocode:vireo-starter-queryengine'
-    implementation 'com.vireocode:vireo-starter-history'
-    implementation 'com.vireocode:vireo-starter-offline'
+    implementation platform("com.vireocode:vireo-bom:${vireoVersion.get()}")
+    implementation 'com.vireocode:vireo-core'
+    implementation 'com.vireocode:vireo-auth'
+    implementation 'com.vireocode:vireo-query'
+    implementation 'com.vireocode:vireo-history'
+    implementation 'com.vireocode:vireo-offline'
 
     // Intentionally versionless: this proves that the BOM's imported Spring
     // Boot platform also reaches an ordinary external consumer.

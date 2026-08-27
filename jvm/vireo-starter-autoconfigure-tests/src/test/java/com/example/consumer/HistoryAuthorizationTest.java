@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.vireocode.starter.history.HistoryReadAuthorizer;
+import com.vireocode.history.HistoryReadAuthorizer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

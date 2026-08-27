@@ -82,8 +82,8 @@ for (const { directory, manifest } of publishedPackages) {
 }
 
 const publishedJvmModules = readdirSync(jvmRoot, { withFileTypes: true })
-  .filter(entry => entry.isDirectory() && entry.name.startsWith("vireo-starter-"))
-  .filter(entry => entry.name === "vireo-starter-bom" || existsSync(join(jvmRoot, entry.name, "api-surface.txt")))
+  .filter(entry => entry.isDirectory() && entry.name.startsWith("vireo-"))
+  .filter(entry => entry.name === "vireo-bom" || existsSync(join(jvmRoot, entry.name, "api-surface.txt")))
   .map(entry => `com.vireocode:${entry.name}`);
 compareSets("Maven module policy", new Set(publishedJvmModules), new Set(Object.keys(policy.maven ?? {})));
 

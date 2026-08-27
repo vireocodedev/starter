@@ -23,16 +23,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.vireocode.starter.base.HistoryEntityType;
-import com.vireocode.starter.spi.HistoryEventsRecorder;
-import com.vireocode.starter.history.HistoryActor;
-import com.vireocode.starter.history.HistoryActorResolver;
-import com.vireocode.starter.history.HistoryReadAuthorizer;
-import com.vireocode.starter.offline.OfflineActor;
-import com.vireocode.starter.offline.OfflineActorResolver;
-import com.vireocode.starter.offline.OfflineSyncService;
-import com.vireocode.starter.offline.StarterOfflineActorResolver;
-import com.vireocode.starter.queryengine.QueryEngineRegistry;
+import com.vireocode.base.HistoryEntityType;
+import com.vireocode.spi.HistoryEventsRecorder;
+import com.vireocode.history.HistoryActor;
+import com.vireocode.history.HistoryActorResolver;
+import com.vireocode.history.HistoryReadAuthorizer;
+import com.vireocode.offline.OfflineActor;
+import com.vireocode.offline.OfflineActorResolver;
+import com.vireocode.offline.OfflineSyncService;
+import com.vireocode.offline.StarterOfflineActorResolver;
+import com.vireocode.queryengine.QueryEngineRegistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -11,19 +11,19 @@ version="$2"
 group_path="com/vireocode"
 group_directory="$repository/$group_path"
 modules=(
-    vireo-starter-auth
-    vireo-starter-bom
-    vireo-starter-core
-    vireo-starter-history
-    vireo-starter-offline
-    vireo-starter-queryengine
+    vireo-auth
+    vireo-bom
+    vireo-core
+    vireo-history
+    vireo-offline
+    vireo-query
 )
 library_modules=(
-    vireo-starter-auth
-    vireo-starter-core
-    vireo-starter-history
-    vireo-starter-offline
-    vireo-starter-queryengine
+    vireo-auth
+    vireo-core
+    vireo-history
+    vireo-offline
+    vireo-query
 )
 checksum_extensions=(md5 sha1 sha256 sha512)
 
@@ -97,7 +97,7 @@ for module in "${modules[@]}"; do
     assert_contains "$pom" "<id>vireocodedev</id>"
     assert_contains "$pom" "<connection>scm:git:https://github.com/vireocodedev/starter.git</connection>"
 
-    if [[ "$module" == "vireo-starter-bom" ]]; then
+    if [[ "$module" == "vireo-bom" ]]; then
         [[ "$(find "$version_directory" -maxdepth 1 -type f | wc -l)" -eq 10 ]] || \
             fail "$module publishes files outside its POM/module/checksum contract."
         [[ -z "$(find "$version_directory" -maxdepth 1 -type f -name '*.jar' -print -quit)" ]] || \

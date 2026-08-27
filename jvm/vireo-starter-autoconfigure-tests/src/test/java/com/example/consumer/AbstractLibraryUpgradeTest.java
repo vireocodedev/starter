@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.vireocode.starter.flyway.StarterFlywayMigrations;
-import com.vireocode.starter.flyway.StarterFlywayModule;
+import com.vireocode.flyway.StarterFlywayMigrations;
+import com.vireocode.flyway.StarterFlywayModule;
 
 /**
  * The proof behind the split: upgrading the library on a database an earlier

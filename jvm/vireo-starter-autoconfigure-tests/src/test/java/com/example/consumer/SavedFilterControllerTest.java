@@ -21,8 +21,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vireocode.starter.auth.LoginRequest;
-import com.vireocode.starter.queryengine.savedfilter.SavedFilterDTO;
+import com.vireocode.auth.LoginRequest;
+import com.vireocode.queryengine.savedfilter.SavedFilterDTO;
 
 @SpringBootTest
 @AutoConfigureMockMvc

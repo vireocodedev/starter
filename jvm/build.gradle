@@ -7,12 +7,12 @@ plugins {
 // produce or to prove them, and must never reach a registry — in particular
 // vireo-starter-autoconfigure-tests, which is a consumer simulation.
 ext.publishedModules = [
-        'vireo-starter-core',
-        'vireo-starter-auth',
-        'vireo-starter-queryengine',
-        'vireo-starter-offline',
-        'vireo-starter-history',
-        'vireo-starter-bom',
+        'vireo-core',
+        'vireo-auth',
+        'vireo-query',
+        'vireo-offline',
+        'vireo-history',
+        'vireo-bom',
 ]
 
 repositories {
@@ -32,7 +32,7 @@ subprojects {
 // convention below. Everything else is a plain library: no Spring Boot plugin,
 // because these modules are consumed as jars and must never produce a fat jar
 // or an executable manifest.
-configure(subprojects.findAll { it.name != 'vireo-starter-bom' }) {
+configure(subprojects.findAll { it.name != 'vireo-bom' }) {
     apply plugin: 'java-library'
     apply plugin: 'com.adarshr.test-logger'
 
@@ -117,7 +117,7 @@ configure(subprojects.findAll { it.name != 'vireo-starter-bom' }) {
 // publication; this task additionally proves that links across library
 // boundaries resolve when the family is viewed as one API.
 def documentedModules = subprojects.findAll {
-    it.name in rootProject.ext.publishedModules && it.name != 'vireo-starter-bom'
+    it.name in rootProject.ext.publishedModules && it.name != 'vireo-bom'
 }
 def aggregateJavadocClasspath = configurations.create('aggregateJavadocClasspath') {
     canBeConsumed = false
@@ -158,7 +158,7 @@ tasks.register('aggregateJavadoc', Javadoc) {
 // exists, works with no network, and puts the surface change in the diff next to
 // the version bump that should accompany it. That is where a reviewer will
 // actually see it. This mirrors scripts/public-surface.mjs on the npm side.
-configure(subprojects.findAll { it.name in rootProject.ext.publishedModules && it.name != 'vireo-starter-bom' }) {
+configure(subprojects.findAll { it.name in rootProject.ext.publishedModules && it.name != 'vireo-bom' }) {
     def surface = layout.projectDirectory.file('api-surface.txt')
 
     def surfaceUpdate = tasks.register('apiSurfaceUpdate', com.vireocode.build.ApiSurfaceUpdateTask) {

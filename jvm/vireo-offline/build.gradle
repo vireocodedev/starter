@@ -1,0 +1,7 @@
+description = 'Offline-first sync: command replay, entity version tracking and the SSE heartbeat channel.'
+
+dependencies {
+    api project(':vireo-core')
+    api project(':vireo-query')
+    implementation project(':vireo-auth')
+}

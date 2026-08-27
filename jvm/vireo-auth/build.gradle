@@ -1,0 +1,6 @@
+description = 'A replaceable default user model, UserDetailsService and session endpoints. Every bean here is meant to be overridable.'
+
+dependencies {
+    api project(':vireo-core')
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+}

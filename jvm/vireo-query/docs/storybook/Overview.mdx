@@ -1,0 +1,28 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Query Engine/Overview" />
+
+# JVM Query Engine
+
+`vireo-query` generates application-owned filter metadata, implements Core's JPA filtering SPI, resolves bounded relation choices, and persists authenticated users' saved filters.
+
+## Why it exists
+
+Filterable data screens otherwise repeat reflection metadata, wire contracts, Criteria construction, relation searches, and saved-view persistence. Query Engine centralizes those mechanics while the application owns entity registration, the explicit field allowlist, domain authorization, and the frontend presentation.
+
+## Installation
+
+```groovy
+dependencies {
+    implementation platform("com.vireocode:vireo-bom:0.2.0")
+    implementation "com.vireocode:vireo-query"
+}
+```
+
+The dependency auto-configures a `QueryEngineRegistry`, metadata generator, `FilterSpecificationBuilder`, relation-option service, authenticated HTTP endpoints, saved-filter service, and isolated Flyway migration. It depends on Auth's default user model because the current saved-filter schema owns a `StarterUser` relation.
+
+## Ownership boundary
+
+Query Engine owns metadata generation, accepted-path and accepted-operator enforcement, typed predicate conversion, bounded relation lookup, and current-user saved-filter visibility. Applications own entity keys, annotations, custom field beans, protected-record authorization, and whether the default HTTP endpoints are appropriate.
+
+The matching `@vireocodedev/starter-queryengine` package owns the browser-side filter model and compilation. JSON is the boundary; JVM code does not execute in Storybook.

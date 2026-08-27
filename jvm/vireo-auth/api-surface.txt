@@ -1,0 +1,126 @@
+public final record com.vireocode.auth.AuthMessageResponse
+    extends java.lang.Record
+    public com.vireocode.auth.AuthMessageResponse(java.lang.String)
+    public final boolean com.vireocode.auth.AuthMessageResponse.equals(java.lang.Object)
+    public final int com.vireocode.auth.AuthMessageResponse.hashCode()
+    public final java.lang.String com.vireocode.auth.AuthMessageResponse.toString()
+    public java.lang.String com.vireocode.auth.AuthMessageResponse.message()
+
+public final record com.vireocode.auth.ChangePasswordRequest
+    extends java.lang.Record
+    public com.vireocode.auth.ChangePasswordRequest(java.lang.String,java.lang.String)
+    public final boolean com.vireocode.auth.ChangePasswordRequest.equals(java.lang.Object)
+    public final int com.vireocode.auth.ChangePasswordRequest.hashCode()
+    public java.lang.String com.vireocode.auth.ChangePasswordRequest.currentPassword()
+    public java.lang.String com.vireocode.auth.ChangePasswordRequest.newPassword()
+    public java.lang.String com.vireocode.auth.ChangePasswordRequest.toString()
+
+public final record com.vireocode.auth.ChangeUsernameRequest
+    extends java.lang.Record
+    public com.vireocode.auth.ChangeUsernameRequest(java.lang.String)
+    public final boolean com.vireocode.auth.ChangeUsernameRequest.equals(java.lang.Object)
+    public final int com.vireocode.auth.ChangeUsernameRequest.hashCode()
+    public final java.lang.String com.vireocode.auth.ChangeUsernameRequest.toString()
+    public java.lang.String com.vireocode.auth.ChangeUsernameRequest.username()
+
+public final record com.vireocode.auth.CurrentUserResponse
+    extends java.lang.Record
+    public com.vireocode.auth.CurrentUserResponse(java.lang.String,java.lang.String)
+    public final boolean com.vireocode.auth.CurrentUserResponse.equals(java.lang.Object)
+    public final int com.vireocode.auth.CurrentUserResponse.hashCode()
+    public final java.lang.String com.vireocode.auth.CurrentUserResponse.toString()
+    public java.lang.String com.vireocode.auth.CurrentUserResponse.role()
+    public java.lang.String com.vireocode.auth.CurrentUserResponse.username()
+
+public final record com.vireocode.auth.LoginRequest
+    extends java.lang.Record
+    public com.vireocode.auth.LoginRequest(java.lang.String,java.lang.String)
+    public final boolean com.vireocode.auth.LoginRequest.equals(java.lang.Object)
+    public final int com.vireocode.auth.LoginRequest.hashCode()
+    public java.lang.String com.vireocode.auth.LoginRequest.password()
+    public java.lang.String com.vireocode.auth.LoginRequest.toString()
+    public java.lang.String com.vireocode.auth.LoginRequest.username()
+
+public final record com.vireocode.auth.LoginResponse
+    extends java.lang.Record
+    public com.vireocode.auth.LoginResponse(java.lang.String,java.lang.String)
+    public final boolean com.vireocode.auth.LoginResponse.equals(java.lang.Object)
+    public final int com.vireocode.auth.LoginResponse.hashCode()
+    public final java.lang.String com.vireocode.auth.LoginResponse.toString()
+    public java.lang.String com.vireocode.auth.LoginResponse.message()
+    public java.lang.String com.vireocode.auth.LoginResponse.username()
+
+public class com.vireocode.auth.StarterAuthAutoConfiguration
+    public com.vireocode.auth.StarterAuthAutoConfiguration()
+
+public class com.vireocode.auth.StarterAuthProperties
+    public com.vireocode.auth.StarterAuthProperties()
+    public boolean com.vireocode.auth.StarterAuthProperties.isAccountEndpointsEnabled()
+    public boolean com.vireocode.auth.StarterAuthProperties.isEndpointPathsDistinct()
+    public boolean com.vireocode.auth.StarterAuthProperties.isEndpointsEnabled()
+    public java.lang.String com.vireocode.auth.StarterAuthProperties.getApiPathPattern()
+    public java.lang.String com.vireocode.auth.StarterAuthProperties.getChangePasswordPath()
+    public java.lang.String com.vireocode.auth.StarterAuthProperties.getChangeUsernamePath()
+    public java.lang.String com.vireocode.auth.StarterAuthProperties.getCurrentUserPath()
+    public java.lang.String com.vireocode.auth.StarterAuthProperties.getDocsRole()
+    public java.lang.String com.vireocode.auth.StarterAuthProperties.getLoginPath()
+    public java.lang.String com.vireocode.auth.StarterAuthProperties.getLogoutPath()
+    public java.util.List<java.lang.String> com.vireocode.auth.StarterAuthProperties.getDocsMatchers()
+    public void com.vireocode.auth.StarterAuthProperties.setAccountEndpointsEnabled(boolean)
+    public void com.vireocode.auth.StarterAuthProperties.setApiPathPattern(java.lang.String)
+    public void com.vireocode.auth.StarterAuthProperties.setChangePasswordPath(java.lang.String)
+    public void com.vireocode.auth.StarterAuthProperties.setChangeUsernamePath(java.lang.String)
+    public void com.vireocode.auth.StarterAuthProperties.setCurrentUserPath(java.lang.String)
+    public void com.vireocode.auth.StarterAuthProperties.setDocsMatchers(java.util.List<java.lang.String>)
+    public void com.vireocode.auth.StarterAuthProperties.setDocsRole(java.lang.String)
+    public void com.vireocode.auth.StarterAuthProperties.setEndpointsEnabled(boolean)
+    public void com.vireocode.auth.StarterAuthProperties.setLoginPath(java.lang.String)
+    public void com.vireocode.auth.StarterAuthProperties.setLogoutPath(java.lang.String)
+
+public abstract interface com.vireocode.auth.StarterHttpSecurityCustomizer
+    public abstract void com.vireocode.auth.StarterHttpSecurityCustomizer.customize(org.springframework.security.config.annotation.web.builders.HttpSecurity) throws java.lang.Exception
+
+public class com.vireocode.auth.StarterUser
+    extends com.vireocode.base.BaseEntity
+    public com.vireocode.auth.StarterUser()
+    public com.vireocode.auth.StarterUser(java.util.UUID,java.lang.String,java.lang.String,java.lang.String,boolean)
+    public boolean com.vireocode.auth.StarterUser.isEnabled()
+    public java.lang.String com.vireocode.auth.StarterUser.getPasswordHash()
+    public java.lang.String com.vireocode.auth.StarterUser.getRole()
+    public java.lang.String com.vireocode.auth.StarterUser.getUsername()
+    public java.util.UUID com.vireocode.auth.StarterUser.getId()
+    public void com.vireocode.auth.StarterUser.setEnabled(boolean)
+    public void com.vireocode.auth.StarterUser.setId(java.util.UUID)
+    public void com.vireocode.auth.StarterUser.setPasswordHash(java.lang.String)
+    public void com.vireocode.auth.StarterUser.setRole(java.lang.String)
+    public void com.vireocode.auth.StarterUser.setUsername(java.lang.String)
+
+public class com.vireocode.auth.StarterUserDetails
+    implements java.io.Serializable
+    implements org.springframework.security.core.userdetails.UserDetails
+    public com.vireocode.auth.StarterUserDetails(com.vireocode.auth.StarterUser)
+    public static final java.lang.String com.vireocode.auth.StarterUserDetails.ROLE_PREFIX
+    public boolean com.vireocode.auth.StarterUserDetails.isAccountNonExpired()
+    public boolean com.vireocode.auth.StarterUserDetails.isAccountNonLocked()
+    public boolean com.vireocode.auth.StarterUserDetails.isCredentialsNonExpired()
+    public boolean com.vireocode.auth.StarterUserDetails.isEnabled()
+    public java.lang.String com.vireocode.auth.StarterUserDetails.getPassword()
+    public java.lang.String com.vireocode.auth.StarterUserDetails.getRole()
+    public java.lang.String com.vireocode.auth.StarterUserDetails.getUsername()
+    public java.lang.String com.vireocode.auth.StarterUserDetails.toString()
+    public java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> com.vireocode.auth.StarterUserDetails.getAuthorities()
+    public java.util.UUID com.vireocode.auth.StarterUserDetails.getId()
+    public static java.lang.String com.vireocode.auth.StarterUserDetails.resolveRole(java.util.Collection<? extends org.springframework.security.core.GrantedAuthority>)
+
+public abstract interface com.vireocode.auth.StarterUserRepository
+    implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.auth.StarterUser, java.util.UUID>
+    public abstract boolean com.vireocode.auth.StarterUserRepository.existsByUsername(java.lang.String)
+    public abstract java.util.Optional<com.vireocode.auth.StarterUser> com.vireocode.auth.StarterUserRepository.findByUsername(java.lang.String)
+
+public final record com.vireocode.auth.UsernameResponse
+    extends java.lang.Record
+    public com.vireocode.auth.UsernameResponse(java.lang.String)
+    public final boolean com.vireocode.auth.UsernameResponse.equals(java.lang.Object)
+    public final int com.vireocode.auth.UsernameResponse.hashCode()
+    public final java.lang.String com.vireocode.auth.UsernameResponse.toString()
+    public java.lang.String com.vireocode.auth.UsernameResponse.username()

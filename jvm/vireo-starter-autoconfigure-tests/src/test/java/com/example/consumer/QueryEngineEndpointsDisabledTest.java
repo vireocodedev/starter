@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import com.vireocode.starter.queryengine.QueryEngineRegistry;
-import com.vireocode.starter.queryengine.savedfilter.SavedFilterService;
+import com.vireocode.queryengine.QueryEngineRegistry;
+import com.vireocode.queryengine.savedfilter.SavedFilterService;
 
 @SpringBootTest(properties = {
         "vireo.starter.query-engine.endpoint-enabled=false",

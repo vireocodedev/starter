@@ -5,8 +5,8 @@ import java.util.Map;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.vireocode.starter.queryengine.QueryEntityKey;
-import com.vireocode.starter.queryengine.QueryEntityTypeResolver;
+import com.vireocode.queryengine.QueryEntityKey;
+import com.vireocode.queryengine.QueryEntityTypeResolver;
 
 /**
  * Registers the consumer's own entity with the query engine.

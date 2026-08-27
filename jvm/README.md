@@ -11,21 +11,21 @@ store.
 
 | Artifact | Responsibility | Direct Vireo dependencies |
 | --- | --- | --- |
-| `vireo-starter-bom` | Aligns all Vireo modules and their Spring Boot dependency line | None |
-| `vireo-starter-core` | CRUD foundations, web errors, shared SPIs, and migration infrastructure | None |
-| `vireo-starter-auth` | Replaceable user model, authentication services, and account endpoints | Core |
-| `vireo-starter-queryengine` | Metadata-driven filtering and per-user saved filters | Core, Auth |
-| `vireo-starter-history` | Append-only entity history and actor resolution | Core; Auth at runtime for the V1 migration |
-| `vireo-starter-offline` | Command replay, entity versions, hydration, and SSE heartbeats | Core, Query Engine; Auth internally |
+| `vireo-bom` | Aligns all Vireo modules and their Spring Boot dependency line | None |
+| `vireo-core` | CRUD foundations, web errors, shared SPIs, and migration infrastructure | None |
+| `vireo-auth` | Replaceable user model, authentication services, and account endpoints | Core |
+| `vireo-query` | Metadata-driven filtering and per-user saved filters | Core, Auth |
+| `vireo-history` | Append-only entity history and actor resolution | Core; Auth at runtime for the V1 migration |
+| `vireo-offline` | Command replay, entity versions, hydration, and SSE heartbeats | Core, Query Engine; Auth internally |
 
 Import the BOM once, then declare only the libraries required by the
 application:
 
 ```groovy
 dependencies {
-    implementation platform("com.vireocode:vireo-starter-bom:0.2.0")
-    implementation "com.vireocode:vireo-starter-auth"
-    implementation "com.vireocode:vireo-starter-history"
+    implementation platform("com.vireocode:vireo-bom:0.2.0")
+    implementation "com.vireocode:vireo-auth"
+    implementation "com.vireocode:vireo-history"
 }
 ```
 

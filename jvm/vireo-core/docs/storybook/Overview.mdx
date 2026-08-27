@@ -1,0 +1,61 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="JVM/Core/Overview" />
+
+# JVM Core
+
+`vireo-core` provides the Spring Boot foundation shared by Vireo's JVM modules: managed CRUD mechanics, auditing, search, stable API errors, optional-module SPIs, and isolated migrations.
+
+## Why it exists
+
+Backend aggregates otherwise repeat transaction boundaries, mapper/repository wiring, soft-delete visibility, keyword search, audit publication, error mapping, and migration coordination. Core centralizes those cross-cutting invariants while leaving domain models, business validation, controllers, authorization policy, and consumer-owned schema in the application.
+
+## Installation
+
+```groovy
+dependencies {
+    implementation platform("com.vireocode:vireo-bom:0.2.0")
+    implementation "com.vireocode:vireo-core"
+}
+```
+
+Auth, History, Query Engine, and Offline already depend on Core. Install it directly when an application wants the base service contracts without another Vireo JVM artifact.
+
+## Ownership boundary
+
+Core owns:
+
+- `BaseEntity`, `BaseMapper`, `SearchableRepository`, `EntityConfig`, and `BaseService` lifecycle mechanics;
+- stable `ApiError` responses and request utilities;
+- JPA auditing and method-security enablement required by Starter contracts;
+- module-isolated Flyway orchestration;
+- SPIs implemented by optional Vireo modules.
+
+Applications own:
+
+- domain entities, DTOs, repositories, controllers, and business rules;
+- endpoint and record-level authorization;
+- application migrations and database selection;
+- workflows that do not fit a conventional CRUD lifecycle.
+
+The dependency auto-configures replaceable defaults for `Clock`, `ObjectMapper`, JSON mappers, auditing, error handling, and Flyway coordination. Consumer beans of the same type take precedence.
+
+## Configuration defaults
+
+```properties
+vireo.starter.core.expose-internal-error-details=false
+vireo.starter.core.system-auditor=system
+```
+
+Unexpected exceptions are logged server-side. Their class and message remain out of HTTP responses unless the application explicitly opts in for a trusted development environment.
+
+## Contract behavior
+
+- Soft-deleted entities are hidden consistently from list, get, update, and delete operations.
+- History-enabled entities fail before persistence when no history recorder exists.
+- Filter payloads fail explicitly when Query Engine is absent.
+- Public CRUD entry points cannot be overridden; protected template hooks preserve the lifecycle.
+- `rowsPerPage=-1` is the explicit all-rows pagination sentinel.
+- Anonymous Spring Security authentication is never treated as an application principal.
+
+The module README is the complete conceptual guide; generated Javadocs remain the detailed type reference.

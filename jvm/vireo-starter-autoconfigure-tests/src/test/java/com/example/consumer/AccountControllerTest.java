@@ -20,9 +20,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vireocode.starter.auth.ChangePasswordRequest;
-import com.vireocode.starter.auth.ChangeUsernameRequest;
-import com.vireocode.starter.auth.LoginRequest;
+import com.vireocode.auth.ChangePasswordRequest;
+import com.vireocode.auth.ChangeUsernameRequest;
+import com.vireocode.auth.LoginRequest;
 
 @SpringBootTest
 @AutoConfigureMockMvc

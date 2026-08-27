@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.vireocode.starter.base.HistoryEntityType;
+import com.vireocode.base.HistoryEntityType;
 
 @SpringBootTest
 @AutoConfigureMockMvc

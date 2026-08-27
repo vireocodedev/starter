@@ -14,7 +14,7 @@ halves a single reviewable pull request, which is the only reason they are
 neighbours. See [jvm/](jvm) and [docs/BACKEND_PARITY.md](docs/BACKEND_PARITY.md).
 
 The frontend application-shell package is `@vireocodedev/starter-shell`. The
-similarly named Maven artifact `com.vireocode:vireo-starter-core` is the
+Maven artifact `com.vireocode:vireo-core` is the
 backend's base entity/service layer; they are separate contracts.
 
 ## Frontend packages

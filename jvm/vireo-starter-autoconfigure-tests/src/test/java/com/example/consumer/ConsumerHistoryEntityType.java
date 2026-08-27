@@ -1,6 +1,6 @@
 package com.example.consumer;
 
-import com.vireocode.starter.base.HistoryEntityType;
+import com.vireocode.base.HistoryEntityType;
 
 /**
  * The library owns the {@code history} table but not the values that may appear

@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import com.vireocode.starter.offline.OfflineEntityVersionService;
-import com.vireocode.starter.offline.OfflineHeartbeatService;
-import com.vireocode.starter.offline.OfflineSyncService;
+import com.vireocode.offline.OfflineEntityVersionService;
+import com.vireocode.offline.OfflineHeartbeatService;
+import com.vireocode.offline.OfflineSyncService;
 
 @SpringBootTest(properties = {
         "vireo.starter.offline.sync-endpoint-enabled=false",
