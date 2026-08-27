@@ -27,9 +27,9 @@ in later phases.
 
 The original plan totaled **57–104 active engineer-days**. After public activation,
 Phase 0 closure, trust-contract publication, the first P1-09 hardening slice, and
-completion of executable documentation, the evaluation funnel, and UI surface
-classification, the planning remainder is **17–33 active engineer-days**, before
-contingency or external wait. It is a scope range, not an elapsed-date commitment.
+completion of the enforceable public-promise tranche, the planning remainder is
+**8–17 active engineer-days**, before contingency or external wait. It is a scope
+range, not an elapsed-date commitment.
 
 ## Backlog
 
@@ -47,9 +47,9 @@ contingency or external wait. It is a scope range, not an elapsed-date commitmen
 | P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial       | 2–4 d + external wait | Medium     |
 | P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Complete      | 0 d                   | High       |
 | P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Complete      | 0 d                   | High       |
-| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Partial       | 7–12 d                | Low        |
+| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Complete      | 0 d                   | High       |
 | P1-13 | Classify and document the supported Starter UI public surface                           | Complete      | 0 d                   | High       |
-| P1-14 | Establish verification duration/resource baselines and regression policy                | Partial       | 2–4 d                 | Medium     |
+| P1-14 | Establish verification duration/resource baselines and regression policy                | Complete      | 0 d                   | High       |
 | P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial       | 3–6 d                 | Low        |
 
 ## Implementation status — 2026-08-27
@@ -82,15 +82,27 @@ contingency or external wait. It is a scope range, not an elapsed-date commitmen
   Dedicated evaluation and public-API maps route readers to every npm entry point,
   JVM module, compatibility boundary, live documentation surface, and canonical
   Template workflow without implying `1.x` or production readiness.
+- **P1-12: complete.** One versioned machine policy defines 19 platform rows in both
+  repositories. Nine admitted supported rows have required merge or scheduled jobs;
+  ten compatible, experimental, or untested rows carry explicit advisory/manual/no-
+  evidence qualifications. Scheduled anonymous npm/Maven consumers, clean-container
+  verification, Java 25, PostgreSQL 17/18, Firefox/WebKit, and cross-repository policy
+  sync all produce retained evidence.
 - **P1-13: complete.** All 1,364 uniquely named Starter UI exports inherit one
   unambiguous `supported`, `advanced`, or `deprecated` stability class through their
   entry point. Machine policy rejects missing/conflicting classifications, surface
   count drift, or deprecated exports without migration guidance. The root and forms
   barrels remain growth-frozen, and legacy Storybook helpers are marked for
   extraction in the next major.
+- **P1-14: complete.** Both authoritative gates measure per-stage and total duration
+  plus GNU-time peak RSS, enforce reviewed warning/failure thresholds on the canonical
+  Ubuntu 24.04 x64 host, and retain structured evidence for 90 days. The policy uses
+  the median of the latest five successful comparable runs for calibration and
+  requires a documented, time-bounded exception before thresholds change.
 - **P1-15: partial.** Anonymous source and artifact access is restored, artifact
-  consumers pass, and one isolated AI clean-room Template evaluation exists. The
-  full admitted environment matrix and human public-alpha adoption decision remain.
+  consumers and the admitted automated environment matrix pass, and one isolated AI
+  clean-room Template evaluation exists. The unfamiliar-human public-alpha adoption
+  decision remains.
 
 ## Dependency waves
 

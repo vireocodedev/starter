@@ -6,13 +6,18 @@ Evidence reconciled: 2026-08-27
 
 Decision: D-105
 
-Status: policy accepted; public support activation requires the enforcement work
-tracked by G-112
+Status: policy accepted; the narrower current public-alpha matrix was activated on
+2026-08-27 and closes G-112
 
 This policy defines the initial Vireo Framework support contract. It deliberately
 separates the contract we intend to publish from the smaller set continuously
 verified today. A target row is not publicly **supported** until all activation
 evidence in this document is green.
+
+The live evidence-backed subset is the versioned
+[current platform support matrix](../../PLATFORM_SUPPORT.md). Its machine-readable
+policy is authoritative for current labels; rows below that remain manual or
+untested are not public support claims.
 
 ## Status vocabulary
 
@@ -197,23 +202,25 @@ runtime guarantee. Until representative workload fixtures, percentile latency an
 resource budgets, failure/recovery tests, and at least one external deployment exist,
 Vireo may publish measurements with methodology but not capacity promises.
 
-## Current evidence and activation gaps
+## Activation audit
 
-As of 2026-08-27:
+As of 2026-08-27, this table preserves the broader activation audit. The narrower
+machine matrix linked above is current and enforced.
 
-| Concern              | Evidence today                                                                                                                                                       | Missing before public support activation                                                            |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Node/npm             | Both repositories pin Node 24.18.1/npm 12.0.2; seven npm `0.2.1` packages and the Template pass anonymous public-registry consumption                                | Keep recurring clean-host/release records and patch updates inside the admitted lines               |
-| Java/Boot            | Java 21 and Boot 4.1.1 are canonical; signed Maven `0.2.0` artifacts and the Template pass anonymous Central consumption; Java 25 has a recurring compatibility lane | Keep recurring Java 25 records and broaden cross-repository BOM admission sampling                  |
-| React/MUI/TypeScript | React 19.2/MUI 9 ranges are bounded; TypeScript 6 and recurring packed required/optional peer-floor consumers are source-enforced                                    | Obtain recurring green records and expand admitted-range sampling beyond floors                     |
-| PostgreSQL           | Starter requires its upgrade fixture on 17/18; Template source-enforces Flyway startup and browser-driven CRUD on both majors nightly                                | Obtain recurring green records, then add backup/restore and release-line upgrade rehearsals         |
-| Browsers             | Template checks desktop/mobile Chromium per merge and source-enforces nightly Playwright Firefox/WebKit full-stack smoke                                             | Obtain recurring green records; add branded browsers, macOS Safari, physical devices, and PWA flows |
-| Operating systems    | Every Starter workflow pins Ubuntu 24.04; a digest-pinned clean Node container runs the full TypeScript gate nightly                                                 | Obtain recurring green records; add Ubuntu 26.04, macOS, and Windows/WSL clean rooms                |
-| Deployment           | Template source-enforces digest-pinned independent frontend/backend images plus PostgreSQL 18 Compose health, static, and API-proxy smoke                            | Obtain recurring green records; add upgrade, backup/restore, rollback, and multi-architecture proof |
+| Concern              | Activated evidence                                                                                                                                    | Broader proof outside the current row                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Node/npm             | Both repositories pin Node 24.18.1/npm 12.0.2; seven npm `0.2.1` packages, fresh anonymous consumers, and the slim clean-container gate are current   | Continue patch updates and recurring records inside the admitted lines               |
+| Java/Boot            | Java 21 and Boot 4.1.1 are canonical; signed Maven `0.2.0` artifacts, anonymous Central consumers, and both Java 25 recurring suites are current      | Broaden cross-repository BOM admission sampling                                      |
+| React/MUI/TypeScript | React 19.2/MUI 9 ranges are bounded; TypeScript 6 plus required/optional peer-floor consumers are enforced and current                                | Expand admitted-range sampling beyond floors                                         |
+| PostgreSQL           | Starter's upgrade fixture and Template's Flyway/browser CRUD contracts are green on PostgreSQL 17 and 18                                              | Add backup/restore and release-line upgrade rehearsals under G-305                   |
+| Browsers             | Template checks desktop/mobile Chromium per merge; current recurring Playwright Firefox 153 and WebKit 26.5 full-stack smoke is green                 | Add branded browsers, macOS Safari, physical devices, and PWA flows under G-303      |
+| Operating systems    | Required workflows pin Ubuntu 24.04 x64 and the digest-pinned slim Node container passes the complete TypeScript gate                                 | Ubuntu 26.04, macOS, Windows/WSL, and ARM64 remain explicit untested/manual rows     |
+| Deployment           | Template enforces digest-pinned independent frontend/backend images plus PostgreSQL 18 Compose health, static, API-proxy, and backend-readiness smoke | Add upgrade, backup/restore, rollback, and multi-architecture proof under later gaps |
 
-These gaps do not reopen the policy decision. They block use of the **supported**
-label and are tracked by G-112 plus the existing browser, database, deployment, and
-clean-room gaps.
+The required rows admitted by the current machine matrix are active and close G-112.
+Broader branded-browser, physical-device, installed-PWA, macOS, Windows/WSL, and
+ARM64 evidence remains explicitly untested/manual and is tracked by G-303 or the
+corresponding later-phase operations gap; it does not dilute the supported rows.
 
 ## Upstream evidence snapshot
 
