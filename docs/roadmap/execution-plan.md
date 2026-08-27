@@ -45,7 +45,7 @@ and completion.
 | Phase 0E  | External evidence                                      | Isolated AI proxy; human research explicitly deferred under D-110                 | Complete with variance |
 | Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete               |
 | Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | In progress            |
-| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Pending                |
+| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | In progress            |
 | Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Pending                |
 | Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Pending                |
 | Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Pending                |
