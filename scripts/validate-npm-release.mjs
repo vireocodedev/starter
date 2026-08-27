@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagesRoot = join(repositoryRoot, "packages");
 const expectedPackages = new Map([
+  ["create-vireo", "create-vireo"],
   ["history", "@vireocodedev/history"],
   ["infrastructure", "@vireocodedev/infrastructure"],
   ["localization", "@vireocodedev/localization"],

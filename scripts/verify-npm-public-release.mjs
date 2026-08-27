@@ -23,6 +23,7 @@ const outputPath = resolve(repositoryRoot, process.argv[2] ?? "npm-public-verifi
 const attempts = positiveInteger(process.env.NPM_PUBLIC_VERIFY_ATTEMPTS, 80);
 const intervalMs = positiveInteger(process.env.NPM_PUBLIC_VERIFY_INTERVAL_MS, 15_000);
 const expectedPackages = new Map([
+  ["create-vireo", "create-vireo"],
   ["history", "@vireocodedev/history"],
   ["infrastructure", "@vireocodedev/infrastructure"],
   ["localization", "@vireocodedev/localization"],
@@ -142,7 +143,6 @@ for (const { manifest } of packages) registryPackages.push(await registryMetadat
 const auditRoot = mkdtempSync(join(tmpdir(), "vireo-public-npm-"));
 const consumerRoot = join(auditRoot, "consumer");
 const consumerNodeModules = join(consumerRoot, "node_modules");
-const consumerScope = join(consumerNodeModules, "@vireocodedev");
 const anonymousNpmrc = join(auditRoot, "anonymous.npmrc");
 
 try {
@@ -211,7 +211,7 @@ try {
   const lockfile = JSON.parse(readFileSync(join(consumerRoot, "package-lock.json"), "utf8"));
   const resolvedPackages = [];
   for (const { manifest } of packages) {
-    const packageDirectory = join(consumerScope, manifest.name.split("/")[1]);
+    const packageDirectory = join(consumerNodeModules, ...manifest.name.split("/"));
     const installedManifest = JSON.parse(readFileSync(join(packageDirectory, "package.json"), "utf8"));
     const lockEntry = lockfile.packages?.[`node_modules/${manifest.name}`];
     if (lstatSync(packageDirectory).isSymbolicLink()) {
@@ -257,10 +257,28 @@ try {
       "--eval",
       runtimeSmoke,
       JSON.stringify(nodeSpecifiers),
-      pathToFileURL(`${consumerScope}/`).href,
+      pathToFileURL(`${consumerNodeModules}/`).href,
     ],
     { cwd: consumerRoot, stdio: "inherit" },
   );
+
+  const createDryRun = JSON.parse(
+    execFileSync(
+      "node",
+      [
+        join(consumerNodeModules, "create-vireo/dist/cli.js"),
+        join(auditRoot, "generated-public-smoke"),
+        "--yes",
+        "--dry-run",
+        "--json",
+        "--no-git",
+      ],
+      { cwd: consumerRoot, encoding: "utf8", env: npmEnvironment },
+    ),
+  );
+  if (createDryRun.projectName !== "generated-public-smoke" || createDryRun.dryRun !== true) {
+    throw new Error("The public create-vireo executable failed its non-writing CLI smoke test.");
+  }
 
   const allSpecifiers = [...nodeSpecifiers, ...browserSpecifiers];
   const typecheckEntry = join(consumerRoot, "consumer.ts");

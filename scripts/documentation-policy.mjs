@@ -59,7 +59,7 @@ const packageRecords = readdirSync(join(root, "packages"), { withFileTypes: true
   .map(entry => ({ directory: entry.name, manifestPath: join(root, "packages", entry.name, "package.json") }))
   .filter(record => existsSync(record.manifestPath))
   .map(record => ({ directory: record.directory, manifest: readJson(record.manifestPath) }))
-  .filter(record => record.manifest.name?.startsWith("@vireocodedev/"));
+  .filter(record => record.manifest.private !== true);
 
 if (current) {
   const declaredPackages = new Map(current.npm?.map(entry => [entry.package, entry.version]));

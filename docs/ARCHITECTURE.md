@@ -31,7 +31,7 @@ graph TD
 | `starter-queryengine`    | —                                      | —              |
 | `starter-sqlite`         | —                                      | —              |
 
-The graph is acyclic and has no backward arrows. Five of the seven packages have
+The graph is acyclic and has no backward arrows. Five of the seven browser packages have
 no workspace dependencies at all.
 
 ## Decision: `starter-core` became `starter-shell` (roadmap 1.5)

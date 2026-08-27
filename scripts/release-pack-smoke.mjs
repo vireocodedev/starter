@@ -244,7 +244,6 @@ const auditRoot = mkdtempSync(join(tmpdir(), "starter-release-smoke-"));
 const tarballRoot = join(auditRoot, "tarballs");
 const consumerRoot = join(auditRoot, "consumer");
 const consumerNodeModules = join(consumerRoot, "node_modules");
-const consumerScope = join(consumerNodeModules, "@vireocodedev");
 
 try {
   mkdirSync(tarballRoot, { recursive: true });
@@ -314,7 +313,7 @@ try {
     const tarball = tarballs.find(file => file === `${prefix}.tgz`);
     if (!tarball) throw new Error(`No tarball was produced for ${sourceManifest.name}.`);
 
-    const packageDirectory = join(consumerScope, sourceManifest.name.split("/")[1]);
+    const packageDirectory = join(consumerNodeModules, ...sourceManifest.name.split("/"));
     mkdirSync(packageDirectory, { recursive: true });
     execFileSync("tar", ["-xzf", join(tarballRoot, tarball), "-C", packageDirectory, "--strip-components=1"]);
 
@@ -351,11 +350,30 @@ try {
       await import(specifier);
     }
   `;
-  const expectedRoot = pathToFileURL(`${consumerScope}/`).href;
+  const expectedRoot = pathToFileURL(`${consumerNodeModules}/`).href;
   execFileSync("node", ["--input-type=module", "--eval", smokeSource, JSON.stringify(nodeSpecifiers), expectedRoot], {
     cwd: consumerRoot,
     stdio: "inherit",
   });
+
+  const createPackage = join(consumerNodeModules, "create-vireo");
+  const createDryRun = JSON.parse(
+    execFileSync(
+      "node",
+      [
+        join(createPackage, "dist/cli.js"),
+        join(auditRoot, "generated-smoke"),
+        "--yes",
+        "--dry-run",
+        "--json",
+        "--no-git",
+      ],
+      { cwd: consumerRoot, encoding: "utf8" },
+    ),
+  );
+  if (createDryRun.projectName !== "generated-smoke" || createDryRun.dryRun !== true) {
+    throw new Error("The packed create-vireo executable failed its non-writing CLI smoke test.");
+  }
 
   const typecheckEntry = join(consumerRoot, "consumer.ts");
   const typecheckConfig = join(consumerRoot, "tsconfig.json");

@@ -8,6 +8,10 @@
       "status": "current",
       "npm": [
         {
+          "package": "create-vireo",
+          "version": "0.1.0"
+        },
+        {
           "package": "@vireocodedev/history",
           "version": "0.2.1"
         },

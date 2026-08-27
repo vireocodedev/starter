@@ -158,7 +158,7 @@ const subjects = walkFiles(outputRoot)
 
 const npmSubjectCount = subjects.filter(subject => subject.kind === "npm-package").length;
 const mavenSubjectCount = subjects.filter(subject => subject.kind === "maven-artifact").length;
-if (npmSubjectCount !== 7) throw new Error(`Expected seven npm package subjects, found ${npmSubjectCount}.`);
+if (npmSubjectCount !== 8) throw new Error(`Expected eight npm package subjects, found ${npmSubjectCount}.`);
 if (mavenSubjectCount !== 27) throw new Error(`Expected 27 versioned Maven subjects, found ${mavenSubjectCount}.`);
 
 const manifest = {

@@ -1,6 +1,6 @@
 # Public npm release
 
-The seven `@vireocodedev/*` workspaces publish as public packages on npm. A
+Seven `@vireocodedev/*` libraries and the unscoped `create-vireo` command publish as eight public packages on npm. A
 release is deliberately split into three independently observable stages:
 
 1. Changesets prepares a version pull request.
@@ -12,6 +12,7 @@ credential.
 
 ## Published packages
 
+- `create-vireo`
 - `@vireocodedev/history`
 - `@vireocodedev/infrastructure`
 - `@vireocodedev/localization`
@@ -29,9 +30,8 @@ and provenance. Package versions are immutable after publication.
    owners and that publishing accounts use two-factor authentication.
 2. In GitHub, create an environment named `package-release`. Restrict it to the
    `main` branch and add the required maintainer reviewers.
-3. Only when bootstrapping previously unpublished packages, use a short-lived
-   granular npm access token that can publish packages in the `vireocodedev`
-   organization. Temporarily store it only as the `NPM_TOKEN` secret on the
+3. Only when bootstrapping a previously unpublished package, use a short-lived
+   granular npm access token owned by the applicable package owner. Temporarily store it only as the `NPM_TOKEN` secret on the
    `package-release` environment and explicitly wire it into the publish step in
    a reviewed workflow change.
 4. After the first publication, open each package's npm settings and add this
@@ -96,7 +96,7 @@ Successful publication automatically starts **Verify public npm release**. It:
 
 - waits for every exact manifest version to become anonymously visible;
 - requires npm distribution metadata and a provenance attestation for each;
-- installs all seven packages from an empty cache and token-free npm config;
+- installs all eight packages from an empty cache and token-free npm config;
 - rejects workspace links and non-npm tarball locations;
 - requires a strict peer dependency tree;
 - imports every framework-free entry point;

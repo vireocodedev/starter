@@ -1,6 +1,12 @@
 {
   "schemaVersion": 1,
   "npm": {
+    "create-vireo": {
+      "role": "project-scaffolder",
+      "entryPoints": {
+        ".": { "audience": "authoring-tooling", "environment": ["node"] }
+      }
+    },
     "@vireocodedev/history": {
       "role": "history-domain",
       "entryPoints": {

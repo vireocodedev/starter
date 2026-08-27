@@ -6,15 +6,15 @@ is development state, not a released compatibility promise.
 
 ## Release families
 
-The seven npm packages are independently versioned. Consumers may install only the
+The eight npm packages are independently versioned. Consumers may install only the
 packages they need, subject to their declared dependencies and peer dependencies.
 The six JVM artifacts share one coordinated version and should be aligned with the
 `com.vireocode:vireo-bom` BOM.
 
-The current public lines are npm `0.2.1` for `@vireocodedev/ui`,
+The current package lines are `0.1.0` for `create-vireo` and npm `0.2.1` for `@vireocodedev/ui`,
 `@vireocodedev/query`, `@vireocodedev/shell`, `@vireocodedev/history`,
 `@vireocodedev/infrastructure`, `@vireocodedev/localization`, and
-`@vireocodedev/sqlite`, and JVM `0.2.0`. Numeric equality between the npm and JVM
+`@vireocodedev/sqlite`, and JVM `0.2.0`. Numeric equality between npm packages or between npm and JVM
 versions is neither required nor implied. A Template commit or tag, together with
 its committed lockfiles, is the compatibility manifest for the exact frontend and
 backend versions demonstrated by that Template revision.

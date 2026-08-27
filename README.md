@@ -52,6 +52,7 @@ backend's base entity/service layer; they are separate contracts.
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| [`create-vireo`](packages/create-vireo)                   | 0.1.0   | Canonical interactive and non-interactive Vireo project creation command.                                 |
 | [`@vireocodedev/ui`](packages/ui)                         | 0.2.1   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
@@ -60,17 +61,16 @@ backend's base entity/service layer; they are separate contracts.
 | [`@vireocodedev/history`](packages/history)               | 0.2.1   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
 | [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.1   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
 
-Versions above are the current public npm releases. `packages/*/package.json`
-remains the source of truth.
+Versions above are the current package lines. `packages/*/package.json` remains the source of truth; an unreleased package is explicitly identified in its changelog and Phase 2 evidence until registry publication completes.
 
 ### Dependency graph
 
-Only UI depends on sibling Vireo packages. The other six can be consumed on their own:
+Only UI depends on sibling Vireo packages. The other seven can be consumed on their own:
 
 ```txt
 ui -> history, infrastructure, localization, query
 
-history · infrastructure · localization · query · shell · sqlite   (no Vireo dependencies)
+create-vireo · history · infrastructure · localization · query · shell · sqlite   (no Vireo dependencies)
 ```
 
 ## Prerequisites

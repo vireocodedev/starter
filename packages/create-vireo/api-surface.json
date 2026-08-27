@@ -1,0 +1,24 @@
+{
+  "package": "create-vireo",
+  "entryPoints": {
+    ".": {
+      "exports": [
+        "CreateVireoOptions",
+        "CreateVireoResult",
+        "TEMPLATE_ARCHIVE_URL",
+        "TEMPLATE_COMMIT",
+        "VireoDatabase",
+        "VireoPackageManager",
+        "createVireo"
+      ],
+      "dependencies": [
+        "node:child_process",
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "node:zlib"
+      ],
+      "workerSafe": false
+    }
+  }
+}

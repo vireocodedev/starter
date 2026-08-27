@@ -6,6 +6,7 @@
   "npm": {
     "registry": "https://registry.npmjs.org",
     "packages": [
+      { "directory": "create-vireo", "name": "create-vireo" },
       { "directory": "history", "name": "@vireocodedev/history" },
       { "directory": "infrastructure", "name": "@vireocodedev/infrastructure" },
       { "directory": "localization", "name": "@vireocodedev/localization" },
@@ -14,7 +15,7 @@
       { "directory": "sqlite", "name": "@vireocodedev/sqlite" },
       { "directory": "ui", "name": "@vireocodedev/ui" }
     ],
-    "expectedSubjectCount": 7
+    "expectedSubjectCount": 8
   },
   "maven": {
     "registry": "https://repo.maven.apache.org/maven2",

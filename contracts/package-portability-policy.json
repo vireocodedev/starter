@@ -10,6 +10,7 @@
     "allowSourcesContent": true,
     "requireRelativeSources": true,
     "packages": {
+      "create-vireo": "forbidden",
       "@vireocodedev/history": "required",
       "@vireocodedev/infrastructure": "required",
       "@vireocodedev/localization": "required",
