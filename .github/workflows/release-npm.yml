@@ -1,0 +1,100 @@
+name: Publish npm release
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type publish to release every unpublished manifest version
+        required: true
+        type: string
+
+concurrency:
+  group: npm-public-release
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  verify:
+    name: Verify npm release candidate
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Confirm protected release intent
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: test "$GITHUB_REF" = "refs/heads/main" && test "$CONFIRMATION" = "publish"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - run: corepack npm ci
+      - run: corepack npm run release:validate
+      - run: corepack npm run verify -- silent
+      - run: corepack npm run release:evidence
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: npm-release-candidate-${{ github.sha }}
+          path: .release-evidence
+          if-no-files-found: error
+          retention-days: 90
+
+  publish:
+    name: Publish public npm packages
+    needs: verify
+    runs-on: ubuntu-24.04
+    environment: package-release
+    permissions:
+      contents: write
+      id-token: write
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      published-packages: ${{ steps.changesets.outputs.publishedPackages }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.18.1
+          registry-url: https://registry.npmjs.org
+          scope: "@vireocodedev"
+          package-manager-cache: false
+      - run: corepack npm ci --ignore-scripts
+      - name: Recheck immutable registry state
+        run: corepack npm run release:validate
+      - name: Publish with registry-backed provenance
+        id: changesets
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        with:
+          publish: corepack npm run release:publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Required only to bootstrap packages that do not yet have a trusted
+          # publisher. npm uses OIDC first once the package trusts this workflow.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+      - name: Require at least one publication
+        env:
+          PUBLISHED: ${{ steps.changesets.outputs.published }}
+        run: test "$PUBLISHED" = "true"
+      - name: Record publication summary
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+        run: |
+          {
+            echo "## Published npm packages"
+            echo
+            echo '```json'
+            echo "$PUBLISHED_PACKAGES"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

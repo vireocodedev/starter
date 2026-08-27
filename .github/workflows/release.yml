@@ -1,101 +1,23 @@
-name: Release
+name: Maintain npm release PR
 
 on:
   push:
     branches: [main]
-  # A release is the one thing worth being able to start by hand: a publish that
-  # failed halfway, or a version bump that needs to go out without a code change.
   workflow_dispatch:
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: npm-release-pr-${{ github.ref }}
+  cancel-in-progress: false
 
-# Write access is granted only to jobs that create release state.
 permissions: {}
 
 jobs:
-  verify-typescript:
-    name: Verify TypeScript release candidate
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
-        with:
-          node-version: 24.18.1
-          registry-url: https://npm.pkg.github.com
-          scope: "@vireocodedev"
-      - run: corepack npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: corepack npm run verify -- silent
-
-  verify-jvm:
-    name: Verify JVM release candidate
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
-    defaults:
-      run:
-        working-directory: jvm
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          persist-credentials: false
-      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
-        with:
-          distribution: temurin
-          java-version: 21
-      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
-      - run: ./gradlew clean check aggregateJavadoc --no-build-cache
-      - run: ./scripts/verify-publication-consumer.sh
-
-  release-evidence:
-    name: Build unsigned release evidence
-    needs: [verify-typescript, verify-jvm]
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
-        with:
-          node-version: 24.18.1
-          registry-url: https://npm.pkg.github.com
-          scope: "@vireocodedev"
-      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
-        with:
-          distribution: temurin
-          java-version: 21
-      - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
-      - run: corepack npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: corepack npm run release:evidence
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: unsigned-release-candidate-${{ github.sha }}
-          path: .release-evidence
-          if-no-files-found: error
-          retention-days: 30
-
-  release-npm:
-    name: Release npm packages
-    needs: [verify-typescript, verify-jvm, release-evidence]
+  version:
+    name: Create or update the npm release PR
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-      packages: write
       pull-requests: write
-    outputs:
-      published: ${{ steps.changesets.outputs.published }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -103,19 +25,13 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24.18.1
-          registry-url: https://npm.pkg.github.com
-          scope: "@vireocodedev"
-      # Dependency lifecycle scripts do not need release credentials. Package
-      # lifecycle hooks still run later, as part of the deliberate publish.
+          package-manager-cache: false
       - run: corepack npm ci --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Release PR or publish to GitHub Packages
-        id: changesets
+      - name: Create or update the Changesets release PR
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
-          publish: corepack npm run release:publish
           version: corepack npm run version-packages
+          commit: "chore(npm): version public packages"
+          title: "chore(npm): version public packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
