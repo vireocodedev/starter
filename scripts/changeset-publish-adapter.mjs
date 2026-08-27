@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const ansiEscape = /\u001B\[[0-?]*[ -/]*[@-~]/gu;
+const ansiEscape = new RegExp(`${String.fromCharCode(27)}\\[[0-?]*[ -/]*[@-~]`, "gu");
 const coordinatePattern = /^(?:@[^/\s]+\/[^@\s]+|[^@\s]+)@[^\s]+$/u;
 
 export function publishedCoordinates(output) {
