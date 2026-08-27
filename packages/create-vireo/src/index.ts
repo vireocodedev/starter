@@ -4,7 +4,7 @@ import { chmod, cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { gunzipSync } from "node:zlib";
 
-export const TEMPLATE_COMMIT = "f1005fb576a3283b44493b7ba0244083d215d8cb";
+export const TEMPLATE_COMMIT = "88cd525f779badef1f671140f2140f088324f4e4";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";
