@@ -7,6 +7,7 @@ storybook-static/
 .turbo
 .release-evidence/
 .support-evidence/
+.npm-public-verification.json
 
 # Research evidence committed under docs/roadmap/research/ is aggregate only.
 # Raw participant material and identity mappings must remain in an approved,

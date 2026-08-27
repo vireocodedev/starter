@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { retryTransientNpmRegistryOperation } from "./npm-registry-retry.mjs";
+import { resolvePackageBin } from "./package-bin.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagesRoot = join(repositoryRoot, "packages");
@@ -290,7 +291,8 @@ try {
       2,
     )}\n`,
   );
-  execFileSync("node", [join(consumerNodeModules, "typescript/bin/tsc"), "--project", typecheckConfig], {
+  const typescriptBin = resolvePackageBin(join(consumerNodeModules, "typescript"), ["tsc", "tsc6"]);
+  execFileSync("node", [typescriptBin, "--project", typecheckConfig], {
     cwd: consumerRoot,
     stdio: "inherit",
   });
