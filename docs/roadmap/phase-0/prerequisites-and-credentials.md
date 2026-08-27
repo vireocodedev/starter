@@ -48,6 +48,19 @@ An empty-cache Starter Template frontend install without a token failed with `E4
 An empty-cache Template JVM build without a GitHub actor/token could not resolve the
 BOM. These are confirmed adoption blockers, not documentation assumptions.
 
+### Post-baseline Maven activation — 2026-08-27
+
+- The Template JVM build now uses only `mavenCentral()` in published mode and no
+  longer accepts or requires GitHub Packages credentials.
+- Canonical Maven coordinates are `com.vireocode:vireo-*`; public Java packages
+  are product-scoped beneath `com.vireocode.vireo.*`.
+- The protected `maven-central` environment owns the four release-only secrets:
+  Central username/password and in-memory signing key/passphrase.
+- Release automation has read-only GitHub permissions, produces and verifies one
+  signed atomic bundle, and uploads it as `USER_MANAGED`.
+- The first Central publication and cold public-registry consumer run remain
+  external release steps. npm credential removal is tracked separately.
+
 ## Runtime configuration
 
 | Variable or port             | Scope                | Purpose/default                                   |

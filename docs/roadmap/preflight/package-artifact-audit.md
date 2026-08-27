@@ -88,18 +88,18 @@ sidecars.
 
 ## Remaining public-distribution work
 
-| ID      | Severity | Finding                                                                                                                                                      | Required disposition                                                                                                                                     |
-| ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PAA-001 | Blocker  | npm packages still target authenticated GitHub Packages.                                                                                                     | After the final npm scope is approved, migrate metadata/workflows to npmjs, set public access explicitly, and configure trusted publishing/provenance.   |
-| PAA-002 | Blocker  | Maven artifacts still use the unverified `com.vireocode` group and GitHub Packages destination.                                                              | Acquire/verify the final namespace, migrate all coordinates atomically, and configure the approved Maven Central publisher.                              |
-| PAA-003 | Blocker  | Local Maven artifacts have checksum sidecars but no PGP signatures.                                                                                          | Configure release-only in-memory signing after the final publisher account and protected signing material exist; require `.asc` artifacts in release CI. |
-| PAA-004 | Resolved | npm tarballs include source maps, and the UI tarball contains 1,123 compiled files because all supported subpath implementations are emitted beneath `dist`. | API growth is now governed by symbol budgets; bundled packages intentionally retain audited maps while UI remains map-free.                              |
-| PAA-005 | Major    | Artifact identity metadata still uses the provisional repository, developer, and copyright wording.                                                          | Update it only after the Phase 0 identity/legal-owner decisions are final, then rerun both artifact audits and clean-consumer rehearsals.                |
+| ID      | Severity        | Finding                                                                                                                                                                                       | Required disposition                                                                                                                                   |
+| ------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| PAA-001 | Blocker         | npm packages still target authenticated GitHub Packages.                                                                                                                                      | After the final npm scope is approved, migrate metadata/workflows to npmjs, set public access explicitly, and configure trusted publishing/provenance. |
+| PAA-002 | Release pending | Resolved in source on 2026-08-27: `com.vireocode` is verified, canonical `vireo-*` artifacts and `com.vireocode.vireo.*` packages are migrated atomically, and Central staging is configured. | Complete the first user-managed publication and cold public-consumer proof.                                                                            |
+| PAA-003 | Resolved        | Release-only in-memory signing now emits and cryptographically verifies `.asc` files for every POM, Gradle module, binary, sources, and Javadoc artifact.                                     | Keep signing secrets environment-scoped and rerun the signed-bundle audit for every deployment.                                                        |
+| PAA-004 | Resolved        | npm tarballs include source maps, and the UI tarball contains 1,123 compiled files because all supported subpath implementations are emitted beneath `dist`.                                  | API growth is now governed by symbol budgets; bundled packages intentionally retain audited maps while UI remains map-free.                            |
+| PAA-005 | Major           | Artifact identity metadata still uses the provisional repository, developer, and copyright wording.                                                                                           | Update it only after the Phase 0 identity/legal-owner decisions are final, then rerun both artifact audits and clean-consumer rehearsals.              |
 
 ## Gate result
 
-The current private artifacts have deterministic, executable, CI-enforced content
-boundaries. They are not yet ready for public registries because coordinate
-ownership, registry migration, provenance/signing, and final identity metadata
-remain unresolved. Those are release-control blockers, not defects hidden inside
-the packed files.
+The artifacts have deterministic, executable, CI-enforced content boundaries. The
+Maven implementation is ready for its first user-managed Central deployment;
+public availability remains unproven until that deployment is manually published
+and the cold public-consumer workflow passes. npm registry migration and final
+cross-ecosystem release evidence remain separate blockers.

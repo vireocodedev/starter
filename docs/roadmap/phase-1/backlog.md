@@ -49,6 +49,25 @@ useful for capacity planning but does not imply all work is sequential.
 | P1-14 | Establish verification duration/resource baselines and regression policy                    | G-108                      | Stable Phase 1 CI shape from P1-09/P1-12 | 2–4 d                        | Medium     |
 | P1-15 | Run the credential-free public-alpha consumer and unfamiliar-user gate                      | G-007, G-106; Phase 1 gate | P1-04 through P1-14                      | 4–7 d                        | Low        |
 
+## Implementation status — 2026-08-27
+
+- **P1-02 (Maven portion): implemented.** The accepted architecture uses
+  release-only in-memory PGP signing, an audited atomic repository bundle, the
+  Central Publisher API, and `USER_MANAGED` publication.
+- **P1-03 (Maven portion): implemented.** Coordinates are
+  `com.vireocode:vireo-{bom,core,auth,query,history,offline}` and public Java APIs
+  live beneath `com.vireocode.vireo.*`; the Template and all JVM fixtures consume
+  them together.
+- **P1-05: implementation complete; external execution pending.** The protected
+  staging workflow and credential-free public-consumer workflow are ready. Exit
+  still requires a validated deployment, manual Central publication, and a green
+  cold public-consumer run.
+- **P1-09 (Maven portion): implemented.** Workflow permissions are read-only,
+  actions are SHA-pinned, signing material is environment-scoped, the exact bundle
+  is retained as evidence, and the release runbook defines recovery boundaries.
+- npm publication, public repository visibility, and the clean-room adoption gate
+  remain open; these Maven changes do not close G-007, G-103, or G-111 globally.
+
 ## Dependency waves
 
 ### Wave 0 — Phase 0 closure
