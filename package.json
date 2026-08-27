@@ -45,7 +45,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",
-    "version-packages": "sh scripts/with-declared-npm.sh changeset version",
+    "version-packages": "node scripts/changeset-version-adapter.mjs",
     "release:smoke": "node scripts/release-pack-smoke.mjs",
     "release:validate": "node scripts/validate-npm-release.mjs",
     "release:verify-public": "node scripts/verify-npm-public-release.mjs",
