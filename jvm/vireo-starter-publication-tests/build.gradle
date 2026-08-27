@@ -19,12 +19,6 @@ repositories {
             maven {
                 name = 'VireoPublicationUnderTest'
                 url = repositoryUri
-                if (repositoryUri.scheme in ['http', 'https'] && System.getenv('GITHUB_TOKEN')) {
-                    credentials {
-                        username = System.getenv('GITHUB_ACTOR') ?: 'x'
-                        password = System.getenv('GITHUB_TOKEN')
-                    }
-                }
             }
         }
         filter {

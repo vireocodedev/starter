@@ -135,24 +135,25 @@ smaller:
    and commit the updated `api-surface.txt` files. This is the forcing function:
    the check task fails the build until the snapshot matches, so a widened
    surface always shows up in the diff next to the version bump.
-3. Merge to `main`. The **Release** workflow verifies the JVM source and local
-   Maven publications, then publishes when the JVM version is absent from the
-   registry. This is intentionally independent of whether npm packages changed;
-   coordinated wire-contract changes remain a pull-request rule documented in
-   `docs/BACKEND_PARITY.md`, while backend-only releases remain possible.
-4. A final job resolves and tests the published artifacts from GitHub Packages
-   through the checked-in standalone consumer with an empty Gradle home, so "it
-   published" and "it is usable" are checked separately.
+3. Merge to `main`, then manually run **Stage Maven Central release** with the
+   exact version. The protected `maven-central` environment builds one signed,
+   audited bundle, uploads it as a `USER_MANAGED` deployment, and waits for
+   Central validation. It does not publish automatically.
+4. Review the validated deployment in Central Portal and explicitly publish it.
+   Then run **Verify Maven Central release** for the same version. That workflow
+   resolves the public BOM and every versionless module through the checked-in
+   standalone consumer with an empty Gradle home, so "it published" and "it is
+   usable" are checked separately.
 
 The same bump table applies. Note that MapStruct's generated `*Impl` classes are
 part of the recorded surface, because they are genuinely part of the jar.
 
-To publish from a workstation, set `gpr.user` and `gpr.key` in
-`~/.gradle/gradle.properties` and run `./gradlew publish` from `jvm/`.
-
 Run `./gradlew clean check aggregateJavadoc --no-build-cache` for the complete
 source gate and `./scripts/verify-publication-consumer.sh` to prove the local
 Maven publications before opening or merging a release pull request.
+
+The complete credential, signing, staging, manual-publication, and recovery
+procedure is in [Maven Central release](docs/MAVEN_CENTRAL_RELEASE.md).
 
 JVM library work follows the repository's
 [JVM package-authoring](docs/package-authoring/JVM_PACKAGES.md) and

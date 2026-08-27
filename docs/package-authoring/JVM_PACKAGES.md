@@ -70,7 +70,7 @@ for symmetry, but make consumer API, Spring wiring, persistence, and internal
 implementation distinguishable.
 
 ```text
-src/main/java/com/vireocode/starter/<module>/
+src/main/java/com/vireocode/vireo/<module>/
   api/                consumer-facing models and services, when needed
   autoconfigure/      Spring Boot auto-configuration
   config/             configuration properties and validation
