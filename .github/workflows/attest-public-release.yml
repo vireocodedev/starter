@@ -65,9 +65,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           for subject in .public-release-evidence/subjects/npm/* .public-release-evidence/subjects/maven/*; do
-            gh attestation verify "$subject" --repo "$GITHUB_REPOSITORY"
+            gh attestation verify "$subject" \
+              --repo "$GITHUB_REPOSITORY" \
+              --predicate-type https://cyclonedx.org/bom \
+              --cert-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/attest-public-release.yml@refs/heads/main" \
+              --source-ref refs/heads/main
           done
       - name: Preserve exact-byte evidence and signed bundles
+        if: >-
+          always() &&
+          steps.npm-attestation.outcome == 'success' &&
+          steps.maven-attestation.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: public-release-sbom-attestations-${{ github.event.workflow_run.head_sha || github.sha }}
