@@ -62,6 +62,7 @@ function subjectKind(path) {
   const normalized = relative(outputRoot, path).replaceAll("\\", "/");
   if (normalized.startsWith("npm/") && normalized.endsWith(".tgz")) return "npm-package";
   if (normalized === "sbom/npm.cdx.json") return "cyclonedx-sbom";
+  if (normalized === "sbom/jvm.cdx.json") return "cyclonedx-sbom";
   if (!normalized.startsWith("maven/") || /\.(?:md5|sha1|sha256|sha512)$/u.test(normalized)) return undefined;
   if (normalized.includes("/maven-metadata.xml")) return undefined;
   return "maven-artifact";
@@ -127,10 +128,17 @@ command(
     join(repoRoot, "jvm"),
     `-PvireoTestRepository=${mavenRoot}`,
     "publishMavenPublicationToVerificationRepository",
+    "cyclonedxBom",
     "--no-build-cache",
   ],
   { stdio: "inherit" },
 );
+const jvmSbomPath = join(sbomRoot, "jvm.cdx.json");
+copyFileSync(join(repoRoot, "jvm", "build", "reports", "cyclonedx", "bom.json"), jvmSbomPath);
+const jvmSbom = JSON.parse(readFileSync(jvmSbomPath, "utf8"));
+if (jvmSbom.bomFormat !== "CycloneDX" || !Array.isArray(jvmSbom.components) || jvmSbom.components.length === 0) {
+  throw new Error("Gradle did not produce a populated CycloneDX SBOM.");
+}
 const jvmVersion = readFileSync(join(repoRoot, "jvm", "gradle.properties"), "utf8").match(/^version=(.+)$/mu)?.[1];
 if (!jvmVersion) throw new Error("Could not read the JVM release version.");
 command(join(repoRoot, "jvm", "scripts", "audit-publication-artifacts.sh"), [mavenRoot, jvmVersion], {
@@ -185,6 +193,7 @@ const manifest = {
   controls: {
     sourceMaps: "contracts/package-portability-policy.json",
     npmSbom: "sbom/npm.cdx.json",
+    jvmSbom: "sbom/jvm.cdx.json",
     checksumAlgorithm: ["sha256", "sha512"],
     signature: "absent-in-dry-run",
     publicationRequiresSignedProvenance: true,
@@ -201,7 +210,7 @@ writeFileSync(
 complete = true;
 
 console.log(
-  `Release evidence generated for ${subjects.length} subjects (${npmSubjectCount} npm, ${mavenSubjectCount} Maven, one SBOM).`,
+  `Release evidence generated for ${subjects.length} subjects (${npmSubjectCount} npm, ${mavenSubjectCount} Maven, two SBOMs).`,
 );
 console.log(`Output: ${outputRoot}`);
 console.log("This dry-run evidence is unsigned; stable publication still requires registry-backed signed provenance.");

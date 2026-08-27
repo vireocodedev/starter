@@ -60,23 +60,47 @@ The initial source-owned baseline on 2026-08-26 scanned 518 commits and about 11
 without a finding. A clean scan is evidence, not proof that a credential never
 existed or was never exposed elsewhere.
 
-## Required GitHub settings
+### Code and dependency scanning
 
-An administrator must record a dated screenshot/export or review note for each
-item before public release:
+CodeQL analyzes Java and JavaScript/TypeScript on pull requests, pushes to `main`,
+weekly, and on demand. The Java database uses an explicit JVM compilation rather
+than build-system guessing. Dependency review blocks pull requests that introduce a
+known vulnerability of moderate severity or higher. Dependabot alerts and security
+updates supplement those source-owned gates.
 
-- set the default workflow token to read-only and disallow workflows from creating
-  or approving pull requests except where the reviewed release workflow requires
-  it;
+These scanners are complementary: CodeQL examines source behavior, dependency
+review examines a pull request's dependency change, Dependabot monitors known
+vulnerabilities after merge, and Gitleaks scans history for credential-like
+material. None substitutes for threat modeling or independent review.
+
+## Verified GitHub settings
+
+An authenticated API audit on 2026-08-27 verified these settings on both Starter
+and Template:
+
+- private vulnerability reporting enabled;
+- Dependabot vulnerability alerts and automated security updates enabled;
+- secret scanning, push protection, non-provider patterns, and validity checks
+  enabled;
+- default workflow-token access set to read-only and workflow approval of pull
+  requests disabled; and
+- full-length commit SHA pinning required for actions.
+
+Repository-owned workflow policy still checks every action against a reviewed
+action/SHA/version map. Provider SHA enforcement is defense in depth rather than a
+replacement for that allowlist.
+
+## Remaining GitHub settings
+
+An administrator must record a dated API export or review note for each remaining
+item before the Phase 1 security gate closes:
+
 - restrict allowed actions to GitHub-owned actions plus the reviewed Changesets
-  and Gradle actions, with full-SHA pinning required where the provider supports it;
+  and Gradle actions; repository SHA enforcement is already enabled;
 - protect `main`: require pull requests, current approving CODEOWNERS review for
   `.github/**`, dismissal of stale approvals, conversation resolution, and the
   TypeScript, JVM, workflow-policy, and secret-scan checks;
 - prohibit force pushes and deletion of `main`; tightly limit bypass identities;
-- enable GitHub secret scanning, push protection, validity checks, and alerts in
-  addition to the repository-owned Gitleaks gate;
-- enable and test private vulnerability reporting;
 - protect the `github-pages` environment and restrict it to the intended branch;
 - before moving publication to a public registry, split release-PR maintenance from
   publication and put npm/Maven publication jobs behind a `package-release`
@@ -84,10 +108,9 @@ item before public release:
 - give at least two trusted maintainers recoverable access to the organization,
   registries, environments, security inbox, and signing/provenance identities.
 
-The current Changesets job both maintains a release PR and publishes after that PR
-merges. Gating the whole job behind a protected environment would require approval
-for ordinary release-PR maintenance. The public-registry pipeline must split those
-responsibilities before claiming protected publication.
+The release-PR and npm publication workflows are now split, and npm publication is
+protected by `package-release`. The Maven and Pages environment findings remain in
+the dated recovery exercise.
 
 ## Review and release rules
 
@@ -107,17 +130,16 @@ responsibilities before claiming protected publication.
 
 `corepack npm run release:evidence` builds all seven npm tarballs, publishes the
 six JVM modules to an isolated Maven repository, audits both artifact families,
-generates an npm CycloneDX SBOM, and records SHA-256/SHA-512 subjects in a manifest
-bound to the clean Git commit and pinned toolchain. The release workflow retains
-that unsigned candidate evidence before either publisher starts.
+generates npm and JVM CycloneDX SBOMs, and records SHA-256/SHA-512 subjects in a
+manifest bound to the clean Git commit and pinned toolchain. The release workflow
+retains that unsigned candidate evidence before either publisher starts.
 
 This is deliberately classified as **unsigned release-candidate evidence**, not
-provenance. The current private pipeline rebuilds during publication and therefore
-does not yet promote these exact bytes. The accepted public pipeline must publish
-the reviewed subjects (or prove a byte-for-byte rebuild), attach registry-backed
-signed provenance, generate a JVM dependency SBOM, and verify those attestations
-from a credential-free consumer. Source-owned dry runs must not be described as
-cryptographic trust.
+provenance. Publication jobs rebuild and therefore do not yet promote these exact
+candidate bytes. npm registry provenance and signed Maven artifacts are verified
+after publication, but the generated SBOMs are not yet attached as signed
+attestations to the published subjects. Source-owned dry runs must not be described
+as cryptographic trust.
 
 ## Evidence checklist
 
@@ -127,10 +149,10 @@ Before each stable public release, attach or link:
 - green read-only candidate verification and secret scan;
 - protected-environment approval and publisher identity;
 - published-coordinate consumer verification from empty caches;
-- generated provenance/SBOM/checksum evidence once those later roadmap controls
-  land; and
+- generated npm/JVM SBOM and checksum evidence, plus published provenance and
+  signature verification; and
 - the rollback/withdrawal decision owner.
 
-Provider controls remain **unverified** until their evidence is recorded. Do not
-translate this source contract into a claim that GitHub or registry settings are
-already enabled.
+Provider controls not listed in the verified section remain **unverified** until
+their evidence is recorded. Do not infer unlisted GitHub or registry settings from
+this source contract.

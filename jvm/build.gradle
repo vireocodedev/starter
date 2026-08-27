@@ -1,6 +1,7 @@
 plugins {
     id 'java-base'
     id 'com.adarshr.test-logger' version '4.0.0' apply false
+    id 'org.cyclonedx.bom' version '3.4.1'
 }
 
 // The artifacts a consumer resolves. Everything else in this build exists to
@@ -14,6 +15,20 @@ ext.publishedModules = [
         'vireo-history',
         'vireo-bom',
 ]
+
+// Release evidence describes only the six public artifacts. Documentation and
+// consumer-test projects are verification fixtures, not shipped components.
+tasks.named('cyclonedxDirectBom') {
+    enabled = false
+}
+configure(subprojects) {
+    tasks.named('cyclonedxDirectBom') {
+        enabled = project.name in rootProject.ext.publishedModules
+        includeConfigs = ['compileClasspath', 'runtimeClasspath']
+        skipConfigs = ['(?i).*test.*']
+        testConfigs = []
+    }
+}
 
 repositories {
     mavenCentral()

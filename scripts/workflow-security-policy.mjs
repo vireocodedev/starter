@@ -186,7 +186,10 @@ for (const fileName of workflowFiles) {
     if (JSON.stringify(writes) !== JSON.stringify(expectedWrites)) {
       problems.push(`${key} has write permissions [${writes.join(", ")}], expected [${expectedWrites.join(", ")}]`);
     }
-    if (/^ {2}pull_request:/m.test(source.slice(0, source.indexOf("jobs:")))) {
+    if (
+      /^ {2}pull_request:/m.test(source.slice(0, source.indexOf("jobs:"))) &&
+      !(policy.pullRequestWriteJobs ?? []).includes(key)
+    ) {
       problems.push(`${key} has write access in a pull-request-triggered workflow`);
     }
   }
@@ -197,6 +200,9 @@ for (const action of Object.keys(policy.actions ?? {})) {
 }
 for (const key of Object.keys(policy.writePermissionJobs ?? {})) {
   if (!observedWriteJobs.has(key)) problems.push(`Write-permission policy contains unused entry ${key}`);
+}
+for (const key of policy.pullRequestWriteJobs ?? []) {
+  if (!observedWriteJobs.has(key)) problems.push(`Pull-request write policy contains unused entry ${key}`);
 }
 for (const image of Object.keys(policy.workflowContainerImages ?? {})) {
   if (!observedWorkflowImages.has(image)) problems.push(`Workflow image policy contains unused entry ${image}`);
