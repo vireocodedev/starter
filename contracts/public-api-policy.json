@@ -47,79 +47,109 @@
           "audience": "application",
           "environment": ["browser"],
           "symbolBudget": 757,
-          "disposition": "freeze-growth"
+          "disposition": "freeze-growth",
+          "stability": "supported",
+          "guidance": "Default application entry point for Vireo components, hooks, providers, and layout contracts."
         },
         "./country": {
           "audience": "application",
           "environment": ["browser"],
           "symbolBudget": 21,
-          "disposition": "retain"
+          "disposition": "retain",
+          "stability": "supported",
+          "guidance": "Focused country-code, country-name, and country-flag surface."
         },
         "./event-source": {
           "audience": "application",
           "environment": ["browser"],
           "symbolBudget": 7,
-          "disposition": "retain"
+          "disposition": "retain",
+          "stability": "advanced",
+          "guidance": "Opt-in browser EventSource integration for applications that own reconnect and authorization policy."
         },
         "./forms": {
           "audience": "application",
           "environment": ["browser"],
           "symbolBudget": 539,
-          "disposition": "freeze-growth"
+          "disposition": "freeze-growth",
+          "stability": "supported",
+          "guidance": "Canonical TanStack Form bindings and Vireo form components; prefer this subpath for form-only consumers."
         },
         "./hello-pangea-dnd": {
           "audience": "optional-integration",
           "environment": ["browser"],
           "symbolBudget": 56,
-          "disposition": "retain"
+          "disposition": "retain",
+          "stability": "advanced",
+          "guidance": "Typed passthrough for applications that deliberately adopt the optional drag-and-drop peer."
         },
         "./localization": {
           "audience": "optional-integration",
           "environment": ["browser"],
           "symbolBudget": 5,
-          "disposition": "retain"
+          "disposition": "retain",
+          "stability": "supported",
+          "guidance": "Required localization boundary for Vireo temporal form fields."
         },
         "./react-i18next": {
           "audience": "optional-integration",
           "environment": ["browser"],
           "symbolBudget": 3,
-          "disposition": "retain"
+          "disposition": "retain",
+          "stability": "advanced",
+          "guidance": "Narrow namespace-bound helpers for applications already using react-i18next."
         },
         "./sonner": {
           "audience": "optional-integration",
           "environment": ["browser"],
           "symbolBudget": 19,
-          "disposition": "retain"
+          "disposition": "retain",
+          "stability": "advanced",
+          "guidance": "Notification integration for applications that deliberately adopt the optional Sonner peer."
         },
         "./tanstack-query": {
           "audience": "optional-integration",
           "environment": ["browser"],
           "symbolBudget": 30,
-          "disposition": "retain"
+          "disposition": "retain",
+          "stability": "advanced",
+          "guidance": "Query-boundary and mutation helpers for applications that own a TanStack Query client."
         },
         "./storybook": {
           "audience": "authoring-tooling",
           "environment": ["browser"],
           "symbolBudget": 5,
-          "disposition": "extract-next-major"
+          "disposition": "extract-next-major",
+          "stability": "deprecated",
+          "guidance": "Legacy Storybook authoring helpers; do not add application runtime dependencies on this subpath.",
+          "migration": "Keep equivalent helpers application-owned until a separate authoring package is available."
         },
         "./storybook/VireoDockedSidePanel": {
           "audience": "authoring-tooling",
           "environment": ["browser"],
           "symbolBudget": 2,
-          "disposition": "extract-next-major"
+          "disposition": "extract-next-major",
+          "stability": "deprecated",
+          "guidance": "Legacy Storybook-only workspace frame; not an application API.",
+          "migration": "Copy the small authoring frame into local Storybook code if customization is required."
         },
         "./storybook/VireoIconContainer": {
           "audience": "authoring-tooling",
           "environment": ["browser"],
           "symbolBudget": 2,
-          "disposition": "extract-next-major"
+          "disposition": "extract-next-major",
+          "stability": "deprecated",
+          "guidance": "Legacy Storybook-only icon comparison frame; not an application API.",
+          "migration": "Copy the small authoring frame into local Storybook code if customization is required."
         },
         "./storybook/VireoResponsiveOverlayFrame": {
           "audience": "authoring-tooling",
           "environment": ["browser"],
           "symbolBudget": 4,
-          "disposition": "extract-next-major"
+          "disposition": "extract-next-major",
+          "stability": "deprecated",
+          "guidance": "Legacy Storybook-only responsive overlay frame; not an application API.",
+          "migration": "Copy the small authoring frame into local Storybook code if customization is required."
         }
       }
     }

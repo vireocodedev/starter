@@ -28,6 +28,11 @@ consumer entry points are nevertheless limited to the package root and the
 subpaths declared in `package.json`; undeclared implementation paths are not a
 compatibility contract.
 
+Every exported entry point has an enforced `supported`, `advanced`, or `deprecated`
+classification. Review the [public-surface map](docs/PUBLIC_SURFACE.md) before
+adopting an optional integration; the legacy `./storybook*` exports are retained
+only for compatibility and must not enter application runtime code.
+
 TypeScript declarations are verified from the packed artifact with TypeScript
 6, `moduleResolution: "Bundler"`, and `skipLibCheck: false`. This file-for-file
 package intentionally omits source maps; its public source remains available in
@@ -82,6 +87,8 @@ code must follow the target structure.
 - [Vireo component authoring](./docs/component-authoring/component-files.md)
 - [Vireo story coverage rulebook](./docs/component-authoring/story-coverage-rulebook.md)
 - [Motion and interaction language](./docs/storybook/MotionGuide.mdx)
+- [Public-surface classification](./docs/PUBLIC_SURFACE.md)
+- [Canonical temporal values](../../docs/TEMPORAL_VALUES.md)
 
 ## Versioning contract
 

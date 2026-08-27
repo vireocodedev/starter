@@ -12,6 +12,10 @@ const requiredFiles = [
   "GOVERNANCE.md",
   "CODE_OF_CONDUCT.md",
   "docs/COMPATIBILITY.md",
+  "docs/EVALUATION.md",
+  "docs/PUBLIC_API.md",
+  "docs/TEMPORAL_VALUES.md",
+  "packages/ui/docs/PUBLIC_SURFACE.md",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
@@ -31,7 +35,15 @@ function requireText(path, fragments) {
   return text;
 }
 
-requireText("README.md", ["SUPPORT.md", "GOVERNANCE.md", "docs/COMPATIBILITY.md"]);
+requireText("README.md", [
+  "SUPPORT.md",
+  "GOVERNANCE.md",
+  "docs/COMPATIBILITY.md",
+  "docs/EVALUATION.md",
+  "docs/PUBLIC_API.md",
+  "packages/ui/docs/PUBLIC_SURFACE.md",
+  "docs/TEMPORAL_VALUES.md",
+]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("GOVERNANCE.md", [".github/CODEOWNERS", "docs/COMPATIBILITY.md"]);
 const compatibility = requireText("docs/COMPATIBILITY.md", [
@@ -64,6 +76,38 @@ for (const form of ["bug_report.yml", "feature_request.yml"]) {
   requireText(`.github/ISSUE_TEMPLATE/${form}`, ["name:", "description:", "body:"]);
 }
 requireText(".github/ISSUE_TEMPLATE/config.yml", ["blank_issues_enabled: false", "contact_links:"]);
+
+const executableDocumentationClaims = [
+  {
+    documentation: "README.md",
+    documentedCommand: "corepack npm ci",
+    evidence: ".github/workflows/ci.yml",
+    evidenceCommand: "corepack npm ci",
+  },
+  {
+    documentation: "README.md",
+    documentedCommand: "corepack npm run verify",
+    evidence: ".github/workflows/ci.yml",
+    evidenceCommand: "corepack npm run verify",
+  },
+  {
+    documentation: "README.md",
+    documentedCommand: "corepack npm run build-storybook",
+    evidence: ".github/workflows/storybook-pages.yml",
+    evidenceCommand: "corepack npm run build-storybook",
+  },
+];
+
+for (const claim of executableDocumentationClaims) {
+  const documentation = readFileSync(join(root, claim.documentation), "utf8");
+  const evidence = readFileSync(join(root, claim.evidence), "utf8");
+  if (!documentation.includes(claim.documentedCommand)) {
+    problems.push(`${claim.documentation} must document executable command ${claim.documentedCommand}`);
+  }
+  if (!evidence.includes(claim.evidenceCommand)) {
+    problems.push(`${claim.evidence} must execute documented command ${claim.evidenceCommand}`);
+  }
+}
 
 const markdownFiles = [];
 function collectMarkdown(directory) {
@@ -99,3 +143,4 @@ if (problems.length > 0) {
 console.log(
   `Public contract policy passed: ${requiredFiles.length} surfaces, ${packageDirectories.length} npm workspaces, and ${markdownFiles.length} Markdown files checked.`,
 );
+console.log(`${executableDocumentationClaims.length} documented commands are bound to hosted execution evidence.`);

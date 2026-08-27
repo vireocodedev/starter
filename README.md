@@ -16,6 +16,22 @@ This public `0.x` line is production-shaped, not a production-readiness claim. T
 create, doctor, upgrade, and full-stack entity generator workflows do not yet exist;
 current applications clone and customize the Template and hand-write domain slices.
 
+## Start here
+
+Choose the shortest path that matches what you are evaluating:
+
+| Goal                           | First step                                                                                 | Expected result                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| Evaluate the complete stack    | Follow the [guided evaluation](docs/EVALUATION.md) in the public Template                  | A running authenticated Item workflow backed by React and Spring Boot     |
+| Adopt frontend building blocks | Review the [npm entry points](docs/PUBLIC_API.md#frontend-entry-points) and live Storybook | A deliberate package/subpath choice rather than an accidental deep import |
+| Adopt backend building blocks  | Review the [Maven modules](docs/PUBLIC_API.md#jvm-entry-points) and BOM example            | Version-aligned Spring Boot modules resolved from Maven Central           |
+| Assess fit before installing   | Read [where Vireo fits](docs/EVALUATION.md#fit-and-limitations)                            | An explicit decision based on current `0.x` capabilities and limitations  |
+
+The [public API map](docs/PUBLIC_API.md) is the package-level navigation surface.
+Starter UI has an additional [classified surface](packages/ui/docs/PUBLIC_SURFACE.md)
+covering every exported entry point. Canonical date, time, and timestamp ownership is
+documented in the [temporal values guide](docs/TEMPORAL_VALUES.md).
+
 The framework libraries live in two halves:
 
 - `packages/*` — the frontend libraries. npm workspaces monorepo, published as
@@ -67,7 +83,7 @@ environments.
 ## Develop
 
 ```bash
-npm install            # installs all workspaces, generates package-lock.json
+corepack npm ci         # installs the reviewed workspace lockfile
 corepack npm run typecheck
 corepack npm run test
 corepack npm run build

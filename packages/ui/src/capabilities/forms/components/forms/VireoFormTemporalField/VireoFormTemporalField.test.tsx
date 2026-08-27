@@ -9,6 +9,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { vireoFormTemporalFieldClasses } from "./VireoFormTemporalField.classes";
@@ -22,6 +24,15 @@ const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/ui/VireoTemporal
 class VireoTestAdapterDayjs extends AdapterDayjs {
   readonly [VIREO_TEMPORAL_ADAPTER_MARKER] = true;
 }
+
+const CANONICAL_TEMPORAL_VALUES = [
+  ["year", "2026"],
+  ["month", "08"],
+  ["year-month", "2026-08"],
+  ["date", "2026-08-25"],
+  ["time", "14:30:00"],
+  ["date-time", "2026-08-25T14:30:00"],
+] as const;
 
 type HarnessProps = {
   defaultValue?: string | null;
@@ -88,16 +99,32 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
     expect(getTemporalGroup()).toBeInTheDocument();
   });
 
-  it.each([
-    ["year", "2026"],
-    ["month", "08"],
-    ["year-month", "2026-08"],
-    ["date", "2026-08-25"],
-    ["time", "14:30:00"],
-    ["date-time", "2026-08-25T14:30:00"],
-  ] as const)("renders the %s mode from its canonical value", (mode, defaultValue) => {
+  it.each(CANONICAL_TEMPORAL_VALUES)("renders the %s mode from its canonical value", (mode, defaultValue) => {
     render(<Harness mode={mode} defaultValue={defaultValue} />);
     expect(getTemporalHiddenInput().value).not.toBe("");
+  });
+
+  it("keeps every tested canonical value in the public temporal guide", () => {
+    const guide = readFileSync(
+      resolve(import.meta.dirname, "../../../../../../../..", "docs/TEMPORAL_VALUES.md"),
+      "utf8",
+    );
+    const documentedValues = new Map(
+      guide
+        .split(/\r?\n/u)
+        .filter(line => line.startsWith("| `"))
+        .map(line => {
+          const cells = line
+            .split("|")
+            .slice(1, -1)
+            .map(cell => cell.trim());
+          return [cells[0], cells[1]];
+        }),
+    );
+
+    for (const [mode, value] of CANONICAL_TEMPORAL_VALUES) {
+      expect(documentedValues.get(`\`${mode}\``)).toBe(`\`${value}\``);
+    }
   });
 
   it("keeps the month picker year-independent", async () => {

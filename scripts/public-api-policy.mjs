@@ -10,6 +10,7 @@ const allowedNpmAudiences = new Set(["application", "optional-integration", "aut
 const allowedEnvironments = new Set(["browser", "worker"]);
 const allowedMavenAudiences = new Set(["application", "build-tooling"]);
 const allowedSurfaceDispositions = new Set(["retain", "freeze-growth", "extract-next-major"]);
+const allowedUiStabilities = new Set(["supported", "advanced", "deprecated", "pending-decision"]);
 const problems = [];
 
 function compareSets(label, expected, actual) {
@@ -77,7 +78,56 @@ for (const { directory, manifest } of publishedPackages) {
       if (!allowedSurfaceDispositions.has(entryPolicy.disposition)) {
         problems.push(`${manifest.name} ${subpath} has invalid surface disposition ${entryPolicy.disposition}`);
       }
+      if (!allowedUiStabilities.has(entryPolicy.stability)) {
+        problems.push(`${manifest.name} ${subpath} has invalid stability ${entryPolicy.stability}`);
+      }
+      if (typeof entryPolicy.guidance !== "string" || entryPolicy.guidance.trim() === "") {
+        problems.push(`${manifest.name} ${subpath} has no consumer guidance`);
+      }
+      if (
+        entryPolicy.stability === "deprecated" &&
+        (typeof entryPolicy.migration !== "string" || entryPolicy.migration.trim() === "")
+      ) {
+        problems.push(`${manifest.name} ${subpath} is deprecated without migration guidance`);
+      }
     }
+  }
+}
+
+const uiSurfaceDocument = readFileSync(join(repoRoot, "packages/ui/docs/PUBLIC_SURFACE.md"), "utf8");
+const uiSurface = JSON.parse(readFileSync(join(repoRoot, "packages/ui/api-surface.json"), "utf8"));
+const uiSurfaceRows = new Map(
+  uiSurfaceDocument
+    .split(/\r?\n/u)
+    .filter(line => line.startsWith("| `"))
+    .map(line => {
+      const cells = line
+        .split("|")
+        .slice(1, -1)
+        .map(cell => cell.trim());
+      return [cells[0], cells];
+    }),
+);
+const classifiedUiSymbols = new Map();
+for (const [subpath, entryPolicy] of Object.entries(policy.npm?.["@vireocodedev/ui"]?.entryPoints ?? {})) {
+  const symbolCount = uiSurface.entryPoints?.[subpath]?.exports?.length;
+  const expectedCells = [
+    `\`${subpath}\``,
+    entryPolicy.stability,
+    String(symbolCount),
+    `\`${entryPolicy.disposition}\``,
+  ];
+  if (JSON.stringify(uiSurfaceRows.get(expectedCells[0])) !== JSON.stringify(expectedCells)) {
+    problems.push(`packages/ui/docs/PUBLIC_SURFACE.md must classify ${subpath} as ${expectedCells.join(" / ")}`);
+  }
+  for (const symbol of uiSurface.entryPoints?.[subpath]?.exports ?? []) {
+    const existingStability = classifiedUiSymbols.get(symbol);
+    if (existingStability && existingStability !== entryPolicy.stability) {
+      problems.push(
+        `@vireocodedev/ui symbol ${symbol} has conflicting stability ${existingStability} and ${entryPolicy.stability}`,
+      );
+    }
+    classifiedUiSymbols.set(symbol, entryPolicy.stability);
   }
 }
 
@@ -145,3 +195,4 @@ console.log(
 console.log(
   `Maven: ${publishedJvmModules.length} classified modules and ${classifiedJvmDeclarations} package-intent-classified public declarations.`,
 );
+console.log(`Starter UI: ${classifiedUiSymbols.size} uniquely named exports inherit one unambiguous stability class.`);

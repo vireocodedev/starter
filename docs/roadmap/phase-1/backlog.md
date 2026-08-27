@@ -26,9 +26,10 @@ in later phases.
   named owner capacity is known.
 
 The original plan totaled **57–104 active engineer-days**. After public activation,
-Phase 0 closure, trust-contract publication, and the first P1-09 hardening slice,
-the planning remainder is **28–55 active engineer-days**, before contingency or
-external wait. It is a scope range, not an elapsed-date commitment.
+Phase 0 closure, trust-contract publication, the first P1-09 hardening slice, and
+completion of executable documentation, the evaluation funnel, and UI surface
+classification, the planning remainder is **17–33 active engineer-days**, before
+contingency or external wait. It is a scope range, not an elapsed-date commitment.
 
 ## Backlog
 
@@ -44,10 +45,10 @@ external wait. It is a scope range, not an elapsed-date commitment.
 | P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Complete      | 0 d                   | High       |
 | P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Complete      | 0 d                   | High       |
 | P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial       | 2–4 d + external wait | Medium     |
-| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Partial       | 2–5 d                 | Medium     |
-| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Pending       | 5–9 d                 | Low        |
+| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Complete      | 0 d                   | High       |
+| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Complete      | 0 d                   | High       |
 | P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Partial       | 7–12 d                | Low        |
-| P1-13 | Classify and document the supported Starter UI public surface                           | Pending       | 4–8 d                 | Low        |
+| P1-13 | Classify and document the supported Starter UI public surface                           | Complete      | 0 d                   | High       |
 | P1-14 | Establish verification duration/resource baselines and regression policy                | Partial       | 2–4 d                 | Medium     |
 | P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial       | 3–6 d                 | Low        |
 
@@ -70,13 +71,23 @@ external wait. It is a scope range, not an elapsed-date commitment.
   generates npm and JVM CycloneDX SBOMs, and a dated recovery tabletop records the
   remaining branch/environment protection, provider allowlist, signed-SBOM, and
   backup-owner gaps.
-- **P1-10: partial.** The known Phase 0 documentation drift is fixed, including the
-  Template's formerly misleading offline simulation label. The packed UI test
-  protects temporal initialization. Both authoritative gates now check required
-  public contracts, current artifact-version pairings, issue-form structure, and
-  local Markdown links; introducing the check found and fixed 11 stale Starter
-  links. Executable setup/deploy snippets, public temporal examples, and recurring
-  clean-room documentation verification still remain G-106.
+- **P1-10: complete.** Both authoritative public-contract gates bind documented
+  setup, verification, Storybook, and deployment commands to the hosted workflow
+  steps that execute them. Clean Starter and Template verification now recurs on a
+  weekly schedule. The public temporal-values guide is tied to the same six
+  canonical values exercised by the UI field suite, while version, issue-form, and
+  local-link drift remain enforced.
+- **P1-11: complete.** The framework and Template READMEs now provide explicit
+  evaluation, fit, limitation, first-success, architecture, and next-step paths.
+  Dedicated evaluation and public-API maps route readers to every npm entry point,
+  JVM module, compatibility boundary, live documentation surface, and canonical
+  Template workflow without implying `1.x` or production readiness.
+- **P1-13: complete.** All 1,364 uniquely named Starter UI exports inherit one
+  unambiguous `supported`, `advanced`, or `deprecated` stability class through their
+  entry point. Machine policy rejects missing/conflicting classifications, surface
+  count drift, or deprecated exports without migration guidance. The root and forms
+  barrels remain growth-frozen, and legacy Storybook helpers are marked for
+  extraction in the next major.
 - **P1-15: partial.** Anonymous source and artifact access is restored, artifact
   consumers pass, and one isolated AI clean-room Template evaluation exists. The
   full admitted environment matrix and human public-alpha adoption decision remain.
