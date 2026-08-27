@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: corepack npm ci
 
+      - name: Build workspace packages
+        run: corepack npm run build
+
       - name: Build Storybook
         run: corepack npm run build-storybook
 
