@@ -1,5 +1,5 @@
-import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Paper, Stack, Typography } from "@mui/material";
 import { DateField } from "@mui/x-date-pickers/DateField";
 import dayjs from "dayjs";

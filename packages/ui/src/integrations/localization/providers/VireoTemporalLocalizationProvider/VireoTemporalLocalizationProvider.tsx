@@ -11,7 +11,7 @@ import { enUS, hrHR } from "@mui/x-date-pickers/locales";
 import React from "react";
 import type { VireoTemporalLocalizationProviderProps } from "./VireoTemporalLocalizationProvider.types";
 
-const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/starter-ui/VireoTemporalLocalizationProvider");
+const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/ui/VireoTemporalLocalizationProvider");
 
 class VireoAdapterDayjs extends AdapterDayjs {
   readonly [VIREO_TEMPORAL_ADAPTER_MARKER] = true;

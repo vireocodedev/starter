@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from "@mui/material";
-import { useVireoForm, type VireoFormLayoutWidth } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { useVireoForm, type VireoFormLayoutWidth } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 function WidthExample({ layoutWidth }: { layoutWidth: VireoFormLayoutWidth }) {
   const form = useVireoForm({ defaultValues: {} });

@@ -1,5 +1,5 @@
-import { VireoThemeColorMeta } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoThemeColorMeta } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, Paper, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
 import React from "react";
 

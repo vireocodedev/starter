@@ -3,8 +3,8 @@ import {
   VireoDragHandle,
   VireoDraggableItem,
   VireoDropZone,
-} from "@vireocodedev/starter-ui/hello-pangea-dnd";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+} from "@vireocodedev/ui/hello-pangea-dnd";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import DragHandleRounded from "@mui/icons-material/DragHandleRounded";
 import { Paper, Stack, Typography } from "@mui/material";
 

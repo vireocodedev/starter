@@ -1,4 +1,4 @@
-import { createHistoryRecordSchema } from "@vireocodedev/starter-history";
+import { createHistoryRecordSchema } from "@vireocodedev/history";
 import { z } from "zod";
 
 const CustomerHistoryRecordSchema = createHistoryRecordSchema({

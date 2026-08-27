@@ -1,11 +1,11 @@
-# @vireocodedev/starter-shell
+# @vireocodedev/shell
 
 Framework-free contracts for application sitemap construction, navigation metadata, authentication redirects, and browser overlay-history coordination.
 
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-shell zod
+npm install @vireocodedev/shell zod
 ```
 
 The package name is stable; registry selection and authentication belong to the
@@ -24,7 +24,7 @@ import {
   defineShellPages,
   defineShellSections,
   shellNavigation,
-} from "@vireocodedev/starter-shell";
+} from "@vireocodedev/shell";
 
 const pages = defineShellPages({
   dashboard: { routePath: "", label: "Dashboard", icon: "home" },
@@ -54,7 +54,7 @@ sitemap.getPath(pages.customer, { customerId: 42 }); // /customers/42
 
 Shell is deliberately independent of React, React Router, MUI, TanStack Query, PWA plugins, and Starter UI. It describes an application shell; it does not render one.
 
-Applications own router adaptation, permission evaluation, responsive layouts, PWA prompts, unsaved-change prompts, and navigation presentation. Reusable React presentation belongs in `@vireocodedev/starter-ui`, not this package.
+Applications own router adaptation, permission evaluation, responsive layouts, PWA prompts, unsaved-change prompts, and navigation presentation. Reusable React presentation belongs in `@vireocodedev/ui`, not this package.
 
 ## Public areas
 

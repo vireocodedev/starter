@@ -1,8 +1,8 @@
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import { Button, ButtonGroup, CircularProgress, Stack, Typography } from "@mui/material";
 import React from "react";
-import { VireoDelayedRender } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoDelayedRender } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 type OperationState = "idle" | "running" | "complete";
 

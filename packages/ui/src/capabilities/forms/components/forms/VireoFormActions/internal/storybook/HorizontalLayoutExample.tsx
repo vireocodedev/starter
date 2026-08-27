@@ -1,7 +1,7 @@
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { VireoFormActions } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoFormActions } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import type { ReactNode } from "react";
 
 function ActionsAtWidth({ children, label, width }: { children: ReactNode; label: string; width: number }) {

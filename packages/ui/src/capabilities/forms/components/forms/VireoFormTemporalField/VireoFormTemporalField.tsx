@@ -46,7 +46,7 @@ import {
   type VireoFormTemporalFieldValue,
 } from "./VireoFormTemporalField.types";
 
-const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/starter-ui/VireoTemporalLocalizationProvider");
+const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/ui/VireoTemporalLocalizationProvider");
 
 type TemporalErrorFormApi = {
   setErrorMap: (errorMap: Record<string, unknown>) => void;
@@ -173,7 +173,7 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
     );
     if (!hasVireoLocalizationProvider) {
       throw new Error(
-        'VireoFormTemporalField must be rendered within VireoTemporalLocalizationProvider. Import it from "@vireocodedev/starter-ui/localization".',
+        'VireoFormTemporalField must be rendered within VireoTemporalLocalizationProvider. Import it from "@vireocodedev/ui/localization".',
       );
     }
 

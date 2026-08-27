@@ -1,5 +1,5 @@
-import { VireoDndProvider, VireoDraggableItem, VireoDropZone } from "@vireocodedev/starter-ui/hello-pangea-dnd";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoDndProvider, VireoDraggableItem, VireoDropZone } from "@vireocodedev/ui/hello-pangea-dnd";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, Paper, Stack, Typography } from "@mui/material";
 
 export default function DefaultExample() {

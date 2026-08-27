@@ -3,7 +3,7 @@ import {
   readOverlayStack,
   resolveOverlayHistoryAction,
   withOverlayStack,
-} from "@vireocodedev/starter-shell";
+} from "@vireocodedev/shell";
 import { describe, expect, it, vi } from "vitest";
 
 describe("overlay history", () => {

@@ -1,5 +1,5 @@
-import { VireoPageLayoutProvider, VireoResponsiveCard, createVireoPageLayout } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoPageLayoutProvider, VireoResponsiveCard, createVireoPageLayout } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { CardContent, Stack, Typography } from "@mui/material";
 function ExampleCard() {
   return (

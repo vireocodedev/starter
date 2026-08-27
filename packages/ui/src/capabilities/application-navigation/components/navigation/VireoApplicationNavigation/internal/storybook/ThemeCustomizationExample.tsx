@@ -1,7 +1,7 @@
 import { SettingsOutlined } from "@mui/icons-material";
 import { Box, List, ThemeProvider, createTheme } from "@mui/material";
-import { VireoApplicationNavigation, VireoApplicationNavigationItem } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoApplicationNavigation, VireoApplicationNavigationItem } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const theme = createTheme({
   palette: { mode: "dark", primary: { main: "#a78bfa" } },

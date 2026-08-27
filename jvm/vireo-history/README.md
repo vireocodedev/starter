@@ -6,7 +6,7 @@ History owns snapshot serialization, neutral actor attribution, persistence, bou
 
 ## Supported API
 
-- `HistoryRecord` and `HistoryActor`: immutable transport models shared with `@vireocodedev/starter-history`.
+- `HistoryRecord` and `HistoryActor`: immutable transport models shared with `@vireocodedev/history`.
 - `HistoryActorResolver`: maps the application's current security context to an optional neutral actor.
 - `HistoryReadAuthorizer`: application-owned per-entity read policy.
 - `StarterHistoryProperties`: endpoint and result-limit configuration.

@@ -4,7 +4,7 @@
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
-      "@vireocodedev/starter-localization": ["./src/index.ts"]
+      "@vireocodedev/localization": ["./src/index.ts"]
     }
   },
   "include": ["src", "tests", "docs/examples"]

@@ -1,7 +1,7 @@
 # Non-React package authoring
 
 This guide defines the target contract for every Starter frontend package other
-than `@vireocodedev/starter-ui`. It applies to new packages immediately and to
+than `@vireocodedev/ui`. It applies to new packages immediately and to
 existing packages as they are migrated. `starter-history` is the pilot that
 proves the rules before they are applied to the remaining packages.
 
@@ -14,7 +14,7 @@ protocols, persistence, or browser infrastructure. It must not own presentation.
   types, hooks, contexts, providers, or renderer-shaped callbacks.
 - Do not add `.tsx` source files.
 - Move any reusable React component or React-specific adapter to
-  `@vireocodedev/starter-ui` under the appropriate core, capability, or
+  `@vireocodedev/ui` under the appropriate core, capability, or
   integration boundary.
 - Prefer serializable or framework-neutral results. A formatter may return text;
   it must not return a UI node.

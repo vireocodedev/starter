@@ -1,4 +1,4 @@
-import { createManagedSqliteRuntime, type WorkerRequest, type WorkerResponse } from "@vireocodedev/starter-sqlite";
+import { createManagedSqliteRuntime, type WorkerRequest, type WorkerResponse } from "@vireocodedev/sqlite";
 
 class DemoWorker extends EventTarget {
   terminated = false;

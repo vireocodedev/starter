@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoMultiStepForm } from "@vireocodedev/starter-ui/forms";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoMultiStepForm } from "@vireocodedev/ui/forms";
 import { z } from "zod";
 
 export default function FieldValidationExample() {

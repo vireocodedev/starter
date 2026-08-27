@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
-import { VireoStatusDot, type VireoStatusDotColor } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoStatusDot, type VireoStatusDotColor } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const statuses: Array<{ color: VireoStatusDotColor; label: string }> = [
   { color: "success", label: "Operational" },

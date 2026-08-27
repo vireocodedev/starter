@@ -20,12 +20,12 @@ const shellExamplesRoot = join(packagesRoot, "shell", "docs", "examples");
 const sqliteDocsRoot = join(packagesRoot, "sqlite", "docs", "storybook");
 const sqliteExamplesRoot = join(packagesRoot, "sqlite", "docs", "examples");
 const jvmDocsRoot = join(repositoryRoot, "jvm", "docs", "storybook");
-const jvmAuthDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-auth", "docs", "storybook");
-const jvmBomDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-bom", "docs", "storybook");
-const jvmCoreDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-core", "docs", "storybook");
-const jvmHistoryDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-history", "docs", "storybook");
-const jvmOfflineDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-offline", "docs", "storybook");
-const jvmQueryEngineDocsRoot = join(repositoryRoot, "jvm", "vireo-starter-queryengine", "docs", "storybook");
+const jvmAuthDocsRoot = join(repositoryRoot, "jvm", "vireo-auth", "docs", "storybook");
+const jvmBomDocsRoot = join(repositoryRoot, "jvm", "vireo-bom", "docs", "storybook");
+const jvmCoreDocsRoot = join(repositoryRoot, "jvm", "vireo-core", "docs", "storybook");
+const jvmHistoryDocsRoot = join(repositoryRoot, "jvm", "vireo-history", "docs", "storybook");
+const jvmOfflineDocsRoot = join(repositoryRoot, "jvm", "vireo-offline", "docs", "storybook");
+const jvmQueryEngineDocsRoot = join(repositoryRoot, "jvm", "vireo-query", "docs", "storybook");
 const jvmDocumentationExamplesRoot = join(
   repositoryRoot,
   "jvm",
@@ -340,7 +340,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
 
       const exampleSource = readFileSync(exampleFile, "utf8");
-      expect(exampleSource).toContain('from "@vireocodedev/starter-history"');
+      expect(exampleSource).toContain('from "@vireocodedev/history"');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });
@@ -362,7 +362,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
 
       const exampleSource = readFileSync(exampleFile, "utf8");
-      expect(exampleSource).toContain('from "@vireocodedev/starter-localization"');
+      expect(exampleSource).toContain('from "@vireocodedev/localization"');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });
@@ -384,7 +384,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
 
       const exampleSource = readFileSync(exampleFile, "utf8");
-      expect(exampleSource).toContain('from "@vireocodedev/starter-infrastructure"');
+      expect(exampleSource).toContain('from "@vireocodedev/infrastructure"');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });
@@ -406,7 +406,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
 
       const exampleSource = readFileSync(exampleFile, "utf8");
-      expect(exampleSource).toContain('from "@vireocodedev/starter-sqlite');
+      expect(exampleSource).toContain('from "@vireocodedev/sqlite');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });
@@ -428,7 +428,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
 
       const exampleSource = readFileSync(exampleFile, "utf8");
-      expect(exampleSource).toContain('from "@vireocodedev/starter-queryengine"');
+      expect(exampleSource).toContain('from "@vireocodedev/query"');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });
@@ -450,7 +450,7 @@ describe("Vireo Starter Storybook navigation contract", () => {
       expect(owningPages[0]?.source).toContain(`../examples/${basename}.example.ts?raw`);
 
       const exampleSource = readFileSync(exampleFile, "utf8");
-      expect(exampleSource).toContain('from "@vireocodedev/starter-shell"');
+      expect(exampleSource).toContain('from "@vireocodedev/shell"');
       expect(exampleSource).not.toMatch(/\b(?:React|jsx|tsx)\b/u);
     }
   });

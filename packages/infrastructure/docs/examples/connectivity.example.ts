@@ -1,4 +1,4 @@
-import { createConnectivityState, type ConnectivityRuntimeAdapter } from "@vireocodedev/starter-infrastructure";
+import { createConnectivityState, type ConnectivityRuntimeAdapter } from "@vireocodedev/infrastructure";
 
 export function runConnectivityExample() {
   let now = 0;

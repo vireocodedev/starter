@@ -1,5 +1,5 @@
-import { VireoBottomDrawer, VireoOverlayHeader, type VireoBottomDrawerProps } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoBottomDrawer, VireoOverlayHeader, type VireoBottomDrawerProps } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 

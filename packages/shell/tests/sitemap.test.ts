@@ -1,9 +1,4 @@
-import {
-  createShellSitemap,
-  defineShellPages,
-  defineShellSections,
-  generateShellPath,
-} from "@vireocodedev/starter-shell";
+import { createShellSitemap, defineShellPages, defineShellSections, generateShellPath } from "@vireocodedev/shell";
 import { describe, expect, it } from "vitest";
 
 describe("Shell sitemap", () => {

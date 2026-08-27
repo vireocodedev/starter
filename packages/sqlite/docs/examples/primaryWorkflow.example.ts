@@ -1,4 +1,4 @@
-import { createSqliteEntityBundle, createSqliteWorkerRuntimeConfig } from "@vireocodedev/starter-sqlite";
+import { createSqliteEntityBundle, createSqliteWorkerRuntimeConfig } from "@vireocodedev/sqlite";
 
 const customers = createSqliteEntityBundle({
   entityNameSingular: "Customer",

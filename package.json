@@ -26,8 +26,8 @@
   "scripts": {
     "verify": "sh scripts/verify.sh",
     "verify:all": "sh scripts/verify-all.sh",
-    "storybook": "sh scripts/with-declared-npm.sh npm run storybook --workspace=@vireocodedev/starter-ui",
-    "build-storybook": "sh scripts/with-declared-npm.sh npm run build-storybook --workspace=@vireocodedev/starter-ui",
+    "storybook": "sh scripts/with-declared-npm.sh npm run storybook --workspace=@vireocodedev/ui",
+    "build-storybook": "sh scripts/with-declared-npm.sh npm run build-storybook --workspace=@vireocodedev/ui",
     "build": "sh scripts/with-declared-npm.sh turbo run build",
     "dev": "sh scripts/with-declared-npm.sh turbo run dev",
     "typecheck": "sh scripts/with-declared-npm.sh turbo run typecheck --concurrency=5",

@@ -1,6 +1,6 @@
 {
-  "name": "@vireocodedev/starter-history",
-  "version": "3.0.0",
+  "name": "@vireocodedev/history",
+  "version": "0.2.0",
   "description": "Framework-free entity history definitions, diff nodes, and transport-neutral record schemas for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": false,
@@ -46,6 +46,8 @@
     "zod": "^4.4.3"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
   }
 }

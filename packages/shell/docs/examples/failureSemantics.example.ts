@@ -1,4 +1,4 @@
-import { createShellSitemap, defineShellConfig, defineShellPages, shellNavigation } from "@vireocodedev/starter-shell";
+import { createShellSitemap, defineShellConfig, defineShellPages, shellNavigation } from "@vireocodedev/shell";
 import { ZodError } from "zod";
 
 function errorMessage(run: () => unknown): string {

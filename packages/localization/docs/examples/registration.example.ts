@@ -1,4 +1,4 @@
-import { registerStarterResources } from "@vireocodedev/starter-localization";
+import { registerStarterResources } from "@vireocodedev/localization";
 import i18next from "i18next";
 
 export async function runRegistrationExample() {

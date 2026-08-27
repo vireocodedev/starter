@@ -1,5 +1,5 @@
-import { VireoDndProvider, VireoDraggableItem, VireoDropZone } from "@vireocodedev/starter-ui/hello-pangea-dnd";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoDndProvider, VireoDraggableItem, VireoDropZone } from "@vireocodedev/ui/hello-pangea-dnd";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Paper, Stack } from "@mui/material";
 
 export default function HorizontalReorderExample() {

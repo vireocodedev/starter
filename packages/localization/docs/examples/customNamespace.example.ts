@@ -1,4 +1,4 @@
-import { createNamespaceResources } from "@vireocodedev/starter-localization";
+import { createNamespaceResources } from "@vireocodedev/localization";
 
 type ProductResources = {
   actions: {

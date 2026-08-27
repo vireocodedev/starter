@@ -1,4 +1,4 @@
-import { createPersistentSignal } from "@vireocodedev/starter-infrastructure";
+import { createPersistentSignal } from "@vireocodedev/infrastructure";
 
 type Preferences = { density: "comfortable" | "compact" };
 

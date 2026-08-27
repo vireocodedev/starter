@@ -1,7 +1,7 @@
 import { Stack } from "@mui/material";
 import { revalidateLogic } from "@tanstack/react-form";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoMultiStepForm } from "@vireocodedev/starter-ui/forms";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoMultiStepForm } from "@vireocodedev/ui/forms";
 import { z } from "zod";
 
 const schema = z.object({ name: z.string().min(2, "Enter a name."), email: z.string().email("Enter a valid email.") });

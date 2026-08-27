@@ -99,7 +99,6 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-      packages: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -107,11 +106,7 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24.18.1
-          registry-url: https://npm.pkg.github.com
-          scope: "@vireocodedev"
       - run: corepack npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: corepack npm run build
       - run: corepack npm run peer-floor:check
       - name: Record evidence
@@ -135,14 +130,11 @@ jobs:
       image: node:24.18.1-bookworm-slim@sha256:a09aabc645e86e81e23dab78e0c0f2eaa233cab4277c7188232181a1a8bd5d39
     permissions:
       contents: read
-      packages: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
       - run: corepack npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: corepack npm run verify -- silent
       - name: Record evidence
         if: always()

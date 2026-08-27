@@ -1,4 +1,4 @@
-import * as shell from "@vireocodedev/starter-shell";
+import * as shell from "@vireocodedev/shell";
 import { describe, expect, it } from "vitest";
 
 describe("starter-shell public contract", () => {

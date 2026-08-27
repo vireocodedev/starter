@@ -1,7 +1,7 @@
 import { DashboardOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Box, List, Typography } from "@mui/material";
-import { VireoApplicationNavigation, VireoApplicationNavigationItem } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoApplicationNavigation, VireoApplicationNavigationItem } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function LockedModeExample() {
   return (

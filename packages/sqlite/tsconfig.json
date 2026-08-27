@@ -4,8 +4,8 @@
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
-      "@vireocodedev/starter-sqlite": ["./src/index.ts"],
-      "@vireocodedev/starter-sqlite/offline": ["./src/offline/index.ts"]
+      "@vireocodedev/sqlite": ["./src/index.ts"],
+      "@vireocodedev/sqlite/offline": ["./src/offline/index.ts"]
     }
   },
   "include": ["src", "tests", "docs/examples"]

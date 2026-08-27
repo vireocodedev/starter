@@ -3,7 +3,7 @@ import {
   createHydrationGate,
   createHydrationRequestQueue,
   createHydrationStatus,
-} from "@vireocodedev/starter-sqlite";
+} from "@vireocodedev/sqlite";
 
 export async function runHydrationStateExample() {
   const registry = createHydrationContributorRegistry();

@@ -4,7 +4,7 @@
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
-      "@vireocodedev/starter-history": ["./src/index.ts"]
+      "@vireocodedev/history": ["./src/index.ts"]
     }
   },
   "include": ["src", "tests", "docs/examples"]

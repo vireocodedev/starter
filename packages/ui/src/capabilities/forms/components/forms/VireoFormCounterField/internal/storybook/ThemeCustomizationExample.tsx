@@ -1,7 +1,7 @@
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoForm, vireoFormCounterFieldClasses } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm, vireoFormCounterFieldClasses } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function ThemeCustomizationExample() {
   const form = useVireoForm({

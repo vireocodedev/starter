@@ -1,4 +1,4 @@
-import { createSessionExpiryChannel } from "@vireocodedev/starter-infrastructure";
+import { createSessionExpiryChannel } from "@vireocodedev/infrastructure";
 
 export function runSessionExpiryExample() {
   const channel = createSessionExpiryChannel();

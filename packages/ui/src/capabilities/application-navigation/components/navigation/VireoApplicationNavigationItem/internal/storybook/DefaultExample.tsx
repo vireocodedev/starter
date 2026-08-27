@@ -1,7 +1,7 @@
 import { DashboardOutlined, Inventory2Outlined } from "@mui/icons-material";
 import { Stack } from "@mui/material";
-import { VireoApplicationNavigationItem } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoApplicationNavigationItem } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function DefaultExample() {
   return (

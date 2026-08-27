@@ -1,8 +1,4 @@
-import {
-  extractReplayHeaders,
-  hydratePagedSnapshot,
-  isOfflineQueueableRequest,
-} from "@vireocodedev/starter-sqlite/offline";
+import { extractReplayHeaders, hydratePagedSnapshot, isOfflineQueueableRequest } from "@vireocodedev/sqlite/offline";
 
 export async function runOfflineUtilitiesExample() {
   const persisted: Array<{ id: string; name: string }> = [];

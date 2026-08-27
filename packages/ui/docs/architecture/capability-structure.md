@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide defines how core, top-level capabilities, child capabilities, structural folders, named modules, and private implementation boundaries are organized in `@vireocodedev/starter-ui`.
+This guide defines how core, top-level capabilities, child capabilities, structural folders, named modules, and private implementation boundaries are organized in `@vireocodedev/ui`.
 
 ## What qualifies as a capability
 

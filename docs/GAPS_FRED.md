@@ -217,7 +217,7 @@ volume control. FRED would gain by switching.
 ```
 
 Three untranslated strings in a component published from a monorepo that ships
-`@vireocodedev/starter-localization` and whose sibling components take a
+`@vireocodedev/localization` and whose sibling components take a
 translation function. FRED is fully internationalised, so it could not adopt this
 component without forking it — which is plausibly part of why it didn't.
 

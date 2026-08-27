@@ -3,7 +3,7 @@ import {
   compileQueryFilterWhere,
   createQueryEngineEntitySchemas,
   type SqliteQueryFilterAdapter,
-} from "@vireocodedev/starter-queryengine";
+} from "@vireocodedev/query";
 
 function captureFailure(run: () => unknown): string {
   try {

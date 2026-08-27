@@ -799,7 +799,7 @@ function collectImportViolations(files) {
         continue;
       }
 
-      if (specifier === "@vireocodedev/starter-ui" || specifier.startsWith("@vireocodedev/starter-ui/")) {
+      if (specifier === "@vireocodedev/ui" || specifier.startsWith("@vireocodedev/ui/")) {
         if (!executableStoryExample) {
           violations.push(
             violation("internal-package-entry-import", file, `imports the package entry point through "${specifier}"`),

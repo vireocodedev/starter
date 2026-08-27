@@ -1,5 +1,5 @@
-import { VireoToaster, toast } from "@vireocodedev/starter-ui/sonner";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoToaster, toast } from "@vireocodedev/ui/sonner";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, Stack, Typography } from "@mui/material";
 
 const toasterId = "stacking";

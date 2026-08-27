@@ -1,4 +1,4 @@
-import { createNamespaceResources, createStarterResources } from "@vireocodedev/starter-localization";
+import { createNamespaceResources, createStarterResources } from "@vireocodedev/localization";
 
 const baseResources = {
   en: { actions: { save: "Save" } },

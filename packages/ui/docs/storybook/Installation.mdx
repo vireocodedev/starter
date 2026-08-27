@@ -7,7 +7,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 Install the package and the peer dependencies used by the Vireo contracts your application consumes:
 
 ```bash
-npm install @vireocodedev/starter-ui
+npm install @vireocodedev/ui
 npm install react react-dom @mui/material @emotion/react @emotion/styled
 ```
 
@@ -30,7 +30,7 @@ Vireo uses the active MUI theme. Applications own theme creation and whether `Cs
 
 ```tsx
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
-import { VireoIconRegistryProvider, VireoThemeColorMeta } from "@vireocodedev/starter-ui";
+import { VireoIconRegistryProvider, VireoThemeColorMeta } from "@vireocodedev/ui";
 
 const theme = createTheme({ palette: { mode: "dark" } });
 
@@ -57,7 +57,7 @@ import {
   VireoProviderComposer,
   VireoThemeColorMeta,
   type VireoProviderWrapper,
-} from "@vireocodedev/starter-ui";
+} from "@vireocodedev/ui";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { QueryClientProvider } from "@tanstack/react-query";
 

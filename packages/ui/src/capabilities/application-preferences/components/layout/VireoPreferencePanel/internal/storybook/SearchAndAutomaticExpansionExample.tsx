@@ -1,8 +1,8 @@
 import React from "react";
 import { DarkModeOutlined, TableRowsOutlined } from "@mui/icons-material";
 import { InputAdornment, Switch, TextField } from "@mui/material";
-import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function SearchAndAutomaticExpansionExample() {
   const [query, setQuery] = React.useState("density");

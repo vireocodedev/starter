@@ -7,8 +7,8 @@ import {
   VireoPageHeader,
   VireoPreferencePanel,
   type VireoPreferenceSectionDefinition,
-} from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+} from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function DefaultExample() {
   const [search, setSearch] = React.useState("");

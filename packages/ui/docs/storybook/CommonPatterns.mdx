@@ -58,9 +58,9 @@ function App() {
 All providers in the correct nesting order:
 
 ```tsx
-import { VireoConfirmationProvider } from "@vireocodedev/starter-ui";
-import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
-import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
+import { VireoConfirmationProvider } from "@vireocodedev/ui";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
+import { VireoToaster } from "@vireocodedev/ui/sonner";
 import { ThemeProvider } from "@mui/material";
 import { QueryClientProvider } from "@tanstack/react-query";
 
@@ -114,7 +114,7 @@ function AppWithConfirmations() {
 Keep fetching and filters in application code and pass one typed column model to the responsive surface:
 
 ```tsx
-import { VireoResponsiveTable } from "@vireocodedev/starter-ui";
+import { VireoResponsiveTable } from "@vireocodedev/ui";
 
 const columns = [
   {
@@ -157,7 +157,7 @@ function UserTable({ users, totalCount }) {
 Using useVireoConfirmation for user confirmations:
 
 ```tsx
-import { useVireoConfirmation } from "@vireocodedev/starter-ui";
+import { useVireoConfirmation } from "@vireocodedev/ui";
 
 function DeleteButton({ userId }) {
   const confirm = useVireoConfirmation();
@@ -189,7 +189,7 @@ function DeleteButton({ userId }) {
 Use the dedicated Sonner integration for transient user feedback. The full native `toast` API remains available:
 
 ```tsx
-import { toast } from "@vireocodedev/starter-ui/sonner";
+import { toast } from "@vireocodedev/ui/sonner";
 
 function SaveButton({ data }) {
   const handleSave = async () => {
@@ -237,7 +237,7 @@ function WelcomeMessage() {
 Combining loader with data components:
 
 ```tsx
-import { VireoQueryBoundary } from "@vireocodedev/starter-ui/tanstack-query";
+import { VireoQueryBoundary } from "@vireocodedev/ui/tanstack-query";
 import { Typography } from "@mui/material";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
@@ -268,7 +268,7 @@ function MetricContent({ metricId }) {
 Using VireoLabelBox for consistent form field styling:
 
 ```tsx
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
+import { VireoLabelBox } from "@vireocodedev/ui";
 
 function FormField({ label, required, helperText, children }) {
   return (

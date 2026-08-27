@@ -7,10 +7,10 @@ import {
 import { describe, expect, it } from "vitest";
 
 /**
- * Contract guard for the `@vireocodedev/starter-queryengine` public surface:
+ * Contract guard for the `@vireocodedev/query` public surface:
  * the operator/field-type/relation-mode enums are a versioned contract — this
  * fails CI on unintended removals. The `queryengine` translation namespace is
- * owned by `@vireocodedev/starter-localization` and guarded by its own contract
+ * owned by `@vireocodedev/localization` and guarded by its own contract
  * test.
  */
 describe("queryengine contract", () => {

@@ -1,6 +1,6 @@
-import { VireoLabelBox, VireoResponsiveFormOverlay } from "@vireocodedev/starter-ui";
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLabelBox, VireoResponsiveFormOverlay } from "@vireocodedev/ui";
+import { useVireoForm } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button } from "@mui/material";
 import { useState } from "react";
 

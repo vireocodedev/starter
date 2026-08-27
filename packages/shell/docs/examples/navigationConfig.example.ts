@@ -1,4 +1,4 @@
-import { createShellSitemap, defineShellConfig, defineShellPages, shellNavigation } from "@vireocodedev/starter-shell";
+import { createShellSitemap, defineShellConfig, defineShellPages, shellNavigation } from "@vireocodedev/shell";
 
 export function runNavigationConfigExample() {
   const pages = defineShellPages({

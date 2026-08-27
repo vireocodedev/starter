@@ -5,7 +5,7 @@ import {
 import { HistoryValueContent } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryValueContent/HistoryValueContent";
 import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
 import { Button } from "@mui/material";
-import type { HistoryFieldRow } from "@vireocodedev/starter-history";
+import type { HistoryFieldRow } from "@vireocodedev/history";
 import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
 import React from "react";
 

@@ -1,5 +1,5 @@
-import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 

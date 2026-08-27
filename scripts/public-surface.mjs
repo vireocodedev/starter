@@ -60,12 +60,12 @@ const update = process.argv.includes("--update");
  * rather than an accident of the current code.
  */
 const WORKER_SAFE_ENTRY_POINTS = {
-  "@vireocodedev/starter-history": ["."],
-  "@vireocodedev/starter-infrastructure": ["./network-status", "./pagination"],
-  "@vireocodedev/starter-localization": ["."],
-  "@vireocodedev/starter-queryengine": ["."],
-  "@vireocodedev/starter-shell": ["."],
-  "@vireocodedev/starter-sqlite": [".", "./offline"],
+  "@vireocodedev/history": ["."],
+  "@vireocodedev/infrastructure": ["./network-status", "./pagination"],
+  "@vireocodedev/localization": ["."],
+  "@vireocodedev/query": ["."],
+  "@vireocodedev/shell": ["."],
+  "@vireocodedev/sqlite": [".", "./offline"],
 };
 
 /* ------------------------------------------------------------------ *

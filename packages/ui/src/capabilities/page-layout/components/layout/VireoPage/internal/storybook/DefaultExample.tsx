@@ -1,5 +1,5 @@
-import { VireoPage, VireoPageBody, VireoPageHeader, VireoResponsiveCard } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoPage, VireoPageBody, VireoPageHeader, VireoResponsiveCard } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, CardContent, Typography } from "@mui/material";
 
 export default function DefaultExample() {

@@ -24,9 +24,9 @@ import {
   VireoProviderComposer,
   VireoThemeColorMeta,
   type VireoProviderWrapper,
-} from "@vireocodedev/starter-ui";
-import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
-import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
+} from "@vireocodedev/ui";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
+import { VireoToaster } from "@vireocodedev/ui/sonner";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { QueryClientProvider } from "@tanstack/react-query";
 
@@ -58,10 +58,10 @@ Prefer explicit JSX when the tree is short, when providers appear in different b
 
 ## Integration boundaries
 
-`VireoToaster` is the finalized Sonner notification surface. It does not accept children and is not part of `VireoProviderComposer`; mount it once as a sibling of application content beneath the MUI theme. Import it and `toast` from `@vireocodedev/starter-ui/sonner`.
+`VireoToaster` is the finalized Sonner notification surface. It does not accept children and is not part of `VireoProviderComposer`; mount it once as a sibling of application content beneath the MUI theme. Import it and `toast` from `@vireocodedev/ui/sonner`.
 
-`VireoTemporalLocalizationProvider` is required around every `field.TemporalField`. Pass the application's effective semantic locale explicitly; the provider does not initialize i18next, detect browser language, hide children while translations load, or assign a timezone. English and Croatian Day.js locale packs and MUI picker text are bundled. For another locale, import its Day.js module in application code and optionally provide `localeText`; use `adapterLocale` when the semantic locale and Day.js identifiers differ. Import the provider from `@vireocodedev/starter-ui/localization`.
+`VireoTemporalLocalizationProvider` is required around every `field.TemporalField`. Pass the application's effective semantic locale explicitly; the provider does not initialize i18next, detect browser language, hide children while translations load, or assign a timezone. English and Croatian Day.js locale packs and MUI picker text are bundled. For another locale, import its Day.js module in application code and optionally provide `localeText`; use `adapterLocale` when the semantic locale and Day.js identifiers differ. Import the provider from `@vireocodedev/ui/localization`.
 
-Applications use TanStack Query's native `QueryClientProvider`; Vireo does not wrap client creation or cache policy. Import `VireoQueryBoundary` and the optional `useVireoMutation` extension from `@vireocodedev/starter-ui/tanstack-query`.
+Applications use TanStack Query's native `QueryClientProvider`; Vireo does not wrap client creation or cache policy. Import `VireoQueryBoundary` and the optional `useVireoMutation` extension from `@vireocodedev/ui/tanstack-query`.
 
-`VireoDndProvider` owns one isolated Hello Pangea drag domain. Keep it near the lists that participate in that domain rather than adding it to the application-global composer by default. Import it and the related primitives from `@vireocodedev/starter-ui/hello-pangea-dnd`.
+`VireoDndProvider` owns one isolated Hello Pangea drag domain. Keep it near the lists that participate in that domain rather than adding it to the application-global composer by default. Import it and the related primitives from `@vireocodedev/ui/hello-pangea-dnd`.

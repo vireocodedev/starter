@@ -1,4 +1,4 @@
-import { createAuthRedirectState, resolvePostLoginPath } from "@vireocodedev/starter-shell";
+import { createAuthRedirectState, resolvePostLoginPath } from "@vireocodedev/shell";
 
 export function runAuthRedirectExample() {
   const state = createAuthRedirectState(

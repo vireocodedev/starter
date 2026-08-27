@@ -1,6 +1,6 @@
 import { Paper, Typography } from "@mui/material";
-import { VireoLoadingRegion, VireoSkeleton } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLoadingRegion, VireoSkeleton } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function LoadingExample() {
   return (

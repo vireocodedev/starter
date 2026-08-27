@@ -1,4 +1,4 @@
-import { createHistoryDefinition, createHistoryNodes, type HistoryNode } from "@vireocodedev/starter-history";
+import { createHistoryDefinition, createHistoryNodes, type HistoryNode } from "@vireocodedev/history";
 import { z } from "zod";
 
 const ItemSchema = z.object({ id: z.union([z.string(), z.number()]), name: z.string() });

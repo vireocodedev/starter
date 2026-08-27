@@ -1,5 +1,5 @@
-import { VireoHistoryEntry, VireoLoadingRegion } from "@vireocodedev/starter-ui";
-import { createHistoryDefinition } from "@vireocodedev/starter-history";
+import { VireoHistoryEntry, VireoLoadingRegion } from "@vireocodedev/ui";
+import { createHistoryDefinition } from "@vireocodedev/history";
 import { Box, Button } from "@mui/material";
 import React from "react";
 import { z } from "zod";

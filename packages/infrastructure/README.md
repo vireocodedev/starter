@@ -1,4 +1,4 @@
-# @vireocodedev/starter-infrastructure
+# @vireocodedev/infrastructure
 
 React-free browser infrastructure primitives for validated HTTP transport, connectivity, persistent state, session-expiry coordination, and execution-mode-aware services.
 
@@ -7,7 +7,7 @@ The package owns reusable mechanisms. Applications still own configured transpor
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-infrastructure axios zod @preact/signals-core
+npm install @vireocodedev/infrastructure axios zod @preact/signals-core
 ```
 
 The package name is stable; registry selection and authentication belong to the
@@ -22,8 +22,8 @@ The package has no React, MUI, React Query, locale, or application singleton dep
 React adapters live in Starter UI:
 
 ```ts
-import { useVireoOnlineStatus } from "@vireocodedev/starter-ui";
-import { createVireoPagedSearchQueries } from "@vireocodedev/starter-ui/tanstack-query";
+import { useVireoOnlineStatus } from "@vireocodedev/ui";
+import { createVireoPagedSearchQueries } from "@vireocodedev/ui/tanstack-query";
 ```
 
 ## Public architecture

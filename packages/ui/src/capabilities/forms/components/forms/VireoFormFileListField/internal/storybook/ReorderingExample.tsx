@@ -1,6 +1,6 @@
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const pages = ["cover.pdf", "proposal.pdf", "appendix.pdf"].map(
   name => new File([name], name, { type: "application/pdf" }),

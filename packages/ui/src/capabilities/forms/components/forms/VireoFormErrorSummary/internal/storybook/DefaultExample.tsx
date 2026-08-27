@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm } from "@vireocodedev/ui/forms";
 import { z } from "zod";
 
 export default function DefaultExample() {

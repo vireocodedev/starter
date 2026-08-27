@@ -1,4 +1,4 @@
-import { createQueryEngineConfigClient } from "@vireocodedev/starter-queryengine";
+import { createQueryEngineConfigClient } from "@vireocodedev/query";
 
 export async function runConfigPersistenceExample() {
   let clearFallback: () => void = () => undefined;

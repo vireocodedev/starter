@@ -1,6 +1,6 @@
-import { VireoDockedSidePanel, VireoOverlayHeader } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { VireoDockedSidePanelWorkspaceFrame } from "@vireocodedev/starter-ui/storybook/VireoDockedSidePanel";
+import { VireoDockedSidePanel, VireoOverlayHeader } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
+import { VireoDockedSidePanelWorkspaceFrame } from "@vireocodedev/ui/storybook/VireoDockedSidePanel";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 

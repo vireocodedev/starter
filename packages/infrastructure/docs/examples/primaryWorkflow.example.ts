@@ -1,4 +1,4 @@
-import { createModeAwareApi } from "@vireocodedev/starter-infrastructure";
+import { createModeAwareApi } from "@vireocodedev/infrastructure";
 
 type CustomerApi = {
   customers: {

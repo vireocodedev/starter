@@ -77,16 +77,16 @@ manual API list.
 
 ### TypeScript packages
 
-| Package                                | Version | Entry points | Named exports | Worker-safe entry points |
-| -------------------------------------- | ------: | -----------: | ------------: | -----------------------: |
-| `@vireocodedev/starter-history`        |   3.0.0 |            1 |            35 |                        1 |
-| `@vireocodedev/starter-infrastructure` |   3.0.0 |            3 |            41 |                        2 |
-| `@vireocodedev/starter-localization`   |   3.0.0 |            1 |            42 |                        1 |
-| `@vireocodedev/starter-queryengine`    |   5.0.0 |            1 |            60 |                        1 |
-| `@vireocodedev/starter-shell`          |   4.0.0 |            1 |            49 |                        1 |
-| `@vireocodedev/starter-sqlite`         |   3.0.0 |            2 |           154 |                        2 |
-| `@vireocodedev/starter-ui`             |   7.1.0 |           13 |         1,364 |                        0 |
-| **Total**                              |         |       **22** |     **1,745** |                    **9** |
+| Package                        | Version | Entry points | Named exports | Worker-safe entry points |
+| ------------------------------ | ------: | -----------: | ------------: | -----------------------: |
+| `@vireocodedev/history`        |   3.0.0 |            1 |            35 |                        1 |
+| `@vireocodedev/infrastructure` |   3.0.0 |            3 |            41 |                        2 |
+| `@vireocodedev/localization`   |   3.0.0 |            1 |            42 |                        1 |
+| `@vireocodedev/query`          |   5.0.0 |            1 |            60 |                        1 |
+| `@vireocodedev/shell`          |   4.0.0 |            1 |            49 |                        1 |
+| `@vireocodedev/sqlite`         |   3.0.0 |            2 |           154 |                        2 |
+| `@vireocodedev/ui`             |   7.1.0 |           13 |         1,364 |                        0 |
+| **Total**                      |         |       **22** |     **1,745** |                    **9** |
 
 UI accounts for about 78% of the named TypeScript surface. That may be justified by
 the component catalog, but it is a material documentation and semantic-versioning

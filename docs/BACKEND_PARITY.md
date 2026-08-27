@@ -62,7 +62,7 @@ constraint in `V1__baseline_schema.sql`, so widening it currently demands a
 migration in the consuming app.
 
 **The frontend already solved this.** `QueryEngineEntityKey` in the published
-`@vireocodedev/starter-queryengine` is just `string`, and `MANAGEMENT_ENTITIES`
+`@vireocodedev/query` is just `string`, and `MANAGEMENT_ENTITIES`
 is app-owned. The backend is the half that never got the treatment.
 
 ### The fix: extensible enums
@@ -165,7 +165,7 @@ session-based default.
 starter/
 ├── package.json          turbo drives everything under packages/
 ├── packages/
-│   ├── queryengine/      @vireocodedev/starter-queryengine
+│   ├── queryengine/      @vireocodedev/query
 │   └── ...
 └── jvm/
     ├── settings.gradle   includes the modules below

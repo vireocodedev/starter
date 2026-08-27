@@ -38,7 +38,7 @@ storybook/
     ...component-specific presentation helpers
 ```
 
-The `@vireocodedev/starter-ui/storybook` entry point owns genuinely reusable Storybook providers and presentation utilities. Component-specific helpers use an exact PascalCase subpath matching the public component, such as `@vireocodedev/starter-ui/storybook/VireoIconContainer`. Do not collect component-specific helpers into the shared entry point or hide them behind a wildcard export.
+The `@vireocodedev/ui/storybook` entry point owns genuinely reusable Storybook providers and presentation utilities. Component-specific helpers use an exact PascalCase subpath matching the public component, such as `@vireocodedev/ui/storybook/VireoIconContainer`. Do not collect component-specific helpers into the shared entry point or hide them behind a wildcard export.
 
 Although these helpers are published so copied examples compile in consumer projects, they remain developer tooling: production modules must not import them, package-root barrels must not re-export them, and their runtime graph must not depend on `@storybook/*` or `storybook/*` packages.
 

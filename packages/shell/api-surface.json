@@ -1,5 +1,5 @@
 {
-  "package": "@vireocodedev/starter-shell",
+  "package": "@vireocodedev/shell",
   "entryPoints": {
     ".": {
       "exports": [

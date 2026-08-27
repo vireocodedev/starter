@@ -1,5 +1,5 @@
 {
-  "package": "@vireocodedev/starter-infrastructure",
+  "package": "@vireocodedev/infrastructure",
   "entryPoints": {
     ".": {
       "exports": [

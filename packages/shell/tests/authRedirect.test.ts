@@ -1,4 +1,4 @@
-import { createAuthRedirectState, isSafeInternalPath, resolvePostLoginPath } from "@vireocodedev/starter-shell";
+import { createAuthRedirectState, isSafeInternalPath, resolvePostLoginPath } from "@vireocodedev/shell";
 import { describe, expect, it } from "vitest";
 
 describe("authentication redirects", () => {

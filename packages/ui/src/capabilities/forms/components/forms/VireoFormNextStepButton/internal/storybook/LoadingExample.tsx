@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
-import { useVireoMultiStepForm } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { useVireoMultiStepForm } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function LoadingExample() {
   const form = useVireoMultiStepForm({

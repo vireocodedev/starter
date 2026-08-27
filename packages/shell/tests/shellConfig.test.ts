@@ -1,4 +1,4 @@
-import { createShellSitemap, defineShellConfig, defineShellPages, shellNavigation } from "@vireocodedev/starter-shell";
+import { createShellSitemap, defineShellConfig, defineShellPages, shellNavigation } from "@vireocodedev/shell";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 

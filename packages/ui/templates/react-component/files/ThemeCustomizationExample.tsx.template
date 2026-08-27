@@ -1,6 +1,6 @@
 import { ThemeProvider, createTheme, type Theme } from "@mui/material";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-// TODO(component-author): After publishing the component boundary, import {{componentName}} from "@vireocodedev/starter-ui".
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
+// TODO(component-author): After publishing the component boundary, import {{componentName}} from "@vireocodedev/ui".
 import { {{componentName}} } from "{{componentSourceModule}}";
 
 function createCustomizedTheme(outerTheme: Theme): Theme {

@@ -1,5 +1,5 @@
-import { VireoInfiniteCanvas, VireoInfiniteCanvasOverlay } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoInfiniteCanvas, VireoInfiniteCanvasOverlay } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, Paper, Stack } from "@mui/material";
 export default function DefaultExample() {
   return (

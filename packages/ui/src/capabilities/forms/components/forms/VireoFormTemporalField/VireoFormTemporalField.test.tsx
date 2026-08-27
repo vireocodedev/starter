@@ -17,7 +17,7 @@ import type { VireoFormTemporalFieldMode, VireoFormTemporalFieldProps } from "./
 
 dayjs.extend(utc);
 
-const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/starter-ui/VireoTemporalLocalizationProvider");
+const VIREO_TEMPORAL_ADAPTER_MARKER = Symbol.for("@vireocodedev/ui/VireoTemporalLocalizationProvider");
 
 class VireoTestAdapterDayjs extends AdapterDayjs {
   readonly [VIREO_TEMPORAL_ADAPTER_MARKER] = true;
@@ -78,7 +78,7 @@ describe(VIREO_FORM_TEMPORAL_FIELD_NAME, () => {
   it("requires the Vireo temporal localization provider", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     expect(() => render(<NativeProviderHarness />)).toThrow(
-      'VireoFormTemporalField must be rendered within VireoTemporalLocalizationProvider. Import it from "@vireocodedev/starter-ui/localization".',
+      'VireoFormTemporalField must be rendered within VireoTemporalLocalizationProvider. Import it from "@vireocodedev/ui/localization".',
     );
     consoleError.mockRestore();
   });

@@ -1,8 +1,4 @@
-import {
-  createConnectivityState,
-  parseHttpResponse,
-  parseQueryFilterRequest,
-} from "@vireocodedev/starter-infrastructure";
+import { createConnectivityState, parseHttpResponse, parseQueryFilterRequest } from "@vireocodedev/infrastructure";
 import z from "zod";
 
 function captureFailure(run: () => unknown): string {

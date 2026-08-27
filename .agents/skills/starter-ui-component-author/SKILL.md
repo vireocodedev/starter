@@ -1,6 +1,6 @@
 ---
 name: starter-ui-component-author
-description: Create, migrate, or complete first-class public Vireo React components in @vireocodedev/starter-ui using its generator and component-authoring contracts. Use for Vireo design-system component work, not application-specific compositions, internal helpers, or ordinary UI edits.
+description: Create, migrate, or complete first-class public Vireo React components in @vireocodedev/ui using its generator and component-authoring contracts. Use for Vireo design-system component work, not application-specific compositions, internal helpers, or ordinary UI edits.
 ---
 
 # Starter UI Component Author
@@ -56,7 +56,7 @@ Generation establishes structure only. Before treating the component as complete
 - Encode accessibility dependencies in types when possible and protect required runtime semantics from late prop spreads.
 - Keep default CSS in `*.styled.ts`; expose only styling regions that are genuine public slots or state classes.
 - Replace baseline tests with capability-driven coverage for behavior, events, accessibility, refs, slots, classes, theme integration, and regressions actually owned by the component.
-- Audit the twelve story-coverage questions and replace baseline stories with the minimum sufficient set of useful default, state, edge-case, interaction, context, and composition examples supported by the component. Treat slot and theme stories as conditional: include them only for meaningful component-specific extension contracts. Start the main component description with a one-sentence summary, then add `### Why it exists` covering the recurring problem, why Vireo owns the abstraction, and its use-or-avoid boundary. Disable Storybook Controls so the canvas cannot diverge from its displayed module. Give every story a complete executable TSX module under `internal/storybook`, import it normally and with `?raw`, and show that raw module through `docs.source.code`. Generated examples temporarily use a repository alias while the component is unfinished; after exporting the component boundary, replace it with consumer-resolvable `@vireocodedev/starter-ui` imports and clear the TODO. Do not duplicate the example as a handwritten source string. A story build is not a substitute for behavior tests.
+- Audit the twelve story-coverage questions and replace baseline stories with the minimum sufficient set of useful default, state, edge-case, interaction, context, and composition examples supported by the component. Treat slot and theme stories as conditional: include them only for meaningful component-specific extension contracts. Start the main component description with a one-sentence summary, then add `### Why it exists` covering the recurring problem, why Vireo owns the abstraction, and its use-or-avoid boundary. Disable Storybook Controls so the canvas cannot diverge from its displayed module. Give every story a complete executable TSX module under `internal/storybook`, import it normally and with `?raw`, and show that raw module through `docs.source.code`. Generated examples temporarily use a repository alias while the component is unfinished; after exporting the component boundary, replace it with consumer-resolvable `@vireocodedev/ui` imports and clear the TODO. Do not duplicate the example as a handwritten source string. A story build is not a substitute for behavior tests.
 - Compose input-like `field.*` components inside `VireoLabelBox` in every executable story, keep the visible label on `VireoLabelBox`, and suppress the underlying MUI input label while retaining an accessible control name. Apply only the explicit whitelist documented in `stories-files.md`; currently `field.SwitchField` and `field.CheckboxField` are exempt because their control-label anatomy is integral to their presentation.
 - Keep every story compatible with the shared dark Vireo Storybook theme. Use semantic palette tokens for neutral fixture surfaces and text, and make local `ThemeProvider` customization extend the outer theme instead of replacing it with a default light theme.
 - Export only the component, classes, and types from the local barrel unless another API is intentionally public. Add the component directory to `packages/ui/src/index.ts` only when ready to publish.
@@ -67,11 +67,11 @@ Generation establishes structure only. Before treating the component as complete
 Run focused checks first and broaden them in proportion to the change. For a new public component, the expected final gate is:
 
 ```bash
-npm exec --workspace @vireocodedev/starter-ui vitest run <path-to-component-test>
-npm run typecheck --workspace @vireocodedev/starter-ui
-npm run test --workspace @vireocodedev/starter-ui
-npm run build --workspace @vireocodedev/starter-ui
-npm run build-storybook --workspace @vireocodedev/starter-ui
+npm exec --workspace @vireocodedev/ui vitest run <path-to-component-test>
+npm run typecheck --workspace @vireocodedev/ui
+npm run test --workspace @vireocodedev/ui
+npm run build --workspace @vireocodedev/ui
+npm run build-storybook --workspace @vireocodedev/ui
 npm run types:strict
 npm run surface
 npm run lint

@@ -31,7 +31,7 @@ Vireo intentionally does not provide a QueryClient factory or provider wrapper. 
 ## Bound one recoverable query region
 
 ```tsx
-import { VireoQueryBoundary } from "@vireocodedev/starter-ui/tanstack-query";
+import { VireoQueryBoundary } from "@vireocodedev/ui/tanstack-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 function CustomerRoute({ customerId }: { customerId: string }) {
@@ -91,7 +91,7 @@ Use TanStack Query's `useMutation` directly unless semantic Vireo notifications 
 ## Import boundary
 
 ```tsx
-import { VireoQueryBoundary, useVireoMutation } from "@vireocodedev/starter-ui/tanstack-query";
+import { VireoQueryBoundary, useVireoMutation } from "@vireocodedev/ui/tanstack-query";
 ```
 
 TanStack Query APIs are not re-exported, and integration APIs are not available from the package root.

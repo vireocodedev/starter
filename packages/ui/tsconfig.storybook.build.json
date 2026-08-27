@@ -4,7 +4,7 @@
     "rootDir": "./storybook",
     "outDir": "./dist/storybook",
     "paths": {
-      "@vireocodedev/starter-ui/localization": ["./dist/integrations/localization/public.d.ts"]
+      "@vireocodedev/ui/localization": ["./dist/integrations/localization/public.d.ts"]
     }
   },
   "include": ["storybook"],

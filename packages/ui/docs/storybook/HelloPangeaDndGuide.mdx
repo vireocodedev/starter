@@ -4,7 +4,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 # Hello Pangea DND guide
 
-Vireo's optional `@vireocodedev/starter-ui/hello-pangea-dnd` entry point provides typed, themed primitives for ordinary reorder and transfer lists. Install a compatible `@hello-pangea/dnd` version alongside Starter UI before importing this entry point.
+Vireo's optional `@vireocodedev/ui/hello-pangea-dnd` entry point provides typed, themed primitives for ordinary reorder and transfer lists. Install a compatible `@hello-pangea/dnd` version alongside Starter UI before importing this entry point.
 
 ## Composition
 
@@ -16,7 +16,7 @@ import {
   VireoDragHandle,
   VireoDraggableItem,
   VireoDropZone,
-} from "@vireocodedev/starter-ui/hello-pangea-dnd";
+} from "@vireocodedev/ui/hello-pangea-dnd";
 
 <VireoDndProvider onDragEnd={result => updateApplicationState(result)}>
   <VireoDropZone id={{ type: "task-list", listId: "backlog" }} mode="reorder">
@@ -45,7 +45,7 @@ Zones exchange items only when their `group` values match. The default group is 
 Identifiers are JSON-compatible objects with a `type` discriminator. Extend the registries once in an application declaration file for autocomplete and discriminated-union narrowing. The codec is private and deterministic; consumers always work with the original objects.
 
 ```ts
-declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+declare module "@vireocodedev/ui/hello-pangea-dnd" {
   interface VireoDraggableIdRegistry {
     task: { taskId: string };
   }

@@ -1,5 +1,5 @@
-import { VireoDndProvider, VireoDropZone } from "@vireocodedev/starter-ui/hello-pangea-dnd";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoDndProvider, VireoDropZone } from "@vireocodedev/ui/hello-pangea-dnd";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material";
 
 function createCustomizedTheme(outerTheme: Theme): Theme {

@@ -1,5 +1,5 @@
 import { Paper, Stack, Typography } from "@mui/material";
-import { useVireoMultiStepForm } from "@vireocodedev/starter-ui/forms";
+import { useVireoMultiStepForm } from "@vireocodedev/ui/forms";
 import React from "react";
 
 const ProgressSurface = React.forwardRef<HTMLElement, React.ComponentProps<typeof Paper>>(

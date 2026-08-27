@@ -13,21 +13,21 @@ independent jobs. Keeping them in one repository makes a change that spans both
 halves a single reviewable pull request, which is the only reason they are
 neighbours. See [jvm/](jvm) and [docs/BACKEND_PARITY.md](docs/BACKEND_PARITY.md).
 
-The frontend application-shell package is `@vireocodedev/starter-shell`. The
+The frontend application-shell package is `@vireocodedev/shell`. The
 Maven artifact `com.vireocode:vireo-core` is the
 backend's base entity/service layer; they are separate contracts.
 
 ## Frontend packages
 
-| Package                                                           | Version | Description                                                                                                  |
-| ----------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
-| [`@vireocodedev/starter-ui`](packages/ui)                         | 7.0.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.     |
-| [`@vireocodedev/starter-queryengine`](packages/queryengine)       | 5.0.0   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                   |
-| [`@vireocodedev/starter-shell`](packages/shell)                   | 4.0.0   | React application shell, initialization, sitemap, routing, responsive navigation, and page-layout contracts. |
-| [`@vireocodedev/starter-localization`](packages/localization)     | 3.0.0   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations.    |
-| [`@vireocodedev/starter-sqlite`](packages/sqlite)                 | 3.0.0   | SQLite worker/client runtime primitives for offline persistence and synchronization.                         |
-| [`@vireocodedev/starter-history`](packages/history)               | 3.0.0   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.           |
-| [`@vireocodedev/starter-infrastructure`](packages/infrastructure) | 3.0.0   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.                 |
+| Package                                                   | Version | Description                                                                                                  |
+| --------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| [`@vireocodedev/ui`](packages/ui)                         | 7.0.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.     |
+| [`@vireocodedev/query`](packages/queryengine)             | 5.0.0   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                   |
+| [`@vireocodedev/shell`](packages/shell)                   | 4.0.0   | React application shell, initialization, sitemap, routing, responsive navigation, and page-layout contracts. |
+| [`@vireocodedev/localization`](packages/localization)     | 3.0.0   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations.    |
+| [`@vireocodedev/sqlite`](packages/sqlite)                 | 3.0.0   | SQLite worker/client runtime primitives for offline persistence and synchronization.                         |
+| [`@vireocodedev/history`](packages/history)               | 3.0.0   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.           |
+| [`@vireocodedev/infrastructure`](packages/infrastructure) | 3.0.0   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.                 |
 
 Versions above are the currently published ones; `packages/*/package.json` is the source of truth.
 

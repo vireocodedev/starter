@@ -66,6 +66,6 @@ Entity revision bumps use row locking and bounded insert-race recovery. Change e
 
 The module owns `sync_command` and `offline_entity_version` through `flyway_schema_history_vireo_offline`. V2 removes the legacy Auth foreign key so custom actor IDs remain valid audit data.
 
-The matching browser implementation lives in `@vireocodedev/starter-sqlite`: it owns the persistent browser queue, replay scheduling, hydration state, and network policy. JSON is the boundary between the two runtimes.
+The matching browser implementation lives in `@vireocodedev/sqlite`: it owns the persistent browser queue, replay scheduling, hydration state, and network policy. JSON is the boundary between the two runtimes.
 
 See the unified Vireo Starter Storybook under **JVM → Offline** for the compiled handler example and operational guidance.

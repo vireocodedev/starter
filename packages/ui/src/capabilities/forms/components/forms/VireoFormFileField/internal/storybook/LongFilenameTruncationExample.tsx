@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const longFile = new File(
   ["example"],

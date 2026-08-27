@@ -1,6 +1,6 @@
 import { Button, Stack, Typography } from "@mui/material";
-import { VireoSlidingScreenStack } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoSlidingScreenStack } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { useState } from "react";
 
 export default function DefaultExample() {

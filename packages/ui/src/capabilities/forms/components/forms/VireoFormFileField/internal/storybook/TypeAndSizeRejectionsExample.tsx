@@ -1,7 +1,7 @@
 import { Alert } from "@mui/material";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoForm, type VireoFileRejection } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm, type VireoFileRejection } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import React from "react";
 
 export default function TypeAndSizeRejectionsExample() {

@@ -1,5 +1,5 @@
-import { useVireoDebouncedCallback, VireoLabelBox } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { useVireoDebouncedCallback, VireoLabelBox } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Stack, TextField, Typography } from "@mui/material";
 import React from "react";
 

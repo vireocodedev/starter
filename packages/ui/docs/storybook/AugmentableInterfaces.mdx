@@ -22,10 +22,10 @@ Vireo exposes focused registry interfaces that consumer apps can extend via Type
 
 ## How it works
 
-Each augmentable interface is declared as an empty `interface` inside `@vireocodedev/starter-ui`. Because interfaces are open in TypeScript, a consumer app can add members via `declare module`:
+Each augmentable interface is declared as an empty `interface` inside `@vireocodedev/ui`. Because interfaces are open in TypeScript, a consumer app can add members via `declare module`:
 
 ```ts
-declare module "@vireocodedev/starter-ui" {
+declare module "@vireocodedev/ui" {
   interface SomeRegistry {
     myKey: MyType;
   }
@@ -42,7 +42,7 @@ Create a single `.d.ts` file in your app (e.g. `src/@types/vireo.d.ts`) and make
 
 ```ts
 // src/@types/vireo.d.ts
-declare module "@vireocodedev/starter-ui" {
+declare module "@vireocodedev/ui" {
   // extend any of the registries here
 }
 ```
@@ -93,7 +93,7 @@ declare module "@vireocodedev/starter-ui" {
 import { MY_ICON_REGISTRY } from "@/setup/icons/icons.registry";
 import type React from "react";
 
-declare module "@vireocodedev/starter-ui" {
+declare module "@vireocodedev/ui" {
   interface VireoIconRegistry extends Record<keyof typeof MY_ICON_REGISTRY, React.ComponentType> {}
 }
 ```
@@ -115,7 +115,7 @@ declare module "@vireocodedev/starter-ui" {
         <strong>Location</strong>
       </td>
       <td>
-        <code>@vireocodedev/starter-ui/hello-pangea-dnd</code>
+        <code>@vireocodedev/ui/hello-pangea-dnd</code>
       </td>
     </tr>
     <tr>
@@ -139,7 +139,7 @@ declare module "@vireocodedev/starter-ui" {
 </table>
 
 ```ts
-declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+declare module "@vireocodedev/ui/hello-pangea-dnd" {
   interface VireoDraggableIdRegistry {
     convoy: {
       convoyId: number;
@@ -175,7 +175,7 @@ type VireoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; t
         <strong>Location</strong>
       </td>
       <td>
-        <code>@vireocodedev/starter-ui/hello-pangea-dnd</code>
+        <code>@vireocodedev/ui/hello-pangea-dnd</code>
       </td>
     </tr>
     <tr>
@@ -199,7 +199,7 @@ type VireoDraggableId = { type: "convoy"; convoyId: number } | { type: "task"; t
 </table>
 
 ```ts
-declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+declare module "@vireocodedev/ui/hello-pangea-dnd" {
   interface VireoDropZoneIdRegistry {
     chamber: {
       chamberSide: ChamberSide;
@@ -233,11 +233,11 @@ import { type ChamberSide, type Direction, type StreamType } from "@/infrastruct
 import { type APP_ICON_REGISTRY } from "@/setup/icons/icons.registry";
 import type React from "react";
 
-declare module "@vireocodedev/starter-ui" {
+declare module "@vireocodedev/ui" {
   interface VireoIconRegistry extends Record<keyof typeof APP_ICON_REGISTRY, React.ComponentType> {}
 }
 
-declare module "@vireocodedev/starter-ui/hello-pangea-dnd" {
+declare module "@vireocodedev/ui/hello-pangea-dnd" {
   interface VireoDraggableIdRegistry {
     convoy: { convoyId: number };
   }

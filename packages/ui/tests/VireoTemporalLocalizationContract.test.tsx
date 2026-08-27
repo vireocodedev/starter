@@ -1,5 +1,5 @@
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
-import { VireoTemporalLocalizationProvider } from "@vireocodedev/starter-ui/localization";
+import { useVireoForm } from "@vireocodedev/ui/forms";
+import { VireoTemporalLocalizationProvider } from "@vireocodedev/ui/localization";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

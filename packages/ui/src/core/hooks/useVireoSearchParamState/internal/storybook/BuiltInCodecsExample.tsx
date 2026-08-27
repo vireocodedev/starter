@@ -1,5 +1,5 @@
-import { useVireoSearchParamState, vireoSearchParamCodecs } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { useVireoSearchParamState, vireoSearchParamCodecs } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 
 export default function BuiltInCodecsExample() {

@@ -1,5 +1,5 @@
-import { VireoIconRegistryProvider, VireoProviderComposer, type VireoProviderWrapper } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoIconRegistryProvider, VireoProviderComposer, type VireoProviderWrapper } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { CssBaseline, Paper, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
 import React from "react";
 

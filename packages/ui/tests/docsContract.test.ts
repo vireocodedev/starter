@@ -11,7 +11,7 @@ import { describe, expect, it } from "vitest";
  * shipped documented-but-nonexistent in the past (`showNotiSnackStatic`,
  * `closeNotiSnackStatic`, `RgoWebWorkerService`, `RgoSseProvider`,
  * `RgoInitializable`), each found only by chance. This test parses every
- * `import ... from "@vireocodedev/starter-ui"` in the `.mdx` docs and in the
+ * `import ... from "@vireocodedev/ui"` in the `.mdx` docs and in the
  * story demos, and asserts the symbol is actually exported.
  *
  * It checks against `api-surface.json` - the frozen public surface - rather than
@@ -25,7 +25,7 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const srcRoot = join(packageRoot, "src");
 const storybookDocsRoot = join(packageRoot, "docs", "storybook");
 
-const PACKAGE_NAME = "@vireocodedev/starter-ui";
+const PACKAGE_NAME = "@vireocodedev/ui";
 
 const surface = JSON.parse(readFileSync(join(packageRoot, "api-surface.json"), "utf8")) as {
   package: string;

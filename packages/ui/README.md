@@ -1,4 +1,4 @@
-# @vireocodedev/starter-ui
+# @vireocodedev/ui
 
 The **MUI-based Vireo component library** for the vireocodedev **starter** product,
 including TanStack-bound forms, responsive tables, overlays, page layout,
@@ -10,7 +10,7 @@ typed integrations, foundational providers, hooks, and formatters.
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-ui
+npm install @vireocodedev/ui
 ```
 
 The package name is stable; registry selection and authentication belong to the
@@ -21,7 +21,7 @@ Peers: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`,
 `@mui/x-date-pickers`, `@emotion/react`, `@emotion/styled`,
 `@tanstack/react-query`, `i18next`,
 `react-i18next`, `zod`, `sonner`, `dayjs`. Depends on
-`@vireocodedev/starter-localization`, which owns the `platform` and `history`
+`@vireocodedev/localization`, which owns the `platform` and `history`
 translation namespaces this package renders.
 
 The package ships unbundled: `dist` mirrors `src` file-for-file. Supported

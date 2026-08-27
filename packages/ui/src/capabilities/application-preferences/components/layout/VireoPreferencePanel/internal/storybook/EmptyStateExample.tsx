@@ -1,7 +1,7 @@
 import { SearchOffRounded } from "@mui/icons-material";
 import { Stack, Typography } from "@mui/material";
-import { VireoPreferencePanel } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoPreferencePanel } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function EmptyStateExample() {
   return (

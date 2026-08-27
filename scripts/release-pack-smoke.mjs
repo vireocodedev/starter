@@ -21,7 +21,7 @@ const packagesRoot = join(repoRoot, "packages");
 const rootNodeModules = join(repoRoot, "node_modules");
 const rootLicense = readFileSync(join(repoRoot, "LICENSE"), "utf8");
 const expectedRepositoryUrl = "git+https://github.com/vireocodedev/starter.git";
-const expectedRegistry = "https://npm.pkg.github.com";
+const expectedRegistry = "https://registry.npmjs.org";
 const portabilityPolicy = JSON.parse(readFileSync(join(repoRoot, "contracts/package-portability-policy.json"), "utf8"));
 const installLifecycleScripts = ["preinstall", "install", "postinstall", "prepare", "prepublish", "prepublishOnly"];
 const forbiddenPackedPath =
@@ -103,6 +103,12 @@ function validateManifest(sourceDirectory, sourceManifest, packedManifest) {
   }
   if (packedManifest.publishConfig?.registry !== expectedRegistry) {
     throw new Error(`${sourceManifest.name} does not target the reviewed package registry.`);
+  }
+  if (packedManifest.publishConfig?.access !== "public") {
+    throw new Error(`${sourceManifest.name} does not explicitly publish with public access.`);
+  }
+  if (packedManifest.publishConfig?.provenance !== true) {
+    throw new Error(`${sourceManifest.name} does not require npm provenance.`);
   }
   if (JSON.stringify(packedManifest.files) !== JSON.stringify(["dist"])) {
     throw new Error(`${sourceManifest.name} must publish only its dist allowlist.`);
@@ -315,7 +321,7 @@ try {
     const metadata = createPackMetadata(packageDirectory, join(tarballRoot, tarball), sourceManifest);
     const packedManifest = validatePackageContents(packageDirectory, sourceDirectory, sourceManifest, metadata);
     const packageEntries = packageSpecifiers(packedManifest);
-    if (packedManifest.name === "@vireocodedev/starter-ui") browserSpecifiers.push(...packageEntries);
+    if (packedManifest.name === "@vireocodedev/ui") browserSpecifiers.push(...packageEntries);
     else nodeSpecifiers.push(...packageEntries);
     summary.push({
       name: packedManifest.name,

@@ -233,7 +233,7 @@ Story-only fixtures must be deterministic, product-neutral, and local to the sto
 
 ## Executable displayed source
 
-The code panel is consumer documentation, not a serialization of Storybook's private render tree. Its displayed source must be a complete TSX module that a consumer can copy into a project with `@vireocodedev/starter-ui` installed, compile without private imports, and render to reproduce the story's initial canvas.
+The code panel is consumer documentation, not a serialization of Storybook's private render tree. Its displayed source must be a complete TSX module that a consumer can copy into a project with `@vireocodedev/ui` installed, compile without private imports, and render to reproduce the story's initial canvas.
 
 For a direct args-only story, generated source may be retained only when it already meets that complete-module standard. When a story uses a render wrapper, coordinated fixture, local state, or presentation chrome, create one executable example file and import that same file both normally and through Vite's `?raw` query:
 
@@ -269,12 +269,12 @@ The story file itself follows the source architecture and reaches the nested exa
 
 `tests/storySourceContract.test.ts` enforces this connection for every Vireo story. It requires a matching `StoryNameExample.tsx`, verifies that the story renders its normal import and displays its `?raw` import, rejects orphan example modules, and prevents the displayed module from depending on repository-private or Storybook-runtime imports.
 
-The generator initially gives each example a `TODO(component-author)` repository-alias import so the unfinished, not-yet-exported scaffold continues to type-check. Once the component is complete and exported from its owner boundary, replace that temporary import with `@vireocodedev/starter-ui`. A component is not finished while any executable example retains the repository alias or its TODO.
+The generator initially gives each example a `TODO(component-author)` repository-alias import so the unfinished, not-yet-exported scaffold continues to type-check. Once the component is complete and exported from its owner boundary, replace that temporary import with `@vireocodedev/ui`. A component is not finished while any executable example retains the repository alias or its TODO.
 
-Presentation infrastructure that is genuinely reusable across components may be published from `@vireocodedev/starter-ui/storybook`. A helper created specifically for one component uses a PascalCase component subpath, for example:
+Presentation infrastructure that is genuinely reusable across components may be published from `@vireocodedev/ui/storybook`. A helper created specifically for one component uses a PascalCase component subpath, for example:
 
 ```tsx
-import { VireoIconContainerComparisonFrame } from "@vireocodedev/starter-ui/storybook/VireoIconContainer";
+import { VireoIconContainerComparisonFrame } from "@vireocodedev/ui/storybook/VireoIconContainer";
 ```
 
 Published Storybook helpers may own comparison layout, review surfaces, labels, or providers, but must leave the documented Vireo invocation visible in the executable example. They are explicit developer-tooling APIs, are never re-exported from the package root, and must have no runtime dependency on Storybook itself.

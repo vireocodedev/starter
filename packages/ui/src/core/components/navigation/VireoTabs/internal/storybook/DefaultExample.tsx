@@ -1,5 +1,5 @@
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { VireoTabs, type VireoTabsProps } from "@vireocodedev/starter-ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
+import { VireoTabs, type VireoTabsProps } from "@vireocodedev/ui";
 
 export default function DefaultExample({ onChange }: Pick<VireoTabsProps, "onChange">) {
   return (

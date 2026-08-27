@@ -1,5 +1,5 @@
-import { replayOfflineSyncBatch } from "@vireocodedev/starter-sqlite";
-import { type OfflineSyncCommand } from "@vireocodedev/starter-sqlite/offline";
+import { replayOfflineSyncBatch } from "@vireocodedev/sqlite";
+import { type OfflineSyncCommand } from "@vireocodedev/sqlite/offline";
 
 const commands: OfflineSyncCommand[] = [
   {

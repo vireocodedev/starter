@@ -1,6 +1,6 @@
 import { List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { VireoStatusDot } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoStatusDot } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function SelectedSurfaceExample() {
   return (

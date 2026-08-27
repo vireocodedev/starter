@@ -1,4 +1,4 @@
-import { createHistoryDefinition, createHistoryNodes } from "@vireocodedev/starter-history";
+import { createHistoryDefinition, createHistoryNodes } from "@vireocodedev/history";
 import { z } from "zod";
 
 const MemberSchema = z.object({ id: z.string(), name: z.string() });

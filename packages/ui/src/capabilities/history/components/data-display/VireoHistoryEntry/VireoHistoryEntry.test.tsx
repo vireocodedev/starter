@@ -2,7 +2,7 @@ import { VireoHistoryEntry } from "./VireoHistoryEntry";
 import { vireoHistoryEntryClasses } from "./VireoHistoryEntry.classes";
 import { VIREO_HISTORY_ENTRY_NAME } from "./VireoHistoryEntry.identity";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { createHistoryDefinition } from "@vireocodedev/starter-history";
+import { createHistoryDefinition } from "@vireocodedev/history";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";

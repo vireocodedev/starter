@@ -1,4 +1,4 @@
-import { createQueryEngineApi, type QueryEngineHttpClient } from "@vireocodedev/starter-queryengine";
+import { createQueryEngineApi, type QueryEngineHttpClient } from "@vireocodedev/query";
 import z from "zod";
 
 const entityKeySchema = z.enum(["CUSTOMER", "ORDER"]);

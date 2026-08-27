@@ -1,5 +1,5 @@
-import { VireoToaster, toast, type SonnerToasterProps } from "@vireocodedev/starter-ui/sonner";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoToaster, toast, type SonnerToasterProps } from "@vireocodedev/ui/sonner";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, Stack, Typography } from "@mui/material";
 import React from "react";
 import { Toaster } from "sonner";

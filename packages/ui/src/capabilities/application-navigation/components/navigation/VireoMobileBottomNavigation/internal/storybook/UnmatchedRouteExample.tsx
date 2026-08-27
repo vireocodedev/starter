@@ -1,7 +1,7 @@
 import { DashboardOutlined, Inventory2Outlined, SettingsOutlined, TuneRounded } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { VireoMobileBottomNavigation } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoMobileBottomNavigation } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const items = [
   { value: "/", label: "Overview", icon: <DashboardOutlined /> },

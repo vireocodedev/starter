@@ -1,5 +1,5 @@
-import { COUNTRY_CODES, VireoCountryFlag, getCountryName } from "@vireocodedev/starter-ui/country";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { COUNTRY_CODES, VireoCountryFlag, getCountryName } from "@vireocodedev/ui/country";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Box, Stack, Typography } from "@mui/material";
 
 export default function FlagRegistryExample() {

@@ -85,7 +85,7 @@ BOM. These are confirmed adoption blockers, not documentation assumptions.
 
 1. Starter contributor documentation overstates the need for a GitHub Packages
    token: a clean Starter workspace install succeeded without one.
-2. Starter README lists `@vireocodedev/starter-ui` `7.0.0`; the audited package is
+2. Starter README lists `@vireocodedev/ui` `7.0.0`; the audited package is
    `7.1.0`.
 3. Starter Template compatibility documentation says UI `^7.0.0`; its dependency is
    `^7.1.0`.

@@ -1,6 +1,6 @@
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Stack, TextField } from "@mui/material";
-import { VireoFormSection, VireoLabelBox } from "@vireocodedev/starter-ui";
+import { VireoFormSection, VireoLabelBox } from "@vireocodedev/ui";
 
 export default function DefaultExample() {
   return (

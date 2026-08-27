@@ -1,16 +1,16 @@
-# @vireocodedev/starter-history
+# @vireocodedev/history
 
 Framework-free entity-history primitives: typed definitions, validated history
 records, and a deterministic diff engine. The package owns no React components,
 renderers, HTTP client, application entity enum, or persistence policy.
 
-React presentation belongs to `@vireocodedev/starter-ui`, whose
+React presentation belongs to `@vireocodedev/ui`, whose
 `VireoHistoryEntry` component consumes the nodes produced here.
 
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-history zod
+npm install @vireocodedev/history zod
 ```
 
 The package name is stable; registry selection and authentication belong to the
@@ -25,7 +25,7 @@ for debugging.
 ## Define and compare an entity
 
 ```ts
-import { createHistoryDefinition, createHistoryNodes } from "@vireocodedev/starter-history";
+import { createHistoryDefinition, createHistoryNodes } from "@vireocodedev/history";
 import { z } from "zod";
 
 const CountrySchema = z.object({
@@ -79,7 +79,7 @@ render the formatted text or make a UI-specific decision from `raw`.
 ## Records
 
 ```ts
-import { createHistoryRecordSchema } from "@vireocodedev/starter-history";
+import { createHistoryRecordSchema } from "@vireocodedev/history";
 import { z } from "zod";
 
 const HistoryRecordSchema = createHistoryRecordSchema({

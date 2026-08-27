@@ -1,4 +1,4 @@
-import { formatIntlNumber } from "@vireocodedev/starter-localization";
+import { formatIntlNumber } from "@vireocodedev/localization";
 
 export function runFormattingExample() {
   const amount = 1234.5;

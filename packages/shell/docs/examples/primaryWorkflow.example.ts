@@ -4,7 +4,7 @@ import {
   defineShellPages,
   defineShellSections,
   shellNavigation,
-} from "@vireocodedev/starter-shell";
+} from "@vireocodedev/shell";
 
 export function runPrimaryWorkflowExample() {
   const pages = defineShellPages({

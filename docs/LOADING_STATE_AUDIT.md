@@ -5,7 +5,7 @@
 **Status:** Foundation, responsive table, history entry, and async confirmation contracts remediated
 
 **Audited against:** [Vireo Loading-State and Skeleton Standard](LOADING_STATE_STANDARD.md)  
-**Scope:** `@vireocodedev/starter-ui` public loading primitives and async-capable visual components
+**Scope:** `@vireocodedev/ui` public loading primitives and async-capable visual components
 
 ## Purpose
 

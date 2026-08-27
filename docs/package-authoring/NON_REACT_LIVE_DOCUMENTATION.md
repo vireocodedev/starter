@@ -5,7 +5,7 @@ documentation to the single Vireo Starter Storybook.
 
 ## Ownership boundary
 
-`@vireocodedev/starter-ui` owns the shared Storybook runtime, React rendering
+`@vireocodedev/ui` owns the shared Storybook runtime, React rendering
 support, theme, navigation, and build. A non-React package owns only its
 documentation content and framework-free executable examples.
 

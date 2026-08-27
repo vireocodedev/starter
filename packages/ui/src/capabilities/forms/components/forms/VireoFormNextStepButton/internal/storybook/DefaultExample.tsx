@@ -1,5 +1,5 @@
 import { Stack, Typography } from "@mui/material";
-import { useVireoMultiStepForm } from "@vireocodedev/starter-ui/forms";
+import { useVireoMultiStepForm } from "@vireocodedev/ui/forms";
 
 export default function DefaultExample() {
   const form = useVireoMultiStepForm({

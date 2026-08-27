@@ -3,7 +3,7 @@ import {
   compileQueryFilterWhere,
   compileSearchTextWhere,
   type SqliteQueryFilterAdapter,
-} from "@vireocodedev/starter-queryengine";
+} from "@vireocodedev/query";
 
 const columns = bindSqliteSearchColumns([
   { alias: "name", expression: "customer.name", valueType: "string" },

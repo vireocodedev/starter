@@ -1,5 +1,5 @@
 import { Box, CssBaseline, ThemeProvider, createTheme } from "@mui/material";
-import { VireoTemporalLocalizationProvider, type VireoTemporalLocale } from "@vireocodedev/starter-ui/localization";
+import { VireoTemporalLocalizationProvider, type VireoTemporalLocale } from "@vireocodedev/ui/localization";
 import type React from "react";
 
 export type VireoStorybookProviderProps = {

@@ -1,4 +1,4 @@
-import { createHistoryDefinition, createHistoryNodes } from "@vireocodedev/starter-history";
+import { createHistoryDefinition, createHistoryNodes } from "@vireocodedev/history";
 import { z } from "zod";
 
 const StepSchema = z.object({ id: z.string(), title: z.string() });

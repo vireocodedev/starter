@@ -1,5 +1,5 @@
-import { VireoQueryBoundary } from "@vireocodedev/starter-ui/tanstack-query";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoQueryBoundary } from "@vireocodedev/ui/tanstack-query";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Alert, Typography } from "@mui/material";
 import { QueryClient, QueryClientProvider, useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";

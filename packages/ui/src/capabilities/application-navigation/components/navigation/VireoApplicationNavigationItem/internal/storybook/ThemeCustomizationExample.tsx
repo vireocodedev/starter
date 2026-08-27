@@ -1,7 +1,7 @@
 import { HomeOutlined } from "@mui/icons-material";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { VireoApplicationNavigationItem } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoApplicationNavigationItem } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const theme = createTheme({
   palette: { mode: "dark", primary: { main: "#f59e0b" } },

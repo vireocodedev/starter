@@ -1,7 +1,7 @@
 import { TuneRounded } from "@mui/icons-material";
 import { Switch } from "@mui/material";
-import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const sections: readonly VireoPreferenceSectionDefinition[] = [
   {

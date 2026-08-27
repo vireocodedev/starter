@@ -1,5 +1,5 @@
 {
-  "package": "@vireocodedev/starter-localization",
+  "package": "@vireocodedev/localization",
   "entryPoints": {
     ".": {
       "exports": [

@@ -1,5 +1,5 @@
-import { VireoTruncatedContent, type VireoTruncatedContentProps } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoTruncatedContent, type VireoTruncatedContentProps } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Box, Stack, Typography } from "@mui/material";
 
 export default function DefaultExample({ onExpandedChange }: Pick<VireoTruncatedContentProps, "onExpandedChange">) {

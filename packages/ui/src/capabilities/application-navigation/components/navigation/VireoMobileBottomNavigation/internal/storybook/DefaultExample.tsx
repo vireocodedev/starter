@@ -1,7 +1,7 @@
 import { DashboardOutlined, Inventory2Outlined, SettingsOutlined, TuneRounded } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { VireoMobileBottomNavigation } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoMobileBottomNavigation } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import React from "react";
 
 const items = [

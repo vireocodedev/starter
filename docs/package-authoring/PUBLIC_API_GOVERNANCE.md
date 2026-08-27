@@ -6,7 +6,7 @@ declaration as a compatibility promise. The machine-readable policy is
 
 ## UI surface decision
 
-`@vireocodedev/starter-ui` 7.1.0 is already published. Removing its large root or
+`@vireocodedev/ui` 7.1.0 is already published. Removing its large root or
 forms barrels without a major release would break consumers, so the current line
 uses a freeze-and-migrate policy:
 
@@ -34,7 +34,7 @@ they are already public:
 
 Their policy disposition is `extract-next-major`. Before removing them from
 `starter-ui`, create and validate a dedicated authoring package (provisionally
-`@vireocodedev/starter-ui-storybook`), migrate this repository's Storybook, publish
+`@vireocodedev/ui-storybook`), migrate this repository's Storybook, publish
 deprecation guidance for the old subpaths, and supply a major changeset. Do not
 duplicate the helpers indefinitely across both packages without an owner and
 removal release.

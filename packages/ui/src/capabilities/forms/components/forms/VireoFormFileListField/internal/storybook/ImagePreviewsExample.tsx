@@ -1,6 +1,6 @@
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { VireoFileImagePreview, useVireoForm } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { VireoFileImagePreview, useVireoForm } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 function image(name: string, background: string, foreground: string): File {
   return new File(

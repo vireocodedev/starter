@@ -4,9 +4,9 @@ import {
   VireoOverlayHeader,
   VireoSidePanelResizeHandle,
   useSidePanelResize,
-} from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { VireoDockedSidePanelWorkspaceFrame } from "@vireocodedev/starter-ui/storybook/VireoDockedSidePanel";
+} from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
+import { VireoDockedSidePanelWorkspaceFrame } from "@vireocodedev/ui/storybook/VireoDockedSidePanel";
 import { Box, Chip, Typography } from "@mui/material";
 import type { CSSProperties } from "react";
 

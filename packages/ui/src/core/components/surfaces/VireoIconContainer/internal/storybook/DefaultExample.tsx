@@ -1,6 +1,6 @@
-import { VireoIconContainer } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
-import { VireoIconContainerComparisonFrame } from "@vireocodedev/starter-ui/storybook/VireoIconContainer";
+import { VireoIconContainer } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
+import { VireoIconContainerComparisonFrame } from "@vireocodedev/ui/storybook/VireoIconContainer";
 
 const clockGeometry = (
   <>

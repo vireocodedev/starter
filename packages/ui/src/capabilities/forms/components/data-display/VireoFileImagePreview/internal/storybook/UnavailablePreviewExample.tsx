@@ -1,5 +1,5 @@
-import { VireoFileImagePreview } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoFileImagePreview } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const documentFile = new File(["Quarterly report"], "quarterly-report.pdf", { type: "application/pdf" });
 

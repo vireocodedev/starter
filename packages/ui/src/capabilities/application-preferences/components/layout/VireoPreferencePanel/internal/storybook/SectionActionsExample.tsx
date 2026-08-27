@@ -1,8 +1,8 @@
 import React from "react";
 import { DarkModeOutlined, RestartAltRounded } from "@mui/icons-material";
 import { Button, Switch, Typography } from "@mui/material";
-import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoPreferencePanel, type VireoPreferenceSectionDefinition } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function SectionActionsExample() {
   const [message, setMessage] = React.useState("The action is independent from the expansion toggle.");

@@ -1,4 +1,4 @@
-# @vireocodedev/starter-localization
+# @vireocodedev/localization
 
 Framework-free localization resources and tooling shared by the Starter
 packages. It is the single owner of the `platform`, `queryengine`, and `history`
@@ -12,12 +12,12 @@ policy.
 
 The package has no React dependency and is safe to load in Node and Web Workers.
 React consumers import namespace hooks from
-`@vireocodedev/starter-ui/react-i18next`.
+`@vireocodedev/ui/react-i18next`.
 
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-localization i18next react-i18next
+npm install @vireocodedev/localization i18next react-i18next
 ```
 
 The package name is stable; registry selection and authentication belong to the
@@ -38,7 +38,7 @@ application's own namespace, then pass the combined resources to an app-owned
 i18next instance:
 
 ```ts
-import { createStarterResources } from "@vireocodedev/starter-localization";
+import { createStarterResources } from "@vireocodedev/localization";
 import { createInstance } from "i18next";
 
 const locales = ["en", "hr"] as const;
@@ -71,7 +71,7 @@ Use `registerStarterResources` when an initialized instance needs the resources
 later in its lifecycle:
 
 ```ts
-import { registerStarterResources } from "@vireocodedev/starter-localization";
+import { registerStarterResources } from "@vireocodedev/localization";
 
 registerStarterResources(i18next, {
   locales: ["en", "hr"],
@@ -91,7 +91,7 @@ hooks read that provider:
 ```tsx
 import type { PropsWithChildren } from "react";
 import { I18nextProvider, initReactI18next } from "react-i18next";
-import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
+import { usePlatformTranslation } from "@vireocodedev/ui/react-i18next";
 
 const reactI18next = createInstance();
 void reactI18next.use(initReactI18next).init({
@@ -121,7 +121,7 @@ Augment i18next with the exported namespace resource types for strict keys and
 autocomplete:
 
 ```ts
-import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/starter-localization";
+import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/localization";
 
 declare module "i18next" {
   interface CustomTypeOptions {

@@ -3,8 +3,8 @@ import {
   VireoInfiniteCanvasBody,
   VireoInfiniteCanvasOverlay,
   useVireoInfiniteCanvas,
-} from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+} from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Add, CenterFocusStrong, Fullscreen, FullscreenExit, Remove } from "@mui/icons-material";
 import { ButtonGroup, IconButton, Paper, Stack, Typography } from "@mui/material";
 function CanvasControls() {

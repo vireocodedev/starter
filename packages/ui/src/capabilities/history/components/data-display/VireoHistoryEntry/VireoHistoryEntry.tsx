@@ -11,7 +11,7 @@ import { HistoryNodeView } from "@/capabilities/history/components/data-display/
 import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
 import { HistoryEntryLoadingView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryEntryLoadingView/HistoryEntryLoadingView";
 import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
-import { createHistoryNodes, type HistoryNode, type HistoryPath } from "@vireocodedev/starter-history";
+import { createHistoryNodes, type HistoryNode, type HistoryPath } from "@vireocodedev/history";
 
 const DEFAULT_LABELS = {
   expandSection: "Expand section",

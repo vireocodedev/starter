@@ -4,8 +4,8 @@ import {
   VireoApplicationNavigation,
   VireoApplicationNavigationItem,
   type VireoApplicationNavigationMode,
-} from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+} from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import React from "react";
 
 const destinations = [

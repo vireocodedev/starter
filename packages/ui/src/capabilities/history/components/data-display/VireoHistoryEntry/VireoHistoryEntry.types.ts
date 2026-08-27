@@ -1,7 +1,7 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { BoxProps } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
-import type { HistoryDefinition } from "@vireocodedev/starter-history";
+import type { HistoryDefinition } from "@vireocodedev/history";
 import type React from "react";
 import { type VireoHistoryEntryClasses, type VireoHistoryEntryClassKey } from "./VireoHistoryEntry.classes";
 import type { VIREO_HISTORY_ENTRY_NAME, VireoHistoryEntrySlotName } from "./VireoHistoryEntry.identity";

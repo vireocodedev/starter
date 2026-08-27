@@ -58,6 +58,6 @@ Both endpoint paths must be absolute and distinct. The relation-option limit acc
 - `GET {endpoint-path}/entities/{entityKey}/fields/{fieldPath}/options`
 - saved-filter list, search, default, create, update, and delete operations under `{saved-filters-endpoint-path}`
 
-The matching TypeScript package is `@vireocodedev/starter-queryengine`. The JVM module owns metadata generation, persistence predicates, relation lookups, and saved-filter authorization; the TypeScript package owns browser-side schemas, query construction, and local execution support.
+The matching TypeScript package is `@vireocodedev/query`. The JVM module owns metadata generation, persistence predicates, relation lookups, and saved-filter authorization; the TypeScript package owns browser-side schemas, query construction, and local execution support.
 
 See the unified Vireo Starter Storybook under **JVM → Query Engine** for the compiled registration example and operational guidance.

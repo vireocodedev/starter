@@ -3,7 +3,7 @@ import {
   createSqliteEntityBundle,
   createSqliteRequestHandlers,
   createSqliteWorkerRuntimeConfig,
-} from "@vireocodedev/starter-sqlite";
+} from "@vireocodedev/sqlite";
 
 function captureFailure(run: () => unknown): string {
   try {

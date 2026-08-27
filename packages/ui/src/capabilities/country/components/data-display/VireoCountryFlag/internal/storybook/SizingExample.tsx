@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
-import { VireoCountryFlag } from "@vireocodedev/starter-ui/country";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoCountryFlag } from "@vireocodedev/ui/country";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const widths = [16, 24, 36, 48] as const;
 

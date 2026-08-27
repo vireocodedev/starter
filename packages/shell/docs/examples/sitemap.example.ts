@@ -1,4 +1,4 @@
-import { createShellSitemap, defineShellPages, defineShellSections } from "@vireocodedev/starter-shell";
+import { createShellSitemap, defineShellPages, defineShellSections } from "@vireocodedev/shell";
 
 export function runSitemapExample() {
   const pages = defineShellPages({

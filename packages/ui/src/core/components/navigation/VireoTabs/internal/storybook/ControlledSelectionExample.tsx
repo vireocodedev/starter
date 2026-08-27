@@ -1,7 +1,7 @@
 import { Button, Stack, Typography } from "@mui/material";
 import React from "react";
-import { VireoTabs } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoTabs } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function ControlledSelectionExample() {
   const [selectedTab, setSelectedTab] = React.useState("profile");

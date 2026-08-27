@@ -1,5 +1,5 @@
 import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
-import type { HistoryPath } from "@vireocodedev/starter-history";
+import type { HistoryPath } from "@vireocodedev/history";
 
 export type HistoryEntryDisclosure = {
   defaultExpandedDepth: number;

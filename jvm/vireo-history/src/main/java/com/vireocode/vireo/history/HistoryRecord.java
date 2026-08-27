@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * <p>
  * Its JSON representation intentionally matches the framework-free
- * {@code @vireocodedev/starter-history} record schema.
+ * {@code @vireocodedev/history} record schema.
  *
  * @param id history event identifier
  * @param timestamp instant at which the event was recorded

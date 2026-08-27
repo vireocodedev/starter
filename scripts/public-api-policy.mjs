@@ -65,7 +65,7 @@ for (const { directory, manifest } of publishedPackages) {
     if (entryPolicy.environment.includes("worker") && surface.entryPoints?.[subpath]?.workerSafe !== true) {
       problems.push(`${manifest.name} ${subpath} claims worker support without a worker-safe surface snapshot`);
     }
-    if (manifest.name === "@vireocodedev/starter-ui") {
+    if (manifest.name === "@vireocodedev/ui") {
       const symbolCount = surface.entryPoints?.[subpath]?.exports?.length;
       if (!Number.isInteger(entryPolicy.symbolBudget) || entryPolicy.symbolBudget < 0) {
         problems.push(`${manifest.name} ${subpath} must declare a non-negative symbol budget`);

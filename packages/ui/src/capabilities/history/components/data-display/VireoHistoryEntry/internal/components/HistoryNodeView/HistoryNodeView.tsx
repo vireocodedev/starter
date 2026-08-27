@@ -1,7 +1,7 @@
 import { HistoryFieldRowView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryFieldRowView/HistoryFieldRowView";
 import { HistoryGroupView } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/components/HistoryGroupView/HistoryGroupView";
 import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
-import type { HistoryNode } from "@vireocodedev/starter-history";
+import type { HistoryNode } from "@vireocodedev/history";
 
 export function HistoryNodeView({
   disclosure,

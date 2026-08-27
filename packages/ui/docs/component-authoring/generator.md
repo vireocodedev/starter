@@ -155,7 +155,7 @@ Before considering it complete:
 
 - Replace every `TODO(component-author)` implementation and Storybook description.
 - Keep the main story description's one-sentence summary and `### Why it exists` section.
-- Replace each generated example's temporary `@/` component import with the public `@vireocodedev/starter-ui` import after adding the completed component to its owner boundary. The temporary import keeps the unfinished scaffold type-checkable; it is not valid final code-panel output.
+- Replace each generated example's temporary `@/` component import with the public `@vireocodedev/ui` import after adding the completed component to its owner boundary. The temporary import keeps the unfinished scaffold type-checkable; it is not valid final code-panel output.
 - Keep each executable example as the single source for both its story render and `docs.source.code`; do not introduce duplicate source strings.
 - Decide whether the public Vireo abstraction is justified.
 - Replace the generated loading classification if implementation work makes the component async-capable. `static` pairs with `none`; every async category pairs with geometry `A`, `B`, or `C`, enters `loading-state-contracts.json`, and documents every applicable canonical story or omission.

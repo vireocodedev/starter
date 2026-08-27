@@ -39,15 +39,15 @@ the canonical license so npm includes it automatically.
 
 Recorded package shape after remediation:
 
-| Package                                | Exports | Files | Packed KiB | Unpacked KiB |
-| -------------------------------------- | ------: | ----: | ---------: | -----------: |
-| `@vireocodedev/starter-history`        |       1 |    12 |       19.5 |         81.6 |
-| `@vireocodedev/starter-infrastructure` |       3 |    22 |       18.6 |         66.3 |
-| `@vireocodedev/starter-localization`   |       1 |    23 |       24.5 |         96.7 |
-| `@vireocodedev/starter-queryengine`    |       1 |    13 |       23.5 |         87.0 |
-| `@vireocodedev/starter-shell`          |       1 |    13 |       13.7 |         50.7 |
-| `@vireocodedev/starter-sqlite`         |       2 |    49 |       59.7 |        244.4 |
-| `@vireocodedev/starter-ui`             |      13 | 1,123 |      295.6 |      1,617.7 |
+| Package                        | Exports | Files | Packed KiB | Unpacked KiB |
+| ------------------------------ | ------: | ----: | ---------: | -----------: |
+| `@vireocodedev/history`        |       1 |    12 |       19.5 |         81.6 |
+| `@vireocodedev/infrastructure` |       3 |    22 |       18.6 |         66.3 |
+| `@vireocodedev/localization`   |       1 |    23 |       24.5 |         96.7 |
+| `@vireocodedev/query`          |       1 |    13 |       23.5 |         87.0 |
+| `@vireocodedev/shell`          |       1 |    13 |       13.7 |         50.7 |
+| `@vireocodedev/sqlite`         |       2 |    49 |       59.7 |        244.4 |
+| `@vireocodedev/ui`             |      13 | 1,123 |      295.6 |      1,617.7 |
 
 Sizes are observations, not frozen budgets. The Vite-bundled packages retain
 source maps with embedded public source for production debugging. Starter UI's

@@ -1,9 +1,9 @@
-import { VireoOverlayHeader, VireoResponsiveOverlayFrame } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoOverlayHeader, VireoResponsiveOverlayFrame } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import {
   VireoResponsiveOverlayFrameCustomerDetails,
   VireoResponsiveOverlayFrameWorkspace,
-} from "@vireocodedev/starter-ui/storybook/VireoResponsiveOverlayFrame";
+} from "@vireocodedev/ui/storybook/VireoResponsiveOverlayFrame";
 import { useState } from "react";
 
 export default function ResizableDockedSidePanelExample() {

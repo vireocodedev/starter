@@ -1,5 +1,5 @@
-import { VireoHistoryEntry } from "@vireocodedev/starter-ui";
-import { createHistoryDefinition } from "@vireocodedev/starter-history";
+import { VireoHistoryEntry } from "@vireocodedev/ui";
+import { createHistoryDefinition } from "@vireocodedev/history";
 import { Box } from "@mui/material";
 import { z } from "zod";
 

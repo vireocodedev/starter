@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "npm": {
-    "@vireocodedev/starter-history": {
+    "@vireocodedev/history": {
       "role": "history-domain",
       "entryPoints": {
         ".": { "audience": "application", "environment": ["browser", "worker"] }
       }
     },
-    "@vireocodedev/starter-infrastructure": {
+    "@vireocodedev/infrastructure": {
       "role": "browser-infrastructure",
       "entryPoints": {
         ".": { "audience": "application", "environment": ["browser"] },
@@ -15,32 +15,32 @@
         "./pagination": { "audience": "application", "environment": ["browser", "worker"] }
       }
     },
-    "@vireocodedev/starter-localization": {
+    "@vireocodedev/localization": {
       "role": "localization-resources",
       "entryPoints": {
         ".": { "audience": "application", "environment": ["browser", "worker"] }
       }
     },
-    "@vireocodedev/starter-queryengine": {
+    "@vireocodedev/query": {
       "role": "query-contracts",
       "entryPoints": {
         ".": { "audience": "application", "environment": ["browser", "worker"] }
       }
     },
-    "@vireocodedev/starter-shell": {
+    "@vireocodedev/shell": {
       "role": "application-shell-contracts",
       "entryPoints": {
         ".": { "audience": "application", "environment": ["browser", "worker"] }
       }
     },
-    "@vireocodedev/starter-sqlite": {
+    "@vireocodedev/sqlite": {
       "role": "offline-persistence",
       "entryPoints": {
         ".": { "audience": "application", "environment": ["browser", "worker"] },
         "./offline": { "audience": "application", "environment": ["browser", "worker"] }
       }
     },
-    "@vireocodedev/starter-ui": {
+    "@vireocodedev/ui": {
       "role": "react-design-system",
       "entryPoints": {
         ".": {

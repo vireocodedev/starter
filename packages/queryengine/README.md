@@ -1,4 +1,4 @@
-# @vireocodedev/starter-queryengine
+# @vireocodedev/query
 
 Framework-free query metadata, transport ports, filter compilation, and parameterized SQLite execution for Vireo Starter.
 
@@ -7,7 +7,7 @@ The package owns reusable query contracts. An application still owns its entity-
 ## Install
 
 ```bash
-npm install @vireocodedev/starter-queryengine zod
+npm install @vireocodedev/query zod
 ```
 
 The package name is stable; registry selection and authentication belong to the
@@ -19,10 +19,10 @@ for debugging.
 
 The sole peer dependency is Zod 3. The root entry point is React-free, browser-global-free, and worker-safe.
 
-React Query integration lives in `@vireocodedev/starter-ui/tanstack-query`:
+React Query integration lives in `@vireocodedev/ui/tanstack-query`:
 
 ```bash
-npm install @vireocodedev/starter-ui @tanstack/react-query
+npm install @vireocodedev/ui @tanstack/react-query
 ```
 
 ## Public architecture
@@ -47,7 +47,7 @@ There are no package-global signals or caches. Every API, executor, and config c
 `createQueryEngineApi` accepts a minimal `get(path, options)` port. It validates all responses, encodes dynamic path segments, forwards abort signals, preserves transport and Zod failures, and can optionally retry an application-provided legacy entity key.
 
 ```ts
-import { createQueryEngineApi } from "@vireocodedev/starter-queryengine";
+import { createQueryEngineApi } from "@vireocodedev/query";
 import z from "zod";
 
 const api = createQueryEngineApi(fetchAdapter, {
@@ -81,7 +81,7 @@ Table identifiers, singleton keys, request names, snapshot shape, and persisted 
 The optional React adapter belongs to Starter UI because it imports React Query:
 
 ```ts
-import { createVireoQueryEngineQueries } from "@vireocodedev/starter-ui/tanstack-query";
+import { createVireoQueryEngineQueries } from "@vireocodedev/ui/tanstack-query";
 
 export const QueryEngineQueries = createVireoQueryEngineQueries(api);
 ```

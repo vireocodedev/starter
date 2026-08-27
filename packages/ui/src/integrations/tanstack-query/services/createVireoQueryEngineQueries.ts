@@ -6,7 +6,7 @@ import {
   type QueryEngineEntityDefinition,
   type QueryEngineEntityKey,
   type QueryEngineEntitySummary,
-} from "@vireocodedev/starter-queryengine";
+} from "@vireocodedev/query";
 import {
   queryOptions,
   type DataTag,

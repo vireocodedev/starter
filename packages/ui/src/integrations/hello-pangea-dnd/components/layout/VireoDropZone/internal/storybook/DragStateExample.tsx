@@ -3,8 +3,8 @@ import {
   VireoDraggableItem,
   VireoDropZone,
   useVireoDndState,
-} from "@vireocodedev/starter-ui/hello-pangea-dnd";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+} from "@vireocodedev/ui/hello-pangea-dnd";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Chip, Paper, Stack } from "@mui/material";
 
 function StateIndicator() {

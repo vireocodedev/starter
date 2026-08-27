@@ -1,4 +1,4 @@
-import { createStarterResources } from "@vireocodedev/starter-localization";
+import { createStarterResources } from "@vireocodedev/localization";
 import { useHistoryTranslation } from "@/integrations/react-i18next/hooks/useHistoryTranslation/useHistoryTranslation";
 import { usePlatformTranslation } from "@/integrations/react-i18next/hooks/usePlatformTranslation/usePlatformTranslation";
 import { useQueryEngineTranslation } from "@/integrations/react-i18next/hooks/useQueryEngineTranslation/useQueryEngineTranslation";

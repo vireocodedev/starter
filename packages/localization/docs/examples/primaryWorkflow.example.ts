@@ -1,4 +1,4 @@
-import { createStarterResources, STARTER_TRANSLATION_NAMESPACES } from "@vireocodedev/starter-localization";
+import { createStarterResources, STARTER_TRANSLATION_NAMESPACES } from "@vireocodedev/localization";
 import { createInstance } from "i18next";
 
 const APP_LOCALES = ["en", "hr"] as const;

@@ -1,4 +1,4 @@
-import { VireoToaster, toast } from "@vireocodedev/starter-ui/sonner";
+import { VireoToaster, toast } from "@vireocodedev/ui/sonner";
 import { Button, CssBaseline, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
 
 const toasterId = "theme-customization";

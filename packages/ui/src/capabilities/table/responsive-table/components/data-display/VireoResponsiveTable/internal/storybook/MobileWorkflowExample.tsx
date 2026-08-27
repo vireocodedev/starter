@@ -1,5 +1,5 @@
-import { VireoResponsiveTable, type VireoResponsiveTableFilters } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoResponsiveTable, type VireoResponsiveTableFilters } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Button, Chip, Stack, TextField, Typography } from "@mui/material";
 import React from "react";
 

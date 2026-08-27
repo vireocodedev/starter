@@ -1,6 +1,6 @@
 {
-  "name": "@vireocodedev/starter-queryengine",
-  "version": "5.0.0",
+  "name": "@vireocodedev/query",
+  "version": "0.2.0",
   "description": "Framework-free query schemas, transport ports, and parameterized SQLite execution for Vireo Starter.",
   "type": "module",
   "sideEffects": false,
@@ -45,6 +45,8 @@
     "zod": "^4.4.3"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
   }
 }

@@ -1,9 +1,9 @@
 import CheckCircleOutline from "@mui/icons-material/CheckCircleOutlineOutlined";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import { Stack, Typography } from "@mui/material";
-import { VireoLabelBox } from "@vireocodedev/starter-ui";
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoLabelBox } from "@vireocodedev/ui";
+import { useVireoForm } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import React from "react";
 
 const plans = [

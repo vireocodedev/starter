@@ -3,7 +3,7 @@
   "compilerOptions": {
     "types": ["node"],
     "paths": {
-      "@vireocodedev/starter-shell": ["./src/index.ts"]
+      "@vireocodedev/shell": ["./src/index.ts"]
     }
   },
   "include": ["src", "tests", "docs/examples"]

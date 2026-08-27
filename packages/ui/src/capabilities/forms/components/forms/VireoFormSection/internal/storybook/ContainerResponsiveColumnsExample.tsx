@@ -1,6 +1,6 @@
 import { Box, Stack, TextField, Typography } from "@mui/material";
-import { VireoFormSection, VireoLabelBox } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoFormSection, VireoLabelBox } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const fields = ["First name", "Last name", "Company"];
 

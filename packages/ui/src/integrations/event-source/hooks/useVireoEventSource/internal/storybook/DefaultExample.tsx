@@ -1,9 +1,9 @@
-import { useVireoEventSource, type VireoEventSourceListeners } from "@vireocodedev/starter-ui/event-source";
+import { useVireoEventSource, type VireoEventSourceListeners } from "@vireocodedev/ui/event-source";
 import {
   VireoEventSourceStoryServer,
   VireoStorybookProvider,
   type VireoEventSourceStoryServerController,
-} from "@vireocodedev/starter-ui/storybook";
+} from "@vireocodedev/ui/storybook";
 import { Alert, Button, Chip, Paper, Stack, Switch, Typography } from "@mui/material";
 import React from "react";
 import { z } from "zod";

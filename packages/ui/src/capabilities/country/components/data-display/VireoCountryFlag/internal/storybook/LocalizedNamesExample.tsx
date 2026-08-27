@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from "@mui/material";
-import { VireoCountryFlag, getCountryName, type CountryCode } from "@vireocodedev/starter-ui/country";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoCountryFlag, getCountryName, type CountryCode } from "@vireocodedev/ui/country";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 const locales = ["en", "hr", "bs", "cnr", "de", "it", "pt", "sl"] as const;
 const countryCodes = ["HR", "JP", "BQ-BO", "GB-SCT", "XA"] as const satisfies readonly CountryCode[];

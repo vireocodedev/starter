@@ -79,8 +79,8 @@ lives in `starter-sqlite` as the `./offline` entry point, next to
 implemented the persistence half of the same feature.
 
 No symbol was renamed, removed or changed. `@vireocodedev/starter-core` becomes
-`@vireocodedev/starter-shell`, and `@vireocodedev/starter-core/offline` becomes
-`@vireocodedev/starter-sqlite/offline`.
+`@vireocodedev/shell`, and `@vireocodedev/starter-core/offline` becomes
+`@vireocodedev/sqlite/offline`.
 
 ## The rule this leaves behind
 

@@ -1,5 +1,5 @@
-import { useVireoForm } from "@vireocodedev/starter-ui/forms";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { useVireoForm } from "@vireocodedev/ui/forms";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function LoadingExample() {
   const form = useVireoForm({ defaultValues: {} });

@@ -1,4 +1,4 @@
-import { postPagedSearch, resolveHttpEndpoint, type PageableResponse } from "@vireocodedev/starter-infrastructure";
+import { postPagedSearch, resolveHttpEndpoint, type PageableResponse } from "@vireocodedev/infrastructure";
 import type { AxiosInstance } from "axios";
 import z from "zod";
 

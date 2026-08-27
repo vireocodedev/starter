@@ -11,7 +11,7 @@ import { describe, expect, it } from "vitest";
  * instead of useful consumer code. Every Vireo story therefore owns a complete
  * TSX module that is both rendered and displayed through a `?raw` import. These
  * checks keep those two paths connected and keep the displayed module portable
- * to a project that consumes `@vireocodedev/starter-ui`.
+ * to a project that consumes `@vireocodedev/ui`.
  */
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -236,7 +236,7 @@ describe("Vireo executable story-source contract", () => {
           const errors: string[] = [];
 
           if (!hasDefaultExport(source)) errors.push(`${location}: missing default export`);
-          if (!specifiers.some(specifier => specifier.startsWith("@vireocodedev/starter-ui"))) {
+          if (!specifiers.some(specifier => specifier.startsWith("@vireocodedev/ui"))) {
             errors.push(`${location}: does not import the public starter-ui package`);
           }
 
@@ -280,7 +280,7 @@ describe("Vireo executable story-source contract", () => {
         statement =>
           ts.isImportDeclaration(statement) &&
           ts.isStringLiteral(statement.moduleSpecifier) &&
-          statement.moduleSpecifier.text === "@vireocodedev/starter-ui" &&
+          statement.moduleSpecifier.text === "@vireocodedev/ui" &&
           statement.importClause?.namedBindings?.getText(source).includes("VireoLabelBox"),
       );
 

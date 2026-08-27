@@ -23,6 +23,6 @@ The dependency auto-configures replay, hydration, heartbeat, the Core revision a
 
 ## Ownership boundary
 
-The JVM module owns server replay policy, persisted idempotency, retry state, revision counters, and committed change publication. `@vireocodedev/starter-sqlite` owns browser queue persistence, scheduling, local hydration, and network state. Applications own which requests may be queued and the business semantics of custom handlers.
+The JVM module owns server replay policy, persisted idempotency, retry state, revision counters, and committed change publication. `@vireocodedev/sqlite` owns browser queue persistence, scheduling, local hydration, and network state. Applications own which requests may be queued and the business semantics of custom handlers.
 
 This capability is designed for row-shaped administrative data. Tile caches, binary media synchronization, collaborative document merges, and domain-specific conflict-free data types need application infrastructure rather than this generic command protocol.

@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
-import { VireoCountryFlag } from "@vireocodedev/starter-ui/country";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoCountryFlag } from "@vireocodedev/ui/country";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import React from "react";
 
 const OrganizationFlag = React.forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>(

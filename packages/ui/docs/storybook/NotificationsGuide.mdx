@@ -4,7 +4,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 # Notifications guide
 
-Vireo uses Sonner for transient application notifications. Import the notification surface and imperative API from the dedicated `@vireocodedev/starter-ui/sonner` entry point.
+Vireo uses Sonner for transient application notifications. Import the notification surface and imperative API from the dedicated `@vireocodedev/ui/sonner` entry point.
 
 ## Choose the right feedback surface
 
@@ -21,7 +21,7 @@ Render one `VireoToaster` beneath the application's MUI `ThemeProvider`. It is a
 
 ```tsx
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { VireoToaster } from "@vireocodedev/starter-ui/sonner";
+import { VireoToaster } from "@vireocodedev/ui/sonner";
 
 export function App() {
   return (
@@ -77,7 +77,7 @@ Both modes use a 3000ms duration, three visible notifications, a 14px gap, colla
 Use Sonner's native API from Vireo's integration entry point:
 
 ```tsx
-import { toast } from "@vireocodedev/starter-ui/sonner";
+import { toast } from "@vireocodedev/ui/sonner";
 
 async function saveCustomer() {
   try {
@@ -103,10 +103,10 @@ toast.promise(request, {
 
 ## TanStack Query mutations
 
-The optional `@vireocodedev/starter-ui/tanstack-query` entry point adds notification messages and schema-validated error details without replacing TanStack Query's mutation API.
+The optional `@vireocodedev/ui/tanstack-query` entry point adds notification messages and schema-validated error details without replacing TanStack Query's mutation API.
 
 ```tsx
-import { useVireoMutation } from "@vireocodedev/starter-ui/tanstack-query";
+import { useVireoMutation } from "@vireocodedev/ui/tanstack-query";
 import { z } from "zod";
 
 const errorDetailsSchema = z.object({
@@ -133,8 +133,8 @@ Most applications should mount exactly one toaster. Use `id` and Sonner's `toast
 ## Migration
 
 - Replace `AppSnackbarProvider` with one sibling `<VireoToaster />` under the MUI theme.
-- Replace package-root `toast` imports with `@vireocodedev/starter-ui/sonner`.
+- Replace package-root `toast` imports with `@vireocodedev/ui/sonner`.
 - Replace `VireoSnack` with native Sonner notification content, or with MUI `Alert` when the feedback is persistent.
-- Import `useVireoMutation` from `@vireocodedev/starter-ui/tanstack-query`.
+- Import `useVireoMutation` from `@vireocodedev/ui/tanstack-query`.
 
 The package root intentionally exports none of these integration APIs.

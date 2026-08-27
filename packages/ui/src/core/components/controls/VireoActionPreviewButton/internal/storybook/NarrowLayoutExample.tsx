@@ -1,7 +1,7 @@
 import { PublishOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { VireoActionPreviewButton } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoActionPreviewButton } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
 export default function NarrowLayoutExample() {
   return (

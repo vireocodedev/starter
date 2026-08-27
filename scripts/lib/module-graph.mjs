@@ -80,7 +80,7 @@ export function resolveSpecifier(specifier, fromFile, srcRoot) {
 /**
  * Resolves a sibling workspace specifier to the source file behind its entry point.
  *
- * Without this, a graph walk would stop at `@vireocodedev/starter-ui` and report
+ * Without this, a graph walk would stop at `@vireocodedev/ui` and report
  * it as an inert external dependency - hiding the fact that importing it also
  * imports React, MUI and every provider they pull in.
  */

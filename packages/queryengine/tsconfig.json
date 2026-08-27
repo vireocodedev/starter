@@ -4,7 +4,7 @@
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
-      "@vireocodedev/starter-queryengine": ["./src/index.ts"]
+      "@vireocodedev/query": ["./src/index.ts"]
     }
   },
   "include": ["src", "tests", "docs/examples"]

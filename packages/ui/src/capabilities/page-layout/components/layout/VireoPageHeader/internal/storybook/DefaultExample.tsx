@@ -1,5 +1,5 @@
-import { VireoPage, VireoPageHeader } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoPage, VireoPageHeader } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { ArrowBack, MoreVert } from "@mui/icons-material";
 import { Button, IconButton } from "@mui/material";
 export default function DefaultExample() {

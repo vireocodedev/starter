@@ -1,5 +1,5 @@
-import { VireoStatusDot } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoStatusDot } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Stack, Typography } from "@mui/material";
 
 export default function DefaultExample() {

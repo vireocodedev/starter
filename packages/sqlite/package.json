@@ -1,6 +1,6 @@
 {
-  "name": "@vireocodedev/starter-sqlite",
-  "version": "3.0.0",
+  "name": "@vireocodedev/sqlite",
+  "version": "0.2.0",
   "description": "Reusable SQLite worker/client runtime primitives for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": false,
@@ -51,6 +51,8 @@
     "vitest": "^4.1.11"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
   }
 }

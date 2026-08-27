@@ -3,7 +3,7 @@ import {
   readOverlayStack,
   resolveOverlayHistoryAction,
   withOverlayStack,
-} from "@vireocodedev/starter-shell";
+} from "@vireocodedev/shell";
 
 export function runOverlayHistoryExample() {
   const registry = createOverlayHistoryRegistry();

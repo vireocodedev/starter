@@ -1,5 +1,5 @@
 import { Stack, ThemeProvider, Typography, createTheme, type Theme } from "@mui/material";
-import { useVireoMultiStepForm } from "@vireocodedev/starter-ui/forms";
+import { useVireoMultiStepForm } from "@vireocodedev/ui/forms";
 
 function createWorkflowTheme(outerTheme: Theme): Theme {
   return createTheme(outerTheme, {

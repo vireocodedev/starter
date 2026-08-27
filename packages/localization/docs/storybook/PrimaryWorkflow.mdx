@@ -10,7 +10,7 @@ import primaryWorkflowSource from "../examples/primaryWorkflow.example.ts?raw";
 Install the application-owned runtime dependencies directly. Starter UI declares the React bindings as optional peers, so relying on another package to install them is not a stable application contract.
 
 ```bash
-npm install @vireocodedev/starter-localization i18next react-i18next
+npm install @vireocodedev/localization i18next react-i18next
 ```
 
 One factory builds every Starter-owned namespace for every requested locale. The application then adds its own namespace per locale and passes the combined resources to its own i18next instance. Keep the namespaces separate: do not copy Starter keys into the application namespace.
@@ -42,11 +42,11 @@ export function AppLocalizationProvider({ children }: PropsWithChildren) {
 }
 ```
 
-Application code binds `useTranslation` to its own namespace. Shared Vireo UI text uses the typed namespace hooks from `@vireocodedev/starter-ui/react-i18next`:
+Application code binds `useTranslation` to its own namespace. Shared Vireo UI text uses the typed namespace hooks from `@vireocodedev/ui/react-i18next`:
 
 ```tsx
 import { useTranslation } from "react-i18next";
-import { usePlatformTranslation } from "@vireocodedev/starter-ui/react-i18next";
+import { usePlatformTranslation } from "@vireocodedev/ui/react-i18next";
 
 const { t: tApp } = useTranslation("app");
 const { t: tPlatform } = usePlatformTranslation();
@@ -58,7 +58,7 @@ tPlatform("common.cancel");
 Augment i18next's `CustomTypeOptions` with the application namespace and the exported `PlatformResources`, `QueryEngineResources`, and `HistoryResources` types to get strict keys and autocomplete:
 
 ```ts
-import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/starter-localization";
+import type { HistoryResources, PlatformResources, QueryEngineResources } from "@vireocodedev/localization";
 import type { AppTranslationResources } from "./appLocalization";
 
 declare module "i18next" {

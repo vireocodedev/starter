@@ -6,7 +6,7 @@ import {
 import type { HistoryEntryDisclosure } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/types/historyEntry.types";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { Button, ButtonBase, Collapse } from "@mui/material";
-import type { HistoryGroupNode, HistoryNode } from "@vireocodedev/starter-history";
+import type { HistoryGroupNode, HistoryNode } from "@vireocodedev/history";
 import { getHistoryPathKey } from "@/capabilities/history/components/data-display/VireoHistoryEntry/internal/utils/getHistoryPathKey";
 
 function isVisible(node: HistoryNode, showUnchanged: boolean): boolean {

@@ -104,12 +104,12 @@ try {
   );
   writeFileSync(
     join(consumerRoot, "consumer.tsx"),
-    `import { VireoSkeleton } from "@vireocodedev/starter-ui";
-import type * as Forms from "@vireocodedev/starter-ui/forms";
-import type * as Dnd from "@vireocodedev/starter-ui/hello-pangea-dnd";
-import type * as I18next from "@vireocodedev/starter-ui/react-i18next";
-import type * as Sonner from "@vireocodedev/starter-ui/sonner";
-import type * as Query from "@vireocodedev/starter-ui/tanstack-query";
+    `import { VireoSkeleton } from "@vireocodedev/ui";
+import type * as Forms from "@vireocodedev/ui/forms";
+import type * as Dnd from "@vireocodedev/ui/hello-pangea-dnd";
+import type * as I18next from "@vireocodedev/ui/react-i18next";
+import type * as Sonner from "@vireocodedev/ui/sonner";
+import type * as Query from "@vireocodedev/ui/tanstack-query";
 
 export const fixture = <VireoSkeleton width={120} />;
 export type OptionalIntegrations = [typeof Forms, typeof Dnd, typeof I18next, typeof Sonner, typeof Query];

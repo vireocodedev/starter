@@ -9,6 +9,6 @@ import primaryWorkflowSource from "../examples/primaryWorkflow.example.ts?raw";
 
 The application injects a transport and its entity-key schema. The API validates every response before metadata enters application state and encodes every dynamic URL segment.
 
-No cache is implied by this contract. React consumers can pass the resulting API to `createVireoQueryEngineQueries` from `@vireocodedev/starter-ui/tanstack-query`; other consumers can choose another cache or none.
+No cache is implied by this contract. React consumers can pass the resulting API to `createVireoQueryEngineQueries` from `@vireocodedev/ui/tanstack-query`; other consumers can choose another cache or none.
 
 <ExecutablePackageExample run={runPrimaryWorkflowExample} source={primaryWorkflowSource} />

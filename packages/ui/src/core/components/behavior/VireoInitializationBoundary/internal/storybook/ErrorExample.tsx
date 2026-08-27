@@ -1,5 +1,5 @@
-import { VireoInitializationBoundary } from "@vireocodedev/starter-ui";
-import { VireoStorybookProvider } from "@vireocodedev/starter-ui/storybook";
+import { VireoInitializationBoundary } from "@vireocodedev/ui";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { Alert, Button, CircularProgress, Stack } from "@mui/material";
 import React from "react";
 import { ErrorBoundary } from "react-error-boundary";

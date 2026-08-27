@@ -1,5 +1,5 @@
 {
-  "package": "@vireocodedev/starter-ui",
+  "package": "@vireocodedev/ui",
   "entryPoints": {
     ".": {
       "exports": [

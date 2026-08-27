@@ -2,7 +2,7 @@ import {
   createSqliteQueryExecutor,
   type ParameterizedSqlitePagedQueryRequest,
   type SqliteQueryFilterAdapter,
-} from "@vireocodedev/starter-queryengine";
+} from "@vireocodedev/query";
 
 const adapter: SqliteQueryFilterAdapter<number> = {
   entity: "customer",
