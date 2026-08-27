@@ -71,6 +71,8 @@ jobs:
         with:
           persist-credentials: false
       - run: corepack npm ci --ignore-scripts
+      - name: Build publishable workspace artifacts
+        run: corepack npm run build
       - name: Recheck immutable registry state
         run: corepack npm run release:validate
       - name: Publish with registry-backed provenance
@@ -82,6 +84,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Required only to bootstrap packages that do not yet have a trusted
           # publisher. npm uses OIDC first once the package trusts this workflow.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
       - name: Require at least one publication

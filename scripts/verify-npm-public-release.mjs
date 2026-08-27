@@ -12,6 +12,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { retryTransientNpmRegistryOperation } from "./npm-registry-retry.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagesRoot = join(repositoryRoot, "packages");
@@ -167,10 +168,38 @@ try {
   writeFileSync(join(consumerRoot, "package.json"), `${JSON.stringify(consumerManifest, null, 2)}\n`);
 
   const npmEnvironment = anonymousNpmEnvironment(auditRoot);
-  execFileSync(
-    "corepack",
-    ["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", "--strict-peer-deps", `--registry=${registry}`],
-    { cwd: consumerRoot, env: npmEnvironment, stdio: "inherit" },
+  await retryTransientNpmRegistryOperation(
+    () => {
+      try {
+        execFileSync(
+          "corepack",
+          [
+            "npm",
+            "install",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--strict-peer-deps",
+            `--registry=${registry}`,
+          ],
+          { cwd: consumerRoot, env: npmEnvironment, encoding: "utf8", stdio: ["ignore", "inherit", "pipe"] },
+        );
+      } catch (error) {
+        if (error.stderr) process.stderr.write(error.stderr);
+        throw error;
+      }
+    },
+    {
+      attempts,
+      intervalMs,
+      onRetry: (_error, attempt) => {
+        rmSync(consumerNodeModules, { recursive: true, force: true });
+        rmSync(join(consumerRoot, "package-lock.json"), { force: true });
+        console.log(
+          `Anonymous install encountered a registry 404 (attempt ${attempt}/${attempts}); waiting ${intervalMs} ms.`,
+        );
+      },
+    },
   );
   execFileSync("corepack", ["npm", "ls", "--all", "--silent"], {
     cwd: consumerRoot,
