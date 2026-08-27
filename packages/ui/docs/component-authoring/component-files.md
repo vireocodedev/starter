@@ -4,7 +4,7 @@ Every first-class public Vireo MUI component keeps its rendering and behavior in
 
 The component's architectural owner and category are governed by the [source structure](../architecture/source-structure.md) and [component folder categories](../architecture/component-folder-categories.md) guides.
 
-[`VireoOverlayHeader.tsx`](../../src/overlay/VireoOverlayHeader/VireoOverlayHeader.tsx) is the reference implementation.
+[`VireoOverlayHeader.tsx`](../../src/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader.tsx) is the reference implementation.
 
 ## Module shape
 

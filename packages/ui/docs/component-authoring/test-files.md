@@ -2,7 +2,7 @@
 
 Every first-class public Vireo component has a colocated `VireoComponent.test.tsx` file. The suite protects the component's public rendering, behavior, accessibility, and customization contracts without testing private implementation details.
 
-[`VireoOverlayHeader.test.tsx`](../../src/overlay/VireoOverlayHeader/VireoOverlayHeader.test.tsx) is the reference suite.
+[`VireoOverlayHeader.test.tsx`](../../src/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader.test.tsx) is the reference suite.
 
 ## File placement
 

@@ -2,7 +2,7 @@
 
 Every first-class public Vireo component has a colocated `index.ts` file. This file is the component directory's public API boundary: it exposes the supported consumer contract while keeping implementation-only modules private.
 
-[`VireoOverlayHeader/index.ts`](../../src/overlay/VireoOverlayHeader/index.ts) is the reference implementation.
+[`VireoOverlayHeader/index.ts`](../../src/capabilities/overlays/components/overlays/VireoOverlayHeader/index.ts) is the reference implementation.
 
 ## Required exports
 

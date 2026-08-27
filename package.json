@@ -52,6 +52,7 @@
     "release:evidence": "node scripts/generate-release-evidence.mjs .release-evidence",
     "peer-floor:check": "node scripts/peer-floor-consumer.mjs",
     "public:audit": "sh scripts/public-repository-audit.sh",
+    "public:check": "node scripts/public-contract-policy.mjs",
     "security:secrets": "sh scripts/secret-scan.sh",
     "security:workflow": "node scripts/workflow-security-policy.mjs",
     "toolchain:check": "node scripts/toolchain-policy.mjs",

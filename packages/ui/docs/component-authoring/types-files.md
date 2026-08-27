@@ -4,7 +4,7 @@ Every first-class public Vireo MUI component keeps its complete type contract in
 
 This convention applies to components intentionally published as `Vireo*` design-system components. Internal React helpers, providers, contexts, and application-level compositions do not automatically require this complete contract.
 
-[`VireoOverlayHeader.types.ts`](../../src/overlay/VireoOverlayHeader/VireoOverlayHeader.types.ts) is the reference implementation.
+[`VireoOverlayHeader.types.ts`](../../src/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader.types.ts) is the reference implementation.
 
 ## Declaration rule
 

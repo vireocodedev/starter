@@ -39,7 +39,7 @@ trap 'exit 143' TERM
 
 cd "$REPOSITORY_ROOT" || exit 1
 
-TOTAL_STEPS=10
+TOTAL_STEPS=11
 CURRENT_STEP=0
 SUITE_STARTED_AT=$(node -p 'Date.now()')
 RESULTS=""
@@ -165,6 +165,7 @@ printf 'Output:     %s\n' "$([ "$SILENT" = 'true' ] && printf 'failures only' ||
 printf 'Steps:      %s\n' "$TOTAL_STEPS"
 
 run_step 'Toolchain policy' corepack npm run toolchain:check
+run_step 'Public contract policy' corepack npm run public:check
 run_step 'Lint' corepack npm run lint
 run_step 'Formatting' corepack npm run format:check
 run_step 'Package builds' corepack npm run build

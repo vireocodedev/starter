@@ -2,7 +2,7 @@
 
 Every first-class public Vireo MUI component has one colocated `VireoComponent.identity.ts` file. It owns the component's canonical runtime name and ordered public slot identities so every integration point uses the same stable values.
 
-[`VireoOverlayHeader.identity.ts`](../../src/overlay/VireoOverlayHeader/VireoOverlayHeader.identity.ts) is the reference implementation.
+[`VireoOverlayHeader.identity.ts`](../../src/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader.identity.ts) is the reference implementation.
 
 ## Required shape
 

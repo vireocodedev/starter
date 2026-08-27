@@ -53,7 +53,7 @@ tables, and a submit-based form cycle, and FRED has none of those.
 
 ### F2 — `bare` mode is a genuinely good host — **Fits**
 
-[packages/shell/src/shell/layout/presets/AppBareShellLayout.tsx](../packages/shell/src/shell/layout/presets/AppBareShellLayout.tsx)
+The historical `packages/shell/src/shell/layout/presets/AppBareShellLayout.tsx`
 gives exactly what a map needs: no nav rail, `flex: 1, minHeight: 0`, a single
 `<main>`, plus skip-link, PWA banner and window-controls-overlay handling for
 free. This probe's literal question has a clean answer, which was not the

@@ -91,4 +91,4 @@ No publishable module or npm entry point is unclassified, no wildcard export exi
 and all worker claims agree with the runtime graph. UI growth budgets, the Storybook
 next-major extraction decision, and package intent for all 111 JVM declarations are
 enforced. The migration procedure lives in
-[`PUBLIC_API_GOVERNANCE.md`](../package-authoring/PUBLIC_API_GOVERNANCE.md).
+[`PUBLIC_API_GOVERNANCE.md`](../../package-authoring/PUBLIC_API_GOVERNANCE.md).

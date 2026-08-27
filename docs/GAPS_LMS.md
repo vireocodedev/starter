@@ -27,7 +27,7 @@ is shaped by leather-production, because it is both the customer and the spec."
 
 `starter-ui` is a descendant of `@rgo/front-ui`, the library LMS consumes today.
 The lineage is visible in the source: the drag-and-drop registry in
-[packages/ui/src/features/@hello-pangea/dnd/models/RgoDroppableId.ts](../packages/ui/src/features/@hello-pangea/dnd/models/RgoDroppableId.ts)
+The historical `packages/ui/src/features/@hello-pangea/dnd/models/RgoDroppableId.ts`
 documents its augmentation pattern using `chamber` and `stream` as the worked
 example — those are _lock_ concepts, not leather ones. `RgoVideoStreamPlayer` and
 its `ovenplayer` dependency exist for drone video, which is why leather-production
@@ -164,7 +164,7 @@ matches leather-production, but the filter vocabulary does not.
 ### G7 — the mode axis is the wrong axis — **Major**
 
 The starter offers `AppShellMode = "dashboard" | "public" | "bare"`
-([packages/shell/src/config/app.config.types.ts:161](../packages/shell/src/config/app.config.types.ts)).
+(historically `packages/shell/src/config/app.config.types.ts:161`).
 
 LMS varies its chrome by **role**, not by mode:
 `LmsOperatorLayoutNav`, `LmsSupervisorLayoutNav`, `LmsAdminLayoutNav`, sharing
@@ -238,7 +238,7 @@ starter reads the authenticated role only.
 
 ### G13 — `useRgoSseEmitter` is transport only — **Major**
 
-[packages/ui/src/hooks/useRgoSseEmitter/useRgoSseEmitter.ts](../packages/ui/src/hooks/useRgoSseEmitter/useRgoSseEmitter.ts)
+The historical `packages/ui/src/hooks/useRgoSseEmitter/useRgoSseEmitter.ts`
 opens an `EventSource`, attaches a `Record<eventName, handler>`, and exposes a
 manual `reconnect()`. That is roughly 20% of what an event-driven app needs.
 

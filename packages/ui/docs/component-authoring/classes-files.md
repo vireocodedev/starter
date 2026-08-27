@@ -2,7 +2,7 @@
 
 Every first-class public Vireo MUI component keeps its utility-class contract in a colocated `VireoComponent.classes.ts` file. The file defines the stable class names consumers, tests, component rendering, and MUI theme customization use to address the component's public styling regions.
 
-[`VireoOverlayHeader.classes.ts`](../../src/overlay/VireoOverlayHeader/VireoOverlayHeader.classes.ts) is the reference implementation.
+[`VireoOverlayHeader.classes.ts`](../../src/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader.classes.ts) is the reference implementation.
 
 ## Required shape
 
