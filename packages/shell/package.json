@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/shell",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Framework-free contracts for application sitemap construction, navigation metadata, auth redirects, and overlay history.",
   "type": "module",
   "sideEffects": false,

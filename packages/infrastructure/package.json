@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/infrastructure",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React-free browser infrastructure primitives for validated HTTP transport, connectivity, persistence, and execution-mode-aware services.",
   "type": "module",
   "sideEffects": false,

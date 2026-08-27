@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/sqlite",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Reusable SQLite worker/client runtime primitives for the vireocodedev starter product.",
   "type": "module",
   "sideEffects": false,
