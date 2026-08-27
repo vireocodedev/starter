@@ -192,10 +192,22 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules && i
     }
 }
 
-// Publishing. GitHub Packages resolves by group, so all six artifacts land in
-// the same repository as the npm packages and authenticate with the same token.
+// Publishing is deliberately local-first. Ordinary builds and the isolated
+// consumer proof need no credentials. A Maven Central bundle is requested only
+// with -PvireoCentralRepository and is the only path that requires the in-memory
+// signing key supplied by the protected release environment.
 configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
     apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    def centralBundleRequested = rootProject.hasProperty('vireoCentralRepository')
+    def signingKey = System.getenv('MAVEN_SIGNING_KEY') ?: findProperty('vireoSigningKey')
+    def signingPassword = System.getenv('MAVEN_SIGNING_PASSWORD') ?: findProperty('vireoSigningPassword')
+
+    if (centralBundleRequested && (!signingKey || !signingPassword)) {
+        throw new GradleException(
+                'A Central bundle requires MAVEN_SIGNING_KEY and MAVEN_SIGNING_PASSWORD.')
+    }
 
     publishing {
         publications {
@@ -212,30 +224,24 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
                     developers {
                         developer {
                             id = 'vireocodedev'
-                            name = 'vireocode'
+                            name = 'Vireo Code'
+                            email = '53398175+brunotot@users.noreply.github.com'
+                            url = 'https://github.com/vireocodedev'
+                            organization = 'Vireo Code'
+                            organizationUrl = 'https://github.com/vireocodedev'
                         }
                     }
                     scm {
                         connection = 'scm:git:https://github.com/vireocodedev/starter.git'
                         developerConnection = 'scm:git:ssh://git@github.com/vireocodedev/starter.git'
                         url = 'https://github.com/vireocodedev/starter'
+                        tag = 'HEAD'
                     }
                 }
             }
         }
 
         repositories {
-            maven {
-                name = 'GitHubPackages'
-                url = 'https://maven.pkg.github.com/vireocodedev/starter'
-                credentials {
-                    // GITHUB_ACTOR / GITHUB_TOKEN are set for us in Actions; the
-                    // gpr.* properties are the local equivalent.
-                    username = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user')
-                    password = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key')
-                }
-            }
-
             // A pre-release consumer check publishes every artifact into one
             // throwaway repository. It is opt-in so ordinary `publish` cannot
             // accidentally write a verification repository into the checkout.
@@ -245,7 +251,25 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
                     url = uri(rootProject.property('vireoTestRepository'))
                 }
             }
+
+            // The Publisher Portal accepts one atomic Maven-layout archive.
+            // Gradle writes the complete signed repository locally; the bundle
+            // script then audits and archives it before any network operation.
+            if (centralBundleRequested) {
+                maven {
+                    name = 'CentralBundle'
+                    url = uri(rootProject.property('vireoCentralRepository'))
+                }
+            }
         }
+    }
+
+    signing {
+        required { centralBundleRequested }
+        if (signingKey && signingPassword) {
+            useInMemoryPgpKeys(signingKey, signingPassword)
+        }
+        sign publishing.publications.maven
     }
 
     // The component has to be attached once the plugin that owns it is applied.
