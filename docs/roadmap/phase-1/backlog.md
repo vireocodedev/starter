@@ -25,31 +25,33 @@ in later phases.
 - Re-estimate after the first two remaining items establish observed throughput and
   named owner capacity is known.
 
-The original plan totaled **57–104 active engineer-days**. After public activation
-and the 2026-08-27 closure work, the planning remainder is **37–71 active
-engineer-days**, before contingency or external wait. This is a scope range, not an
+The original plan totaled **57–104 active engineer-days**. After public activation,
+Phase 0 closure, and the first local Phase 1 trust-contract implementation, the
+planning remainder is **30–61 active engineer-days**, before contingency or
+external wait. This includes up to one day each to review, publish, and anonymously
+verify the locally completed P1-07 and P1-08 surfaces. It is a scope range, not an
 elapsed-date commitment.
 
 ## Backlog
 
-| ID    | Outcome                                                                                 | Current state | Remaining estimate    | Confidence |
-| ----- | --------------------------------------------------------------------------------------- | ------------- | --------------------- | ---------- |
-| P1-00 | Freeze the passed Phase 0 scope and Phase 1 acceptance set                              | Complete      | 0 d                   | High       |
-| P1-01 | Activate and professionally clear the identity across canonical public surfaces         | Partial       | 1–3 d + external wait | Low        |
-| P1-02 | Productionize the accepted npm/Maven distribution and provenance architecture           | Complete      | 0 d                   | High       |
-| P1-03 | Finish repository migration and publish compatibility sequencing                        | Partial       | 2–4 d                 | Medium     |
-| P1-04 | Publish credential-free npm artifacts through the selected trusted path                 | Complete      | 0 d                   | High       |
-| P1-05 | Publish credential-free Maven artifacts/BOM through the selected trusted path           | Complete      | 0 d                   | High       |
-| P1-06 | Correct repository metadata, topics, links, and public settings                         | Partial       | 1–2 d                 | High       |
-| P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Pending       | 3–5 d                 | High       |
-| P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Pending       | 4–7 d                 | Medium     |
-| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial       | 3–6 d                 | Low        |
-| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Partial       | 2–5 d                 | Medium     |
-| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Pending       | 5–9 d                 | Low        |
-| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Partial       | 7–12 d                | Low        |
-| P1-13 | Classify and document the supported Starter UI public surface                           | Pending       | 4–8 d                 | Low        |
-| P1-14 | Establish verification duration/resource baselines and regression policy                | Partial       | 2–4 d                 | Medium     |
-| P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial       | 3–6 d                 | Low        |
+| ID    | Outcome                                                                                 | Current state    | Remaining estimate    | Confidence |
+| ----- | --------------------------------------------------------------------------------------- | ---------------- | --------------------- | ---------- |
+| P1-00 | Freeze the passed Phase 0 scope and Phase 1 acceptance set                              | Complete         | 0 d                   | High       |
+| P1-01 | Activate and professionally clear the identity across canonical public surfaces         | Partial          | 1–3 d + external wait | Low        |
+| P1-02 | Productionize the accepted npm/Maven distribution and provenance architecture           | Complete         | 0 d                   | High       |
+| P1-03 | Finish repository migration and publish compatibility sequencing                        | Partial          | 2–4 d                 | Medium     |
+| P1-04 | Publish credential-free npm artifacts through the selected trusted path                 | Complete         | 0 d                   | High       |
+| P1-05 | Publish credential-free Maven artifacts/BOM through the selected trusted path           | Complete         | 0 d                   | High       |
+| P1-06 | Correct repository metadata, topics, links, and public settings                         | Partial          | 1–2 d                 | High       |
+| P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Ready to publish | 0–1 d                 | High       |
+| P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Ready to publish | 0–1 d                 | High       |
+| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial          | 3–6 d                 | Low        |
+| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Partial          | 2–5 d                 | Medium     |
+| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Pending          | 5–9 d                 | Low        |
+| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Partial          | 7–12 d                | Low        |
+| P1-13 | Classify and document the supported Starter UI public surface                           | Pending          | 4–8 d                 | Low        |
+| P1-14 | Establish verification duration/resource baselines and regression policy                | Partial          | 2–4 d                 | Medium     |
+| P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial          | 3–6 d                 | Low        |
 
 ## Implementation status — 2026-08-27
 
@@ -62,14 +64,25 @@ elapsed-date commitment.
 - **P1-06: partial.** Both repositories are publicly readable. The Starter's
   externally hosted description is stale and homepage/topics/discussions/template
   settings remain incomplete; these cannot be corrected by a local-only commit.
+- **P1-07: ready to publish.** Both repositories now define honest best-effort
+  support boundaries, maintainer authority, CODEOWNERS semantics, contribution
+  routing, and structured bug/feature/security intake. The local contract check
+  requires those surfaces and README links; public verification follows push.
+- **P1-08: ready to publish.** Starter now defines independent npm/JVM release
+  families, SemVer and peer-floor rules, supported public surfaces, schema and
+  cross-stack compatibility, deprecation windows, and manual migrations. The
+  Template records its exact six npm ranges plus JVM version and application-owned
+  upgrade/deployment procedure. Verification derives those values from manifests.
 - **P1-09: partial.** Workflow permissions are least-privilege, actions are pinned,
   signing is protected, and npm/Maven provenance exists. Complete scanning, SBOM
   policy, and recovery evidence remain.
 - **P1-10: partial.** The known Phase 0 documentation drift is fixed, including the
-  Template's formerly misleading offline simulation label. The packed UI test now
-  protects temporal initialization and canonical seconds are documented, but the
-  clean probe shows public application examples and comprehensive executable
-  documentation still remain G-106.
+  Template's formerly misleading offline simulation label. The packed UI test
+  protects temporal initialization. Both authoritative gates now check required
+  public contracts, current artifact-version pairings, issue-form structure, and
+  local Markdown links; introducing the check found and fixed 11 stale Starter
+  links. Executable setup/deploy snippets, public temporal examples, and recurring
+  clean-room documentation verification still remain G-106.
 - **P1-15: partial.** Anonymous artifact consumers and one isolated AI clean-room
   Template evaluation exist. The full admitted environment matrix and the human
   public-alpha adoption decision still remain.

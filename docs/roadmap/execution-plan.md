@@ -44,7 +44,7 @@ and completion.
 | Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete               |
 | Phase 0E  | External evidence                                      | Isolated AI proxy; human research explicitly deferred under D-110                 | Complete with variance |
 | Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete               |
-| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Authorized             |
+| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | In progress            |
 | Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Pending                |
 | Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Pending                |
 | Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Pending                |
