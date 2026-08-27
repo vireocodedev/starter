@@ -29,9 +29,11 @@ and provenance. Package versions are immutable after publication.
    owners and that publishing accounts use two-factor authentication.
 2. In GitHub, create an environment named `package-release`. Restrict it to the
    `main` branch and add the required maintainer reviewers.
-3. Bootstrap the first publication with a short-lived granular npm access token
-   that can publish packages in the `vireocodedev` organization. Store it only as
-   the `NPM_TOKEN` secret on the `package-release` environment.
+3. Only when bootstrapping previously unpublished packages, use a short-lived
+   granular npm access token that can publish packages in the `vireocodedev`
+   organization. Temporarily store it only as the `NPM_TOKEN` secret on the
+   `package-release` environment and explicitly wire it into the publish step in
+   a reviewed workflow change.
 4. After the first publication, open each package's npm settings and add this
    trusted publisher:
 
@@ -84,8 +86,9 @@ version is outside the approved `0.x` line, or there is nothing new to publish.
 5. Confirm that the publish job reports at least one published package.
 
 The workflow rechecks registry immutability immediately before Changesets calls
-`npm publish`. The first run may use `NPM_TOKEN`; once trusted publishing is
-configured, npm obtains a short-lived OIDC identity and records provenance.
+`npm publish`. The production workflow is OIDC-only: it does not read
+`NPM_TOKEN` or `NODE_AUTH_TOKEN`. npm obtains a short-lived identity from GitHub
+Actions and records provenance for each publication.
 
 ## Verify the public result
 
