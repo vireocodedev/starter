@@ -840,10 +840,11 @@ For every public component:
 
 ### 22.3 Trusted releases
 
-- [ ] Publish npm packages publicly without consumer tokens.
-- [ ] Publish Maven artifacts through a broadly accessible public repository.
-- [ ] Use OIDC/trusted publishing where supported.
-- [ ] Generate package provenance and signed attestations.
+- [x] Publish npm packages publicly without consumer tokens.
+- [x] Publish Maven artifacts through a broadly accessible public repository.
+- [x] Use OIDC/trusted publishing for npm; protect in-memory signing and Central
+      publication for Maven, where the registry does not offer the same OIDC path.
+- [x] Generate npm provenance attestations and signed Maven artifacts.
 - [ ] Produce checksums and release manifests.
 - [ ] Target an appropriate SLSA build level.
 - [ ] Run OpenSSF Scorecard and remediate meaningful findings.
@@ -865,7 +866,7 @@ For every public component:
 
 ## 23. Packaging, versioning, compatibility, and releases
 
-- [ ] Move from private GitHub Packages-only consumption to credential-free public installation.
+- [x] Move from private GitHub Packages-only consumption to credential-free public installation.
 - [ ] Decide whether frontend packages remain independently versioned or use a coordinated release train.
 - [ ] Keep the JVM BOM authoritative for aligned backend modules.
 - [ ] Publish a compatibility matrix across frontend packages, JVM modules, template, CLI, React, MUI, Spring Boot, Java, Node, PostgreSQL, and browsers.
@@ -1313,6 +1314,16 @@ The following sequence minimizes the risk of spending months polishing internals
 
 **Gate:** Demonstrated target-user interest and no unresolved identity/distribution blocker.
 
+**2026-08-27 closure variance:** **CONDITIONAL GO — Phase 0 AI proxy passed;
+live target-developer validation deferred to public beta as an accepted risk.**
+Public repositories and canonical npm/Maven artifacts are anonymously consumable;
+positioning, competitor, and clean-onboarding evidence is provisional AI evidence.
+It does not demonstrate human interest, adoption intent, or product-market fit.
+Revisit the retained human protocol after the first three independent adopters or
+before a 1.0 commitment, whichever comes first. The dated evidence and accepted
+risks are recorded in the
+[closure review](docs/roadmap/phase-0/phase-0-gate-review-2026-08-27.md).
+
 ### Phase 1 — Public foundation and trust (3–6 weeks)
 
 - Credential-free public package distribution.
@@ -1323,6 +1334,13 @@ The following sequence minimizes the risk of spending months polishing internals
 - Clean-install CI across supported environments.
 
 **Gate:** A stranger can inspect, install, verify, and legally adopt Vireo.
+
+**Current state:** Phase 1 is the next authorized phase. Public source and artifact
+distribution are already active; remaining work centers on accurate external
+repository metadata, governance/support and compatibility contracts, executable
+documentation, the admitted clean-room matrix, security/SBOM/recovery evidence,
+and the complete unfamiliar-user gate. The original duration is not a commitment;
+the current backlog estimates remaining active effort separately from external wait.
 
 ### Phase 2 — Golden-path DX (4–8 weeks)
 
@@ -1469,15 +1487,21 @@ An item is not complete merely because code exists. Unless explicitly inapplicab
 
 These are the recommended first actions, in order:
 
-1. [ ] Decide and write the precise primary audience and non-goals.
-2. [ ] Produce a dated baseline scorecard from the current repositories.
-3. [ ] Interview five unfamiliar React + Spring Boot developers.
-4. [ ] Test the proposed positioning language with those developers.
-5. [ ] Resolve the Vireo name, domain, organization, and public package coordinates.
-6. [ ] Decide the canonical public repository topology.
-7. [ ] Make package installation credential-free.
-8. [ ] Define the supported toolchain/browser/database matrix.
-9. [ ] Rewrite the README around outcomes and the demo.
+1. [x] Decide and write the provisional primary audience and non-goals (D-101;
+       human validation remains deferred under D-110).
+2. [x] Produce a dated baseline scorecard from the current repositories.
+3. [ ] Interview five unfamiliar React + Spring Boot developers (deferred to the
+       public-beta validation gate; zero completed).
+4. [ ] Test the proposed positioning language with those developers (AI proxy only;
+       human testing deferred).
+5. [ ] Complete Vireo professional clearance and external profile consistency;
+       domain, public repositories, npm scope, and Maven coordinates are active.
+6. [x] Decide the canonical public repository topology.
+7. [x] Make package installation credential-free.
+8. [x] Define the supported toolchain/browser/database matrix (individual support
+       rows remain inactive until their enforcement evidence passes).
+9. [x] Rewrite the README around outcomes, maturity, ownership, and limitations;
+       a hosted demo remains future work.
 10. [ ] Separate minimal template responsibilities from demonstration/kitchen-sink content.
 11. [ ] Build the one-command create workflow.
 12. [ ] Run observed clean-room onboarding and fix every blocker.
