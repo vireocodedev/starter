@@ -56,7 +56,7 @@
     "security:workflow": "node scripts/workflow-security-policy.mjs",
     "toolchain:check": "node scripts/toolchain-policy.mjs",
     "release": "sh scripts/with-declared-npm.sh sh -c 'npm run verify -- silent && npm run release:publish'",
-    "release:publish": "changeset publish"
+    "release:publish": "sh scripts/with-declared-npm.sh changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.1",
