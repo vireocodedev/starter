@@ -151,13 +151,13 @@ identity, and `main` source ref, then retains subjects, manifests, checksums, SB
 and signed bundles for 90 days.
 
 Hosted run
-[`33082999406`](https://github.com/vireocodedev/starter/actions/runs/33082999406)
+[`33083933339`](https://github.com/vireocodedev/starter/actions/runs/33083933339)
 verified this path for npm attestation
-[`43423367`](https://github.com/vireocodedev/starter/attestations/43423367), Maven
+[`43426192`](https://github.com/vireocodedev/starter/attestations/43426192), Maven
 attestation
-[`43423371`](https://github.com/vireocodedev/starter/attestations/43423371), and
+[`43426201`](https://github.com/vireocodedev/starter/attestations/43426201), and
 retained evidence artifact
-[`9651031208`](https://github.com/vireocodedev/starter/actions/runs/33082999406/artifacts/9651031208).
+[`9651461596`](https://github.com/vireocodedev/starter/actions/runs/33083933339/artifacts/9651461596).
 These SBOM claims supplement, rather than replace, npm registry provenance and
 Maven PGP signatures.
 

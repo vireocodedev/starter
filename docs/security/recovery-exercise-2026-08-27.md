@@ -42,7 +42,7 @@ sequence without reusing an immutable version.
 - Release evidence now generates populated npm and JVM CycloneDX documents and
   digests all candidate subjects.
 - Hosted run
-  [`33082999406`](https://github.com/vireocodedev/starter/actions/runs/33082999406)
+  [`33083933339`](https://github.com/vireocodedev/starter/actions/runs/33083933339)
   independently downloaded and registry-hash-validated all seven public npm
   tarballs and 27 Maven Central artifacts, signed two CycloneDX attestations through
   GitHub OIDC/Sigstore, verified every subject against the exact signer identity,
@@ -60,9 +60,9 @@ sequence without reusing an immutable version.
   access without the primary maintainer.
 - **Closed in source:** npm/JVM CycloneDX SBOMs are signed attestations bound to the
   exact published bytes. npm attestation
-  [`43423367`](https://github.com/vireocodedev/starter/attestations/43423367) covers
+  [`43426192`](https://github.com/vireocodedev/starter/attestations/43426192) covers
   seven tarballs; Maven attestation
-  [`43423371`](https://github.com/vireocodedev/starter/attestations/43423371) covers
+  [`43426201`](https://github.com/vireocodedev/starter/attestations/43426201) covers
   all 27 Central artifacts.
 
 The runbook is technically actionable, but P1-09 remains partial until the open
