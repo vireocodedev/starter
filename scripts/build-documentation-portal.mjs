@@ -283,7 +283,7 @@ function renderPortal({ release: currentRelease, counts }) {
       <h1>Build with the public contract in view.</h1>
       <p class="lede">Search the complete Storybook guide catalog, every declared TypeScript export, and the aggregate JVM API from one release-specific documentation snapshot.</p>
       <div class="versions"><span>npm ${escapeHtml(npmVersionSummary)}</span><span>JVM ${escapeHtml(currentRelease.jvm.version)}</span><span>${searchCount.toLocaleString()} searchable records</span></div>
-      <label class="search"><span>Search all documentation</span><input id="docs-search" type="search" placeholder="Try VireoDataGrid, offline replay, or BaseService" autocomplete="off" /></label>
+      <label class="search"><span>Search all documentation</span><input id="docs-search" type="search" placeholder="Try VireoPageLayout, offline replay, or BaseService" autocomplete="off" /></label>
     </header>
     <main>
       <section id="search-section" aria-live="polite">

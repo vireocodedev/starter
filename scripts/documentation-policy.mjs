@@ -202,8 +202,18 @@ function validateArtifact(release) {
       problems.push(`generated search has no ${category} entries`);
     }
   }
+  for (const query of ["VireoPageLayout", "offline replay", "BaseService"]) {
+    const terms = query.toLocaleLowerCase().split(/\s+/);
+    const hasResult = search.some(entry => {
+      const haystack = `${entry.label} ${entry.description} ${entry.category}`.toLocaleLowerCase();
+      return terms.every(term => haystack.includes(term));
+    });
+    if (!hasResult) problems.push(`generated search example ${query} has no result`);
+  }
+  const htmlCache = new Map();
   for (const entry of search) {
-    const targetPath = decodeURIComponent(entry.url.split(/[?#]/, 1)[0]);
+    const [urlWithoutFragment, fragment] = entry.url.split("#", 2);
+    const targetPath = decodeURIComponent(urlWithoutFragment.split("?", 1)[0]);
     let resolvedTarget = join(versionRoot, targetPath);
     if (existsSync(resolvedTarget) && statSync(resolvedTarget).isDirectory()) {
       resolvedTarget = join(resolvedTarget, "index.html");
@@ -211,6 +221,13 @@ function validateArtifact(release) {
     if (!existsSync(resolvedTarget)) {
       problems.push(`search entry ${entry.label} links to missing ${entry.url}`);
       if (problems.length > 30) return;
+    }
+    if (entry.category === "TypeScript API" && fragment && existsSync(resolvedTarget)) {
+      if (!htmlCache.has(resolvedTarget)) htmlCache.set(resolvedTarget, readFileSync(resolvedTarget, "utf8"));
+      if (!htmlCache.get(resolvedTarget).includes(`id="${decodeURIComponent(fragment)}"`)) {
+        problems.push(`TypeScript search entry ${entry.label} links to missing anchor ${entry.url}`);
+        if (problems.length > 30) return;
+      }
     }
   }
 }
