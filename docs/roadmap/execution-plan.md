@@ -44,10 +44,10 @@ and completion.
 | Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete                                       |
 | Phase 0E  | External evidence                                      | Isolated AI proxy; human research explicitly deferred under D-110                 | Complete with variance                         |
 | Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete                                       |
-| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | In progress                                    |
+| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Engineering complete; external-human gate open |
 | Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Engineering complete; external-human gate open |
 | Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open  |
-| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Pending                                        |
+| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | In progress                                    |
 | Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Pending                                        |
 | Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Pending                                        |
 
@@ -134,6 +134,20 @@ throughput are known.
 The engineering surface is complete. The phase exit gate remains open because no
 unfamiliar external user has independently generated and customized the slice or
 reported meaningful time saved.
+
+## Phase 4 production-readiness evidence set
+
+- [Phase 4 backlog and evidence classes](phase-4/backlog.md)
+- [Production-readiness criteria and baseline](phase-4/production-readiness-criteria.md)
+- Existing security, browser, PostgreSQL, deployment, provenance, SBOM, bundle,
+  verification-duration, and peak-RSS gates
+
+The baseline begins from partial but material production evidence. Phase 4 does
+not reimplement already-green container and deployment work (`G-306`, `G-307`). It
+concentrates on the unproven contracts in `G-301`–`G-305` and the supported
+upgrade path in `G-203`. Independent security, physical-device, branded-browser,
+manual assistive-technology, field-performance, and target-environment rehearsal
+evidence cannot be completed by maintainer automation and stays visibly open.
 
 ## Measurement policy
 

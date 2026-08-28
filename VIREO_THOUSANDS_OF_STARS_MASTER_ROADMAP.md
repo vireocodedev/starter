@@ -1368,6 +1368,12 @@ admission boundary; unfamiliar-user generation/customization gate remains open.
 
 ### Phase 4 — Production hardening (6–12 weeks, overlapping)
 
+**Engineering status (28 August 2026):** in progress under a dated backlog and
+production-readiness gate. Existing container/deployment proof is retained;
+security, offline, accessibility/platform, performance, operations, and upgrade
+contracts are being converted into executable evidence. Independent/manual rows
+are not replaceable by automation.
+
 - Authentication/security review.
 - Offline guarantees, conflict model, schema upgrades, and adversarial tests.
 - Accessibility audit.
