@@ -62,7 +62,7 @@ Vireo is a reasonable fit when a team wants ordinary application code plus revie
 conventions for React/Spring business software. It is not currently a fit when the
 decision depends on any of these being complete:
 
-- a released upgrade CLI (create, doctor, and the entity generator are implemented; first create/generator publication is pending);
+- a version-aware upgrade CLI (project creation, doctor diagnostics, and the entity generator are released, but upgrades remain manual);
 - a production-readiness or long-term-support guarantee;
 - arbitrary offline synchronization without application-owned eligibility and
   conflict policy;

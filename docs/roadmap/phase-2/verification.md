@@ -27,6 +27,18 @@
 
 The clean-room directory was outside both repositories and is disposable evidence, not committed product state. Registry resolution is recorded independently because a local tarball cannot prove `npm create vireo@latest` is anonymously consumable.
 
+## 2026-08-28 public activation record
+
+`create-vireo@0.2.0` and `@vireocodedev/ui@0.2.2` were published from protected
+workflow run [`33142739135`](https://github.com/vireocodedev/starter/actions/runs/33142739135)
+with registry-backed provenance. Token-free public verification run
+[`33143174421`](https://github.com/vireocodedev/starter/actions/runs/33143174421)
+resolved every exact workspace version, compiled and bundled every public entry
+point, and verified registry integrity and signatures. SBOM attestation run
+[`33143174581`](https://github.com/vireocodedev/starter/actions/runs/33143174581)
+bound and verified the public npm and Maven artifacts. This closes the registry
+portion of `P2-02`; the unfamiliar-human gate in `P2-08` remains external.
+
 ## Human exit gate
 
 The roadmap gate is at least 70% successful unassisted starts by unfamiliar external testers. Record participant count, recruitment criteria, exact public command/version, unassisted success count, time to first running app, and anonymized friction codes. Maintainers, automated jobs, and AI proxy sessions are excluded from the percentage.

@@ -1506,7 +1506,7 @@ These are the recommended first actions, in order:
 9. [x] Rewrite the README around outcomes, maturity, ownership, and limitations;
        a hosted demo remains future work.
 10. [x] Separate minimal template responsibilities from demonstration/kitchen-sink content.
-11. [x] Build the one-command create workflow (implementation complete; first npm publication remains external).
+11. [x] Build and publicly release the one-command create workflow (`create-vireo@0.2.0`).
 12. [ ] Run observed clean-room onboarding and fix every blocker.
 13. [x] Specify the vertical-slice entity schema and generated ownership model.
 14. [x] Implement the smallest end-to-end generator proving the concept.

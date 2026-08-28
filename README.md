@@ -14,7 +14,7 @@ current runnable full-stack composition.
 
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
 creation, doctor diagnostics, and the Phase 3 full-stack entity generator are
-implemented; their first npm publication remains pending. A version-aware upgrade
+implemented and publicly available in `create-vireo@0.2.0`. A version-aware upgrade
 workflow does not yet exist.
 
 ## Start here
@@ -62,7 +62,7 @@ backend's base entity/service layer; they are separate contracts.
 | [`@vireocodedev/history`](packages/history)               | 0.2.1   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
 | [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.1   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
 
-Versions above are the current package lines. `packages/*/package.json` remains the source of truth; an unreleased package is explicitly identified in its changelog and Phase 2 evidence until registry publication completes.
+Versions above are the current package lines. `packages/*/package.json` remains the source of truth.
 
 ### Dependency graph
 
