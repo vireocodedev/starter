@@ -2,12 +2,33 @@ const root = document.documentElement;
 const storedTheme = localStorage.getItem("vireo-docs-theme");
 if (storedTheme === "light" || storedTheme === "dark") root.dataset.theme = storedTheme;
 
-document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
-  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const currentDark = root.dataset.theme === "dark" || (root.dataset.theme !== "light" && systemDark);
+const themeToggle = document.querySelector("[data-theme-toggle]");
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+function currentThemeIsDark() {
+  return root.dataset.theme === "dark" || (root.dataset.theme !== "light" && systemTheme.matches);
+}
+
+function syncThemeToggle() {
+  if (!themeToggle) return;
+  const target = currentThemeIsDark() ? "light" : "dark";
+  const label = `Use ${target} theme`;
+  themeToggle.dataset.themeTarget = target;
+  themeToggle.setAttribute("aria-label", label);
+  themeToggle.setAttribute("title", label);
+}
+
+syncThemeToggle();
+systemTheme.addEventListener("change", () => {
+  if (root.dataset.theme === "system") syncThemeToggle();
+});
+
+themeToggle?.addEventListener("click", () => {
+  const currentDark = currentThemeIsDark();
   const next = currentDark ? "light" : "dark";
   root.dataset.theme = next;
   localStorage.setItem("vireo-docs-theme", next);
+  syncThemeToggle();
 });
 
 for (const button of document.querySelectorAll("[data-copy-command]")) {

@@ -46,6 +46,16 @@ function WebsiteDocument({ website, page, navigation, allPages }) {
 }
 
 function SiteHeader({ website, page }) {
+  const activePath = page.basePath ?? page.path;
+  const activeHref = activePath.startsWith("/docs/components/")
+    ? "/docs/components/"
+    : activePath.startsWith("/docs/")
+      ? "/docs/"
+      : activePath.startsWith("/examples/")
+        ? "/examples/"
+        : activePath.startsWith("/reference/")
+          ? "/reference/"
+          : undefined;
   const links = [
     ["/docs/", "Docs"],
     ["/docs/components/", "Components"],
@@ -57,18 +67,20 @@ function SiteHeader({ website, page }) {
     { className: "site-header" },
     h(
       "div",
-      { className: "site-header__inner" },
-      h(
-        "button",
-        {
-          className: "icon-button mobile-only",
-          type: "button",
-          "data-navigation-toggle": true,
-          "aria-label": "Open documentation navigation",
-          "aria-expanded": "false",
-        },
-        "☰",
-      ),
+      { className: `site-header__inner${page.kind === "home" ? " site-header__inner--home" : ""}` },
+      page.kind === "home"
+        ? null
+        : h(
+            "button",
+            {
+              className: "icon-button mobile-only",
+              type: "button",
+              "data-navigation-toggle": true,
+              "aria-label": "Open documentation navigation",
+              "aria-expanded": "false",
+            },
+            "☰",
+          ),
       h(
         "a",
         { className: "brand", href: "/", "aria-label": "Vireo Framework home" },
@@ -79,7 +91,7 @@ function SiteHeader({ website, page }) {
         "nav",
         { className: "site-nav", "aria-label": "Primary navigation" },
         ...links.map(([href, label]) =>
-          h("a", { href, "aria-current": page.path.startsWith(href) ? "page" : undefined, key: href }, label),
+          h("a", { href, "aria-current": activeHref === href ? "page" : undefined, key: href }, label),
         ),
       ),
       h(
@@ -89,13 +101,22 @@ function SiteHeader({ website, page }) {
           "button",
           { className: "search-trigger", type: "button", "data-search-open": true },
           h("span", null, "Search"),
+          h(SearchIcon),
           h("kbd", null, "⌘ K"),
         ),
         h("a", { className: "version-pill", href: "/versions/" }, `v${website.documentation.version}`),
         h(
           "button",
-          { className: "icon-button", type: "button", "data-theme-toggle": true, "aria-label": "Change color theme" },
-          "◐",
+          {
+            className: "icon-button",
+            type: "button",
+            "data-theme-toggle": true,
+            "data-theme-target": "light",
+            "aria-label": "Use light theme",
+            title: "Use light theme",
+          },
+          h(ThemeIcon, { mode: "light" }),
+          h(ThemeIcon, { mode: "dark" }),
         ),
         h(
           "a",
@@ -176,23 +197,27 @@ function LandingPage({ website }) {
       { className: "proof-strip", "aria-label": "Current public release" },
       h(
         "div",
-        null,
-        h("strong", null, `create-vireo ${website.currentRelease.createVireo}`),
-        h("span", null, "Create, generate and upgrade"),
+        { className: "proof-strip__inner" },
+        h(
+          "div",
+          null,
+          h("strong", null, `create-vireo ${website.currentRelease.createVireo}`),
+          h("span", null, "Create, generate and upgrade"),
+        ),
+        h(
+          "div",
+          null,
+          h("strong", null, `${scopedPackages.length} npm libraries`),
+          h("span", null, "Typed React foundations"),
+        ),
+        h(
+          "div",
+          null,
+          h("strong", null, `${website.currentRelease.jvm.modules.length} JVM modules`),
+          h("span", null, "Spring Boot building blocks"),
+        ),
+        h("div", null, h("strong", null, "Live HTTPS demo"), h("span", null, "Monitored and reset safely")),
       ),
-      h(
-        "div",
-        null,
-        h("strong", null, `${scopedPackages.length} npm libraries`),
-        h("span", null, "Typed React foundations"),
-      ),
-      h(
-        "div",
-        null,
-        h("strong", null, `${website.currentRelease.jvm.modules.length} JVM modules`),
-        h("span", null, "Spring Boot building blocks"),
-      ),
-      h("div", null, h("strong", null, "Live HTTPS demo"), h("span", null, "Monitored and reset safely")),
     ),
     h(HomeSection, {
       eyebrow: "Choose your path",
@@ -301,7 +326,8 @@ function LandingPage({ website }) {
 }
 
 function DocumentationPage({ website, page, navigation, allPages }) {
-  const section = navigation.find(candidate =>
+  const sidebarNavigation = createSidebarNavigation(navigation, allPages);
+  const section = sidebarNavigation.find(candidate =>
     candidate.pages.some(candidatePage => candidatePage.path === page.basePath),
   );
   const currentIndex = allPages.findIndex(candidate => candidate.path === page.basePath);
@@ -322,7 +348,7 @@ function DocumentationPage({ website, page, navigation, allPages }) {
       h(
         "nav",
         { "aria-label": "Documentation navigation" },
-        ...navigation.map(group =>
+        ...sidebarNavigation.map(group =>
           h(
             "section",
             { className: "navigation-group", key: group.label },
@@ -577,6 +603,65 @@ function VireoMark() {
     }),
     h("path", { fill: "currentColor", d: "m12.2 13.1 5.8 10 5.8-10h-4l-1.8 3.5-1.8-3.5Z" }),
   );
+}
+
+function ThemeIcon({ mode }) {
+  const properties = {
+    className: `theme-icon theme-icon--${mode}`,
+    "data-theme-icon": mode,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+  if (mode === "light") {
+    return h(
+      "svg",
+      properties,
+      h("circle", { cx: 12, cy: 12, r: 4 }),
+      h("path", {
+        d: "M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42",
+      }),
+    );
+  }
+  return h("svg", properties, h("path", { d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" }));
+}
+
+function SearchIcon() {
+  return h(
+    "svg",
+    {
+      className: "search-icon",
+      "data-search-icon": true,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      "aria-hidden": "true",
+    },
+    h("circle", { cx: 11, cy: 11, r: 7 }),
+    h("path", { d: "m20 20-4-4" }),
+  );
+}
+
+function createSidebarNavigation(navigation, allPages) {
+  const pagesByPath = new Map(allPages.map(page => [page.path, page]));
+  const supplementalGroups = [
+    { label: "Explore", paths: ["/examples/", "/storybook/"] },
+    {
+      label: "Reference",
+      paths: ["/reference/", "/reference/typescript/", "/reference/java/", "/versions/"],
+    },
+    { label: "Project", paths: ["/roadmap/", "/community/"] },
+  ].map(group => ({
+    label: group.label,
+    pages: group.paths.map(path => pagesByPath.get(path)).filter(Boolean),
+  }));
+  return [...navigation, ...supplementalGroups.filter(group => group.pages.length > 0)];
 }
 
 function versionHref(path, page) {

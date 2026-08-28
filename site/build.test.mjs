@@ -95,6 +95,8 @@ test("builds the complete multi-page, searchable and versioned website artifact"
 
     const landing = readFileSync(join(outputRoot, "index.html"), "utf8");
     const docs = readFileSync(join(outputRoot, "docs/index.html"), "utf8");
+    const components = readFileSync(join(outputRoot, "docs/components/index.html"), "utf8");
+    const examples = readFileSync(join(outputRoot, "examples/index.html"), "utf8");
     const snapshot = readFileSync(join(outputRoot, "docs/0.2/index.html"), "utf8");
     for (const expected of [
       "Build the workflow.",
@@ -104,8 +106,21 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     ]) {
       assert.match(landing, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")));
     }
+    assert.doesNotMatch(landing, /data-navigation-toggle/u);
+    assert.match(landing, /data-search-icon/u);
     assert.match(docs, /Vireo documentation/u);
     assert.match(docs, /On this page/u);
+    assert.match(docs, /data-navigation-toggle/u);
+    const componentHeader = components.match(/<nav class="site-nav"[^>]*>.*?<\/nav>/su)?.[0] ?? "";
+    const componentSidebar = components.match(/<aside class="docs-sidebar"[^>]*>.*?<\/aside>/su)?.[0] ?? "";
+    const examplesHeader = examples.match(/<nav class="site-nav"[^>]*>.*?<\/nav>/su)?.[0] ?? "";
+    assert.doesNotMatch(componentHeader, /href="\/docs\/" aria-current="page"/u);
+    assert.match(componentHeader, /href="\/docs\/components\/" aria-current="page"/u);
+    assert.match(examplesHeader, /href="\/examples\/" aria-current="page"/u);
+    assert.match(componentSidebar, /href="\/examples\/"/u);
+    assert.match(componentSidebar, /href="\/reference\/"/u);
+    assert.match(components, /data-theme-target="light"/u);
+    assert.match(components, /data-theme-icon="dark"/u);
     assert.match(snapshot, /Vireo 0.2 snapshot/u);
     assert.match(snapshot, /rel="canonical" href="https:\/\/vireocode.com\/docs\/"/u);
   } finally {
