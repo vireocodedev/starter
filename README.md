@@ -17,7 +17,7 @@ current runnable full-stack composition.
 
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
 creation, doctor diagnostics, and target-aware entity generator are implemented.
-The standalone frontend profile is scheduled for `create-vireo@0.4.0`. Its version-aware
+The standalone frontend profile is public in `create-vireo@0.4.0`. Its version-aware
 project upgrade currently supports the explicit 0.2.0→0.3.0 release pair.
 
 ## Start here
@@ -60,7 +60,7 @@ Public-beta evaluation is open, but readiness and independent adoption are not y
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.3.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
+| [`create-vireo`](packages/create-vireo)                   | 0.4.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
 | [`@vireocodedev/ui`](packages/ui)                         | 0.2.2   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |

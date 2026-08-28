@@ -358,15 +358,17 @@ and is not included in the completable scope above.
 - [x] Add unit coverage and a clean generated frontend consumer job in hosted CI.
 - [x] Publish architecture, team ownership, OpenAPI-wrapper, capability-limitation,
       command, public API, and website guidance.
-- [x] Add a minor `create-vireo` changeset and pin generated projects to the
-      corresponding CLI line.
+- [x] Publish `create-vireo@0.4.0` with npm provenance and pin generated projects
+      to that CLI line.
 
 Engineering is complete in the adapter-enabled Template commit and the Starter
 frontend-profile implementation. The clean consumer creates a standalone project
 from the pinned public Template, installs registry dependencies, runs doctor,
 generates Purchase Order twice, checks the wire contract, proves no backend files
-exist, type-checks, tests, and builds. This is technical feasibility evidence, not
-evidence that separate frontend/backend teams want or have adopted the profile.
+exist, type-checks, tests, and builds. The protected publish and anonymous
+post-publish verification passed on 2026-08-28. This is technical feasibility
+evidence, not evidence that separate frontend/backend teams want or have adopted
+the profile.
 
 ## Deferred engineering — not on the launch critical path
 
