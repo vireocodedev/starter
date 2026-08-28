@@ -1,5 +1,12 @@
 # create-vireo
 
+## 0.4.1
+
+### Patch Changes
+
+- 36c3c37: Pin project creation to the verified Template revision that preserves adapter method
+  introspection for test spies and satisfies the complete mock-adapter lint contract.
+
 ## 0.4.0
 
 ### Minor Changes
