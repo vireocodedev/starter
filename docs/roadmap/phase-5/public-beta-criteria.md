@@ -1,6 +1,6 @@
 # Phase 5 public-beta evidence criteria
 
-Status: **engineering baseline active; external adopter evidence absent**.
+Status: **engineering scope substantially complete; public-beta decision HOLD**.
 
 ## Public evaluation contract
 
@@ -8,10 +8,11 @@ Status: **engineering baseline active; external adopter evidence absent**.
 | -------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------- |
 | First run            | Anonymous `npm create vireo@latest`, doctor, setup, and clean verification                       | Automated evidence exists; human row open |
 | Killer workflow      | Generate, run, customize, eject, and upgrade a realistic application-owned vertical slice        | Automated fixture exists; human row open  |
-| Flagship quality     | Responsive seeded application, accessible critical journey, explicit supported/unsupported scope | Phase 5 engineering pending               |
-| Hosted evaluation    | Public revision, health, journey, reset policy, monitoring history, and incident contact         | Host and operations evidence pending      |
+| Flagship quality     | Responsive seeded application, accessible critical journey, explicit supported/unsupported scope | Engineering evidence complete             |
+| Hosted evaluation    | Public revision, health, journey, reset policy, monitoring history, and incident contact         | Source/contract ready; external host open |
 | Production readiness | Phase 4 independent security/manual accessibility/device/field/target-environment evidence       | Open; no public-beta readiness claim      |
 | Independent adoption | Three unaffiliated active teams and one maintained production-like deployment through an upgrade | No qualifying team recorded               |
+| Feedback evidence    | Structured privacy-safe intake, triage, aggregate validation, and explicit gate status           | Engineering evidence complete; gate HOLD  |
 
 ## Qualifying external workflow session
 

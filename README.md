@@ -16,8 +16,8 @@ current runnable full-stack composition.
 
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
 creation, doctor diagnostics, and the Phase 3 full-stack entity generator are
-implemented and publicly available in `create-vireo@0.2.0`. A version-aware upgrade
-workflow does not yet exist.
+implemented and publicly available in `create-vireo@0.3.0`. Its version-aware
+project upgrade currently supports the explicit 0.2.0→0.3.0 release pair.
 
 ## Start here
 

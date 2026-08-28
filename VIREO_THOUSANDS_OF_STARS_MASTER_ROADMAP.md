@@ -1386,9 +1386,12 @@ replaceable by automation.
 
 ### Phase 5 — Flagship experience and public beta (4–8 weeks)
 
-**Engineering status (28 August 2026):** active under the
-[numbered Phase 5 backlog](docs/roadmap/phase-5/backlog.md). Engineering and
-independent-adopter evidence are tracked separately.
+**Engineering status (28 August 2026):** substantially complete under the
+[numbered Phase 5 backlog](docs/roadmap/phase-5/backlog.md). The flagship, proof,
+demo-operations source, and feedback evidence loop are implemented. External host
+activation, unfamiliar-human workflow evidence, and independent adoption remain
+open; the [closure decision](docs/roadmap/phase-5/closure-review-2026-08-28.md) is
+**HOLD**.
 
 - Visually exceptional flagship demo.
 - Example applications and proof material.
