@@ -64,7 +64,8 @@ demonstrated.
 Vireo is a poor fit for:
 
 - marketing, content, e-commerce storefront, or SEO-first websites;
-- teams that have not selected both React and Spring Boot;
+- teams that have not selected React; teams without Spring Boot are outside the
+  full-stack golden path but may use the supported frontend-only profile;
 - teams seeking a no-code or low-code product that owns their domain model;
 - native-mobile-first products whose core experience depends on native platform APIs;
 - consumer social, gaming, media-streaming, or hyperscale internet workloads;

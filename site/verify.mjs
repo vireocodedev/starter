@@ -38,6 +38,7 @@ const requiredLinks = [
   "tutorial",
   "comparison",
   "architecture",
+  "frontendProfile",
   "security",
   "roadmap",
   "discussions",

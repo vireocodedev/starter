@@ -1,9 +1,10 @@
 # Vireo Framework · by Vireo Code
 
-Vireo is an opinionated full-stack foundation for small teams building operational
-business applications with React and Spring Boot. It supplies reusable responsive
-UI, cross-stack contracts, history, localization, and offline building blocks while
-leaving applications as ordinary React and Spring Boot code.
+Vireo is an opinionated foundation for teams building operational business
+applications with React, with a complete Spring Boot golden path when the same team
+owns both halves. It supplies reusable responsive UI, adapters, cross-stack
+contracts, history, localization, and offline building blocks while leaving
+applications as ordinary React and, when selected, Spring Boot code.
 
 The application team owns its domain model, authorization policy, data sensitivity,
 offline eligibility, and conflict resolution. Vireo's offline packages provide
@@ -15,20 +16,22 @@ adversarial admission checklist are in
 current runnable full-stack composition.
 
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
-creation, doctor diagnostics, and the Phase 3 full-stack entity generator are
-implemented and publicly available in `create-vireo@0.3.0`. Its version-aware
+creation, doctor diagnostics, and target-aware entity generator are implemented.
+The standalone frontend profile is scheduled for `create-vireo@0.4.0`. Its version-aware
 project upgrade currently supports the explicit 0.2.0→0.3.0 release pair.
 
 ## Start here
 
 Choose the shortest path that matches what you are evaluating:
 
-| Goal                           | First step                                                                                 | Expected result                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Evaluate the complete stack    | Follow the [guided evaluation](docs/EVALUATION.md) in the public Template                  | A running authenticated Item workflow backed by React and Spring Boot     |
-| Adopt frontend building blocks | Review the [npm entry points](docs/PUBLIC_API.md#frontend-entry-points) and live Storybook | A deliberate package/subpath choice rather than an accidental deep import |
-| Adopt backend building blocks  | Review the [Maven modules](docs/PUBLIC_API.md#jvm-entry-points) and BOM example            | Version-aligned Spring Boot modules resolved from Maven Central           |
-| Assess fit before installing   | Read [where Vireo fits](docs/EVALUATION.md#fit-and-limitations)                            | An explicit decision based on current `0.x` capabilities and limitations  |
+| Goal                            | First step                                                                                 | Expected result                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| Evaluate the complete stack     | Follow the [guided evaluation](docs/EVALUATION.md) in the public Template                  | A running authenticated Item workflow backed by React and Spring Boot     |
+| Create a standalone frontend    | Run `npm create vireo@latest app -- --profile frontend`                                    | A mock-backed React app with no Java or database                          |
+| Adopt into an existing frontend | Read the [frontend-only profile](docs/architecture/frontend-only-profile.md)               | Vireo packages and adapters introduced behind an owned API boundary       |
+| Adopt frontend building blocks  | Review the [npm entry points](docs/PUBLIC_API.md#frontend-entry-points) and live Storybook | A deliberate package/subpath choice rather than an accidental deep import |
+| Adopt backend building blocks   | Review the [Maven modules](docs/PUBLIC_API.md#jvm-entry-points) and BOM example            | Version-aligned Spring Boot modules resolved from Maven Central           |
+| Assess fit before installing    | Read [where Vireo fits](docs/EVALUATION.md#fit-and-limitations)                            | An explicit decision based on current `0.x` capabilities and limitations  |
 
 The [public API map](docs/PUBLIC_API.md) is the package-level navigation surface.
 Starter UI has an additional [classified surface](packages/ui/docs/PUBLIC_SURFACE.md)
@@ -57,7 +60,7 @@ Public-beta evaluation is open, but readiness and independent adoption are not y
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.2.0   | Project creation plus the `vireo` full-stack entity, contract-check, and ejection CLI.                    |
+| [`create-vireo`](packages/create-vireo)                   | 0.3.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
 | [`@vireocodedev/ui`](packages/ui)                         | 0.2.2   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |

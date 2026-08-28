@@ -257,6 +257,12 @@ h1 {
   white-space: pre-wrap;
 }
 
+.command-card__alternative {
+  margin: 1.2rem 0 -0.45rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
 .copy-button {
   padding: 0.3rem 0.55rem;
   border: 1px solid var(--border);

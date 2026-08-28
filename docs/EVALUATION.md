@@ -5,6 +5,21 @@ coherent React and Spring Boot starting point, responsive CRUD surfaces, explici
 cross-stack contracts, and optional offline mechanisms without surrendering
 ownership of application code.
 
+Organizations with separately owned frontend and backend repositories can evaluate
+the standalone React profile instead:
+
+```bash
+npm create vireo@latest operations-ui -- --profile frontend
+cd operations-ui
+corepack npm run setup
+corepack npm run doctor
+corepack npm run dev
+```
+
+This starts against mock adapters and requires no Java process or database. See the
+[frontend-only ownership and integration contract](architecture/frontend-only-profile.md)
+before connecting a company API.
+
 ## Guided first-run path
 
 The public Template is the canonical evaluation surface because it consumes Vireo
@@ -62,7 +77,6 @@ Vireo is a reasonable fit when a team wants ordinary application code plus revie
 conventions for React/Spring business software. It is not currently a fit when the
 decision depends on any of these being complete:
 
-- a version-aware upgrade CLI (project creation, doctor diagnostics, and the entity generator are released, but upgrades remain manual);
 - a production-readiness or long-term-support guarantee;
 - arbitrary offline synchronization without application-owned eligibility and
   conflict policy;
@@ -81,6 +95,7 @@ claim that an unreviewed clone is safe for a particular production workload.
 ## Continue by use case
 
 - Full application: [Template customization](https://github.com/vireocodedev/starter-template/blob/main/docs/customizing-the-template.md)
+- Standalone frontend: [frontend-only project profile](architecture/frontend-only-profile.md)
 - Frontend packages and subpaths: [public API map](PUBLIC_API.md#frontend-entry-points)
 - React design system: [Starter UI classified surface](../packages/ui/docs/PUBLIC_SURFACE.md)
 - JVM modules and BOM: [public API map](PUBLIC_API.md#jvm-entry-points)

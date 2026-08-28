@@ -1,4 +1,4 @@
-# Full-stack entity generator
+# Entity generator
 
 Build `create-vireo`, then run its application CLI from a Vireo project root:
 
@@ -10,7 +10,7 @@ node /path/to/starter/packages/create-vireo/dist/vireo-cli.js \
   --dry-run
 ```
 
-After `create-vireo@0.2.0` is public, generated applications expose the shorter form:
+Generated applications expose the shorter form:
 
 ```bash
 corepack npm run vireo -- generate entity .vireo/examples/purchase-order.entity.json --dry-run
@@ -22,10 +22,30 @@ The schema is validated twice conceptually: the shipped JSON Schema documents ed
 
 ## Generated vertical slice
 
+Generation has two targets. A `full-stack` project defaults to `full-stack`; a
+`frontend` project defaults to `frontend` and refuses the backend target. A
+full-stack project may explicitly use `--target frontend`.
+
+### Full-stack target
+
 - Flyway table migration and indexes.
 - JPA entity, Jakarta validation, enums, DTO, MapStruct mapper, repository, Vireo service, secured REST controller, query registration, and history identity.
 - Separate Zod transport/domain schemas, mapper functions, validated API adapter, TanStack Query CRUD page, responsive empty/loading/error/list/form states, route/navigation registration, English/Croatian resources, Storybook story, and contract test.
 - Spring API integration test, capability documentation, canonical schema copy, wire contract, and hash manifest.
+
+### Frontend target
+
+- Zod transport/domain schemas, mappers, an explicit API interface and configurable
+  HTTP adapter.
+- TanStack Query CRUD page, responsive states, route/navigation and capability
+  registration, English/Croatian resources, Storybook story, and contract test.
+- Capability documentation, canonical schema copy, target-aware wire contract, and
+  hash manifest.
+- No Java, Gradle, Flyway, or database artifact.
+
+Schema format version 1 remains common to both targets. Its Java package, database,
+permissions, and backend capability fields are retained so one reviewed schema can
+cross a team boundary; the frontend renderer ignores backend-only values.
 
 The v1 identifier is a generated `Long`. Explicit singular/plural names avoid English pluralization guesses. Acronyms are accepted when portable. Relationships, compound identifiers, and offline replay are represented as deliberate admission boundaries rather than partially generated code. Offline guarantees belong to Phase 4; relationship generation requires an admitted relational fixture.
 

@@ -87,6 +87,7 @@ export function renderLanding(website) {
     )
     .join("");
   const createCommand = "npm create vireo@latest my-app";
+  const frontendCommand = "npm create vireo@latest my-app -- --profile frontend";
 
   return `<!doctype html>
 <html lang="en">
@@ -125,9 +126,9 @@ export function renderLanding(website) {
     <main id="main">
       <section class="shell hero" aria-labelledby="hero-title">
         <div>
-          <p class="eyebrow">React + Spring Boot · operational applications</p>
+          <p class="eyebrow">React · optional Spring Boot · operational applications</p>
           <h1 id="hero-title">Ship the business workflow, not another foundation.</h1>
-          <p class="hero__lede">Vireo connects responsive React UI, Spring Boot modules, cross-stack generation, versioned contracts, and production-shaped operations while leaving domain code in your application.</p>
+          <p class="hero__lede">Vireo connects responsive React UI, swappable backend adapters, target-aware generation, versioned contracts, and an optional complete Spring Boot path while leaving domain code in your application.</p>
           <div class="actions">
             <a class="button button--primary" href="${escapeHtml(links.demo)}">Open the live demo</a>
             <a class="button" href="${escapeHtml(links.quickstart)}">Follow the quickstart</a>
@@ -139,6 +140,8 @@ export function renderLanding(website) {
             <button class="copy-button" type="button" data-copy-command="${escapeHtml(createCommand)}">Copy</button>
           </div>
           <code>${escapeHtml(createCommand)}</code>
+          <p class="command-card__alternative">Frontend repository only:</p>
+          <code>${escapeHtml(frontendCommand)}</code>
           <span class="visually-hidden" aria-live="polite" data-copy-status></span>
         </aside>
       </section>
@@ -159,8 +162,8 @@ export function renderLanding(website) {
         </div>
         <div class="cards">
           ${pathCard("01", "Try the workflow", "Use the seeded Item application without installing anything. The demo is a public sandbox with no uptime SLA.", links.demo, "Open demo")}
-          ${pathCard("02", "Create your application", "Run the public CLI, then use doctor and the root workflow to start the React and Spring Boot halves.", links.quickstart, "Read quickstart")}
-          ${pathCard("03", "Generate a vertical slice", "Generate application-owned migration, backend, frontend, localization, stories, and tests from one reviewed schema.", links.tutorial, "Follow tutorial")}
+          ${pathCard("02", "Choose your ownership boundary", "Create the complete React/Spring application or a standalone mock-backed frontend for a separately owned company API.", links.frontendProfile, "See frontend profile")}
+          ${pathCard("03", "Generate a vertical slice", "Generate a full-stack capability or only its frontend models, adapter, UI, localization, stories, and tests from one reviewed schema.", links.tutorial, "Follow tutorial")}
         </div>
       </section>
 

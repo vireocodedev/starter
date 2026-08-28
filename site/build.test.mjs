@@ -18,6 +18,7 @@ const sitePolicy = {
     tutorial: "https://example.com/tutorial",
     comparison: "https://example.com/comparison",
     architecture: "https://example.com/architecture",
+    frontendProfile: "https://example.com/frontend-profile",
     security: "https://example.com/security",
     roadmap: "https://example.com/roadmap",
     discussions: "https://example.com/discussions",
@@ -71,10 +72,12 @@ test("renders the connected and version-aware public surface", () => {
     sitePolicy.links.demo,
     sitePolicy.links.documentation,
     sitePolicy.links.quickstart,
+    sitePolicy.links.frontendProfile,
     sitePolicy.links.contributing,
     documentationPolicy.releases[0].releaseLinks.npm,
     documentationPolicy.releases[0].releaseLinks.jvm,
     "production-shaped 0.x software, not a blanket production-readiness claim",
+    "--profile frontend",
   ]) {
     assert.match(html, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }

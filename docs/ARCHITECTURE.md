@@ -3,6 +3,10 @@
 How the `starter` packages are layered, and the decisions that produced the
 current shape.
 
+Application-level composition and organizational ownership are documented
+separately in the [frontend-only project profile](architecture/frontend-only-profile.md)
+and [generated wire contracts](architecture/wire-contracts.md).
+
 ## The dependency graph
 
 Measured from the workspace manifests, not from intent:

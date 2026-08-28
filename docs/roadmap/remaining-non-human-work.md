@@ -343,6 +343,31 @@ and is not included in the completable scope above.
 - [ ] Produce a launch rehearsal report and retain the HOLD decision until external
       gates pass.
 
+### `P6-13` — Frontend-only organizational adoption
+
+- [x] Preserve the complete React + Spring Boot project as the default profile.
+- [x] Add `--profile frontend` project creation without Java, Gradle, Flyway, or
+      database artifacts.
+- [x] Provide mock-backed login, Item CRUD, query metadata, and history-independent
+      local development.
+- [x] Establish stable injectable auth, Item, history, and query adapter boundaries.
+- [x] Support `vireo generate entity --target frontend`, including inferred target,
+      contract check, idempotence, collision safety, and ejection.
+- [x] Record target-aware wire semantics without claiming behavior for an external
+      backend.
+- [x] Add unit coverage and a clean generated frontend consumer job in hosted CI.
+- [x] Publish architecture, team ownership, OpenAPI-wrapper, capability-limitation,
+      command, public API, and website guidance.
+- [x] Add a minor `create-vireo` changeset and pin generated projects to the
+      corresponding CLI line.
+
+Engineering is complete in the adapter-enabled Template commit and the Starter
+frontend-profile implementation. The clean consumer creates a standalone project
+from the pinned public Template, installs registry dependencies, runs doctor,
+generates Purchase Order twice, checks the wire contract, proves no backend files
+exist, type-checks, tests, and builds. This is technical feasibility evidence, not
+evidence that separate frontend/backend teams want or have adopted the profile.
+
 ## Deferred engineering — not on the launch critical path
 
 These items can be engineered without human evaluators, but they remain deferred

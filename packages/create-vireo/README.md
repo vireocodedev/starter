@@ -1,6 +1,8 @@
 # create-vireo
 
-Creates a full-stack Vireo application from an immutable, reviewed commit of the public [Vireo Starter Template](https://github.com/vireocodedev/starter-template).
+Creates either a full-stack Vireo application or a standalone Vireo frontend from
+an immutable, reviewed commit of the public
+[Vireo Starter Template](https://github.com/vireocodedev/starter-template).
 
 ```bash
 npm create vireo@latest my-app
@@ -11,6 +13,20 @@ corepack npm run dev
 ```
 
 The interactive path asks for the project name, Java package, database, and Git initialization. PostgreSQL is the generated-app default; `--database h2` selects the zero-service embedded development database.
+
+For a frontend team with a separately owned backend:
+
+```bash
+npm create vireo@latest operations-ui -- --profile frontend
+cd operations-ui
+corepack npm run setup
+corepack npm run doctor
+corepack npm run dev
+```
+
+This profile contains no Java, Gradle, Flyway, or database configuration. It starts
+against application-owned mock adapters; use `demo` / `demo123`, then replace the
+adapters or select HTTP mode when the company API is ready.
 
 For automation:
 
@@ -35,9 +51,10 @@ await createVireo({ directory: "my-app", database: "h2", git: false });
 
 The package performs no telemetry and prints no environment variables or credentials.
 
-## Generate a full-stack capability
+## Generate a capability
 
-Version 0.2 adds a second executable, `vireo`, while preserving `npm create vireo`:
+The package includes a second executable, `vireo`, while preserving
+`npm create vireo`:
 
 ```bash
 vireo generate entity .vireo/examples/purchase-order.entity.json --dry-run
@@ -45,11 +62,23 @@ vireo generate entity .vireo/examples/purchase-order.entity.json
 vireo check
 ```
 
-Generation emits a Flyway migration, Spring CRUD/query/history slice, Zod transport/domain models, API adapter, responsive React CRUD page, route/navigation registration, localization, Storybook story, and frontend/backend tests. The canonical schema and wire-contract formats are versioned and shipped with the package.
+Full-stack generation emits a Flyway migration, Spring CRUD/query/history slice,
+Zod transport/domain models, configurable API adapter, responsive React CRUD page,
+route/navigation registration, localization, Storybook story, and frontend/backend
+tests. A frontend-profile project automatically emits only the React-side artifacts:
+
+```bash
+vireo generate entity .vireo/examples/purchase-order.entity.json
+# or, from a full-stack project:
+vireo generate entity schema.json --target frontend
+```
+
+The canonical schema and target-aware wire-contract formats are versioned and
+shipped with the package.
 
 Use `--output <directory>` to inspect a standalone tree. An identical rerun is byte-for-byte idempotent. Schema changes require `--force`; collisions or customized files additionally require `--accept-overwrite`. `vireo eject <plural>` keeps application code and removes Vireo management.
 
-The detailed contracts are in [entity schema](../../docs/generators/entity-schema.md), [generated ownership](../../docs/architecture/generated-code-ownership.md), and [wire contracts](../../docs/architecture/wire-contracts.md).
+The detailed contracts are in [frontend-only profile](../../docs/architecture/frontend-only-profile.md), [entity schema](../../docs/generators/entity-schema.md), [generated ownership](../../docs/architecture/generated-code-ownership.md), and [wire contracts](../../docs/architecture/wire-contracts.md).
 
 ## Upgrade a generated project
 

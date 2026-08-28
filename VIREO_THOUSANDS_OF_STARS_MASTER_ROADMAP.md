@@ -11,7 +11,7 @@
 
 **Primary outcome:** Create a framework developers can discover, understand, try,
 trust, adopt, upgrade, extend, recommend, and contribute to
-**North-star positioning:** **The opinionated full-stack framework for polished, offline-capable business PWAs built with React and Spring Boot.**
+**North-star positioning:** **The opinionated full-stack framework for polished, offline-capable business PWAs built with React and Spring Boot.** A supported secondary frontend-only profile lets separately owned React teams use the UI, generation, and adapter contracts without adopting Vireo's backend; it does not replace the golden path or inherit its backend guarantees.
 
 ---
 

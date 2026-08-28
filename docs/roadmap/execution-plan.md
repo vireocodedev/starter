@@ -49,7 +49,7 @@ and completion.
 | Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open   |
 | Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Engineering complete; external/manual gate open |
 | Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Engineering substantially complete; gate HOLD   |
-| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Pending                                         |
+| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Engineering in progress; external gate pending  |
 
 ## Phase 0A evidence set
 
@@ -165,6 +165,17 @@ deployments do not count.
 The [dated Phase 5 closure review](phase-5/closure-review-2026-08-28.md) records
 completed `P5-01` through `P5-05` and `P5-08`, including activated hosted-demo
 evidence under `P5-03`, and the unchanged external `P5-06`/`P5-07` gates.
+
+## Phase 6 current engineering evidence
+
+- [`P6-02` standalone Vireo website](remaining-non-human-work.md#p6-02--primary-website-and-conversion-funnel)
+- [`P6-13` frontend-only organizational adoption](remaining-non-human-work.md#p6-13--frontend-only-organizational-adoption)
+- [Frontend-only profile and team boundary](../architecture/frontend-only-profile.md)
+- Template adapter/mock contracts and Starter unit plus clean generated-consumer
+  coverage
+
+Phase 6 is not complete. These independently useful engineering slices do not
+substitute for the remaining launch, sustainability, or external-adoption gates.
 
 ## Measurement policy
 

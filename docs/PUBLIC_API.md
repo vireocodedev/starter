@@ -8,7 +8,7 @@ source files and JVM implementation packages are not public entry points.
 
 | Package or subpath                            | Use it for                                                      | Runtime           |
 | --------------------------------------------- | --------------------------------------------------------------- | ----------------- |
-| `create-vireo`                                | Creating a pinned, customized full-stack Vireo application      | Node.js 24        |
+| `create-vireo`                                | Creating a pinned full-stack or standalone frontend application | Node.js 24        |
 | `@vireocodedev/history`                       | Validated, framework-free history records and diffs             | Browser or worker |
 | `@vireocodedev/infrastructure`                | HTTP transport, connectivity, persistence, and session expiry   | Browser           |
 | `@vireocodedev/infrastructure/network-status` | Framework-free network status                                   | Browser or worker |

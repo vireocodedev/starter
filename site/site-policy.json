@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "canonicalUrl": "https://vireocode.com/",
-  "title": "Vireo Framework · React + Spring Boot business applications",
-  "description": "A production-shaped React and Spring Boot foundation for operational business applications, with public packages, a runnable template, versioned documentation, and an honest 0.x boundary.",
+  "title": "Vireo Framework · React business applications, with Spring Boot",
+  "description": "A production-shaped React foundation for operational business applications, with a complete Spring Boot path, standalone frontend profile, public packages, and an honest 0.x boundary.",
   "maturity": {
     "label": "Public 0.x",
     "summary": "Production-shaped foundation; public-beta readiness and independent adoption are not yet claimed.",
@@ -19,6 +19,7 @@
     "tutorial": "https://github.com/vireocodedev/starter-template/blob/main/docs/tutorials/30-minute-vertical-slice.md",
     "comparison": "https://github.com/vireocodedev/starter-template/blob/main/docs/comparison.md",
     "architecture": "https://github.com/vireocodedev/starter-template/blob/main/docs/flagship-architecture.md",
+    "frontendProfile": "https://github.com/vireocodedev/starter/blob/main/docs/architecture/frontend-only-profile.md",
     "security": "https://github.com/vireocodedev/starter/blob/main/SECURITY.md",
     "roadmap": "https://github.com/vireocodedev/starter/blob/main/VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md",
     "discussions": "https://github.com/vireocodedev/starter/discussions",
