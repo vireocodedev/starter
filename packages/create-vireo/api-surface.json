@@ -50,7 +50,8 @@
         "node:fs/promises",
         "node:path",
         "node:url",
-        "node:zlib"
+        "node:zlib",
+        "prettier"
       ],
       "workerSafe": false
     }
