@@ -53,6 +53,7 @@
     "generate": "node scripts/generate.mjs",
     "generate:test": "node --test scripts/generator/*.test.mjs",
     "generate:entity:fixture": "node scripts/generated-entity-fixture.mjs",
+    "generate:frontend:fixture": "node scripts/generated-frontend-fixture.mjs",
     "upgrade:project:fixture": "node scripts/project-upgrade-fixture.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

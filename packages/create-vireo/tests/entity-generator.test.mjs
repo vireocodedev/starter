@@ -70,6 +70,18 @@ async function projectFixture() {
   return { root, schemaPath };
 }
 
+async function frontendProjectFixture() {
+  const root = await mkdtemp(join(tmpdir(), "vireo-frontend-entity-generator-"));
+  await mkdir(join(root, ".vireo"), { recursive: true });
+  await writeFile(
+    join(root, ".vireo/project.json"),
+    JSON.stringify({ schemaVersion: 1, profile: "frontend", projectName: "frontend-fixture", packageManager: "npm" }),
+  );
+  const schemaPath = join(root, "api-client.entity.json");
+  await writeFile(schemaPath, JSON.stringify(schema()));
+  return { root, schemaPath };
+}
+
 test("validates acronyms and explicit irregular plural names without inferring them", () => {
   const parsed = parseEntitySchema(schema());
   assert.equal(parsed.entity.name, "APIClient");
@@ -136,4 +148,29 @@ test("unmanaged collisions require both force and explicit overwrite acceptance"
   );
   await generateEntity({ projectDirectory: root, schemaPath, force: true, acceptOverwrite: true });
   assert.match(await readFile(collision, "utf8"), /APIClientTransportSchema/u);
+});
+
+test("frontend projects generate, check, and eject only root-level TypeScript capabilities", async () => {
+  const { root, schemaPath } = await frontendProjectFixture();
+  const generated = await generateEntity({ projectDirectory: root, schemaPath });
+
+  assert.equal(generated.target, "frontend");
+  assert.ok(generated.files.some(file => file.path === "src/generated/api-clients/models/APIClient.ts"));
+  assert.ok(generated.files.every(file => !file.path.endsWith(".java") && !file.path.includes("db/migration")));
+  const api = await readFile(join(root, "src/generated/api-clients/api/aPIClient.api.ts"), "utf8");
+  assert.match(api, /export interface APIClientApi/u);
+  assert.match(api, /configureAPIClientApi/u);
+  assert.deepEqual(await checkGeneratedEntities(root), [{ entity: "APIClient", ok: true, problems: [] }]);
+
+  await ejectEntity(root, "api-clients");
+  assert.match(await readFile(join(root, "src/generated/api-clients/models/APIClient.ts"), "utf8"), /@vireo-ejected/u);
+  assert.deepEqual(await checkGeneratedEntities(root), []);
+});
+
+test("a full-stack project may explicitly generate a frontend-only capability", async () => {
+  const { root, schemaPath } = await projectFixture();
+  const generated = await generateEntity({ projectDirectory: root, schemaPath, target: "frontend" });
+  assert.equal(generated.target, "frontend");
+  assert.ok(generated.files.some(file => file.path.startsWith("frontend/src/generated/")));
+  assert.ok(generated.files.every(file => !file.path.endsWith(".java") && !file.path.includes("db/migration")));
 });

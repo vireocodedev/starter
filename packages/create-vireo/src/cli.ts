@@ -1,9 +1,10 @@
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { createVireo, type VireoDatabase } from "./index.js";
+import { createVireo, type VireoDatabase, type VireoProfile } from "./index.js";
 
 type Arguments = {
   directory?: string;
+  profile?: VireoProfile;
   name?: string;
   javaPackage?: string;
   database?: VireoDatabase;
@@ -20,8 +21,9 @@ Usage:
 
 Options:
   --name <kebab-name>          Project name (defaults to directory name)
-  --java-package <package>     Java base package
-  --database <postgresql|h2>   Development database (default: postgresql)
+  --profile <profile>          full-stack (default) or frontend
+  --java-package <package>     Java base package (full-stack only)
+  --database <postgresql|h2>   Development database (full-stack only)
   --package-manager <npm>      Canonical package manager (default: npm)
   --git / --no-git             Initialize Git (default: yes)
   -y, --yes                    Accept all defaults; requires directory
@@ -49,7 +51,12 @@ function parse(values: string[]): Arguments {
     else if (value === "--git") parsed.git = true;
     else if (value === "--no-git") parsed.git = false;
     else if (value === "--name") parsed.name = valueAt(values, index++, value);
-    else if (value === "--java-package") parsed.javaPackage = valueAt(values, index++, value);
+    else if (value === "--profile") {
+      const profile = valueAt(values, index++, value);
+      if (profile !== "full-stack" && profile !== "frontend")
+        throw new Error("--profile must be `full-stack` or `frontend`.");
+      parsed.profile = profile;
+    } else if (value === "--java-package") parsed.javaPackage = valueAt(values, index++, value);
     else if (value === "--database") {
       const database = valueAt(values, index++, value);
       if (database !== "postgresql" && database !== "h2") throw new Error("--database must be `postgresql` or `h2`.");
@@ -78,12 +85,21 @@ async function promptForMissing(args: Arguments) {
     args.directory ||= (await prompt.question("Project directory (my-vireo-app): ")).trim() || "my-vireo-app";
     const directoryName = args.directory.split(/[\\/]/u).slice(-1)[0];
     args.name ||= (await prompt.question(`Project name (${directoryName}): `)).trim() || directoryName;
-    args.javaPackage ||=
-      (await prompt.question(`Java package (${defaultJavaPackage(args.name!)}): `)).trim() ||
-      defaultJavaPackage(args.name!);
-    const database = (await prompt.question("Database (postgresql/h2) [postgresql]: ")).trim() || "postgresql";
-    if (database !== "postgresql" && database !== "h2") throw new Error("Database must be `postgresql` or `h2`.");
-    args.database = database;
+    const profile =
+      args.profile ??
+      (((await prompt.question("Profile (full-stack/frontend) [full-stack]: ")).trim() ||
+        "full-stack") as VireoProfile);
+    if (profile !== "full-stack" && profile !== "frontend")
+      throw new Error("Profile must be `full-stack` or `frontend`.");
+    args.profile = profile;
+    if (profile === "full-stack") {
+      args.javaPackage ||=
+        (await prompt.question(`Java package (${defaultJavaPackage(args.name!)}): `)).trim() ||
+        defaultJavaPackage(args.name!);
+      const database = (await prompt.question("Database (postgresql/h2) [postgresql]: ")).trim() || "postgresql";
+      if (database !== "postgresql" && database !== "h2") throw new Error("Database must be `postgresql` or `h2`.");
+      args.database = database;
+    }
     if (args.git === undefined)
       args.git = !/^n(?:o)?$/iu.test((await prompt.question("Initialize Git? [Y/n]: ")).trim());
     return args;
@@ -96,6 +112,7 @@ async function main() {
   const args = await promptForMissing(parse(process.argv.slice(2)));
   const result = await createVireo({
     directory: args.directory!,
+    profile: args.profile,
     projectName: args.name,
     javaPackage: args.javaPackage,
     database: args.database,
@@ -105,9 +122,13 @@ async function main() {
   });
   if (args.json) console.log(JSON.stringify(result, null, 2));
   else if (result.dryRun)
-    console.log(`Dry run valid: ${result.projectName} · ${result.javaPackage} · ${result.database}`);
+    console.log(
+      `Dry run valid: ${result.projectName} · ${result.profile}${result.profile === "full-stack" ? ` · ${result.javaPackage} · ${result.database}` : ""}`,
+    );
   else {
-    console.log(`Created ${result.projectName} from Vireo Template ${result.templateCommit.slice(0, 12)}.`);
+    console.log(
+      `Created ${result.projectName} (${result.profile}) from Vireo Template ${result.templateCommit.slice(0, 12)}.`,
+    );
     console.log(
       `\n  cd ${args.directory}\n  corepack npm run setup\n  corepack npm run doctor\n  corepack npm run dev\n`,
     );

@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import { checkGeneratedEntities, ejectEntity, generateEntity } from "./entity-generator.js";
+import type { VireoGenerationTarget } from "./entity-renderer.js";
 import { upgradeVireoProject } from "./project-upgrade.js";
 
 const HELP = `Vireo application development CLI.
@@ -13,6 +14,7 @@ Usage:
 Generate options:
   --project <directory>        Vireo application root (default: current directory)
   --output <directory>         Render a reviewable standalone output tree
+  --target <target>            frontend or full-stack (defaults to project profile)
   --dry-run                    Validate and show the complete write plan
   --diff                       Alias for --dry-run with per-file statuses
   --force                      Allow a reviewed schema change to regenerate
@@ -68,10 +70,16 @@ async function generate(values: string[]) {
   let outputDirectory: string | undefined;
   let force = false;
   let acceptOverwrite = false;
+  let target: VireoGenerationTarget | undefined;
   for (let index = 0; index < rest.length; index += 1) {
     const value = rest[index];
     if (value === "--output") outputDirectory = resolve(valueAfter(rest, index++, value));
-    else if (value === "--force") force = true;
+    else if (value === "--target") {
+      const requested = valueAfter(rest, index++, value);
+      if (requested !== "frontend" && requested !== "full-stack")
+        throw new Error("--target must be `frontend` or `full-stack`.");
+      target = requested;
+    } else if (value === "--force") force = true;
     else if (value === "--accept-overwrite") acceptOverwrite = true;
     else if (value.startsWith("-")) throw new Error(`Unknown generate option: ${value}`);
     else if (schemaPath) throw new Error(`Unexpected generate argument: ${value}`);
@@ -85,11 +93,12 @@ async function generate(values: string[]) {
     dryRun: common.dryRun,
     force,
     acceptOverwrite,
+    target,
   });
   if (common.json) return print(result, true);
   print(
     [
-      `${result.dryRun ? "Validated" : "Generated"} ${result.entity} (${result.schemaDigest.slice(0, 12)}).`,
+      `${result.dryRun ? "Validated" : "Generated"} ${result.entity} for ${result.target} (${result.schemaDigest.slice(0, 12)}).`,
       ...result.files.map(file => `${file.status.padEnd(10)} ${file.path}`),
       result.dryRun
         ? "No files were written."

@@ -8,10 +8,11 @@ import {
   renderCapabilityRegistry,
   renderEntityFiles,
   type GeneratedFile,
+  type VireoGenerationTarget,
   type VireoProjectMetadata,
 } from "./entity-renderer.js";
 
-export const VIREO_GENERATOR_VERSION = "0.2.0";
+export const VIREO_GENERATOR_VERSION = "0.3.0";
 
 type ManifestFile = Pick<GeneratedFile, "ownership" | "path" | "role"> & {
   sha256: string;
@@ -20,6 +21,7 @@ type ManifestFile = Pick<GeneratedFile, "ownership" | "path" | "role"> & {
 export type EntityGenerationManifest = {
   schemaVersion: 1;
   generatorVersion: string;
+  target?: VireoGenerationTarget;
   entity: string;
   plural: string;
   fileStem: string;
@@ -42,6 +44,7 @@ export type GenerateEntityOptions = {
   dryRun?: boolean;
   force?: boolean;
   acceptOverwrite?: boolean;
+  target?: VireoGenerationTarget;
 };
 
 export type GenerateEntityResult = {
@@ -51,6 +54,7 @@ export type GenerateEntityResult = {
   outputDirectory: string;
   schemaDigest: string;
   contractDigest: string;
+  target: VireoGenerationTarget;
   dryRun: boolean;
   files: EntityGenerationFileResult[];
 };
@@ -124,8 +128,13 @@ function parseProjectMetadata(value: unknown): VireoProjectMetadata {
   const data = value as Record<string, unknown>;
   if (data.schemaVersion !== 1)
     throw new VireoGeneratorError("VIR-GEN-002", "Project metadata schemaVersion must be 1.");
-  if (typeof data.projectName !== "string" || typeof data.javaPackage !== "string")
-    throw new VireoGeneratorError("VIR-GEN-002", "Project metadata must contain projectName and javaPackage.");
+  if (typeof data.projectName !== "string")
+    throw new VireoGeneratorError("VIR-GEN-002", "Project metadata must contain projectName.");
+  const profile = data.profile ?? "full-stack";
+  if (profile !== "full-stack" && profile !== "frontend")
+    throw new VireoGeneratorError("VIR-GEN-002", "Project metadata profile must be full-stack or frontend.");
+  if (profile === "full-stack" && typeof data.javaPackage !== "string")
+    throw new VireoGeneratorError("VIR-GEN-002", "Full-stack project metadata must contain javaPackage.");
   return data as VireoProjectMetadata;
 }
 
@@ -222,14 +231,18 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
   const projectRoot = resolve(options.projectDirectory);
   const outputRoot = options.outputDirectory ? resolve(options.outputDirectory) : projectRoot;
   const project = await readProjectMetadata(projectRoot);
+  const profile = project.profile ?? "full-stack";
+  const target = options.target ?? profile;
+  if (target === "full-stack" && profile === "frontend")
+    throw new VireoGeneratorError("VIR-GEN-002", "A frontend project cannot generate full-stack files.");
   const schema = await readEntitySchema(resolve(projectRoot, options.schemaPath));
   const canonicalSchema = stableJson(schema);
   const schemaDigest = sha256(canonicalSchema);
-  const contract = createWireContract(schema);
+  const contract = createWireContract(schema, target);
   const contractJson = stableJson(contract);
   const contractDigest = sha256(contractJson);
   const names = entityNames(schema, project);
-  const generatedFiles = renderEntityFiles(schema, project, schemaDigest);
+  const generatedFiles = renderEntityFiles(schema, project, schemaDigest, target);
   const schemaFile = `.vireo/schemas/${names.plural}.json`;
   const contractFile = `.vireo/contracts/${names.plural}.contract.json`;
   const priorManifest = options.outputDirectory ? null : await readManifest(manifestPath(projectRoot, names.plural));
@@ -244,6 +257,7 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
   const manifest: EntityGenerationManifest = {
     schemaVersion: 1,
     generatorVersion: VIREO_GENERATOR_VERSION,
+    target,
     entity: schema.entity.name,
     plural: names.plural,
     fileStem: names.fileStem,
@@ -258,7 +272,7 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
     })),
   };
   records = [...records, manifest].sort((left, right) => left.plural.localeCompare(right.plural));
-  const registryFile = "frontend/src/generated/vireo.capabilities.ts";
+  const registryFile = `${profile === "frontend" ? "" : "frontend/"}src/generated/vireo.capabilities.ts`;
   const registry: GeneratedFile = {
     path: registryFile,
     content: registryFromManifests(records),
@@ -342,6 +356,7 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
     outputDirectory: outputRoot,
     schemaDigest,
     contractDigest,
+    target,
     dryRun: options.dryRun ?? false,
     files: classification,
   };
@@ -349,7 +364,7 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
 
 export async function checkGeneratedEntities(projectDirectory: string): Promise<GeneratedContractCheck[]> {
   const root = resolve(projectDirectory);
-  await readProjectMetadata(root);
+  const project = await readProjectMetadata(root);
   const records = await manifests(root);
   return Promise.all(
     records.map(async record => {
@@ -362,7 +377,7 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
           const canonical = stableJson(schema);
           if (sha256(canonical) !== record.schemaDigest)
             problems.push("canonical schema digest differs from the manifest");
-          const contract = stableJson(createWireContract(schema));
+          const contract = stableJson(createWireContract(schema, record.target ?? project.profile ?? "full-stack"));
           if (sha256(contract) !== record.contractDigest)
             problems.push("derived wire contract digest differs from the schema");
           const contractPath = join(root, ".vireo", "contracts", `${record.plural}.contract.json`);
@@ -384,6 +399,7 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
 
 export async function ejectEntity(projectDirectory: string, plural: string, dryRun = false) {
   const root = resolve(projectDirectory);
+  const project = await readProjectMetadata(root);
   const path = manifestPath(root, plural);
   const manifest = await readManifest(path);
   if (!manifest) throw new VireoGeneratorError("VIR-GEN-006", `No managed generated capability named ${plural}.`);
@@ -395,7 +411,10 @@ export async function ejectEntity(projectDirectory: string, plural: string, dryR
       const content = await readFile(target, "utf8");
       await writeFile(target, content.replace("@vireo-generated-once", "@vireo-ejected"));
     }
-    await writeFile(join(root, "frontend/src/generated/vireo.capabilities.ts"), registryFromManifests(remaining));
+    await writeFile(
+      join(root, `${project.profile === "frontend" ? "" : "frontend/"}src/generated/vireo.capabilities.ts`),
+      registryFromManifests(remaining),
+    );
     await rm(path, { force: true });
     await rm(join(root, ".vireo", "schemas", `${plural}.json`), { force: true });
     await rm(join(root, ".vireo", "contracts", `${plural}.contract.json`), { force: true });

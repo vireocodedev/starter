@@ -89,6 +89,23 @@ jobs:
       - run: corepack npm run build --workspace=create-vireo
       - run: corepack npm run generate:entity:fixture
 
+  generated-frontend:
+    name: Generated frontend-only fixture
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - run: corepack npm ci
+      - run: corepack npm run build --workspace=create-vireo
+      - run: corepack npm run generate:frontend:fixture
+
   project-upgrade:
     name: Project upgrade 0.2.0 to 0.3.0
     runs-on: ubuntu-24.04

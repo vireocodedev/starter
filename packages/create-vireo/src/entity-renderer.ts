@@ -9,11 +9,14 @@ export type GeneratedFile = {
 
 export type VireoProjectMetadata = {
   schemaVersion: number;
+  profile?: "frontend" | "full-stack";
   projectName: string;
-  javaPackage: string;
+  javaPackage?: string;
   database?: string;
   packageManager?: string;
 };
+
+export type VireoGenerationTarget = "frontend" | "full-stack";
 
 export type WireContract = {
   schemaVersion: 1;
@@ -35,8 +38,12 @@ export type WireContract = {
   };
   semantics: {
     date: "ISO-8601 calendar date";
-    decimal: "JSON number; BigDecimal is canonical on the server";
-    errors: "Spring ProblemDetail with field violations when validation fails";
+    decimal:
+      | "JSON number; BigDecimal is canonical on the server"
+      | "JSON number by default; the application adapter owns precision-sensitive transport mapping";
+    errors:
+      | "Spring ProblemDetail with field violations when validation fails"
+      | "The application adapter normalizes backend-specific failures into frontend errors";
     nullability: "optional fields are explicit JSON null; unknown response fields are stripped by Zod";
     timestamp: "ISO-8601 UTC or offset timestamp";
   };
@@ -76,8 +83,8 @@ export function entityNames(schema: VireoEntitySchema, project: VireoProjectMeta
     className,
     constant: upperSnake(className),
     fileStem,
-    packageName: `${project.javaPackage}.app.${fileStem.toLocaleLowerCase("en-US")}`,
-    packagePath: `${project.javaPackage.replaceAll(".", "/")}/app/${fileStem.toLocaleLowerCase("en-US")}`,
+    packageName: `${project.javaPackage ?? "dev.vireo.frontend"}.app.${fileStem.toLocaleLowerCase("en-US")}`,
+    packagePath: `${(project.javaPackage ?? "dev.vireo.frontend").replaceAll(".", "/")}/app/${fileStem.toLocaleLowerCase("en-US")}`,
     pageClass: `AppPage${schema.entity.plural
       .split("-")
       .map(part => `${part[0].toLocaleUpperCase("en-US")}${part.slice(1)}`)
@@ -94,7 +101,10 @@ function wireType(type: EntityFieldType): WireContract["fields"][number]["wireTy
   return "string";
 }
 
-export function createWireContract(schema: VireoEntitySchema): WireContract {
+export function createWireContract(
+  schema: VireoEntitySchema,
+  target: VireoGenerationTarget = "full-stack",
+): WireContract {
   return {
     schemaVersion: 1,
     entity: schema.entity.name,
@@ -115,8 +125,14 @@ export function createWireContract(schema: VireoEntitySchema): WireContract {
     },
     semantics: {
       date: "ISO-8601 calendar date",
-      decimal: "JSON number; BigDecimal is canonical on the server",
-      errors: "Spring ProblemDetail with field violations when validation fails",
+      decimal:
+        target === "full-stack"
+          ? "JSON number; BigDecimal is canonical on the server"
+          : "JSON number by default; the application adapter owns precision-sensitive transport mapping",
+      errors:
+        target === "full-stack"
+          ? "Spring ProblemDetail with field violations when validation fails"
+          : "The application adapter normalizes backend-specific failures into frontend errors",
       nullability: "optional fields are explicit JSON null; unknown response fields are stripped by Zod",
       timestamp: "ISO-8601 UTC or offset timestamp",
     },
@@ -582,6 +598,7 @@ function renderApi(schema: VireoEntitySchema, names: EntityNames, digest: string
   const endpoint = schema.api.path.replace(/^\/api\//u, "").replace(/^\//u, "");
   return `${generatedHeader("//", digest, "generated-once")}import { z } from "zod";
 import type { PageableParams, PageableResponse } from "@vireocodedev/infrastructure";
+import { createAdapterSlot } from "@/app/adapters/createAdapterSlot";
 import { AppAxiosHttpClient, postAppPagedSearch } from "@/app/data/network/clients/AppAxiosClient";
 import {
   ${names.className}Schema,
@@ -589,7 +606,14 @@ import {
   type ${names.className},
 } from "../models/${names.className}";
 
-class ${names.className}Api extends AppAxiosHttpClient {
+export interface ${names.className}Api {
+  search(pageable: PageableParams, searchText: string, signal?: AbortSignal): Promise<PageableResponse<${names.className}>>;
+  create(value: ${names.className}): Promise<${names.className}>;
+  update(id: number, value: ${names.className}): Promise<${names.className}>;
+  delete(id: number): Promise<void>;
+}
+
+export class ${names.className}HttpApi extends AppAxiosHttpClient implements ${names.className}Api {
   constructor() {
     super(${JSON.stringify(endpoint)});
   }
@@ -617,7 +641,10 @@ class ${names.className}Api extends AppAxiosHttpClient {
   }
 }
 
-export const ${names.fileStem}Api = new ${names.className}Api();
+const ${names.fileStem}ApiSlot = createAdapterSlot<${names.className}Api>(new ${names.className}HttpApi());
+
+export const ${names.fileStem}Api = ${names.fileStem}ApiSlot.adapter;
+export const configure${names.className}Api = ${names.fileStem}ApiSlot.configure;
 `;
 }
 
@@ -893,19 +920,25 @@ ${JSON.stringify(valid, null, 2)
 `;
 }
 
-function renderDocumentation(schema: VireoEntitySchema, names: EntityNames, digest: string) {
+function renderDocumentation(
+  schema: VireoEntitySchema,
+  names: EntityNames,
+  digest: string,
+  target: VireoGenerationTarget,
+) {
   return `<!-- @vireo-generated-once schema-v1 digest:${digest} -->
 # ${schema.localization.en.singular} capability
 
 Generated from the canonical Vireo entity schema for \`${schema.entity.name}\`.
 
 - API: \`${schema.api.path}\`
-- Table: \`${schema.database.table}\`
+- Generation target: \`${target}\`
+${target === "full-stack" ? `- Table: \`${schema.database.table}\`` : "- Backend ownership: external; implement or inject the generated TypeScript API interface"}
 - History: ${schema.capabilities.history ? "enabled" : "disabled"}
 - Query filtering: ${schema.capabilities.query ? "enabled" : "disabled"}
 - Offline replay: disabled in schema v1; Phase 4 owns offline guarantees
 
-The Java, TypeScript, page, story, tests, and migration files are generated once and are now application-owned. Run \`vireo check\` to detect contract drift. Run \`vireo eject ${names.plural}\` before deliberately breaking the generated wire contract.
+The ${target === "full-stack" ? "Java, migration, and " : ""}TypeScript, page, story, and test files are generated once and are now application-owned. Run \`vireo check\` to detect contract drift. Run \`vireo eject ${names.plural}\` before deliberately breaking the generated wire contract.
 `;
 }
 
@@ -913,60 +946,14 @@ export function renderEntityFiles(
   schema: VireoEntitySchema,
   project: VireoProjectMetadata,
   schemaDigest: string,
+  target: VireoGenerationTarget = "full-stack",
 ): GeneratedFile[] {
   const names = entityNames(schema, project);
   const javaMain = `src/main/java/${names.packagePath}`;
   const javaTest = `src/test/java/${names.packagePath}`;
-  const frontend = `frontend/src/generated/${names.plural}`;
+  const frontendRoot = project.profile === "frontend" ? "" : "frontend/";
+  const frontend = `${frontendRoot}src/generated/${names.plural}`;
   const files: GeneratedFile[] = [
-    {
-      path: `${javaMain}/${names.className}.java`,
-      content: renderEntity(schema, names, schemaDigest),
-      ownership: "generated-once",
-      role: "backend",
-    },
-    {
-      path: `${javaMain}/${names.className}DTO.java`,
-      content: renderDto(schema, names, schemaDigest),
-      ownership: "generated-once",
-      role: "backend",
-    },
-    {
-      path: `${javaMain}/${names.className}Mapper.java`,
-      content: renderMapper(names, schemaDigest),
-      ownership: "generated-once",
-      role: "backend",
-    },
-    {
-      path: `${javaMain}/${names.className}Repository.java`,
-      content: renderRepository(names, schemaDigest),
-      ownership: "generated-once",
-      role: "backend",
-    },
-    {
-      path: `${javaMain}/${names.className}Service.java`,
-      content: renderService(schema, names, schemaDigest),
-      ownership: "generated-once",
-      role: "backend",
-    },
-    {
-      path: `${javaMain}/${names.className}Controller.java`,
-      content: renderController(schema, names, schemaDigest),
-      ownership: "generated-once",
-      role: "backend",
-    },
-    {
-      path: `src/main/resources/db/migration/V${schema.database.migrationVersion}__create_${schema.database.table}.sql`,
-      content: renderMigration(schema, names, schemaDigest),
-      ownership: "generated-once",
-      role: "migration",
-    },
-    {
-      path: `${javaTest}/${names.className}ApiIntegrationTest.java`,
-      content: renderBackendTest(schema, names, schemaDigest),
-      ownership: "generated-once",
-      role: "test",
-    },
     {
       path: `${frontend}/models/${names.className}.ts`,
       content: renderModel(schema, names, schemaDigest),
@@ -1010,33 +997,84 @@ export function renderEntityFiles(
       role: "registry",
     },
     {
-      path: `frontend/tests/contract/generated/${names.fileStem}.wire-contract.test.ts`,
+      path: `${frontendRoot}tests/contract/generated/${names.fileStem}.wire-contract.test.ts`,
       content: renderFrontendTest(schema, names, schemaDigest),
       ownership: "generated-once",
       role: "test",
     },
     {
       path: `docs/generated/${names.plural}.md`,
-      content: renderDocumentation(schema, names, schemaDigest),
+      content: renderDocumentation(schema, names, schemaDigest, target),
       ownership: "generated-once",
       role: "documentation",
     },
   ];
-  if (schema.capabilities.history)
+  if (target === "full-stack")
+    files.push(
+      {
+        path: `${javaMain}/${names.className}.java`,
+        content: renderEntity(schema, names, schemaDigest),
+        ownership: "generated-once",
+        role: "backend",
+      },
+      {
+        path: `${javaMain}/${names.className}DTO.java`,
+        content: renderDto(schema, names, schemaDigest),
+        ownership: "generated-once",
+        role: "backend",
+      },
+      {
+        path: `${javaMain}/${names.className}Mapper.java`,
+        content: renderMapper(names, schemaDigest),
+        ownership: "generated-once",
+        role: "backend",
+      },
+      {
+        path: `${javaMain}/${names.className}Repository.java`,
+        content: renderRepository(names, schemaDigest),
+        ownership: "generated-once",
+        role: "backend",
+      },
+      {
+        path: `${javaMain}/${names.className}Service.java`,
+        content: renderService(schema, names, schemaDigest),
+        ownership: "generated-once",
+        role: "backend",
+      },
+      {
+        path: `${javaMain}/${names.className}Controller.java`,
+        content: renderController(schema, names, schemaDigest),
+        ownership: "generated-once",
+        role: "backend",
+      },
+      {
+        path: `src/main/resources/db/migration/V${schema.database.migrationVersion}__create_${schema.database.table}.sql`,
+        content: renderMigration(schema, names, schemaDigest),
+        ownership: "generated-once",
+        role: "migration",
+      },
+      {
+        path: `${javaTest}/${names.className}ApiIntegrationTest.java`,
+        content: renderBackendTest(schema, names, schemaDigest),
+        ownership: "generated-once",
+        role: "test",
+      },
+    );
+  if (target === "full-stack" && schema.capabilities.history)
     files.push({
       path: `${javaMain}/${names.className}HistoryEntityType.java`,
       content: renderHistoryType(names, schemaDigest),
       ownership: "generated-once",
       role: "backend",
     });
-  if (schema.capabilities.query)
+  if (target === "full-stack" && schema.capabilities.query)
     files.push({
       path: `${javaMain}/${names.className}QueryRegistration.java`,
       content: renderQueryRegistration(names, schemaDigest),
       ownership: "generated-once",
       role: "backend",
     });
-  for (const field of schema.fields.filter(field => field.type === "enum"))
+  for (const field of target === "full-stack" ? schema.fields.filter(field => field.type === "enum") : [])
     files.push({
       path: `${javaMain}/${upperFirst(field.name)}.java`,
       content: renderEnum(field, names, schemaDigest),
