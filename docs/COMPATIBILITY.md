@@ -11,8 +11,8 @@ packages they need, subject to their declared dependencies and peer dependencies
 The six JVM artifacts share one coordinated version and should be aligned with the
 `com.vireocode:vireo-bom` BOM.
 
-The current package lines are `0.1.0` for `create-vireo` and npm `0.2.1` for `@vireocodedev/ui`,
-`@vireocodedev/query`, `@vireocodedev/shell`, `@vireocodedev/history`,
+The current package lines are `0.2.0` for `create-vireo`, `0.2.2` for
+`@vireocodedev/ui`, and npm `0.2.1` for `@vireocodedev/query`, `@vireocodedev/shell`, `@vireocodedev/history`,
 `@vireocodedev/infrastructure`, `@vireocodedev/localization`, and
 `@vireocodedev/sqlite`, and JVM `0.2.0`. Numeric equality between npm packages or between npm and JVM
 versions is neither required nor implied. A Template commit or tag, together with

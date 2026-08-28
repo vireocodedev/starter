@@ -225,7 +225,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     await mkdir(join(staging, ".vireo"), { recursive: true });
     await writeFile(
       join(staging, ".vireo", "project.json"),
-      `${JSON.stringify({ schemaVersion: 1, projectName, javaPackage, database, databaseName: projectName.replaceAll("-", "_"), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.1.0" }, null, 2)}\n`,
+      `${JSON.stringify({ schemaVersion: 1, projectName, javaPackage, database, databaseName: projectName.replaceAll("-", "_"), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.2.0" }, null, 2)}\n`,
     );
     if (options.git !== false) {
       const initialized = spawnSync("git", ["init", "--quiet"], { cwd: staging });

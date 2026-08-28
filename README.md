@@ -53,8 +53,8 @@ backend's base entity/service layer; they are separate contracts.
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.1.0   | Project creation plus the `vireo` full-stack entity, contract-check, and ejection CLI (0.2.0 unreleased). |
-| [`@vireocodedev/ui`](packages/ui)                         | 0.2.1   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
+| [`create-vireo`](packages/create-vireo)                   | 0.2.0   | Project creation plus the `vireo` full-stack entity, contract-check, and ejection CLI.                    |
+| [`@vireocodedev/ui`](packages/ui)                         | 0.2.2   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
 | [`@vireocodedev/localization`](packages/localization)     | 0.2.1   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |

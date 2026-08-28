@@ -18,8 +18,9 @@ replacing the package-owned guides that already exist.
 
 The release-specific route is
 `/versions/npm-0.2.1_jvm-0.2.0/`. npm and JVM versions are deliberately shown
-separately because their release lines are independent. The current npm packages
-happen to share `0.2.1`; that is not a requirement for later releases.
+separately because their release lines are independent. Exact versions for all npm
+packages are recorded in `versions.json`; the route identifies the documentation
+release rather than requiring every package to share one version.
 
 The unified search index includes:
 
