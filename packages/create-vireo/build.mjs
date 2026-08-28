@@ -11,6 +11,7 @@ const options = {
   platform: "node",
   format: "esm",
   target: "node24",
+  external: ["prettier"],
   sourcemap: false,
   banner: { js: "#!/usr/bin/env node" },
 };

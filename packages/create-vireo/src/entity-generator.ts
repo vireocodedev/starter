@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { format, resolveConfig } from "prettier";
 import { readEntitySchema } from "./entity-schema.js";
 import {
   createWireContract,
@@ -227,6 +228,16 @@ function registryFromManifests(records: EntityGenerationManifest[]) {
   return renderCapabilityRegistry(records.map(record => ({ plural: record.plural, fileStem: record.fileStem })));
 }
 
+const prettierExtensions = new Set([".json", ".md", ".ts", ".tsx"]);
+
+async function formatGeneratedFile(root: string, file: GeneratedFile): Promise<GeneratedFile> {
+  const extension = file.path.slice(file.path.lastIndexOf("."));
+  if (!prettierExtensions.has(extension)) return file;
+  const filepath = join(root, file.path);
+  const config = (await resolveConfig(filepath)) ?? {};
+  return { ...file, content: await format(file.content, { ...config, filepath }) };
+}
+
 export async function generateEntity(options: GenerateEntityOptions): Promise<GenerateEntityResult> {
   const projectRoot = resolve(options.projectDirectory);
   const outputRoot = options.outputDirectory ? resolve(options.outputDirectory) : projectRoot;
@@ -246,11 +257,13 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
   const schemaFile = `.vireo/schemas/${names.plural}.json`;
   const contractFile = `.vireo/contracts/${names.plural}.contract.json`;
   const priorManifest = options.outputDirectory ? null : await readManifest(manifestPath(projectRoot, names.plural));
-  const plannedFiles: GeneratedFile[] = [
-    ...generatedFiles,
-    { path: schemaFile, content: canonicalSchema, ownership: "regenerated", role: "contract" },
-    { path: contractFile, content: contractJson, ownership: "regenerated", role: "contract" },
-  ];
+  const plannedFiles: GeneratedFile[] = await Promise.all(
+    [
+      ...generatedFiles,
+      { path: schemaFile, content: canonicalSchema, ownership: "regenerated", role: "contract" },
+      { path: contractFile, content: contractJson, ownership: "regenerated", role: "contract" },
+    ].map(file => formatGeneratedFile(outputRoot, file as GeneratedFile)),
+  );
   let records = options.outputDirectory
     ? []
     : (await manifests(projectRoot)).filter(record => record.plural !== names.plural);
@@ -273,12 +286,12 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
   };
   records = [...records, manifest].sort((left, right) => left.plural.localeCompare(right.plural));
   const registryFile = `${profile === "frontend" ? "" : "frontend/"}src/generated/vireo.capabilities.ts`;
-  const registry: GeneratedFile = {
+  const registry: GeneratedFile = await formatGeneratedFile(outputRoot, {
     path: registryFile,
     content: registryFromManifests(records),
     ownership: "regenerated",
     role: "registry",
-  };
+  });
   plannedFiles.push(registry);
 
   const classification = await classifyFiles(outputRoot, plannedFiles, priorManifest);
@@ -381,7 +394,10 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
           if (sha256(contract) !== record.contractDigest)
             problems.push("derived wire contract digest differs from the schema");
           const contractPath = join(root, ".vireo", "contracts", `${record.plural}.contract.json`);
-          if (!(await pathExists(contractPath)) || sha256(await readFile(contractPath)) !== record.contractDigest)
+          if (
+            !(await pathExists(contractPath)) ||
+            sha256(stableJson(await readJson(contractPath))) !== record.contractDigest
+          )
             problems.push("wire-contract artifact is missing or stale");
         } catch (error) {
           problems.push(error instanceof Error ? error.message : String(error));

@@ -41,6 +41,9 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "corepack npm run build && node --test tests/*.test.mjs"
   },
+  "dependencies": {
+    "prettier": "^3.9.6"
+  },
   "devDependencies": {
     "@types/node": "^24.13.3",
     "esbuild": "^0.28.2",

@@ -60,13 +60,7 @@ try {
 
   run("corepack", ["npm", "ci"], projectRoot);
   run("corepack", ["npm", "run", "doctor"], projectRoot);
-  run("corepack", ["npm", "run", "typecheck"], projectRoot);
-  run(
-    "corepack",
-    ["npm", "run", "test", "--", "tests/contract/generated/purchaseOrder.wire-contract.test.ts"],
-    projectRoot,
-  );
-  run("corepack", ["npm", "run", "build"], projectRoot);
+  run("corepack", ["npm", "run", "verify"], projectRoot);
   console.log(
     `Generated ${first.files.length} frontend artifacts; standalone mock-backed fixture verification passed.`,
   );
