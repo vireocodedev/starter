@@ -1,5 +1,12 @@
 # @vireocodedev/sqlite
 
+## 0.2.2
+
+### Patch Changes
+
+- fe25cd3: Reject duplicate queued command IDs and malformed replay responses, make equal-time
+  ordering deterministic, and serialize different concurrent offline-owner changes.
+
 ## 0.2.1
 
 ### Patch Changes
