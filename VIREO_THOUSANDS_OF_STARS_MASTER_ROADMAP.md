@@ -1355,6 +1355,9 @@ the current backlog estimates remaining active effort separately from external w
 
 ### Phase 3 — Killer workflow (6–12 weeks)
 
+**Engineering status (27 August 2026):** implemented with a schema-v1 scalar/enum
+admission boundary; unfamiliar-user generation/customization gate remains open.
+
 - Schema model and full-stack entity/capability generator.
 - Wire-contract validation/generation.
 - Generated migration, backend, frontend, localization, stories, and tests.
@@ -1502,12 +1505,12 @@ These are the recommended first actions, in order:
        rows remain inactive until their enforcement evidence passes).
 9. [x] Rewrite the README around outcomes, maturity, ownership, and limitations;
        a hosted demo remains future work.
-10. [ ] Separate minimal template responsibilities from demonstration/kitchen-sink content.
-11. [ ] Build the one-command create workflow.
+10. [x] Separate minimal template responsibilities from demonstration/kitchen-sink content.
+11. [x] Build the one-command create workflow (implementation complete; first npm publication remains external).
 12. [ ] Run observed clean-room onboarding and fix every blocker.
-13. [ ] Specify the vertical-slice entity schema and generated ownership model.
-14. [ ] Implement the smallest end-to-end generator proving the concept.
-15. [ ] Formalize and test frontend/backend wire-contract drift detection.
+13. [x] Specify the vertical-slice entity schema and generated ownership model.
+14. [x] Implement the smallest end-to-end generator proving the concept.
+15. [x] Formalize and test frontend/backend wire-contract drift detection.
 16. [ ] Publish precise offline guarantees and a threat model.
 17. [ ] Build the flagship demo scenario and visual-quality bar.
 18. [ ] Establish trusted releases, provenance, security reporting, and compatibility policy.

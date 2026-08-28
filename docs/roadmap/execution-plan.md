@@ -46,7 +46,7 @@ and completion.
 | Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete                                       |
 | Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | In progress                                    |
 | Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Engineering complete; external-human gate open |
-| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Pending                                        |
+| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open  |
 | Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Pending                                        |
 | Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Pending                                        |
 | Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Pending                                        |
@@ -120,6 +120,20 @@ deferred to public beta as an accepted risk.** Public npm/Maven artifacts and bo
 repositories are anonymously consumable. Phase 1 is therefore the next authorized
 phase; no elapsed forecast is promised until owners, capacity, and observed
 throughput are known.
+
+## Phase 3 engineering evidence set
+
+- [Phase 3 backlog and gate split](phase-3/backlog.md)
+- [Canonical entity schema](../generators/entity-schema.md)
+- [Generated-code ownership decision](../architecture/generated-code-ownership.md)
+- [Cross-stack wire-contract decision](../architecture/wire-contracts.md)
+- `create-vireo` generator and refusal/idempotence/ejection tests
+- Clean generated Purchase Order frontend typecheck/Zod contract test and Spring API integration test
+- Hosted generated-fixture job in `.github/workflows/ci.yml`
+
+The engineering surface is complete. The phase exit gate remains open because no
+unfamiliar external user has independently generated and customized the slice or
+reported meaningful time saved.
 
 ## Measurement policy
 

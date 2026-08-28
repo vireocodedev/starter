@@ -1,0 +1,143 @@
+import { resolve } from "node:path";
+import { checkGeneratedEntities, ejectEntity, generateEntity } from "./entity-generator.js";
+
+const HELP = `Vireo application development CLI.
+
+Usage:
+  vireo generate entity <schema.json> [options]
+  vireo check [options]
+  vireo eject <entity-plural> [options]
+
+Generate options:
+  --project <directory>        Vireo application root (default: current directory)
+  --output <directory>         Render a reviewable standalone output tree
+  --dry-run                    Validate and show the complete write plan
+  --diff                       Alias for --dry-run with per-file statuses
+  --force                      Allow a reviewed schema change to regenerate
+  --accept-overwrite           With --force, explicitly overwrite collisions/customizations
+  --json                       Print machine-readable output
+
+Check verifies canonical schema, derived wire contract, migration, backend DTO/controller,
+and frontend transport/API hashes. Eject retains application code while removing Vireo
+management and generated route registration.
+`;
+
+type CommonArguments = {
+  project: string;
+  json: boolean;
+  dryRun: boolean;
+};
+
+function valueAfter(values: string[], index: number, option: string) {
+  const value = values[index + 1];
+  if (!value || value.startsWith("-")) throw new Error(`${option} requires a value.`);
+  return value;
+}
+
+function commonArguments(values: string[]) {
+  const common: CommonArguments = { project: process.cwd(), json: false, dryRun: false };
+  const rest: string[] = [];
+  for (let index = 0; index < values.length; index += 1) {
+    const value = values[index];
+    if (value === "--project") common.project = resolve(valueAfter(values, index++, value));
+    else if (value === "--json") common.json = true;
+    else if (value === "--dry-run" || value === "--diff") common.dryRun = true;
+    else rest.push(value);
+  }
+  return { common, rest };
+}
+
+function print(value: unknown, json: boolean) {
+  if (json) console.log(JSON.stringify(value, null, 2));
+  else if (Array.isArray(value)) value.forEach(item => console.log(String(item)));
+  else console.log(String(value));
+}
+
+async function generate(values: string[]) {
+  if (values.shift() !== "entity") throw new Error("The supported Phase 3 generator is `vireo generate entity`.");
+  const { common, rest } = commonArguments(values);
+  let schemaPath: string | undefined;
+  let outputDirectory: string | undefined;
+  let force = false;
+  let acceptOverwrite = false;
+  for (let index = 0; index < rest.length; index += 1) {
+    const value = rest[index];
+    if (value === "--output") outputDirectory = resolve(valueAfter(rest, index++, value));
+    else if (value === "--force") force = true;
+    else if (value === "--accept-overwrite") acceptOverwrite = true;
+    else if (value.startsWith("-")) throw new Error(`Unknown generate option: ${value}`);
+    else if (schemaPath) throw new Error(`Unexpected generate argument: ${value}`);
+    else schemaPath = value;
+  }
+  if (!schemaPath) throw new Error("generate entity requires a schema JSON path.");
+  const result = await generateEntity({
+    projectDirectory: common.project,
+    schemaPath,
+    outputDirectory,
+    dryRun: common.dryRun,
+    force,
+    acceptOverwrite,
+  });
+  if (common.json) return print(result, true);
+  print(
+    [
+      `${result.dryRun ? "Validated" : "Generated"} ${result.entity} (${result.schemaDigest.slice(0, 12)}).`,
+      ...result.files.map(file => `${file.status.padEnd(10)} ${file.path}`),
+      result.dryRun
+        ? "No files were written."
+        : `Run \`vireo check --project ${result.projectDirectory}\` to verify wire-contract integrity.`,
+    ],
+    false,
+  );
+}
+
+async function check(values: string[]) {
+  const { common, rest } = commonArguments(values);
+  if (rest.length > 0) throw new Error(`Unknown check option: ${rest[0]}`);
+  const results = await checkGeneratedEntities(common.project);
+  if (common.json) print(results, true);
+  else
+    print(
+      results.length === 0
+        ? ["No managed generated capabilities found."]
+        : results.flatMap(result => [
+            `${result.ok ? "PASS" : "FAIL"} ${result.entity}`,
+            ...result.problems.map(problem => `  - ${problem}`),
+          ]),
+      false,
+    );
+  if (results.some(result => !result.ok)) process.exitCode = 1;
+}
+
+async function eject(values: string[]) {
+  const { common, rest } = commonArguments(values);
+  if (rest.length !== 1 || rest[0].startsWith("-")) throw new Error("eject requires one entity plural name.");
+  const result = await ejectEntity(common.project, rest[0], common.dryRun);
+  if (common.json) print(result, true);
+  else
+    print(
+      [
+        `${result.dryRun ? "Would eject" : "Ejected"} ${result.entity}.`,
+        `Retained ${result.retainedFiles.length} application-owned files; route registration and contract management ${result.dryRun ? "would be removed" : "were removed"}.`,
+      ],
+      false,
+    );
+}
+
+async function main() {
+  const values = process.argv.slice(2);
+  if (values.length === 0 || values[0] === "--help" || values[0] === "-h") {
+    console.log(HELP);
+    return;
+  }
+  const command = values.shift();
+  if (command === "generate") await generate(values);
+  else if (command === "check") await check(values);
+  else if (command === "eject") await eject(values);
+  else throw new Error(`Unknown command: ${command}\n\n${HELP}`);
+}
+
+main().catch(error => {
+  console.error(`vireo: ${error instanceof Error ? error.message : String(error)}`);
+  process.exitCode = 1;
+});

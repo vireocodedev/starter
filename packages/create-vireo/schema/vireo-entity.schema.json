@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vireocode.com/schemas/entity/v1.json",
+  "title": "Vireo entity schema v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "entity",
+    "database",
+    "api",
+    "permissions",
+    "capabilities",
+    "fields",
+    "localization"
+  ],
+  "properties": {
+    "$schema": { "type": "string", "format": "uri-reference" },
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "entity" },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "plural"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9]*$" },
+        "plural": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "description": { "type": "string" }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["table", "migrationVersion"],
+      "properties": {
+        "table": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "migrationVersion": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "api": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^/[a-z][a-z0-9-]*(/[a-z][a-z0-9-]*)*$" }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read", "manage"],
+      "properties": {
+        "read": { "type": "string", "minLength": 1 },
+        "manage": { "type": "string", "minLength": 1 }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["history", "offline", "query"],
+      "properties": {
+        "history": { "type": "boolean" },
+        "offline": { "const": false },
+        "query": { "type": "boolean" }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+          "type": {
+            "enum": ["boolean", "date", "decimal", "enum", "integer", "long", "string", "text", "timestamp", "uuid"]
+          },
+          "required": { "type": "boolean" },
+          "unique": { "type": "boolean" },
+          "default": { "type": ["boolean", "number", "string"] },
+          "enumValues": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" }
+          },
+          "constraints": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "min": { "type": "number" },
+              "max": { "type": "number" },
+              "pattern": { "type": "string" }
+            }
+          },
+          "query": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "filterable": { "type": "boolean" },
+              "searchable": { "type": "boolean" },
+              "sortable": { "type": "boolean" }
+            }
+          },
+          "ui": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "control": { "enum": ["checkbox", "date", "number", "select", "text", "textarea"] },
+              "list": { "type": "boolean" },
+              "label": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "maxItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "kind", "target", "displayField"],
+        "properties": {
+          "name": { "type": "string" },
+          "kind": { "const": "many-to-one" },
+          "target": { "type": "string" },
+          "required": { "type": "boolean" },
+          "displayField": { "type": "string" }
+        }
+      }
+    },
+    "localization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en"],
+      "properties": {
+        "en": { "$ref": "#/$defs/names" },
+        "hr": { "$ref": "#/$defs/names" }
+      }
+    }
+  },
+  "$defs": {
+    "names": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["singular", "plural"],
+      "properties": {
+        "singular": { "type": "string", "minLength": 1 },
+        "plural": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

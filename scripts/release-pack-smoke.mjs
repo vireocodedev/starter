@@ -110,8 +110,9 @@ function validateManifest(sourceDirectory, sourceManifest, packedManifest) {
   if (packedManifest.publishConfig?.provenance !== true) {
     throw new Error(`${sourceManifest.name} does not require npm provenance.`);
   }
-  if (JSON.stringify(packedManifest.files) !== JSON.stringify(["dist"])) {
-    throw new Error(`${sourceManifest.name} must publish only its dist allowlist.`);
+  const expectedFiles = sourceManifest.name === "create-vireo" ? ["dist", "schema"] : ["dist"];
+  if (JSON.stringify(packedManifest.files) !== JSON.stringify(expectedFiles)) {
+    throw new Error(`${sourceManifest.name} must publish only its reviewed file allowlist.`);
   }
   if (
     packedManifest.name === "@vireocodedev/ui" &&
@@ -130,9 +131,10 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
   validateManifest(sourceDirectory, sourceManifest, manifest);
 
   const files = readdirSync(packageDirectory, { withFileTypes: true });
+  const allowedDirectories = new Set(["dist", ...(manifest.name === "create-vireo" ? ["schema"] : [])]);
   const unexpected = files
     .map(entry => entry.name)
-    .filter(name => name !== "dist" && name !== "package.json" && !/^(?:README|LICENSE)/iu.test(name));
+    .filter(name => !allowedDirectories.has(name) && name !== "package.json" && !/^(?:README|LICENSE)/iu.test(name));
   if (unexpected.length > 0) {
     throw new Error(`${manifest.name} publishes unexpected top-level files: ${unexpected.join(", ")}`);
   }
@@ -141,6 +143,9 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
     if (!existsSync(join(packageDirectory, required))) {
       throw new Error(`${manifest.name} tarball is missing ${required}.`);
     }
+  }
+  if (manifest.name === "create-vireo" && !existsSync(join(packageDirectory, "schema/vireo-entity.schema.json"))) {
+    throw new Error("create-vireo must publish its canonical entity schema.");
   }
   if (readFileSync(join(packageDirectory, "LICENSE"), "utf8") !== rootLicense) {
     throw new Error(`${manifest.name} publishes license text that differs from the repository license.`);

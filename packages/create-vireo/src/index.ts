@@ -4,7 +4,34 @@ import { chmod, cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { gunzipSync } from "node:zlib";
 
-export const TEMPLATE_COMMIT = "88cd525f779badef1f671140f2140f088324f4e4";
+export {
+  checkGeneratedEntities,
+  ejectEntity,
+  generateEntity,
+  readProjectMetadata,
+  sha256,
+  stableJson,
+  VIREO_GENERATOR_VERSION,
+  VireoGeneratorError,
+  type EntityGenerationFileResult,
+  type EntityGenerationManifest,
+  type GenerateEntityOptions,
+  type GenerateEntityResult,
+  type GeneratedContractCheck,
+} from "./entity-generator.js";
+export {
+  EntitySchemaError,
+  parseEntitySchema,
+  readEntitySchema,
+  VIREO_ENTITY_SCHEMA_VERSION,
+  type EntityFieldSchema,
+  type EntityFieldType,
+  type EntityRelationshipSchema,
+  type VireoEntitySchema,
+} from "./entity-schema.js";
+export { createWireContract, entityNames, type EntityNames, type WireContract } from "./entity-renderer.js";
+
+export const TEMPLATE_COMMIT = "2520c99b1550246c3b0c5299b3cc6055dd10ead7";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";

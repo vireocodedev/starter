@@ -18,7 +18,8 @@
     "starter"
   ],
   "bin": {
-    "create-vireo": "./dist/cli.js"
+    "create-vireo": "./dist/cli.js",
+    "vireo": "./dist/vireo-cli.js"
   },
   "exports": {
     ".": {
@@ -30,7 +31,8 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "schema"
   ],
   "scripts": {
     "build": "node build.mjs",

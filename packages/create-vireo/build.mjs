@@ -5,7 +5,7 @@ import { build, context } from "esbuild";
 const watch = process.argv.includes("--watch");
 await rm("dist", { recursive: true, force: true });
 const options = {
-  entryPoints: ["src/index.ts", "src/cli.ts"],
+  entryPoints: ["src/index.ts", "src/cli.ts", "src/vireo-cli.ts"],
   outdir: "dist",
   bundle: true,
   platform: "node",

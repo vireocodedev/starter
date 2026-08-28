@@ -46,6 +46,7 @@
     "types:strict": "node scripts/strict-consumer-types.mjs",
     "generate": "node scripts/generate.mjs",
     "generate:test": "node --test scripts/generator/*.test.mjs",
+    "generate:entity:fixture": "node scripts/generated-entity-fixture.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",

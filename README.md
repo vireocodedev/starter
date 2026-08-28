@@ -12,9 +12,10 @@ logic synchronize safely. See the public
 [Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
 current runnable full-stack composition.
 
-This public `0.x` line is production-shaped, not a production-readiness claim. The
-create, doctor, upgrade, and full-stack entity generator workflows do not yet exist;
-current applications clone and customize the Template and hand-write domain slices.
+This public `0.x` line is production-shaped, not a production-readiness claim. Project
+creation, doctor diagnostics, and the Phase 3 full-stack entity generator are
+implemented; their first npm publication remains pending. A version-aware upgrade
+workflow does not yet exist.
 
 ## Start here
 
@@ -52,7 +53,7 @@ backend's base entity/service layer; they are separate contracts.
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.1.0   | Canonical interactive and non-interactive Vireo project creation command.                                 |
+| [`create-vireo`](packages/create-vireo)                   | 0.1.0   | Project creation plus the `vireo` full-stack entity, contract-check, and ejection CLI (0.2.0 unreleased). |
 | [`@vireocodedev/ui`](packages/ui)                         | 0.2.1   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |

@@ -1,0 +1,139 @@
+import assert from "node:assert/strict";
+import { mkdtemp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import test from "node:test";
+import {
+  checkGeneratedEntities,
+  ejectEntity,
+  EntitySchemaError,
+  generateEntity,
+  parseEntitySchema,
+} from "../dist/index.js";
+
+function schema(overrides = {}) {
+  return {
+    schemaVersion: 1,
+    kind: "entity",
+    entity: { name: "APIClient", plural: "api-clients", description: "Acronym fixture" },
+    database: { table: "api_client", migrationVersion: 3 },
+    api: { path: "/api/api-clients" },
+    permissions: { read: "hasRole('USER')", manage: "hasRole('SUPERADMIN')" },
+    capabilities: { history: true, offline: false, query: true },
+    fields: [
+      {
+        name: "displayName",
+        type: "string",
+        required: true,
+        constraints: { min: 2, max: 120 },
+        query: { filterable: true, searchable: true, sortable: true },
+      },
+      {
+        name: "creditLimit",
+        type: "decimal",
+        required: true,
+        constraints: { min: 0 },
+        query: { filterable: true },
+      },
+      {
+        name: "status",
+        type: "enum",
+        required: true,
+        enumValues: ["NEW", "ACTIVE"],
+        query: { filterable: true },
+      },
+      { name: "reviewedAt", type: "timestamp", query: { filterable: true } },
+    ],
+    localization: {
+      en: { singular: "API client", plural: "API clients" },
+      hr: { singular: "API klijent", plural: "API klijenti" },
+    },
+    ...overrides,
+  };
+}
+
+async function projectFixture() {
+  const root = await mkdtemp(join(tmpdir(), "vireo-entity-generator-"));
+  await mkdir(join(root, ".vireo"), { recursive: true });
+  await writeFile(
+    join(root, ".vireo/project.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      projectName: "fixture",
+      javaPackage: "dev.example.fixture",
+      database: "h2",
+      packageManager: "npm",
+    }),
+  );
+  const schemaPath = join(root, "api-client.entity.json");
+  await writeFile(schemaPath, JSON.stringify(schema()));
+  return { root, schemaPath };
+}
+
+test("validates acronyms and explicit irregular plural names without inferring them", () => {
+  const parsed = parseEntitySchema(schema());
+  assert.equal(parsed.entity.name, "APIClient");
+  assert.equal(parsed.entity.plural, "api-clients");
+});
+
+test("rejects reserved, Unicode, relationship, compound-id, and offline shapes explicitly in schema v1", () => {
+  for (const value of [
+    schema({ entity: { name: "Član", plural: "clanovi" } }),
+    schema({ fields: [{ name: "class", type: "string", required: true, query: { searchable: true } }] }),
+    schema({ relationships: [{ name: "owner", kind: "many-to-one", target: "User", displayField: "name" }] }),
+    schema({ capabilities: { history: true, offline: true, query: true } }),
+    { ...schema(), id: { fields: ["tenantId", "number"] } },
+  ]) {
+    assert.throws(() => parseEntitySchema(value), EntitySchemaError);
+  }
+});
+
+test("dry run is non-writing and output mode renders a deterministic review tree", async () => {
+  const { root, schemaPath } = await projectFixture();
+  const dry = await generateEntity({ projectDirectory: root, schemaPath, dryRun: true });
+  assert.equal(dry.dryRun, true);
+  await assert.rejects(stat(join(root, "src/main/java/dev/example/fixture/app/aPIClient/APIClient.java")), /ENOENT/u);
+
+  const output = join(root, "review");
+  const first = await generateEntity({ projectDirectory: root, schemaPath, outputDirectory: output });
+  const source = await readFile(join(output, "src/main/java/dev/example/fixture/app/apiclient/APIClient.java"), "utf8");
+  assert.match(source, /class APIClient extends BaseEntity/u);
+  const second = await generateEntity({ projectDirectory: root, schemaPath, outputDirectory: output });
+  assert.ok(second.files.every(file => file.status === "unchanged"));
+  assert.equal(first.schemaDigest, second.schemaDigest);
+});
+
+test("generation is idempotent, detects wire drift, refuses customization, and ejects without deleting code", async () => {
+  const { root, schemaPath } = await projectFixture();
+  const first = await generateEntity({ projectDirectory: root, schemaPath });
+  assert.ok(first.files.some(file => file.status === "create"));
+  const second = await generateEntity({ projectDirectory: root, schemaPath });
+  assert.ok(second.files.every(file => file.status === "unchanged"));
+
+  const model = join(root, "frontend/src/generated/api-clients/models/APIClient.ts");
+  await writeFile(model, `${await readFile(model, "utf8")}\n// deliberate contract drift\n`);
+  const checks = await checkGeneratedEntities(root);
+  assert.equal(checks[0].ok, false);
+  assert.match(checks[0].problems.join("\n"), /contract drift/u);
+  await assert.rejects(generateEntity({ projectDirectory: root, schemaPath }), /VIR-GEN-005/u);
+
+  const ejected = await ejectEntity(root, "api-clients");
+  assert.ok(ejected.retainedFiles.length > 10);
+  assert.match(await readFile(model, "utf8"), /@vireo-ejected/u);
+  await stat(model);
+  assert.deepEqual(await checkGeneratedEntities(root), []);
+});
+
+test("unmanaged collisions require both force and explicit overwrite acceptance", async () => {
+  const { root, schemaPath } = await projectFixture();
+  const collision = join(root, "frontend/src/generated/api-clients/models/APIClient.ts");
+  await mkdir(join(root, "frontend/src/generated/api-clients/models"), { recursive: true });
+  await writeFile(collision, "user-owned\n");
+  await assert.rejects(generateEntity({ projectDirectory: root, schemaPath }), /VIR-GEN-003/u);
+  await assert.rejects(
+    generateEntity({ projectDirectory: root, schemaPath, acceptOverwrite: true }),
+    /--accept-overwrite is valid only together with --force/u,
+  );
+  await generateEntity({ projectDirectory: root, schemaPath, force: true, acceptOverwrite: true });
+  assert.match(await readFile(collision, "utf8"), /APIClientTransportSchema/u);
+});

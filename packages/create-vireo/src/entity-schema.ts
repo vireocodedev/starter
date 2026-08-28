@@ -1,0 +1,402 @@
+import { readFile } from "node:fs/promises";
+
+export const VIREO_ENTITY_SCHEMA_VERSION = 1 as const;
+
+export type EntityFieldType =
+  "boolean" | "date" | "decimal" | "enum" | "integer" | "long" | "string" | "text" | "timestamp" | "uuid";
+
+export type EntityFieldSchema = {
+  name: string;
+  type: EntityFieldType;
+  required?: boolean;
+  unique?: boolean;
+  default?: boolean | number | string;
+  enumValues?: string[];
+  constraints?: {
+    max?: number;
+    min?: number;
+    pattern?: string;
+  };
+  query?: {
+    filterable?: boolean;
+    searchable?: boolean;
+    sortable?: boolean;
+  };
+  ui?: {
+    control?: "checkbox" | "date" | "number" | "select" | "text" | "textarea";
+    list?: boolean;
+    label?: string;
+  };
+};
+
+export type EntityRelationshipSchema = {
+  name: string;
+  kind: "many-to-one";
+  target: string;
+  required?: boolean;
+  displayField: string;
+};
+
+export type VireoEntitySchema = {
+  schemaVersion: typeof VIREO_ENTITY_SCHEMA_VERSION;
+  kind: "entity";
+  entity: {
+    name: string;
+    plural: string;
+    description?: string;
+  };
+  database: {
+    table: string;
+    migrationVersion: number;
+  };
+  api: {
+    path: string;
+  };
+  permissions: {
+    read: string;
+    manage: string;
+  };
+  capabilities: {
+    history: boolean;
+    offline: boolean;
+    query: boolean;
+  };
+  fields: EntityFieldSchema[];
+  relationships?: EntityRelationshipSchema[];
+  localization: {
+    en: {
+      singular: string;
+      plural: string;
+    };
+    hr?: {
+      singular: string;
+      plural: string;
+    };
+  };
+};
+
+export class EntitySchemaError extends Error {
+  readonly code = "VIR-GEN-001";
+
+  constructor(readonly problems: string[]) {
+    super(`Invalid Vireo entity schema:\n- ${problems.join("\n- ")}`);
+    this.name = "EntitySchemaError";
+  }
+}
+
+const FIELD_TYPES = new Set<EntityFieldType>([
+  "boolean",
+  "date",
+  "decimal",
+  "enum",
+  "integer",
+  "long",
+  "string",
+  "text",
+  "timestamp",
+  "uuid",
+]);
+const RESERVED_TYPESCRIPT_NAMES = new Set([
+  "await",
+  "break",
+  "case",
+  "catch",
+  "class",
+  "const",
+  "continue",
+  "debugger",
+  "default",
+  "delete",
+  "do",
+  "else",
+  "enum",
+  "export",
+  "extends",
+  "false",
+  "finally",
+  "for",
+  "function",
+  "if",
+  "import",
+  "in",
+  "instanceof",
+  "interface",
+  "let",
+  "new",
+  "null",
+  "return",
+  "static",
+  "super",
+  "switch",
+  "this",
+  "throw",
+  "true",
+  "try",
+  "typeof",
+  "var",
+  "void",
+  "while",
+  "with",
+  "yield",
+]);
+const RESERVED_JAVA_NAMES = new Set([
+  "abstract",
+  "assert",
+  "boolean",
+  "break",
+  "byte",
+  "case",
+  "catch",
+  "char",
+  "class",
+  "const",
+  "continue",
+  "default",
+  "do",
+  "double",
+  "else",
+  "enum",
+  "extends",
+  "final",
+  "finally",
+  "float",
+  "for",
+  "goto",
+  "if",
+  "implements",
+  "import",
+  "instanceof",
+  "int",
+  "interface",
+  "long",
+  "native",
+  "new",
+  "package",
+  "private",
+  "protected",
+  "public",
+  "return",
+  "short",
+  "static",
+  "strictfp",
+  "super",
+  "switch",
+  "synchronized",
+  "this",
+  "throw",
+  "throws",
+  "transient",
+  "try",
+  "void",
+  "volatile",
+  "while",
+]);
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function requiredObject(parent: Record<string, unknown>, key: string, problems: string[]) {
+  const value = parent[key];
+  if (!isObject(value)) {
+    problems.push(`${key} must be an object`);
+    return {};
+  }
+  return value;
+}
+
+function requiredString(parent: Record<string, unknown>, key: string, path: string, problems: string[]) {
+  const value = parent[key];
+  if (typeof value !== "string" || !value.trim()) {
+    problems.push(`${path}.${key} must be a non-empty string`);
+    return "";
+  }
+  return value.trim();
+}
+
+function requiredBoolean(parent: Record<string, unknown>, key: string, path: string, problems: string[]) {
+  const value = parent[key];
+  if (typeof value !== "boolean") {
+    problems.push(`${path}.${key} must be a boolean`);
+    return false;
+  }
+  return value;
+}
+
+function rejectUnknown(parent: Record<string, unknown>, allowed: readonly string[], path: string, problems: string[]) {
+  const accepted = new Set(allowed);
+  for (const key of Object.keys(parent)) {
+    if (!accepted.has(key)) problems.push(`${path ? `${path}.` : ""}${key} is not supported by schema v1`);
+  }
+}
+
+function validJavaIdentifier(value: string) {
+  return /^[\p{L}_$][\p{L}\p{N}_$]*$/u.test(value) && !RESERVED_JAVA_NAMES.has(value);
+}
+
+function validFieldIdentifier(value: string) {
+  return /^[a-z][A-Za-z0-9]*$/u.test(value) && !RESERVED_TYPESCRIPT_NAMES.has(value) && !RESERVED_JAVA_NAMES.has(value);
+}
+
+function validateField(value: unknown, index: number, problems: string[]): EntityFieldSchema | null {
+  const path = `fields[${index}]`;
+  if (!isObject(value)) {
+    problems.push(`${path} must be an object`);
+    return null;
+  }
+  rejectUnknown(
+    value,
+    ["name", "type", "required", "unique", "default", "enumValues", "constraints", "query", "ui"],
+    path,
+    problems,
+  );
+  const name = requiredString(value, "name", path, problems);
+  const type = requiredString(value, "type", path, problems) as EntityFieldType;
+  if (name && !validFieldIdentifier(name))
+    problems.push(`${path}.name must be a portable lower-camel Java/TypeScript identifier`);
+  if (!FIELD_TYPES.has(type)) problems.push(`${path}.type is unsupported: ${type}`);
+  if (name === "id") problems.push(`${path}.name is reserved because Vireo supplies the Long id`);
+  if (type === "enum") {
+    if (!Array.isArray(value.enumValues) || value.enumValues.length < 2)
+      problems.push(`${path}.enumValues must contain at least two values for an enum field`);
+    else {
+      const values = value.enumValues.filter(item => typeof item === "string") as string[];
+      if (values.length !== value.enumValues.length || values.some(item => !/^[A-Z][A-Z0-9_]*$/u.test(item)))
+        problems.push(`${path}.enumValues must use portable UPPER_SNAKE_CASE identifiers`);
+      if (new Set(values).size !== values.length) problems.push(`${path}.enumValues must be unique`);
+    }
+  } else if (value.enumValues !== undefined) problems.push(`${path}.enumValues is valid only when type is enum`);
+  if (value.required !== undefined && typeof value.required !== "boolean")
+    problems.push(`${path}.required must be a boolean`);
+  if (value.unique !== undefined && typeof value.unique !== "boolean")
+    problems.push(`${path}.unique must be a boolean`);
+  if (value.constraints !== undefined && !isObject(value.constraints))
+    problems.push(`${path}.constraints must be an object`);
+  const constraints = isObject(value.constraints) ? value.constraints : undefined;
+  if (constraints) {
+    for (const key of ["min", "max"] as const) {
+      const constraint = constraints[key];
+      if (constraint !== undefined && (typeof constraint !== "number" || !Number.isFinite(constraint)))
+        problems.push(`${path}.constraints.${key} must be a finite number`);
+    }
+    if (typeof constraints.min === "number" && typeof constraints.max === "number" && constraints.min > constraints.max)
+      problems.push(`${path}.constraints.min cannot exceed max`);
+    if (constraints.pattern !== undefined) {
+      if (typeof constraints.pattern !== "string") problems.push(`${path}.constraints.pattern must be a string`);
+      else {
+        try {
+          new RegExp(constraints.pattern, "u");
+        } catch {
+          problems.push(`${path}.constraints.pattern must be a valid regular expression`);
+        }
+      }
+    }
+  }
+  if (value.query !== undefined && !isObject(value.query)) problems.push(`${path}.query must be an object`);
+  if (value.ui !== undefined && !isObject(value.ui)) problems.push(`${path}.ui must be an object`);
+  return value as EntityFieldSchema;
+}
+
+export function parseEntitySchema(value: unknown): VireoEntitySchema {
+  const problems: string[] = [];
+  if (!isObject(value)) throw new EntitySchemaError(["document must be a JSON object"]);
+  rejectUnknown(
+    value,
+    [
+      "$schema",
+      "schemaVersion",
+      "kind",
+      "entity",
+      "database",
+      "api",
+      "permissions",
+      "capabilities",
+      "fields",
+      "relationships",
+      "localization",
+    ],
+    "",
+    problems,
+  );
+  if (value.schemaVersion !== VIREO_ENTITY_SCHEMA_VERSION)
+    problems.push(`schemaVersion must be ${VIREO_ENTITY_SCHEMA_VERSION}`);
+  if (value.kind !== "entity") problems.push('kind must be "entity"');
+
+  const entity = requiredObject(value, "entity", problems);
+  rejectUnknown(entity, ["name", "plural", "description"], "entity", problems);
+  const name = requiredString(entity, "name", "entity", problems);
+  const plural = requiredString(entity, "plural", "entity", problems);
+  if (name && (!/^[A-Z][A-Za-z0-9]*$/u.test(name) || !validJavaIdentifier(name)))
+    problems.push("entity.name must be a portable UpperCamelCase Java/TypeScript identifier");
+  if (plural && !/^[a-z][a-z0-9-]*$/u.test(plural)) problems.push("entity.plural must be lowercase kebab-case");
+
+  const database = requiredObject(value, "database", problems);
+  rejectUnknown(database, ["table", "migrationVersion"], "database", problems);
+  const table = requiredString(database, "table", "database", problems);
+  if (table && !/^[a-z][a-z0-9_]*$/u.test(table)) problems.push("database.table must be lower_snake_case");
+  if (!Number.isSafeInteger(database.migrationVersion) || Number(database.migrationVersion) < 1)
+    problems.push("database.migrationVersion must be a positive integer");
+
+  const api = requiredObject(value, "api", problems);
+  rejectUnknown(api, ["path"], "api", problems);
+  const apiPath = requiredString(api, "path", "api", problems);
+  if (apiPath && !/^\/[a-z][a-z0-9-]*(?:\/[a-z][a-z0-9-]*)*$/u.test(apiPath))
+    problems.push("api.path must be an absolute lowercase kebab-case path");
+
+  const permissions = requiredObject(value, "permissions", problems);
+  rejectUnknown(permissions, ["read", "manage"], "permissions", problems);
+  requiredString(permissions, "read", "permissions", problems);
+  requiredString(permissions, "manage", "permissions", problems);
+  const capabilities = requiredObject(value, "capabilities", problems);
+  rejectUnknown(capabilities, ["history", "offline", "query"], "capabilities", problems);
+  requiredBoolean(capabilities, "history", "capabilities", problems);
+  requiredBoolean(capabilities, "offline", "capabilities", problems);
+  requiredBoolean(capabilities, "query", "capabilities", problems);
+  if (capabilities.offline === true)
+    problems.push("capabilities.offline is reserved for Phase 4; Phase 3 schemas must declare false");
+
+  if (!Array.isArray(value.fields) || value.fields.length === 0)
+    problems.push("fields must contain at least one field");
+  const fields = Array.isArray(value.fields)
+    ? value.fields.map((field, index) => validateField(field, index, problems)).filter(Boolean)
+    : [];
+  const fieldNames = fields.map(field => field!.name);
+  if (new Set(fieldNames).size !== fieldNames.length) problems.push("field names must be unique");
+  if (!fields.some(field => field?.query?.searchable)) problems.push("at least one field must be query.searchable");
+
+  if (value.relationships !== undefined) {
+    if (!Array.isArray(value.relationships)) problems.push("relationships must be an array");
+    else if (value.relationships.length > 0)
+      problems.push(
+        "relationships are described by schema v1 but generation is deferred until a relational fixture is admitted",
+      );
+  }
+
+  const localization = requiredObject(value, "localization", problems);
+  rejectUnknown(localization, ["en", "hr"], "localization", problems);
+  const english = requiredObject(localization, "en", problems);
+  rejectUnknown(english, ["singular", "plural"], "localization.en", problems);
+  requiredString(english, "singular", "localization.en", problems);
+  requiredString(english, "plural", "localization.en", problems);
+  if (localization.hr !== undefined) {
+    const croatian = requiredObject(localization, "hr", problems);
+    rejectUnknown(croatian, ["singular", "plural"], "localization.hr", problems);
+    requiredString(croatian, "singular", "localization.hr", problems);
+    requiredString(croatian, "plural", "localization.hr", problems);
+  }
+
+  if (problems.length > 0) throw new EntitySchemaError(problems);
+  return value as VireoEntitySchema;
+}
+
+export async function readEntitySchema(path: string): Promise<VireoEntitySchema> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await readFile(path, "utf8"));
+  } catch (error) {
+    throw new EntitySchemaError([
+      `could not read valid JSON from ${path}: ${error instanceof Error ? error.message : String(error)}`,
+    ]);
+  }
+  return parseEntitySchema(parsed);
+}
