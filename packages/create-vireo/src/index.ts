@@ -39,7 +39,7 @@ export {
   type VireoUpgradeResult,
 } from "./project-upgrade.js";
 
-export const TEMPLATE_COMMIT = "a0657624120da26c2b22cbb634db9063ea070201";
+export const TEMPLATE_COMMIT = "dd9c25405decf881ab2f39b2248ac136ab0499d2";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";

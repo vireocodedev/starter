@@ -22,7 +22,8 @@ external/manual evidence.
 
 Concentrated implementation commits are `1658022`, `fe25cd3`, `6458313`,
 `53bae10`, and `20e3318` in Starter, and `4b7827a`, `9e94824`, `89f782f`,
-`8b1fe82`, `a7b549c`, `cc13fb7`, `37b6f1b`, and `a065762` in Template.
+`8b1fe82`, `a7b549c`, `cc13fb7`, `37b6f1b`, `a065762`, `5860614`, and
+`dd9c254` in Template.
 
 ## Reproducible local results
 
