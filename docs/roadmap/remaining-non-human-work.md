@@ -152,13 +152,19 @@ professional assessment.
       release links from the enforced documentation release policy.
 - [x] Add source-policy, rendering, artifact, workflow-security, and drift checks.
 - [ ] Add hosted browser accessibility, link, performance, and proof-surface checks.
-- [ ] Activate the standalone artifact on the VPS at `https://vireocode.com`.
-- [ ] Verify the complete anonymous discovery-to-first-action path.
+- [x] Activate the standalone artifact on the VPS at `https://vireocode.com`.
+- [x] Verify the complete anonymous discovery-to-first-action path.
 
 Core infrastructure was implemented in Starter commit `3c4b08c`: `site/` owns the
 standalone build, Vireo-specific presentation, release-derived public model, VPS
 deployment script and Caddy contract; `.github/workflows/website.yml` builds and
 retains the artifact without replacing the GitHub Pages documentation portal.
+The one-time host bootstrap was added in `7069011` and activated on 2026-08-28 as
+release `706901125c26-20260828T103454Z`. The live TLS, health, metadata, redirect,
+404, cache, demo, documentation, API, registry, quickstart, tutorial, community,
+and first-run-command paths were then verified anonymously. The corresponding
+[hosted website artifact run](https://github.com/vireocodedev/starter/actions/runs/33163891340)
+passed independently.
 
 ### `P6-03` — Documentation completion
 
