@@ -39,11 +39,20 @@ deployment; it does not replace or deploy through GitHub Pages.
 ## VPS activation
 
 The checked-in `Caddyfile` serves release directories through the atomic
-`/srv/www/vireocode/current` symlink. One privileged host setup is required:
+`/srv/www/vireocode/current` symlink. One privileged host setup is required.
+Build and stage the first release from the development machine:
 
-1. create `/srv/www/vireocode/releases` owned by `deploy`;
-2. install `site/Caddyfile` as `/etc/caddy/sites/vireo-website.caddy`;
-3. validate and reload Caddy.
+```bash
+corepack npm run site:build
+corepack npm run site:check:artifact
+corepack npm run site:stage:vps
+```
+
+The staging command prints one `sudo sh .../bootstrap-vps.sh ...` command to run
+on the VPS. That reviewed bootstrap creates `/srv/www/vireocode` and its release
+directory as `deploy`, activates the staged release, installs the Caddy site,
+validates the complete Caddy configuration, and reloads Caddy. It leaves the
+staged copy in `/tmp` for inspection and eventual system cleanup.
 
 After that one-time setup, deployments do not require root:
 

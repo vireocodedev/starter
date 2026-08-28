@@ -7,6 +7,9 @@ node --test \
   scripts/package-bin.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
   site/build.test.mjs
+sh -n site/bootstrap-vps.sh
+sh -n site/deploy-vps.sh
+sh -n site/stage-vps-bootstrap.sh
 npm run security:workflow
 npm run test:architecture
 turbo run test

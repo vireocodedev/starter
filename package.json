@@ -36,6 +36,7 @@
     "site:check:artifact": "node site/verify.mjs --artifact",
     "site:test": "node --test site/build.test.mjs",
     "site:deploy:vps": "sh site/deploy-vps.sh",
+    "site:stage:vps": "sh site/stage-vps-bootstrap.sh",
     "build-docs": "corepack npm run build && corepack npm run build-storybook && ./jvm/gradlew -p jvm aggregateJavadoc && corepack npm run docs:portal && corepack npm run docs:check:artifact",
     "build": "sh scripts/with-declared-npm.sh turbo run build",
     "dev": "sh scripts/with-declared-npm.sh turbo run dev",
