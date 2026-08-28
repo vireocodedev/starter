@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "2026-08-27.1",
-  "reviewedAt": "2026-08-27",
+  "policyVersion": "2026-08-28.1",
+  "reviewedAt": "2026-08-28",
   "canonicalHost": { "os": "ubuntu-24.04", "architecture": "x64", "runnerClass": "github-hosted" },
   "freshnessHours": { "merge": 48, "scheduled": 192, "manual": 840 },
   "toolchains": {
@@ -170,9 +170,13 @@
     {
       "id": "installed-pwa",
       "surface": "Installed PWA",
-      "target": "Install, update, offline, and recovery lifecycle",
+      "target": "Automated manifest, worker, offline-shell, and cache lifecycle; physical install/update manual",
       "status": "experimental",
-      "evidence": { "requirement": "manual", "cadence": "manual", "lanes": [] }
+      "evidence": {
+        "requirement": "advisory",
+        "cadence": "merge",
+        "lanes": [{ "repository": "starter-template", "workflow": "ci.yml", "job": "verify" }]
+      }
     },
     {
       "id": "ubuntu-26",

@@ -29,7 +29,7 @@ automated lane exists at the stated cadence.
 | `java-25-runtime`           | compatible     | advisory             | scheduled |
 | `firefox-webkit-engines`    | compatible     | advisory             | scheduled |
 | `advanced-browser-storage`  | experimental   | advisory             | merge     |
-| `installed-pwa`             | experimental   | manual               | manual    |
+| `installed-pwa`             | experimental   | advisory             | merge     |
 | `ubuntu-26`                 | untested       | none                 | manual    |
 | `macos-apple-silicon`       | untested       | manual               | manual    |
 | `windows-11-wsl2`           | untested       | manual               | manual    |
