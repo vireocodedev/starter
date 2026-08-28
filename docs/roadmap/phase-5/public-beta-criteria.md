@@ -9,7 +9,7 @@ Status: **engineering scope substantially complete; public-beta decision HOLD**.
 | First run            | Anonymous `npm create vireo@latest`, doctor, setup, and clean verification                       | Automated evidence exists; human row open |
 | Killer workflow      | Generate, run, customize, eject, and upgrade a realistic application-owned vertical slice        | Automated fixture exists; human row open  |
 | Flagship quality     | Responsive seeded application, accessible critical journey, explicit supported/unsupported scope | Engineering evidence complete             |
-| Hosted evaluation    | Public revision, health, journey, reset policy, monitoring history, and incident contact         | Source/contract ready; external host open |
+| Hosted evaluation    | Public revision, health, journey, reset policy, monitoring history, and incident contact         | Complete; best effort, no SLA             |
 | Production readiness | Phase 4 independent security/manual accessibility/device/field/target-environment evidence       | Open; no public-beta readiness claim      |
 | Independent adoption | Three unaffiliated active teams and one maintained production-like deployment through an upgrade | No qualifying team recorded               |
 | Feedback evidence    | Structured privacy-safe intake, triage, aggregate validation, and explicit gate status           | Engineering evidence complete; gate HOLD  |

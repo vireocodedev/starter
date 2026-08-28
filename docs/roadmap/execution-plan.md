@@ -162,7 +162,9 @@ feedback loop, and evidence capture. Only unfamiliar external teams can close th
 adopter gate; repository traffic, automated clean rooms, and maintainer-owned
 deployments do not count.
 
-The [dated Phase 5 closure review](phase-5/closure-review-2026-08-28.md) records completed `P5-01`, `P5-02`, `P5-04`, `P5-05`, and `P5-08`, partial hosted activation under `P5-03`, and the unchanged external `P5-06`/`P5-07` gates.
+The [dated Phase 5 closure review](phase-5/closure-review-2026-08-28.md) records
+completed `P5-01` through `P5-05` and `P5-08`, including activated hosted-demo
+evidence under `P5-03`, and the unchanged external `P5-06`/`P5-07` gates.
 
 ## Measurement policy
 

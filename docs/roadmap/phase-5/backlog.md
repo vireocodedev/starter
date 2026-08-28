@@ -14,7 +14,7 @@ not count as an independent team actively building with Vireo.
 | `P5-00` | Scope, baseline, and evidence contract | Phase 4 release evidence is reconciled; the flagship boundary, public-beta criteria, non-goals, evidence classes, and gate are versioned.                                    | Done          |
 | `P5-01` | Flagship product narrative             | A realistic operations scenario, named audience, primary job, seeded states, success path, limitations, and visible proof hierarchy are documented and reflected in the app. | Done          |
 | `P5-02` | Flagship application experience        | The public Template presents an exceptional responsive overview and complete seeded Item workflow with accessible loading, empty, error, permission, and operational states. | Done          |
-| `P5-03` | Hosted demo operations (`G-308`)       | Reproducible deployment source, public health checks, synthetic journey, reset/seed policy, data/privacy boundary, incident path, and explicit uptime status exist.          | Partial       |
+| `P5-03` | Hosted demo operations (`G-308`)       | Reproducible deployment source, public health checks, synthetic journey, reset/seed policy, data/privacy boundary, incident path, and explicit uptime status exist.          | Done          |
 | `P5-04` | Examples and proof material            | Focused runnable recipes, screenshots, architecture proof, comparison boundaries, and copy-pastable tutorials demonstrate the supported path without inflated claims.        | Done          |
 | `P5-05` | Public-beta feedback loop              | Evaluation and adopter paths, structured issue/discussion intake, privacy-safe feedback schema, triage policy, and aggregate evidence workflow are public.                   | Done          |
 | `P5-06` | Onboarding and workflow evidence       | Unfamiliar humans attempt create/doctor, first change, generation, customization, upgrade, and deployment; outcomes close or revise `P1-15`, `P2-08`, and `P3-09`.           | External      |
@@ -51,4 +51,9 @@ may be complete while this gate remains open. Phase 6 launch planning may be
 prepared, but a 1.0 commitment must also satisfy the remaining Phase 4 independent
 and manual evidence.
 
-The dated [closure review](closure-review-2026-08-28.md) records the implemented engineering evidence and the hold decision. `P5-03` has deployment, seed/reset, privacy, health-path, synthetic-journey, and no-uptime-claim contracts; it remains partial until an external HTTPS host produces retained monitoring/reset evidence and has an incident owner.
+The dated [closure review](closure-review-2026-08-28.md) records the implemented
+engineering evidence and the hold decision. `P5-03` is complete: the
+[hosted-demo activation record](evidence/hosted-demo-2026-08-28.md) ties the public
+HTTPS host, best-effort/no-SLA boundary, maintainer incident path, hourly monitor,
+daily reset timer, retained reset rehearsal, and post-reset journey to an exact
+Template revision.
