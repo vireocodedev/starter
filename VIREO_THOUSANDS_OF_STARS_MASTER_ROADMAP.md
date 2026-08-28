@@ -1403,6 +1403,11 @@ open; the [closure decision](docs/roadmap/phase-5/closure-review-2026-08-28.md) 
 
 ### Phase 6 — Launch and sustained growth (ongoing)
 
+Maintainer-executable carry-over, proposed numbered Phase 6 work, and deliberately
+deferred engineering are tracked in the
+[remaining non-human-evaluation checklist](docs/roadmap/remaining-non-human-work.md).
+Its `P6-*` identifiers remain proposed until `P6-00` versions the official backlog.
+
 - Coordinated 1.0 or major public release.
 - Launch content and community outreach.
 - Responsive support and rapid onboarding fixes.
