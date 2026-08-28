@@ -1,0 +1,32 @@
+vireocode.com {
+	root * /srv/www/vireocode/current
+	encode zstd gzip
+
+	header {
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self'"
+		Cross-Origin-Opener-Policy "same-origin"
+		Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+	}
+
+	@metadata path /healthz /robots.txt /site.json /sitemap.xml
+	header @metadata Cache-Control "no-cache"
+
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=300"
+
+	file_server
+
+	handle_errors {
+		@notFound expression {http.error.status_code} == 404
+		rewrite @notFound /404.html
+		file_server
+	}
+}
+
+www.vireocode.com {
+	redir https://vireocode.com{uri} permanent
+}
