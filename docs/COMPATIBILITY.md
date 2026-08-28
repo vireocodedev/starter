@@ -11,8 +11,9 @@ packages they need, subject to their declared dependencies and peer dependencies
 The six JVM artifacts share one coordinated version and should be aligned with the
 `com.vireocode:vireo-bom` BOM.
 
-The next `create-vireo` line is 0.3.0 (0.2.0 remains the first supported project
-upgrade source); the current `@vireocodedev/ui` line is `0.2.2`; npm is `0.2.1` for
+The current `create-vireo` line is 0.3.0 and the frontend-profile release line is
+0.4.0 (0.2.0 remains the first supported project-upgrade source, for the explicit
+0.2.0→0.3.0 pair); the current `@vireocodedev/ui` line is `0.2.2`; npm is `0.2.1` for
 `@vireocodedev/query`, `@vireocodedev/shell`, `@vireocodedev/history`,
 `@vireocodedev/infrastructure`, `@vireocodedev/localization`, and
 `@vireocodedev/sqlite`; and JVM is `0.2.0`. Numeric equality between npm packages or between npm and JVM
