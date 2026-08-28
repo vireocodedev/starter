@@ -3,7 +3,7 @@ import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createVireo, generateEntity, upgradeVireoProject } from "../packages/create-vireo/dist/index.js";
+import { createVireo, upgradeVireoProject } from "../packages/create-vireo/dist/index.js";
 
 const sourceRelease = "0.2.0";
 const targetRelease = "0.3.0";
@@ -45,11 +45,31 @@ try {
   metadata.templateCommit = sourceTemplateCommit;
   metadata.createdBy = `create-vireo@${sourceRelease}`;
   await writeFile(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`);
+  const packagePath = join(projectRoot, "package.json");
+  const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
+  packageJson.scripts.vireo = `npx --yes --package=create-vireo@${sourceRelease} vireo`;
+  await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 
   const entityFixture = join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.entity.json");
   const entitySchema = join(projectRoot, ".vireo/purchase-order.entity.json");
   await cp(entityFixture, entitySchema);
-  await generateEntity({ projectDirectory: projectRoot, schemaPath: entitySchema });
+  run(
+    "corepack",
+    [
+      "npm",
+      "exec",
+      "--yes",
+      `--package=create-vireo@${sourceRelease}`,
+      "--",
+      "vireo",
+      "generate",
+      "entity",
+      entitySchema,
+      "--project",
+      projectRoot,
+    ],
+    repositoryRoot,
+  );
 
   const dryRun = await upgradeVireoProject({ projectDirectory: projectRoot, targetRelease });
   if (!dryRun.dryRun || !dryRun.files.some(file => file.status !== "unchanged"))
