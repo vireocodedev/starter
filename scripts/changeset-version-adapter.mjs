@@ -21,7 +21,7 @@ try {
   });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exitCode = result.status ?? 1;
-  else synchronizeDocumentationRelease(repositoryRoot);
+  else await synchronizeDocumentationRelease(repositoryRoot);
 } finally {
   unlinkSync(localNpx);
 }

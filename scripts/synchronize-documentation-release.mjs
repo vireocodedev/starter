@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { format, resolveConfig } from "prettier";
 
-export function synchronizeDocumentationRelease(repositoryRoot) {
+export async function synchronizeDocumentationRelease(repositoryRoot) {
   const policyPath = join(repositoryRoot, "contracts", "documentation-release-policy.json");
   const policy = JSON.parse(readFileSync(policyPath, "utf8"));
   const current = policy.releases?.find(release => release.id === policy.currentRelease);
@@ -28,5 +29,12 @@ export function synchronizeDocumentationRelease(repositoryRoot) {
     entry.version = version;
   }
 
-  writeFileSync(policyPath, `${JSON.stringify(policy, null, 2)}\n`);
+  const prettierOptions = (await resolveConfig(policyPath)) ?? {};
+  writeFileSync(
+    policyPath,
+    await format(JSON.stringify(policy), {
+      ...prettierOptions,
+      filepath: policyPath,
+    }),
+  );
 }

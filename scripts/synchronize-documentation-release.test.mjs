@@ -5,7 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { synchronizeDocumentationRelease } from "./synchronize-documentation-release.mjs";
 
-test("synchronizes current documentation package versions", () => {
+test("synchronizes current documentation package versions", async () => {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   try {
     mkdirSync(join(root, "contracts"));
@@ -33,7 +33,7 @@ test("synchronizes current documentation package versions", () => {
       ],
     });
 
-    synchronizeDocumentationRelease(root);
+    await synchronizeDocumentationRelease(root);
 
     const policy = JSON.parse(readFileSync(join(root, "contracts", "documentation-release-policy.json"), "utf8"));
     assert.deepEqual(policy.releases[0].npm, [
