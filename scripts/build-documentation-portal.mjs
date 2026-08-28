@@ -44,6 +44,8 @@ writeJson(join(outputRoot, "versions.json"), {
   schemaVersion: policy.schemaVersion,
   currentRelease: release.id,
   releases: policy.releases.map(candidate => ({
+    documentationVersion: candidate.documentationVersion,
+    documentationLabel: candidate.documentationLabel,
     id: candidate.id,
     status: candidate.status,
     npm: candidate.npm,
@@ -70,8 +72,8 @@ writeFileSync(
   }),
 );
 
-writeRedirect(join(outputRoot, "docs/index.html"), `../versions/${release.id}/`);
-writeRedirect(join(outputRoot, "latest/index.html"), `../versions/${release.id}/`);
+writeRedirect(join(outputRoot, "docs/index.html"), "https://vireocode.com/docs/");
+writeRedirect(join(outputRoot, "latest/index.html"), "https://vireocode.com/docs/");
 writeRedirect(join(outputRoot, "api/typescript/index.html"), `../../versions/${release.id}/api/typescript/`);
 writeRedirect(join(outputRoot, "api/jvm/index.html"), `../../versions/${release.id}/api/jvm/`);
 
@@ -281,7 +283,7 @@ function renderPortal({ release: currentRelease, counts }) {
     `<header class="hero">
       <p class="eyebrow">Vireo Framework documentation</p>
       <h1>Build with the public contract in view.</h1>
-      <p class="lede">Search the complete Storybook guide catalog, every declared TypeScript export, and the aggregate JVM API from one release-specific documentation snapshot.</p>
+      <p class="lede">This exact-release technical snapshot contains interactive Storybook, every declared TypeScript export, and the aggregate JVM API. Task-oriented guides live on <a href="https://vireocode.com/docs/">vireocode.com</a>.</p>
       <div class="versions"><span>npm ${escapeHtml(npmVersionSummary)}</span><span>JVM ${escapeHtml(currentRelease.jvm.version)}</span><span>${searchCount.toLocaleString()} searchable records</span></div>
       <label class="search"><span>Search all documentation</span><input id="docs-search" type="search" placeholder="Try VireoPageLayout, offline replay, or BaseService" autocomplete="off" /></label>
     </header>
@@ -301,6 +303,7 @@ function renderPortal({ release: currentRelease, counts }) {
       <section>
         <div class="section-heading"><h2>Release and migration</h2><p>The npm and JVM families are versioned independently.</p></div>
         <div class="links">
+          <a href="https://vireocode.com/docs/">Main Vireo documentation</a>
           <a href="${currentRelease.releaseLinks.npm}">npm packages</a>
           <a href="${currentRelease.releaseLinks.jvm}">Maven Central</a>
           <a href="${currentRelease.releaseLinks.jvmTag}">JVM ${escapeHtml(currentRelease.jvm.version)} source tag</a>
@@ -369,16 +372,16 @@ function renderVersions(documentationPolicy) {
   const rows = documentationPolicy.releases
     .map(releaseRecord => {
       const npmVersions = releaseRecord.npm.map(entry => `${entry.package} ${entry.version}`).join(", ");
-      return `<tr><td><a href="${escapeHtml(releaseRecord.id)}/"><code>${escapeHtml(
-        releaseRecord.id,
-      )}</code></a></td><td>${escapeHtml(releaseRecord.status)}</td><td>${escapeHtml(
+      return `<tr><td><a href="${escapeHtml(releaseRecord.id)}/"><strong>${escapeHtml(
+        releaseRecord.documentationLabel,
+      )}</strong><br><code>${escapeHtml(releaseRecord.id)}</code></a></td><td>${escapeHtml(releaseRecord.status)}</td><td>${escapeHtml(
         npmVersions,
       )}</td><td>${escapeHtml(releaseRecord.jvm.version)}</td></tr>`;
     })
     .join("");
   return page(
     "Vireo documentation versions",
-    `<nav><a href="../docs/">← Current documentation</a></nav><main><p class="eyebrow">Documentation releases</p><h1>Version-specific snapshots</h1><p class="lede">npm packages and the coordinated JVM family have independent release lines. Each row names the exact artifact set documented by its stable URL.</p><div class="table-wrap"><table><thead><tr><th>Snapshot</th><th>Status</th><th>npm artifacts</th><th>JVM</th></tr></thead><tbody>${rows}</tbody></table></div><p><a href="../versions.json">Read the machine-readable release index</a></p></main>`,
+    `<nav><a href="https://vireocode.com/versions/">← Friendly Vireo versions</a></nav><main><p class="eyebrow">Exact technical releases</p><h1>Version-specific snapshots</h1><p class="lede">The main website uses friendly Vireo minor lines. This technical archive maps those lines to exact, independently versioned npm and JVM artifacts.</p><div class="table-wrap"><table><thead><tr><th>Vireo / exact snapshot</th><th>Status</th><th>npm artifacts</th><th>JVM</th></tr></thead><tbody>${rows}</tbody></table></div><p><a href="../versions.json">Read the machine-readable release index</a></p></main>`,
   );
 }
 

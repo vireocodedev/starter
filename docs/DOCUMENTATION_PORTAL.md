@@ -1,87 +1,89 @@
-# Public documentation portal
+# Public documentation architecture
 
-The public Vireo documentation entry point is
-<https://vireocodedev.github.io/starter/docs/>. It combines the existing
-Storybook catalog with generated TypeScript and JVM API references instead of
-replacing the package-owned guides that already exist.
+The canonical Vireo documentation entry point is <https://vireocode.com/docs/>.
+It contains task-oriented onboarding, concepts, guides, CLI documentation,
+operations, examples, versions, roadmap, and community routes.
 
-## Published surfaces
+The GitHub Pages artifact at <https://vireocodedev.github.io/starter/> remains the
+exact-release technical host for interactive Storybook, generated TypeScript exports,
+aggregate Javadocs, and immutable machine snapshots. It is not the primary learning
+experience.
 
-| Stable route                                                                 | Content                                         |
-| ---------------------------------------------------------------------------- | ----------------------------------------------- |
-| [`/docs/`](https://vireocodedev.github.io/starter/docs/)                     | Current release landing page and unified search |
-| [`/latest/`](https://vireocodedev.github.io/starter/latest/)                 | Alias for the current release snapshot          |
-| [`/api/typescript/`](https://vireocodedev.github.io/starter/api/typescript/) | Current TypeScript API reference                |
-| [`/api/jvm/`](https://vireocodedev.github.io/starter/api/jvm/)               | Current aggregate JVM Javadocs                  |
-| [`/versions/`](https://vireocodedev.github.io/starter/versions/)             | Available documentation releases                |
-| [`/versions.json`](https://vireocodedev.github.io/starter/versions.json)     | Machine-readable release index                  |
+## Main website surfaces
 
-The release-specific route is
-`/versions/npm-0.2.1_jvm-0.2.0/`. npm and JVM versions are deliberately shown
-separately because their release lines are independent. Exact versions for all npm
-packages are recorded in `versions.json`; the route identifies the documentation
-release rather than requiring every package to share one version.
+| Route                | Content                                                |
+| -------------------- | ------------------------------------------------------ |
+| `/docs/`             | Current friendly documentation line                    |
+| `/docs/0.2/`         | Version-specific copy of the current Vireo 0.2 guides  |
+| `/examples/`         | End-to-end and interactive example paths               |
+| `/storybook/`        | Curated Storybook entry and exact snapshot link        |
+| `/reference/`        | TypeScript, Java, Storybook, and release reference map |
+| `/versions/`         | Friendly-to-exact release mapping                      |
+| `/search-index.json` | Current canonical content search index                 |
+| `/versions.json`     | Machine-readable CLI/npm/JVM/Template mapping          |
 
-The unified search index includes:
+`site/content/manifest.json` owns the information architecture and canonical page
+metadata. `site/content/*.md` owns user-facing guide content. `site/app.mjs` renders
+the React document shell, while `site/build.mjs` pre-renders every route, current
+version aliases, search, sitemap, and machine metadata.
 
-- every Storybook guide, component documentation page, and example;
-- every export from the checked TypeScript `api-surface.json` snapshots, with the
-  declaration emitted for its public package entry point; and
-- every public aggregate-Javadoc type and member.
+## Exact reference surfaces
 
-Package export maps, TypeScript API snapshots, emitted declarations, Java source,
-and aggregate Javadoc remain the authorities. The portal only derives navigation
-and presentation from those checked sources.
+| Stable GitHub Pages route | Content                                  |
+| ------------------------- | ---------------------------------------- |
+| `/`                       | Interactive Storybook host               |
+| `/api/typescript/`        | Current exact TypeScript reference alias |
+| `/api/jvm/`               | Current exact aggregate-Javadoc alias    |
+| `/versions/`              | Exact machine-release snapshots          |
+| `/versions.json`          | Exact package/JVM release index          |
+
+The old `/docs/` and `/latest/` GitHub Pages routes redirect to the canonical main
+website. Exact reference and Storybook routes remain on Pages.
 
 ## Version contract
 
-[`documentation-release-policy.json`](../contracts/documentation-release-policy.json)
-declares the current documentation release, exact npm package versions, coordinated
-JVM family version, published modules, and registry/source/migration links. The
-documentation policy fails when those values drift from package manifests or
-`jvm/gradle.properties`.
+The human-facing version is a Vireo minor line such as `0.2`. It maps to independent
+artifact versions rather than replacing them. The current mapping includes:
 
-Only the latest npm and JVM lines receive support. A release-specific URL identifies
-the artifact pair described by a documentation snapshot; it does not imply that npm
-and JVM use one shared version.
+- the exact `create-vireo` release;
+- every published npm package version;
+- the coordinated JVM family and modules;
+- the exact starter-template commit; and
+- the immutable GitHub Pages reference snapshot.
 
-When a new documentation release becomes current:
+The machine release ID, currently `npm-0.2.1_jvm-0.2.0`, remains an internal exact
+snapshot key. It is deliberately not the primary navigation label.
 
-1. retain the prior release entry in the policy;
-2. retain its generated snapshot as a source-owned historical archive before the
-   stable aliases move;
-3. update all changed package/JVM versions and release links;
-4. build and verify the new snapshot; and
-5. publish only after its corresponding registry artifacts are public.
+When a future documentation line becomes current, retain the prior friendly route as
+a source-owned archive before moving `/docs/`. Exact reference archives continue to
+follow the existing documentation-release policy.
 
-Historical release entries must provide a complete archive, so a later Pages deploy
-cannot silently turn an old release URL into the new API. The first public
-documentation release has no predecessor to archive.
+## Content ownership
 
-## Local build and verification
+- Main website: explanation, decisions, tutorials, task guides, component usage.
+- Storybook: interactive visual states and component authoring context.
+- TypeScript/Javadocs: exhaustive generated signatures.
+- Package READMEs: concise install and entry summaries linking to the website.
+- Repository docs: contributor, release, evidence, and implementation detail.
 
-Build the complete Pages artifact:
+Content must not be copied into several canonical locations. When a repository guide
+is migrated, the README or source guide points to the corresponding website route.
+
+## Local builds
+
+Build and verify the main website:
+
+```bash
+corepack npm run site:test
+corepack npm run site:build
+corepack npm run site:check:artifact
+```
+
+Build the exact Storybook/API reference artifact:
 
 ```bash
 corepack npm run build-docs
 ```
 
-That command builds all npm declarations, Storybook, aggregate Javadocs, the
-release-specific portal, and the artifact contract. If the package and Storybook
-outputs already exist, rebuild only the assembled portal with:
-
-```bash
-./jvm/gradlew -p jvm aggregateJavadoc
-corepack npm run docs:portal
-corepack npm run docs:check:artifact
-```
-
-The generated site remains ignored at `packages/ui/storybook-static`. It is never a
-source of release truth and is not committed.
-
-## Deployment contract
-
-Every push to `main` runs the Pages workflow. The workflow builds package
-declarations and Storybook, compiles aggregate Javadocs, assembles the versioned
-portal, validates all searchable targets, and uploads one static artifact. A failed
-build or policy check cannot replace the current public deployment.
+The website deploys atomically to the Vireo VPS. GitHub Pages continues to deploy the
+exact technical artifact after its own policy checks pass.

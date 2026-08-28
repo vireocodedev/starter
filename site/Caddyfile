@@ -12,7 +12,7 @@ vireocode.com {
 		X-Frame-Options "DENY"
 	}
 
-	@metadata path /healthz /robots.txt /site.json /sitemap.xml
+	@metadata path /healthz /robots.txt /search-index.json /site.json /sitemap.xml /versions.json
 	header @metadata Cache-Control "no-cache"
 
 	@assets path /assets/*

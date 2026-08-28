@@ -1,29 +1,20 @@
 import assert from "node:assert/strict";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
-import { createWebsiteModel, renderLanding, renderNotFound } from "./build.mjs";
+import { tmpdir } from "node:os";
+import { buildWebsite, createWebsiteModel } from "./build.mjs";
+import { renderMarkdown } from "./markdown.mjs";
 
 const sitePolicy = {
   canonicalUrl: "https://vireocode.com/",
-  title: "Vireo",
-  description: "Description",
-  maturity: { label: "Public 0.x", summary: "Not a production claim.", reviewed: "2026-08-28" },
+  title: "Vireo Framework documentation",
+  description: "A sufficiently detailed Vireo documentation website description for rendering and policy tests.",
+  maturity: { label: "Public 0.x", summary: "Public beta is not yet claimed.", reviewed: "2026-08-28" },
   links: {
-    documentation: "docs/",
-    versions: "versions/",
-    typescriptApi: "api/typescript/",
-    jvmApi: "api/jvm/",
+    documentation: "https://vireocode.com/docs/",
+    versions: "https://vireocode.com/versions/",
     demo: "https://demo.vireocode.com",
-    template: "https://github.com/vireocodedev/starter-template",
-    quickstart: "https://example.com/quickstart",
-    tutorial: "https://example.com/tutorial",
-    comparison: "https://example.com/comparison",
-    architecture: "https://example.com/architecture",
-    frontendProfile: "https://example.com/frontend-profile",
-    security: "https://example.com/security",
-    roadmap: "https://example.com/roadmap",
-    discussions: "https://example.com/discussions",
-    feedback: "https://example.com/feedback",
-    contributing: "https://example.com/contributing",
   },
 };
 
@@ -33,71 +24,104 @@ const documentationPolicy = {
   releases: [
     {
       id: "npm-0.3.0_jvm-0.2.0",
+      documentationVersion: "0.2",
+      documentationLabel: "Vireo 0.2",
       status: "current",
       npm: [
         { package: "create-vireo", version: "0.3.0" },
         { package: "@vireocodedev/ui", version: "0.2.2" },
       ],
       jvm: { group: "com.vireocode", version: "0.2.0", modules: ["vireo-core"] },
+      template: { repository: "https://example.com/template", commit: "a".repeat(40) },
       releaseLinks: {
         source: "https://example.com/source",
         npm: "https://example.com/npm",
         jvm: "https://example.com/maven",
-        compatibility: "https://example.com/compatibility",
-        migration: "https://example.com/migration",
       },
     },
   ],
 };
 
-test("derives the website release from the documentation policy", () => {
+test("derives friendly and exact release identities from one policy", () => {
   const website = createWebsiteModel({ documentationPolicy, sitePolicy });
 
+  assert.equal(website.schemaVersion, 2);
+  assert.equal(website.documentation.version, "0.2");
   assert.equal(website.currentRelease.id, documentationPolicy.currentRelease);
   assert.equal(website.currentRelease.createVireo, "0.3.0");
-  assert.deepEqual(website.currentRelease.npm, documentationPolicy.releases[0].npm);
-  assert.equal(website.currentRelease.jvm.version, "0.2.0");
+  assert.equal(
+    website.links.storybook,
+    `https://vireocodedev.github.io/starter/versions/${documentationPolicy.currentRelease}/storybook/`,
+  );
   assert.equal(website.links.source, documentationPolicy.releases[0].releaseLinks.source);
 });
 
-test("renders the connected and version-aware public surface", () => {
-  const website = createWebsiteModel({ documentationPolicy, sitePolicy });
-  const html = renderLanding(website);
+test("renders trusted documentation markdown with headings, code and tables", () => {
+  const rendered = renderMarkdown(
+    `## Configure\n\nUse **one** adapter.\n\n\`\`\`ts\nconst ready = true;\n\`\`\`\n\n| Mode | Value |\n| --- | --- |\n| Mock | local |`,
+  );
 
-  for (const expected of [
-    documentationPolicy.currentRelease,
-    "create-vireo 0.3.0",
-    "@vireocodedev/ui",
-    "JVM 0.2.0",
-    sitePolicy.links.demo,
-    sitePolicy.links.documentation,
-    sitePolicy.links.quickstart,
-    sitePolicy.links.frontendProfile,
-    sitePolicy.links.contributing,
-    documentationPolicy.releases[0].releaseLinks.npm,
-    documentationPolicy.releases[0].releaseLinks.jvm,
-    "production-shaped 0.x software, not a blanket production-readiness claim",
-    "--profile frontend",
-  ]) {
-    assert.match(html, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.deepEqual(rendered.headings, [{ anchor: "configure", label: "Configure", level: 2 }]);
+  assert.match(rendered.html, /<strong>one<\/strong>/u);
+  assert.match(rendered.html, /data-copy-code/u);
+  assert.match(rendered.html, /<table>/u);
+});
+
+test("builds the complete multi-page, searchable and versioned website artifact", () => {
+  const outputRoot = mkdtempSync(join(tmpdir(), "vireo-website-"));
+  try {
+    const result = buildWebsite({ outputRoot });
+
+    assert.equal(result.website.documentation.version, "0.2");
+    assert.ok(result.pages.length >= 50);
+    assert.ok(result.searchIndex.length >= 30);
+    for (const path of [
+      "index.html",
+      "docs/index.html",
+      "docs/0.2/index.html",
+      "docs/getting-started/frontend-only/index.html",
+      "docs/concepts/architecture/index.html",
+      "docs/cli/doctor/index.html",
+      "storybook/index.html",
+      "reference/typescript/index.html",
+      "versions/index.html",
+      "search-index.json",
+      "versions.json",
+      "site.json",
+      "sitemap.xml",
+    ]) {
+      assert.equal(existsSync(join(outputRoot, path)), true, `missing ${path}`);
+    }
+
+    const landing = readFileSync(join(outputRoot, "index.html"), "utf8");
+    const docs = readFileSync(join(outputRoot, "docs/index.html"), "utf8");
+    const snapshot = readFileSync(join(outputRoot, "docs/0.2/index.html"), "utf8");
+    for (const expected of [
+      "Build the workflow.",
+      "--profile frontend",
+      "data-search-open",
+      "/docs/getting-started/",
+    ]) {
+      assert.match(landing, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")));
+    }
+    assert.match(docs, /Vireo documentation/u);
+    assert.match(docs, /On this page/u);
+    assert.match(snapshot, /Vireo 0.2 snapshot/u);
+    assert.match(snapshot, /rel="canonical" href="https:\/\/vireocode.com\/docs\/"/u);
+  } finally {
+    rmSync(outputRoot, { recursive: true, force: true });
   }
 });
 
-test("renders a useful no-index 404 page", () => {
-  const website = createWebsiteModel({ documentationPolicy, sitePolicy });
-  const html = renderNotFound(website);
-
-  assert.match(html, /meta name="robots" content="noindex"/);
-  assert.match(html, /href="docs\/"/);
-  assert.match(html, /Vireo home/);
-});
-
-test("refuses a release without the public create command", () => {
-  const invalidPolicy = structuredClone(documentationPolicy);
-  invalidPolicy.releases[0].npm = invalidPolicy.releases[0].npm.filter(entry => entry.package !== "create-vireo");
-
+test("refuses a release without the public create command or human documentation version", () => {
+  const missingCreate = structuredClone(documentationPolicy);
+  missingCreate.releases[0].npm = missingCreate.releases[0].npm.filter(entry => entry.package !== "create-vireo");
   assert.throws(
-    () => createWebsiteModel({ documentationPolicy: invalidPolicy, sitePolicy }),
-    /does not declare create-vireo/,
+    () => createWebsiteModel({ documentationPolicy: missingCreate, sitePolicy }),
+    /does not declare create-vireo/u,
   );
+
+  const missingVersion = structuredClone(documentationPolicy);
+  delete missingVersion.releases[0].documentationVersion;
+  assert.throws(() => createWebsiteModel({ documentationPolicy: missingVersion, sitePolicy }), /has no human version/u);
 });

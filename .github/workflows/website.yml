@@ -26,6 +26,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install website runtime dependencies
+        run: corepack npm ci --ignore-scripts
+
       - name: Verify source policy
         run: node site/verify.mjs
 

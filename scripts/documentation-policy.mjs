@@ -19,12 +19,23 @@ if (!Array.isArray(policy.releases) || policy.releases.length === 0) {
 }
 
 const releaseIds = new Set();
+const documentationVersions = new Set();
 for (const release of policy.releases ?? []) {
   if (!/^[a-z0-9][a-z0-9._-]+$/.test(release.id ?? "")) {
     problems.push(`invalid documentation release id: ${JSON.stringify(release.id)}`);
   }
   if (releaseIds.has(release.id)) problems.push(`duplicate documentation release id: ${release.id}`);
   releaseIds.add(release.id);
+  if (!/^0\.\d+$/u.test(release.documentationVersion ?? "")) {
+    problems.push(`documentation release ${release.id} must declare a friendly 0.x minor version`);
+  }
+  if (documentationVersions.has(release.documentationVersion)) {
+    problems.push(`duplicate friendly documentation version: ${release.documentationVersion}`);
+  }
+  documentationVersions.add(release.documentationVersion);
+  if (release.documentationLabel !== `Vireo ${release.documentationVersion}`) {
+    problems.push(`documentation release ${release.id} label must match its friendly version`);
+  }
   if (!["current", "historical"].includes(release.status)) {
     problems.push(`documentation release ${release.id} has invalid status ${release.status}`);
   }
@@ -62,6 +73,17 @@ const packageRecords = readdirSync(join(root, "packages"), { withFileTypes: true
   .filter(record => record.manifest.private !== true);
 
 if (current) {
+  if (current.template?.repository !== "https://github.com/vireocodedev/starter-template") {
+    problems.push("documentation release must identify the canonical starter-template repository");
+  }
+  if (!/^[a-f0-9]{40}$/u.test(current.template?.commit ?? "")) {
+    problems.push("documentation release must pin an exact starter-template commit");
+  }
+  const createSource = readFileSync(join(root, "packages/create-vireo/src/index.ts"), "utf8");
+  const generatedTemplateCommit = createSource.match(/TEMPLATE_COMMIT = "([a-f0-9]{40})"/u)?.[1];
+  if (current.template?.commit !== generatedTemplateCommit) {
+    problems.push(`documentation template pin must match create-vireo ${generatedTemplateCommit ?? "source"}`);
+  }
   const declaredPackages = new Map(current.npm?.map(entry => [entry.package, entry.version]));
   for (const { manifest } of packageRecords) {
     if (declaredPackages.get(manifest.name) !== manifest.version) {
@@ -158,9 +180,14 @@ function validateArtifact(release) {
   if (JSON.stringify(generatedReleaseIds) !== JSON.stringify(policy.releases.map(record => record.id))) {
     problems.push("generated version index does not preserve the declared release order");
   }
-  for (const route of ["docs/index.html", "latest/index.html", "api/typescript/index.html", "api/jvm/index.html"]) {
+  for (const route of ["api/typescript/index.html", "api/jvm/index.html"]) {
     if (!readFileSync(join(outputRoot, route), "utf8").includes(release.id)) {
       problems.push(`generated stable route ${route} does not target ${release.id}`);
+    }
+  }
+  for (const route of ["docs/index.html", "latest/index.html"]) {
+    if (!readFileSync(join(outputRoot, route), "utf8").includes("https://vireocode.com/docs/")) {
+      problems.push(`generated stable route ${route} does not target the main documentation website`);
     }
   }
 

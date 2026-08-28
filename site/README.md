@@ -1,20 +1,46 @@
 # Vireo website
 
-This directory owns the standalone Vireo Framework product website served from
-`https://vireocode.com`. It is deliberately separate from the versioned
-documentation artifact published at `https://vireocodedev.github.io/starter`.
+This directory owns the Vireo Framework product and documentation website served
+from `https://vireocode.com`. It is the canonical home for task-oriented guides,
+concepts, examples, project versions, roadmap, and community entry points.
+
+The GitHub Pages artifact remains the exact-release host for interactive Storybook,
+generated TypeScript exports, aggregate Javadocs, and historical machine snapshots.
 
 ## Source and version contract
 
 - `site-policy.json` owns product-site copy boundaries, canonical URL, maturity,
   and public destinations.
 - `../contracts/documentation-release-policy.json` owns current npm, JVM, source,
-  compatibility, and documentation release information.
-- `build.mjs` combines those sources into `site/dist`.
-- `verify.mjs` prevents link, maturity, canonical-host, and release-version drift.
+  template, compatibility, exact-release, and friendly documentation versions.
+- `content/manifest.json` owns information architecture, navigation, canonical
+  routes, summaries, source provenance, and the content-version declaration.
+- `content/*.md` is the canonical user-guide source migrated from framework and
+  Template repository documentation.
+- `app.mjs` contains the React-rendered documentation and product UI.
+- `markdown.mjs` renders the trusted source Markdown without client execution.
+- `build.mjs` pre-renders current and version-specific routes into `site/dist`,
+  builds search/version feeds and validates internal links.
+- `verify.mjs` prevents content, link, maturity, canonical-host, route-count, and
+  release-version drift.
 
-The generated `site.json` is the machine-readable public summary. The site never
+The generated `site.json` is the machine-readable public summary. `versions.json`
+maps friendly Vireo documentation lines to exact CLI/npm/JVM/Template snapshots,
+and `search-index.json` covers every canonical content page. The site never
 hardcodes an independent package-version table.
+
+## Documentation ownership
+
+User education belongs on the main website. Package and repository READMEs retain
+a short installation/entry summary and point to the canonical guide. Contributor,
+release, evidence, and deep implementation material may remain repository-owned.
+
+Storybook owns interactive component states. Generated TypeScript and Java pages
+own exhaustive signatures. Neither replaces explanatory website content.
+
+The current alias is `/docs/`; the friendly snapshot is `/docs/0.2/`. Exact
+reference snapshots keep the independent machine release identifier used by the
+GitHub Pages portal.
 
 ## Local build
 

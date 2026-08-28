@@ -5,6 +5,8 @@
   "releases": [
     {
       "id": "npm-0.2.1_jvm-0.2.0",
+      "documentationVersion": "0.2",
+      "documentationLabel": "Vireo 0.2",
       "status": "current",
       "npm": [
         { "package": "create-vireo", "version": "0.4.2" },
@@ -20,6 +22,10 @@
         "group": "com.vireocode",
         "version": "0.2.0",
         "modules": ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"]
+      },
+      "template": {
+        "repository": "https://github.com/vireocodedev/starter-template",
+        "commit": "038df86f7e311ef771e0f01a4a44b698f27e4b28"
       },
       "releaseLinks": {
         "source": "https://github.com/vireocodedev/starter",

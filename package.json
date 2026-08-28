@@ -32,6 +32,7 @@
     "docs:check": "node scripts/documentation-policy.mjs",
     "docs:check:artifact": "node scripts/documentation-policy.mjs --artifact",
     "site:build": "node site/build.mjs",
+    "site:dev": "node site/dev.mjs",
     "site:check": "node site/verify.mjs",
     "site:check:artifact": "node site/verify.mjs --artifact",
     "site:test": "node --test site/build.test.mjs",

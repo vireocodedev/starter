@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "documentationVersion": "0.2",
+  "sections": [
+    {
+      "label": "Start",
+      "pages": [
+        {
+          "path": "/docs/",
+          "title": "Vireo documentation",
+          "shortTitle": "Overview",
+          "description": "Learn Vireo through task-oriented guides, framework concepts, working examples and explicit ownership boundaries.",
+          "category": "Documentation",
+          "file": "docs-overview.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/README.md",
+          "sourceLabel": "Framework README"
+        },
+        {
+          "path": "/docs/getting-started/",
+          "title": "Getting started",
+          "description": "Create a Vireo application, validate the local environment and reach a working development loop.",
+          "category": "Start",
+          "file": "getting-started.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/getting-started.md"
+        },
+        {
+          "path": "/docs/getting-started/choose-your-profile/",
+          "title": "Choose a project profile",
+          "shortTitle": "Choose a profile",
+          "description": "Choose frontend-only or full-stack according to the ownership boundary your organization already has.",
+          "category": "Start",
+          "file": "choose-profile.md"
+        },
+        {
+          "path": "/docs/getting-started/frontend-only/",
+          "title": "Frontend-only applications",
+          "shortTitle": "Frontend-only",
+          "description": "Run Vireo without Java or a database and connect the React application to a separately owned company API.",
+          "category": "Start",
+          "file": "frontend-only.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/architecture/frontend-only-profile.md"
+        },
+        {
+          "path": "/docs/getting-started/full-stack/",
+          "title": "Full-stack applications",
+          "shortTitle": "Full-stack",
+          "description": "Run the complete React and Spring Boot golden path with an embedded or PostgreSQL database.",
+          "category": "Start",
+          "file": "full-stack.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/getting-started.md"
+        }
+      ]
+    },
+    {
+      "label": "Core concepts",
+      "pages": [
+        {
+          "path": "/docs/concepts/architecture/",
+          "title": "Architecture",
+          "description": "Understand Vireo's layers, request paths, replaceable seams and application ownership model.",
+          "category": "Core concepts",
+          "file": "architecture.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/flagship-architecture.md"
+        },
+        {
+          "path": "/docs/concepts/ownership-boundaries/",
+          "title": "Ownership boundaries",
+          "description": "Separate framework guarantees, replaceable adapters, generated code and application-owned product decisions.",
+          "category": "Core concepts",
+          "file": "ownership-boundaries.md"
+        },
+        {
+          "path": "/docs/concepts/adapters/",
+          "title": "Adapters and company APIs",
+          "shortTitle": "Adapters",
+          "description": "Replace mock or HTTP defaults through stable authentication, item, query and history adapter slots.",
+          "category": "Core concepts",
+          "file": "adapters.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/frontend/docs/architecture/frontend-only-adoption.md"
+        },
+        {
+          "path": "/docs/concepts/wire-contracts/",
+          "title": "Wire contracts",
+          "description": "Keep generated frontend transports, schemas and backend DTO boundaries aligned without hiding domain decisions.",
+          "category": "Core concepts",
+          "file": "wire-contracts.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/architecture/wire-contracts.md"
+        },
+        {
+          "path": "/docs/concepts/generated-code/",
+          "title": "Generated code ownership",
+          "shortTitle": "Generated code",
+          "description": "Know what Vireo may regenerate, how drift is detected and when to eject a capability into application ownership.",
+          "category": "Core concepts",
+          "file": "generated-code.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/architecture/generated-code-ownership.md"
+        }
+      ]
+    },
+    {
+      "label": "Build",
+      "pages": [
+        {
+          "path": "/docs/frontend/",
+          "title": "Frontend foundations",
+          "description": "Use Vireo's React libraries for page composition, queries, forms, localization, history and offline-aware UX.",
+          "category": "Build",
+          "file": "frontend.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md"
+        },
+        {
+          "path": "/docs/spring/",
+          "title": "Spring Boot foundations",
+          "description": "Adopt the coordinated Vireo BOM and Spring modules while keeping application domain and authorization policy explicit.",
+          "category": "Build",
+          "file": "spring.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md"
+        },
+        {
+          "path": "/docs/offline/",
+          "title": "Offline behavior",
+          "description": "Understand the offline shell guarantee, queue boundaries and the domain decisions Vireo deliberately does not infer.",
+          "category": "Build",
+          "file": "offline.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/offline.md"
+        },
+        {
+          "path": "/docs/components/",
+          "title": "Components",
+          "description": "Find Vireo component families, usage guidance and direct links into the interactive Storybook catalogue.",
+          "category": "Build",
+          "file": "components.md"
+        },
+        {
+          "path": "/docs/guides/30-minute-vertical-slice/",
+          "title": "Build a vertical slice",
+          "shortTitle": "30-minute vertical slice",
+          "description": "Generate, inspect, run and verify one complete Purchase Order capability in a Vireo project.",
+          "category": "Guide",
+          "file": "vertical-slice.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/tutorials/30-minute-vertical-slice.md"
+        }
+      ]
+    },
+    {
+      "label": "CLI",
+      "pages": [
+        {
+          "path": "/docs/cli/",
+          "title": "Vireo CLI",
+          "description": "Create projects and manage generated capabilities with the two executables published by create-vireo.",
+          "category": "CLI",
+          "file": "cli.md"
+        },
+        {
+          "path": "/docs/cli/doctor/",
+          "title": "Doctor diagnostics",
+          "shortTitle": "Doctor",
+          "description": "Diagnose environment, dependency, metadata, port and profile problems without modifying the project.",
+          "category": "CLI",
+          "file": "doctor.md"
+        },
+        {
+          "path": "/docs/cli/generate/",
+          "title": "Entity generation",
+          "shortTitle": "Generate and check",
+          "description": "Generate reviewable frontend or full-stack capabilities from a versioned entity schema and verify their integrity.",
+          "category": "CLI",
+          "file": "generate.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/generators/entity-schema.md"
+        },
+        {
+          "path": "/docs/upgrades/",
+          "title": "Project upgrades",
+          "description": "Preview supported Vireo-managed migrations, apply them deliberately and retain application-owned changes.",
+          "category": "CLI",
+          "file": "upgrades.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/project-upgrades.md"
+        }
+      ]
+    },
+    {
+      "label": "Operate",
+      "pages": [
+        {
+          "path": "/docs/deployment/",
+          "title": "Deployment",
+          "description": "Package and deploy Vireo applications with explicit profiles, health endpoints, secrets and rollback boundaries.",
+          "category": "Operate",
+          "file": "deployment.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/deployment.md"
+        },
+        {
+          "path": "/docs/security/",
+          "title": "Security",
+          "description": "Understand framework controls, application responsibilities, supported reporting and production-hardening boundaries.",
+          "category": "Operate",
+          "file": "security.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/security-hardening.md"
+        },
+        {
+          "path": "/docs/accessibility/",
+          "title": "Accessibility",
+          "description": "Apply Vireo's keyboard, focus, responsive and semantic UI expectations to product-specific workflows.",
+          "category": "Operate",
+          "file": "accessibility.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/accessibility.md"
+        },
+        {
+          "path": "/docs/troubleshooting/",
+          "title": "Troubleshooting",
+          "description": "Resolve the most common environment, port, dependency, database, PWA and generated-contract failures.",
+          "category": "Operate",
+          "file": "troubleshooting.md",
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/troubleshooting.md"
+        }
+      ]
+    }
+  ],
+  "standalone": [
+    {
+      "path": "/examples/",
+      "title": "Examples",
+      "description": "Follow complete workflows and open the deployed flagship or focused interactive component examples.",
+      "category": "Explore",
+      "file": "examples.md"
+    },
+    {
+      "path": "/storybook/",
+      "title": "Interactive Storybook",
+      "description": "Explore live Vireo component states, responsive behavior, controls and accessibility-oriented examples.",
+      "category": "Explore",
+      "file": "storybook.md"
+    },
+    {
+      "path": "/reference/",
+      "title": "Reference",
+      "description": "Reach exhaustive TypeScript exports, aggregate Java APIs, exact release coordinates and compatibility contracts.",
+      "category": "Reference",
+      "file": "reference.md"
+    },
+    {
+      "path": "/reference/typescript/",
+      "title": "TypeScript API reference",
+      "description": "Inspect every declared public TypeScript export and signature from the exact current package snapshot.",
+      "category": "Reference",
+      "file": "typescript-reference.md"
+    },
+    {
+      "path": "/reference/java/",
+      "title": "Java API reference",
+      "description": "Inspect aggregate Javadocs for every public type and member in the coordinated current JVM module family.",
+      "category": "Reference",
+      "file": "java-reference.md"
+    },
+    {
+      "path": "/versions/",
+      "title": "Versions",
+      "description": "Map friendly Vireo documentation versions to exact CLI, npm, JVM, template and reference snapshots.",
+      "category": "Project",
+      "file": "versions.md"
+    },
+    {
+      "path": "/roadmap/",
+      "title": "Roadmap and maturity",
+      "description": "Understand Vireo's current public 0.x boundary, completed engineering evidence and deliberately open product work.",
+      "category": "Project",
+      "file": "roadmap.md",
+      "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md"
+    },
+    {
+      "path": "/community/",
+      "title": "Community",
+      "description": "Ask questions, report problems, propose changes and contribute to the Vireo framework and template.",
+      "category": "Project",
+      "file": "community.md"
+    }
+  ]
+}

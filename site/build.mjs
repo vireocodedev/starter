@@ -1,6 +1,8 @@
-import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { renderWebsitePage } from "./app.mjs";
+import { renderMarkdown } from "./markdown.mjs";
 
 const siteRoot = dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = resolve(siteRoot, "..");
@@ -8,32 +10,75 @@ const repositoryRoot = resolve(siteRoot, "..");
 export function buildWebsite({ root = repositoryRoot, outputRoot = join(root, "site/dist") } = {}) {
   const sitePolicy = readJson(join(root, "site/site-policy.json"));
   const documentationPolicy = readJson(join(root, "contracts/documentation-release-policy.json"));
-  const currentRelease = documentationPolicy.releases.find(
-    candidate => candidate.id === documentationPolicy.currentRelease,
-  );
+  const contentManifest = readJson(join(root, "site/content/manifest.json"));
+  const website = createWebsiteModel({ documentationPolicy, sitePolicy });
+  validateContentManifest({ contentManifest, root, website });
 
-  if (!currentRelease) {
-    throw new Error(`current documentation release ${documentationPolicy.currentRelease} is not declared`);
-  }
-
+  if (existsSync(outputRoot)) rmSync(outputRoot, { recursive: true, force: true });
   mkdirSync(join(outputRoot, "assets"), { recursive: true });
   cpSync(join(root, "site/assets"), join(outputRoot, "assets"), { recursive: true });
 
-  const website = createWebsiteModel({ documentationPolicy, sitePolicy });
-  writeFileSync(join(outputRoot, "index.html"), renderLanding(website));
-  writeFileSync(join(outputRoot, "404.html"), renderNotFound(website));
-  writeFileSync(join(outputRoot, "robots.txt"), renderRobots(website));
-  writeFileSync(join(outputRoot, "sitemap.xml"), renderSitemap(website));
-  writeFileSync(join(outputRoot, "healthz"), "ok\n");
-  writeFileSync(join(outputRoot, ".nojekyll"), "");
-  writeJson(join(outputRoot, "site.json"), website);
+  const navigation = contentManifest.sections.map(section => ({
+    label: section.label,
+    pages: section.pages.map(page => normalizeManifestPage(page)),
+  }));
+  const allPageRecords = [
+    ...navigation.flatMap(section => section.pages),
+    ...contentManifest.standalone.map(normalizeManifestPage),
+  ];
+  const contentPages = allPageRecords.map(record => createContentPage({ record, root, website }));
+  const renderedPages = [];
 
-  console.log(
-    `Website built for ${website.currentRelease.id}: create-vireo ${website.currentRelease.createVireo}, ` +
-      `${website.currentRelease.npm.length - 1} scoped npm packages, and JVM ${website.currentRelease.jvm.version}.`,
+  const landing = createLandingPage(website);
+  writePage({ allPages: allPageRecords, navigation, outputRoot, page: landing, website });
+  renderedPages.push(landing);
+
+  for (const page of contentPages) {
+    writePage({ allPages: allPageRecords, navigation, outputRoot, page, website });
+    renderedPages.push(page);
+    if (page.path.startsWith("/docs/")) {
+      const versionedPath = page.path.replace("/docs/", `/docs/${website.documentation.version}/`);
+      const versionedPage = {
+        ...page,
+        canonicalPath: page.path,
+        documentationVersion: website.documentation.version,
+        html: page.html.replaceAll('href="/docs/', `href="/docs/${website.documentation.version}/`),
+        path: versionedPath,
+        versioned: true,
+      };
+      writePage({ allPages: allPageRecords, navigation, outputRoot, page: versionedPage, website });
+      renderedPages.push(versionedPage);
+    }
+  }
+
+  const notFound = createNotFoundPage();
+  writeFileSync(
+    join(outputRoot, "404.html"),
+    renderWebsitePage({ website, page: notFound, navigation, allPages: allPageRecords }),
   );
 
-  return website;
+  const searchIndex = contentPages.map(page => ({
+    category: page.category,
+    description: page.description,
+    label: page.title,
+    text: page.searchText,
+    url: page.path,
+    version: website.documentation.version,
+  }));
+  writeJson(join(outputRoot, "search-index.json"), searchIndex);
+  writeJson(join(outputRoot, "versions.json"), createVersionsModel(documentationPolicy));
+  writeJson(join(outputRoot, "site.json"), website);
+  writeFileSync(join(outputRoot, "robots.txt"), renderRobots(website));
+  writeFileSync(join(outputRoot, "sitemap.xml"), renderSitemap(website, renderedPages));
+  writeFileSync(join(outputRoot, "healthz"), "ok\n");
+  writeFileSync(join(outputRoot, ".nojekyll"), "");
+  validateInternalLinks({ outputRoot, pages: renderedPages });
+
+  console.log(
+    `Website built with React for Vireo ${website.documentation.version}: ${contentPages.length} canonical pages, ` +
+      `${renderedPages.length} rendered routes, create-vireo ${website.currentRelease.createVireo}.`,
+  );
+  return { pages: renderedPages, searchIndex, website };
 }
 
 export function createWebsiteModel({ documentationPolicy, sitePolicy }) {
@@ -41,9 +86,10 @@ export function createWebsiteModel({ documentationPolicy, sitePolicy }) {
   if (!release) throw new Error(`current release ${documentationPolicy.currentRelease} is missing`);
   const createVireo = release.npm.find(entry => entry.package === "create-vireo");
   if (!createVireo) throw new Error(`documentation release ${release.id} does not declare create-vireo`);
-
+  if (!release.documentationVersion) throw new Error(`documentation release ${release.id} has no human version`);
+  const publicSnapshot = `${documentationPolicy.publicBaseUrl}/versions/${release.id}`;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     canonicalUrl: sitePolicy.canonicalUrl,
     title: sitePolicy.title,
     description: sitePolicy.description,
@@ -53,229 +99,188 @@ export function createWebsiteModel({ documentationPolicy, sitePolicy }) {
       source: release.releaseLinks.source,
       npm: release.releaseLinks.npm,
       maven: release.releaseLinks.jvm,
-      compatibility: release.releaseLinks.compatibility,
-      migration: release.releaseLinks.migration,
+      storybook: `${publicSnapshot}/storybook/`,
+      typescriptApi: `${publicSnapshot}/api/typescript/`,
+      jvmApi: `${publicSnapshot}/api/jvm/`,
+    },
+    documentation: {
+      version: release.documentationVersion,
+      label: release.documentationLabel ?? `Vireo ${release.documentationVersion}`,
+      status: release.status,
+      currentPath: "/docs/",
+      snapshotPath: `/docs/${release.documentationVersion}/`,
+      exactReferenceSnapshot: `${publicSnapshot}/`,
     },
     currentRelease: {
       id: release.id,
       createVireo: createVireo.version,
-      documentationUrl: `${documentationPolicy.publicBaseUrl}/versions/${release.id}/`,
       npm: release.npm,
       jvm: release.jvm,
+      template: release.template,
     },
     releases: documentationPolicy.releases.map(candidate => ({
-      id: candidate.id,
+      documentationVersion: candidate.documentationVersion,
+      exactId: candidate.id,
+      label: candidate.documentationLabel ?? `Vireo ${candidate.documentationVersion}`,
       status: candidate.status,
-      url: `${documentationPolicy.publicBaseUrl}/versions/${candidate.id}/`,
+      url: `/docs/${candidate.documentationVersion}/`,
+      referenceUrl: `${documentationPolicy.publicBaseUrl}/versions/${candidate.id}/`,
     })),
   };
 }
 
-export function renderLanding(website) {
-  const { currentRelease, links, maturity } = website;
-  const scopedPackages = currentRelease.npm.filter(entry => entry.package !== "create-vireo");
-  const npmVersions = [...new Set(scopedPackages.map(entry => entry.version))].join(", ");
-  const packageRows = currentRelease.npm
-    .map(entry => `<li><code>${escapeHtml(entry.package)}</code><span>${escapeHtml(entry.version)}</span></li>`)
-    .join("");
-  const releaseOptions = website.releases
-    .map(
-      release =>
-        `<option value="${escapeHtml(release.url)}"${
-          release.id === currentRelease.id ? " selected" : ""
-        }>${escapeHtml(release.id)} · ${escapeHtml(release.status)}</option>`,
-    )
-    .join("");
-  const createCommand = "npm create vireo@latest my-app";
-  const frontendCommand = "npm create vireo@latest my-app -- --profile frontend";
-
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="${escapeHtml(website.description)}" />
-    <meta name="theme-color" content="#07111f" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="${escapeHtml(website.title)}" />
-    <meta property="og:description" content="${escapeHtml(website.description)}" />
-    <meta property="og:url" content="${escapeHtml(website.canonicalUrl)}" />
-    <meta name="twitter:card" content="summary" />
-    <link rel="canonical" href="${escapeHtml(website.canonicalUrl)}" />
-    <link rel="stylesheet" href="assets/site.css" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-    <title>${escapeHtml(website.title)}</title>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
-      <div class="shell site-header__inner">
-        <a class="brand" href="./" aria-label="Vireo Framework home">
-          ${vireoMark()}
-          <span>Vireo Framework <small>by Vireo Code</small></span>
-        </a>
-        <nav class="site-nav" aria-label="Primary navigation">
-          <a href="${escapeHtml(links.documentation)}">Docs</a>
-          <a href="${escapeHtml(links.demo)}">Demo</a>
-          <a href="${escapeHtml(links.versions)}">Versions</a>
-          <a href="${escapeHtml(links.source)}">GitHub</a>
-        </nav>
-      </div>
-    </header>
-
-    <main id="main">
-      <section class="shell hero" aria-labelledby="hero-title">
-        <div>
-          <p class="eyebrow">React · optional Spring Boot · operational applications</p>
-          <h1 id="hero-title">Ship the business workflow, not another foundation.</h1>
-          <p class="hero__lede">Vireo connects responsive React UI, swappable backend adapters, target-aware generation, versioned contracts, and an optional complete Spring Boot path while leaving domain code in your application.</p>
-          <div class="actions">
-            <a class="button button--primary" href="${escapeHtml(links.demo)}">Open the live demo</a>
-            <a class="button" href="${escapeHtml(links.quickstart)}">Follow the quickstart</a>
-          </div>
-        </div>
-        <aside class="command-card" aria-label="Create a Vireo application">
-          <div class="command-card__label">
-            <span>Create from the public release</span>
-            <button class="copy-button" type="button" data-copy-command="${escapeHtml(createCommand)}">Copy</button>
-          </div>
-          <code>${escapeHtml(createCommand)}</code>
-          <p class="command-card__alternative">Frontend repository only:</p>
-          <code>${escapeHtml(frontendCommand)}</code>
-          <span class="visually-hidden" aria-live="polite" data-copy-status></span>
-        </aside>
-      </section>
-
-      <div class="proof-strip" aria-label="Current public proof">
-        <div class="shell proof-strip__inner">
-          <div class="proof"><strong>create-vireo ${escapeHtml(currentRelease.createVireo)}</strong><span>Public project creation and upgrade CLI</span></div>
-          <div class="proof"><strong>npm ${escapeHtml(npmVersions)}</strong><span>${scopedPackages.length} scoped framework packages</span></div>
-          <div class="proof"><strong>JVM ${escapeHtml(currentRelease.jvm.version)}</strong><span>${currentRelease.jvm.modules.length} Maven Central modules</span></div>
-          <div class="proof"><strong>Live HTTPS demo</strong><span>Seeded, monitored, and reset daily</span></div>
-        </div>
-      </div>
-
-      <section class="shell section" aria-labelledby="path-title">
-        <div class="section-heading">
-          <h2 id="path-title">One connected path.</h2>
-          <p>Evaluate the experience, create an ordinary application, inspect the exact public contracts, and keep the release boundary visible throughout.</p>
-        </div>
-        <div class="cards">
-          ${pathCard("01", "Try the workflow", "Use the seeded Item application without installing anything. The demo is a public sandbox with no uptime SLA.", links.demo, "Open demo")}
-          ${pathCard("02", "Choose your ownership boundary", "Create the complete React/Spring application or a standalone mock-backed frontend for a separately owned company API.", links.frontendProfile, "See frontend profile")}
-          ${pathCard("03", "Generate a vertical slice", "Generate a full-stack capability or only its frontend models, adapter, UI, localization, stories, and tests from one reviewed schema.", links.tutorial, "Follow tutorial")}
-        </div>
-      </section>
-
-      <section class="shell section section--compact" aria-labelledby="release-title">
-        <div class="release-layout">
-          <div class="release-panel">
-            <p class="eyebrow">Version-aware by construction</p>
-            <h2 id="release-title">Current documentation snapshot</h2>
-            <p>The site is generated from the same release policy that verifies package manifests and JVM coordinates. Stable documentation aliases point to <a href="${escapeHtml(currentRelease.documentationUrl)}"><code>${escapeHtml(currentRelease.id)}</code></a>.</p>
-            <div class="release-meta">
-              <span class="pill">create-vireo ${escapeHtml(currentRelease.createVireo)}</span>
-              <span class="pill">npm ${escapeHtml(npmVersions)}</span>
-              <span class="pill">JVM ${escapeHtml(currentRelease.jvm.version)}</span>
-            </div>
-            <ul class="package-list" aria-label="Current public package versions">${packageRows}</ul>
-            <label for="release-select">Open a documentation release</label>
-            <select class="release-select" id="release-select" data-release-select>${releaseOptions}</select>
-          </div>
-          <aside class="boundary" aria-labelledby="boundary-title">
-            <p class="eyebrow">${escapeHtml(maturity.label)} · reviewed ${escapeHtml(maturity.reviewed)}</p>
-            <h2 id="boundary-title">Useful now. Honest about what remains.</h2>
-            <p><strong>${escapeHtml(maturity.summary)}</strong></p>
-            <ul>
-              <li>Applications own domain rules, authorization policy, data sensitivity, and conflict decisions.</li>
-              <li>The Template demonstrates an offline shell; it does not claim arbitrary offline domain synchronization.</li>
-              <li>The hosted flagship and automated fixtures are not evidence of independent adoption.</li>
-            </ul>
-            <a href="${escapeHtml(links.compatibility)}">Read compatibility and maturity boundaries</a>
-          </aside>
-        </div>
-      </section>
-
-      <section class="shell section" aria-labelledby="explore-title">
-        <div class="section-heading">
-          <h2 id="explore-title">Everything connects from here.</h2>
-          <p>Use the layer that answers your current question; all technical references retain their exact release identity.</p>
-        </div>
-        <div class="link-grid">
-          ${linkTile(links.documentation, "Searchable documentation", "Storybook guides plus TypeScript and JVM reference")}
-          ${linkTile(links.typescriptApi, "TypeScript API", "Declared package exports and signatures")}
-          ${linkTile(links.jvmApi, "JVM API", "Aggregate Javadocs for the current module family")}
-          ${linkTile(links.architecture, "Architecture", "Request path, ownership, and deployment shape")}
-          ${linkTile(links.comparison, "Comparison", "Where Vireo fits and where alternatives fit better")}
-          ${linkTile(links.security, "Security", "Private reporting, supported versions, and response policy")}
-          ${linkTile(links.roadmap, "Roadmap", "Evidence gates, current maturity, and remaining work")}
-          ${linkTile(links.discussions, "Community", "Questions, ideas, announcements, and design discussion")}
-          ${linkTile(links.npm, "npm packages", "Public frontend packages and the create-vireo CLI")}
-          ${linkTile(links.maven, "Maven Central", "The version-aligned Spring Boot module family")}
-          ${linkTile(links.source, "Framework source", "Cross-stack contracts, generators, releases, and roadmap")}
-          ${linkTile(links.contributing, "Contribute", "Setup, verification, ownership, and pull-request expectations")}
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <div class="shell site-footer__inner">
-        <p>Vireo Framework by Vireo Code. Public source and packages under the MIT license. The current line is production-shaped 0.x software, not a blanket production-readiness claim.</p>
-        <a href="${escapeHtml(links.feedback)}">Share evaluation feedback</a>
-      </div>
-    </footer>
-    <script src="assets/site.js" defer></script>
-  </body>
-</html>\n`;
+function normalizeManifestPage(page) {
+  return { ...page, path: normalizeRoute(page.path) };
 }
 
-export function renderNotFound(website) {
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
-    <title>Page not found · Vireo Framework</title>
-    <style>:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif}body{display:grid;min-height:100vh;margin:0;place-items:center;background:#07111f;color:#f5f8fc}main{width:min(42rem,calc(100% - 2rem))}p{color:#a9bad0;font-size:1.1rem}a{color:#7cd9fd}</style>
-  </head>
-  <body><main><p>404 · Vireo Framework</p><h1>This route is not part of the current site.</h1><p>Return to the product overview or open the current versioned documentation.</p><p><a href="${escapeHtml(website.canonicalUrl)}">Vireo home</a> · <a href="${escapeHtml(website.links.documentation)}">Documentation</a></p></main></body>
-</html>\n`;
+function createContentPage({ record, root, website }) {
+  const source = join(root, "site/content", record.file);
+  const markdown = readFileSync(source, "utf8");
+  const rendered = renderMarkdown(expandTokens(markdown, website));
+  return {
+    ...record,
+    basePath: record.path,
+    headings: rendered.headings,
+    html: rendered.html,
+    kind: "docs",
+    readingMinutes: Math.max(1, Math.round(rendered.text.split(/\s+/u).length / 210)),
+    searchText: rendered.text,
+  };
+}
+
+function expandTokens(markdown, website) {
+  const replacements = {
+    "{{CREATE_VIREO_VERSION}}": website.currentRelease.createVireo,
+    "{{DOCS_VERSION}}": website.documentation.version,
+    "{{EXACT_RELEASE_ID}}": website.currentRelease.id,
+    "{{JVM_VERSION}}": website.currentRelease.jvm.version,
+    "{{STORYBOOK_URL}}": website.links.storybook,
+    "{{TYPESCRIPT_API_URL}}": website.links.typescriptApi,
+    "{{JVM_API_URL}}": website.links.jvmApi,
+  };
+  let expanded = markdown;
+  for (const [token, value] of Object.entries(replacements)) expanded = expanded.replaceAll(token, value);
+  return expanded;
+}
+
+function createLandingPage(website) {
+  return {
+    basePath: "/",
+    category: "Vireo Framework",
+    description: website.description,
+    headings: [],
+    kind: "home",
+    path: "/",
+    searchText: website.description,
+    title: "React foundations for operational applications",
+  };
+}
+
+function createNotFoundPage() {
+  const rendered = renderMarkdown(
+    `# Page not found\n\nThis route is not part of the current Vireo documentation.\n\n- [Open the documentation](/docs/)\n- [Search the current guides](/docs/)\n- [Return to the Vireo homepage](/)`,
+  );
+  return {
+    basePath: "/404.html",
+    category: "404",
+    description: "The requested Vireo documentation route was not found.",
+    headings: rendered.headings,
+    html: rendered.html,
+    kind: "docs",
+    noIndex: true,
+    path: "/404.html",
+    searchText: "",
+    title: "Page not found",
+  };
+}
+
+function writePage({ allPages, navigation, outputRoot, page, website }) {
+  const destination = routeDestination(outputRoot, page.path);
+  mkdirSync(dirname(destination), { recursive: true });
+  writeFileSync(destination, renderWebsitePage({ website, page, navigation, allPages }));
+}
+
+function routeDestination(outputRoot, route) {
+  if (route === "/") return join(outputRoot, "index.html");
+  if (route.endsWith(".html")) return join(outputRoot, route.slice(1));
+  return join(outputRoot, route.slice(1), "index.html");
+}
+
+function normalizeRoute(route) {
+  if (typeof route !== "string" || !route.startsWith("/")) throw new Error(`invalid content route ${route}`);
+  return route === "/" || route.endsWith("/") ? route : `${route}/`;
+}
+
+function validateContentManifest({ contentManifest, root, website }) {
+  if (contentManifest.schemaVersion !== 1) throw new Error("site content manifest schemaVersion must be 1");
+  if (contentManifest.documentationVersion !== website.documentation.version) {
+    throw new Error(
+      `content version ${contentManifest.documentationVersion} does not match ${website.documentation.version}`,
+    );
+  }
+  const records = [...contentManifest.sections.flatMap(section => section.pages), ...contentManifest.standalone];
+  const paths = new Set();
+  for (const record of records) {
+    const path = normalizeRoute(record.path);
+    if (paths.has(path)) throw new Error(`duplicate content route ${path}`);
+    paths.add(path);
+    for (const field of ["title", "description", "category", "file"]) {
+      if (typeof record[field] !== "string" || !record[field].trim()) throw new Error(`${path} has no ${field}`);
+    }
+    if (!existsSync(join(root, "site/content", record.file)))
+      throw new Error(`${path} is missing content file ${record.file}`);
+  }
+  if (records.length < 24) throw new Error("the primary website must expose at least 24 canonical content pages");
+}
+
+function createVersionsModel(documentationPolicy) {
+  const current = documentationPolicy.releases.find(release => release.id === documentationPolicy.currentRelease);
+  return {
+    schemaVersion: 2,
+    currentRelease: documentationPolicy.currentRelease,
+    currentDocumentationVersion: current?.documentationVersion,
+    releases: documentationPolicy.releases.map(release => ({
+      documentationVersion: release.documentationVersion,
+      exactId: release.id,
+      status: release.status,
+      npm: release.npm,
+      jvm: release.jvm,
+      template: release.template,
+      documentationUrl: `/docs/${release.documentationVersion}/`,
+      referenceUrl: `${documentationPolicy.publicBaseUrl}/versions/${release.id}/`,
+    })),
+  };
 }
 
 function renderRobots(website) {
   return `User-agent: *\nAllow: /\nSitemap: ${website.canonicalUrl}sitemap.xml\n`;
 }
 
-function renderSitemap(website) {
-  const routes = [""];
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${routes
-    .map(route => `  <url><loc>${escapeXml(new URL(route, website.canonicalUrl).href)}</loc></url>`)
+function renderSitemap(website, pages) {
+  const canonicalPages = pages.filter(page => !page.versioned && !page.noIndex);
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${canonicalPages
+    .map(page => `  <url><loc>${escapeXml(new URL(page.path, website.canonicalUrl).href)}</loc></url>`)
     .join("\n")}\n</urlset>\n`;
 }
 
-function pathCard(number, title, description, href, action) {
-  return `<article class="card"><span class="card__number">${escapeHtml(number)}</span><h3>${escapeHtml(title)}</h3><p>${escapeHtml(description)}</p><a href="${escapeHtml(href)}">${escapeHtml(action)} →</a></article>`;
-}
-
-function linkTile(href, title, description) {
-  return `<a href="${escapeHtml(href)}">${escapeHtml(title)}<span>${escapeHtml(description)}</span></a>`;
-}
-
-function vireoMark() {
-  return `<svg viewBox="0 0 40 40" role="img" aria-label=""><path fill="#36c7fa" d="M6 7h10l4 8 4-8h10L20 35 6 7Z"/><path fill="#f0b44c" d="M15 7h10l-5 10-5-10Z"/></svg>`;
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
-function escapeXml(value) {
-  return escapeHtml(value).replaceAll("'", "&apos;");
+function validateInternalLinks({ outputRoot, pages }) {
+  const available = new Set(pages.map(page => page.path));
+  available.add("/404.html");
+  const problems = [];
+  for (const page of pages) {
+    const html = readFileSync(routeDestination(outputRoot, page.path), "utf8");
+    for (const match of html.matchAll(/href="(\/[^"#?]*)(?:[#?][^"]*)?"/gu)) {
+      const destination = match[1];
+      if (destination.startsWith("/assets/") || destination === "/sitemap.xml") continue;
+      if (existsSync(join(outputRoot, destination.slice(1)))) continue;
+      const normalized = destination.endsWith(".html") || destination.endsWith("/") ? destination : `${destination}/`;
+      if (!available.has(normalized) && !existsSync(routeDestination(outputRoot, normalized))) {
+        problems.push(`${page.path} links to missing internal route ${destination}`);
+      }
+    }
+  }
+  if (problems.length > 0)
+    throw new Error(`website internal-link validation failed:\n${problems.map(problem => `- ${problem}`).join("\n")}`);
 }
 
 function readJson(path) {
@@ -283,15 +288,16 @@ function readJson(path) {
 }
 
 function writeJson(path, value) {
-  mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try {
-    buildWebsite();
-  } catch (error) {
-    console.error(`Website build failed: ${error instanceof Error ? error.message : String(error)}`);
-    process.exit(1);
-  }
+function escapeXml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) buildWebsite();

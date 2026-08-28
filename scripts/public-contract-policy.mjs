@@ -24,6 +24,7 @@ const requiredFiles = [
   "contracts/public-release-attestation-policy.json",
   "contracts/documentation-release-policy.json",
   "contracts/public-beta-evidence-policy.json",
+  "site/content/manifest.json",
   "packages/ui/docs/PUBLIC_SURFACE.md",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -125,6 +126,15 @@ for (const claim of executableDocumentationClaims) {
 }
 
 const markdownFiles = [];
+const websiteContentRoot = join(root, "site/content");
+const websiteManifest = JSON.parse(readFileSync(join(websiteContentRoot, "manifest.json"), "utf8"));
+const websiteRoutes = new Set([
+  "/",
+  "/versions.json",
+  ...websiteManifest.sections.flatMap(section => section.pages.map(page => page.path)),
+  ...websiteManifest.standalone.map(page => page.path),
+]);
+const websiteLinkTokens = new Set(["{{STORYBOOK_URL}}", "{{TYPESCRIPT_API_URL}}", "{{JVM_API_URL}}"]);
 function collectMarkdown(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if ([".git", "node_modules", "dist", "storybook-static"].includes(entry.name)) continue;
@@ -142,6 +152,12 @@ for (const source of markdownFiles) {
     if (!rawTarget || /^(?:https?:|mailto:|#)/.test(rawTarget)) continue;
     const target = decodeURIComponent(rawTarget.split("#", 1)[0].split("?", 1)[0]);
     if (!target) continue;
+    if (source.startsWith(`${websiteContentRoot}/`) && websiteLinkTokens.has(target)) continue;
+    if (source.startsWith(`${websiteContentRoot}/`) && target.startsWith("/")) {
+      if (!websiteRoutes.has(target))
+        problems.push(`${relative(root, source)} links to undeclared website route ${rawTarget}`);
+      continue;
+    }
     const resolved = resolve(dirname(source), target);
     if (!existsSync(resolved)) problems.push(`${relative(root, source)} links to missing ${rawTarget}`);
     else if (!statSync(resolved).isFile() && !statSync(resolved).isDirectory())

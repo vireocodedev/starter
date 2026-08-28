@@ -24,16 +24,19 @@ project upgrade currently supports the explicit 0.2.0→0.3.0 release pair.
 
 Choose the shortest path that matches what you are evaluating:
 
-| Goal                            | First step                                                                                 | Expected result                                                           |
-| ------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Evaluate the complete stack     | Follow the [guided evaluation](docs/EVALUATION.md) in the public Template                  | A running authenticated Item workflow backed by React and Spring Boot     |
-| Create a standalone frontend    | Run `npm create vireo@latest app -- --profile frontend`                                    | A mock-backed React app with no Java or database                          |
-| Adopt into an existing frontend | Read the [frontend-only profile](docs/architecture/frontend-only-profile.md)               | Vireo packages and adapters introduced behind an owned API boundary       |
-| Adopt frontend building blocks  | Review the [npm entry points](docs/PUBLIC_API.md#frontend-entry-points) and live Storybook | A deliberate package/subpath choice rather than an accidental deep import |
-| Adopt backend building blocks   | Review the [Maven modules](docs/PUBLIC_API.md#jvm-entry-points) and BOM example            | Version-aligned Spring Boot modules resolved from Maven Central           |
-| Assess fit before installing    | Read [where Vireo fits](docs/EVALUATION.md#fit-and-limitations)                            | An explicit decision based on current `0.x` capabilities and limitations  |
+| Goal                            | First step                                                                                      | Expected result                                                            |
+| ------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Learn Vireo                     | Open the [main documentation](https://vireocode.com/docs/)                                      | Task-oriented guides, concepts, examples, CLI and operations documentation |
+| Evaluate the complete stack     | Follow the [guided start](https://vireocode.com/docs/getting-started/)                          | A running authenticated Item workflow backed by React and Spring Boot      |
+| Create a standalone frontend    | Run `npm create vireo@latest app -- --profile frontend`                                         | A mock-backed React app with no Java or database                           |
+| Adopt into an existing frontend | Read the [frontend-only guide](https://vireocode.com/docs/getting-started/frontend-only/)       | Vireo packages and adapters introduced behind an owned API boundary        |
+| Adopt frontend building blocks  | Review the [frontend guide](https://vireocode.com/docs/frontend/) and live Storybook            | A deliberate package/subpath choice rather than an accidental deep import  |
+| Adopt backend building blocks   | Review the [Spring guide](https://vireocode.com/docs/spring/) and BOM example                   | Version-aligned Spring Boot modules resolved from Maven Central            |
+| Assess fit before installing    | Read [profiles and boundaries](https://vireocode.com/docs/getting-started/choose-your-profile/) | An explicit decision based on current `0.x` capabilities and limitations   |
 
 The [public API map](docs/PUBLIC_API.md) is the package-level navigation surface.
+The repository-owned [evaluation evidence](docs/EVALUATION.md) remains available for
+maintainers and auditors after the user-facing guidance moved to vireocode.com.
 Starter UI has an additional [classified surface](packages/ui/docs/PUBLIC_SURFACE.md)
 covering every exported entry point. Canonical date, time, and timestamp ownership is
 documented in the [temporal values guide](docs/TEMPORAL_VALUES.md).
@@ -104,10 +107,14 @@ corepack npm run verify:all      # TypeScript + JVM, including aggregate Javadoc
 
 ### Live documentation
 
-The public Vireo documentation portal searches the complete Storybook guide and
-component catalog together with generated TypeScript and JVM API references:
+The [Vireo documentation website](https://vireocode.com/docs/) is the canonical
+source for onboarding, concepts, guides, CLI usage, operations, versions, examples,
+and component-use decisions. The GitHub Pages artifact remains the exact-release
+host for interactive Storybook and generated TypeScript/JVM reference:
 
-**[Open the Vireo Starter documentation](https://vireocodedev.github.io/starter/docs/)**
+- [Main documentation](https://vireocode.com/docs/)
+- [Interactive Storybook](https://vireocode.com/storybook/)
+- [TypeScript and Java reference](https://vireocode.com/reference/)
 
 ```bash
 corepack npm run storybook
