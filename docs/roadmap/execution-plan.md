@@ -36,20 +36,20 @@ and completion.
 
 ## Execution sequence
 
-| Milestone | Scope                                                  | Exit evidence                                                                     | Status                                          |
-| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete                                        |
-| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete                                        |
-| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete                                        |
-| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete                                        |
-| Phase 0E  | External evidence                                      | Isolated AI proxy; human research explicitly deferred under D-110                 | Complete with variance                          |
-| Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete                                        |
-| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Engineering complete; external-human gate open  |
-| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Engineering complete; external-human gate open  |
-| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open   |
-| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Engineering complete; external/manual gate open |
-| Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Pending                                         |
-| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Pending                                         |
+| Milestone | Scope                                                  | Exit evidence                                                                     | Status                                           |
+| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete                                         |
+| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete                                         |
+| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete                                         |
+| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete                                         |
+| Phase 0E  | External evidence                                      | Isolated AI proxy; human research explicitly deferred under D-110                 | Complete with variance                           |
+| Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete                                         |
+| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Engineering complete; external-human gate open   |
+| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Engineering complete; external-human gate open   |
+| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open    |
+| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Engineering complete; external/manual gate open  |
+| Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Active; numbered engineering backlog established |
+| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Pending                                          |
 
 ## Phase 0A evidence set
 
@@ -149,6 +149,18 @@ concentrates on the unproven contracts in `G-301`–`G-305` and the supported
 upgrade path in `G-203`. Independent security, physical-device, branded-browser,
 manual assistive-technology, field-performance, and target-environment rehearsal
 evidence cannot be completed by maintainer automation and stays visibly open.
+
+## Phase 5 flagship and public-beta execution set
+
+- [Numbered Phase 5 backlog and gate split](phase-5/backlog.md)
+- [Public-beta evidence criteria](phase-5/public-beta-criteria.md)
+- `G-308` hosted flagship and operations evidence
+- `G-309` independent adopter and deployment evidence
+
+Phase 5 engineering may build the flagship, deployment source, proof material,
+feedback loop, and evidence capture. Only unfamiliar external teams can close the
+adopter gate; repository traffic, automated clean rooms, and maintainer-owned
+deployments do not count.
 
 ## Measurement policy
 

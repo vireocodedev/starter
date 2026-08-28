@@ -40,6 +40,12 @@ The following passed on 2026-08-28:
   generated-project fixture, public contract/API/surface policy, and isolated packed
   release smoke.
 
+The release activation completed on 2026-08-28: `create-vireo` 0.3.0 and
+`@vireocodedev/sqlite` 0.2.2 were published through the protected OIDC workflow,
+the anonymous public-consumer verification passed, signed SBOM attestations were
+verified, and the hosted 0.2.0→0.3.0 project-upgrade fixture passed on the release
+commit.
+
 Workflow definitions now require or schedule the corresponding hosted evidence.
 They are not described as hosted-green until these commits are pushed and complete.
 
@@ -55,15 +61,11 @@ They are not described as hosted-green until these commits are pushed and comple
    (`G-304`).
 5. A restore and incident rehearsal witnessed in the intended deployment environment,
    with measured recovery time/data point and retained evidence (`G-305`).
-6. Publication of `create-vireo` 0.3.0 followed by a green hosted 0.2.0→0.3.0
-   release-pair fixture (`G-203`).
-
-The prior Phase 1–3 unfamiliar-user/adopter gates also remain open and are not
-waived by Phase 4 automation.
+   The prior Phase 1–3 unfamiliar-user/adopter gates also remain open and are not
+   waived by Phase 4 automation.
 
 ## Next gate action
 
-Push both repositories, observe required and scheduled workflows, publish
-`create-vireo` 0.3.0 only after the frozen Template commit is publicly downloadable,
-then retain the first hosted project-upgrade evidence. After that, execution can
-concentrate on Phase 5 while scheduling the independent/manual evidence above.
+Concentrate maintainer-automatable execution on the numbered Phase 5 backlog while
+scheduling the independent/manual evidence above. Do not convert a hosted demo or
+automated beta surface into evidence of independent adoption.

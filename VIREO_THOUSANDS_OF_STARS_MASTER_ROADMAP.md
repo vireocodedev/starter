@@ -1368,11 +1368,11 @@ admission boundary; unfamiliar-user generation/customization gate remains open.
 
 ### Phase 4 — Production hardening (6–12 weeks, overlapping)
 
-**Engineering status (28 August 2026):** in progress under a dated backlog and
-production-readiness gate. Existing container/deployment proof is retained;
-security, offline, accessibility/platform, performance, operations, and upgrade
-contracts are being converted into executable evidence. Independent/manual rows
-are not replaceable by automation.
+**Engineering status (28 August 2026):** maintainer-automatable implementation is
+complete. `create-vireo` 0.3.0 and its hosted 0.2.0→0.3.0 upgrade fixture are
+active. Independent security, manual accessibility, branded-browser, physical-
+device, field-performance, and target-environment rows remain open and are not
+replaceable by automation.
 
 - Authentication/security review.
 - Offline guarantees, conflict model, schema upgrades, and adversarial tests.
@@ -1385,6 +1385,10 @@ are not replaceable by automation.
 **Gate:** Written production-readiness criteria pass and known limitations are public.
 
 ### Phase 5 — Flagship experience and public beta (4–8 weeks)
+
+**Engineering status (28 August 2026):** active under the
+[numbered Phase 5 backlog](docs/roadmap/phase-5/backlog.md). Engineering and
+independent-adopter evidence are tracked separately.
 
 - Visually exceptional flagship demo.
 - Example applications and proof material.
