@@ -42,6 +42,7 @@ const requiredLinks = [
   "roadmap",
   "discussions",
   "feedback",
+  "contributing",
 ];
 for (const name of requiredLinks) {
   const value = sitePolicy.links?.[name];

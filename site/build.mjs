@@ -207,6 +207,10 @@ export function renderLanding(website) {
           ${linkTile(links.security, "Security", "Private reporting, supported versions, and response policy")}
           ${linkTile(links.roadmap, "Roadmap", "Evidence gates, current maturity, and remaining work")}
           ${linkTile(links.discussions, "Community", "Questions, ideas, announcements, and design discussion")}
+          ${linkTile(links.npm, "npm packages", "Public frontend packages and the create-vireo CLI")}
+          ${linkTile(links.maven, "Maven Central", "The version-aligned Spring Boot module family")}
+          ${linkTile(links.source, "Framework source", "Cross-stack contracts, generators, releases, and roadmap")}
+          ${linkTile(links.contributing, "Contribute", "Setup, verification, ownership, and pull-request expectations")}
         </div>
       </section>
     </main>

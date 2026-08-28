@@ -137,17 +137,28 @@ professional assessment.
 
 ### `P6-02` — Primary website and conversion funnel
 
-- [ ] Build the primary `vireocode.com` landing surface.
-- [ ] Lead with the qualified value proposition, audience, maturity, and limitations.
-- [ ] Link the live demo, quickstart, tutorial, documentation, comparison,
+- [x] Build the standalone deployable `vireocode.com` landing artifact.
+- [x] Lead with the qualified value proposition, audience, maturity, and limitations.
+- [x] Link the live demo, quickstart, tutorial, documentation, comparison,
       architecture, security policy, roadmap, packages, source, Discussions, and
       contribution path.
 - [ ] Add real screenshots, architecture proof, and restrained status badges.
-- [ ] Add accessible responsive behavior, metadata, canonical URLs, sitemap, and
-      social cards.
-- [ ] Make public content version-aware and prevent abandoned-version ambiguity.
-- [ ] Add automated accessibility, link, performance, and proof-surface checks.
+- [x] Add accessible responsive behavior, reduced-motion handling, and keyboard
+      focus treatment.
+- [x] Add description/Open Graph metadata, canonical URL, robots policy, sitemap,
+      favicon, health route, and static 404 page.
+- [ ] Add final raster social-preview cards and `og:image` metadata.
+- [x] Derive the current CLI, npm, JVM, source, compatibility, and documentation
+      release links from the enforced documentation release policy.
+- [x] Add source-policy, rendering, artifact, workflow-security, and drift checks.
+- [ ] Add hosted browser accessibility, link, performance, and proof-surface checks.
+- [ ] Activate the standalone artifact on the VPS at `https://vireocode.com`.
 - [ ] Verify the complete anonymous discovery-to-first-action path.
+
+Core infrastructure was implemented in Starter commit `3c4b08c`: `site/` owns the
+standalone build, Vireo-specific presentation, release-derived public model, VPS
+deployment script and Caddy contract; `.github/workflows/website.yml` builds and
+retains the artifact without replacing the GitHub Pages documentation portal.
 
 ### `P6-03` — Documentation completion
 

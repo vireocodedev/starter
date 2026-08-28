@@ -22,6 +22,7 @@ const sitePolicy = {
     roadmap: "https://example.com/roadmap",
     discussions: "https://example.com/discussions",
     feedback: "https://example.com/feedback",
+    contributing: "https://example.com/contributing",
   },
 };
 
@@ -70,6 +71,9 @@ test("renders the connected and version-aware public surface", () => {
     sitePolicy.links.demo,
     sitePolicy.links.documentation,
     sitePolicy.links.quickstart,
+    sitePolicy.links.contributing,
+    documentationPolicy.releases[0].releaseLinks.npm,
+    documentationPolicy.releases[0].releaseLinks.jvm,
     "production-shaped 0.x software, not a blanket production-readiness claim",
   ]) {
     assert.match(html, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
