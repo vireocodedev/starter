@@ -45,7 +45,7 @@ export {
   type VireoUpgradeResult,
 } from "./project-upgrade.js";
 
-export const TEMPLATE_COMMIT = "5054e351280110a708a0586f7155c30e0673e0d8";
+export const TEMPLATE_COMMIT = "038df86f7e311ef771e0f01a4a44b698f27e4b28";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";
@@ -301,7 +301,7 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       "architecture:check": packageJson.scripts["architecture:check"],
       "bundle:check": packageJson.scripts["bundle:check"],
       preview: packageJson.scripts.preview,
-      vireo: "npx --yes --package=create-vireo@0.4.0 vireo",
+      vireo: "npx --yes --package=create-vireo@0.4.1 vireo",
       "generate:check": "corepack npm run vireo -- check",
       verify: "bash scripts/verify-frontend-profile.sh",
     };
@@ -342,7 +342,7 @@ async function pinGeneratedProjectCli(staging: string) {
     scripts?: Record<string, string>;
   };
   if (!packageJson.scripts) throw new Error("The pinned Template package.json does not declare scripts.");
-  packageJson.scripts.vireo = "npx --yes --package=create-vireo@0.4.0 vireo";
+  packageJson.scripts.vireo = "npx --yes --package=create-vireo@0.4.1 vireo";
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 }
 
@@ -410,7 +410,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     await mkdir(join(staging, ".vireo"), { recursive: true });
     await writeFile(
       join(staging, ".vireo", "project.json"),
-      `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.4.0" }, null, 2)}\n`,
+      `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.4.1" }, null, 2)}\n`,
     );
     if (options.git !== false) {
       const initialized = spawnSync("git", ["init", "--quiet"], { cwd: staging });
