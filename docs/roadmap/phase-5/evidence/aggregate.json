@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-28",
+  "revision": "phase-5-engineering-baseline",
+  "workflowSessions": {
+    "total": 0,
+    "completedWithoutHelp": 0,
+    "completedWithHelp": 0,
+    "blocked": 0,
+    "abandoned": 0,
+    "taskAttempts": {
+      "first-run": 0,
+      "first-change": 0,
+      "generation": 0,
+      "customization": 0,
+      "upgrade": 0,
+      "deployment": 0
+    }
+  },
+  "adoption": {
+    "qualifyingActiveTeams": 0,
+    "maintainedDeploymentUpgrades": 0
+  },
+  "notes": [
+    "No qualifying external workflow or adoption evidence has been recorded.",
+    "Maintainer automation and the flagship demo are excluded from these counts."
+  ]
+}

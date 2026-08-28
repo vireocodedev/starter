@@ -1,0 +1,52 @@
+name: Public-beta evidence
+
+on:
+  pull_request:
+    paths:
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/public-beta-evidence.yml"
+      - "contracts/public-beta-evidence-policy.json"
+      - "docs/roadmap/phase-5/**"
+      - "scripts/public-beta-evidence.mjs"
+  push:
+    branches: [main]
+    paths:
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/public-beta-evidence.yml"
+      - "contracts/public-beta-evidence-policy.json"
+      - "docs/roadmap/phase-5/**"
+      - "scripts/public-beta-evidence.mjs"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: public-beta-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.18.1
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Validate and summarize aggregate evidence
+        run: node scripts/public-beta-evidence.mjs --write
+
+      - name: Upload aggregate summary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-beta-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .public-beta-evidence/latest.json
+          if-no-files-found: error
+          retention-days: 90

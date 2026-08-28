@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "aggregatePath": "docs/roadmap/phase-5/evidence/aggregate.json",
+  "rawEvidencePolicy": "external-access-controlled-only",
+  "publicIdentityRetention": "none-in-roadmap-aggregate",
+  "qualifyingTeamMinimum": 3,
+  "maintainedDeploymentUpgradeMinimum": 1,
+  "allowedOutcomes": ["completed-without-help", "completed-with-help", "blocked", "abandoned"],
+  "requiredTasks": ["first-run", "first-change", "generation", "customization", "upgrade", "deployment"],
+  "disallowedAggregateKeys": ["name", "email", "handle", "username", "organization", "repository", "projectUrl"]
+}

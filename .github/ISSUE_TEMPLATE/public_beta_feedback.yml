@@ -1,0 +1,84 @@
+name: Public-beta evaluation
+description: Record a sanitized outcome from evaluating Vireo's supported path
+title: "[Beta evaluation]: "
+labels: ["beta-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for evaluating Vireo. This issue is public. Do not include private source, application data, credentials, participant identity, employer identity, or security findings. Report vulnerabilities through SECURITY.md.
+  - type: checkboxes
+    id: privacy-consent
+    attributes:
+      label: Public and aggregate use
+      options:
+        - label: I removed confidential and identifying material and consent to this outcome being counted in anonymous aggregate evidence.
+          required: true
+        - label: This is not a vulnerability report.
+          required: true
+  - type: dropdown
+    id: task
+    attributes:
+      label: Evaluation task
+      options:
+        - Create, doctor, and first run
+        - First application-owned change
+        - Generate or eject a capability
+        - Customize the product shell
+        - Upgrade a generated project
+        - Deploy the production-like stack
+        - Other supported-path evaluation
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Public version or revision
+      description: Package version, create-vireo version, or public commit SHA only.
+      placeholder: "create-vireo 0.3.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options: [Completed without help, Completed with help, Blocked, Abandoned]
+    validations:
+      required: true
+  - type: dropdown
+    id: elapsed-band
+    attributes:
+      label: Elapsed-time band
+      options: [Under 15 minutes, 15–30 minutes, 31–60 minutes, More than 60 minutes]
+    validations:
+      required: true
+  - type: input
+    id: diagnostic-code
+    attributes:
+      label: Blocking diagnostic code
+      description: If blocked, provide a stable doctor/generator/error code. Sanitize paths and values.
+      placeholder: "VIR-... or none"
+    validations:
+      required: true
+  - type: textarea
+    id: change-and-help
+    attributes:
+      label: Change attempted and help required
+      description: Describe the application-owned change and only public documentation or assistance used.
+    validations:
+      required: true
+  - type: dropdown
+    id: perceived-time-saved
+    attributes:
+      label: Perceived time saved
+      description: A perception band, not measured productivity evidence.
+      options: [None, Under 1 hour, 1–4 hours, More than 4 hours, Cannot estimate]
+    validations:
+      required: true
+  - type: textarea
+    id: objection
+    attributes:
+      label: Most important objection
+      description: What would stop you from choosing or continuing with Vireo?
+    validations:
+      required: true

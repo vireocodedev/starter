@@ -51,6 +51,8 @@ The frontend application-shell package is `@vireocodedev/shell`. The
 Maven artifact `com.vireocode:vireo-core` is the
 backend's base entity/service layer; they are separate contracts.
 
+Public-beta evaluation is open, but readiness and independent adoption are not yet claimed. Use the structured [feedback and aggregate-evidence path](docs/roadmap/phase-5/feedback-and-evidence.md); do not treat downloads, automation, or the maintainer-built flagship as adopter evidence.
+
 ## Frontend packages
 
 | Package                                                   | Version | Description                                                                                               |

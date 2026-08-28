@@ -18,13 +18,18 @@ const requiredFiles = [
   "docs/PLATFORM_SUPPORT.md",
   "docs/VERIFICATION_PERFORMANCE.md",
   "docs/DOCUMENTATION_PORTAL.md",
+  "docs/roadmap/phase-5/feedback-and-evidence.md",
+  "docs/roadmap/phase-5/evidence/aggregate.json",
   "contracts/platform-support-policy.json",
   "contracts/public-release-attestation-policy.json",
   "contracts/documentation-release-policy.json",
+  "contracts/public-beta-evidence-policy.json",
   "packages/ui/docs/PUBLIC_SURFACE.md",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/ISSUE_TEMPLATE/public_beta_feedback.yml",
+  ".github/ISSUE_TEMPLATE/adopter_check_in.yml",
   ".github/ISSUE_TEMPLATE/config.yml",
 ];
 const problems = [];
@@ -52,6 +57,7 @@ requireText("README.md", [
   "docs/PLATFORM_SUPPORT.md",
   "docs/VERIFICATION_PERFORMANCE.md",
   "docs/DOCUMENTATION_PORTAL.md",
+  "docs/roadmap/phase-5/feedback-and-evidence.md",
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("GOVERNANCE.md", [".github/CODEOWNERS", "docs/COMPATIBILITY.md"]);
@@ -81,7 +87,7 @@ const jvmVersion = gradleProperties.match(/^version=(.+)$/m)?.[1];
 if (!jvmVersion || !compatibility.includes(jvmVersion))
   problems.push("docs/COMPATIBILITY.md must reflect jvm/gradle.properties version");
 
-for (const form of ["bug_report.yml", "feature_request.yml"]) {
+for (const form of ["bug_report.yml", "feature_request.yml", "public_beta_feedback.yml", "adopter_check_in.yml"]) {
   requireText(`.github/ISSUE_TEMPLATE/${form}`, ["name:", "description:", "body:"]);
 }
 requireText(".github/ISSUE_TEMPLATE/config.yml", ["blank_issues_enabled: false", "contact_links:"]);

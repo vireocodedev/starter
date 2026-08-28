@@ -1,0 +1,53 @@
+name: Independent adopter check-in
+description: Opt in to a privacy-safe qualification review for the Phase 5 adopter gate
+title: "[Adopter check-in]: "
+labels: ["beta-adopter"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This public form records only qualification signals. Do not link private repositories, name clients or employers, paste application data, or disclose security findings. Maintainers aggregate qualifying outcomes without copying identity into roadmap evidence.
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Consent and independence
+      options:
+        - label: I am unaffiliated with Vireo implementation and consent to an anonymized aggregate qualification record.
+          required: true
+        - label: I control a non-fixture application and have made application-owned changes across at least two working sessions.
+          required: true
+        - label: I removed confidential and identifying project information from this issue.
+          required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Current stage
+      options: [Local evaluation, Active development, Production-like deployment, Maintained deployment]
+    validations:
+      required: true
+  - type: checkboxes
+    id: workflows
+    attributes:
+      label: Workflows attempted
+      options:
+        - label: Create, doctor, and first run
+        - label: Application-owned customization
+        - label: Capability generation or ejection
+        - label: Supported project upgrade
+        - label: Deployment and health checks
+        - label: Backup and restore rehearsal
+  - type: input
+    id: versions
+    attributes:
+      label: Public versions used
+      description: Versions only; do not include repository or organization details.
+      placeholder: "create-vireo 0.3.0; @vireocodedev/ui 0.2.1"
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Sanitized outcome and blocker
+      description: State what worked, what failed, and the most important objection without identifying the application or team.
+    validations:
+      required: true

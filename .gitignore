@@ -9,6 +9,7 @@ storybook-static/
 .public-release-evidence/
 .support-evidence/
 .verification-evidence/
+.public-beta-evidence/
 npm-public-verification.json
 
 # Research evidence committed under docs/roadmap/research/ is aggregate only.
