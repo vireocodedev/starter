@@ -3,6 +3,8 @@
   "entryPoints": {
     ".": {
       "exports": [
+        "CreateVireoOptions",
+        "CreateVireoResult",
         "EntityFieldSchema",
         "EntityFieldType",
         "EntityGenerationFileResult",
@@ -10,8 +12,6 @@
         "EntityNames",
         "EntityRelationshipSchema",
         "EntitySchemaError",
-        "CreateVireoOptions",
-        "CreateVireoResult",
         "GenerateEntityOptions",
         "GenerateEntityResult",
         "GeneratedContractCheck",
@@ -23,6 +23,11 @@
         "VireoEntitySchema",
         "VireoGeneratorError",
         "VireoPackageManager",
+        "VireoUpgradeCheck",
+        "VireoUpgradeError",
+        "VireoUpgradeFile",
+        "VireoUpgradeOptions",
+        "VireoUpgradeResult",
         "WireContract",
         "checkGeneratedEntities",
         "createVireo",
@@ -34,13 +39,15 @@
         "readEntitySchema",
         "readProjectMetadata",
         "sha256",
-        "stableJson"
+        "stableJson",
+        "upgradeVireoProject"
       ],
       "dependencies": [
         "node:child_process",
         "node:crypto",
         "node:fs/promises",
         "node:path",
+        "node:url",
         "node:zlib"
       ],
       "workerSafe": false

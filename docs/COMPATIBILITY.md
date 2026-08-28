@@ -11,10 +11,11 @@ packages they need, subject to their declared dependencies and peer dependencies
 The six JVM artifacts share one coordinated version and should be aligned with the
 `com.vireocode:vireo-bom` BOM.
 
-The current package lines are `0.2.0` for `create-vireo`, `0.2.2` for
-`@vireocodedev/ui`, and npm `0.2.1` for `@vireocodedev/query`, `@vireocodedev/shell`, `@vireocodedev/history`,
+The next `create-vireo` line is 0.3.0 (0.2.0 remains the first supported project
+upgrade source); the current `@vireocodedev/ui` line is `0.2.2`; npm is `0.2.1` for
+`@vireocodedev/query`, `@vireocodedev/shell`, `@vireocodedev/history`,
 `@vireocodedev/infrastructure`, `@vireocodedev/localization`, and
-`@vireocodedev/sqlite`, and JVM `0.2.0`. Numeric equality between npm packages or between npm and JVM
+`@vireocodedev/sqlite`; and JVM is `0.2.0`. Numeric equality between npm packages or between npm and JVM
 versions is neither required nor implied. A Template commit or tag, together with
 its committed lockfiles, is the compatibility manifest for the exact frontend and
 backend versions demonstrated by that Template revision.
@@ -81,7 +82,11 @@ fixes.
 5. For a cross-stack change, verify the intended frontend/backend deployment order
    and rollback path in an application-owned environment.
 
-There is no `vireo upgrade` command today. Template-derived applications own their
-updates and selectively merge or port upstream Template changes. Compatibility bugs
-should be reported through [SUPPORT.md](../SUPPORT.md) with both versions and a
-minimal published-artifact reproduction.
+`vireo upgrade` is dry-run-first and supports only release pairs embedded in the
+invoked CLI. It checks the source Template identity, managed dependencies and
+lockfile declarations, Flyway version uniqueness, and generated/wire-contract drift.
+It migrates only declared Vireo-managed surfaces. Template-derived applications
+still own and selectively merge or port upstream source, configuration, deployment,
+and data changes. Compatibility bugs should be reported through
+[SUPPORT.md](../SUPPORT.md) with both versions and a minimal published-artifact
+reproduction.

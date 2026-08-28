@@ -30,8 +30,16 @@ export {
   type VireoEntitySchema,
 } from "./entity-schema.js";
 export { createWireContract, entityNames, type EntityNames, type WireContract } from "./entity-renderer.js";
+export {
+  upgradeVireoProject,
+  VireoUpgradeError,
+  type VireoUpgradeCheck,
+  type VireoUpgradeFile,
+  type VireoUpgradeOptions,
+  type VireoUpgradeResult,
+} from "./project-upgrade.js";
 
-export const TEMPLATE_COMMIT = "2520c99b1550246c3b0c5299b3cc6055dd10ead7";
+export const TEMPLATE_COMMIT = "a7b549cc17daf82f250b392453e70cacff09c425";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";
@@ -225,7 +233,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     await mkdir(join(staging, ".vireo"), { recursive: true });
     await writeFile(
       join(staging, ".vireo", "project.json"),
-      `${JSON.stringify({ schemaVersion: 1, projectName, javaPackage, database, databaseName: projectName.replaceAll("-", "_"), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.2.0" }, null, 2)}\n`,
+      `${JSON.stringify({ schemaVersion: 1, projectName, javaPackage, database, databaseName: projectName.replaceAll("-", "_"), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.3.0" }, null, 2)}\n`,
     );
     if (options.git !== false) {
       const initialized = spawnSync("git", ["init", "--quiet"], { cwd: staging });

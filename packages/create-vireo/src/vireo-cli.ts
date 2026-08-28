@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import { checkGeneratedEntities, ejectEntity, generateEntity } from "./entity-generator.js";
+import { upgradeVireoProject } from "./project-upgrade.js";
 
 const HELP = `Vireo application development CLI.
 
@@ -7,6 +8,7 @@ Usage:
   vireo generate entity <schema.json> [options]
   vireo check [options]
   vireo eject <entity-plural> [options]
+  vireo upgrade --to <version> [options]
 
 Generate options:
   --project <directory>        Vireo application root (default: current directory)
@@ -20,6 +22,12 @@ Generate options:
 Check verifies canonical schema, derived wire contract, migration, backend DTO/controller,
 and frontend transport/API hashes. Eject retains application code while removing Vireo
 management and generated route registration.
+
+Upgrade options:
+  --to <version>              Required target create-vireo release
+  --dry-run                   Validate and show the migration plan (default)
+  --apply                     Apply only the declared Vireo-managed migration
+  --accept-application-owned  Required with --apply; acknowledges the manual Template boundary
 `;
 
 type CommonArguments = {
@@ -124,6 +132,42 @@ async function eject(values: string[]) {
     );
 }
 
+async function upgrade(values: string[]) {
+  const { common, rest } = commonArguments(values);
+  let targetRelease: string | undefined;
+  let apply = false;
+  let acceptApplicationOwned = false;
+  for (let index = 0; index < rest.length; index += 1) {
+    const value = rest[index];
+    if (value === "--to") targetRelease = valueAfter(rest, index++, value);
+    else if (value === "--apply") apply = true;
+    else if (value === "--accept-application-owned") acceptApplicationOwned = true;
+    else throw new Error(`Unknown upgrade option: ${value}`);
+  }
+  if (!targetRelease) throw new Error("upgrade requires --to <version>.");
+  if (apply && common.dryRun) throw new Error("Choose either --dry-run or --apply.");
+  const result = await upgradeVireoProject({
+    projectDirectory: common.project,
+    targetRelease,
+    dryRun: !apply,
+    acceptApplicationOwned,
+  });
+  if (common.json) return print(result, true);
+  print(
+    [
+      `${result.dryRun ? "Validated" : "Applied"} Vireo project upgrade ${result.sourceRelease} -> ${result.targetRelease}.`,
+      ...result.checks.map(check => `${check.status.toUpperCase().padEnd(6)} ${check.id}: ${check.detail}`),
+      ...result.files.map(file => `${file.status.padEnd(10)} ${file.path}`),
+      "Application-owned actions:",
+      ...result.manualActions.map(action => `  - ${action}`),
+      result.dryRun
+        ? "No files were written."
+        : "Commit the managed migration only after completing the application-owned review.",
+    ],
+    false,
+  );
+}
+
 async function main() {
   const values = process.argv.slice(2);
   if (values.length === 0 || values[0] === "--help" || values[0] === "-h") {
@@ -134,6 +178,7 @@ async function main() {
   if (command === "generate") await generate(values);
   else if (command === "check") await check(values);
   else if (command === "eject") await eject(values);
+  else if (command === "upgrade") await upgrade(values);
   else throw new Error(`Unknown command: ${command}\n\n${HELP}`);
 }
 

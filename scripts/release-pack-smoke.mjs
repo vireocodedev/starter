@@ -147,6 +147,9 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
   if (manifest.name === "create-vireo" && !existsSync(join(packageDirectory, "schema/vireo-entity.schema.json"))) {
     throw new Error("create-vireo must publish its canonical entity schema.");
   }
+  if (manifest.name === "create-vireo" && !existsSync(join(packageDirectory, "schema/vireo-upgrade-policy.json"))) {
+    throw new Error("create-vireo must publish its project upgrade policy.");
+  }
   if (readFileSync(join(packageDirectory, "LICENSE"), "utf8") !== rootLicense) {
     throw new Error(`${manifest.name} publishes license text that differs from the repository license.`);
   }

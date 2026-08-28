@@ -50,3 +50,21 @@ Generation emits a Flyway migration, Spring CRUD/query/history slice, Zod transp
 Use `--output <directory>` to inspect a standalone tree. An identical rerun is byte-for-byte idempotent. Schema changes require `--force`; collisions or customized files additionally require `--accept-overwrite`. `vireo eject <plural>` keeps application code and removes Vireo management.
 
 The detailed contracts are in [entity schema](../../docs/generators/entity-schema.md), [generated ownership](../../docs/architecture/generated-code-ownership.md), and [wire contracts](../../docs/architecture/wire-contracts.md).
+
+## Upgrade a generated project
+
+Version 0.3 introduces the first supported release pair, from a project created by
+`create-vireo` 0.2.0 to 0.3.0. The command is non-writing by default:
+
+```bash
+vireo upgrade --to 0.3.0 --dry-run
+vireo upgrade --to 0.3.0 --apply --accept-application-owned
+```
+
+The preflight refuses unknown source commits, changed Vireo dependency declarations,
+lockfile drift, invalid/duplicate Flyway migration versions, and managed generated or
+wire-contract drift. Apply changes only Vireo-managed metadata and the pinned CLI
+script. Template files, domain logic, deployment, data migration, and adopted/ejected
+code remain application-owned and must be reviewed against the target Template
+commit printed by the command. The generated application contains the complete
+review, verification, and rollback procedure in `docs/project-upgrades.md`.
