@@ -61,7 +61,7 @@ The root entry point exposes one complete persistent queue contract:
 - explicit status projection;
 - equivalent instance-scoped in-memory fallback behavior.
 
-Persisted command bodies and headers are parsed strictly. Corrupt JSON raises a descriptive error carrying the command identifier rather than replaying altered fallback data. Batch sizes and retry limits must be positive integers.
+Persisted command bodies and headers are parsed strictly. Corrupt JSON raises a descriptive error carrying the command identifier rather than replaying altered fallback data. Duplicate command identifiers are rejected instead of replacing an existing payload. Commands are selected by capture time and then command identifier. Malformed server responses are rejected before local queue state changes. Batch sizes and retry limits must be positive integers.
 
 The package does not decide when the browser is offline, which requests are safe for a product to queue, how authentication is refreshed, or how permanent failures are shown to a user.
 
@@ -80,7 +80,7 @@ The hydration controller compares local and remote revisions, applies per-entity
 
 ## Lifecycle and ownership
 
-Database ownership, OPFS file discovery/removal, offline-data cleanup ordering, and operation coordination are instance-scoped factories. Construct one set per application runtime and dispose it when that runtime ends.
+Database ownership, OPFS file discovery/removal, offline-data cleanup ordering, and operation coordination are instance-scoped factories. Construct one set per application runtime and dispose it when that runtime ends. Concurrent owner changes are serialized, so the final requested owner cannot accidentally inherit the first transition's result.
 
 Destructive lifecycle operations are deliberately explicit. The host chooses storage namespaces, confirmation policy, and when clearing local data is safe.
 
@@ -98,3 +98,7 @@ Destructive lifecycle operations are deliberately explicit. The host chooses sto
 ## Verification and live documentation
 
 Package tests exercise runtime lifecycle, queue persistence/replay, hydration scheduling, lifecycle cleanup, concurrency, and framework boundaries. The unified Vireo Storybook contains executable examples under the top-level **SQLite** section; every displayed source file is the same TypeScript module Storybook executes.
+
+The complete supported guarantees and deliberate limits are published in the
+[Vireo offline contract](../../docs/OFFLINE_GUARANTEES.md). This package supplies
+primitives, not automatic offline behavior for an application capability.

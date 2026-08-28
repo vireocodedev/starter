@@ -25,7 +25,7 @@ export type OfflineDataLifecycle = {
 };
 
 export function createOfflineDataLifecycle(config: CreateOfflineDataLifecycleConfig): OfflineDataLifecycle {
-  let inFlightOwnerReconciliation: Promise<boolean> | null = null;
+  let ownerReconciliationTail: Promise<void> = Promise.resolve();
 
   const quiesce = async (options: OfflineDataLifecycleOptions) => {
     options.onPhase?.("hydration");
@@ -72,10 +72,12 @@ export function createOfflineDataLifecycle(config: CreateOfflineDataLifecycleCon
     release,
     purge,
     async ensureOwnedBy(owner) {
-      inFlightOwnerReconciliation ??= reconcileOwner(owner).finally(() => {
-        inFlightOwnerReconciliation = null;
-      });
-      return await inFlightOwnerReconciliation;
+      const reconciliation = ownerReconciliationTail.then(() => reconcileOwner(owner));
+      ownerReconciliationTail = reconciliation.then(
+        () => undefined,
+        () => undefined,
+      );
+      return await reconciliation;
     },
   };
 }

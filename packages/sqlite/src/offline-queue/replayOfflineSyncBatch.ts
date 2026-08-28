@@ -47,6 +47,28 @@ function toSyncCommandDto(command: OfflineSyncCommand): OfflineSyncCommandDto {
   };
 }
 
+function validateResponse(batch: OfflineSyncCommand[], response: OfflineSyncBatchResponse): void {
+  const expectedIds = new Set(batch.map(command => command.commandId));
+  const resultIds = new Set<string>();
+
+  for (const result of response.results) {
+    if (!expectedIds.has(result.commandId)) {
+      throw new Error(`Offline replay response contains unknown command ID "${result.commandId}".`);
+    }
+    if (resultIds.has(result.commandId)) {
+      throw new Error(`Offline replay response contains duplicate command ID "${result.commandId}".`);
+    }
+    resultIds.add(result.commandId);
+  }
+
+  if (response.accepted < 0 || response.failed < 0 || response.accepted + response.failed !== response.results.length) {
+    throw new Error("Offline replay response counts do not match its results.");
+  }
+  if (response.accepted !== response.results.filter(result => result.success).length) {
+    throw new Error("Offline replay response accepted count does not match successful results.");
+  }
+}
+
 export async function replayOfflineSyncBatch(args: {
   batchSize: number;
   maxAttempts: number;
@@ -63,6 +85,7 @@ export async function replayOfflineSyncBatch(args: {
   if (batch.length === 0) return 0;
 
   const response = await dependencies.sendBatch(batch.map(toSyncCommandDto));
+  validateResponse(batch, response);
   const resultsByCommandId = new Map(response.results.map(result => [result.commandId, result]));
   const successfulCommandIds: string[] = [];
   const permanentlyFailedCommandIds: string[] = [];

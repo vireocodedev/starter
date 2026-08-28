@@ -69,6 +69,10 @@ decision depends on any of these being complete:
 - a hosted backend, managed database, or deployment control plane;
 - stable `1.x` APIs or automatic application upgrades.
 
+Read the [offline guarantees and limits](OFFLINE_GUARANTEES.md) before treating
+SQLite, queue, hydration, or server replay primitives as an application-level
+offline promise.
+
 The current `0.x` contract still treats incompatible exported API removal as a
 major change and publishes exact Template/framework compatibility. “Production
 shaped” means the repository demonstrates the engineering boundary; it is not a

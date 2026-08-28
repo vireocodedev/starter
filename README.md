@@ -8,7 +8,9 @@ leaving applications as ordinary React and Spring Boot code.
 The application team owns its domain model, authorization policy, data sensitivity,
 offline eligibility, and conflict resolution. Vireo's offline packages provide
 mechanisms for selected disconnected workflows; they do not make arbitrary business
-logic synchronize safely. See the public
+logic synchronize safely. The exact primitive guarantees, conflict ownership, and
+adversarial admission checklist are in
+[`docs/OFFLINE_GUARANTEES.md`](docs/OFFLINE_GUARANTEES.md). See the public
 [Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
 current runnable full-stack composition.
 

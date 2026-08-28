@@ -57,7 +57,7 @@ function toQueueStatus(value: unknown): OfflineQueuedCommandStatus {
 
 export function enqueueOfflineCommand(db: SqliteDatabase, command: OfflineSyncCommandRecord): void {
   const statement = db.prepare(`
-    INSERT OR REPLACE INTO ${OFFLINE_QUEUE_TABLE}
+    INSERT INTO ${OFFLINE_QUEUE_TABLE}
       (command_id, method, url, body_json, headers_json, created_at)
     VALUES (?, ?, ?, ?, ?, ?);
   `);
@@ -83,7 +83,7 @@ export function getPendingOfflineCommands(db: SqliteDatabase, batchSize: number)
     SELECT command_id, method, url, body_json, headers_json, created_at, status, retry_count, last_error
     FROM ${OFFLINE_QUEUE_TABLE}
     WHERE status = '${OFFLINE_QUEUE_PENDING}'
-    ORDER BY created_at ASC
+    ORDER BY created_at ASC, command_id ASC
     LIMIT ?;
   `);
   const commands: OfflineQueuedCommand[] = [];

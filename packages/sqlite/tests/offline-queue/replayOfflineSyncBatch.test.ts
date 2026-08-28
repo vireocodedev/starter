@@ -45,4 +45,65 @@ describe("replayOfflineSyncBatch", () => {
     expect(markRetryable).toHaveBeenCalledWith(["missing"], null, 5);
     expect(refreshStatus).toHaveBeenCalledOnce();
   });
+
+  it.each([
+    {
+      label: "unknown command",
+      response: {
+        accepted: 1,
+        failed: 0,
+        results: [{ commandId: "other", success: true, status: 200, error: null }],
+      },
+      message: 'unknown command ID "other"',
+    },
+    {
+      label: "duplicate command",
+      response: {
+        accepted: 2,
+        failed: 0,
+        results: [
+          { commandId: "queued", success: true, status: 200, error: null },
+          { commandId: "queued", success: true, status: 200, error: null },
+        ],
+      },
+      message: 'duplicate command ID "queued"',
+    },
+    {
+      label: "inconsistent counts",
+      response: {
+        accepted: 0,
+        failed: 0,
+        results: [{ commandId: "queued", success: true, status: 200, error: null }],
+      },
+      message: "counts do not match",
+    },
+  ])("refuses a malformed $label response before mutating the queue", async ({ response, message }) => {
+    const mutation = vi.fn().mockResolvedValue(undefined);
+    const command = {
+      commandId: "queued",
+      method: "POST",
+      url: "/api/product",
+      body: null,
+      headers: {},
+      createdAt: 1,
+    };
+
+    await expect(
+      replayOfflineSyncBatch({
+        batchSize: 1,
+        maxAttempts: 3,
+        dependencies: {
+          getBatch: vi.fn().mockResolvedValue([command]),
+          sendBatch: vi.fn().mockResolvedValue(response),
+          cleanupSuccessfulCommands: mutation,
+          deleteSuccessful: mutation,
+          markPermanentlyFailed: mutation,
+          markRetryable: mutation,
+          refreshStatus: mutation,
+        },
+      }),
+    ).rejects.toThrow(message);
+
+    expect(mutation).not.toHaveBeenCalled();
+  });
 });

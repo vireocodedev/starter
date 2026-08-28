@@ -85,6 +85,50 @@ describe("offlineQueueStateSqlite", () => {
     db.close();
   });
 
+  it("refuses a duplicate command ID instead of replacing the durable payload", () => {
+    const db = openDatabase();
+    enqueueOfflineCommand(db, {
+      commandId: "stable-command",
+      method: "POST",
+      url: "/api/product",
+      body: { description: "Original" },
+      headers: {},
+      createdAt: 1,
+    });
+
+    expect(() =>
+      enqueueOfflineCommand(db, {
+        commandId: "stable-command",
+        method: "DELETE",
+        url: "/api/product/1",
+        body: null,
+        headers: {},
+        createdAt: 2,
+      }),
+    ).toThrow();
+    expect(getPendingOfflineCommands(db, 10)).toMatchObject([
+      { commandId: "stable-command", method: "POST", body: { description: "Original" } },
+    ]);
+    db.close();
+  });
+
+  it("uses command ID as the deterministic tie-breaker for equal capture timestamps", () => {
+    const db = openDatabase();
+    for (const commandId of ["command-b", "command-a"]) {
+      enqueueOfflineCommand(db, {
+        commandId,
+        method: "POST",
+        url: "/api/product",
+        body: null,
+        headers: {},
+        createdAt: 1,
+      });
+    }
+
+    expect(getPendingOfflineCommands(db, 10).map(command => command.commandId)).toEqual(["command-a", "command-b"]);
+    db.close();
+  });
+
   it("rejects corrupted persisted commands instead of replaying altered data", () => {
     const db = openDatabase();
     db.exec(`

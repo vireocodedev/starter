@@ -45,7 +45,7 @@ describe("createOfflineDataLifecycle", () => {
     ]);
   });
 
-  it("single-flights concurrent account switches", async () => {
+  it("coalesces the effects of concurrent switches to the same account", async () => {
     const { lifecycle, calls, readOwner } = createHarness("bruno");
 
     await Promise.all([lifecycle.ensureOwnedBy("marta"), lifecycle.ensureOwnedBy("marta")]);
@@ -53,5 +53,20 @@ describe("createOfflineDataLifecycle", () => {
     expect(readOwner()).toBe("marta");
     expect(calls.filter(call => call === "reset-runtime")).toHaveLength(1);
     expect(calls.filter(call => call === "persist:marta")).toHaveLength(1);
+  });
+
+  it("serializes concurrent switches to different accounts and ends with the latest owner", async () => {
+    const { lifecycle, calls, readOwner } = createHarness("bruno");
+
+    const [firstChangedOwner, secondChangedOwner] = await Promise.all([
+      lifecycle.ensureOwnedBy("marta"),
+      lifecycle.ensureOwnedBy("ivo"),
+    ]);
+
+    expect(firstChangedOwner).toBe(true);
+    expect(secondChangedOwner).toBe(true);
+    expect(readOwner()).toBe("ivo");
+    expect(calls.filter(call => call === "reset-runtime")).toHaveLength(2);
+    expect(calls.filter(call => call.startsWith("persist:"))).toEqual(["persist:marta", "persist:ivo"]);
   });
 });
