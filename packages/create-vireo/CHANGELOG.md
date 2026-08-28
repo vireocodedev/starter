@@ -1,5 +1,13 @@
 # create-vireo
 
+## 0.4.2
+
+### Patch Changes
+
+- 39c471d: Emit the standalone frontend doctor and generated TypeScript, JSON, Markdown, and
+  contract files in repository-standard Prettier format so a project's complete
+  `verify` command passes without source edits before and after entity generation.
+
 ## 0.4.1
 
 ### Patch Changes
