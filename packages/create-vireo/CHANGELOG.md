@@ -1,5 +1,11 @@
 # create-vireo
 
+## 0.4.0
+
+### Minor Changes
+
+- 803fa6f: Add a standalone frontend project profile, swappable API adapters, mock-backed local development, and frontend-only entity generation.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -7,7 +7,7 @@
       "id": "npm-0.2.1_jvm-0.2.0",
       "status": "current",
       "npm": [
-        { "package": "create-vireo", "version": "0.3.0" },
+        { "package": "create-vireo", "version": "0.4.0" },
         { "package": "@vireocodedev/history", "version": "0.2.1" },
         { "package": "@vireocodedev/infrastructure", "version": "0.2.1" },
         { "package": "@vireocodedev/localization", "version": "0.2.1" },
