@@ -196,10 +196,6 @@ const licenseEvidence = {
   sha256: digest(licenseInventoryPath, "sha256"),
 };
 
-console.log("Evaluating npm and JVM third-party licenses...");
-const licenseInventoryPath = join(outputRoot, "licenses", "third-party-license-inventory.json");
-runLicensePolicy({ ecosystem: "all", jvmSbom: jvmSbomPath, output: licenseInventoryPath });
-
 const subjects = walkFiles(outputRoot)
   .map(path => ({ path, kind: subjectKind(path) }))
   .filter(subject => subject.kind)
