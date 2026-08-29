@@ -35,6 +35,8 @@ The default policy accepts only `POST`, `PUT`, `PATCH`, and `DELETE` beneath `/a
 
 Request bodies and headers are omitted from `OfflineSyncCommandDto.toString()`. Downstream exception bodies are not returned to clients. Duplicate IDs inside one batch and oversized batches fail before replay.
 
+Command diagnostics reject pages above 10,000, page sizes above 200, and the former `rowsPerPage=-1` all-rows sentinel before repository access.
+
 Custom handlers receive an immutable command DTO and return an outcome. Offline—not the handler—owns persistence, retry state, and timestamps.
 
 ## Configuration

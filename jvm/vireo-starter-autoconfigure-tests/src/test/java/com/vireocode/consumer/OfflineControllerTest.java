@@ -79,6 +79,13 @@ class OfflineControllerTest {
                         """))
                 .andExpect(status().isBadRequest());
 
+        mockMvc.perform(post("/api/offline/sync/commands/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .queryParam("rowsPerPage", "201")
+                .content("{\"rows\":[]}"))
+                .andExpect(status().isBadRequest());
+
         mockMvc.perform(get("/api/offline/hydration/versions")
                 .queryParam("entities", "ORDER", "CUSTOMER"))
                 .andExpect(status().isBadRequest());

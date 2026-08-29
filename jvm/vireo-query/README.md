@@ -32,6 +32,7 @@ Entity keys are normalized to upper case and must be unique. Entity types must b
 
 - Only paths and operators published in generated metadata are accepted by the auto-configured filter builder.
 - Invalid typed values fail with HTTP 400 rather than silently disappearing.
+- Saved-filter search is limited to page 10,000 and 200 rows; the legacy `/all` view returns at most 200 records.
 - Relation-option searches inspect declared relation label fields, have a bounded result count, and always apply the application policy predicate.
 - Saved-filter reads return the current user's filters plus public filters.
 - Only the owner may update or delete a saved filter; request JSON cannot assign `userId` or `username`.

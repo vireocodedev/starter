@@ -3,7 +3,6 @@ package com.vireocode.vireo.queryengine.savedfilter;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -41,7 +40,7 @@ public class SavedFilterController {
 
     @GetMapping("/all")
     public List<SavedFilterDTO> findAll() {
-        SearchablePageable pageable = new SearchablePageable(Pageable.unpaged(), null);
+        SearchablePageable pageable = RestUtils.makePageable(0, 200, "name", "asc", null);
         return this.service.findAll(pageable).toList();
     }
 

@@ -11,6 +11,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 public final class RestUtils {
+    private static final int MAX_PAGE_NUMBER = 10_000;
+    private static final int MAX_ROWS_PER_PAGE = 200;
+
     private RestUtils() {
     }
 
@@ -44,11 +47,11 @@ public final class RestUtils {
 
     public static SearchablePageable makePageable(int page, int rowsPerPage, String sortBy, String sortDirection,
             String searchText) {
-        if (page < 0) {
-            throw badRequest("page must be greater than or equal to zero");
+        if (page < 0 || page > MAX_PAGE_NUMBER) {
+            throw badRequest("page must be between zero and " + MAX_PAGE_NUMBER);
         }
-        if (rowsPerPage == 0 || rowsPerPage < -1) {
-            throw badRequest("rowsPerPage must be greater than zero or exactly -1");
+        if (rowsPerPage < 1 || rowsPerPage > MAX_ROWS_PER_PAGE) {
+            throw badRequest("rowsPerPage must be between 1 and " + MAX_ROWS_PER_PAGE);
         }
         if (sortBy == null || sortBy.isBlank()) {
             throw badRequest("sortBy must not be blank");
@@ -62,7 +65,7 @@ public final class RestUtils {
         }
 
         Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page, rowsPerPage == -1 ? Integer.MAX_VALUE : rowsPerPage, sort);
+        Pageable pageable = PageRequest.of(page, rowsPerPage, sort);
         return new SearchablePageable(pageable, searchText);
     }
 

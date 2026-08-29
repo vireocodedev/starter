@@ -46,21 +46,28 @@ class RestUtilsTest {
         SearchablePageable uppercase = RestUtils.makePageable(0, 10, "id", "DESC", null);
         assertEquals(Sort.Direction.DESC, uppercase.getPageable().getSort().getOrderFor("id").getDirection());
 
-        SearchablePageable maxRows = RestUtils.makePageable(0, -1, "id", "asc", null);
-        assertEquals(Integer.MAX_VALUE, maxRows.getPageable().getPageSize());
+        SearchablePageable maxRows = RestUtils.makePageable(10_000, 200, "id", "asc", null);
+        assertEquals(10_000, maxRows.getPageable().getPageNumber());
+        assertEquals(200, maxRows.getPageable().getPageSize());
     }
 
     @Test
     void makePageable_RejectsInvalidPublicRequestParametersAsBadRequests() {
         assertStatus(assertThrows(ResponseStatusException.class,
                 () -> RestUtils.makePageable(-1, 10, "id", "asc", null)), 400,
-                "page must be greater than or equal to zero");
+                "page must be between zero and 10000");
         assertStatus(assertThrows(ResponseStatusException.class,
                 () -> RestUtils.makePageable(0, 0, "id", "asc", null)), 400,
-                "rowsPerPage must be greater than zero or exactly -1");
+                "rowsPerPage must be between 1 and 200");
         assertStatus(assertThrows(ResponseStatusException.class,
-                () -> RestUtils.makePageable(0, -2, "id", "asc", null)), 400,
-                "rowsPerPage must be greater than zero or exactly -1");
+                () -> RestUtils.makePageable(0, -1, "id", "asc", null)), 400,
+                "rowsPerPage must be between 1 and 200");
+        assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(10_001, 10, "id", "asc", null)), 400,
+                "page must be between zero and 10000");
+        assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(0, 201, "id", "asc", null)), 400,
+                "rowsPerPage must be between 1 and 200");
         assertStatus(assertThrows(ResponseStatusException.class,
                 () -> RestUtils.makePageable(0, 10, " ", "asc", null)), 400,
                 "sortBy must not be blank");

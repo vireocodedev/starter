@@ -100,8 +100,9 @@ non-anonymous principal is available and must not be blank.
   order rather than overwritten.
 - Unexpected failures are logged server-side and do not expose exception class
   names or messages by default.
-- `RestUtils.makePageable` rejects invalid public request values as HTTP 400;
-  `rowsPerPage=-1` remains the explicit all-rows sentinel.
+- `RestUtils.makePageable` rejects invalid public request values as HTTP 400 and
+  caps requests at page 10,000 and 200 rows per page. There is no public
+  all-rows sentinel.
 - `RestUtils.getCurrentPrincipal` excludes unauthenticated and anonymous
   security tokens.
 
