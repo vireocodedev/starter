@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
 import { tmpdir } from "node:os";
-import { buildWebsite, createWebsiteModel } from "./build.mjs";
+import { buildWebsite, createWebsiteModel, removeMetadataHeading } from "./build.mjs";
 import { renderMarkdown } from "./markdown.mjs";
 
 const sitePolicy = {
@@ -67,6 +67,16 @@ test("renders trusted documentation markdown with headings, code and tables", ()
   assert.match(rendered.html, /<table>/u);
 });
 
+test("makes manifest metadata the sole page H1", () => {
+  assert.equal(removeMetadataHeading("# Configure\n\n## Database\n", "Configure"), "\n## Database\n");
+  assert.throws(() => removeMetadataHeading("## Configure\n", "Configure"), /must begin with one H1/u);
+  assert.throws(() => removeMetadataHeading("# Setup\n", "Configure"), /does not match manifest title/u);
+  assert.throws(
+    () => removeMetadataHeading("# Configure\n\n# Another title\n", "Configure"),
+    /must not contain a second H1/u,
+  );
+});
+
 test("builds the complete multi-page, searchable and versioned website artifact", () => {
   const outputRoot = mkdtempSync(join(tmpdir(), "vireo-website-"));
   try {
@@ -98,6 +108,15 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     const components = readFileSync(join(outputRoot, "docs/components/index.html"), "utf8");
     const examples = readFileSync(join(outputRoot, "examples/index.html"), "utf8");
     const snapshot = readFileSync(join(outputRoot, "docs/0.2/index.html"), "utf8");
+    for (const page of result.pages) {
+      const html = readFileSync(
+        page.path === "/" ? join(outputRoot, "index.html") : join(outputRoot, page.path.slice(1), "index.html"),
+        "utf8",
+      );
+      assert.equal(html.match(/<h1(?:\s|>)/gu)?.length, 1, `${page.path} must render exactly one H1`);
+    }
+    const notFound = readFileSync(join(outputRoot, "404.html"), "utf8");
+    assert.equal(notFound.match(/<h1(?:\s|>)/gu)?.length, 1, "404 page must render exactly one H1");
     for (const expected of [
       "Build the workflow.",
       "--profile frontend",

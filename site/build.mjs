@@ -136,7 +136,7 @@ function normalizeManifestPage(page) {
 function createContentPage({ record, root, website }) {
   const source = join(root, "site/content", record.file);
   const markdown = readFileSync(source, "utf8");
-  const rendered = renderMarkdown(expandTokens(markdown, website));
+  const rendered = renderMarkdown(expandTokens(removeMetadataHeading(markdown, record.title), website));
   return {
     ...record,
     basePath: record.path,
@@ -146,6 +146,19 @@ function createContentPage({ record, root, website }) {
     readingMinutes: Math.max(1, Math.round(rendered.text.split(/\s+/u).length / 210)),
     searchText: rendered.text,
   };
+}
+
+export function removeMetadataHeading(markdown, expectedTitle) {
+  const normalized = markdown.replaceAll("\r\n", "\n");
+  const match = /^(\s*)#\s+([^\n]+)\n?/u.exec(normalized);
+  if (!match) throw new Error(`documentation content ${expectedTitle} must begin with one H1 metadata heading`);
+  if (match[2].trim() !== expectedTitle) {
+    throw new Error(`documentation H1 ${match[2].trim()} does not match manifest title ${expectedTitle}`);
+  }
+  if (/^#\s+/mu.test(normalized.slice(match[0].length))) {
+    throw new Error(`documentation content ${expectedTitle} must not contain a second H1`);
+  }
+  return `${match[1]}${normalized.slice(match[0].length)}`;
 }
 
 function expandTokens(markdown, website) {
@@ -178,7 +191,7 @@ function createLandingPage(website) {
 
 function createNotFoundPage() {
   const rendered = renderMarkdown(
-    `# Page not found\n\nThis route is not part of the current Vireo documentation.\n\n- [Open the documentation](/docs/)\n- [Search the current guides](/docs/)\n- [Return to the Vireo homepage](/)`,
+    `This route is not part of the current Vireo documentation.\n\n- [Open the documentation](/docs/)\n- [Search the current guides](/docs/)\n- [Return to the Vireo homepage](/)`,
   );
   return {
     basePath: "/404.html",
