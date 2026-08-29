@@ -68,7 +68,7 @@ Public-beta evaluation is open, but readiness and independent adoption are not y
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
 | [`@vireocodedev/localization`](packages/localization)     | 0.2.1   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
-| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.1   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
+| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.2   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
 | [`@vireocodedev/history`](packages/history)               | 0.2.1   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
 | [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.1   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
 

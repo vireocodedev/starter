@@ -11,15 +11,28 @@ packages they need, subject to their declared dependencies and peer dependencies
 The six JVM artifacts share one coordinated version and should be aligned with the
 `com.vireocode:vireo-bom` BOM.
 
-The current `create-vireo` line is 0.4.2 and includes the frontend profile
-(0.2.0 remains the first supported project-upgrade source, for the explicit
-0.2.0→0.3.0 pair); the current `@vireocodedev/ui` line is `0.2.2`; npm is `0.2.1` for
-`@vireocodedev/query`, `@vireocodedev/shell`, `@vireocodedev/history`,
-`@vireocodedev/infrastructure`, `@vireocodedev/localization`, and
-`@vireocodedev/sqlite`; and JVM is `0.2.0`. Numeric equality between npm packages or between npm and JVM
-versions is neither required nor implied. A Template commit or tag, together with
-its committed lockfiles, is the compatibility manifest for the exact frontend and
-backend versions demonstrated by that Template revision.
+The current released artifact mapping is machine-owned by
+`contracts/documentation-release-policy.json` and validated against this table and
+the package manifests:
+
+| Artifact                       | Current version |
+| ------------------------------ | --------------: |
+| `create-vireo`                 |           0.4.2 |
+| `@vireocodedev/history`        |           0.2.1 |
+| `@vireocodedev/infrastructure` |           0.2.1 |
+| `@vireocodedev/localization`   |           0.2.1 |
+| `@vireocodedev/query`          |           0.2.1 |
+| `@vireocodedev/shell`          |           0.2.1 |
+| `@vireocodedev/sqlite`         |           0.2.2 |
+| `@vireocodedev/ui`             |           0.2.2 |
+| `com.vireocode:vireo-*`        |           0.2.0 |
+
+`create-vireo` includes the frontend profile. Version 0.2.0 remains the first
+supported project-upgrade source for the explicit 0.2.0→0.3.0 pair. Numeric
+equality between npm packages or between npm and JVM versions is neither required
+nor implied. A Template commit or tag, together with its committed lockfiles and
+compatibility contract, records the exact frontend and backend combination proven
+by that Template revision.
 
 Only the latest published version of each npm package and latest published JVM
 family receive fixes and security updates. Older immutable artifacts remain

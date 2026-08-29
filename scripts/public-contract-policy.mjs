@@ -69,6 +69,29 @@ const compatibility = requireText("docs/COMPATIBILITY.md", [
   "schema",
   "Template",
 ]);
+const releasePolicy = JSON.parse(readFileSync(join(root, "contracts/documentation-release-policy.json"), "utf8"));
+const currentRelease = releasePolicy.releases?.find(release => release.id === releasePolicy.currentRelease);
+if (!currentRelease) {
+  problems.push(`current release ${releasePolicy.currentRelease} is not declared`);
+}
+
+function requireArtifactVersionRow(path, artifact, version) {
+  const rows = readFileSync(join(root, path), "utf8").split("\n");
+  const matchingRows = rows
+    .filter(line => line.startsWith("|") && line.includes(artifact))
+    .map(line => line.split("|").slice(1, -1).map(cell => cell.trim()));
+  if (matchingRows.length !== 1 || !matchingRows[0].includes(version)) {
+    problems.push(`${path} must contain exactly one ${artifact} table row at ${version}`);
+  }
+}
+
+for (const entry of currentRelease?.npm ?? []) {
+  requireArtifactVersionRow("README.md", entry.package, entry.version);
+  requireArtifactVersionRow("docs/COMPATIBILITY.md", entry.package, entry.version);
+}
+if (currentRelease?.jvm?.version) {
+  requireArtifactVersionRow("docs/COMPATIBILITY.md", `${currentRelease.jvm.group}:vireo-*`, currentRelease.jvm.version);
+}
 
 const packageDirectories = readdirSync(join(root, "packages"), { withFileTypes: true })
   .filter(entry => entry.isDirectory())

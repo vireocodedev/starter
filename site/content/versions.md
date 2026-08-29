@@ -24,7 +24,7 @@ The complete npm package and template mapping is available in machine-readable [
 
 ## Support boundary
 
-Vireo is public `0.x` software. Minor releases may contain breaking changes and must include migration guidance where a supported upgrade path exists. Patch releases should remain compatible within their declared line.
+Vireo is public `0.x` software and applies Semantic Versioning to every published package family. Breaking public-contract changes require a major release even during `0.x`; minor releases add compatible capability, and patches remain compatible within their declared line. Where coordinated application changes are needed, the release also publishes migration and deployment-order guidance.
 
 ## Unreleased documentation
 
