@@ -349,7 +349,7 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
     }
 
     signing {
-        required { centralBundleRequested }
+        required = { centralBundleRequested }
         if (signingKey && signingPassword) {
             useInMemoryPgpKeys(signingKey, signingPassword)
         }
