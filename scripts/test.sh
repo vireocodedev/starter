@@ -6,6 +6,7 @@ node --test \
   scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
   scripts/package-bin.test.mjs \
+  scripts/publish-verified-npm-candidates.test.mjs \
   scripts/release-impact-policy.test.mjs \
   scripts/release-impact-version.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
