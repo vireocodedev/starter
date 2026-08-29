@@ -80,6 +80,7 @@
           "required": { "type": "boolean" },
           "unique": { "type": "boolean" },
           "default": { "type": ["boolean", "number", "string"] },
+          "example": { "type": ["boolean", "number", "string"] },
           "enumValues": {
             "type": "array",
             "minItems": 2,
@@ -120,6 +121,7 @@
             "then": {
               "properties": {
                 "default": { "type": "boolean" },
+                "example": { "type": "boolean" },
                 "constraints": { "maxProperties": 0 },
                 "ui": { "properties": { "control": { "const": "checkbox" } } }
               }
@@ -130,6 +132,7 @@
             "then": {
               "properties": {
                 "default": { "type": "number" },
+                "example": { "type": "number" },
                 "constraints": { "properties": { "pattern": false } },
                 "ui": { "properties": { "control": { "enum": ["number", "text"] } } }
               }
@@ -140,6 +143,7 @@
             "then": {
               "properties": {
                 "default": { "type": "string" },
+                "example": { "type": "string" },
                 "constraints": {
                   "properties": {
                     "min": { "type": "integer", "minimum": 0 },
@@ -155,6 +159,7 @@
             "then": {
               "properties": {
                 "default": { "type": "string" },
+                "example": { "type": "string" },
                 "constraints": { "maxProperties": 0 },
                 "ui": { "properties": { "control": { "const": "select" } } }
               }
@@ -165,6 +170,7 @@
             "then": {
               "properties": {
                 "default": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+                "example": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
                 "constraints": { "maxProperties": 0 },
                 "ui": { "properties": { "control": { "enum": ["date", "text"] } } }
               }
@@ -175,6 +181,7 @@
             "then": {
               "properties": {
                 "default": { "type": "string" },
+                "example": { "type": "string" },
                 "constraints": { "maxProperties": 0 },
                 "ui": { "properties": { "control": { "const": "text" } } }
               }

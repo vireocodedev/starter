@@ -839,14 +839,24 @@ export const Default: Story = {};
 
 function sampleValue(field: EntityFieldSchema, valid: boolean): unknown {
   if (!valid && field.required) return null;
+  if (field.example !== undefined) return field.example;
+  if (field.default !== undefined) return field.default;
   if (field.type === "boolean") return true;
-  if (field.type === "integer" || field.type === "long") return field.constraints?.min ?? 1;
-  if (field.type === "decimal") return field.constraints?.min ?? 12.5;
+  if (field.type === "integer" || field.type === "long")
+    return field.constraints?.min ?? (field.constraints?.max !== undefined ? Math.min(1, field.constraints.max) : 1);
+  if (field.type === "decimal")
+    return (
+      field.constraints?.min ?? (field.constraints?.max !== undefined ? Math.min(12.5, field.constraints.max) : 12.5)
+    );
   if (field.type === "enum") return field.enumValues![0];
   if (field.type === "date") return "2026-08-27";
   if (field.type === "timestamp") return "2026-08-27T12:00:00Z";
   if (field.type === "uuid") return "123e4567-e89b-12d3-a456-426614174000";
-  return "EXAMPLE";
+  const minimumLength = field.constraints?.min ?? 1;
+  const maximumLength = field.constraints?.max;
+  const length =
+    maximumLength === undefined ? Math.max(1, minimumLength) : Math.min(Math.max(1, minimumLength), maximumLength);
+  return "X".repeat(length);
 }
 
 function renderFrontendTest(schema: VireoEntitySchema, names: EntityNames, digest: string) {

@@ -11,6 +11,7 @@ export type EntityFieldSchema = {
   required?: boolean;
   unique?: boolean;
   default?: boolean | number | string;
+  example?: boolean | number | string;
   enumValues?: string[];
   constraints?: {
     max?: number;
@@ -252,6 +253,53 @@ function validFieldIdentifier(value: string) {
   return /^[a-z][A-Za-z0-9]*$/u.test(value) && !RESERVED_TYPESCRIPT_NAMES.has(value) && !RESERVED_JAVA_NAMES.has(value);
 }
 
+function validateFieldLiteral(field: EntityFieldSchema, key: "default" | "example", path: string, problems: string[]) {
+  const value = field[key];
+  if (value === undefined) return;
+  const valuePath = `${path}.${key}`;
+
+  if (field.type === "boolean" && typeof value !== "boolean")
+    problems.push(`${valuePath} must be a boolean for a boolean field`);
+  else if (NUMERIC_TYPES.has(field.type) && (typeof value !== "number" || !Number.isFinite(value)))
+    problems.push(`${valuePath} must be a finite number for a ${field.type} field`);
+  else if (!NUMERIC_TYPES.has(field.type) && field.type !== "boolean" && typeof value !== "string")
+    problems.push(`${valuePath} must be a string for a ${field.type} field`);
+
+  if ((field.type === "integer" || field.type === "long") && !Number.isSafeInteger(value))
+    problems.push(`${valuePath} must be a safe integer for a ${field.type} field`);
+  if (field.type === "enum" && typeof value === "string" && !field.enumValues?.includes(value))
+    problems.push(`${valuePath} must be one of the declared enumValues`);
+  if (field.type === "date" && typeof value === "string" && !/^\d{4}-\d{2}-\d{2}$/u.test(value))
+    problems.push(`${valuePath} must use YYYY-MM-DD for a date field`);
+  if (
+    field.type === "uuid" &&
+    typeof value === "string" &&
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value)
+  )
+    problems.push(`${valuePath} must be a canonical UUID for a uuid field`);
+
+  if (typeof value === "string") {
+    if (field.constraints?.min !== undefined && value.length < field.constraints.min)
+      problems.push(`${valuePath} is shorter than constraints.min`);
+    if (field.constraints?.max !== undefined && value.length > field.constraints.max)
+      problems.push(`${valuePath} is longer than constraints.max`);
+    if (field.constraints?.pattern) {
+      try {
+        if (!new RegExp(field.constraints.pattern, "u").test(value))
+          problems.push(`${valuePath} does not match constraints.pattern`);
+      } catch {
+        // The constraint validator reports the malformed expression once.
+      }
+    }
+  }
+  if (typeof value === "number") {
+    if (field.constraints?.min !== undefined && value < field.constraints.min)
+      problems.push(`${valuePath} is below constraints.min`);
+    if (field.constraints?.max !== undefined && value > field.constraints.max)
+      problems.push(`${valuePath} exceeds constraints.max`);
+  }
+}
+
 function validateField(value: unknown, index: number, problems: string[]): EntityFieldSchema | null {
   const path = `fields[${index}]`;
   if (!isObject(value)) {
@@ -260,7 +308,7 @@ function validateField(value: unknown, index: number, problems: string[]): Entit
   }
   rejectUnknown(
     value,
-    ["name", "type", "required", "unique", "default", "enumValues", "constraints", "query", "ui"],
+    ["name", "type", "required", "unique", "default", "example", "enumValues", "constraints", "query", "ui"],
     path,
     problems,
   );
@@ -284,31 +332,6 @@ function validateField(value: unknown, index: number, problems: string[]): Entit
     problems.push(`${path}.required must be a boolean`);
   if (value.unique !== undefined && typeof value.unique !== "boolean")
     problems.push(`${path}.unique must be a boolean`);
-  if (value.default !== undefined && FIELD_TYPES.has(type)) {
-    if (type === "boolean" && typeof value.default !== "boolean")
-      problems.push(`${path}.default must be a boolean for a boolean field`);
-    else if (NUMERIC_TYPES.has(type) && (typeof value.default !== "number" || !Number.isFinite(value.default)))
-      problems.push(`${path}.default must be a finite number for a ${type} field`);
-    else if (!NUMERIC_TYPES.has(type) && type !== "boolean" && typeof value.default !== "string")
-      problems.push(`${path}.default must be a string for a ${type} field`);
-    if ((type === "integer" || type === "long") && !Number.isSafeInteger(value.default))
-      problems.push(`${path}.default must be a safe integer for a ${type} field`);
-    if (
-      type === "enum" &&
-      typeof value.default === "string" &&
-      Array.isArray(value.enumValues) &&
-      !value.enumValues.includes(value.default)
-    )
-      problems.push(`${path}.default must be one of the declared enumValues`);
-    if (type === "date" && typeof value.default === "string" && !/^\d{4}-\d{2}-\d{2}$/u.test(value.default))
-      problems.push(`${path}.default must use YYYY-MM-DD for a date field`);
-    if (
-      type === "uuid" &&
-      typeof value.default === "string" &&
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value.default)
-    )
-      problems.push(`${path}.default must be a canonical UUID for a uuid field`);
-  }
   if (value.constraints !== undefined && !isObject(value.constraints))
     problems.push(`${path}.constraints must be an object`);
   const constraints = isObject(value.constraints) ? value.constraints : undefined;
@@ -322,11 +345,15 @@ function validateField(value: unknown, index: number, problems: string[]): Entit
         problems.push(`${path}.constraints.${key} must be an integer length for a ${type} field`);
       else if (constraint !== undefined && STRING_LENGTH_TYPES.has(type) && constraint < 0)
         problems.push(`${path}.constraints.${key} cannot be negative for a ${type} field`);
+      else if (constraint !== undefined && (type === "integer" || type === "long") && !Number.isSafeInteger(constraint))
+        problems.push(`${path}.constraints.${key} must be a safe integer for a ${type} field`);
       else if (constraint !== undefined && !STRING_LENGTH_TYPES.has(type) && !NUMERIC_TYPES.has(type))
         problems.push(`${path}.constraints.${key} is valid only for string, text, or numeric fields`);
     }
     if (typeof constraints.min === "number" && typeof constraints.max === "number" && constraints.min > constraints.max)
       problems.push(`${path}.constraints.min cannot exceed max`);
+    if (value.required === true && STRING_LENGTH_TYPES.has(type) && constraints.max === 0)
+      problems.push(`${path}.constraints.max must be at least 1 for a required ${type} field`);
     if (constraints.pattern !== undefined) {
       if (typeof constraints.pattern !== "string") problems.push(`${path}.constraints.pattern must be a string`);
       else if (!STRING_LENGTH_TYPES.has(type))
@@ -360,7 +387,12 @@ function validateField(value: unknown, index: number, problems: string[]): Entit
     if (ui.list !== undefined && typeof ui.list !== "boolean") problems.push(`${path}.ui.list must be a boolean`);
     if (ui.label !== undefined && typeof ui.label !== "string") problems.push(`${path}.ui.label must be a string`);
   }
-  return value as EntityFieldSchema;
+  const field = value as EntityFieldSchema;
+  if (field.constraints?.pattern && field.example === undefined && field.default === undefined)
+    problems.push(`${path}.example is required when constraints.pattern is declared`);
+  validateFieldLiteral(field, "default", path, problems);
+  validateFieldLiteral(field, "example", path, problems);
+  return field;
 }
 
 export function parseEntitySchema(value: unknown): VireoEntitySchema {

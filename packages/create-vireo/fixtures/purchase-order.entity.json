@@ -20,6 +20,7 @@
       "type": "string",
       "required": true,
       "unique": true,
+      "example": "PO-1001",
       "constraints": { "min": 3, "max": 40, "pattern": "^[A-Z0-9-]+$" },
       "query": { "filterable": true, "searchable": true, "sortable": true },
       "ui": { "label": "Order number", "list": true }

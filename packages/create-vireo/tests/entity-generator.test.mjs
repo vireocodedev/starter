@@ -132,6 +132,43 @@ test("rejects nested field values that disagree with their declared type", () =>
   );
 });
 
+test("requires constraint-valid examples for patterned fields", () => {
+  const missingExample = schema();
+  missingExample.fields[0] = {
+    ...missingExample.fields[0],
+    constraints: { min: 3, max: 6, pattern: "^PO-[0-9]{3}$" },
+  };
+  assert.throws(() => parseEntitySchema(missingExample), /example is required/u);
+
+  const invalidExample = structuredClone(missingExample);
+  invalidExample.fields[0].example = "EXAMPLE";
+  assert.throws(() => parseEntitySchema(invalidExample), /example does not match constraints\.pattern/u);
+
+  const validExample = structuredClone(missingExample);
+  validExample.fields[0].example = "PO-123";
+  assert.equal(parseEntitySchema(validExample).fields[0].example, "PO-123");
+});
+
+test("collects malformed patterns without evaluating them against examples", () => {
+  const invalidPattern = schema();
+  invalidPattern.fields[0] = {
+    ...invalidPattern.fields[0],
+    example: "PO-123",
+    constraints: { pattern: "[" },
+  };
+  assert.throws(() => parseEntitySchema(invalidPattern), /pattern must be a valid regular expression/u);
+});
+
+test("rejects impossible required string fixture constraints", () => {
+  const impossible = schema();
+  impossible.fields[0] = {
+    ...impossible.fields[0],
+    required: true,
+    constraints: { max: 0 },
+  };
+  assert.throws(() => parseEntitySchema(impossible), /max must be at least 1/u);
+});
+
 test("dry run is non-writing and output mode renders a deterministic review tree", async () => {
   const { root, schemaPath } = await projectFixture();
   const dry = await generateEntity({ projectDirectory: root, schemaPath, dryRun: true });
@@ -170,6 +207,34 @@ test("generated pages import only controls used by the schema", async () => {
   assert.doesNotMatch(page, /\bCheckbox\b/u);
   assert.doesNotMatch(page, /\bFormControlLabel\b/u);
   assert.doesNotMatch(page, /\bMenuItem\b/u);
+});
+
+test("generated fixtures respect declared string length constraints", async () => {
+  const { root, schemaPath } = await projectFixture();
+  await writeFile(
+    schemaPath,
+    JSON.stringify(
+      schema({
+        fields: [
+          {
+            name: "countryCode",
+            type: "string",
+            required: true,
+            constraints: { min: 2, max: 6 },
+            query: { searchable: true },
+          },
+        ],
+      }),
+    ),
+  );
+
+  await generateEntity({ projectDirectory: root, schemaPath });
+  const frontendTest = await readFile(
+    join(root, "frontend/tests/contract/generated/aPIClient.wire-contract.test.ts"),
+    "utf8",
+  );
+  assert.match(frontendTest, /countryCode: "XX"/u);
+  assert.doesNotMatch(frontendTest, /EXAMPLE/u);
 });
 
 test("generation is idempotent, detects wire drift, refuses customization, and ejects without deleting code", async () => {
