@@ -121,7 +121,10 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.equal(result.database, undefined);
     assert.match(await readFile(join(target, "vite.config.ts"), "utf8"), /name: "Operations Ui"/u);
     assert.match(await readFile(join(target, ".env.development"), "utf8"), /VITE_API_MODE=mock/u);
-    assert.match(await readFile(join(target, "scripts/vireo-frontend-doctor.mjs"), "utf8"), /Frontend profile/u);
+    const doctor = await readFile(join(target, "scripts/vireo-frontend-doctor.mjs"), "utf8");
+    assert.match(doctor, /Frontend profile/u);
+    assert.match(doctor, /VIR-VERIFY-001/u);
+    assert.match(await readFile(join(target, "README.md"), "utf8"), /Ubuntu 24\.04 x86-64/u);
     const metadata = JSON.parse(await readFile(join(target, ".vireo/project.json"), "utf8"));
     assert.equal(metadata.profile, "frontend");
     await assert.rejects(readFile(join(target, "settings.gradle")), /ENOENT/u);

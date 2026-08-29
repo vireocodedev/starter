@@ -210,7 +210,8 @@ done
 printf 'Frontend-only verification passed: %d/%d steps.\\n' "\${#steps[@]}" "\${#steps[@]}"
 `;
 
-const FRONTEND_DOCTOR_SCRIPT = `import { existsSync, readFileSync } from "node:fs";
+const FRONTEND_DOCTOR_SCRIPT = `import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { createConnection } from "node:net";
 import { resolve } from "node:path";
 
@@ -225,6 +226,32 @@ add(
   nodeMajor === 24 ? "pass" : "fail",
   \`Node \${process.versions.node}\`,
   "Install Node 24.15 or newer, but below 25.",
+);
+
+const osRelease = existsSync("/etc/os-release") ? readFileSync("/etc/os-release", "utf8") : "";
+const kernelRelease = existsSync("/proc/sys/kernel/osrelease")
+  ? readFileSync("/proc/sys/kernel/osrelease", "utf8")
+  : "";
+const ubuntu2404 = /^ID=ubuntu$/mu.test(osRelease) && /^VERSION_ID="?24\\.04"?$/mu.test(osRelease);
+const wsl = /microsoft/iu.test(kernelRelease);
+const commandIsGnu = executable => {
+  const completed = spawnSync(executable, ["--version"], { encoding: "utf8" });
+  return completed.status === 0 && /GNU/iu.test(\`\${completed.stdout ?? ""}\\n\${completed.stderr ?? ""}\`);
+};
+const supportedHost = process.platform === "linux" && process.arch === "x64" && ubuntu2404 && !wsl;
+const verificationTools = commandIsGnu("/usr/bin/time") && commandIsGnu("date");
+add(
+  "VIR-VERIFY-001",
+  supportedHost && verificationTools ? "pass" : supportedHost ? "fail" : "warn",
+  supportedHost && verificationTools
+    ? "Authoritative verification host: Ubuntu 24.04 x86-64 with GNU time/date"
+    : supportedHost
+      ? "Ubuntu 24.04 x86-64 is missing GNU time or GNU date"
+      : (wsl ? "Windows/WSL2" : process.platform + "/" + process.arch) +
+        " is outside the supported local verification host",
+  supportedHost
+    ? "Install GNU time and coreutils before running corepack npm run verify."
+    : "Use Ubuntu 24.04 x86-64 for release evidence; this host remains untested until an automated support lane exists.",
 );
 
 let metadata;
@@ -293,7 +320,14 @@ for (const result of results)
     \`\${result.status === "pass" ? "✓" : result.status === "warn" ? "!" : "✗"} \${result.code} \${result.summary}\`,
   );
 const ok = results.every(result => result.status !== "fail");
-console.log(ok ? "Frontend profile is ready." : "Resolve the failed checks and rerun the doctor.");
+const warnings = results.some(result => result.status === "warn");
+console.log(
+  ok
+    ? warnings
+      ? "Frontend profile is ready for development with unverified platform warnings."
+      : "Frontend profile is ready."
+    : "Resolve the failed checks and rerun the doctor.",
+);
 if (!ok) process.exitCode = 1;
 `;
 
@@ -363,7 +397,7 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
 
     await writeFile(
       join(projection, "README.md"),
-      `# ${productName}\n\nA standalone Vireo frontend. It runs without Java or a database by default through application-owned mock adapters.\n\n\`\`\`bash\ncorepack npm run setup\ncorepack npm run doctor\ncorepack npm run dev\n\`\`\`\n\nSign in with \`demo\` / \`demo123\`. Replace the adapters exported from \`src/app/adapters/public.ts\` when connecting the company API. See \`docs/architecture/frontend-only-adoption.md\`.\n`,
+      `# ${productName}\n\nA standalone Vireo frontend. It runs without Java or a database by default through application-owned mock adapters.\n\nThe authoritative local verification host is Ubuntu 24.04 x86-64 with GNU time/coreutils. Other Linux releases, macOS, Windows/WSL2, and ARM64 may work for development but remain untested; Doctor reports this boundary.\n\n\`\`\`bash\ncorepack npm run setup\ncorepack npm run doctor\ncorepack npm run dev\n\`\`\`\n\nSign in with \`demo\` / \`demo123\`. Replace the adapters exported from \`src/app/adapters/public.ts\` when connecting the company API. See \`docs/architecture/frontend-only-adoption.md\`.\n`,
     );
     await writeFile(
       join(projection, ".env.development"),
