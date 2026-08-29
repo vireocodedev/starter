@@ -63,7 +63,7 @@ Endpoint paths must be absolute and distinct. Numeric limits and heartbeat caden
 
 ## Persistence and failure semantics
 
-`command_id` is unique. A stored `DONE` command is idempotent success; transient failures are retried up to the configured server budget; permanent 4xx failures, excluding timeout and throttling responses, are rejected. Concurrent inserts return a retryable conflict. Handler results are persisted centrally.
+Every non-empty batch requires a resolved actor. Stored commands carry a normalized actor key and a SHA-256 fingerprint over the canonical method, URL, JSON body, and admitted replay headers. A stored `DONE` command is idempotent success only when both bindings match; another actor cannot observe that result, payload reuse is rejected with 409, and pre-binding legacy rows are never replayed. `command_id` remains globally unique as a collision backstop, with an additional actor/command database constraint. Transient failures are retried up to the configured server budget; permanent 4xx failures, excluding timeout and throttling responses, are rejected. Concurrent inserts return a generic retryable conflict. Handler results are persisted centrally.
 
 Entity revision bumps use row locking and bounded insert-race recovery. Change events flush only after transaction commit and are discarded on rollback. Concurrent sync batches keep the heartbeat in-progress state true until the last batch finishes.
 

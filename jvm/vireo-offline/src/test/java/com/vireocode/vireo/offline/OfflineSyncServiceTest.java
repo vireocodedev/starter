@@ -33,6 +33,11 @@ import com.vireocode.vireo.web.SearchablePageable;
 
 class OfflineSyncServiceTest {
 
+    private static final OfflineActor TEST_ACTOR = new OfflineActor(null, "demo", false);
+    private static final String TEST_OWNER_KEY = "username:demo";
+    private static final String CONCURRENT_REPLAY_MESSAGE_FOR_TEST =
+            "Command is already being replayed by a concurrent batch.";
+
     @Test
     void processBatch_WithEmptyCommands_ReturnsEmptyResponseAndTogglesHeartbeatFlag() {
         OfflineHeartbeatService heartbeatService = org.mockito.Mockito.mock(OfflineHeartbeatService.class);
@@ -62,10 +67,10 @@ class OfflineSyncServiceTest {
         existing.setCommandId(commandId);
         existing.setStatus(OfflineSyncCommandStatus.DONE);
         existing.setResponseStatus(null);
-        when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
-
         OfflineSyncBatchRequestDto request = new OfflineSyncBatchRequestDto(List.of(
                 new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of())));
+        bind(existing, request.commands().get(0), service);
+        when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
 
         OfflineSyncBatchResponseDto response = service.processBatch(request, requestWithBaseUrl());
 
@@ -76,6 +81,104 @@ class OfflineSyncServiceTest {
         assertEquals(OfflineSyncResultReason.ALREADY_APPLIED, response.results().get(0).reason());
         verify(repository(), never()).save(any(OfflineSyncCommandEntity.class));
         verify(repository(), never()).saveAndFlush(any(OfflineSyncCommandEntity.class));
+    }
+
+    @Test
+    void processBatch_RejectsCommandIdReusedWithDifferentPayload() {
+        OfflineSyncService service = newService();
+        UUID commandId = UUID.randomUUID();
+        OfflineSyncCommandDto original = new OfflineSyncCommandDto(commandId, "POST", "/api/product",
+                json("{\"name\":\"original\"}"), Map.of("Idempotency-Key", commandId.toString()));
+        OfflineSyncCommandDto changed = new OfflineSyncCommandDto(commandId, "POST", "/api/product",
+                json("{\"name\":\"changed\"}"), Map.of("Idempotency-Key", commandId.toString()));
+
+        OfflineSyncCommandEntity existing = new OfflineSyncCommandEntity();
+        existing.setCommandId(commandId);
+        existing.setStatus(OfflineSyncCommandStatus.DONE);
+        bind(existing, original, service);
+        when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
+
+        OfflineSyncBatchResponseDto response = service.processBatch(
+                new OfflineSyncBatchRequestDto(List.of(changed)), requestWithBaseUrl());
+
+        assertEquals(0, response.accepted());
+        assertEquals(1, response.failed());
+        assertEquals(409, response.results().get(0).status());
+        assertEquals(OfflineSyncResultReason.REJECTED, response.results().get(0).reason());
+        verify(repository(), never()).save(any(OfflineSyncCommandEntity.class));
+        verify(repository(), never()).saveAndFlush(any(OfflineSyncCommandEntity.class));
+    }
+
+    @Test
+    void processBatch_DoesNotExposeAnotherActorsStoredCommand() {
+        OfflineSyncService service = newService();
+        UUID commandId = UUID.randomUUID();
+        OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
+
+        OfflineSyncCommandEntity anotherActorsCommand = new OfflineSyncCommandEntity();
+        anotherActorsCommand.setCommandId(commandId);
+        anotherActorsCommand.setOwnerKey("username:other");
+        anotherActorsCommand.setStatus(OfflineSyncCommandStatus.DONE);
+        anotherActorsCommand.setResponseStatus(201);
+        when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(anotherActorsCommand));
+        when(repository().saveAndFlush(any(OfflineSyncCommandEntity.class)))
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("duplicate command_id"));
+
+        OfflineSyncBatchResponseDto response = service.processBatch(
+                new OfflineSyncBatchRequestDto(List.of(command)), requestWithBaseUrl());
+
+        assertEquals(409, response.results().get(0).status());
+        assertEquals(OfflineSyncResultReason.RETRYABLE, response.results().get(0).reason());
+        assertEquals(CONCURRENT_REPLAY_MESSAGE_FOR_TEST, response.results().get(0).error());
+    }
+
+    @Test
+    void processBatch_RejectsLegacyCommandWithoutPayloadBinding() {
+        OfflineSyncService service = newService();
+        UUID commandId = UUID.randomUUID();
+        OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
+
+        OfflineSyncCommandEntity existing = new OfflineSyncCommandEntity();
+        existing.setCommandId(commandId);
+        existing.setOwnerKey(TEST_OWNER_KEY);
+        existing.setStatus(OfflineSyncCommandStatus.FAILED);
+        when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
+
+        OfflineSyncBatchResponseDto response = service.processBatch(
+                new OfflineSyncBatchRequestDto(List.of(command)), requestWithBaseUrl());
+
+        assertEquals(409, response.results().get(0).status());
+        assertEquals(OfflineSyncResultReason.REJECTED, response.results().get(0).reason());
+        verify(repository(), never()).save(any(OfflineSyncCommandEntity.class));
+    }
+
+    @Test
+    void processBatch_RequiresResolvedActor() {
+        OfflineSyncService service = newService();
+        when(actorResolver().resolveCurrentActor()).thenReturn(Optional.empty());
+
+        org.springframework.web.server.ResponseStatusException exception = org.junit.jupiter.api.Assertions.assertThrows(
+                org.springframework.web.server.ResponseStatusException.class,
+                () -> service.processBatch(new OfflineSyncBatchRequestDto(List.of(
+                        new OfflineSyncCommandDto(UUID.randomUUID(), "POST", "/api/product", null, Map.of()))),
+                        requestWithBaseUrl()));
+
+        assertEquals(401, exception.getStatusCode().value());
+        verify(repository(), never()).findAllByCommandIdIn(any());
+    }
+
+    @Test
+    void requestFingerprint_IsStableAcrossJsonObjectFieldOrder() throws Exception {
+        OfflineSyncService service = newService();
+        UUID commandId = UUID.randomUUID();
+        OfflineSyncCommandDto first = new OfflineSyncCommandDto(commandId, "post", "/api/product",
+                json("{\"name\":\"Widget\",\"details\":{\"z\":1,\"a\":2}}"), Map.of("X-Trace", "one"));
+        OfflineSyncCommandDto reordered = new OfflineSyncCommandDto(commandId, "POST", "/api/product",
+                json("{\"details\":{\"a\":2,\"z\":1},\"name\":\"Widget\"}"), Map.of("x-trace", "one"));
+
+        assertEquals(
+                invoke(service, "requestFingerprint", new Class<?>[] { OfflineSyncCommandDto.class }, first),
+                invoke(service, "requestFingerprint", new Class<?>[] { OfflineSyncCommandDto.class }, reordered));
     }
 
     @Test
@@ -98,12 +201,14 @@ class OfflineSyncServiceTest {
         existing.setRetryCount(1);
 
         when(repository.findAllByCommandIdIn(any())).thenReturn(List.of(existing));
+        when(actorResolver.resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
         when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
         when(handler.process(eq(command)))
                 .thenReturn(new OfflineSyncCommandResultDto(commandId, true, 200, null));
 
         OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(),
                 actorResolver, List.of(handler), filterBuilder);
+        bind(existing, command, service);
 
         OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(command)),
                 requestWithBaseUrl());
@@ -129,10 +234,11 @@ class OfflineSyncServiceTest {
         existing.setStatus(OfflineSyncCommandStatus.FAILED);
         existing.setResponseStatus(503);
         existing.setRetryCount(new StarterOfflineProperties().getMaxReplayAttempts());
+        OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
+        bind(existing, command, service);
         when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
 
-        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(
-                new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of()))),
+        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(command)),
                 requestWithBaseUrl());
 
         assertEquals(0, response.accepted());
@@ -156,10 +262,11 @@ class OfflineSyncServiceTest {
         existing.setStatus(OfflineSyncCommandStatus.REJECTED);
         existing.setResponseStatus(400);
         existing.setErrorMessage("Unsupported HTTP method.");
+        OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
+        bind(existing, command, service);
         when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
 
-        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(
-                new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of()))),
+        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(command)),
                 requestWithBaseUrl());
 
         assertEquals(0, response.accepted());
@@ -179,10 +286,11 @@ class OfflineSyncServiceTest {
         OfflineSyncCommandEntity existing = new OfflineSyncCommandEntity();
         existing.setCommandId(commandId);
         existing.setStatus(OfflineSyncCommandStatus.REJECTED);
+        OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
+        bind(existing, command, service);
         when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(existing));
 
-        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(
-                new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of()))),
+        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(command)),
                 requestWithBaseUrl());
 
         assertEquals(422, response.results().get(0).status());
@@ -202,23 +310,29 @@ class OfflineSyncServiceTest {
         done.setCommandId(doneId);
         done.setStatus(OfflineSyncCommandStatus.DONE);
         done.setResponseStatus(201);
+        OfflineSyncCommandDto doneCommand = new OfflineSyncCommandDto(doneId, "POST", "/api/product", null, Map.of());
+        bind(done, doneCommand, service);
 
         OfflineSyncCommandEntity rejected = new OfflineSyncCommandEntity();
         rejected.setCommandId(rejectedId);
         rejected.setStatus(OfflineSyncCommandStatus.REJECTED);
         rejected.setResponseStatus(400);
+        OfflineSyncCommandDto rejectedCommand = new OfflineSyncCommandDto(rejectedId, "POST", "/api/product", null,
+                Map.of());
+        bind(rejected, rejectedCommand, service);
 
         OfflineSyncCommandEntity exhausted = new OfflineSyncCommandEntity();
         exhausted.setCommandId(exhaustedId);
         exhausted.setStatus(OfflineSyncCommandStatus.FAILED);
         exhausted.setRetryCount(new StarterOfflineProperties().getMaxReplayAttempts());
+        OfflineSyncCommandDto exhaustedCommand = new OfflineSyncCommandDto(exhaustedId, "POST", "/api/product", null,
+                Map.of());
+        bind(exhausted, exhaustedCommand, service);
 
         when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(done, rejected, exhausted));
 
         OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(
-                new OfflineSyncCommandDto(doneId, "POST", "/api/product", null, Map.of()),
-                new OfflineSyncCommandDto(rejectedId, "POST", "/api/product", null, Map.of()),
-                new OfflineSyncCommandDto(exhaustedId, "POST", "/api/product", null, Map.of()))),
+                doneCommand, rejectedCommand, exhaustedCommand)),
                 requestWithBaseUrl());
 
         assertEquals(1, response.accepted());
@@ -328,6 +442,7 @@ class OfflineSyncServiceTest {
         OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
 
         when(repository.findAllByCommandIdIn(any())).thenReturn(List.of());
+        when(actorResolver.resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
         when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
         when(handler.process(eq(command)))
                 .thenReturn(new OfflineSyncCommandResultDto(commandId, true, 201, null));
@@ -356,6 +471,7 @@ class OfflineSyncServiceTest {
         OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
 
         when(repository.findAllByCommandIdIn(any())).thenReturn(List.of());
+        when(actorResolver.resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
         when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
         when(handler.process(eq(command))).thenThrow(new RuntimeException("boom"));
 
@@ -466,28 +582,31 @@ class OfflineSyncServiceTest {
     }
 
     @Test
-    void privateHelper_NewCommandEntity_UsesActorWhenPresentOtherwiseSystem() throws Exception {
+    void privateHelper_NewCommandEntity_BindsResolvedActorAndPayload() throws Exception {
         OfflineSyncService service = newService();
-
-        when(actorResolver().resolveCurrentActor())
-                .thenReturn(Optional.of(new OfflineActor(UUID.fromString("11111111-1111-1111-1111-111111111111"), "demo", false)))
-                .thenReturn(Optional.empty());
+        OfflineActor identifiedActor = new OfflineActor(
+                UUID.fromString("11111111-1111-1111-1111-111111111111"), "demo", false);
 
         UUID firstId = UUID.randomUUID();
         OfflineSyncCommandDto first = new OfflineSyncCommandDto(firstId, "post", "/api/p", null, Map.of("k", "v"));
         OfflineSyncCommandEntity firstEntity = (OfflineSyncCommandEntity) invoke(service, "newCommandEntity",
-                new Class<?>[] { OfflineSyncCommandDto.class }, first);
+                new Class<?>[] { OfflineSyncCommandDto.class, OfflineActor.class, String.class }, first,
+                identifiedActor, "id:" + identifiedActor.id());
 
         assertEquals(firstId, firstEntity.getCommandId());
         assertEquals("POST", firstEntity.getHttpMethod());
         assertEquals("demo", firstEntity.getOwnerUsername());
         assertNotNull(firstEntity.getOwnerId());
+        assertEquals("id:" + identifiedActor.id(), firstEntity.getOwnerKey());
+        assertEquals(64, firstEntity.getRequestFingerprint().length());
 
         OfflineSyncCommandDto second = new OfflineSyncCommandDto(UUID.randomUUID(), "get", "/api/p", null, Map.of());
         OfflineSyncCommandEntity secondEntity = (OfflineSyncCommandEntity) invoke(service, "newCommandEntity",
-                new Class<?>[] { OfflineSyncCommandDto.class }, second);
-        assertEquals("system", secondEntity.getOwnerUsername());
+                new Class<?>[] { OfflineSyncCommandDto.class, OfflineActor.class, String.class }, second,
+                TEST_ACTOR, TEST_OWNER_KEY);
+        assertEquals("demo", secondEntity.getOwnerUsername());
         assertNull(secondEntity.getOwnerId());
+        assertEquals(TEST_OWNER_KEY, secondEntity.getOwnerKey());
     }
 
     private final OfflineHeartbeatService heartbeatService = org.mockito.Mockito.mock(OfflineHeartbeatService.class);
@@ -497,8 +616,26 @@ class OfflineSyncServiceTest {
             .mock(QueryEngineFilterSpecificationBuilder.class);
 
     private OfflineSyncService newService() {
-                when(actorResolver.resolveCurrentActor()).thenReturn(Optional.empty());
+        when(actorResolver.resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
         return new OfflineSyncService(heartbeatService, repository, new ObjectMapper(), actorResolver, List.of(), queryBuilder);
+    }
+
+    private void bind(OfflineSyncCommandEntity entity, OfflineSyncCommandDto command, OfflineSyncService service) {
+        entity.setOwnerKey(TEST_OWNER_KEY);
+        try {
+            entity.setRequestFingerprint((String) invoke(service, "requestFingerprint",
+                    new Class<?>[] { OfflineSyncCommandDto.class }, command));
+        } catch (Exception ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
+    private com.fasterxml.jackson.databind.JsonNode json(String value) {
+        try {
+            return new ObjectMapper().readTree(value);
+        } catch (JsonProcessingException ex) {
+            throw new AssertionError(ex);
+        }
     }
 
     private OfflineSyncCommandRepository repository() {

@@ -73,7 +73,7 @@ abstract class AbstractLibraryUpgradeTest {
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_auth")).containsExactly("1", "2");
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_history")).containsExactly("1", "2");
         assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_queryengine")).containsExactly("1");
-        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1", "2");
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1", "2", "3");
     }
 
     @Test
@@ -198,11 +198,19 @@ abstract class AbstractLibraryUpgradeTest {
 
         StarterFlywayMigrations.migrate(new StarterFlywayModule("offline", 20), dataSource, vendor);
 
-        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1", "2");
+        assertThat(appliedVersions(dataSource, "flyway_schema_history_vireo_offline")).containsExactly("1", "2", "3");
         assertThat(jdbc.queryForObject(
                 "SELECT owner_id FROM sync_command WHERE id = '22222222-2222-2222-2222-222222222222'",
                 String.class))
                 .isEqualTo("11111111-1111-1111-1111-111111111111");
+        assertThat(jdbc.queryForObject(
+                "SELECT owner_key FROM sync_command WHERE id = '22222222-2222-2222-2222-222222222222'",
+                String.class))
+                .isEqualTo("id:11111111-1111-1111-1111-111111111111");
+        assertThat(jdbc.queryForObject(
+                "SELECT request_fingerprint FROM sync_command WHERE id = '22222222-2222-2222-2222-222222222222'",
+                String.class))
+                .isNull();
 
         jdbc.update("DELETE FROM app_user WHERE id = '11111111-1111-1111-1111-111111111111'");
 
@@ -212,14 +220,16 @@ abstract class AbstractLibraryUpgradeTest {
                 .isEqualTo(1);
 
         jdbc.update("INSERT INTO sync_command"
-                + " (id, command_id, owner_username, http_method, url, status, created_at)"
+                + " (id, command_id, owner_username, owner_key, request_fingerprint, http_method, url, status, created_at)"
                 + " VALUES ('44444444-4444-4444-4444-444444444444',"
-                + " '55555555-5555-5555-5555-555555555555', 'current-user', 'PATCH', '/api/items/42',"
+                + " '55555555-5555-5555-5555-555555555555', 'current-user', 'username:current-user',"
+                + " 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'PATCH', '/api/items/42',"
                 + " 'DONE', CURRENT_TIMESTAMP)");
         assertThatThrownBy(() -> jdbc.update("INSERT INTO sync_command"
-                + " (id, command_id, owner_username, http_method, url, status, created_at)"
+                + " (id, command_id, owner_username, owner_key, request_fingerprint, http_method, url, status, created_at)"
                 + " VALUES ('66666666-6666-6666-6666-666666666666',"
-                + " '77777777-7777-7777-7777-777777777777', 'current-user', 'PATCH', '/api/items/42',"
+                + " '77777777-7777-7777-7777-777777777777', 'current-user', 'username:current-user',"
+                + " 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'PATCH', '/api/items/42',"
                 + " 'UNKNOWN', CURRENT_TIMESTAMP)"))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }

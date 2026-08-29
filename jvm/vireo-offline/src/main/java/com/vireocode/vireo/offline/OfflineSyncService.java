@@ -1,15 +1,20 @@
 package com.vireocode.vireo.offline;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,7 +35,10 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder;
 import com.vireocode.vireo.queryengine.QueryFilterRequest;
 import com.vireocode.vireo.web.RestUtils;
@@ -46,6 +54,10 @@ public class OfflineSyncService {
     private static final String ALREADY_PROCESSED_MESSAGE = "Command already processed.";
     private static final String REJECTED_MESSAGE = "Command was permanently rejected by the server.";
     private static final String CONCURRENT_REPLAY_MESSAGE = "Command is already being replayed by a concurrent batch.";
+    private static final String BINDING_MISMATCH_MESSAGE =
+            "Command identity is already bound to a different request.";
+    private static final String LEGACY_BINDING_MESSAGE =
+            "Command predates payload binding and cannot be replayed safely.";
 
     private final RestClient restClient;
     private final OfflineHeartbeatService offlineHeartbeatService;
@@ -106,9 +118,13 @@ public class OfflineSyncService {
                     "Offline command IDs must be unique within a batch.");
         }
 
+        OfflineActor actor = offlineActorResolver.resolveCurrentActor()
+                .orElseThrow(() -> RestUtils.unauthorized("Unauthorized"));
+        String ownerKey = ownerKey(actor);
+
         offlineHeartbeatService.beginSync();
         try {
-            return processBatchInternal(request, sourceRequest);
+            return processBatchInternal(request, sourceRequest, actor, ownerKey);
         } finally {
             offlineHeartbeatService.endSync();
         }
@@ -191,9 +207,9 @@ public class OfflineSyncService {
     }
 
     private OfflineSyncBatchResponseDto processBatchInternal(OfflineSyncBatchRequestDto request,
-            HttpServletRequest sourceRequest) {
+            HttpServletRequest sourceRequest, OfflineActor actor, String ownerKey) {
         List<OfflineSyncCommandResultDto> results = new ArrayList<>(request.commands().size());
-        Map<UUID, OfflineSyncCommandEntity> existingByCommandId = loadExistingCommands(request.commands());
+        Map<UUID, OfflineSyncCommandEntity> existingByCommandId = loadExistingCommands(request.commands(), ownerKey);
         String baseUrl = UriComponentsBuilder.fromUriString(sourceRequest.getRequestURL().toString())
                 .replacePath(null)
                 .replaceQuery(null)
@@ -207,7 +223,7 @@ public class OfflineSyncService {
                 continue;
             }
 
-            results.add(processCommand(command, sourceRequest, baseUrl));
+            results.add(processCommand(command, sourceRequest, baseUrl, actor, ownerKey));
         }
 
         int accepted = (int) results.stream().filter(OfflineSyncCommandResultDto::success).count();
@@ -222,6 +238,15 @@ public class OfflineSyncService {
      */
     private OfflineSyncCommandResultDto processExistingCommand(OfflineSyncCommandDto command,
             OfflineSyncCommandEntity existing, HttpServletRequest sourceRequest, String baseUrl) {
+        if (!StringUtils.hasText(existing.getRequestFingerprint())) {
+            return bindingRejected(command, LEGACY_BINDING_MESSAGE);
+        }
+        if (!MessageDigest.isEqual(
+                existing.getRequestFingerprint().getBytes(StandardCharsets.US_ASCII),
+                requestFingerprint(command).getBytes(StandardCharsets.US_ASCII))) {
+            return bindingRejected(command, BINDING_MISMATCH_MESSAGE);
+        }
+
         if (OfflineSyncCommandStatus.DONE == existing.getStatus()) {
             return new OfflineSyncCommandResultDto(command.commandId(), true,
                     existing.getResponseStatus() == null ? 200 : existing.getResponseStatus(),
@@ -260,9 +285,14 @@ public class OfflineSyncService {
                 OfflineSyncResultReason.RETRY_LIMIT_EXCEEDED);
     }
 
+    private OfflineSyncCommandResultDto bindingRejected(OfflineSyncCommandDto command, String message) {
+        return new OfflineSyncCommandResultDto(command.commandId(), false, 409, message,
+                OfflineSyncResultReason.REJECTED);
+    }
+
     private OfflineSyncCommandResultDto processCommand(OfflineSyncCommandDto command, HttpServletRequest sourceRequest,
-            String baseUrl) {
-        OfflineSyncCommandEntity entity = newCommandEntity(command);
+            String baseUrl, OfflineActor actor, String ownerKey) {
+        OfflineSyncCommandEntity entity = newCommandEntity(command, actor, ownerKey);
         entity.setStatus(OfflineSyncCommandStatus.PENDING);
 
         try {
@@ -411,21 +441,24 @@ public class OfflineSyncService {
                 .orElse(null);
     }
 
-    private OfflineSyncCommandEntity newCommandEntity(OfflineSyncCommandDto command) {
+    private OfflineSyncCommandEntity newCommandEntity(OfflineSyncCommandDto command, OfflineActor actor,
+            String ownerKey) {
         OfflineSyncCommandEntity entity = new OfflineSyncCommandEntity();
         entity.setCommandId(command.commandId());
         entity.setHttpMethod(command.method().toUpperCase(Locale.ROOT));
         entity.setUrl(command.url());
         entity.setRequestBody(toJson(command.body()));
         entity.setRequestHeaders(toJson(sanitizeReplayHeaders(command.headers())));
+        entity.setRequestFingerprint(requestFingerprint(command));
         entity.setCreatedAt(Instant.now(clock));
-        Optional<OfflineActor> currentActor = offlineActorResolver.resolveCurrentActor();
-        entity.setOwnerUsername(currentActor.map(OfflineActor::username).orElse("system"));
-        entity.setOwnerId(currentActor.map(OfflineActor::id).orElse(null));
+        entity.setOwnerUsername(StringUtils.hasText(actor.username()) ? actor.username().trim() : actor.id().toString());
+        entity.setOwnerId(actor.id());
+        entity.setOwnerKey(ownerKey);
         return entity;
     }
 
-    private Map<UUID, OfflineSyncCommandEntity> loadExistingCommands(List<OfflineSyncCommandDto> commands) {
+    private Map<UUID, OfflineSyncCommandEntity> loadExistingCommands(List<OfflineSyncCommandDto> commands,
+            String ownerKey) {
         if (CollectionUtils.isEmpty(commands)) {
             return Map.of();
         }
@@ -439,8 +472,65 @@ public class OfflineSyncService {
         }
 
         return offlineSyncCommandRepository.findAllByCommandIdIn(commandIds).stream()
+                .filter(entry -> ownerKey.equals(entry.getOwnerKey()))
                 .collect(Collectors.toMap(OfflineSyncCommandEntity::getCommandId, entry -> entry, (a, b) -> a,
                         HashMap::new));
+    }
+
+    private String ownerKey(OfflineActor actor) {
+        if (actor.id() != null) {
+            return "id:" + actor.id();
+        }
+        if (!StringUtils.hasText(actor.username())) {
+            throw RestUtils.unauthorized("Unauthorized");
+        }
+        return "username:" + actor.username().trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String requestFingerprint(OfflineSyncCommandDto command) {
+        ObjectNode canonical = objectMapper.createObjectNode();
+        canonical.put("method", command.method().toUpperCase(Locale.ROOT));
+        canonical.put("url", command.url());
+        canonical.set("body", canonicalize(OfflineSyncBodyNormalizer.normalize(command.body(), objectMapper)));
+
+        ObjectNode headers = objectMapper.createObjectNode();
+        Map<String, String> normalizedHeaders = new TreeMap<>();
+        sanitizeReplayHeaders(command.headers()).forEach((name, value) -> {
+            String normalizedName = name.toLowerCase(Locale.ROOT);
+            String previous = normalizedHeaders.putIfAbsent(normalizedName, value);
+            if (previous != null && !previous.equals(value)) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST,
+                        "Replay headers must not repeat a name with different casing.");
+            }
+        });
+        normalizedHeaders.forEach(headers::put);
+        canonical.set("headers", headers);
+
+        try {
+            byte[] bytes = objectMapper.writeValueAsBytes(canonical);
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (JsonProcessingException | NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("Unable to fingerprint an offline command.", ex);
+        }
+    }
+
+    private JsonNode canonicalize(JsonNode value) {
+        if (value == null || value.isNull() || value.isValueNode()) {
+            return value == null ? objectMapper.nullNode() : value;
+        }
+        if (value.isArray()) {
+            ArrayNode result = objectMapper.createArrayNode();
+            value.forEach(child -> result.add(canonicalize(child)));
+            return result;
+        }
+
+        ObjectNode result = objectMapper.createObjectNode();
+        java.util.stream.StreamSupport.stream(
+                java.util.Spliterators.spliteratorUnknownSize(value.fieldNames(), 0), false)
+                .sorted()
+                .forEach(field -> result.set(field, canonicalize(value.get(field))));
+        return result;
     }
 
     private String toJson(Object value) {

@@ -66,7 +66,8 @@ class ConsumerMigrationTest {
         assertThat(appliedIn("auth")).containsExactly("auth baseline");
         assertThat(appliedIn("history")).containsExactly("history baseline", "neutral actor contract");
         assertThat(appliedIn("queryengine")).containsExactly("saved filter baseline");
-        assertThat(appliedIn("offline")).containsExactly("offline baseline", "decouple sync actor");
+        assertThat(appliedIn("offline")).containsExactly(
+                "offline baseline", "decouple sync actor", "bind commands to actor and payload");
     }
 
     private List<String> appliedIn(String module) {

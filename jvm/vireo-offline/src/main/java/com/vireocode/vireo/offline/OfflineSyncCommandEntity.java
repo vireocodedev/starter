@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -40,6 +41,16 @@ public class OfflineSyncCommandEntity {
     @Column(name = "owner_username", nullable = false, length = 100)
     @Filterable(label = "network.owner", operators = { QueryOperator.CONTAINS, QueryOperator.EQUALS })
     private String ownerUsername;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    @Column(name = "owner_key", nullable = false, length = 140)
+    private String ownerKey;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    @Column(name = "request_fingerprint", length = 64)
+    private String requestFingerprint;
 
     @Column(name = "http_method", nullable = false, length = 10)
     @Filterable(label = "network.httpMethod", operators = { QueryOperator.EQUALS, QueryOperator.NOT_EQUALS })
