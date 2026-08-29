@@ -8,10 +8,20 @@ final class OfflineSseBatchContext {
 
     private final String batchId = UUID.randomUUID().toString();
     private final List<OfflineSseBatchItem> events = new ArrayList<>();
+    private String audience;
     private boolean flushScheduled;
 
-    void addEvent(OfflineSseBatchItem event) {
+    void addEvent(String eventAudience, OfflineSseBatchItem event) {
+        if (audience == null) {
+            audience = eventAudience;
+        } else if (!audience.equals(eventAudience)) {
+            throw new IllegalStateException("One transaction cannot publish offline SSE events to multiple audiences");
+        }
         events.add(event);
+    }
+
+    String getAudience() {
+        return audience;
     }
 
     String getBatchId() {
@@ -32,6 +42,7 @@ final class OfflineSseBatchContext {
 
     void clear() {
         events.clear();
+        audience = null;
         flushScheduled = false;
     }
 }

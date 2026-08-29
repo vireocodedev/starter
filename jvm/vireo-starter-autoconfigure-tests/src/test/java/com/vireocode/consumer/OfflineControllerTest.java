@@ -101,6 +101,13 @@ class OfflineControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "demo", roles = "USER")
+    void streamFailsClosedWithoutAnApplicationAudienceResolver() throws Exception {
+        mockMvc.perform(get("/api/offline/heartbeat/stream"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void allOfflineEndpointsRejectAnonymousCallers() throws Exception {
         mockMvc.perform(post("/api/offline/sync")
                 .with(csrf())

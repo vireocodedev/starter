@@ -31,6 +31,7 @@ import com.vireocode.vireo.history.HistoryReadAuthorizer;
 import com.vireocode.vireo.offline.OfflineActor;
 import com.vireocode.vireo.offline.OfflineActorResolver;
 import com.vireocode.vireo.offline.OfflineSyncService;
+import com.vireocode.vireo.offline.OfflineSseAudienceResolver;
 import com.vireocode.vireo.offline.StarterOfflineActorResolver;
 import com.vireocode.vireo.queryengine.QueryEngineRegistry;
 import com.vireocode.vireo.queryengine.QueryRelationOptionPolicy;
@@ -108,6 +109,12 @@ class ConsumerOverrideTest {
         assertThat(context.getBeansOfType(StarterOfflineActorResolver.class)).isEmpty();
     }
 
+    @Test
+    @DisplayName("replaces the fail-closed offline SSE audience resolver")
+    void replacesOfflineSseAudienceResolver() {
+        assertThat(context.getBean(OfflineSseAudienceResolver.class)).isInstanceOf(FixedSseAudienceResolver.class);
+    }
+
     /**
      * Substituting five beans must not quietly withdraw the rest of the library.
      */
@@ -166,6 +173,11 @@ class ConsumerOverrideTest {
         }
 
         @Bean
+        OfflineSseAudienceResolver consumerSseAudienceResolver() {
+            return new FixedSseAudienceResolver();
+        }
+
+        @Bean
         Clock consumerClock() {
             return Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
         }
@@ -197,6 +209,14 @@ class ConsumerOverrideTest {
         @Override
         public Optional<OfflineActor> resolveCurrentActor() {
             return Optional.empty();
+        }
+    }
+
+    static class FixedSseAudienceResolver implements OfflineSseAudienceResolver {
+
+        @Override
+        public Optional<String> resolveCurrentAudience() {
+            return Optional.of("consumer-account");
         }
     }
 

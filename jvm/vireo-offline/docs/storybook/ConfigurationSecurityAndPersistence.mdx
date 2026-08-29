@@ -28,10 +28,10 @@ vireo.starter.offline.replay-headers=Content-Type,Idempotency-Key,X-Offline-Temp
 vireo.starter.offline.privileged-role=SUPERADMIN
 ```
 
-Every default endpoint requires authentication. Relative canonical paths and mutation methods are required; Auth and Offline routes, absolute URLs, fragments, encoded traversal, and unapproved headers are rejected. Session cookies and XSRF tokens come only from the current flush request.
+Every default endpoint requires authentication. SSE payload streaming additionally fails closed until the application supplies an `OfflineSseAudienceResolver`; empty audiences deny stream creation and discard change payloads. Relative canonical paths and mutation methods are required; Auth and Offline routes, absolute URLs, fragments, encoded traversal, and unapproved headers are rejected. Session cookies and XSRF tokens come only from the current flush request.
 
 Non-privileged command search is owner-scoped. The default actor adapter uses Starter Auth, but applications can replace it with any `OfflineActorResolver`. The schema deliberately has no Auth foreign key.
 
-`DONE` commands are idempotent success. Transient failures remain retryable up to the server budget. Permanent client errors become `REJECTED`; request timeout and throttling remain retryable. Transactional change events publish after commit and disappear on rollback.
+`DONE` commands are idempotent success. Transient failures remain retryable up to the server budget. Permanent client errors become `REJECTED`; request timeout and throttling remain retryable. Transactional change events publish after commit, disappear on rollback, and reach only connections whose opaque subject/tenant audience matches the batch.
 
 The module owns `sync_command` and `offline_entity_version` through its isolated Flyway history. Applied migrations remain immutable; V2 removes the legacy user-table constraint while preserving recorded actor IDs.

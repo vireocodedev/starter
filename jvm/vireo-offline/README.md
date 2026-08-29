@@ -24,9 +24,10 @@ The artifact depends on Core and Query Engine. Auth is an implementation depende
 - `GET /api/offline/hydration/versions` returns normalized per-entity revisions.
 - `GET /api/offline/heartbeat` and `/stream` expose current sync state and transaction-aware change batches.
 - `OfflineSyncReplayHandler` is an ordered application extension point for domain replay that should not loop through the HTTP stack.
-- `OfflineActorResolver` supplies application-neutral ownership and privileged-read policy.
+- `OfflineActorResolver` supplies application-neutral command ownership and privileged-read policy.
+- `OfflineSseAudienceResolver` supplies the opaque subject/tenant audience shared by a stream and its events.
 
-All default endpoints require authentication. A non-privileged actor sees only commands owned by its stable ID, with username fallback for legacy rows. A privileged actor may inspect the complete command stream.
+All default endpoints require authentication. A non-privileged actor sees only commands owned by its stable ID, with username fallback for legacy rows. A privileged actor may inspect the complete command stream. SSE payload streaming additionally requires a non-empty application audience; the fail-closed resolver denies stream creation and discards payload events.
 
 ## Replay safety
 
@@ -63,6 +64,8 @@ Endpoint paths must be absolute and distinct. Numeric limits and heartbeat caden
 `command_id` is unique. A stored `DONE` command is idempotent success; transient failures are retried up to the configured server budget; permanent 4xx failures, excluding timeout and throttling responses, are rejected. Concurrent inserts return a retryable conflict. Handler results are persisted centrally.
 
 Entity revision bumps use row locking and bounded insert-race recovery. Change events flush only after transaction commit and are discarded on rollback. Concurrent sync batches keep the heartbeat in-progress state true until the last batch finishes.
+
+Each SSE connection is bound to the audience resolved when it opens. Each transaction batch is bound to the audience resolved when its first event is published and is delivered only to matching connections. Resolving a different audience later in the same transaction fails instead of mixing data. Applications choose whether the opaque value represents one subject, tenant, organization, or another isolation boundary; there is no global payload audience by default.
 
 The module owns `sync_command` and `offline_entity_version` through `flyway_schema_history_vireo_offline`. V2 removes the legacy Auth foreign key so custom actor IDs remain valid audit data.
 

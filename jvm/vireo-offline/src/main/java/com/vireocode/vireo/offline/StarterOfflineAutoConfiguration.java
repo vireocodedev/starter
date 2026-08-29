@@ -57,8 +57,15 @@ public class StarterOfflineAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    OfflineHeartbeatService starterOfflineHeartbeatService(Clock clock) {
-        return new OfflineHeartbeatService(clock);
+    OfflineSseAudienceResolver starterOfflineSseAudienceResolver() {
+        return new DenyAllOfflineSseAudienceResolver();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    OfflineHeartbeatService starterOfflineHeartbeatService(Clock clock,
+            OfflineSseAudienceResolver audienceResolver) {
+        return new OfflineHeartbeatService(clock, audienceResolver);
     }
 
     /**

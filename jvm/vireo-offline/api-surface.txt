@@ -80,6 +80,9 @@ public final record com.vireocode.vireo.offline.OfflineHydrationVersionsResponse
     public java.time.Instant com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.serverTime()
     public java.util.List<com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto> com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.versions()
 
+public abstract interface com.vireocode.vireo.offline.OfflineSseAudienceResolver
+    public abstract java.util.Optional<java.lang.String> com.vireocode.vireo.offline.OfflineSseAudienceResolver.resolveCurrentAudience()
+
 public final record com.vireocode.vireo.offline.OfflineSseBatchEvent
     extends java.lang.Record
     public com.vireocode.vireo.offline.OfflineSseBatchEvent(java.lang.String,java.util.List<com.vireocode.vireo.offline.OfflineSseBatchItem>)
