@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "2026-08-30.1",
+  "maturity": "public-alpha",
+  "product": {
+    "id": "vireo-framework",
+    "name": "Vireo Framework",
+    "organization": "Vireo Code",
+    "sourceRepository": "https://github.com/vireocodedev/starter",
+    "documentation": "https://vireocodedev.github.io/starter",
+    "support": "https://github.com/vireocodedev/starter/blob/main/SUPPORT.md",
+    "security": "https://github.com/vireocodedev/starter/security/advisories/new"
+  },
+  "policySources": {
+    "platformSupport": "contracts/platform-support-policy.json",
+    "documentationReleases": "contracts/documentation-release-policy.json",
+    "publicArtifacts": "contracts/public-release-attestation-policy.json",
+    "publicBetaEvidence": "contracts/public-beta-evidence-policy.json",
+    "verificationBudgets": "contracts/verification-budget-policy.json"
+  },
+  "current": {
+    "id": "npm-0.2.1_jvm-0.2.0",
+    "npm": [
+      { "name": "create-vireo", "version": "0.4.2", "role": "project-scaffolder" },
+      { "name": "@vireocodedev/history", "version": "0.2.1", "role": "history-domain" },
+      { "name": "@vireocodedev/infrastructure", "version": "0.2.1", "role": "browser-infrastructure" },
+      { "name": "@vireocodedev/localization", "version": "0.2.1", "role": "localization-resources" },
+      { "name": "@vireocodedev/query", "version": "0.2.1", "role": "query-contracts" },
+      { "name": "@vireocodedev/shell", "version": "0.2.1", "role": "application-shell-contracts" },
+      { "name": "@vireocodedev/sqlite", "version": "0.2.2", "role": "offline-persistence" },
+      { "name": "@vireocodedev/ui", "version": "0.2.2", "role": "react-design-system" }
+    ],
+    "maven": {
+      "group": "com.vireocode",
+      "version": "0.2.0",
+      "modules": ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"]
+    },
+    "template": {
+      "repository": "https://github.com/vireocodedev/starter-template",
+      "commit": "038df86f7e311ef771e0f01a4a44b698f27e4b28",
+      "profiles": ["frontend", "full-stack"],
+      "databases": ["h2", "postgresql"]
+    }
+  },
+  "compatibility": {
+    "versioning": "independent-artifact-semver",
+    "defaultSet": "current-alpha",
+    "sets": [
+      {
+        "id": "current-alpha",
+        "status": "supported",
+        "release": "npm-0.2.1_jvm-0.2.0",
+        "npm": {
+          "create-vireo": "0.4.2",
+          "@vireocodedev/history": "0.2.1",
+          "@vireocodedev/infrastructure": "0.2.1",
+          "@vireocodedev/localization": "0.2.1",
+          "@vireocodedev/query": "0.2.1",
+          "@vireocodedev/shell": "0.2.1",
+          "@vireocodedev/sqlite": "0.2.2",
+          "@vireocodedev/ui": "0.2.2"
+        },
+        "mavenBom": "com.vireocode:vireo-bom:0.2.0",
+        "templateCommit": "038df86f7e311ef771e0f01a4a44b698f27e4b28"
+      }
+    ]
+  },
+  "gates": {
+    "fast": {
+      "command": "corepack npm run verify -- silent",
+      "scope": "typescript-merge",
+      "hosted": [{ "workflow": "ci.yml", "job": "build" }]
+    },
+    "full": {
+      "command": "corepack npm run verify:all -- silent",
+      "scope": "ecosystem-local",
+      "hosted": [
+        { "workflow": "ci.yml", "job": "build" },
+        { "workflow": "ci.yml", "job": "jvm" }
+      ]
+    },
+    "release": {
+      "command": "corepack npm run release:smoke",
+      "scope": "packed-npm-candidates",
+      "hosted": [{ "workflow": "release-npm.yml", "job": "verify" }]
+    }
+  },
+  "channels": {
+    "stable": { "status": "active", "npmTag": "latest" },
+    "prerelease": { "status": "not-enabled", "npmTag": "next" }
+  },
+  "supportLines": [
+    {
+      "id": "0.2-alpha",
+      "status": "active",
+      "claim": "public-alpha",
+      "release": "npm-0.2.1_jvm-0.2.0",
+      "eol": null,
+      "compatibilityPolicy": "docs/COMPATIBILITY.md"
+    }
+  ],
+  "evidence": {
+    "claimGate": "contracts/public-beta-evidence-policy.json",
+    "publicBetaStatus": "hold",
+    "freshnessSource": "contracts/platform-support-policy.json"
+  }
+}

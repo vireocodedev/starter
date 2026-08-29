@@ -21,6 +21,7 @@ const requiredFiles = [
   "docs/roadmap/phase-5/feedback-and-evidence.md",
   "docs/roadmap/phase-5/evidence/aggregate.json",
   "contracts/platform-support-policy.json",
+  "contracts/ecosystem-release-contract.json",
   "contracts/public-release-attestation-policy.json",
   "contracts/documentation-release-policy.json",
   "contracts/public-beta-evidence-policy.json",
@@ -79,7 +80,12 @@ function requireArtifactVersionRow(path, artifact, version) {
   const rows = readFileSync(join(root, path), "utf8").split("\n");
   const matchingRows = rows
     .filter(line => line.startsWith("|") && line.includes(artifact))
-    .map(line => line.split("|").slice(1, -1).map(cell => cell.trim()));
+    .map(line =>
+      line
+        .split("|")
+        .slice(1, -1)
+        .map(cell => cell.trim()),
+    );
   if (matchingRows.length !== 1 || !matchingRows[0].includes(version)) {
     problems.push(`${path} must contain exactly one ${artifact} table row at ${version}`);
   }
