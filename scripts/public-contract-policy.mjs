@@ -133,7 +133,7 @@ const executableDocumentationClaims = [
     documentation: "README.md",
     documentedCommand: "corepack npm run verify",
     evidence: ".github/workflows/ci.yml",
-    evidenceCommand: "corepack npm run verify",
+    evidenceCommand: "corepack npm run gate:fast",
   },
   {
     documentation: "README.md",

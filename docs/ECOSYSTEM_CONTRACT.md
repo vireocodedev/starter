@@ -11,3 +11,9 @@ corepack npm run ecosystem:check
 ```
 
 The check compares relationships rather than searching for version tokens. It rejects drift between package manifests, Gradle properties, `create-vireo`, documentation releases, attestation scope, platform policy, and hosted gate jobs. Downstream Doctor, projection, documentation, upgrade, and release tooling should consume this contract instead of introducing a new current-version map.
+
+Execute the declared gates through `corepack npm run gate:fast`, `corepack npm run
+gate:full`, or `corepack npm run gate:release`. The same manifest owns each gate's
+shell-free invocation, required tool classes, evidence subjects, hosted workflow
+job, and hosted command. The release gate validates registry state, runs the merge
+gate against packed candidates, and generates the uploadable candidate evidence.

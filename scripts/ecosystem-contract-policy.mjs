@@ -113,6 +113,15 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
 
   for (const [gateName, gate] of Object.entries(contract.gates ?? {})) {
     if (!gate.command || !gate.scope) problems.push(`gate ${gateName} must declare command and scope`);
+    if (!gate.execution?.executable || !Array.isArray(gate.execution?.arguments)) {
+      problems.push(`gate ${gateName} must declare a shell-free execution`);
+    }
+    if (!Array.isArray(gate.requiredTools) || gate.requiredTools.length === 0) {
+      problems.push(`gate ${gateName} must declare required tools`);
+    }
+    if (!Array.isArray(gate.evidenceSubjects) || gate.evidenceSubjects.length === 0) {
+      problems.push(`gate ${gateName} must declare evidence subjects`);
+    }
     for (const lane of gate.hosted ?? []) {
       const workflowPath = join(repositoryRoot, ".github/workflows", lane.workflow);
       if (!existsSync(workflowPath)) {
@@ -123,6 +132,9 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
       const escapedJob = lane.job.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
       if (!new RegExp(`^ {2}${escapedJob}:\\s*$`, "mu").test(workflow)) {
         problems.push(`gate ${gateName} references missing job ${lane.job} in ${lane.workflow}`);
+      }
+      if (lane.command && !workflow.includes(lane.command)) {
+        problems.push(`gate ${gateName} references missing command ${lane.command} in ${lane.workflow}`);
       }
     }
   }

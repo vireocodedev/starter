@@ -32,7 +32,7 @@ jobs:
       # linting, formatting, package builds, type checking, tests and contract
       # checks, strict consumer declarations, generator tests, and the Vireo
       # Storybook production build.
-      - run: corepack npm run verify
+      - run: corepack npm run gate:fast
       - name: Upload verification performance evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -68,21 +68,51 @@
   "gates": {
     "fast": {
       "command": "corepack npm run verify -- silent",
+      "execution": {
+        "executable": "corepack",
+        "arguments": ["npm", "run", "verify", "--", "silent"]
+      },
       "scope": "typescript-merge",
-      "hosted": [{ "workflow": "ci.yml", "job": "build" }]
+      "requiredTools": ["node", "npm"],
+      "evidenceSubjects": ["npm-workspaces", "packed-consumers", "storybook-static"],
+      "hosted": [
+        {
+          "workflow": "ci.yml",
+          "job": "build",
+          "command": "corepack npm run gate:fast"
+        }
+      ]
     },
     "full": {
       "command": "corepack npm run verify:all -- silent",
+      "execution": {
+        "executable": "corepack",
+        "arguments": ["npm", "run", "verify:all", "--", "silent"]
+      },
       "scope": "ecosystem-local",
+      "requiredTools": ["node", "npm", "java", "gradle"],
+      "evidenceSubjects": ["fast-gate", "maven-modules", "documentation-portal", "jvm-consumer"],
       "hosted": [
         { "workflow": "ci.yml", "job": "build" },
         { "workflow": "ci.yml", "job": "jvm" }
       ]
     },
     "release": {
-      "command": "corepack npm run release:smoke",
+      "command": "sh scripts/verify-release-candidate.sh",
+      "execution": {
+        "executable": "sh",
+        "arguments": ["scripts/verify-release-candidate.sh"]
+      },
       "scope": "packed-npm-candidates",
-      "hosted": [{ "workflow": "release-npm.yml", "job": "verify" }]
+      "requiredTools": ["node", "npm", "java", "gradle"],
+      "evidenceSubjects": ["registry-state", "fast-gate", "packed-npm-candidates", "release-evidence"],
+      "hosted": [
+        {
+          "workflow": "release-npm.yml",
+          "job": "verify",
+          "command": "corepack npm run gate:release"
+        }
+      ]
     }
   },
   "channels": {
