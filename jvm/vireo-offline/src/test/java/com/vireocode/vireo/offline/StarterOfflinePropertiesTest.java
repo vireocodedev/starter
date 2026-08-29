@@ -34,6 +34,8 @@ class StarterOfflinePropertiesTest {
             assertThat(properties.getExcludedReplayPathPrefixes()).containsExactly("/api/auth", "/api/offline/");
             assertThat(properties.getReplayHeaders())
                     .containsExactly("Content-Type", "Idempotency-Key", "X-Offline-Temp-Id");
+            assertThat(properties.getCommandRetention()).isEqualTo(Duration.ofDays(30));
+            assertThat(properties.getMaxCommandsPerPartition()).isEqualTo(10_000);
         });
     }
 
@@ -48,6 +50,10 @@ class StarterOfflinePropertiesTest {
         contextRunner.withPropertyValues("vireo.starter.offline.replay-methods=GET")
                 .run(context -> assertThat(context).hasFailed());
         contextRunner.withPropertyValues("vireo.starter.offline.heartbeat-interval=0s")
+                .run(context -> assertThat(context).hasFailed());
+        contextRunner.withPropertyValues("vireo.starter.offline.command-retention=0s")
+                .run(context -> assertThat(context).hasFailed());
+        contextRunner.withPropertyValues("vireo.starter.offline.max-commands-per-partition=0")
                 .run(context -> assertThat(context).hasFailed());
     }
 

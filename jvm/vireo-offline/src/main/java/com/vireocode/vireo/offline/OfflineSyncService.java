@@ -58,6 +58,8 @@ public class OfflineSyncService {
     private final StarterOfflineProperties properties;
     private final Clock clock;
     private final OfflineSyncTransactionOperations transactionOperations;
+    private final OfflineDataLifecyclePolicy lifecyclePolicy;
+    private final OfflineDataLifecycleService lifecycleService;
 
     public OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
             OfflineSyncCommandRepository offlineSyncCommandRepository,
@@ -68,7 +70,7 @@ public class OfflineSyncService {
             PlatformTransactionManager transactionManager) {
         this(offlineHeartbeatService, offlineSyncCommandRepository, objectMapper, offlineActorResolver, replayHandlers,
                 queryEngineFilterSpecificationBuilder, new StarterOfflineProperties(), Clock.systemUTC(),
-                new OfflineSyncTransactionOperations(transactionManager));
+                new OfflineSyncTransactionOperations(transactionManager), null, null);
     }
 
     OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
@@ -80,6 +82,21 @@ public class OfflineSyncService {
             StarterOfflineProperties properties,
             Clock clock,
             OfflineSyncTransactionOperations transactionOperations) {
+        this(offlineHeartbeatService, offlineSyncCommandRepository, objectMapper, offlineActorResolver, replayHandlers,
+                queryEngineFilterSpecificationBuilder, properties, clock, transactionOperations, null, null);
+    }
+
+    OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
+            OfflineSyncCommandRepository offlineSyncCommandRepository,
+            ObjectMapper objectMapper,
+            OfflineActorResolver offlineActorResolver,
+            List<OfflineSyncReplayHandler> replayHandlers,
+            QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder,
+            StarterOfflineProperties properties,
+            Clock clock,
+            OfflineSyncTransactionOperations transactionOperations,
+            OfflineDataLifecyclePolicy lifecyclePolicy,
+            OfflineDataLifecycleService lifecycleService) {
         this.offlineHeartbeatService = offlineHeartbeatService;
         this.offlineSyncCommandRepository = offlineSyncCommandRepository;
         this.objectMapper = objectMapper;
@@ -89,6 +106,13 @@ public class OfflineSyncService {
         this.properties = java.util.Objects.requireNonNull(properties, "properties");
         this.clock = java.util.Objects.requireNonNull(clock, "clock");
         this.transactionOperations = java.util.Objects.requireNonNull(transactionOperations, "transactionOperations");
+        this.lifecyclePolicy = lifecyclePolicy == null
+                ? new SafeDefaultOfflineDataLifecyclePolicy(properties)
+                : lifecyclePolicy;
+        this.lifecycleService = lifecycleService == null
+                ? new OfflineDataLifecycleService(offlineSyncCommandRepository, properties, clock, event -> {
+                })
+                : lifecycleService;
     }
 
     public OfflineSyncBatchResponseDto processBatch(OfflineSyncBatchRequestDto request,
@@ -311,7 +335,9 @@ public class OfflineSyncService {
 
         OfflineSyncCommandEntity entity = newCommandEntity(command, actor, ownerKey);
         entity.setStatus(OfflineSyncCommandStatus.PENDING);
+        lifecycleService.admit(entity);
         offlineSyncCommandRepository.saveAndFlush(entity);
+        lifecycleService.redacted();
         return CommandClaim.replay(entity);
     }
 
@@ -395,13 +421,27 @@ public class OfflineSyncService {
         entity.setCommandId(command.commandId());
         entity.setHttpMethod(command.method().toUpperCase(Locale.ROOT));
         entity.setUrl(command.url());
-        entity.setRequestBody(toJson(command.body()));
-        entity.setRequestHeaders(toJson(sanitizeReplayHeaders(command.headers())));
         entity.setRequestFingerprint(requestFingerprint(command));
-        entity.setCreatedAt(Instant.now(clock));
+        Instant createdAt = Instant.now(clock);
+        entity.setCreatedAt(createdAt);
         entity.setOwnerUsername(StringUtils.hasText(actor.username()) ? actor.username().trim() : actor.id().toString());
         entity.setOwnerId(actor.id());
         entity.setOwnerKey(ownerKey);
+        OfflineDataLifecycleDecision lifecycle = java.util.Objects.requireNonNull(
+                lifecyclePolicy.classify(new OfflineDataLifecycleContext(
+                        createdAt, actor, ownerKey, sanitizeCommand(command),
+                        toJson(command.body()), toJson(sanitizeReplayHeaders(command.headers())))),
+                "OfflineDataLifecyclePolicy must return a decision");
+        if (lifecycle.retainUntil().isBefore(createdAt)) {
+            throw new OfflineDataLifecycleException("Offline retainUntil must not precede createdAt.");
+        }
+        entity.setLifecyclePartition(lifecycle.partitionKey());
+        entity.setRetainUntil(lifecycle.retainUntil());
+        entity.setLegalHold(lifecycle.legalHold());
+        entity.setRequestBody(lifecycle.requestBody());
+        entity.setRequestHeaders(lifecycle.requestHeaders());
+        entity.setPayloadRedactedAt(
+                lifecycle.requestBody() == null && lifecycle.requestHeaders() == null ? createdAt : null);
         return entity;
     }
 

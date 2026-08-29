@@ -50,6 +50,13 @@ public class StarterOfflineProperties {
     private int maxHydrationEntities = 100;
 
     @NotNull
+    private Duration commandRetention = Duration.ofDays(30);
+
+    @Min(1)
+    @Max(1_000_000)
+    private int maxCommandsPerPartition = 10_000;
+
+    @NotNull
     private Duration heartbeatInterval = Duration.ofSeconds(1);
 
     @NotBlank
@@ -137,6 +144,22 @@ public class StarterOfflineProperties {
         this.maxHydrationEntities = maxHydrationEntities;
     }
 
+    public Duration getCommandRetention() {
+        return commandRetention;
+    }
+
+    public void setCommandRetention(Duration commandRetention) {
+        this.commandRetention = commandRetention;
+    }
+
+    public int getMaxCommandsPerPartition() {
+        return maxCommandsPerPartition;
+    }
+
+    public void setMaxCommandsPerPartition(int maxCommandsPerPartition) {
+        this.maxCommandsPerPartition = maxCommandsPerPartition;
+    }
+
     public Duration getHeartbeatInterval() {
         return heartbeatInterval;
     }
@@ -221,5 +244,10 @@ public class StarterOfflineProperties {
     @AssertTrue(message = "heartbeat interval must be positive")
     public boolean isHeartbeatIntervalValid() {
         return heartbeatInterval != null && !heartbeatInterval.isZero() && !heartbeatInterval.isNegative();
+    }
+
+    @AssertTrue(message = "command retention must be positive")
+    public boolean isCommandRetentionValid() {
+        return commandRetention != null && !commandRetention.isZero() && !commandRetention.isNegative();
     }
 }

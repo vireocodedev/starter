@@ -11,6 +11,64 @@ public final record com.vireocode.vireo.offline.OfflineActor
 public abstract interface com.vireocode.vireo.offline.OfflineActorResolver
     public abstract java.util.Optional<com.vireocode.vireo.offline.OfflineActor> com.vireocode.vireo.offline.OfflineActorResolver.resolveCurrentActor()
 
+public final record com.vireocode.vireo.offline.OfflineDataLifecycleContext
+    extends java.lang.Record
+    public com.vireocode.vireo.offline.OfflineDataLifecycleContext(java.time.Instant,com.vireocode.vireo.offline.OfflineActor,java.lang.String,com.vireocode.vireo.offline.OfflineSyncCommandDto,java.lang.String,java.lang.String)
+    public com.vireocode.vireo.offline.OfflineActor com.vireocode.vireo.offline.OfflineDataLifecycleContext.actor()
+    public com.vireocode.vireo.offline.OfflineSyncCommandDto com.vireocode.vireo.offline.OfflineDataLifecycleContext.command()
+    public final boolean com.vireocode.vireo.offline.OfflineDataLifecycleContext.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineDataLifecycleContext.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleContext.toString()
+    public java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleContext.ownerKey()
+    public java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleContext.serializedBody()
+    public java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleContext.serializedHeaders()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineDataLifecycleContext.createdAt()
+
+public final record com.vireocode.vireo.offline.OfflineDataLifecycleDecision
+    extends java.lang.Record
+    public com.vireocode.vireo.offline.OfflineDataLifecycleDecision(java.lang.String,java.time.Instant,boolean,java.lang.String,java.lang.String)
+    public boolean com.vireocode.vireo.offline.OfflineDataLifecycleDecision.legalHold()
+    public final boolean com.vireocode.vireo.offline.OfflineDataLifecycleDecision.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineDataLifecycleDecision.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleDecision.toString()
+    public java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleDecision.partitionKey()
+    public java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleDecision.requestBody()
+    public java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleDecision.requestHeaders()
+    public java.time.Instant com.vireocode.vireo.offline.OfflineDataLifecycleDecision.retainUntil()
+
+public final record com.vireocode.vireo.offline.OfflineDataLifecycleEvent
+    extends java.lang.Record
+    public com.vireocode.vireo.offline.OfflineDataLifecycleEvent(com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation,long,long)
+    public com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent.operation()
+    public final boolean com.vireocode.vireo.offline.OfflineDataLifecycleEvent.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineDataLifecycleEvent.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineDataLifecycleEvent.toString()
+    public long com.vireocode.vireo.offline.OfflineDataLifecycleEvent.affectedRecords()
+    public long com.vireocode.vireo.offline.OfflineDataLifecycleEvent.heldRecords()
+
+public static final enum com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation
+    extends java.lang.Enum<com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation>
+    public static final com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.CLASSIFIED
+    public static final com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.ERASED
+    public static final com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.HOLD_PLACED
+    public static final com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.HOLD_RELEASED
+    public static final com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.PURGED
+    public static final com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.QUOTA_REJECTED
+    public static com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.valueOf(java.lang.String)
+    public static com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation[] com.vireocode.vireo.offline.OfflineDataLifecycleEvent$Operation.values()
+
+public class com.vireocode.vireo.offline.OfflineDataLifecycleException
+    extends java.lang.RuntimeException
+    public com.vireocode.vireo.offline.OfflineDataLifecycleException(java.lang.String)
+
+public abstract interface com.vireocode.vireo.offline.OfflineDataLifecyclePolicy
+    public abstract com.vireocode.vireo.offline.OfflineDataLifecycleDecision com.vireocode.vireo.offline.OfflineDataLifecyclePolicy.classify(com.vireocode.vireo.offline.OfflineDataLifecycleContext)
+
+public class com.vireocode.vireo.offline.OfflineDataLifecycleService
+    public boolean com.vireocode.vireo.offline.OfflineDataLifecycleService.setLegalHold(java.lang.String,java.util.UUID,boolean)
+    public int com.vireocode.vireo.offline.OfflineDataLifecycleService.eraseOwner(java.lang.String,java.lang.String)
+    public int com.vireocode.vireo.offline.OfflineDataLifecycleService.purgeExpired(java.lang.String)
+
 public class com.vireocode.vireo.offline.OfflineEntityVersionEntity
     public com.vireocode.vireo.offline.OfflineEntityVersionEntity()
     public java.lang.String com.vireocode.vireo.offline.OfflineEntityVersionEntity.getEntityKey()
@@ -187,7 +245,14 @@ public final record com.vireocode.vireo.offline.OfflineSyncCommandListItemDto
 public abstract interface com.vireocode.vireo.offline.OfflineSyncCommandRepository
     implements org.springframework.data.jpa.repository.JpaRepository<com.vireocode.vireo.offline.OfflineSyncCommandEntity, java.util.UUID>
     implements org.springframework.data.jpa.repository.JpaSpecificationExecutor<com.vireocode.vireo.offline.OfflineSyncCommandEntity>
+    public abstract int com.vireocode.vireo.offline.OfflineSyncCommandRepository.eraseOwner(java.lang.String,java.lang.String)
+    public abstract int com.vireocode.vireo.offline.OfflineSyncCommandRepository.purgeExpired(java.lang.String,java.time.Instant)
+    public abstract int com.vireocode.vireo.offline.OfflineSyncCommandRepository.setLegalHold(java.lang.String,java.util.UUID,boolean)
     public abstract java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandEntity> com.vireocode.vireo.offline.OfflineSyncCommandRepository.findAllByCommandIdIn(java.util.Collection<java.util.UUID>)
+    public abstract java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandEntity> com.vireocode.vireo.offline.OfflineSyncCommandRepository.findByLifecyclePartitionAndLegalHoldFalseOrderByCreatedAtAscIdAsc(java.lang.String,org.springframework.data.domain.Pageable)
+    public abstract long com.vireocode.vireo.offline.OfflineSyncCommandRepository.countByLifecyclePartition(java.lang.String)
+    public abstract long com.vireocode.vireo.offline.OfflineSyncCommandRepository.countByLifecyclePartitionAndLegalHoldTrue(java.lang.String)
+    public abstract long com.vireocode.vireo.offline.OfflineSyncCommandRepository.countByLifecyclePartitionAndOwnerKeyAndLegalHoldTrue(java.lang.String,java.lang.String)
 
 public final record com.vireocode.vireo.offline.OfflineSyncCommandResultDto
     extends java.lang.Record
@@ -235,6 +300,11 @@ public class com.vireocode.vireo.offline.OfflineSyncService
     public com.vireocode.vireo.offline.OfflineSyncBatchResponseDto com.vireocode.vireo.offline.OfflineSyncService.processBatch(com.vireocode.vireo.offline.OfflineSyncBatchRequestDto,jakarta.servlet.http.HttpServletRequest)
     public org.springframework.data.domain.Page<com.vireocode.vireo.offline.OfflineSyncCommandListItemDto> com.vireocode.vireo.offline.OfflineSyncService.searchCommands(com.vireocode.vireo.web.SearchablePageable,com.vireocode.vireo.queryengine.QueryFilterRequest)
 
+public final class com.vireocode.vireo.offline.SafeDefaultOfflineDataLifecyclePolicy
+    implements com.vireocode.vireo.offline.OfflineDataLifecyclePolicy
+    public com.vireocode.vireo.offline.SafeDefaultOfflineDataLifecyclePolicy(com.vireocode.vireo.offline.StarterOfflineProperties)
+    public com.vireocode.vireo.offline.OfflineDataLifecycleDecision com.vireocode.vireo.offline.SafeDefaultOfflineDataLifecyclePolicy.classify(com.vireocode.vireo.offline.OfflineDataLifecycleContext)
+
 public class com.vireocode.vireo.offline.StarterOfflineActorResolver
     implements com.vireocode.vireo.offline.OfflineActorResolver
     public com.vireocode.vireo.offline.StarterOfflineActorResolver(java.lang.String)
@@ -245,6 +315,7 @@ public class com.vireocode.vireo.offline.StarterOfflineAutoConfiguration
 
 public class com.vireocode.vireo.offline.StarterOfflineProperties
     public com.vireocode.vireo.offline.StarterOfflineProperties()
+    public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isCommandRetentionValid()
     public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isEndpointPathsDistinct()
     public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isHeartbeatEndpointEnabled()
     public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isHeartbeatIntervalValid()
@@ -253,6 +324,7 @@ public class com.vireocode.vireo.offline.StarterOfflineProperties
     public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isReplayPathPolicyValid()
     public boolean com.vireocode.vireo.offline.StarterOfflineProperties.isSyncEndpointEnabled()
     public int com.vireocode.vireo.offline.StarterOfflineProperties.getMaxBatchSize()
+    public int com.vireocode.vireo.offline.StarterOfflineProperties.getMaxCommandsPerPartition()
     public int com.vireocode.vireo.offline.StarterOfflineProperties.getMaxHydrationEntities()
     public int com.vireocode.vireo.offline.StarterOfflineProperties.getMaxReplayAttempts()
     public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getHeartbeatEndpointPath()
@@ -260,10 +332,12 @@ public class com.vireocode.vireo.offline.StarterOfflineProperties
     public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getPrivilegedRole()
     public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getReplayApiPrefix()
     public java.lang.String com.vireocode.vireo.offline.StarterOfflineProperties.getSyncEndpointPath()
+    public java.time.Duration com.vireocode.vireo.offline.StarterOfflineProperties.getCommandRetention()
     public java.time.Duration com.vireocode.vireo.offline.StarterOfflineProperties.getHeartbeatInterval()
     public java.util.List<java.lang.String> com.vireocode.vireo.offline.StarterOfflineProperties.getExcludedReplayPathPrefixes()
     public java.util.List<java.lang.String> com.vireocode.vireo.offline.StarterOfflineProperties.getReplayHeaders()
     public java.util.List<java.lang.String> com.vireocode.vireo.offline.StarterOfflineProperties.getReplayMethods()
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setCommandRetention(java.time.Duration)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setExcludedReplayPathPrefixes(java.util.List<java.lang.String>)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setHeartbeatEndpointEnabled(boolean)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setHeartbeatEndpointPath(java.lang.String)
@@ -271,6 +345,7 @@ public class com.vireocode.vireo.offline.StarterOfflineProperties
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setHydrationEndpointEnabled(boolean)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setHydrationEndpointPath(java.lang.String)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setMaxBatchSize(int)
+    public void com.vireocode.vireo.offline.StarterOfflineProperties.setMaxCommandsPerPartition(int)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setMaxHydrationEntities(int)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setMaxReplayAttempts(int)
     public void com.vireocode.vireo.offline.StarterOfflineProperties.setPrivilegedRole(java.lang.String)

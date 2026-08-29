@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.Clock;
@@ -88,13 +89,27 @@ public class StarterOfflineAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    OfflineDataLifecyclePolicy starterOfflineDataLifecyclePolicy(StarterOfflineProperties properties) {
+        return new SafeDefaultOfflineDataLifecyclePolicy(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    OfflineDataLifecycleService starterOfflineDataLifecycleService(OfflineSyncCommandRepository repository,
+            StarterOfflineProperties properties, Clock clock, ApplicationEventPublisher events) {
+        return new OfflineDataLifecycleService(repository, properties, clock, events);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     OfflineSyncService starterOfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
             OfflineSyncCommandRepository repository, ObjectMapper objectMapper, OfflineActorResolver actorResolver,
             List<OfflineSyncReplayHandler> replayHandlers,
             QueryEngineFilterSpecificationBuilder filterSpecificationBuilder, StarterOfflineProperties properties,
-            Clock clock, OfflineSyncTransactionOperations transactionOperations) {
+            Clock clock, OfflineSyncTransactionOperations transactionOperations,
+            OfflineDataLifecyclePolicy lifecyclePolicy, OfflineDataLifecycleService lifecycleService) {
         return new OfflineSyncService(offlineHeartbeatService, repository, objectMapper, actorResolver, replayHandlers,
-                filterSpecificationBuilder, properties, clock, transactionOperations);
+                filterSpecificationBuilder, properties, clock, transactionOperations, lifecyclePolicy, lifecycleService);
     }
 
     @Bean

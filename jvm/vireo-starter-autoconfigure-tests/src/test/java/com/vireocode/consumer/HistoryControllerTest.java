@@ -211,9 +211,11 @@ class HistoryControllerTest {
             String snapshotPrevious, String snapshotCurrent) {
         UUID id = UUID.randomUUID();
         jdbcTemplate.update("INSERT INTO history"
-                        + " (id, occurred_at, actor_label, entity, entity_id, snapshot_previous, snapshot_current)"
-                        + " VALUES (?, ?, ?, ?, ?, ?, ?)",
-                id, occurredAt, "demo", entity.name(), entityId, snapshotPrevious, snapshotCurrent);
+                        + " (id, occurred_at, actor_label, entity, entity_id, snapshot_previous, snapshot_current,"
+                        + " lifecycle_partition, retain_until, legal_hold)"
+                        + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)",
+                id, occurredAt, "demo", entity.name(), entityId, snapshotPrevious, snapshotCurrent,
+                "actor:demo", occurredAt.plusSeconds(86_400));
         return id;
     }
 }

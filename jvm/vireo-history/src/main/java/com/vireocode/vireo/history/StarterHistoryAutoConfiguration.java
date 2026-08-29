@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.vireo.spi.HistoryEventsRecorder;
@@ -34,8 +35,22 @@ public class StarterHistoryAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(HistoryEventsRecorder.class)
     HistoryRecorder starterHistoryRecorder(HistoryRepository repository, ObjectMapper objectMapper,
-            HistoryActorResolver actorResolver, Clock clock) {
-        return new HistoryRecorder(repository, objectMapper, actorResolver, clock);
+            HistoryActorResolver actorResolver, Clock clock, HistoryDataLifecyclePolicy lifecyclePolicy,
+            HistoryDataLifecycleService lifecycleService) {
+        return new HistoryRecorder(repository, objectMapper, actorResolver, clock, lifecyclePolicy, lifecycleService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    HistoryDataLifecyclePolicy starterHistoryDataLifecyclePolicy(StarterHistoryProperties properties) {
+        return new SafeDefaultHistoryDataLifecyclePolicy(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    HistoryDataLifecycleService starterHistoryDataLifecycleService(HistoryRepository repository,
+            StarterHistoryProperties properties, Clock clock, ApplicationEventPublisher events) {
+        return new HistoryDataLifecycleService(repository, properties, clock, events);
     }
 
     @Bean

@@ -54,4 +54,13 @@ class HistoryEntry {
 
     @Column(name = "snapshot_current", columnDefinition = "text")
     private String snapshotCurrent;
+
+    @Column(name = "lifecycle_partition", nullable = false, length = 140)
+    private String lifecyclePartition;
+
+    @Column(name = "retain_until", nullable = false)
+    private Instant retainUntil;
+
+    @Column(name = "legal_hold", nullable = false)
+    private boolean legalHold;
 }

@@ -2,6 +2,8 @@ package com.vireocode.vireo.history;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -20,7 +22,17 @@ class StarterHistoryPropertiesTest {
             assertThat(properties.getEndpointPath()).isEqualTo("/api/history");
             assertThat(properties.getDefaultLimit()).isEqualTo(200);
             assertThat(properties.getMaxLimit()).isEqualTo(500);
+            assertThat(properties.getRetention()).isEqualTo(Duration.ofDays(30));
+            assertThat(properties.getMaxRecordsPerPartition()).isEqualTo(10_000);
         });
+    }
+
+    @Test
+    void lifecycleBoundsFailAtStartup() {
+        contextRunner.withPropertyValues("vireo.starter.history.retention=0s")
+                .run(context -> assertThat(context).hasFailed());
+        contextRunner.withPropertyValues("vireo.starter.history.max-records-per-partition=0")
+                .run(context -> assertThat(context).hasFailed());
     }
 
     @Test

@@ -64,10 +64,11 @@ class ConsumerMigrationTest {
     @Test
     void eachModuleAppliedOnlyItsOwnMigrations() {
         assertThat(appliedIn("auth")).containsExactly("auth baseline");
-        assertThat(appliedIn("history")).containsExactly("history baseline", "neutral actor contract");
+        assertThat(appliedIn("history")).containsExactly(
+                "history baseline", "neutral actor contract", "data lifecycle");
         assertThat(appliedIn("queryengine")).containsExactly("saved filter baseline");
         assertThat(appliedIn("offline")).containsExactly(
-                "offline baseline", "decouple sync actor", "bind commands to actor and payload");
+                "offline baseline", "decouple sync actor", "bind commands to actor and payload", "data lifecycle");
     }
 
     private List<String> appliedIn(String module) {

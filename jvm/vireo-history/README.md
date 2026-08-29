@@ -10,6 +10,10 @@ History owns snapshot serialization, neutral actor attribution, persistence, bou
 - `HistoryActorResolver`: maps the application's current security context to an optional neutral actor.
 - `HistoryReadAuthorizer`: application-owned per-entity read policy.
 - `StarterHistoryProperties`: endpoint and result-limit configuration.
+- `HistoryDataLifecyclePolicy`: application classification, tenant partition,
+  redaction, retention, and legal-hold decisions made before persistence.
+- `HistoryDataLifecycleService`: partition-scoped expiry purge and actor erasure
+  that preserve held rows and enforce a hard quota.
 - `HistoryEventsRecorder`: the lower-level sink declared by `vireo-core`; replace it to store history elsewhere.
 
 Persistence and the default controller/recorder are implementation details.
@@ -25,6 +29,18 @@ Recording participates in the owning service transaction. Missing identity, an e
 System activity has a `null` actor. The default resolver attributes authenticated activity by principal name and leaves the optional actor ID empty.
 
 The read endpoint fails closed. The module does not install a permissive `HistoryReadAuthorizer`; even when `vireo.starter.history.endpoint-enabled=true`, no controller is published until the application supplies a bean named `historyReadAuthorizer`. That policy must decide access for the authenticated subject and the requested entity/entity ID, including owner, tenant, deletion, and field-redaction rules relevant to the application.
+
+History persistence also fails closed. The default lifecycle policy keeps event
+shape but replaces every snapshot with `{}`, partitions rows by neutral actor,
+expires them after 30 days, and caps each partition at 10,000 rows. Configure
+`vireo.starter.history.retention` and `max-records-per-partition`, or provide a
+`HistoryDataLifecyclePolicy` that adds the application's tenant key and approved
+field redaction. Legal holds skip purge/erasure; a hold-saturated quota rejects
+new writes rather than deleting held records or growing without bound.
+
+The V3 migration redacts pre-policy snapshots and marks them immediately eligible
+for scoped purge. See [`docs/DATA_LIFECYCLE.md`](../../docs/DATA_LIFECYCLE.md) for
+erasure, scheduling, and observability responsibilities.
 
 ## Documentation
 

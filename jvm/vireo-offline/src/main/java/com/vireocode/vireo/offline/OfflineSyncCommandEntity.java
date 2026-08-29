@@ -89,4 +89,24 @@ public class OfflineSyncCommandEntity {
 
     @Column(name = "processed_at")
     private Instant processedAt;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    @Column(name = "lifecycle_partition", nullable = false, length = 140)
+    private String lifecyclePartition;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    @Column(name = "retain_until", nullable = false)
+    private Instant retainUntil;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    @Column(name = "legal_hold", nullable = false)
+    private boolean legalHold;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    @Column(name = "payload_redacted_at")
+    private Instant payloadRedactedAt;
 }

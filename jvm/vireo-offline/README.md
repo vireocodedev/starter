@@ -35,6 +35,15 @@ The default policy accepts only `POST`, `PUT`, `PATCH`, and `DELETE` beneath `/a
 
 Request bodies and headers are omitted from `OfflineSyncCommandDto.toString()`. Downstream exception bodies are not returned to clients. Duplicate IDs inside one batch and oversized batches fail before replay.
 
+They are also omitted from persistence by the safe-default
+`OfflineDataLifecyclePolicy`; idempotency uses the SHA-256 request fingerprint,
+not a stored payload. New commands expire after 30 days and each owner partition
+is capped at 10,000 rows. Configure `command-retention` and
+`max-commands-per-partition`, or provide an application policy that returns an
+opaque tenant/owner partition, approved redacted payload, expiry, and legal-hold
+decision. Held rows survive purge and erasure, but cannot make growth unbounded:
+admission fails when holds exhaust quota.
+
 Command diagnostics reject pages above 10,000, page sizes above 200, and the former `rowsPerPage=-1` all-rows sentinel before repository access.
 
 Custom handlers receive an immutable, header-sanitized command DTO and return an outcome. Offline—not the handler—owns persistence, retry state, and timestamps. A valid command with no accepting application handler is permanently rejected with status 422; there is no HTTP fallback.
@@ -51,6 +60,8 @@ vireo.starter.offline.hydration-endpoint-path=/api/offline/hydration
 vireo.starter.offline.max-batch-size=100
 vireo.starter.offline.max-replay-attempts=5
 vireo.starter.offline.max-hydration-entities=100
+vireo.starter.offline.command-retention=30d
+vireo.starter.offline.max-commands-per-partition=10000
 vireo.starter.offline.heartbeat-interval=1s
 vireo.starter.offline.replay-api-prefix=/api/
 vireo.starter.offline.replay-methods=POST,PUT,PATCH,DELETE
@@ -71,7 +82,7 @@ Entity revision bumps use row locking and bounded insert-race recovery. Change e
 
 Each SSE connection is bound to the audience resolved when it opens. Each transaction batch is bound to the audience resolved when its first event is published and is delivered only to matching connections. Resolving a different audience later in the same transaction fails instead of mixing data. Applications choose whether the opaque value represents one subject, tenant, organization, or another isolation boundary; there is no global payload audience by default.
 
-The module owns `sync_command` and `offline_entity_version` through `flyway_schema_history_vireo_offline`. V2 removes the legacy Auth foreign key so custom actor IDs remain valid audit data.
+The module owns `sync_command` and `offline_entity_version` through `flyway_schema_history_vireo_offline`. V2 removes the legacy Auth foreign key so custom actor IDs remain valid audit data. V4 adds partition/expiry/hold metadata, redacts legacy bodies and headers, and marks those rows eligible for scoped purge. `OfflineDataLifecycleService` provides partition-plus-owner erasure and publishes payload-free count events. See [`docs/DATA_LIFECYCLE.md`](../../docs/DATA_LIFECYCLE.md).
 
 The matching browser implementation lives in `@vireocodedev/sqlite`: it owns the persistent browser queue, replay scheduling, hydration state, and network policy. JSON is the boundary between the two runtimes.
 

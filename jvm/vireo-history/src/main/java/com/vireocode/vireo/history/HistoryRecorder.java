@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.vireo.base.HistoryEntityType;
 import com.vireocode.vireo.spi.HistoryEventsRecorder;
@@ -19,13 +20,18 @@ class HistoryRecorder implements HistoryEventsRecorder {
     private final ObjectMapper objectMapper;
     private final HistoryActorResolver actorResolver;
     private final Clock clock;
+    private final HistoryDataLifecyclePolicy lifecyclePolicy;
+    private final HistoryDataLifecycleService lifecycleService;
 
     HistoryRecorder(HistoryRepository repository, ObjectMapper objectMapper,
-            HistoryActorResolver actorResolver, Clock clock) {
+            HistoryActorResolver actorResolver, Clock clock,
+            HistoryDataLifecyclePolicy lifecyclePolicy, HistoryDataLifecycleService lifecycleService) {
         this.repository = repository;
         this.objectMapper = objectMapper;
         this.actorResolver = actorResolver;
         this.clock = clock;
+        this.lifecyclePolicy = lifecyclePolicy;
+        this.lifecycleService = lifecycleService;
     }
 
     public void recordCreate(HistoryEntityType entity, Object entityId, Object currentDto) {
@@ -54,11 +60,34 @@ class HistoryRecorder implements HistoryEventsRecorder {
         historyEntry.setOccurredAt(Instant.now(clock));
         historyEntry.setEntity(entityName);
         historyEntry.setEntityId(entityIdValue);
-        historyEntry.setSnapshotPrevious(toJson(previousDto));
-        historyEntry.setSnapshotCurrent(toJson(currentDto));
         applyActor(historyEntry);
 
-        repository.save(historyEntry);
+        JsonNode previous = toTree(previousDto);
+        JsonNode current = toTree(currentDto);
+        HistoryActor actor = historyEntry.getActorLabel() == null
+                ? null
+                : new HistoryActor(historyEntry.getActorId(), historyEntry.getActorLabel());
+        HistoryDataLifecycleDecision decision = java.util.Objects.requireNonNull(
+                lifecyclePolicy.classify(new HistoryDataLifecycleContext(
+                        historyEntry.getOccurredAt(), actor, entityName, entityIdValue, previous, current)),
+                "HistoryDataLifecyclePolicy must return a decision");
+        if (decision.retainUntil().isBefore(historyEntry.getOccurredAt())) {
+            throw new HistoryDataLifecycleException("History retainUntil must not precede occurredAt.");
+        }
+        if (previousDto == null && decision.snapshotPrevious() != null
+                || previousDto != null && decision.snapshotPrevious() == null
+                || currentDto == null && decision.snapshotCurrent() != null
+                || currentDto != null && decision.snapshotCurrent() == null) {
+            throw new HistoryDataLifecycleException(
+                    "History lifecycle redaction must preserve create/update/delete snapshot presence.");
+        }
+        historyEntry.setLifecyclePartition(decision.partitionKey());
+        historyEntry.setRetainUntil(decision.retainUntil());
+        historyEntry.setLegalHold(decision.legalHold());
+        historyEntry.setSnapshotPrevious(toJson(decision.snapshotPrevious()));
+        historyEntry.setSnapshotCurrent(toJson(decision.snapshotCurrent()));
+
+        lifecycleService.store(historyEntry);
     }
 
     private void applyActor(HistoryEntry historyEntry) {
@@ -68,15 +97,26 @@ class HistoryRecorder implements HistoryEventsRecorder {
         });
     }
 
-    private String toJson(Object dto) {
+    private JsonNode toTree(Object dto) {
         if (dto == null) {
             return null;
         }
         try {
-            return objectMapper.writeValueAsString(dto);
+            return objectMapper.readTree(objectMapper.writeValueAsString(dto));
         } catch (JsonProcessingException exception) {
             throw new HistoryRecordingException(
                     "Failed to serialize history snapshot of type " + dto.getClass().getName(), exception);
+        }
+    }
+
+    private String toJson(JsonNode snapshot) {
+        if (snapshot == null) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(snapshot);
+        } catch (JsonProcessingException exception) {
+            throw new HistoryRecordingException("Failed to serialize redacted history snapshot", exception);
         }
     }
 
