@@ -13,16 +13,24 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.vireocode.vireo.config.StarterCoreProperties;
 
@@ -102,6 +110,41 @@ class GlobalExceptionHandlerTest {
         assertEquals(403, denied.status());
         assertEquals("Forbidden", denied.message());
         assertNull(denied.errors());
+    }
+
+    @Test
+    void routingAndInputExceptions_PreserveSafeClientStatuses() {
+        GlobalExceptionHandler handler = handler(false);
+
+        assertEquals(404, handler.handleNoResourceFound(
+                new NoResourceFoundException(HttpMethod.GET, "/missing", "/missing")).status());
+        assertEquals(405, handler.handleMethodNotSupported(
+                new HttpRequestMethodNotSupportedException("TRACE", List.of("GET"))).status());
+        assertEquals(415, handler.handleMediaTypeNotSupported(
+                new HttpMediaTypeNotSupportedException(MediaType.TEXT_PLAIN, List.of(MediaType.APPLICATION_JSON)))
+                .status());
+        ApiError missingParameter = handler.handleMissingServletRequestParameter(
+                new MissingServletRequestParameterException("entity", "String"));
+        assertEquals(400, missingParameter.status());
+        assertEquals("is required", missingParameter.errors().get("entity"));
+        ApiError invalidArgument = handler.handleIllegalArgument(new IllegalArgumentException("sensitive detail"));
+        assertEquals(400, invalidArgument.status());
+        assertEquals("Request contains an invalid value", invalidArgument.errors().get("request"));
+    }
+
+    @Test
+    void persistenceFailures_MapToConflictWithoutLeakingDatabaseDetails() {
+        ApiError integrity = handler(false)
+                .handlePersistenceConflict(new DataIntegrityViolationException("secret constraint"));
+        ApiError optimistic = handler(false)
+                .handlePersistenceConflict(new ObjectOptimisticLockingFailureException("Widget", 7L));
+
+        assertEquals(409, integrity.status());
+        assertEquals("Conflict", integrity.message());
+        assertNull(integrity.errors());
+        assertEquals(409, optimistic.status());
+        assertEquals("Conflict", optimistic.message());
+        assertNull(optimistic.errors());
     }
 
     @Test

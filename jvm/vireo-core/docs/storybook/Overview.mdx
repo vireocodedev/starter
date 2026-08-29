@@ -49,6 +49,8 @@ vireo.starter.core.system-auditor=system
 
 Unexpected exceptions are logged server-side. Their class and message remain out of HTTP responses unless the application explicitly opts in for a trusted development environment.
 
+Known routing, input, and persistence failures preserve safe client semantics: missing resources are 404, unsupported methods/media types are 405/415, invalid arguments are 400, and integrity or optimistic-lock conflicts are 409.
+
 ## Contract behavior
 
 - Soft-deleted entities are hidden consistently from list, get, update, and delete operations.
