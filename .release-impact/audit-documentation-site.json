@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "release",
+  "bump": "deploy",
+  "summary": "Deploy federated API search, exact flagship proof, and updated public release contracts."
+}
