@@ -100,6 +100,38 @@ test("rejects reserved, Unicode, relationship, compound-id, and offline shapes e
   }
 });
 
+test("rejects nested field values that disagree with their declared type", () => {
+  const invalid = schema();
+  invalid.fields[0] = {
+    ...invalid.fields[0],
+    default: false,
+    constraints: { ...invalid.fields[0].constraints, unexpected: 1 },
+    query: { ...invalid.fields[0].query, searchable: "yes", unexpected: true },
+    ui: { control: "bogus", list: "yes", label: false, unexpected: true },
+  };
+  invalid.fields[1] = {
+    ...invalid.fields[1],
+    constraints: { ...invalid.fields[1].constraints, pattern: "^[0-9]+$" },
+  };
+
+  assert.throws(
+    () => parseEntitySchema(invalid),
+    error => {
+      assert.ok(error instanceof EntitySchemaError);
+      assert.match(error.message, /fields\[0\]\.default must be a string/u);
+      assert.match(error.message, /fields\[0\]\.constraints\.unexpected is not supported/u);
+      assert.match(error.message, /fields\[0\]\.query\.searchable must be a boolean/u);
+      assert.match(error.message, /fields\[0\]\.query\.unexpected is not supported/u);
+      assert.match(error.message, /fields\[0\]\.ui\.control is incompatible/u);
+      assert.match(error.message, /fields\[0\]\.ui\.list must be a boolean/u);
+      assert.match(error.message, /fields\[0\]\.ui\.label must be a string/u);
+      assert.match(error.message, /fields\[0\]\.ui\.unexpected is not supported/u);
+      assert.match(error.message, /fields\[1\]\.constraints\.pattern is valid only/u);
+      return true;
+    },
+  );
+});
+
 test("dry run is non-writing and output mode renders a deterministic review tree", async () => {
   const { root, schemaPath } = await projectFixture();
   const dry = await generateEntity({ projectDirectory: root, schemaPath, dryRun: true });
@@ -134,10 +166,7 @@ test("generated pages import only controls used by the schema", async () => {
   );
 
   await generateEntity({ projectDirectory: root, schemaPath });
-  const page = await readFile(
-    join(root, "frontend/src/generated/api-clients/pages/AppPageApiClients.tsx"),
-    "utf8",
-  );
+  const page = await readFile(join(root, "frontend/src/generated/api-clients/pages/AppPageApiClients.tsx"), "utf8");
   assert.doesNotMatch(page, /\bCheckbox\b/u);
   assert.doesNotMatch(page, /\bFormControlLabel\b/u);
   assert.doesNotMatch(page, /\bMenuItem\b/u);

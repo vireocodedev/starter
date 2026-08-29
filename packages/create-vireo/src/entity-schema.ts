@@ -96,6 +96,20 @@ const FIELD_TYPES = new Set<EntityFieldType>([
   "timestamp",
   "uuid",
 ]);
+const STRING_LENGTH_TYPES = new Set<EntityFieldType>(["string", "text"]);
+const NUMERIC_TYPES = new Set<EntityFieldType>(["decimal", "integer", "long"]);
+const UI_CONTROLS_BY_TYPE: Record<EntityFieldType, ReadonlySet<string>> = {
+  boolean: new Set(["checkbox"]),
+  date: new Set(["date", "text"]),
+  decimal: new Set(["number", "text"]),
+  enum: new Set(["select"]),
+  integer: new Set(["number", "text"]),
+  long: new Set(["number", "text"]),
+  string: new Set(["text", "textarea"]),
+  text: new Set(["text", "textarea"]),
+  timestamp: new Set(["text"]),
+  uuid: new Set(["text"]),
+};
 const RESERVED_TYPESCRIPT_NAMES = new Set([
   "await",
   "break",
@@ -270,19 +284,53 @@ function validateField(value: unknown, index: number, problems: string[]): Entit
     problems.push(`${path}.required must be a boolean`);
   if (value.unique !== undefined && typeof value.unique !== "boolean")
     problems.push(`${path}.unique must be a boolean`);
+  if (value.default !== undefined && FIELD_TYPES.has(type)) {
+    if (type === "boolean" && typeof value.default !== "boolean")
+      problems.push(`${path}.default must be a boolean for a boolean field`);
+    else if (NUMERIC_TYPES.has(type) && (typeof value.default !== "number" || !Number.isFinite(value.default)))
+      problems.push(`${path}.default must be a finite number for a ${type} field`);
+    else if (!NUMERIC_TYPES.has(type) && type !== "boolean" && typeof value.default !== "string")
+      problems.push(`${path}.default must be a string for a ${type} field`);
+    if ((type === "integer" || type === "long") && !Number.isSafeInteger(value.default))
+      problems.push(`${path}.default must be a safe integer for a ${type} field`);
+    if (
+      type === "enum" &&
+      typeof value.default === "string" &&
+      Array.isArray(value.enumValues) &&
+      !value.enumValues.includes(value.default)
+    )
+      problems.push(`${path}.default must be one of the declared enumValues`);
+    if (type === "date" && typeof value.default === "string" && !/^\d{4}-\d{2}-\d{2}$/u.test(value.default))
+      problems.push(`${path}.default must use YYYY-MM-DD for a date field`);
+    if (
+      type === "uuid" &&
+      typeof value.default === "string" &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value.default)
+    )
+      problems.push(`${path}.default must be a canonical UUID for a uuid field`);
+  }
   if (value.constraints !== undefined && !isObject(value.constraints))
     problems.push(`${path}.constraints must be an object`);
   const constraints = isObject(value.constraints) ? value.constraints : undefined;
   if (constraints) {
+    rejectUnknown(constraints, ["min", "max", "pattern"], `${path}.constraints`, problems);
     for (const key of ["min", "max"] as const) {
       const constraint = constraints[key];
       if (constraint !== undefined && (typeof constraint !== "number" || !Number.isFinite(constraint)))
         problems.push(`${path}.constraints.${key} must be a finite number`);
+      else if (constraint !== undefined && STRING_LENGTH_TYPES.has(type) && !Number.isSafeInteger(constraint))
+        problems.push(`${path}.constraints.${key} must be an integer length for a ${type} field`);
+      else if (constraint !== undefined && STRING_LENGTH_TYPES.has(type) && constraint < 0)
+        problems.push(`${path}.constraints.${key} cannot be negative for a ${type} field`);
+      else if (constraint !== undefined && !STRING_LENGTH_TYPES.has(type) && !NUMERIC_TYPES.has(type))
+        problems.push(`${path}.constraints.${key} is valid only for string, text, or numeric fields`);
     }
     if (typeof constraints.min === "number" && typeof constraints.max === "number" && constraints.min > constraints.max)
       problems.push(`${path}.constraints.min cannot exceed max`);
     if (constraints.pattern !== undefined) {
       if (typeof constraints.pattern !== "string") problems.push(`${path}.constraints.pattern must be a string`);
+      else if (!STRING_LENGTH_TYPES.has(type))
+        problems.push(`${path}.constraints.pattern is valid only for string or text fields`);
       else {
         try {
           new RegExp(constraints.pattern, "u");
@@ -293,7 +341,25 @@ function validateField(value: unknown, index: number, problems: string[]): Entit
     }
   }
   if (value.query !== undefined && !isObject(value.query)) problems.push(`${path}.query must be an object`);
+  const query = isObject(value.query) ? value.query : undefined;
+  if (query) {
+    rejectUnknown(query, ["filterable", "searchable", "sortable"], `${path}.query`, problems);
+    for (const key of ["filterable", "searchable", "sortable"] as const) {
+      if (query[key] !== undefined && typeof query[key] !== "boolean")
+        problems.push(`${path}.query.${key} must be a boolean`);
+    }
+  }
   if (value.ui !== undefined && !isObject(value.ui)) problems.push(`${path}.ui must be an object`);
+  const ui = isObject(value.ui) ? value.ui : undefined;
+  if (ui) {
+    rejectUnknown(ui, ["control", "list", "label"], `${path}.ui`, problems);
+    if (ui.control !== undefined) {
+      if (typeof ui.control !== "string" || !FIELD_TYPES.has(type) || !UI_CONTROLS_BY_TYPE[type].has(ui.control))
+        problems.push(`${path}.ui.control is incompatible with field type ${type}`);
+    }
+    if (ui.list !== undefined && typeof ui.list !== "boolean") problems.push(`${path}.ui.list must be a boolean`);
+    if (ui.label !== undefined && typeof ui.label !== "string") problems.push(`${path}.ui.label must be a string`);
+  }
   return value as EntityFieldSchema;
 }
 
