@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderWebsitePage } from "./app.mjs";
@@ -57,14 +57,17 @@ export function buildWebsite({ root = repositoryRoot, outputRoot = join(root, "s
     renderWebsitePage({ website, page: notFound, navigation, allPages: allPageRecords }),
   );
 
-  const searchIndex = contentPages.map(page => ({
-    category: page.category,
-    description: page.description,
-    label: page.title,
-    text: page.searchText,
-    url: page.path,
-    version: website.documentation.version,
-  }));
+  const searchIndex = [
+    ...contentPages.map(page => ({
+      category: page.category,
+      description: page.description,
+      label: page.title,
+      text: page.searchText,
+      url: page.path,
+      version: website.documentation.version,
+    })),
+    ...createReferenceSearchIndex({ root, website }),
+  ];
   writeJson(join(outputRoot, "search-index.json"), searchIndex);
   writeJson(join(outputRoot, "versions.json"), createVersionsModel(documentationPolicy));
   writeJson(join(outputRoot, "site.json"), website);
@@ -79,6 +82,58 @@ export function buildWebsite({ root = repositoryRoot, outputRoot = join(root, "s
       `${renderedPages.length} rendered routes, create-vireo ${website.currentRelease.createVireo}.`,
   );
   return { pages: renderedPages, searchIndex, website };
+}
+
+export function createReferenceSearchIndex({ root = repositoryRoot, website }) {
+  const snapshot = `${website.documentation.exactReferenceSnapshot.replace(/\/$/u, "")}/`;
+  const records = [];
+  const packageRoot = join(root, "packages");
+  for (const entry of readdirSync(packageRoot, { withFileTypes: true })) {
+    const surfacePath = join(packageRoot, entry.name, "api-surface.json");
+    const manifestPath = join(packageRoot, entry.name, "package.json");
+    if (!entry.isDirectory() || !existsSync(surfacePath) || !existsSync(manifestPath)) continue;
+    const surface = readJson(surfacePath);
+    const manifest = readJson(manifestPath);
+    for (const [entryPoint, contract] of Object.entries(surface.entryPoints ?? {})) {
+      const importPath = entryPoint === "." ? manifest.name : `${manifest.name}/${entryPoint.slice(2)}`;
+      const pageName = `${manifest.name.replace(/^@/u, "").replaceAll("/", "-")}--${
+        entryPoint === "." ? "root" : entryPoint.slice(2).replaceAll("/", "-")
+      }.html`;
+      for (const symbol of contract.exports ?? []) {
+        records.push({
+          category: "TypeScript API",
+          description: `Public export from ${importPath}`,
+          label: symbol,
+          text: `${symbol} ${importPath}`,
+          url: `${snapshot}api/typescript/${pageName}#${referenceSymbolAnchor(symbol)}`,
+          version: website.documentation.version,
+        });
+      }
+    }
+  }
+
+  const jvmRoot = join(root, "jvm");
+  for (const entry of readdirSync(jvmRoot, { withFileTypes: true })) {
+    const surfacePath = join(jvmRoot, entry.name, "api-surface.txt");
+    if (!entry.isDirectory() || !existsSync(surfacePath)) continue;
+    const source = readFileSync(surfacePath, "utf8");
+    for (const match of source.matchAll(/^public .*\s(com\.vireocode\.[A-Za-z0-9_.]+)(?:<[^\n]+>)?$/gmu)) {
+      const qualifiedName = match[1];
+      records.push({
+        category: "JVM API",
+        description: `${entry.name} public type`,
+        label: qualifiedName.slice(qualifiedName.lastIndexOf(".") + 1),
+        text: qualifiedName,
+        url: `${snapshot}api/jvm/${qualifiedName.replaceAll(".", "/")}.html`,
+        version: website.documentation.version,
+      });
+    }
+  }
+  return records;
+}
+
+function referenceSymbolAnchor(symbol) {
+  return `symbol-${symbol.toLocaleLowerCase().replace(/[^a-z0-9_-]+/gu, "-")}`;
 }
 
 export function createWebsiteModel({ documentationPolicy, sitePolicy }) {

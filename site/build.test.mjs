@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
 import { tmpdir } from "node:os";
-import { buildWebsite, createWebsiteModel, removeMetadataHeading } from "./build.mjs";
+import { buildWebsite, createReferenceSearchIndex, createWebsiteModel, removeMetadataHeading } from "./build.mjs";
 import { renderMarkdown } from "./markdown.mjs";
 
 const sitePolicy = {
@@ -67,6 +67,17 @@ test("renders trusted documentation markdown with headings, code and tables", ()
   assert.match(rendered.html, /<table>/u);
 });
 
+test("federates exact TypeScript and JVM symbols into main-site search", () => {
+  const website = createWebsiteModel({ documentationPolicy, sitePolicy });
+  const index = createReferenceSearchIndex({ website });
+  const pageLayout = index.find(entry => entry.label === "VireoPageLayout");
+  const baseService = index.find(entry => entry.label === "BaseService");
+
+  assert.ok(index.length > 1_000);
+  assert.match(pageLayout?.url ?? "", /api\/typescript\/vireocodedev-ui--root\.html#symbol-vireopagelayout$/u);
+  assert.match(baseService?.url ?? "", /api\/jvm\/com\/vireocode\/vireo\/base\/BaseService\.html$/u);
+});
+
 test("makes manifest metadata the sole page H1", () => {
   assert.equal(removeMetadataHeading("# Configure\n\n## Database\n", "Configure"), "\n## Database\n");
   assert.throws(() => removeMetadataHeading("## Configure\n", "Configure"), /must begin with one H1/u);
@@ -84,7 +95,7 @@ test("builds the complete multi-page, searchable and versioned website artifact"
 
     assert.equal(result.website.documentation.version, "0.2");
     assert.ok(result.pages.length >= 50);
-    assert.ok(result.searchIndex.length >= 30);
+    assert.ok(result.searchIndex.length > 1_000);
     for (const path of [
       "index.html",
       "docs/index.html",

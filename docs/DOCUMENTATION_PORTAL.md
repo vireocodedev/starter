@@ -11,16 +11,16 @@ experience.
 
 ## Main website surfaces
 
-| Route                | Content                                                |
-| -------------------- | ------------------------------------------------------ |
-| `/docs/`             | Current friendly documentation line                    |
-| `/docs/0.2/`         | Version-specific copy of the current Vireo 0.2 guides  |
-| `/examples/`         | End-to-end and interactive example paths               |
-| `/storybook/`        | Curated Storybook entry and exact snapshot link        |
-| `/reference/`        | TypeScript, Java, Storybook, and release reference map |
-| `/versions/`         | Friendly-to-exact release mapping                      |
-| `/search-index.json` | Current canonical content search index                 |
-| `/versions.json`     | Machine-readable CLI/npm/JVM/Template mapping          |
+| Route                | Content                                                 |
+| -------------------- | ------------------------------------------------------- |
+| `/docs/`             | Current friendly documentation line                     |
+| `/docs/0.2/`         | Version-specific copy of the current Vireo 0.2 guides   |
+| `/examples/`         | End-to-end and interactive example paths                |
+| `/storybook/`        | Curated Storybook entry and exact snapshot link         |
+| `/reference/`        | TypeScript, Java, Storybook, and release reference map  |
+| `/versions/`         | Friendly-to-exact release mapping                       |
+| `/search-index.json` | Canonical guides plus exact TypeScript/JVM symbol links |
+| `/versions.json`     | Machine-readable CLI/npm/JVM/Template mapping           |
 
 `site/content/manifest.json` owns the information architecture and canonical page
 metadata. `site/content/*.md` owns user-facing guide content. `site/app.mjs` renders
@@ -39,6 +39,8 @@ version aliases, search, sitemap, and machine metadata.
 
 The old `/docs/` and `/latest/` GitHub Pages routes redirect to the canonical main
 website. Exact reference and Storybook routes remain on Pages.
+
+Main-site search federates every checked TypeScript export and JVM public type into the same index as the task guides. A symbol result links directly to its immutable exact-release reference, so users do not need to discover or search a second portal first. The exhaustive reference portal retains its richer member and Storybook search.
 
 ## Version contract
 
