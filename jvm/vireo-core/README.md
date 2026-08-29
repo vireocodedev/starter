@@ -102,7 +102,7 @@ non-anonymous principal is available and must not be blank.
   names or messages by default.
 - `RestUtils.makePageable` rejects invalid public request values as HTTP 400 and
   caps requests at page 10,000 and 200 rows per page. There is no public
-  all-rows sentinel.
+  all-rows sentinel, and search text is limited to 256 characters.
 - `RestUtils.getCurrentPrincipal` excludes unauthenticated and anonymous
   security tokens.
 

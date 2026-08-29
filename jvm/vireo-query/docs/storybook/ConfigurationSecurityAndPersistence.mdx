@@ -18,7 +18,7 @@ vireo.starter.query-engine.saved-filters-endpoint-path=/api/filters
 vireo.starter.query-engine.relation-options-limit=20
 ```
 
-Paths must begin with `/` and be distinct. Relation lookup is limited to 1–1000 results and searches the configured label fields. It fails closed until the application supplies a `QueryRelationOptionPolicy`; every lookup applies that policy's Criteria predicate to enforce owner, tenant, deletion, retention, and other domain visibility rules.
+Paths must begin with `/` and be distinct. Filter requests are flat and limited to 50 clauses, 4,096 characters per value, and 100 selected relation options per clause. Relation lookup is limited to 1–1000 results and 128 search characters and searches the configured label fields. It fails closed until the application supplies a `QueryRelationOptionPolicy`; every lookup applies that policy's Criteria predicate to enforce owner, tenant, deletion, retention, and other domain visibility rules.
 
 All default endpoints require authentication. The fallback relation-option policy denies every request rather than querying unscoped data. Saved-filter reads include the current user's records and other users' public records; update and delete remain owner-only. `userId` and `username` are response-only fields. Applications still authorize access to the domain records returned after a filter is applied.
 

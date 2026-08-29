@@ -72,6 +72,9 @@ class RestUtilsTest {
                 () -> RestUtils.makePageable(0, 10, " ", "asc", null)), 400,
                 "sortBy must not be blank");
         assertStatus(assertThrows(ResponseStatusException.class,
+                () -> RestUtils.makePageable(0, 10, "id", "asc", "x".repeat(257))), 400,
+                "searchText must not exceed 256 characters");
+        assertStatus(assertThrows(ResponseStatusException.class,
                 () -> RestUtils.makePageable(0, 10, "id", "sideways", null)), 400,
                 "sortDirection must be asc or desc");
     }

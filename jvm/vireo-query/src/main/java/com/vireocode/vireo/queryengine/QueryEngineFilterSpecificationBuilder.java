@@ -35,6 +35,10 @@ import jakarta.persistence.criteria.Root;
 
 public class QueryEngineFilterSpecificationBuilder implements FilterSpecificationBuilder {
 
+    private static final int MAX_FILTER_CLAUSES = 50;
+    private static final int MAX_FILTER_VALUE_LENGTH = 4096;
+    private static final int MAX_RELATION_OPTIONS_PER_CLAUSE = 100;
+
     private final QueryEngineRegistry registry;
     private final QueryEngineMetadataGenerator metadataGenerator;
     private final List<QueryCustomFieldResolver<?>> customFieldResolvers;
@@ -69,6 +73,8 @@ public class QueryEngineFilterSpecificationBuilder implements FilterSpecificatio
             return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
         }
 
+        validateWorkload(request);
+
         List<QueryFilterNode> filterNodes = resolveFilterNodes(request);
         if (filterNodes.isEmpty()) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
@@ -95,6 +101,25 @@ public class QueryEngineFilterSpecificationBuilder implements FilterSpecificatio
 
             return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
         };
+    }
+
+    private void validateWorkload(QueryFilterRequest request) {
+        if (request.rows().size() > MAX_FILTER_CLAUSES) {
+            throw RestUtils.badRequest("filters must not contain more than " + MAX_FILTER_CLAUSES + " clauses");
+        }
+        for (QueryFilterRow row : request.rows()) {
+            if (row == null) {
+                continue;
+            }
+            if (row.value() != null && row.value().length() > MAX_FILTER_VALUE_LENGTH) {
+                throw RestUtils.badRequest(
+                        "filter values must not exceed " + MAX_FILTER_VALUE_LENGTH + " characters");
+            }
+            if (row.selectedOptions().size() > MAX_RELATION_OPTIONS_PER_CLAUSE) {
+                throw RestUtils.badRequest("relation filters must not contain more than "
+                        + MAX_RELATION_OPTIONS_PER_CLAUSE + " selected options");
+            }
+        }
     }
 
     private void validateNodes(List<QueryFieldDefinition> fields, List<QueryFilterNode> nodes) {

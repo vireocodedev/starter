@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
@@ -25,6 +26,18 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
 class QueryEngineRelationOptionServiceTest {
+
+    @Test
+    void listOptions_RejectsOversizedSearchBeforeMetadataOrDatabaseAccess() {
+        QueryEngineRelationOptionService service = new QueryEngineRelationOptionService(
+                mock(QueryEngineRegistry.class), mock(QueryEngineMetadataGenerator.class));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.listOptions("WIDGET", "category", "x".repeat(129)));
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertEquals("relation option searchText must not exceed 128 characters", exception.getReason());
+    }
 
     @Test
     void listOptions_ThrowsWhenRelationFieldMissing() {

@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 public final class RestUtils {
     private static final int MAX_PAGE_NUMBER = 10_000;
     private static final int MAX_ROWS_PER_PAGE = 200;
+    private static final int MAX_SEARCH_TEXT_LENGTH = 256;
 
     private RestUtils() {
     }
@@ -55,6 +56,9 @@ public final class RestUtils {
         }
         if (sortBy == null || sortBy.isBlank()) {
             throw badRequest("sortBy must not be blank");
+        }
+        if (searchText != null && searchText.length() > MAX_SEARCH_TEXT_LENGTH) {
+            throw badRequest("searchText must not exceed " + MAX_SEARCH_TEXT_LENGTH + " characters");
         }
 
         Sort.Direction direction;

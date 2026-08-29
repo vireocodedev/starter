@@ -10,6 +10,9 @@ import java.util.Objects;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.vireocode.vireo.web.RestUtils;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
 import jakarta.persistence.PersistenceContext;
@@ -17,6 +20,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 public class QueryEngineRelationOptionService {
+
+    private static final int MAX_SEARCH_TEXT_LENGTH = 128;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -44,6 +49,10 @@ public class QueryEngineRelationOptionService {
     }
 
     public List<QueryRelationOption> listOptions(String entityKey, String fieldPath, String searchText) {
+        if (searchText != null && searchText.length() > MAX_SEARCH_TEXT_LENGTH) {
+            throw RestUtils.badRequest("relation option searchText must not exceed " + MAX_SEARCH_TEXT_LENGTH
+                    + " characters");
+        }
         QueryEntityDefinition entityDefinition = generator.generate(entityKey, registry.requireEntityType(entityKey));
         QueryFieldDefinition fieldDefinition = findField(entityDefinition.fields(), fieldPath);
 

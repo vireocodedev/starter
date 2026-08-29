@@ -66,6 +66,30 @@ class QueryEngineFilterSpecificationBuilderTest {
     }
 
     @Test
+    void build_RejectsOversizedFilterWorkBeforeMetadataOrDatabaseAccess() {
+        QueryEngineFilterSpecificationBuilder builder = new QueryEngineFilterSpecificationBuilder(
+                mock(QueryEngineRegistry.class));
+        QueryFilterRow leaf = new QueryFilterRow("leaf", "name", QueryOperator.EQUALS, "a", false, List.of());
+
+        ResponseStatusException clauses = assertThrows(ResponseStatusException.class,
+                () -> builder.build(TestEntity.class,
+                        new QueryFilterRequest("ENTITY", null, java.util.Collections.nCopies(51, leaf))));
+        assertEquals("filters must not contain more than 50 clauses", clauses.getReason());
+
+        QueryFilterRow largeValue = new QueryFilterRow(
+                "leaf", "name", QueryOperator.EQUALS, "x".repeat(4097), false, List.of());
+        ResponseStatusException value = assertThrows(ResponseStatusException.class,
+                () -> builder.build(TestEntity.class, new QueryFilterRequest("ENTITY", null, List.of(largeValue))));
+        assertEquals("filter values must not exceed 4096 characters", value.getReason());
+
+        QueryFilterRow options = new QueryFilterRow("relation", "category", null, null, false,
+                java.util.Collections.nCopies(101, new QueryFilterRelationOption("1", "Category")));
+        ResponseStatusException selectedOptions = assertThrows(ResponseStatusException.class,
+                () -> builder.build(TestEntity.class, new QueryFilterRequest("ENTITY", null, List.of(options))));
+        assertEquals("relation filters must not contain more than 100 selected options", selectedOptions.getReason());
+    }
+
+    @Test
     void build_WithParameterizedRowProducesConjunction() {
         QueryEngineRegistry registry = mock(QueryEngineRegistry.class);
         QueryEngineFilterSpecificationBuilder builder = new QueryEngineFilterSpecificationBuilder(registry);
