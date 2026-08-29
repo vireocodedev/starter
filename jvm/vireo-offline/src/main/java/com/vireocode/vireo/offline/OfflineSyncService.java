@@ -24,17 +24,17 @@ import org.springframework.http.HttpMethod;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder;
 import com.vireocode.vireo.queryengine.QueryFilterRequest;
 import com.vireocode.vireo.web.RestUtils;
 import com.vireocode.vireo.web.SearchablePageable;
 
 import jakarta.servlet.http.HttpServletRequest;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class OfflineSyncService {
 
@@ -478,7 +478,7 @@ public class OfflineSyncService {
         try {
             byte[] bytes = objectMapper.writeValueAsBytes(canonical);
             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
-        } catch (JsonProcessingException | NoSuchAlgorithmException ex) {
+        } catch (JacksonException | NoSuchAlgorithmException ex) {
             throw new IllegalStateException("Unable to fingerprint an offline command.", ex);
         }
     }
@@ -494,8 +494,7 @@ public class OfflineSyncService {
         }
 
         ObjectNode result = objectMapper.createObjectNode();
-        java.util.stream.StreamSupport.stream(
-                java.util.Spliterators.spliteratorUnknownSize(value.fieldNames(), 0), false)
+        value.propertyNames().stream()
                 .sorted()
                 .forEach(field -> result.set(field, canonicalize(value.get(field))));
         return result;
@@ -508,7 +507,7 @@ public class OfflineSyncService {
 
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return Optional.ofNullable(value).map(Object::toString).orElse(null);
         }
     }

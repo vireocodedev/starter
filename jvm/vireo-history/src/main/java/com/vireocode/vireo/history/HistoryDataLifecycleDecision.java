@@ -2,7 +2,7 @@ package com.vireocode.vireo.history;
 
 import java.time.Instant;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /** Persisted representation and lifecycle metadata selected by a History policy. */
 public record HistoryDataLifecycleDecision(

@@ -74,9 +74,9 @@ public abstract interface com.vireocode.vireo.base.HistoryEntityType
 
 public abstract class com.vireocode.vireo.base.JsonNodeMapper
     public com.vireocode.vireo.base.JsonNodeMapper()
-    protected com.fasterxml.jackson.databind.ObjectMapper com.vireocode.vireo.base.JsonNodeMapper.objectMapper
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.base.JsonNodeMapper.toNode(java.lang.String)
-    public java.lang.String com.vireocode.vireo.base.JsonNodeMapper.toString(com.fasterxml.jackson.databind.JsonNode)
+    protected tools.jackson.databind.ObjectMapper com.vireocode.vireo.base.JsonNodeMapper.objectMapper
+    public java.lang.String com.vireocode.vireo.base.JsonNodeMapper.toString(tools.jackson.databind.JsonNode)
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.base.JsonNodeMapper.toNode(java.lang.String)
 
 public class com.vireocode.vireo.base.JsonNodeMapperImpl
     extends com.vireocode.vireo.base.JsonNodeMapper

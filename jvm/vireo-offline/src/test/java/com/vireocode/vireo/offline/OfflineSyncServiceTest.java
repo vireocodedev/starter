@@ -30,11 +30,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder;
 import com.vireocode.vireo.queryengine.QueryFilterRequest;
 import com.vireocode.vireo.web.SearchablePageable;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 class OfflineSyncServiceTest {
 
@@ -694,7 +695,7 @@ class OfflineSyncServiceTest {
                 .mock(QueryEngineFilterSpecificationBuilder.class);
         ObjectMapper mapper = org.mockito.Mockito.mock(ObjectMapper.class);
 
-        when(mapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("x") {
+        when(mapper.writeValueAsString(any())).thenThrow(new JacksonException("x") {
             private static final long serialVersionUID = 1L;
         });
 
@@ -778,10 +779,10 @@ class OfflineSyncServiceTest {
         }
     }
 
-    private com.fasterxml.jackson.databind.JsonNode json(String value) {
+    private tools.jackson.databind.JsonNode json(String value) {
         try {
             return new ObjectMapper().readTree(value);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new AssertionError(ex);
         }
     }

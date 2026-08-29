@@ -36,7 +36,8 @@ import com.vireocode.vireo.offline.StarterOfflineActorResolver;
 import com.vireocode.vireo.queryengine.QueryEngineRegistry;
 import com.vireocode.vireo.queryengine.QueryRelationOptionPolicy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * A default is only a default if it gets out of the way.
@@ -183,8 +184,8 @@ class ConsumerOverrideTest {
         }
 
         @Bean
-        ObjectMapper consumerObjectMapper() {
-            return new ObjectMapper();
+        JsonMapper consumerObjectMapper() {
+            return JsonMapper.builder().build();
         }
     }
 

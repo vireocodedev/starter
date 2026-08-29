@@ -12,11 +12,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.Clock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.vireo.flyway.StarterFlywayModule;
 import com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder;
 import com.vireocode.vireo.spi.OfflineChangeBroadcaster;
 import com.vireocode.vireo.spi.OfflineRevisionTracker;
+
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wires the offline sync stack from the dependency alone.

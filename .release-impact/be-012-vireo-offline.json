@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "jvm:vireo-offline",
+  "decision": "release",
+  "bump": "major",
+  "summary": "Use Jackson 3 for offline command bodies and replay customization."
+}

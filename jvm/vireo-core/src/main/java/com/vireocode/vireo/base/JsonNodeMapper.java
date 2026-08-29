@@ -3,8 +3,8 @@ package com.vireocode.vireo.base;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Mapper(componentModel = "spring")
 public abstract class JsonNodeMapper {

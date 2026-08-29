@@ -12,9 +12,7 @@ public abstract interface com.vireocode.vireo.history.HistoryActorResolver
 
 public final record com.vireocode.vireo.history.HistoryDataLifecycleContext
     extends java.lang.Record
-    public com.vireocode.vireo.history.HistoryDataLifecycleContext(java.time.Instant,com.vireocode.vireo.history.HistoryActor,java.lang.String,java.lang.String,com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.JsonNode)
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleContext.snapshotCurrent()
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleContext.snapshotPrevious()
+    public com.vireocode.vireo.history.HistoryDataLifecycleContext(java.time.Instant,com.vireocode.vireo.history.HistoryActor,java.lang.String,java.lang.String,tools.jackson.databind.JsonNode,tools.jackson.databind.JsonNode)
     public com.vireocode.vireo.history.HistoryActor com.vireocode.vireo.history.HistoryDataLifecycleContext.actor()
     public final boolean com.vireocode.vireo.history.HistoryDataLifecycleContext.equals(java.lang.Object)
     public final int com.vireocode.vireo.history.HistoryDataLifecycleContext.hashCode()
@@ -22,18 +20,20 @@ public final record com.vireocode.vireo.history.HistoryDataLifecycleContext
     public java.lang.String com.vireocode.vireo.history.HistoryDataLifecycleContext.entity()
     public java.lang.String com.vireocode.vireo.history.HistoryDataLifecycleContext.entityId()
     public java.time.Instant com.vireocode.vireo.history.HistoryDataLifecycleContext.occurredAt()
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleContext.snapshotCurrent()
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleContext.snapshotPrevious()
 
 public final record com.vireocode.vireo.history.HistoryDataLifecycleDecision
     extends java.lang.Record
-    public com.vireocode.vireo.history.HistoryDataLifecycleDecision(java.lang.String,java.time.Instant,boolean,com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.JsonNode)
+    public com.vireocode.vireo.history.HistoryDataLifecycleDecision(java.lang.String,java.time.Instant,boolean,tools.jackson.databind.JsonNode,tools.jackson.databind.JsonNode)
     public boolean com.vireocode.vireo.history.HistoryDataLifecycleDecision.legalHold()
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleDecision.snapshotCurrent()
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleDecision.snapshotPrevious()
     public final boolean com.vireocode.vireo.history.HistoryDataLifecycleDecision.equals(java.lang.Object)
     public final int com.vireocode.vireo.history.HistoryDataLifecycleDecision.hashCode()
     public final java.lang.String com.vireocode.vireo.history.HistoryDataLifecycleDecision.toString()
     public java.lang.String com.vireocode.vireo.history.HistoryDataLifecycleDecision.partitionKey()
     public java.time.Instant com.vireocode.vireo.history.HistoryDataLifecycleDecision.retainUntil()
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleDecision.snapshotCurrent()
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryDataLifecycleDecision.snapshotPrevious()
 
 public final record com.vireocode.vireo.history.HistoryDataLifecycleEvent
     extends java.lang.Record
@@ -73,9 +73,7 @@ public abstract interface com.vireocode.vireo.history.HistoryReadAuthorizer
 
 public final record com.vireocode.vireo.history.HistoryRecord
     extends java.lang.Record
-    public com.vireocode.vireo.history.HistoryRecord(java.util.UUID,java.time.Instant,com.vireocode.vireo.history.HistoryActor,java.lang.String,java.lang.String,com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.JsonNode)
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryRecord.snapshotCurrent()
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryRecord.snapshotPrevious()
+    public com.vireocode.vireo.history.HistoryRecord(java.util.UUID,java.time.Instant,com.vireocode.vireo.history.HistoryActor,java.lang.String,java.lang.String,tools.jackson.databind.JsonNode,tools.jackson.databind.JsonNode)
     public com.vireocode.vireo.history.HistoryActor com.vireocode.vireo.history.HistoryRecord.actor()
     public final boolean com.vireocode.vireo.history.HistoryRecord.equals(java.lang.Object)
     public final int com.vireocode.vireo.history.HistoryRecord.hashCode()
@@ -84,6 +82,8 @@ public final record com.vireocode.vireo.history.HistoryRecord
     public java.lang.String com.vireocode.vireo.history.HistoryRecord.entityId()
     public java.time.Instant com.vireocode.vireo.history.HistoryRecord.timestamp()
     public java.util.UUID com.vireocode.vireo.history.HistoryRecord.id()
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryRecord.snapshotCurrent()
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.history.HistoryRecord.snapshotPrevious()
 
 public class com.vireocode.vireo.history.HistoryRecordingException
     extends java.lang.RuntimeException

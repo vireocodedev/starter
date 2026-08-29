@@ -2,7 +2,7 @@ package com.vireocode.vireo.history;
 
 import java.time.Instant;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /** Input presented to an application's History data-classification policy. */
 public record HistoryDataLifecycleContext(

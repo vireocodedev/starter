@@ -33,7 +33,7 @@ import com.vireocode.vireo.spi.OfflineChangeBroadcaster;
 import com.vireocode.vireo.spi.OfflineRevisionTracker;
 import com.vireocode.vireo.web.GlobalExceptionHandler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The dependency alone has to be enough.

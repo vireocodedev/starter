@@ -180,13 +180,12 @@ public final record com.vireocode.vireo.offline.OfflineSyncBatchResponseDto
     public java.util.List<com.vireocode.vireo.offline.OfflineSyncCommandResultDto> com.vireocode.vireo.offline.OfflineSyncBatchResponseDto.results()
 
 public final class com.vireocode.vireo.offline.OfflineSyncBodyNormalizer
-    public static <T> T com.vireocode.vireo.offline.OfflineSyncBodyNormalizer.treeToValue(com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.ObjectMapper,java.lang.Class<T>) throws java.lang.Exception
-    public static com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.offline.OfflineSyncBodyNormalizer.normalize(com.fasterxml.jackson.databind.JsonNode,com.fasterxml.jackson.databind.ObjectMapper)
+    public static <T> T com.vireocode.vireo.offline.OfflineSyncBodyNormalizer.treeToValue(tools.jackson.databind.JsonNode,tools.jackson.databind.ObjectMapper,java.lang.Class<T>) throws java.lang.Exception
+    public static tools.jackson.databind.JsonNode com.vireocode.vireo.offline.OfflineSyncBodyNormalizer.normalize(tools.jackson.databind.JsonNode,tools.jackson.databind.ObjectMapper)
 
 public final record com.vireocode.vireo.offline.OfflineSyncCommandDto
     extends java.lang.Record
-    public com.vireocode.vireo.offline.OfflineSyncCommandDto(java.util.UUID,java.lang.String,java.lang.String,com.fasterxml.jackson.databind.JsonNode,java.util.Map<java.lang.String, java.lang.String>)
-    public com.fasterxml.jackson.databind.JsonNode com.vireocode.vireo.offline.OfflineSyncCommandDto.body()
+    public com.vireocode.vireo.offline.OfflineSyncCommandDto(java.util.UUID,java.lang.String,java.lang.String,tools.jackson.databind.JsonNode,java.util.Map<java.lang.String, java.lang.String>)
     public final boolean com.vireocode.vireo.offline.OfflineSyncCommandDto.equals(java.lang.Object)
     public final int com.vireocode.vireo.offline.OfflineSyncCommandDto.hashCode()
     public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandDto.method()
@@ -194,6 +193,7 @@ public final record com.vireocode.vireo.offline.OfflineSyncCommandDto
     public java.lang.String com.vireocode.vireo.offline.OfflineSyncCommandDto.url()
     public java.util.Map<java.lang.String, java.lang.String> com.vireocode.vireo.offline.OfflineSyncCommandDto.headers()
     public java.util.UUID com.vireocode.vireo.offline.OfflineSyncCommandDto.commandId()
+    public tools.jackson.databind.JsonNode com.vireocode.vireo.offline.OfflineSyncCommandDto.body()
 
 public class com.vireocode.vireo.offline.OfflineSyncCommandEntity
     public com.vireocode.vireo.offline.OfflineSyncCommandEntity()
@@ -296,7 +296,7 @@ public final enum com.vireocode.vireo.offline.OfflineSyncResultReason
     public static com.vireocode.vireo.offline.OfflineSyncResultReason[] com.vireocode.vireo.offline.OfflineSyncResultReason.values()
 
 public class com.vireocode.vireo.offline.OfflineSyncService
-    public com.vireocode.vireo.offline.OfflineSyncService(com.vireocode.vireo.offline.OfflineHeartbeatService,com.vireocode.vireo.offline.OfflineSyncCommandRepository,com.fasterxml.jackson.databind.ObjectMapper,com.vireocode.vireo.offline.OfflineActorResolver,java.util.List<com.vireocode.vireo.offline.OfflineSyncReplayHandler>,com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder,org.springframework.transaction.PlatformTransactionManager)
+    public com.vireocode.vireo.offline.OfflineSyncService(com.vireocode.vireo.offline.OfflineHeartbeatService,com.vireocode.vireo.offline.OfflineSyncCommandRepository,tools.jackson.databind.ObjectMapper,com.vireocode.vireo.offline.OfflineActorResolver,java.util.List<com.vireocode.vireo.offline.OfflineSyncReplayHandler>,com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder,org.springframework.transaction.PlatformTransactionManager)
     public com.vireocode.vireo.offline.OfflineSyncBatchResponseDto com.vireocode.vireo.offline.OfflineSyncService.processBatch(com.vireocode.vireo.offline.OfflineSyncBatchRequestDto,jakarta.servlet.http.HttpServletRequest)
     public org.springframework.data.domain.Page<com.vireocode.vireo.offline.OfflineSyncCommandListItemDto> com.vireocode.vireo.offline.OfflineSyncService.searchCommands(com.vireocode.vireo.web.SearchablePageable,com.vireocode.vireo.queryengine.QueryFilterRequest)
 

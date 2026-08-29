@@ -1,7 +1,7 @@
 package com.vireocode.vireo.history;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
  * Safe fallback: preserve event shape, discard snapshot fields, partition by

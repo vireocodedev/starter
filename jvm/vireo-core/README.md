@@ -70,16 +70,18 @@ Adding the dependency provides replaceable defaults for:
 
 - one UTC `Clock`;
 - one stable `GlobalExceptionHandler`;
-- Jackson 2 support for `JsonNullable`, Java time, and existing Vireo wire
-  contracts;
+- Boot-owned Jackson 3 composition with `JsonNullable`, Java time, and Vireo's
+  `is`-prefixed boolean wire convention;
 - `JsonNullableMapper` and `JsonNodeMapper`;
 - Spring Data JPA auditing and a security-context `AuditorAware<String>`;
 - method security for Starter endpoints;
 - a Flyway migration strategy when Flyway is present.
 
-Ordinary consumer beans replace the `Clock`, `ObjectMapper`, error handler,
+Ordinary consumer beans replace the `Clock`, Boot `JsonMapper`, error handler,
 mappers, auditor, or Flyway strategy through `@ConditionalOnMissingBean`.
-Applications that already enable JPA auditing retain their own auditing setup.
+Applications can contribute Jackson modules and builder customizers without
+Vireo replacing Boot's mapper or HTTP converter. Applications that already
+enable JPA auditing retain their own auditing setup.
 
 ## Configuration
 

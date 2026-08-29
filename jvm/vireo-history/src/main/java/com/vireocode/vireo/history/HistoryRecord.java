@@ -3,7 +3,7 @@ package com.vireocode.vireo.history;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Immutable HTTP read model for one history event.

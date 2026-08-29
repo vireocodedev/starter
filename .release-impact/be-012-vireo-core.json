@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "jvm:vireo-core",
+  "decision": "release",
+  "bump": "major",
+  "summary": "Use Boot-owned Jackson 3 composition and Jackson 3 tree contracts."
+}

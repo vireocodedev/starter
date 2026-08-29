@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.vireo.offline.OfflineActor;
 import com.vireocode.vireo.offline.OfflineActorResolver;
 import com.vireocode.vireo.offline.OfflineSyncBodyNormalizer;
@@ -16,6 +15,8 @@ import com.vireocode.vireo.offline.OfflineSyncCommandDto;
 import com.vireocode.vireo.offline.OfflineSyncCommandResultDto;
 import com.vireocode.vireo.offline.OfflineSyncReplayHandler;
 import com.vireocode.vireo.offline.OfflineSyncResultReason;
+
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration(proxyBeanMethods = false)
 public class OfflineReplayConfigurationExample {

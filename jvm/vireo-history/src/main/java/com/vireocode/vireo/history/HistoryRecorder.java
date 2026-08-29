@@ -4,11 +4,12 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.vireo.base.HistoryEntityType;
 import com.vireocode.vireo.spi.HistoryEventsRecorder;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Central sink for entity change history. Serializes DTO snapshots to JSON and
@@ -102,8 +103,8 @@ class HistoryRecorder implements HistoryEventsRecorder {
             return null;
         }
         try {
-            return objectMapper.readTree(objectMapper.writeValueAsString(dto));
-        } catch (JsonProcessingException exception) {
+            return objectMapper.valueToTree(dto);
+        } catch (JacksonException exception) {
             throw new HistoryRecordingException(
                     "Failed to serialize history snapshot of type " + dto.getClass().getName(), exception);
         }
@@ -115,7 +116,7 @@ class HistoryRecorder implements HistoryEventsRecorder {
         }
         try {
             return objectMapper.writeValueAsString(snapshot);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new HistoryRecordingException("Failed to serialize redacted history snapshot", exception);
         }
     }

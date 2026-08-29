@@ -20,9 +20,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vireocode.vireo.base.HistoryEntityType;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class HistoryRecorderTest {
@@ -80,8 +81,8 @@ class HistoryRecorderTest {
     @Test
     void record_WithSerializationFailure_AbortsInsteadOfPersistingPartialHistory() throws Exception {
         ObjectMapper failingMapper = org.mockito.Mockito.mock(ObjectMapper.class);
-        when(failingMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("boom") {
+        when(failingMapper.valueToTree(any()))
+                .thenThrow(new JacksonException("boom") {
                     private static final long serialVersionUID = 1L;
                 });
         HistoryRecorder recorder = recorder(Optional.empty(), failingMapper);
