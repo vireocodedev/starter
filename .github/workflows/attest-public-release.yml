@@ -17,18 +17,17 @@ concurrency:
 permissions: {}
 
 jobs:
-  attest:
-    name: Bind SBOMs to exact public artifacts
+  collect:
+    name: Collect and classify exact public artifacts
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     permissions:
-      artifact-metadata: write
-      attestations: write
       contents: read
-      id-token: write
+    outputs:
+      matrix: ${{ steps.mapping.outputs.matrix }}
     steps:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
@@ -46,43 +45,64 @@ jobs:
       - run: corepack npm ci --ignore-scripts
       - name: Collect exact public artifacts and current SBOMs
         run: corepack npm run release:collect-public-evidence
+      - name: Validate one-to-one SBOM ownership
+        id: mapping
+        run: node scripts/validate-release-sbom-evidence.mjs .public-release-evidence --github-matrix >> "$GITHUB_OUTPUT"
       - name: Require a clean source checkout
         run: test -z "$(git status --porcelain)"
-      - name: Attest the npm SBOM to all eight public tarballs
-        id: npm-attestation
+      - name: Preserve classified exact-byte evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-release-sbom-evidence-${{ github.event.workflow_run.head_sha || github.sha }}
+          path: .public-release-evidence
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+  attest:
+    name: Bind ${{ matrix.id }} SBOM to its exact public subject
+    needs: collect
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.collect.outputs.matrix) }}
+    permissions:
+      artifact-metadata: write
+      attestations: write
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: public-release-sbom-evidence-${{ github.event.workflow_run.head_sha || github.sha }}
+          path: .public-release-evidence
+      - name: Attest the subject-specific SBOM
+        id: attestation
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-checksums: .public-release-evidence/npm-subjects.sha256
-          sbom-path: .public-release-evidence/sbom/npm.cdx.json
-      - name: Attest the JVM SBOM to all 27 public Maven artifacts
-        id: maven-attestation
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
-        with:
-          subject-checksums: .public-release-evidence/maven-subjects.sha256
-          sbom-path: .public-release-evidence/sbom/jvm.cdx.json
-      - name: Verify the published attestations
+          subject-checksums: ${{ matrix.checksums }}
+          sbom-path: ${{ matrix.sbom }}
+      - name: Verify the published attestation
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for subject in .public-release-evidence/subjects/npm/* .public-release-evidence/subjects/maven/*; do
+          while read -r _ subject; do
             gh attestation verify "$subject" \
               --repo "$GITHUB_REPOSITORY" \
               --predicate-type https://cyclonedx.org/bom \
               --cert-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/attest-public-release.yml@refs/heads/main" \
               --source-ref refs/heads/main
-          done
-      - name: Preserve exact-byte evidence and signed bundles
-        if: >-
-          always() &&
-          steps.npm-attestation.outcome == 'success' &&
-          steps.maven-attestation.outcome == 'success'
+          done < "${{ matrix.checksums }}"
+      - name: Preserve the subject-specific signed bundle
+        if: always() && steps.attestation.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: public-release-sbom-attestations-${{ github.event.workflow_run.head_sha || github.sha }}
+          name: public-release-sbom-attestation-${{ matrix.id }}-${{ github.event.workflow_run.head_sha || github.sha }}
           path: |
-            .public-release-evidence
-            ${{ steps.npm-attestation.outputs.bundle-path }}
-            ${{ steps.maven-attestation.outputs.bundle-path }}
+            ${{ matrix.sbom }}
+            ${{ matrix.checksums }}
+            ${{ steps.attestation.outputs.bundle-path }}
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90

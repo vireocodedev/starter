@@ -17,8 +17,10 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runLicensePolicy } from "./third-party-license-policy.mjs";
+import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const policy = JSON.parse(readFileSync(join(repoRoot, "contracts", "public-release-attestation-policy.json"), "utf8"));
 const outputArgument = process.argv[2];
 
 if (!outputArgument || process.argv.length !== 3) {
@@ -62,9 +64,6 @@ function digest(path, algorithm, encoding = "hex") {
 function subjectKind(path) {
   const normalized = relative(outputRoot, path).replaceAll("\\", "/");
   if (normalized.startsWith("npm/") && normalized.endsWith(".tgz")) return "npm-package";
-  if (normalized === "sbom/npm.cdx.json") return "cyclonedx-sbom";
-  if (normalized === "sbom/jvm.cdx.json") return "cyclonedx-sbom";
-  if (normalized === "licenses/third-party-license-inventory.json") return "license-inventory";
   if (!normalized.startsWith("maven/") || /\.(?:md5|sha1|sha256|sha512)$/u.test(normalized)) return undefined;
   if (normalized.includes("/maven-metadata.xml")) return undefined;
   return "maven-artifact";
@@ -106,20 +105,56 @@ try {
   rmSync(npmPackRoot, { recursive: true, force: true });
 }
 
-console.log("Generating the npm CycloneDX SBOM...");
-const npmSbomPath = join(sbomRoot, "npm.cdx.json");
-const npmSbomDescriptor = openSync(npmSbomPath, "w");
-try {
-  execFileSync("corepack", ["npm", "sbom", "--sbom-format", "cyclonedx"], {
-    cwd: repoRoot,
-    stdio: ["ignore", npmSbomDescriptor, "inherit"],
-  });
-} finally {
-  closeSync(npmSbomDescriptor);
+function packedManifest(tarball) {
+  return JSON.parse(command("tar", ["-xOf", tarball, "package/package.json"]));
 }
-const npmSbom = JSON.parse(readFileSync(npmSbomPath, "utf8"));
-if (npmSbom.bomFormat !== "CycloneDX" || !Array.isArray(npmSbom.components) || npmSbom.components.length === 0) {
-  throw new Error("npm did not produce a populated CycloneDX SBOM.");
+
+function generatePackedNpmSbom(tarball, destination, expected) {
+  const temporaryRoot = mkdtempSync(join(tmpdir(), "vireo-sbom-"));
+  try {
+    command("tar", ["-xzf", tarball, "-C", temporaryRoot]);
+    const packageRoot = join(temporaryRoot, "package");
+    const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+    if (manifest.name !== expected.name || manifest.version !== expected.version) {
+      throw new Error(
+        `${tarball} contains ${manifest.name}@${manifest.version}, expected ${expected.name}@${expected.version}`,
+      );
+    }
+    // npm publishes devDependencies in package.json even though they are not
+    // part of the install contract. Resolve a runtime projection of the exact
+    // packed manifest so a dependency that is also used during development is
+    // not incorrectly omitted from the release SBOM.
+    delete manifest.devDependencies;
+    writeFileSync(join(packageRoot, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+    command(
+      "corepack",
+      ["npm", "install", "--package-lock-only", "--ignore-scripts", "--omit=dev", "--workspaces=false"],
+      { cwd: packageRoot, env: { ...process.env, npm_config_cache: join(temporaryRoot, "npm-cache") } },
+    );
+    const descriptor = openSync(destination, "w");
+    try {
+      execFileSync(
+        "corepack",
+        ["npm", "sbom", "--package-lock-only", "--omit=dev", "--sbom-format", "cyclonedx", "--sbom-type", "library"],
+        { cwd: packageRoot, stdio: ["ignore", descriptor, "inherit"] },
+      );
+    } finally {
+      closeSync(descriptor);
+    }
+  } finally {
+    rmSync(temporaryRoot, { recursive: true, force: true });
+  }
+}
+
+console.log("Generating one CycloneDX SBOM from each packed npm package...");
+const npmCoordinates = new Map();
+for (const tarball of readdirSync(npmRoot).filter(file => file.endsWith(".tgz"))) {
+  const path = join(npmRoot, tarball);
+  const manifest = packedManifest(path);
+  const declared = policy.npm.packages.find(entry => entry.name === manifest.name);
+  if (!declared) throw new Error(`${manifest.name} is packed but has no SBOM policy`);
+  npmCoordinates.set(`npm/${tarball}`, `${manifest.name}@${manifest.version}`);
+  generatePackedNpmSbom(path, join(sbomRoot, `${declared.sbomId}.cdx.json`), manifest);
 }
 
 console.log("Publishing JVM release candidates to the evidence repository...");
@@ -131,21 +166,35 @@ command(
     `-PvireoTestRepository=${mavenRoot}`,
     "publishMavenPublicationToVerificationRepository",
     "cyclonedxBom",
+    ...policy.maven.modules.map(module => `:${module.name}:cyclonedxDirectBom`),
     "--no-build-cache",
   ],
   { stdio: "inherit" },
 );
-const jvmSbomPath = join(sbomRoot, "jvm.cdx.json");
-copyFileSync(join(repoRoot, "jvm", "build", "reports", "cyclonedx", "bom.json"), jvmSbomPath);
-const jvmSbom = JSON.parse(readFileSync(jvmSbomPath, "utf8"));
-if (jvmSbom.bomFormat !== "CycloneDX" || !Array.isArray(jvmSbom.components) || jvmSbom.components.length === 0) {
-  throw new Error("Gradle did not produce a populated CycloneDX SBOM.");
-}
 const jvmVersion = readFileSync(join(repoRoot, "jvm", "gradle.properties"), "utf8").match(/^version=(.+)$/mu)?.[1];
 if (!jvmVersion) throw new Error("Could not read the JVM release version.");
+for (const module of policy.maven.modules) {
+  copyFileSync(
+    join(repoRoot, "jvm", module.name, "build", "reports", "cyclonedx-direct", "bom.json"),
+    join(sbomRoot, `${module.sbomId}.cdx.json`),
+  );
+}
 command(join(repoRoot, "jvm", "scripts", "audit-publication-artifacts.sh"), [mavenRoot, jvmVersion], {
   stdio: "inherit",
 });
+
+console.log("Evaluating npm and JVM third-party licenses...");
+const licenseInventoryPath = join(outputRoot, "licenses", "third-party-license-inventory.json");
+runLicensePolicy({
+  ecosystem: "all",
+  jvmSbom: join(repoRoot, "jvm", "build", "reports", "cyclonedx", "bom.json"),
+  output: licenseInventoryPath,
+});
+const licenseEvidence = {
+  path: relative(outputRoot, licenseInventoryPath).replaceAll("\\", "/"),
+  bytes: statSync(licenseInventoryPath).size,
+  sha256: digest(licenseInventoryPath, "sha256"),
+};
 
 console.log("Evaluating npm and JVM third-party licenses...");
 const licenseInventoryPath = join(outputRoot, "licenses", "third-party-license-inventory.json");
@@ -154,21 +203,63 @@ runLicensePolicy({ ecosystem: "all", jvmSbom: jvmSbomPath, output: licenseInvent
 const subjects = walkFiles(outputRoot)
   .map(path => ({ path, kind: subjectKind(path) }))
   .filter(subject => subject.kind)
-  .map(({ path, kind }) => ({
-    path: relative(outputRoot, path).replaceAll("\\", "/"),
-    kind,
-    bytes: statSync(path).size,
-    sha256: digest(path, "sha256"),
-    sha512: digest(path, "sha512"),
-  }));
+  .map(({ path, kind }) => {
+    const normalized = relative(outputRoot, path).replaceAll("\\", "/");
+    const module =
+      kind === "maven-artifact"
+        ? policy.maven.modules.find(entry => normalized.split("/").at(-1).startsWith(`${entry.name}-${jvmVersion}`))
+        : undefined;
+    return {
+      path: normalized,
+      kind,
+      ecosystem: kind === "npm-package" ? "npm" : "maven",
+      coordinate:
+        kind === "npm-package" ? npmCoordinates.get(normalized) : `${policy.maven.group}:${module?.name}:${jvmVersion}`,
+      bytes: statSync(path).size,
+      sha256: digest(path, "sha256"),
+      sha512: digest(path, "sha512"),
+    };
+  });
 
 const npmSubjectCount = subjects.filter(subject => subject.kind === "npm-package").length;
 const mavenSubjectCount = subjects.filter(subject => subject.kind === "maven-artifact").length;
-if (npmSubjectCount !== 8) throw new Error(`Expected eight npm package subjects, found ${npmSubjectCount}.`);
-if (mavenSubjectCount !== 27) throw new Error(`Expected 27 versioned Maven subjects, found ${mavenSubjectCount}.`);
+if (npmSubjectCount !== policy.npm.expectedSubjectCount)
+  throw new Error(`Expected ${policy.npm.expectedSubjectCount} npm package subjects, found ${npmSubjectCount}.`);
+if (mavenSubjectCount !== policy.maven.expectedSubjectCount)
+  throw new Error(
+    `Expected ${policy.maven.expectedSubjectCount} versioned Maven subjects, found ${mavenSubjectCount}.`,
+  );
+
+const sboms = [
+  ...policy.npm.packages.map(entry => ({
+    id: entry.sbomId,
+    ecosystem: "npm",
+    coordinate: subjects.find(subject => subject.coordinate?.startsWith(`${entry.name}@`))?.coordinate,
+    path: `sbom/${entry.sbomId}.cdx.json`,
+    checksums: `mappings/${entry.sbomId}.sha256`,
+    subjects: subjects.filter(subject => subject.coordinate?.startsWith(`${entry.name}@`)).map(subject => subject.path),
+  })),
+  ...policy.maven.modules.map(module => ({
+    id: module.sbomId,
+    ecosystem: "maven",
+    coordinate: `${policy.maven.group}:${module.name}:${jvmVersion}`,
+    path: `sbom/${module.sbomId}.cdx.json`,
+    checksums: `mappings/${module.sbomId}.sha256`,
+    subjects: subjects
+      .filter(subject => subject.coordinate === `${policy.maven.group}:${module.name}:${jvmVersion}`)
+      .map(subject => subject.path),
+  })),
+];
+mkdirSync(join(outputRoot, "mappings"), { recursive: true });
+for (const mapping of sboms) {
+  writeFileSync(
+    join(outputRoot, mapping.checksums),
+    `${mapping.subjects.map(path => `${subjects.find(subject => subject.path === path).sha256}  ${path}`).join("\n")}\n`,
+  );
+}
 
 const manifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   evidenceClass: "unsigned-release-candidate",
   source: {
     repository: "https://github.com/vireocodedev/starter",
@@ -193,20 +284,25 @@ const manifest = {
         .sort((left, right) => left.name.localeCompare(right.name))
         .map(packageManifest => [packageManifest.name, packageManifest.version]),
     ),
-    maven: { group: "com.vireocode", version: jvmVersion },
+    maven: { group: policy.maven.group, version: jvmVersion },
   },
   subjects,
   controls: {
     sourceMaps: "contracts/package-portability-policy.json",
-    npmSbom: "sbom/npm.cdx.json",
-    jvmSbom: "sbom/jvm.cdx.json",
-    thirdPartyLicenses: "licenses/third-party-license-inventory.json",
+    sbomScope: "one-cyclonedx-document-per-publishable-package-or-module",
+    thirdPartyLicenses: licenseEvidence,
     checksumAlgorithm: ["sha256", "sha512"],
     signature: "absent-in-dry-run",
     publicationRequiresSignedProvenance: true,
     immutableVersionPolicy: "correct-forward-only",
   },
+  sboms,
 };
+
+const sbomProblems = validateReleaseSbomManifest(manifest, policy, { root: outputRoot });
+if (sbomProblems.length > 0) {
+  throw new Error(`Release SBOM evidence is invalid:\n${sbomProblems.map(problem => `- ${problem}`).join("\n")}`);
+}
 
 writeFileSync(join(outputRoot, "release-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 writeFileSync(
@@ -217,7 +313,7 @@ writeFileSync(
 complete = true;
 
 console.log(
-  `Release evidence generated for ${subjects.length} subjects (${npmSubjectCount} npm, ${mavenSubjectCount} Maven, two SBOMs, one license inventory).`,
+  `Release evidence generated for ${subjects.length} subjects (${npmSubjectCount} npm, ${mavenSubjectCount} Maven, ${sboms.length} subject-specific SBOMs, one hashed license inventory).`,
 );
 console.log(`Output: ${outputRoot}`);
 console.log("This dry-run evidence is unsigned; stable publication still requires registry-backed signed provenance.");

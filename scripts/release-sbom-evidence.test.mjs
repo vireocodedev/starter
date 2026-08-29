@@ -1,0 +1,143 @@
+import assert from "node:assert/strict";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import test from "node:test";
+import { validateReleaseSbomManifest, validateReleaseSbomPolicy } from "./lib/release-sbom-evidence.mjs";
+
+const policy = {
+  schemaVersion: 2,
+  npm: {
+    expectedSubjectCount: 1,
+    packages: [{ name: "example", directory: "example", sbomId: "npm-example" }],
+  },
+  maven: {
+    group: "com.example",
+    expectedSubjectCount: 2,
+    modules: [
+      {
+        name: "example-core",
+        sbomId: "maven-example-core",
+        artifacts: [
+          { classifier: "", extension: "jar" },
+          { classifier: "", extension: "pom" },
+        ],
+      },
+    ],
+  },
+};
+
+function fixture() {
+  const root = mkdtempSync(join(tmpdir(), "release-sbom-test-"));
+  mkdirSync(join(root, "sbom"));
+  mkdirSync(join(root, "mappings"));
+  const subjects = [
+    { ecosystem: "npm", coordinate: "example@1.2.3", path: "npm/example-1.2.3.tgz", sha256: "a".repeat(64) },
+    {
+      ecosystem: "maven",
+      coordinate: "com.example:example-core:4.5.6",
+      path: "maven/example-core-4.5.6.jar",
+      sha256: "b".repeat(64),
+    },
+    {
+      ecosystem: "maven",
+      coordinate: "com.example:example-core:4.5.6",
+      path: "maven/example-core-4.5.6.pom",
+      sha256: "c".repeat(64),
+    },
+  ];
+  const sboms = [
+    {
+      id: "npm-example",
+      ecosystem: "npm",
+      coordinate: "example@1.2.3",
+      path: "sbom/npm-example.cdx.json",
+      checksums: "mappings/npm-example.sha256",
+      subjects: [subjects[0].path],
+    },
+    {
+      id: "maven-example-core",
+      ecosystem: "maven",
+      coordinate: "com.example:example-core:4.5.6",
+      path: "sbom/maven-example-core.cdx.json",
+      checksums: "mappings/maven-example-core.sha256",
+      subjects: subjects.slice(1).map(subject => subject.path),
+    },
+  ];
+  for (const mapping of sboms) {
+    const [name, version] = mapping.ecosystem === "npm" ? ["example", "1.2.3"] : ["example-core", "4.5.6"];
+    const component = mapping.ecosystem === "maven" ? { group: "com.example", name, version } : { name, version };
+    const document = { bomFormat: "CycloneDX", specVersion: "1.6", metadata: { component } };
+    if (mapping.ecosystem === "npm") document.components = [];
+    writeFileSync(join(root, mapping.path), JSON.stringify(document));
+    writeFileSync(
+      join(root, mapping.checksums),
+      `${mapping.subjects.map(path => `${subjects.find(subject => subject.path === path).sha256}  ${path}`).join("\n")}\n`,
+    );
+  }
+  return {
+    root,
+    manifest: {
+      schemaVersion: 2,
+      versions: { npm: { example: "1.2.3" }, maven: { group: "com.example", version: "4.5.6" } },
+      subjects,
+      sboms,
+    },
+  };
+}
+
+test("accepts one exact subject family per package or Maven module", t => {
+  const { root, manifest } = fixture();
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  assert.deepEqual(validateReleaseSbomManifest(manifest, policy, { root }), []);
+});
+
+test("rejects unclassified and ambiguously classified subjects", t => {
+  const { root, manifest } = fixture();
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  manifest.subjects.push({
+    ecosystem: "npm",
+    coordinate: "example@1.2.3",
+    path: "npm/unclassified.tgz",
+    sha256: "d".repeat(64),
+  });
+  manifest.sboms[1].subjects.push(manifest.subjects[0].path);
+  const problems = validateReleaseSbomManifest(manifest, policy, { root });
+  assert.ok(problems.some(problem => problem.includes("has no SBOM mapping")));
+  assert.ok(problems.some(problem => problem.includes("ambiguously mapped")));
+});
+
+test("rejects cross-coordinate mappings and a misleading SBOM root component", t => {
+  const { root, manifest } = fixture();
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  manifest.sboms[0].subjects = [manifest.subjects[1].path];
+  writeFileSync(
+    join(root, manifest.sboms[0].path),
+    JSON.stringify({
+      bomFormat: "CycloneDX",
+      specVersion: "1.6",
+      metadata: { component: { name: "different", version: "9.9.9" } },
+      components: [],
+    }),
+  );
+  const problems = validateReleaseSbomManifest(manifest, policy, { root });
+  assert.ok(problems.some(problem => problem.includes("crosses artifact boundary")));
+  assert.ok(problems.some(problem => problem.includes("not example@1.2.3")));
+});
+
+test("rejects duplicate SBOM ownership identifiers and Maven artifact declarations", () => {
+  const invalid = structuredClone(policy);
+  invalid.maven.modules[0].sbomId = "npm-example";
+  invalid.maven.modules[0].artifacts.push({ classifier: "", extension: "jar" });
+  const problems = validateReleaseSbomPolicy(invalid);
+  assert.ok(problems.some(problem => problem.includes("SBOM id npm-example is declared more than once")));
+  assert.ok(problems.some(problem => problem.includes("repeats artifact .jar")));
+});
+
+test("rejects checksum files containing an unrelated subject", t => {
+  const { root, manifest } = fixture();
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  writeFileSync(join(root, manifest.sboms[0].checksums), `${"f".repeat(64)}  npm/not-the-subject.tgz\n`);
+  const problems = validateReleaseSbomManifest(manifest, policy, { root });
+  assert.ok(problems.some(problem => problem.includes("does not contain exactly its mapped subjects")));
+});

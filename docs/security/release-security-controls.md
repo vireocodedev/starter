@@ -148,11 +148,12 @@ the dated recovery exercise.
 
 ## Release evidence boundary
 
-`corepack npm run release:evidence` builds all seven npm tarballs, publishes the
+`corepack npm run release:evidence` builds all eight npm tarballs, publishes the
 six JVM modules to an isolated Maven repository, audits both artifact families,
-generates npm and JVM CycloneDX SBOMs, and records SHA-256/SHA-512 subjects in a
-manifest bound to the clean Git commit and pinned toolchain. The release workflow
-retains that unsigned candidate evidence before either publisher starts.
+generates one CycloneDX SBOM from each packed npm package and one direct CycloneDX
+SBOM for each Maven module, and records SHA-256/SHA-512 subjects in a manifest bound
+to the clean Git commit and pinned toolchain. The release workflow retains that
+unsigned candidate evidence before either publisher starts.
 
 This candidate evidence remains deliberately classified as **unsigned
 release-candidate evidence**, not provenance. Publication jobs rebuild and do not
@@ -160,25 +161,36 @@ promote those candidate bytes.
 
 After public npm or Maven verification succeeds,
 `corepack npm run release:collect-public-evidence` independently downloads the exact
-registry artifacts. It requires registry SRI and a provenance URL for all seven npm
+registry artifacts. It requires registry SRI and a provenance URL for all eight npm
 tarballs, requires Maven Central SHA-256 agreement for all 27 BOM/module artifacts,
-and regenerates populated npm/JVM CycloneDX documents. The
-`Attest public release SBOMs` workflow then uses GitHub OIDC and the public Sigstore
-instance to bind each ecosystem SBOM to those exact public subject digests. It
+and regenerates the 14 subject-specific CycloneDX documents. The eight npm SBOMs
+are generated from the downloaded tarball contents, not the monorepo install. Each
+of the six Maven SBOMs describes exactly one published module. A module SBOM is
+intentionally shared only by that module's binary, sources, Javadoc, POM, and Gradle
+module-metadata files: those are alternate representations of one Maven coordinate,
+not separate dependency graphs. No ecosystem aggregate is attested as though it
+described an individual artifact.
+
+The `Attest public release SBOMs` workflow validates the manifest and per-mapping
+checksum files before using GitHub OIDC and the public Sigstore instance to bind
+each package/module SBOM only to its exact public subject family. The validator
+fails closed on an unclassified subject, duplicate ownership, cross-coordinate
+mapping, misleading CycloneDX root component, or checksum drift. The workflow then
 verifies every subject against the CycloneDX predicate, exact workflow certificate
-identity, and `main` source ref, then retains subjects, manifests, checksums, SBOMs,
+identity, and `main` source ref, and retains subjects, manifests, checksums, SBOMs,
 and signed bundles for 90 days.
 
 Hosted run
 [`33083933339`](https://github.com/vireocodedev/starter/actions/runs/33083933339)
-verified this path for npm attestation
+verified the earlier aggregate path for npm attestation
 [`43426192`](https://github.com/vireocodedev/starter/attestations/43426192), Maven
 attestation
 [`43426201`](https://github.com/vireocodedev/starter/attestations/43426201), and
 retained evidence artifact
 [`9651461596`](https://github.com/vireocodedev/starter/actions/runs/33083933339/artifacts/9651461596).
 These SBOM claims supplement, rather than replace, npm registry provenance and
-Maven PGP signatures.
+Maven PGP signatures. It is historical evidence only; new runs use the
+subject-specific model above.
 
 ## Evidence checklist
 

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateReleaseSbomPolicy } from "./lib/release-sbom-evidence.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const readJson = path => JSON.parse(readFileSync(join(repositoryRoot, path), "utf8"));
@@ -89,6 +90,7 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
   });
 
   const attestation = readJson(contract.policySources.publicArtifacts);
+  problems.push(...validateReleaseSbomPolicy(attestation));
   requireEqual(
     "attested npm names",
     attestation.npm?.packages?.map(entry => entry.name),

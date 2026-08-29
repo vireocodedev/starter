@@ -1,8 +1,21 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  closeSync,
+  copyFileSync,
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputArgument = process.argv[2];
@@ -17,7 +30,7 @@ if (existsSync(outputRoot)) throw new Error(`Public release evidence already exi
 const policy = JSON.parse(
   readFileSync(join(repositoryRoot, "contracts", "public-release-attestation-policy.json"), "utf8"),
 );
-if (policy.schemaVersion !== 1) throw new Error(`Unsupported attestation policy schema ${policy.schemaVersion}`);
+if (policy.schemaVersion !== 2) throw new Error(`Unsupported attestation policy schema ${policy.schemaVersion}`);
 
 const attempts = positiveInteger(process.env.VIREO_PUBLIC_EVIDENCE_ATTEMPTS, 20);
 const intervalMs = positiveInteger(process.env.VIREO_PUBLIC_EVIDENCE_INTERVAL_MS, 15_000);
@@ -77,26 +90,41 @@ async function fetchRequired(url, accept = "application/octet-stream") {
   throw new Error(`Could not fetch ${url}`);
 }
 
-function assertCycloneDx(path, label) {
-  const sbom = JSON.parse(readFileSync(path, "utf8"));
-  if (sbom.bomFormat !== "CycloneDX" || !Array.isArray(sbom.components) || sbom.components.length === 0) {
-    throw new Error(`${label} is not a populated CycloneDX SBOM.`);
+function generatePackedNpmSbom(tarball, destination, expected) {
+  const temporaryRoot = mkdtempSync(join(tmpdir(), "vireo-public-sbom-"));
+  try {
+    command("tar", ["-xzf", tarball, "-C", temporaryRoot]);
+    const packageRoot = join(temporaryRoot, "package");
+    const packed = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+    if (packed.name !== expected.name || packed.version !== expected.version) {
+      throw new Error(
+        `${tarball} contains ${packed.name}@${packed.version}, expected ${expected.name}@${expected.version}`,
+      );
+    }
+    // Resolve only the published install contract. Keeping packed
+    // devDependencies here can cause npm to label a peer as development-only
+    // and silently omit it from the CycloneDX runtime graph.
+    delete packed.devDependencies;
+    writeFileSync(join(packageRoot, "package.json"), `${JSON.stringify(packed, null, 2)}\n`);
+    command(
+      "corepack",
+      ["npm", "install", "--package-lock-only", "--ignore-scripts", "--omit=dev", "--workspaces=false"],
+      { cwd: packageRoot, env: { ...process.env, npm_config_cache: join(temporaryRoot, "npm-cache") } },
+    );
+    const descriptor = openSync(destination, "w");
+    try {
+      execFileSync(
+        "corepack",
+        ["npm", "sbom", "--package-lock-only", "--omit=dev", "--sbom-format", "cyclonedx", "--sbom-type", "library"],
+        { cwd: packageRoot, stdio: ["ignore", descriptor, "inherit"] },
+      );
+    } finally {
+      closeSync(descriptor);
+    }
+  } finally {
+    rmSync(temporaryRoot, { recursive: true, force: true });
   }
 }
-
-console.log("Generating current npm and JVM CycloneDX SBOMs...");
-const npmSbomPath = join(sbomRoot, "npm.cdx.json");
-writeFileSync(npmSbomPath, `${command("corepack", ["npm", "sbom", "--sbom-format", "cyclonedx"])}\n`);
-assertCycloneDx(npmSbomPath, "npm SBOM");
-
-command(
-  join(repositoryRoot, "jvm", "gradlew"),
-  ["-p", join(repositoryRoot, "jvm"), "cyclonedxBom", "--no-build-cache"],
-  { stdio: "inherit" },
-);
-const jvmSbomPath = join(sbomRoot, "jvm.cdx.json");
-copyFileSync(join(repositoryRoot, "jvm", "build", "reports", "cyclonedx", "bom.json"), jvmSbomPath);
-assertCycloneDx(jvmSbomPath, "JVM SBOM");
 
 console.log("Downloading exact public npm tarballs...");
 const npmSubjects = [];
@@ -123,7 +151,7 @@ for (const expected of policy.npm.packages) {
   if (!integrityAlgorithm || !integrityValue || digest(bytes, integrityAlgorithm, "base64") !== integrityValue) {
     throw new Error(`${coordinate} tarball does not match npm registry integrity`);
   }
-  const fileName = `${manifest.name.slice(1).replace("/", "-")}-${manifest.version}.tgz`;
+  const fileName = `${manifest.name.replace(/^@/u, "").replace("/", "-")}-${manifest.version}.tgz`;
   const path = join(npmSubjectsRoot, fileName);
   writeFileSync(path, bytes);
   npmSubjects.push({
@@ -139,6 +167,12 @@ for (const expected of policy.npm.packages) {
     sha512: digest(bytes, "sha512"),
     registryIntegrity: metadata.dist.integrity,
   });
+}
+
+console.log("Generating one CycloneDX SBOM from each exact public npm tarball...");
+for (const subject of npmSubjects) {
+  const declared = policy.npm.packages.find(entry => entry.name === subject.name);
+  generatePackedNpmSbom(join(repositoryRoot, subject.path), join(sbomRoot, `${declared.sbomId}.cdx.json`), subject);
 }
 
 console.log("Downloading exact public Maven Central artifacts...");
@@ -183,6 +217,24 @@ if (mavenSubjects.length !== policy.maven.expectedSubjectCount) {
   throw new Error(`Expected ${policy.maven.expectedSubjectCount} Maven subjects, found ${mavenSubjects.length}`);
 }
 
+console.log("Generating one CycloneDX SBOM for each published Maven module...");
+command(
+  join(repositoryRoot, "jvm", "gradlew"),
+  [
+    "-p",
+    join(repositoryRoot, "jvm"),
+    ...policy.maven.modules.map(module => `:${module.name}:cyclonedxDirectBom`),
+    "--no-build-cache",
+  ],
+  { stdio: "inherit" },
+);
+for (const module of policy.maven.modules) {
+  copyFileSync(
+    join(repositoryRoot, "jvm", module.name, "build", "reports", "cyclonedx-direct", "bom.json"),
+    join(sbomRoot, `${module.sbomId}.cdx.json`),
+  );
+}
+
 function writeChecksums(name, subjects) {
   const path = join(outputRoot, name);
   const rows = subjects
@@ -191,6 +243,33 @@ function writeChecksums(name, subjects) {
   writeFileSync(path, `${rows.join("\n")}\n`);
   return normalizedPath(path);
 }
+
+const sboms = [
+  ...policy.npm.packages.map(entry => ({
+    id: entry.sbomId,
+    ecosystem: "npm",
+    coordinate: npmSubjects.find(subject => subject.name === entry.name)?.coordinate,
+    path: `sbom/${entry.sbomId}.cdx.json`,
+    checksums: `mappings/${entry.sbomId}.sha256`,
+    subjects: npmSubjects.filter(subject => subject.name === entry.name).map(subject => subject.path),
+  })),
+  ...policy.maven.modules.map(module => ({
+    id: module.sbomId,
+    ecosystem: "maven",
+    coordinate: `${policy.maven.group}:${module.name}:${mavenVersion}`,
+    path: `sbom/${module.sbomId}.cdx.json`,
+    checksums: `mappings/${module.sbomId}.sha256`,
+    subjects: mavenSubjects
+      .filter(subject => subject.coordinate === `${policy.maven.group}:${module.name}:${mavenVersion}`)
+      .map(subject => subject.path),
+  })),
+];
+mkdirSync(join(outputRoot, "mappings"), { recursive: true });
+for (const mapping of sboms)
+  writeChecksums(
+    mapping.checksums,
+    mapping.subjects.map(path => [...npmSubjects, ...mavenSubjects].find(subject => subject.path === path)),
+  );
 
 const manifest = {
   schemaVersion: policy.schemaVersion,
@@ -205,20 +284,23 @@ const manifest = {
     npm: Object.fromEntries(npmSubjects.map(subject => [subject.name, subject.version])),
     maven: { group: policy.maven.group, version: mavenVersion },
   },
-  sboms: {
-    npm: normalizedPath(npmSbomPath),
-    maven: normalizedPath(jvmSbomPath),
-  },
+  sboms,
   checksumFiles: {
     npm: writeChecksums("npm-subjects.sha256", npmSubjects),
     maven: writeChecksums("maven-subjects.sha256", mavenSubjects),
   },
   subjects: [...npmSubjects, ...mavenSubjects],
 };
+const sbomProblems = validateReleaseSbomManifest(manifest, policy, { root: outputRoot });
+if (sbomProblems.length > 0) {
+  throw new Error(
+    `Public release SBOM evidence is invalid:\n${sbomProblems.map(problem => `- ${problem}`).join("\n")}`,
+  );
+}
 writeFileSync(join(outputRoot, "public-release-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 
 complete = true;
 console.log(
-  `Collected ${npmSubjects.length} npm and ${mavenSubjects.length} Maven Central exact-byte subjects with two populated SBOMs.`,
+  `Collected ${npmSubjects.length} npm and ${mavenSubjects.length} Maven Central exact-byte subjects with ${sboms.length} subject-specific SBOMs.`,
 );
 console.log(`Output: ${outputRoot}`);

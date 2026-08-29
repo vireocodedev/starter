@@ -1,19 +1,23 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "evidenceClass": "signed-sbom-attestation",
   "repository": "vireocodedev/starter",
   "retentionDays": 90,
   "npm": {
     "registry": "https://registry.npmjs.org",
     "packages": [
-      { "directory": "create-vireo", "name": "create-vireo" },
-      { "directory": "history", "name": "@vireocodedev/history" },
-      { "directory": "infrastructure", "name": "@vireocodedev/infrastructure" },
-      { "directory": "localization", "name": "@vireocodedev/localization" },
-      { "directory": "queryengine", "name": "@vireocodedev/query" },
-      { "directory": "shell", "name": "@vireocodedev/shell" },
-      { "directory": "sqlite", "name": "@vireocodedev/sqlite" },
-      { "directory": "ui", "name": "@vireocodedev/ui" }
+      { "directory": "create-vireo", "name": "create-vireo", "sbomId": "npm-create-vireo" },
+      { "directory": "history", "name": "@vireocodedev/history", "sbomId": "npm-vireocodedev-history" },
+      {
+        "directory": "infrastructure",
+        "name": "@vireocodedev/infrastructure",
+        "sbomId": "npm-vireocodedev-infrastructure"
+      },
+      { "directory": "localization", "name": "@vireocodedev/localization", "sbomId": "npm-vireocodedev-localization" },
+      { "directory": "queryengine", "name": "@vireocodedev/query", "sbomId": "npm-vireocodedev-query" },
+      { "directory": "shell", "name": "@vireocodedev/shell", "sbomId": "npm-vireocodedev-shell" },
+      { "directory": "sqlite", "name": "@vireocodedev/sqlite", "sbomId": "npm-vireocodedev-sqlite" },
+      { "directory": "ui", "name": "@vireocodedev/ui", "sbomId": "npm-vireocodedev-ui" }
     ],
     "expectedSubjectCount": 8
   },
@@ -23,6 +27,7 @@
     "modules": [
       {
         "name": "vireo-bom",
+        "sbomId": "maven-vireo-bom",
         "artifacts": [
           { "classifier": "", "extension": "module" },
           { "classifier": "", "extension": "pom" }
@@ -30,6 +35,7 @@
       },
       {
         "name": "vireo-core",
+        "sbomId": "maven-vireo-core",
         "artifacts": [
           { "classifier": "-javadoc", "extension": "jar" },
           { "classifier": "-sources", "extension": "jar" },
@@ -40,6 +46,7 @@
       },
       {
         "name": "vireo-auth",
+        "sbomId": "maven-vireo-auth",
         "artifacts": [
           { "classifier": "-javadoc", "extension": "jar" },
           { "classifier": "-sources", "extension": "jar" },
@@ -50,6 +57,7 @@
       },
       {
         "name": "vireo-query",
+        "sbomId": "maven-vireo-query",
         "artifacts": [
           { "classifier": "-javadoc", "extension": "jar" },
           { "classifier": "-sources", "extension": "jar" },
@@ -60,6 +68,7 @@
       },
       {
         "name": "vireo-history",
+        "sbomId": "maven-vireo-history",
         "artifacts": [
           { "classifier": "-javadoc", "extension": "jar" },
           { "classifier": "-sources", "extension": "jar" },
@@ -70,6 +79,7 @@
       },
       {
         "name": "vireo-offline",
+        "sbomId": "maven-vireo-offline",
         "artifacts": [
           { "classifier": "-javadoc", "extension": "jar" },
           { "classifier": "-sources", "extension": "jar" },
