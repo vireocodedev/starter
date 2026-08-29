@@ -69,6 +69,7 @@
     "version-packages": "node scripts/changeset-version-adapter.mjs",
     "release:smoke": "node scripts/release-pack-smoke.mjs",
     "release:validate": "node scripts/validate-npm-release.mjs",
+    "release:publish-candidates": "node scripts/publish-verified-npm-candidates.mjs .release-evidence",
     "release:verify-public": "node scripts/verify-npm-public-release.mjs",
     "release:evidence": "node scripts/generate-release-evidence.mjs .release-evidence",
     "release:collect-public-evidence": "node scripts/collect-public-release-evidence.mjs .public-release-evidence",

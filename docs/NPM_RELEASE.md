@@ -85,8 +85,10 @@ version is outside the approved `0.x` line, or there is nothing new to publish.
 4. Approve the `package-release` environment deployment.
 5. Confirm that the publish job reports at least one published package.
 
-The workflow rechecks registry immutability immediately before Changesets calls
-`npm publish`. The production workflow is OIDC-only: it does not read
+The publish job downloads the retained evidence from the verify job, requires its
+source commit and all eight tarball SHA-256 digests to match, rechecks registry
+immutability, and passes those exact tarballs to `npm publish`. It does not rebuild
+package bytes. The production workflow is OIDC-only: it does not read
 `NPM_TOKEN` or `NODE_AUTH_TOKEN`. npm obtains a short-lived identity from GitHub
 Actions and records provenance for each publication.
 
@@ -119,9 +121,9 @@ publisher received a success response.
 
 - If verification times out while npm is propagating a valid release, rerun
   **Verify public npm release**. Do not republish the same version.
-- If only some workspaces publish, inspect npm first. The validation and
-  Changesets tooling skip already-immutable coordinates, so a reviewed retry may
-  publish only the missing versions from the unchanged commit.
+- If only some workspaces publish, inspect npm first. The publisher skips
+  already-immutable coordinates, so a reviewed retry may publish only the missing
+  tarballs from the unchanged retained candidate.
 - If a published artifact is defective, deprecate it with an actionable message,
   prepare corrected patch versions, and run the normal release path. Never move
   a tag or attempt to overwrite a published version.
