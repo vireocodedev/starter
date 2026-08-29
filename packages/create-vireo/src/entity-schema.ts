@@ -206,6 +206,108 @@ const RESERVED_JAVA_NAMES = new Set([
   "volatile",
   "while",
 ]);
+const PORTABLE_SQL_IDENTIFIER_MAX_LENGTH = 63;
+const PORTABLE_SQL_RESERVED_WORDS = new Set([
+  "all",
+  "and",
+  "any",
+  "array",
+  "as",
+  "authorization",
+  "between",
+  "both",
+  "case",
+  "cast",
+  "check",
+  "column",
+  "constraint",
+  "create",
+  "cross",
+  "current_date",
+  "current_role",
+  "current_schema",
+  "current_time",
+  "current_timestamp",
+  "current_user",
+  "default",
+  "distinct",
+  "else",
+  "end",
+  "except",
+  "exists",
+  "false",
+  "fetch",
+  "for",
+  "foreign",
+  "from",
+  "full",
+  "grant",
+  "group",
+  "having",
+  "in",
+  "inner",
+  "intersect",
+  "into",
+  "is",
+  "join",
+  "key",
+  "leading",
+  "left",
+  "like",
+  "limit",
+  "localtime",
+  "localtimestamp",
+  "natural",
+  "not",
+  "null",
+  "offset",
+  "on",
+  "only",
+  "or",
+  "order",
+  "outer",
+  "primary",
+  "references",
+  "returning",
+  "right",
+  "row",
+  "select",
+  "session_user",
+  "set",
+  "some",
+  "table",
+  "then",
+  "to",
+  "true",
+  "union",
+  "unique",
+  "user",
+  "using",
+  "value",
+  "values",
+  "when",
+  "where",
+  "window",
+  "with",
+]);
+const GENERATED_AUDIT_COLUMNS = new Set([
+  "created_at",
+  "modified_at",
+  "created_by",
+  "modified_by",
+  "keywords",
+  "deleted",
+]);
+
+export function entityFieldSqlName(value: string) {
+  return value.replace(/([a-z0-9])([A-Z])/gu, "$1_$2").toLocaleLowerCase("en-US");
+}
+
+function validateSqlIdentifier(value: string, path: string, problems: string[]) {
+  if (value.length > PORTABLE_SQL_IDENTIFIER_MAX_LENGTH)
+    problems.push(`${path} exceeds the portable ${PORTABLE_SQL_IDENTIFIER_MAX_LENGTH}-character SQL identifier limit`);
+  if (PORTABLE_SQL_RESERVED_WORDS.has(value)) problems.push(`${path} uses the reserved H2/PostgreSQL word ${value}`);
+}
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -432,6 +534,7 @@ export function parseEntitySchema(value: unknown): VireoEntitySchema {
   rejectUnknown(database, ["table", "migrationVersion"], "database", problems);
   const table = requiredString(database, "table", "database", problems);
   if (table && !/^[a-z][a-z0-9_]*$/u.test(table)) problems.push("database.table must be lower_snake_case");
+  if (table) validateSqlIdentifier(table, "database.table", problems);
   if (!Number.isSafeInteger(database.migrationVersion) || Number(database.migrationVersion) < 1)
     problems.push("database.migrationVersion must be a positive integer");
 
@@ -460,6 +563,21 @@ export function parseEntitySchema(value: unknown): VireoEntitySchema {
     : [];
   const fieldNames = fields.map(field => field!.name);
   if (new Set(fieldNames).size !== fieldNames.length) problems.push("field names must be unique");
+  const sqlFieldNames = fields.map(field => entityFieldSqlName(field!.name));
+  for (const [index, sqlFieldName] of sqlFieldNames.entries()) {
+    validateSqlIdentifier(sqlFieldName, `fields[${index}].name-derived SQL identifier`, problems);
+    if (GENERATED_AUDIT_COLUMNS.has(sqlFieldName))
+      problems.push(`fields[${index}].name conflicts with the generated ${sqlFieldName} audit column`);
+    if (table && fields[index]?.type === "enum")
+      validateSqlIdentifier(`ck_${table}_${sqlFieldName}`, `fields[${index}].name-derived check constraint`, problems);
+    if (
+      table &&
+      (fields[index]?.query?.filterable || fields[index]?.query?.searchable || fields[index]?.query?.sortable)
+    )
+      validateSqlIdentifier(`ix_${table}_${sqlFieldName}`, `fields[${index}].name-derived index`, problems);
+  }
+  if (new Set(sqlFieldNames).size !== sqlFieldNames.length)
+    problems.push("field names must remain unique after lower_snake_case SQL conversion");
   if (!fields.some(field => field?.query?.searchable)) problems.push("at least one field must be query.searchable");
 
   if (value.relationships !== undefined) {

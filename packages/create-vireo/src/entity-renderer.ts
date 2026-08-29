@@ -1,4 +1,9 @@
-import type { EntityFieldSchema, EntityFieldType, VireoEntitySchema } from "./entity-schema.js";
+import {
+  entityFieldSqlName,
+  type EntityFieldSchema,
+  type EntityFieldType,
+  type VireoEntitySchema,
+} from "./entity-schema.js";
 
 export type GeneratedFile = {
   path: string;
@@ -70,10 +75,6 @@ function upperSnake(value: string) {
 
 function upperFirst(value: string) {
   return `${value[0].toLocaleUpperCase("en-US")}${value.slice(1)}`;
-}
-
-function sqlName(value: string) {
-  return value.replace(/([a-z0-9])([A-Z])/gu, "$1_$2").toLocaleLowerCase("en-US");
 }
 
 export function entityNames(schema: VireoEntitySchema, project: VireoProjectMetadata): EntityNames {
@@ -213,7 +214,7 @@ function entityField(field: EntityFieldSchema, schema: VireoEntitySchema) {
         ? field.constraints?.max
         : undefined;
   const columnOptions = [
-    `name = "${sqlName(field.name)}"`,
+    `name = "${entityFieldSqlName(field.name)}"`,
     field.required ? "nullable = false" : "",
     field.unique ? "unique = true" : "",
     length ? `length = ${length}` : "",
@@ -499,7 +500,7 @@ function sqlDefault(field: EntityFieldSchema) {
 function renderMigration(schema: VireoEntitySchema, names: EntityNames, digest: string) {
   const fields = schema.fields.map(field => {
     const constraints = `${field.required ? " NOT NULL" : ""}${field.unique ? " UNIQUE" : ""}${sqlDefault(field)}`;
-    return `    ${sqlName(field.name)} ${sqlType(field)}${constraints}`;
+    return `    ${entityFieldSqlName(field.name)} ${sqlType(field)}${constraints}`;
   });
   const audit = [
     "    created_at TIMESTAMP WITH TIME ZONE",
@@ -513,14 +514,14 @@ function renderMigration(schema: VireoEntitySchema, names: EntityNames, digest: 
     .filter(field => field.type === "enum")
     .map(
       field =>
-        `    CONSTRAINT ck_${schema.database.table}_${sqlName(field.name)} CHECK (${sqlName(field.name)} IN (${field.enumValues!.map(value => `'${value}'`).join(", ")}))`,
+        `    CONSTRAINT ck_${schema.database.table}_${entityFieldSqlName(field.name)} CHECK (${entityFieldSqlName(field.name)} IN (${field.enumValues!.map(value => `'${value}'`).join(", ")}))`,
     );
   const columns = [...fields, ...audit, ...checks].join(",\n");
   const indexes = schema.fields
     .filter(field => field.query?.filterable || field.query?.searchable || field.query?.sortable)
     .map(
       field =>
-        `CREATE INDEX IF NOT EXISTS ix_${schema.database.table}_${sqlName(field.name)} ON ${schema.database.table} (${sqlName(field.name)});`,
+        `CREATE INDEX IF NOT EXISTS ix_${schema.database.table}_${entityFieldSqlName(field.name)} ON ${schema.database.table} (${entityFieldSqlName(field.name)});`,
     )
     .join("\n");
   return `${generatedHeader("--", digest, "generated-once")}CREATE TABLE IF NOT EXISTS ${schema.database.table} (

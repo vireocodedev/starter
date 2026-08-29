@@ -100,6 +100,38 @@ test("rejects reserved, Unicode, relationship, compound-id, and offline shapes e
   }
 });
 
+test("rejects reserved, colliding, and oversized derived SQL identifiers", () => {
+  assert.throws(
+    () => parseEntitySchema(schema({ database: { table: "user", migrationVersion: 3 } })),
+    /reserved H2\/PostgreSQL word user/u,
+  );
+
+  const reservedField = schema();
+  reservedField.fields[0] = { ...reservedField.fields[0], name: "order" };
+  assert.throws(() => parseEntitySchema(reservedField), /reserved H2\/PostgreSQL word order/u);
+
+  const auditCollision = schema();
+  auditCollision.fields[0] = { ...auditCollision.fields[0], name: "createdAt" };
+  assert.throws(() => parseEntitySchema(auditCollision), /conflicts with the generated created_at audit column/u);
+
+  const conversionCollision = schema();
+  conversionCollision.fields = [
+    { ...conversionCollision.fields[0], name: "apiClient" },
+    { ...conversionCollision.fields[0], name: "apiCLIENT" },
+  ];
+  assert.throws(() => parseEntitySchema(conversionCollision), /remain unique after lower_snake_case/u);
+
+  assert.throws(
+    () =>
+      parseEntitySchema(
+        schema({
+          database: { table: `orders_${"x".repeat(48)}`, migrationVersion: 3 },
+        }),
+      ),
+    /name-derived index exceeds the portable 63-character/u,
+  );
+});
+
 test("rejects nested field values that disagree with their declared type", () => {
   const invalid = schema();
   invalid.fields[0] = {

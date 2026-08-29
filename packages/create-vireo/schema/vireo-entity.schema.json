@@ -34,7 +34,7 @@
       "additionalProperties": false,
       "required": ["table", "migrationVersion"],
       "properties": {
-        "table": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "table": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "maxLength": 63 },
         "migrationVersion": { "type": "integer", "minimum": 1 }
       }
     },
@@ -73,7 +73,7 @@
         "additionalProperties": false,
         "required": ["name", "type"],
         "properties": {
-          "name": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+          "name": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$", "maxLength": 63 },
           "type": {
             "enum": ["boolean", "date", "decimal", "enum", "integer", "long", "string", "text", "timestamp", "uuid"]
           },

@@ -49,4 +49,6 @@ cross a team boundary; the frontend renderer ignores backend-only values.
 
 The v1 identifier is a generated `Long`. Explicit singular/plural names avoid English pluralization guesses. Acronyms are accepted when portable. Relationships, compound identifiers, and offline replay are represented as deliberate admission boundaries rather than partially generated code. Offline guarantees belong to Phase 4; relationship generation requires an admitted relational fixture.
 
+Full-stack schemas use an unquoted, portable H2/PostgreSQL identifier policy. Table names and field-derived column names cannot be reserved words, cannot conflict with generated audit columns, and must remain unique after lower-camel to lower-snake conversion. Tables, columns, generated enum checks, and generated query indexes must each fit PostgreSQL's 63-character identifier limit. The CLI reports the exact derived identifier before writing files; shorten the table or field name instead of relying on database truncation or quoting.
+
 See [generated-code ownership](../architecture/generated-code-ownership.md) before regeneration and [wire contracts](../architecture/wire-contracts.md) before changing transport fields.
