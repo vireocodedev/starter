@@ -8,22 +8,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +51,7 @@ class OfflineSyncServiceTest {
         QueryEngineFilterSpecificationBuilder filterBuilder = org.mockito.Mockito
                 .mock(QueryEngineFilterSpecificationBuilder.class);
 
-        OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(), actorResolver,
+        OfflineSyncService service = serviceWithTransactions(heartbeatService, repository, new ObjectMapper(), actorResolver,
                 List.of(), filterBuilder);
 
         OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of()),
@@ -206,7 +211,7 @@ class OfflineSyncServiceTest {
         when(handler.process(eq(command)))
                 .thenReturn(new OfflineSyncCommandResultDto(commandId, true, 200, null));
 
-        OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(),
+        OfflineSyncService service = serviceWithTransactions(heartbeatService, repository, new ObjectMapper(),
                 actorResolver, List.of(handler), filterBuilder);
         bind(existing, command, service);
 
@@ -222,6 +227,32 @@ class OfflineSyncServiceTest {
         verify(repository, org.mockito.Mockito.times(2)).save(existing);
         verify(repository, never()).saveAndFlush(any(OfflineSyncCommandEntity.class));
         verify(handler).process(eq(command));
+    }
+
+    @Test
+    void processBatch_ResumesAPendingClaimLeftByAProcessFailure() {
+        OfflineSyncReplayHandler handler = org.mockito.Mockito.mock(OfflineSyncReplayHandler.class);
+        UUID commandId = UUID.randomUUID();
+        OfflineSyncCommandDto command = new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of());
+        OfflineSyncCommandEntity pending = new OfflineSyncCommandEntity();
+        pending.setCommandId(commandId);
+        pending.setStatus(OfflineSyncCommandStatus.PENDING);
+
+        OfflineSyncService service = serviceWithTransactions(heartbeatService, repository(), new ObjectMapper(),
+                actorResolver(), List.of(handler), queryBuilder());
+        bind(pending, command, service);
+        when(actorResolver().resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
+        when(repository().findAllByCommandIdIn(any())).thenReturn(List.of(pending));
+        when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
+        when(handler.process(command)).thenReturn(new OfflineSyncCommandResultDto(commandId, true, 204, null));
+
+        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(command)),
+                requestWithBaseUrl());
+
+        assertEquals(1, response.accepted());
+        assertEquals(1, pending.getRetryCount());
+        assertEquals(OfflineSyncCommandStatus.DONE, pending.getStatus());
+        assertEquals(204, pending.getResponseStatus());
     }
 
     @Test
@@ -363,21 +394,54 @@ class OfflineSyncServiceTest {
     }
 
     @Test
-    void privateHelper_IsPermanentFailure_SeparatesClientErrorsFromTransientOnes() throws Exception {
-        OfflineSyncService service = newService();
+    void processBatch_ConstraintRollbackDoesNotPreventTheNextCommandFromCommitting() {
+        OfflineSyncCommandRepository commandRepository = org.mockito.Mockito.mock(OfflineSyncCommandRepository.class);
+        OfflineSyncReplayHandler handler = org.mockito.Mockito.mock(OfflineSyncReplayHandler.class);
+        PlatformTransactionManager transactionManager = org.mockito.Mockito.mock(PlatformTransactionManager.class);
+        AtomicInteger commits = new AtomicInteger();
+        AtomicInteger rollbacks = new AtomicInteger();
+        when(actorResolver().resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
+        when(commandRepository.findAllByCommandIdIn(any())).thenReturn(List.of());
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        doAnswer(invocation -> {
+            commits.incrementAndGet();
+            return null;
+        }).when(transactionManager).commit(any());
+        doAnswer(invocation -> {
+            rollbacks.incrementAndGet();
+            return null;
+        }).when(transactionManager).rollback(any());
 
-        assertTrue((Boolean) invoke(service, "isPermanentFailure",
-                new Class<?>[] { org.springframework.http.HttpStatusCode.class },
-                org.springframework.http.HttpStatus.BAD_REQUEST));
-        assertFalse((Boolean) invoke(service, "isPermanentFailure",
-                new Class<?>[] { org.springframework.http.HttpStatusCode.class },
-                org.springframework.http.HttpStatus.REQUEST_TIMEOUT));
-        assertFalse((Boolean) invoke(service, "isPermanentFailure",
-                new Class<?>[] { org.springframework.http.HttpStatusCode.class },
-                org.springframework.http.HttpStatus.TOO_MANY_REQUESTS));
-        assertFalse((Boolean) invoke(service, "isPermanentFailure",
-                new Class<?>[] { org.springframework.http.HttpStatusCode.class },
-                org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR));
+        UUID conflictedId = UUID.randomUUID();
+        UUID appliedId = UUID.randomUUID();
+        when(commandRepository.saveAndFlush(any(OfflineSyncCommandEntity.class)))
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("duplicate command_id"))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(commandRepository.save(any(OfflineSyncCommandEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(handler.supports(any(OfflineSyncCommandDto.class), eq(HttpMethod.POST))).thenReturn(true);
+        when(handler.process(any(OfflineSyncCommandDto.class))).thenAnswer(invocation -> {
+            OfflineSyncCommandDto command = invocation.getArgument(0);
+            return new OfflineSyncCommandResultDto(command.commandId(), true, 204, null);
+        });
+        OfflineSyncService service = new OfflineSyncService(heartbeatService, commandRepository, new ObjectMapper(),
+                actorResolver(), List.of(handler), queryBuilder(), transactionManager);
+
+        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(
+                new OfflineSyncCommandDto(conflictedId, "POST", "/api/orders/conflict", null, Map.of()),
+                new OfflineSyncCommandDto(appliedId, "POST", "/api/orders/apply", null, Map.of()))),
+                requestWithBaseUrl());
+
+        assertEquals(1, response.accepted());
+        assertEquals(1, response.failed());
+        assertEquals(OfflineSyncResultReason.RETRYABLE, response.results().get(0).reason());
+        assertEquals(OfflineSyncResultReason.APPLIED, response.results().get(1).reason());
+        assertEquals(1, rollbacks.get());
+        assertEquals(2, commits.get());
+        ArgumentCaptor<OfflineSyncCommandEntity> finalized = ArgumentCaptor.forClass(OfflineSyncCommandEntity.class);
+        verify(commandRepository).save(finalized.capture());
+        assertEquals(appliedId, finalized.getValue().getCommandId());
+        assertEquals(OfflineSyncCommandStatus.DONE, finalized.getValue().getStatus());
     }
 
     @Test
@@ -447,7 +511,7 @@ class OfflineSyncServiceTest {
         when(handler.process(eq(command)))
                 .thenReturn(new OfflineSyncCommandResultDto(commandId, true, 201, null));
 
-        OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(), actorResolver,
+        OfflineSyncService service = serviceWithTransactions(heartbeatService, repository, new ObjectMapper(), actorResolver,
                 List.of(handler), filterBuilder);
 
         OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(command)),
@@ -456,6 +520,24 @@ class OfflineSyncServiceTest {
         assertEquals(1, response.accepted());
         assertEquals(0, response.failed());
         assertEquals(201, response.results().get(0).status());
+    }
+
+    @Test
+    void processBatch_RejectsValidCommandWithoutAnApplicationReplayHandler() {
+        OfflineSyncService service = newService();
+        UUID commandId = UUID.randomUUID();
+        when(repository().findAllByCommandIdIn(any())).thenReturn(List.of());
+
+        OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(
+                new OfflineSyncCommandDto(commandId, "POST", "/api/product", null, Map.of()))),
+                requestWithBaseUrl());
+
+        assertEquals(0, response.accepted());
+        assertEquals(422, response.results().get(0).status());
+        assertEquals(OfflineSyncResultReason.REJECTED, response.results().get(0).reason());
+        ArgumentCaptor<OfflineSyncCommandEntity> saved = ArgumentCaptor.forClass(OfflineSyncCommandEntity.class);
+        verify(repository(), atLeastOnce()).save(saved.capture());
+        assertEquals(OfflineSyncCommandStatus.REJECTED, saved.getValue().getStatus());
     }
 
     @Test
@@ -475,7 +557,7 @@ class OfflineSyncServiceTest {
         when(handler.supports(command, HttpMethod.POST)).thenReturn(true);
         when(handler.process(eq(command))).thenThrow(new RuntimeException("boom"));
 
-        OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, new ObjectMapper(), actorResolver,
+        OfflineSyncService service = serviceWithTransactions(heartbeatService, repository, new ObjectMapper(), actorResolver,
                 List.of(handler), filterBuilder);
 
         OfflineSyncBatchResponseDto response = service.processBatch(new OfflineSyncBatchRequestDto(List.of(command)),
@@ -485,6 +567,79 @@ class OfflineSyncServiceTest {
         assertEquals(1, response.failed());
         assertEquals(500, response.results().get(0).status());
         assertEquals("Command replay failed.", response.results().get(0).error());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void processBatch_UsesIndependentTransactionsAndNeverDispatchesRequestCredentialsOrHost() {
+        OfflineHeartbeatService heartbeat = org.mockito.Mockito.mock(OfflineHeartbeatService.class);
+        OfflineSyncCommandRepository commandRepository = org.mockito.Mockito.mock(OfflineSyncCommandRepository.class);
+        OfflineActorResolver resolver = org.mockito.Mockito.mock(OfflineActorResolver.class);
+        QueryEngineFilterSpecificationBuilder filterBuilder = org.mockito.Mockito
+                .mock(QueryEngineFilterSpecificationBuilder.class);
+        OfflineSyncReplayHandler handler = org.mockito.Mockito.mock(OfflineSyncReplayHandler.class);
+        PlatformTransactionManager transactionManager = org.mockito.Mockito.mock(PlatformTransactionManager.class);
+        AtomicInteger commits = new AtomicInteger();
+        Map<UUID, OfflineSyncCommandEntity> persisted = new HashMap<>();
+
+        when(resolver.resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        doAnswer(invocation -> {
+            commits.incrementAndGet();
+            return null;
+        }).when(transactionManager).commit(any());
+        when(commandRepository.findAllByCommandIdIn(any())).thenAnswer(invocation -> {
+            Collection<UUID> ids = invocation.getArgument(0);
+            return ids.stream().map(persisted::get).filter(java.util.Objects::nonNull).toList();
+        });
+        when(commandRepository.saveAndFlush(any(OfflineSyncCommandEntity.class))).thenAnswer(invocation -> {
+            OfflineSyncCommandEntity entity = invocation.getArgument(0);
+            persisted.put(entity.getCommandId(), entity);
+            return entity;
+        });
+        when(commandRepository.save(any(OfflineSyncCommandEntity.class))).thenAnswer(invocation -> {
+            OfflineSyncCommandEntity entity = invocation.getArgument(0);
+            persisted.put(entity.getCommandId(), entity);
+            return entity;
+        });
+        when(handler.supports(any(OfflineSyncCommandDto.class), eq(HttpMethod.POST))).thenReturn(true);
+        when(handler.process(any(OfflineSyncCommandDto.class))).thenAnswer(invocation -> {
+            OfflineSyncCommandDto command = invocation.getArgument(0);
+            if (command.url().endsWith("/fail")) {
+                assertEquals(1, commits.get(), "the claim must commit before application dispatch");
+                throw new IllegalStateException("domain conflict");
+            }
+            assertEquals(3, commits.get(), "the previous finalize and this claim must commit independently");
+            assertEquals(Map.of("Idempotency-Key", "safe"), command.headers());
+            return new OfflineSyncCommandResultDto(command.commandId(), true, 204, null);
+        });
+
+        OfflineSyncService service = new OfflineSyncService(heartbeat, commandRepository, new ObjectMapper(), resolver,
+                List.of(handler), filterBuilder, transactionManager);
+        UUID failedId = UUID.randomUUID();
+        UUID appliedId = UUID.randomUUID();
+        OfflineSyncBatchRequestDto batch = new OfflineSyncBatchRequestDto(List.of(
+                new OfflineSyncCommandDto(failedId, "POST", "/api/orders/fail", null,
+                        Map.of("Cookie", "queued-secret", "Host", "queued.example", "Idempotency-Key", "safe")),
+                new OfflineSyncCommandDto(appliedId, "POST", "/api/orders/apply", null,
+                        Map.of("Cookie", "queued-secret", "Idempotency-Key", "safe"))));
+        MockHttpServletRequest request = requestWithBaseUrl();
+        request.setServerName("attacker.example");
+        request.addHeader("Host", "attacker.example");
+        request.addHeader("Cookie", "SESSION=incoming-secret");
+        request.addHeader("X-XSRF-TOKEN", "incoming-xsrf");
+
+        OfflineSyncBatchResponseDto response = service.processBatch(batch, request);
+
+        assertEquals(1, response.accepted());
+        assertEquals(1, response.failed());
+        assertEquals(OfflineSyncResultReason.RETRYABLE, response.results().get(0).reason());
+        assertEquals(OfflineSyncResultReason.APPLIED, response.results().get(1).reason());
+        assertEquals(OfflineSyncCommandStatus.FAILED, persisted.get(failedId).getStatus());
+        assertEquals(OfflineSyncCommandStatus.DONE, persisted.get(appliedId).getStatus());
+        assertEquals(4, commits.get());
+        assertFalse(java.util.Arrays.stream(OfflineSyncService.class.getDeclaredFields())
+                .anyMatch(field -> field.getType().getName().contains("RestClient")));
     }
 
     @Test
@@ -531,7 +686,7 @@ class OfflineSyncServiceTest {
     }
 
     @Test
-    void privateHelpers_CopyHeadersReplayableUrlAndToJsonFallback() throws Exception {
+    void privateHelpers_ValidateReplayableUrlAndToJsonFallback() throws Exception {
         OfflineHeartbeatService heartbeatService = org.mockito.Mockito.mock(OfflineHeartbeatService.class);
         OfflineSyncCommandRepository repository = org.mockito.Mockito.mock(OfflineSyncCommandRepository.class);
         OfflineActorResolver actorResolver = org.mockito.Mockito.mock(OfflineActorResolver.class);
@@ -543,25 +698,8 @@ class OfflineSyncServiceTest {
             private static final long serialVersionUID = 1L;
         });
 
-        OfflineSyncService service = new OfflineSyncService(heartbeatService, repository, mapper, actorResolver,
+        OfflineSyncService service = serviceWithTransactions(heartbeatService, repository, mapper, actorResolver,
                 List.of(), filterBuilder);
-
-        HttpHeaders headers = new HttpHeaders();
-        MockHttpServletRequest request = requestWithBaseUrl();
-        request.addHeader("Cookie", "SESSION=abc");
-        request.addHeader("X-XSRF-TOKEN", "token");
-
-        invoke(service, "copyHeaders", new Class<?>[] { HttpHeaders.class, Map.class, jakarta.servlet.http.HttpServletRequest.class },
-                headers,
-                Map.of("Idempotency-Key", "ok", "X-Custom", "blocked", "Host", "example.org", "Cookie",
-                        "should-not-pass", "", "skip"),
-                request);
-
-        assertEquals("SESSION=abc", headers.getFirst("Cookie"));
-        assertEquals("token", headers.getFirst("X-XSRF-TOKEN"));
-        assertEquals("ok", headers.getFirst("Idempotency-Key"));
-        assertNull(headers.getFirst("X-Custom"));
-        assertNull(headers.getFirst("Host"));
 
         assertTrue((Boolean) invoke(service, "isReplayableApiUrl", new Class<?>[] { String.class }, "/api/product"));
         assertFalse((Boolean) invoke(service, "isReplayableApiUrl", new Class<?>[] { String.class }, "/api/offline/sync"));
@@ -617,7 +755,17 @@ class OfflineSyncServiceTest {
 
     private OfflineSyncService newService() {
         when(actorResolver.resolveCurrentActor()).thenReturn(Optional.of(TEST_ACTOR));
-        return new OfflineSyncService(heartbeatService, repository, new ObjectMapper(), actorResolver, List.of(), queryBuilder);
+        return serviceWithTransactions(heartbeatService, repository, new ObjectMapper(), actorResolver, List.of(),
+                queryBuilder);
+    }
+
+    private OfflineSyncService serviceWithTransactions(OfflineHeartbeatService heartbeat,
+            OfflineSyncCommandRepository commandRepository, ObjectMapper mapper, OfflineActorResolver resolver,
+            List<OfflineSyncReplayHandler> handlers, QueryEngineFilterSpecificationBuilder filterBuilder) {
+        PlatformTransactionManager transactionManager = org.mockito.Mockito.mock(PlatformTransactionManager.class);
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        return new OfflineSyncService(heartbeat, commandRepository, mapper, resolver, handlers, filterBuilder,
+                transactionManager);
     }
 
     private void bind(OfflineSyncCommandEntity entity, OfflineSyncCommandDto command, OfflineSyncService service) {

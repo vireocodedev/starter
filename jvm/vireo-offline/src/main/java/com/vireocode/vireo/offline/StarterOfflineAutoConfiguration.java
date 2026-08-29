@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestClient;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.Clock;
 
@@ -81,13 +81,20 @@ public class StarterOfflineAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    OfflineSyncTransactionOperations starterOfflineSyncTransactionOperations(
+            PlatformTransactionManager transactionManager) {
+        return new OfflineSyncTransactionOperations(transactionManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     OfflineSyncService starterOfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
             OfflineSyncCommandRepository repository, ObjectMapper objectMapper, OfflineActorResolver actorResolver,
             List<OfflineSyncReplayHandler> replayHandlers,
             QueryEngineFilterSpecificationBuilder filterSpecificationBuilder, StarterOfflineProperties properties,
-            Clock clock) {
+            Clock clock, OfflineSyncTransactionOperations transactionOperations) {
         return new OfflineSyncService(offlineHeartbeatService, repository, objectMapper, actorResolver, replayHandlers,
-                filterSpecificationBuilder, properties, clock, RestClient.builder());
+                filterSpecificationBuilder, properties, clock, transactionOperations);
     }
 
     @Bean

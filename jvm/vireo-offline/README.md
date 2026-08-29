@@ -23,7 +23,7 @@ The artifact depends on Core and Query Engine. Auth is an implementation depende
 - `POST /api/offline/sync/commands/search` exposes caller-scoped command diagnostics.
 - `GET /api/offline/hydration/versions` returns normalized per-entity revisions.
 - `GET /api/offline/heartbeat` and `/stream` expose current sync state and transaction-aware change batches.
-- `OfflineSyncReplayHandler` is an ordered application extension point for domain replay that should not loop through the HTTP stack.
+- `OfflineSyncReplayHandler` is the required, ordered application extension point for domain replay. Offline never loops a command through the HTTP stack.
 - `OfflineActorResolver` supplies application-neutral command ownership and privileged-read policy.
 - `OfflineSseAudienceResolver` supplies the opaque subject/tenant audience shared by a stream and its events.
 
@@ -31,13 +31,13 @@ All default endpoints require authentication. A non-privileged actor sees only c
 
 ## Replay safety
 
-The default policy accepts only `POST`, `PUT`, `PATCH`, and `DELETE` beneath `/api/`. Auth and Offline paths are excluded. Paths must be relative, canonical, fragment-free, and free of encoded traversal. Only `Content-Type`, `Idempotency-Key`, and `X-Offline-Temp-Id` are accepted from queued command headers; session cookie and XSRF headers come from the authenticated flush request.
+The default policy accepts only `POST`, `PUT`, `PATCH`, and `DELETE` beneath `/api/`. Auth and Offline paths are excluded. Paths must be relative, canonical, fragment-free, and free of encoded traversal. Only `Content-Type`, `Idempotency-Key`, and `X-Offline-Temp-Id` are accepted from queued command headers. Incoming Host, Cookie, CSRF, Authorization, and arbitrary queued headers are never copied into command dispatch. Authentication establishes the actor and security context at the sync endpoint; it is not forwarded as a credential-bearing loopback request.
 
 Request bodies and headers are omitted from `OfflineSyncCommandDto.toString()`. Downstream exception bodies are not returned to clients. Duplicate IDs inside one batch and oversized batches fail before replay.
 
 Command diagnostics reject pages above 10,000, page sizes above 200, and the former `rowsPerPage=-1` all-rows sentinel before repository access.
 
-Custom handlers receive an immutable command DTO and return an outcome. Offline—not the handler—owns persistence, retry state, and timestamps.
+Custom handlers receive an immutable, header-sanitized command DTO and return an outcome. Offline—not the handler—owns persistence, retry state, and timestamps. A valid command with no accepting application handler is permanently rejected with status 422; there is no HTTP fallback.
 
 ## Configuration
 
@@ -63,7 +63,9 @@ Endpoint paths must be absolute and distinct. Numeric limits and heartbeat caden
 
 ## Persistence and failure semantics
 
-Every non-empty batch requires a resolved actor. Stored commands carry a normalized actor key and a SHA-256 fingerprint over the canonical method, URL, JSON body, and admitted replay headers. A stored `DONE` command is idempotent success only when both bindings match; another actor cannot observe that result, payload reuse is rejected with 409, and pre-binding legacy rows are never replayed. `command_id` remains globally unique as a collision backstop, with an additional actor/command database constraint. Transient failures are retried up to the configured server budget; permanent 4xx failures, excluding timeout and throttling responses, are rejected. Concurrent inserts return a generic retryable conflict. Handler results are persisted centrally.
+Every non-empty batch requires a resolved actor. Stored commands carry a normalized actor key and a SHA-256 fingerprint over the canonical method, URL, JSON body, and admitted replay headers. A stored `DONE` command is idempotent success only when both bindings match; another actor cannot observe that result, payload reuse is rejected with 409, and pre-binding legacy rows are never replayed. `command_id` remains globally unique as a collision backstop, with an additional actor/command database constraint. Transient failures are retried up to the configured server budget. Applications classify handler failures as retryable or rejected. Concurrent inserts return a generic retryable conflict. Handler results are persisted centrally.
+
+Each command uses a short `REQUIRES_NEW` claim transaction, runs application dispatch with no Offline persistence transaction open, and uses a separate `REQUIRES_NEW` finalize transaction. A handler exception or rollback therefore cannot mark the batch transaction rollback-only or prevent later commands from being processed. The application handler may establish its own domain transaction. Because a process failure can occur after the domain mutation commits but before Offline records `DONE`, handlers must make business effects idempotent using the stable command ID; external side effects require the same protection.
 
 Entity revision bumps use row locking and bounded insert-race recovery. Change events flush only after transaction commit and are discarded on rollback. Concurrent sync batches keep the heartbeat in-progress state true until the last batch finishes.
 

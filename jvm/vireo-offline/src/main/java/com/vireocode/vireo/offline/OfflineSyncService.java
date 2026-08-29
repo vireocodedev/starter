@@ -7,32 +7,22 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,8 +39,6 @@ import jakarta.servlet.http.HttpServletRequest;
 public class OfflineSyncService {
 
     private static final Logger log = LoggerFactory.getLogger(OfflineSyncService.class);
-    private static final String HEADER_COOKIE = "Cookie";
-    private static final String HEADER_XSRF = "X-XSRF-TOKEN";
     private static final String ALREADY_PROCESSED_MESSAGE = "Command already processed.";
     private static final String REJECTED_MESSAGE = "Command was permanently rejected by the server.";
     private static final String CONCURRENT_REPLAY_MESSAGE = "Command is already being replayed by a concurrent batch.";
@@ -58,8 +46,9 @@ public class OfflineSyncService {
             "Command identity is already bound to a different request.";
     private static final String LEGACY_BINDING_MESSAGE =
             "Command predates payload binding and cannot be replayed safely.";
+    private static final String NO_REPLAY_HANDLER_MESSAGE =
+            "No application offline replay handler accepted the command.";
 
-    private final RestClient restClient;
     private final OfflineHeartbeatService offlineHeartbeatService;
     private final OfflineSyncCommandRepository offlineSyncCommandRepository;
     private final ObjectMapper objectMapper;
@@ -68,16 +57,18 @@ public class OfflineSyncService {
     private final QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder;
     private final StarterOfflineProperties properties;
     private final Clock clock;
+    private final OfflineSyncTransactionOperations transactionOperations;
 
     public OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
             OfflineSyncCommandRepository offlineSyncCommandRepository,
             ObjectMapper objectMapper,
             OfflineActorResolver offlineActorResolver,
             List<OfflineSyncReplayHandler> replayHandlers,
-            QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder) {
+            QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder,
+            PlatformTransactionManager transactionManager) {
         this(offlineHeartbeatService, offlineSyncCommandRepository, objectMapper, offlineActorResolver, replayHandlers,
                 queryEngineFilterSpecificationBuilder, new StarterOfflineProperties(), Clock.systemUTC(),
-                RestClient.builder());
+                new OfflineSyncTransactionOperations(transactionManager));
     }
 
     OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
@@ -88,8 +79,7 @@ public class OfflineSyncService {
             QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder,
             StarterOfflineProperties properties,
             Clock clock,
-            RestClient.Builder restClientBuilder) {
-        this.restClient = java.util.Objects.requireNonNull(restClientBuilder, "restClientBuilder").build();
+            OfflineSyncTransactionOperations transactionOperations) {
         this.offlineHeartbeatService = offlineHeartbeatService;
         this.offlineSyncCommandRepository = offlineSyncCommandRepository;
         this.objectMapper = objectMapper;
@@ -98,9 +88,9 @@ public class OfflineSyncService {
         this.queryEngineFilterSpecificationBuilder = queryEngineFilterSpecificationBuilder;
         this.properties = java.util.Objects.requireNonNull(properties, "properties");
         this.clock = java.util.Objects.requireNonNull(clock, "clock");
+        this.transactionOperations = java.util.Objects.requireNonNull(transactionOperations, "transactionOperations");
     }
 
-    @Transactional
     public OfflineSyncBatchResponseDto processBatch(OfflineSyncBatchRequestDto request,
             HttpServletRequest sourceRequest) {
         java.util.Objects.requireNonNull(request, "request");
@@ -124,7 +114,7 @@ public class OfflineSyncService {
 
         offlineHeartbeatService.beginSync();
         try {
-            return processBatchInternal(request, sourceRequest, actor, ownerKey);
+            return processBatchInternal(request, actor, ownerKey);
         } finally {
             offlineHeartbeatService.endSync();
         }
@@ -207,23 +197,15 @@ public class OfflineSyncService {
     }
 
     private OfflineSyncBatchResponseDto processBatchInternal(OfflineSyncBatchRequestDto request,
-            HttpServletRequest sourceRequest, OfflineActor actor, String ownerKey) {
+            OfflineActor actor, String ownerKey) {
         List<OfflineSyncCommandResultDto> results = new ArrayList<>(request.commands().size());
-        Map<UUID, OfflineSyncCommandEntity> existingByCommandId = loadExistingCommands(request.commands(), ownerKey);
-        String baseUrl = UriComponentsBuilder.fromUriString(sourceRequest.getRequestURL().toString())
-                .replacePath(null)
-                .replaceQuery(null)
-                .build()
-                .toUriString();
-
         for (OfflineSyncCommandDto command : request.commands()) {
-            OfflineSyncCommandEntity existing = existingByCommandId.get(command.commandId());
-            if (existing != null) {
-                results.add(processExistingCommand(command, existing, sourceRequest, baseUrl));
-                continue;
+            try {
+                results.add(processCommand(command, actor, ownerKey));
+            } catch (RuntimeException ex) {
+                log.warn("Offline command {} persistence transition failed.", command.commandId(), ex);
+                results.add(failed(command, 500, "Command persistence failed."));
             }
-
-            results.add(processCommand(command, sourceRequest, baseUrl, actor, ownerKey));
         }
 
         int accepted = (int) results.stream().filter(OfflineSyncCommandResultDto::success).count();
@@ -236,40 +218,40 @@ public class OfflineSyncService {
      * {@link OfflineSyncCommandStatus#DONE} row is idempotent success; failed rows
      * are replayed again (bounded) and rejected rows stay permanently failed.
      */
-    private OfflineSyncCommandResultDto processExistingCommand(OfflineSyncCommandDto command,
-            OfflineSyncCommandEntity existing, HttpServletRequest sourceRequest, String baseUrl) {
+    private CommandClaim processExistingCommand(OfflineSyncCommandDto command,
+            OfflineSyncCommandEntity existing) {
         if (!StringUtils.hasText(existing.getRequestFingerprint())) {
-            return bindingRejected(command, LEGACY_BINDING_MESSAGE);
+            return CommandClaim.complete(bindingRejected(command, LEGACY_BINDING_MESSAGE));
         }
         if (!MessageDigest.isEqual(
                 existing.getRequestFingerprint().getBytes(StandardCharsets.US_ASCII),
                 requestFingerprint(command).getBytes(StandardCharsets.US_ASCII))) {
-            return bindingRejected(command, BINDING_MISMATCH_MESSAGE);
+            return CommandClaim.complete(bindingRejected(command, BINDING_MISMATCH_MESSAGE));
         }
 
         if (OfflineSyncCommandStatus.DONE == existing.getStatus()) {
-            return new OfflineSyncCommandResultDto(command.commandId(), true,
+            return CommandClaim.complete(new OfflineSyncCommandResultDto(command.commandId(), true,
                     existing.getResponseStatus() == null ? 200 : existing.getResponseStatus(),
                     ALREADY_PROCESSED_MESSAGE,
-                    OfflineSyncResultReason.ALREADY_APPLIED);
+                    OfflineSyncResultReason.ALREADY_APPLIED));
         }
 
         if (OfflineSyncCommandStatus.REJECTED == existing.getStatus()) {
-            return new OfflineSyncCommandResultDto(command.commandId(), false,
+            return CommandClaim.complete(new OfflineSyncCommandResultDto(command.commandId(), false,
                     existing.getResponseStatus() == null ? 422 : existing.getResponseStatus(),
                     StringUtils.hasText(existing.getErrorMessage()) ? existing.getErrorMessage() : REJECTED_MESSAGE,
-                    OfflineSyncResultReason.REJECTED);
+                    OfflineSyncResultReason.REJECTED));
         }
 
         if (existing.getRetryCount() >= properties.getMaxReplayAttempts()) {
-            return rejectExhaustedCommand(command, existing);
+            return CommandClaim.complete(rejectExhaustedCommand(command, existing));
         }
 
         existing.setRetryCount(existing.getRetryCount() + 1);
         existing.setStatus(OfflineSyncCommandStatus.PENDING);
         existing.setErrorMessage(null);
         offlineSyncCommandRepository.save(existing);
-        return replayCommand(command, existing, sourceRequest, baseUrl);
+        return CommandClaim.replay(existing);
     }
 
     private OfflineSyncCommandResultDto rejectExhaustedCommand(OfflineSyncCommandDto command,
@@ -290,99 +272,90 @@ public class OfflineSyncService {
                 OfflineSyncResultReason.REJECTED);
     }
 
-    private OfflineSyncCommandResultDto processCommand(OfflineSyncCommandDto command, HttpServletRequest sourceRequest,
-            String baseUrl, OfflineActor actor, String ownerKey) {
-        OfflineSyncCommandEntity entity = newCommandEntity(command, actor, ownerKey);
-        entity.setStatus(OfflineSyncCommandStatus.PENDING);
-
+    private OfflineSyncCommandResultDto processCommand(OfflineSyncCommandDto command, OfflineActor actor,
+            String ownerKey) {
+        CommandClaim claim;
         try {
-            offlineSyncCommandRepository.saveAndFlush(entity);
+            claim = transactionOperations.requiresNew(() -> claimCommand(command, actor, ownerKey));
         } catch (DataIntegrityViolationException ex) {
-            // Another batch inserted the same command_id concurrently; the unique
-            // constraint is the backstop. Keep the command on the client so the next
-            // flush observes the persisted row and takes the DONE/FAILED/REJECTED path.
             return new OfflineSyncCommandResultDto(command.commandId(), false, 409, CONCURRENT_REPLAY_MESSAGE,
                     OfflineSyncResultReason.RETRYABLE);
         }
 
-        return replayCommand(command, entity, sourceRequest, baseUrl);
+        if (claim.completedResult() != null) {
+            return claim.completedResult();
+        }
+
+        OfflineSyncCommandResultDto result = dispatchCommand(sanitizeCommand(command));
+        transactionOperations.requiresNew(() -> {
+            persistHandlerResult(claim.entity(), result);
+            return Boolean.TRUE;
+        });
+        return result;
     }
 
-    private OfflineSyncCommandResultDto replayCommand(OfflineSyncCommandDto command, OfflineSyncCommandEntity entity,
-            HttpServletRequest sourceRequest, String baseUrl) {
+    private CommandClaim claimCommand(OfflineSyncCommandDto command, OfflineActor actor, String ownerKey) {
+        List<OfflineSyncCommandEntity> stored = offlineSyncCommandRepository
+                .findAllByCommandIdIn(List.of(command.commandId()));
+        Optional<OfflineSyncCommandEntity> storedCommand = stored.stream()
+                .filter(candidate -> command.commandId().equals(candidate.getCommandId()))
+                .findFirst();
+        if (storedCommand.isPresent()) {
+            OfflineSyncCommandEntity existing = storedCommand.get();
+            if (!ownerKey.equals(existing.getOwnerKey())) {
+                return CommandClaim.complete(new OfflineSyncCommandResultDto(command.commandId(), false, 409,
+                        CONCURRENT_REPLAY_MESSAGE, OfflineSyncResultReason.RETRYABLE));
+            }
+            return processExistingCommand(command, existing);
+        }
+
+        OfflineSyncCommandEntity entity = newCommandEntity(command, actor, ownerKey);
+        entity.setStatus(OfflineSyncCommandStatus.PENDING);
+        offlineSyncCommandRepository.saveAndFlush(entity);
+        return CommandClaim.replay(entity);
+    }
+
+    private OfflineSyncCommandResultDto dispatchCommand(OfflineSyncCommandDto command) {
         if (!isReplayableApiUrl(command.url())) {
-            return markRejected(command, entity, 400, "The command URL is outside the configured replay policy.");
+            return rejected(command, 400, "The command URL is outside the configured replay policy.");
         }
 
         HttpMethod method;
         try {
             method = HttpMethod.valueOf(command.method().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException ex) {
-            return markRejected(command, entity, 400, "Unsupported HTTP method.");
+            return rejected(command, 400, "Unsupported HTTP method.");
         }
         if (!properties.getReplayMethods().stream().anyMatch(allowed -> allowed.equalsIgnoreCase(method.name()))) {
-            return markRejected(command, entity, 400, "The HTTP method is not enabled for offline replay.");
+            return rejected(command, 400, "The HTTP method is not enabled for offline replay.");
         }
 
         try {
             OfflineSyncReplayHandler replayHandler = findReplayHandler(command, method);
-            if (replayHandler != null) {
-                OfflineSyncCommandResultDto result = java.util.Objects.requireNonNull(replayHandler.process(command),
-                        "Offline replay handlers must return a result");
-                if (!command.commandId().equals(result.commandId())) {
-                    throw new IllegalStateException("Offline replay handler returned a different command ID.");
-                }
-                persistHandlerResult(entity, result);
-                return result;
+            if (replayHandler == null) {
+                return rejected(command, 422, NO_REPLAY_HANDLER_MESSAGE);
             }
-
-            URI uri = URI.create(baseUrl + command.url());
-            HttpStatusCode statusCode;
-            if (HttpMethod.POST.equals(method)
-                    || HttpMethod.PUT.equals(method)
-                    || HttpMethod.PATCH.equals(method)
-                    || HttpMethod.DELETE.equals(method)) {
-                statusCode = restClient
-                        .method(method)
-                        .uri(uri)
-                        .headers(headers -> copyHeaders(headers, command.headers(), sourceRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(command.body())
-                        .retrieve()
-                        .toBodilessEntity()
-                        .getStatusCode();
-            } else {
-                statusCode = restClient
-                        .method(method)
-                        .uri(uri)
-                        .headers(headers -> copyHeaders(headers, command.headers(), sourceRequest))
-                        .retrieve()
-                        .toBodilessEntity()
-                        .getStatusCode();
+            OfflineSyncCommandResultDto result = java.util.Objects.requireNonNull(replayHandler.process(command),
+                    "Offline replay handlers must return a result");
+            if (!command.commandId().equals(result.commandId())) {
+                throw new IllegalStateException("Offline replay handler returned a different command ID.");
             }
-
-            boolean success = statusCode.is2xxSuccessful();
-            entity.setStatus(success ? OfflineSyncCommandStatus.DONE : OfflineSyncCommandStatus.FAILED);
-            entity.setResponseStatus(statusCode.value());
-            entity.setErrorMessage(success ? null : "Command replay failed with non-success status.");
-            entity.setProcessedAt(Instant.now(clock));
-            offlineSyncCommandRepository.save(entity);
-            return new OfflineSyncCommandResultDto(
-                    command.commandId(),
-                    success,
-                    statusCode.value(),
-                    success ? null : "Command replay failed with non-success status.",
-                    success ? OfflineSyncResultReason.APPLIED : OfflineSyncResultReason.RETRYABLE);
-        } catch (RestClientResponseException ex) {
-            String safeMessage = "Replay target returned HTTP " + ex.getStatusCode().value() + ".";
-            if (isPermanentFailure(ex.getStatusCode())) {
-                return markRejected(command, entity, ex.getStatusCode().value(), safeMessage);
-            }
-
-            return markFailed(command, entity, ex.getStatusCode().value(), safeMessage);
+            validateHandlerResult(result);
+            return result;
         } catch (Exception ex) {
             log.warn("Offline command {} replay failed.", command.commandId(), ex);
-            return markFailed(command, entity, 500, "Command replay failed.");
+            return failed(command, 500, "Command replay failed.");
+        }
+    }
+
+    private void validateHandlerResult(OfflineSyncCommandResultDto result) {
+        if (result.reason() == null || result.status() < 100 || result.status() > 599) {
+            throw new IllegalStateException("Offline replay handler returned an invalid outcome.");
+        }
+        boolean appliedReason = result.reason() == OfflineSyncResultReason.APPLIED
+                || result.reason() == OfflineSyncResultReason.ALREADY_APPLIED;
+        if (result.success() != appliedReason) {
+            throw new IllegalStateException("Offline replay handler returned an inconsistent outcome.");
         }
     }
 
@@ -399,39 +372,14 @@ public class OfflineSyncService {
         offlineSyncCommandRepository.save(entity);
     }
 
-    private OfflineSyncCommandResultDto markRejected(OfflineSyncCommandDto command, OfflineSyncCommandEntity entity,
-            int status, String errorMessage) {
-        entity.setStatus(OfflineSyncCommandStatus.REJECTED);
-        entity.setResponseStatus(status);
-        entity.setErrorMessage(errorMessage);
-        entity.setProcessedAt(Instant.now(clock));
-        offlineSyncCommandRepository.save(entity);
+    private OfflineSyncCommandResultDto rejected(OfflineSyncCommandDto command, int status, String errorMessage) {
         return new OfflineSyncCommandResultDto(command.commandId(), false, status, errorMessage,
                 OfflineSyncResultReason.REJECTED);
     }
 
-    private OfflineSyncCommandResultDto markFailed(OfflineSyncCommandDto command, OfflineSyncCommandEntity entity,
-            int status, String errorMessage) {
-        entity.setStatus(OfflineSyncCommandStatus.FAILED);
-        entity.setResponseStatus(status);
-        entity.setErrorMessage(errorMessage);
-        entity.setProcessedAt(Instant.now(clock));
-        offlineSyncCommandRepository.save(entity);
+    private OfflineSyncCommandResultDto failed(OfflineSyncCommandDto command, int status, String errorMessage) {
         return new OfflineSyncCommandResultDto(command.commandId(), false, status, errorMessage,
                 OfflineSyncResultReason.RETRYABLE);
-    }
-
-    /**
-     * A 4xx replay response means the request itself is invalid, so replaying it
-     * again can never succeed. Timeout and throttling responses stay retryable.
-     */
-    private boolean isPermanentFailure(HttpStatusCode statusCode) {
-        if (!statusCode.is4xxClientError()) {
-            return false;
-        }
-
-        int value = statusCode.value();
-        return value != 408 && value != 429;
     }
 
     private OfflineSyncReplayHandler findReplayHandler(OfflineSyncCommandDto command, HttpMethod method) {
@@ -455,26 +403,6 @@ public class OfflineSyncService {
         entity.setOwnerId(actor.id());
         entity.setOwnerKey(ownerKey);
         return entity;
-    }
-
-    private Map<UUID, OfflineSyncCommandEntity> loadExistingCommands(List<OfflineSyncCommandDto> commands,
-            String ownerKey) {
-        if (CollectionUtils.isEmpty(commands)) {
-            return Map.of();
-        }
-
-        Set<UUID> commandIds = commands.stream()
-                .map(OfflineSyncCommandDto::commandId)
-                .collect(Collectors.toSet());
-
-        if (commandIds.isEmpty()) {
-            return Map.of();
-        }
-
-        return offlineSyncCommandRepository.findAllByCommandIdIn(commandIds).stream()
-                .filter(entry -> ownerKey.equals(entry.getOwnerKey()))
-                .collect(Collectors.toMap(OfflineSyncCommandEntity::getCommandId, entry -> entry, (a, b) -> a,
-                        HashMap::new));
     }
 
     private String ownerKey(OfflineActor actor) {
@@ -587,33 +515,19 @@ public class OfflineSyncService {
         return Map.copyOf(sanitized);
     }
 
-    private void copyHeaders(HttpHeaders target, Map<String, String> commandHeaders, HttpServletRequest sourceRequest) {
-        String cookie = sourceRequest.getHeader(HEADER_COOKIE);
-        if (StringUtils.hasText(cookie)) {
-            target.set(HEADER_COOKIE, cookie);
+    private OfflineSyncCommandDto sanitizeCommand(OfflineSyncCommandDto command) {
+        return new OfflineSyncCommandDto(command.commandId(), command.method(), command.url(), command.body(),
+                sanitizeReplayHeaders(command.headers()));
+    }
+
+    private record CommandClaim(OfflineSyncCommandEntity entity, OfflineSyncCommandResultDto completedResult) {
+
+        private static CommandClaim replay(OfflineSyncCommandEntity entity) {
+            return new CommandClaim(java.util.Objects.requireNonNull(entity, "entity"), null);
         }
 
-        String xsrfToken = sourceRequest.getHeader(HEADER_XSRF);
-        if (StringUtils.hasText(xsrfToken)) {
-            target.set(HEADER_XSRF, xsrfToken);
+        private static CommandClaim complete(OfflineSyncCommandResultDto result) {
+            return new CommandClaim(null, java.util.Objects.requireNonNull(result, "result"));
         }
-
-        if (commandHeaders == null || commandHeaders.isEmpty()) {
-            return;
-        }
-
-        sanitizeReplayHeaders(commandHeaders).forEach((name, value) -> {
-            if (!StringUtils.hasText(name) || !StringUtils.hasText(value)) {
-                return;
-            }
-            String lowerName = name.toLowerCase(Locale.ROOT);
-            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)
-                    || HttpHeaders.HOST.equalsIgnoreCase(name)
-                    || HEADER_COOKIE.toLowerCase(Locale.ROOT).equals(lowerName)
-                    || HEADER_XSRF.toLowerCase(Locale.ROOT).equals(lowerName)) {
-                return;
-            }
-            target.set(name, value);
-        });
     }
 }
