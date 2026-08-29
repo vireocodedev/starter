@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "policyOwner": "@vireocodedev/security",
+  "reviewCadence": "before every release and when dependency resolution changes",
+  "licenses": [
+    { "id": "0BSD", "classification": "allowed", "obligations": ["retain-license-text"] },
+    {
+      "id": "Apache-2.0",
+      "classification": "allowed",
+      "obligations": ["retain-license-text", "retain-notice-if-present", "state-modifications"]
+    },
+    { "id": "BSD-2-Clause", "classification": "allowed", "obligations": ["retain-license-text"] },
+    { "id": "BSD-3-Clause", "classification": "allowed", "obligations": ["retain-license-text"] },
+    { "id": "BlueOak-1.0.0", "classification": "allowed", "obligations": ["retain-license-text"] },
+    { "id": "ISC", "classification": "allowed", "obligations": ["retain-license-text"] },
+    { "id": "MIT", "classification": "allowed", "obligations": ["retain-license-text"] },
+    { "id": "Unicode-3.0", "classification": "allowed", "obligations": ["retain-license-text"] },
+    {
+      "id": "EPL-2.0",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modifications"]
+    },
+    {
+      "id": "GPL-2.0-with-classpath-exception",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modifications"]
+    },
+    {
+      "id": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modifications"]
+    },
+    {
+      "id": "LGPL-2.1-only",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modifications", "permit-library-relinking"]
+    },
+    {
+      "id": "LGPL-2.1-or-later",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modifications", "permit-library-relinking"]
+    },
+    {
+      "id": "LGPL-3.0-only",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modifications", "permit-library-relinking"]
+    },
+    {
+      "id": "LGPL-3.0-or-later",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modifications", "permit-library-relinking"]
+    },
+    {
+      "id": "MPL-2.0",
+      "classification": "review",
+      "obligations": ["retain-license-text", "publish-source-for-modified-files"]
+    },
+    { "id": "AGPL-3.0-only", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "AGPL-3.0-or-later", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "BUSL-1.1", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "Commons-Clause", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "Elastic-2.0", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "GPL-2.0-only", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "GPL-2.0-or-later", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "GPL-3.0-only", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "GPL-3.0-or-later", "classification": "denied", "obligations": ["publication-blocked"] },
+    { "id": "SSPL-1.0", "classification": "denied", "obligations": ["publication-blocked"] }
+  ],
+  "aliases": {
+    "Apache License, Version 2.0": "Apache-2.0",
+    "MIT License": "MIT",
+    "The Apache Software License, Version 2.0": "Apache-2.0"
+  },
+  "exceptions": [
+    {
+      "id": "jvm-logback-classic-1.5.38",
+      "ecosystem": "jvm",
+      "package": "ch.qos.logback:logback-classic",
+      "version": "1.5.38",
+      "licenses": ["EPL-2.0", "LGPL-2.1-only"],
+      "owner": "@vireocodedev/security",
+      "tracking": "docs/security/third-party-license-policy.md#reviewed-jvm-exceptions",
+      "rationale": "Unmodified logging runtime with upstream dual-license declarations and no copied source.",
+      "obligationsAccepted": ["retain-license-text", "retain-notice-if-present"],
+      "expiresAt": "2027-02-28T00:00:00Z"
+    },
+    {
+      "id": "jvm-logback-core-1.5.38",
+      "ecosystem": "jvm",
+      "package": "ch.qos.logback:logback-core",
+      "version": "1.5.38",
+      "licenses": ["EPL-2.0", "LGPL-2.1-only"],
+      "owner": "@vireocodedev/security",
+      "tracking": "docs/security/third-party-license-policy.md#reviewed-jvm-exceptions",
+      "rationale": "Unmodified logging runtime with upstream dual-license declarations and no copied source.",
+      "obligationsAccepted": ["retain-license-text", "retain-notice-if-present"],
+      "expiresAt": "2027-02-28T00:00:00Z"
+    },
+    {
+      "id": "jvm-jakarta-annotation-api-3.0.0",
+      "ecosystem": "jvm",
+      "package": "jakarta.annotation:jakarta.annotation-api",
+      "version": "3.0.0",
+      "licenses": ["EPL-2.0", "GPL-2.0-with-classpath-exception"],
+      "owner": "@vireocodedev/security",
+      "tracking": "docs/security/third-party-license-policy.md#reviewed-jvm-exceptions",
+      "rationale": "Unmodified Jakarta specification API consumed under its upstream dual-license terms.",
+      "obligationsAccepted": ["retain-license-text", "retain-notice-if-present"],
+      "expiresAt": "2027-02-28T00:00:00Z"
+    },
+    {
+      "id": "jvm-jakarta-transaction-api-2.0.1",
+      "ecosystem": "jvm",
+      "package": "jakarta.transaction:jakarta.transaction-api",
+      "version": "2.0.1",
+      "licenses": ["EPL-2.0", "GPL-2.0-with-classpath-exception"],
+      "owner": "@vireocodedev/security",
+      "tracking": "docs/security/third-party-license-policy.md#reviewed-jvm-exceptions",
+      "rationale": "Unmodified Jakarta specification API consumed under its upstream dual-license terms.",
+      "obligationsAccepted": ["retain-license-text", "retain-notice-if-present"],
+      "expiresAt": "2027-02-28T00:00:00Z"
+    },
+    {
+      "id": "jvm-aspectjweaver-1.9.25.1",
+      "ecosystem": "jvm",
+      "package": "org.aspectj:aspectjweaver",
+      "version": "1.9.25.1",
+      "licenses": ["EPL-2.0"],
+      "owner": "@vireocodedev/security",
+      "tracking": "docs/security/third-party-license-policy.md#reviewed-jvm-exceptions",
+      "rationale": "Unmodified weaving runtime used by Spring infrastructure without source incorporation.",
+      "obligationsAccepted": ["retain-license-text", "retain-notice-if-present"],
+      "expiresAt": "2027-02-28T00:00:00Z"
+    }
+  ]
+}

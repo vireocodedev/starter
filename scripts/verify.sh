@@ -46,7 +46,7 @@ trap 'exit 143' TERM
 
 cd "$REPOSITORY_ROOT" || exit 1
 
-TOTAL_STEPS=12
+TOTAL_STEPS=13
 CURRENT_STEP=0
 SUITE_STARTED_AT=$(node -p 'Date.now()')
 RESULTS=""
@@ -198,6 +198,7 @@ printf 'Steps:      %s\n' "$TOTAL_STEPS"
 
 run_step 'toolchain' 'Toolchain policy' corepack npm run toolchain:check
 run_step 'public-contract' 'Public contract policy' corepack npm run public:check
+run_step 'npm-licenses' 'npm third-party license policy' corepack npm run license:check:npm
 run_step 'lint' 'Lint' corepack npm run lint
 run_step 'format' 'Formatting' corepack npm run format:check
 run_step 'build' 'Package builds' corepack npm run build

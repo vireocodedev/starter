@@ -16,6 +16,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { runLicensePolicy } from "./third-party-license-policy.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputArgument = process.argv[2];
@@ -63,6 +64,7 @@ function subjectKind(path) {
   if (normalized.startsWith("npm/") && normalized.endsWith(".tgz")) return "npm-package";
   if (normalized === "sbom/npm.cdx.json") return "cyclonedx-sbom";
   if (normalized === "sbom/jvm.cdx.json") return "cyclonedx-sbom";
+  if (normalized === "licenses/third-party-license-inventory.json") return "license-inventory";
   if (!normalized.startsWith("maven/") || /\.(?:md5|sha1|sha256|sha512)$/u.test(normalized)) return undefined;
   if (normalized.includes("/maven-metadata.xml")) return undefined;
   return "maven-artifact";
@@ -145,6 +147,10 @@ command(join(repoRoot, "jvm", "scripts", "audit-publication-artifacts.sh"), [mav
   stdio: "inherit",
 });
 
+console.log("Evaluating npm and JVM third-party licenses...");
+const licenseInventoryPath = join(outputRoot, "licenses", "third-party-license-inventory.json");
+runLicensePolicy({ ecosystem: "all", jvmSbom: jvmSbomPath, output: licenseInventoryPath });
+
 const subjects = walkFiles(outputRoot)
   .map(path => ({ path, kind: subjectKind(path) }))
   .filter(subject => subject.kind)
@@ -194,6 +200,7 @@ const manifest = {
     sourceMaps: "contracts/package-portability-policy.json",
     npmSbom: "sbom/npm.cdx.json",
     jvmSbom: "sbom/jvm.cdx.json",
+    thirdPartyLicenses: "licenses/third-party-license-inventory.json",
     checksumAlgorithm: ["sha256", "sha512"],
     signature: "absent-in-dry-run",
     publicationRequiresSignedProvenance: true,
@@ -210,7 +217,7 @@ writeFileSync(
 complete = true;
 
 console.log(
-  `Release evidence generated for ${subjects.length} subjects (${npmSubjectCount} npm, ${mavenSubjectCount} Maven, two SBOMs).`,
+  `Release evidence generated for ${subjects.length} subjects (${npmSubjectCount} npm, ${mavenSubjectCount} Maven, two SBOMs, one license inventory).`,
 );
 console.log(`Output: ${outputRoot}`);
 console.log("This dry-run evidence is unsigned; stable publication still requires registry-backed signed provenance.");

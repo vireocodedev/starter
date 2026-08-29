@@ -11,6 +11,7 @@ node --test \
   scripts/release-impact-version.test.mjs \
   scripts/release-lifecycle-policy.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
+  scripts/third-party-license-policy.test.mjs \
   site/build.test.mjs
 sh -n site/bootstrap-vps.sh
 sh -n site/deploy-vps.sh
