@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "contractId": "vireo-application-projection",
+  "description": "Authoritative ownership and projection policy for projects created from the pinned Vireo Template.",
+  "categories": {
+    "maintainer-only": {
+      "projectDisposition": "exclude",
+      "description": "Vireo flagship operations, evidence, and maintainer governance that must never be copied into an application."
+    },
+    "managed": {
+      "projectDisposition": "copy-managed",
+      "description": "Framework integration infrastructure copied with provenance and updated through Vireo upgrade tooling."
+    },
+    "application-owned": {
+      "projectDisposition": "copy-ejectable",
+      "description": "Application code and policy copied once, then owned and reviewed by the generated project."
+    },
+    "optional": {
+      "projectDisposition": "copy-when-selected",
+      "description": "Examples, editor conveniences, or capabilities emitted only when their profile or option is selected."
+    },
+    "substitution-required": {
+      "projectDisposition": "render",
+      "description": "Public identity or project metadata that must be rendered from explicit creation inputs and resolved before release."
+    },
+    "historical": {
+      "projectDisposition": "exclude",
+      "description": "Dated engineering evidence retained by Vireo but not shipped as current application guidance."
+    }
+  },
+  "identity": {
+    "metadataPath": ".vireo/project.json",
+    "unresolvedMarkerPrefix": "UNRESOLVED_VIREO_",
+    "fields": [
+      {
+        "name": "projectName",
+        "source": "creation-input",
+        "requiredBy": "creation",
+        "format": "kebab-case"
+      },
+      {
+        "name": "displayName",
+        "source": "creation-input-or-derived",
+        "requiredBy": "creation",
+        "format": "non-empty"
+      },
+      {
+        "name": "ownerName",
+        "source": "creation-input",
+        "requiredBy": "release",
+        "format": "non-empty",
+        "unresolvedMarker": "UNRESOLVED_VIREO_OWNER_NAME"
+      },
+      {
+        "name": "repositoryUrl",
+        "source": "creation-input",
+        "requiredBy": "release",
+        "format": "https-url",
+        "unresolvedMarker": "UNRESOLVED_VIREO_REPOSITORY_URL"
+      },
+      {
+        "name": "supportUrl",
+        "source": "creation-input",
+        "requiredBy": "release",
+        "format": "https-or-mailto-url",
+        "unresolvedMarker": "UNRESOLVED_VIREO_SUPPORT_URL"
+      },
+      {
+        "name": "securityContact",
+        "source": "creation-input",
+        "requiredBy": "release",
+        "format": "https-or-mailto-url",
+        "unresolvedMarker": "UNRESOLVED_VIREO_SECURITY_CONTACT"
+      }
+    ],
+    "releaseRequirements": {
+      "rejectUnresolvedMarkers": true,
+      "requireApplicationOwner": true,
+      "requireApplicationRepository": true,
+      "requireDistinctSupportAndSecurityRoutes": true,
+      "forbiddenInheritedHosts": ["github.com/vireocodedev/starter", "github.com/vireocodedev/starter-template"]
+    }
+  },
+  "profiles": ["full-stack", "frontend"],
+  "rules": [
+    {
+      "id": "flagship-operations",
+      "category": "maintainer-only",
+      "profiles": ["full-stack", "frontend"],
+      "paths": [
+        ".github/workflows/flagship-demo.yml",
+        ".github/workflows/support-evidence.yml",
+        "compose.demo.yaml",
+        "contracts/flagship-demo-policy.json",
+        "scripts/flagship-demo-policy.mjs",
+        "scripts/flagship-proof-policy.mjs",
+        "scripts/reset-flagship-demo.sh",
+        "scripts/write-support-evidence.mjs"
+      ],
+      "prefixes": [".performance-evidence/", ".verification-evidence/", "deploy/hetzner/"]
+    },
+    {
+      "id": "dated-template-evidence",
+      "category": "historical",
+      "profiles": ["full-stack", "frontend"],
+      "paths": [
+        "docs/assets/flagship-overview.png",
+        "docs/flagship-demo.md",
+        "docs/flagship.md",
+        "docs/platform-support-evidence.md",
+        "docs/tutorials/evaluate-flagship.md",
+        "docs/verification-performance.md",
+        "frontend/docs/LOADING_STATE_AUDIT.md"
+      ],
+      "prefixes": []
+    },
+    {
+      "id": "public-application-identity",
+      "category": "substitution-required",
+      "profiles": ["full-stack", "frontend"],
+      "paths": [
+        ".github/CODEOWNERS",
+        ".github/ISSUE_TEMPLATE/bug_report.yml",
+        ".github/ISSUE_TEMPLATE/config.yml",
+        ".github/ISSUE_TEMPLATE/feature_request.yml",
+        ".github/pull_request_template.md",
+        "CONTRIBUTING.md",
+        "GOVERNANCE.md",
+        "README.md",
+        "SECURITY.md",
+        "SUPPORT.md",
+        "package.json"
+      ],
+      "prefixes": []
+    },
+    {
+      "id": "project-identifiers",
+      "category": "substitution-required",
+      "profiles": ["full-stack"],
+      "paths": [
+        ".env.example",
+        "frontend/package-lock.json",
+        "frontend/package.json",
+        "frontend/src/app/ui/localization/resources/app.en.ts",
+        "frontend/src/app/ui/localization/resources/app.hr.ts",
+        "frontend/vite.config.ts",
+        "settings.gradle"
+      ],
+      "prefixes": ["src/main/java/com/vireocode/startertemplate/", "src/test/java/com/vireocode/startertemplate/"]
+    },
+    {
+      "id": "frontend-project-identifiers",
+      "category": "substitution-required",
+      "profiles": ["frontend"],
+      "paths": [
+        "frontend/.env.example",
+        "frontend/package-lock.json",
+        "frontend/package.json",
+        "frontend/src/app/ui/localization/resources/app.en.ts",
+        "frontend/src/app/ui/localization/resources/app.hr.ts",
+        "frontend/vite.config.ts"
+      ],
+      "prefixes": []
+    },
+    {
+      "id": "framework-integration",
+      "category": "managed",
+      "profiles": ["full-stack"],
+      "paths": [
+        ".dockerignore",
+        ".github/workflows/ci.yml",
+        ".github/workflows/codeql.yml",
+        ".github/workflows/dependency-review.yml",
+        ".github/workflows/security.yml",
+        ".gitleaks.toml",
+        ".gitignore",
+        ".java-version",
+        ".nvmrc",
+        "Dockerfile",
+        "build.gradle",
+        "gradle.properties",
+        "gradlew",
+        "gradlew.bat"
+      ],
+      "prefixes": ["contracts/", "frontend/.storybook/", "frontend/scripts/", "gradle/", "scripts/"]
+    },
+    {
+      "id": "frontend-framework-integration",
+      "category": "managed",
+      "profiles": ["frontend"],
+      "paths": [
+        "frontend/.dockerignore",
+        "frontend/.prettierignore",
+        "frontend/.prettierrc",
+        "frontend/Dockerfile",
+        "frontend/eslint.config.mjs",
+        "frontend/index.html",
+        "frontend/nginx.conf",
+        "frontend/playwright.config.ts",
+        "frontend/playwright.pwa.config.ts",
+        "frontend/tsconfig.app.json",
+        "frontend/tsconfig.base.json",
+        "frontend/tsconfig.json",
+        "frontend/tsconfig.local-starter.json",
+        "frontend/tsconfig.node.json",
+        "frontend/vitest.config.ts",
+        "frontend/vitest.storybook.config.ts"
+      ],
+      "prefixes": ["frontend/.storybook/", "frontend/scripts/"]
+    },
+    {
+      "id": "application-runtime",
+      "category": "application-owned",
+      "profiles": ["full-stack"],
+      "paths": [
+        "CODE_OF_CONDUCT.md",
+        "LICENSE",
+        "compose.dev.yaml",
+        "compose.yaml",
+        "frontend/index.html",
+        "frontend/nginx.conf"
+      ],
+      "prefixes": [
+        "deploy/postgres/",
+        "docs/",
+        "frontend/docs/",
+        "frontend/public/",
+        "frontend/src/",
+        "frontend/tests/integration/",
+        "frontend/tests/mocks/",
+        "frontend/tests/unit/",
+        "src/main/resources/"
+      ]
+    },
+    {
+      "id": "frontend-application-runtime",
+      "category": "application-owned",
+      "profiles": ["frontend"],
+      "paths": ["CODE_OF_CONDUCT.md", "LICENSE"],
+      "prefixes": [
+        "frontend/docs/",
+        "frontend/public/",
+        "frontend/src/",
+        "frontend/tests/integration/",
+        "frontend/tests/mocks/",
+        "frontend/tests/unit/"
+      ]
+    },
+    {
+      "id": "selected-examples-and-tools",
+      "category": "optional",
+      "profiles": ["full-stack", "frontend"],
+      "paths": [".github/dependabot.yml", "frontend/playwright.demo.config.ts"],
+      "prefixes": [
+        ".vireo/examples/",
+        ".vscode/",
+        "docs/recipes/",
+        "docs/tutorials/",
+        "frontend/tests/demo/",
+        "frontend/tests/e2e/",
+        "frontend/tests/pwa/"
+      ]
+    }
+  ],
+  "requiredClassifications": [
+    { "path": ".github/workflows/flagship-demo.yml", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".verification-evidence/latest.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "deploy/hetzner/deploy.sh", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "docs/flagship.md", "profile": "full-stack", "category": "historical" },
+    { "path": "SECURITY.md", "profile": "full-stack", "category": "substitution-required" },
+    { "path": "frontend/package.json", "profile": "frontend", "category": "substitution-required" },
+    { "path": "gradle/wrapper/gradle-wrapper.properties", "profile": "full-stack", "category": "managed" },
+    { "path": "frontend/scripts/verify.sh", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/src/app/App.tsx", "profile": "full-stack", "category": "application-owned" },
+    { "path": "src/main/resources/application.properties", "profile": "full-stack", "category": "application-owned" },
+    { "path": ".vireo/examples/purchase-order.entity.json", "profile": "frontend", "category": "optional" }
+  ],
+  "projectionAssertions": {
+    "excludedCategories": ["maintainer-only", "historical"],
+    "releaseBlockedWhileIdentityUnresolved": true,
+    "unclassifiedPathsFail": true,
+    "multiplyClassifiedPathsFail": true
+  }
+}
