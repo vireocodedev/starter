@@ -15,6 +15,10 @@ adversarial admission checklist are in
 [Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
 current runnable full-stack composition.
 
+[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/038df86f7e311ef771e0f01a4a44b698f27e4b28/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
+
+This is the current Template pinned by the release contract, not a concept render. [Try the disposable live demo](https://demo.vireocode.com), follow the [guided build](https://vireocode.com/docs/getting-started/), or read [who Vireo does and does not fit](https://vireocode.com/docs/getting-started/choose-your-profile/) before installing.
+
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
 creation, doctor diagnostics, and target-aware entity generator are implemented.
 The standalone frontend profile is public in `create-vireo@0.4.0`. Its version-aware

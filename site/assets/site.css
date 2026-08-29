@@ -552,6 +552,30 @@ a {
   display: block;
 }
 
+.flagship-proof {
+  margin: 3rem auto 0;
+  max-width: 1180px;
+  padding: 0 1.25rem;
+}
+
+.flagship-proof img {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 30px 90px rgb(0 0 0 / 28%);
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.flagship-proof figcaption {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0.85rem auto 0;
+  max-width: 760px;
+  text-align: center;
+}
+
 .proof-strip strong {
   color: var(--text-strong);
   font-size: 0.98rem;

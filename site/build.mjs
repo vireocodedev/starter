@@ -143,6 +143,11 @@ export function createWebsiteModel({ documentationPolicy, sitePolicy }) {
   if (!createVireo) throw new Error(`documentation release ${release.id} does not declare create-vireo`);
   if (!release.documentationVersion) throw new Error(`documentation release ${release.id} has no human version`);
   const publicSnapshot = `${documentationPolicy.publicBaseUrl}/versions/${release.id}`;
+  const templateSource = release.template.repository.replace(
+    "https://github.com/",
+    "https://raw.githubusercontent.com/",
+  );
+  const flagshipImage = `${templateSource}/${release.template.commit}/docs/assets/flagship-overview.png`;
   return {
     schemaVersion: 2,
     canonicalUrl: sitePolicy.canonicalUrl,
@@ -157,6 +162,7 @@ export function createWebsiteModel({ documentationPolicy, sitePolicy }) {
       storybook: `${publicSnapshot}/storybook/`,
       typescriptApi: `${publicSnapshot}/api/typescript/`,
       jvmApi: `${publicSnapshot}/api/jvm/`,
+      flagshipImage,
     },
     documentation: {
       version: release.documentationVersion,

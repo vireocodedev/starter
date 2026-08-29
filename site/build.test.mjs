@@ -138,6 +138,11 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     }
     assert.doesNotMatch(landing, /data-navigation-toggle/u);
     assert.match(landing, /data-search-icon/u);
+    assert.match(landing, /property="og:image"/u);
+    assert.match(landing, /name="twitter:card" content="summary_large_image"/u);
+    assert.match(landing, /application\/ld\+json/u);
+    assert.match(landing, /flagship-overview\.png/u);
+    assert.match(landing, /current pinned Starter Template/u);
     assert.match(docs, /Vireo documentation/u);
     assert.match(docs, /On this page/u);
     assert.match(docs, /data-navigation-toggle/u);
