@@ -21,8 +21,9 @@ function createSourceParameters(code: string) {
 const meta = {
   title: "TypeScript/UI/Capabilities/Application Navigation/VireoMobileBottomNavigation",
   component: VireoMobileBottomNavigation,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
+    a11y: { test: "error" },
     controls: { disable: true },
     docs: {
       description: {

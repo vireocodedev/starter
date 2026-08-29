@@ -99,6 +99,15 @@
       "warningRssKiB": 5242880,
       "failureRssKiB": 7340032
     },
+    "storybook-contracts": {
+      "label": "Storybook interaction and accessibility contracts",
+      "baselineMs": 300000,
+      "warningMs": 420000,
+      "failureMs": 600000,
+      "baselineRssKiB": 3000000,
+      "warningRssKiB": 5242880,
+      "failureRssKiB": 7340032
+    },
     "storybook": {
       "label": "Vireo Starter Storybook build",
       "baselineMs": 25000,
@@ -110,9 +119,9 @@
     }
   },
   "total": {
-    "baselineMs": 165000,
-    "warningMs": 270000,
-    "failureMs": 360000,
+    "baselineMs": 465000,
+    "warningMs": 690000,
+    "failureMs": 960000,
     "baselineRssKiB": 7298089,
     "warningRssKiB": 8388608,
     "failureRssKiB": 10485760

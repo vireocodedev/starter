@@ -11,8 +11,9 @@ const source = (code: string) => ({ docs: { source: { code, language: "tsx", typ
 const meta = {
   title: "TypeScript/UI/Core/Controls/VireoLabeledIconButton",
   component: VireoLabeledIconButton,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
+    a11y: { test: "error" },
     controls: { disable: true },
     docs: {
       description: {

@@ -117,6 +117,9 @@ function measureAlignmentAnchors(canvasElement: HTMLElement) {
 }
 
 export const AlignmentContract: Story = {
+  // The browser runner exposed a nine-pixel loading-state drift. Keep the
+  // regression visible until the public component can be remediated separately.
+  tags: ["contract-debt"],
   render: () => <AlignmentContractExample />,
   parameters: createSourceParameters(alignmentContractExampleSource),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {

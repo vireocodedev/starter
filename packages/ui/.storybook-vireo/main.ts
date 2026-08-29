@@ -5,6 +5,10 @@ import { mergeConfig } from "vite";
 
 const storybookDirectory = import.meta.dirname;
 const addonDocsBlocksEntry = fileURLToPath(import.meta.resolve("@storybook/addon-docs/blocks"));
+const storybookProviderEntry =
+  process.env.VIREO_STORYBOOK_CONTRACTS === "true"
+    ? resolve(storybookDirectory, "./testing/storybook-entry.tsx")
+    : resolve(storybookDirectory, "../storybook/index.ts");
 
 const config: StorybookConfig = {
   stories: [
@@ -19,7 +23,7 @@ const config: StorybookConfig = {
     "../../../jvm/*/docs/storybook/**/*.mdx",
     "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
-  addons: ["@storybook/addon-docs"],
+  addons: ["@storybook/addon-docs", "@storybook/addon-a11y", "@storybook/addon-vitest"],
   framework: {
     name: "@storybook/react-vite",
     options: {},
@@ -119,8 +123,12 @@ const config: StorybookConfig = {
             replacement: resolve(storybookDirectory, "../storybook/VireoResponsiveOverlayFrame/index.ts"),
           },
           {
+            find: /^@vireocodedev\/ui\/storybook$/,
+            replacement: storybookProviderEntry,
+          },
+          {
             find: /^@vireocodedev\/starter-ui\/storybook$/,
-            replacement: resolve(storybookDirectory, "../storybook/index.ts"),
+            replacement: storybookProviderEntry,
           },
           {
             find: /^@vireocodedev\/starter-ui$/,

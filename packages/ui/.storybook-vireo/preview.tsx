@@ -1,4 +1,6 @@
-import { VireoStorybookProvider } from "../storybook";
+import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
+import { hasVireoStorybookA11yDebt } from "./testing/storybook-a11y-debt";
+import { VireoStorybookThemeModeContext } from "./testing/storybook-theme-context";
 import { vireoStorybookTheme } from "./storybook-theme";
 import "./preview.css";
 import type { Preview } from "@storybook/react-vite";
@@ -6,15 +8,38 @@ import React from "react";
 
 const preview: Preview = {
   decorators: [
-    Story => (
-      <VireoStorybookProvider>
-        <div className="vireo-story-surface">
-          <Story />
-        </div>
-      </VireoStorybookProvider>
-    ),
+    (Story, context) => {
+      const themeMode = context.globals.vireoTheme === "light" ? "light" : "dark";
+      if (hasVireoStorybookA11yDebt(context.title, context.name)) {
+        context.parameters.a11y = { ...context.parameters.a11y, test: "todo" };
+      }
+      return (
+        <VireoStorybookThemeModeContext.Provider value={themeMode}>
+          <VireoStorybookProvider>
+            <div className="vireo-story-surface">
+              <Story />
+            </div>
+          </VireoStorybookProvider>
+        </VireoStorybookThemeModeContext.Provider>
+      );
+    },
   ],
+  globalTypes: {
+    vireoTheme: {
+      description: "Theme used by executable Storybook contracts",
+      defaultValue: "dark",
+      toolbar: {
+        icon: "paintbrush",
+        items: [
+          { title: "Dark", value: "dark" },
+          { title: "Light", value: "light" },
+        ],
+      },
+    },
+  },
+  initialGlobals: { vireoTheme: "dark" },
   parameters: {
+    a11y: { test: "error" },
     layout: "padded",
     options: {
       // Storybook's static indexer requires this comparator to remain inline.

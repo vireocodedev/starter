@@ -46,7 +46,7 @@ trap 'exit 143' TERM
 
 cd "$REPOSITORY_ROOT" || exit 1
 
-TOTAL_STEPS=11
+TOTAL_STEPS=12
 CURRENT_STEP=0
 SUITE_STARTED_AT=$(node -p 'Date.now()')
 RESULTS=""
@@ -206,6 +206,7 @@ run_step 'tests' 'Tests and contract checks' corepack npm run test
 run_step 'strict-types' 'Strict consumer declarations' corepack npm run types:strict
 run_step 'generator' 'Generator tests' corepack npm run generate:test
 run_step 'release-smoke' 'Packed release artifacts' corepack npm run release:smoke
+run_step 'storybook-contracts' 'Storybook interaction and accessibility contracts' corepack npm run test:storybook
 run_step 'storybook' 'Vireo Starter Storybook build' corepack npm run build-storybook
 
 VERIFY_FINISHED_AT=$(node -p 'Date.now()')

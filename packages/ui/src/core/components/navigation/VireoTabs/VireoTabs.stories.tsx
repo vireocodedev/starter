@@ -23,8 +23,9 @@ function createSourceParameters(code: string) {
 const meta = {
   title: "TypeScript/UI/Core/Navigation/VireoTabs",
   component: VireoTabs,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
+    a11y: { test: "error" },
     controls: { disable: true },
     docs: {
       description: {
