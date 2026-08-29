@@ -8,4 +8,5 @@ dependencies {
     // SavedFilter a plain owner id instead of a mapped relation, which is a
     // schema decision rather than a build one.
     api project(':vireo-auth')
+    compileOnly 'io.micrometer:micrometer-observation'
 }

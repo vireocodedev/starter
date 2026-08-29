@@ -9,7 +9,9 @@ import java.util.Locale;
 import java.util.Objects;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.vireocode.vireo.web.RestUtils;
 
@@ -30,6 +32,7 @@ public class QueryEngineRelationOptionService {
     private final QueryEngineMetadataGenerator generator;
     private final int resultLimit;
     private final QueryRelationOptionPolicy policy;
+    private final ApplicationEventPublisher observationEvents;
 
     public QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator) {
         this(registry, generator, new StarterQueryEngineProperties(), new DenyAllQueryRelationOptionPolicy());
@@ -42,13 +45,45 @@ public class QueryEngineRelationOptionService {
 
     public QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
             StarterQueryEngineProperties properties, QueryRelationOptionPolicy policy) {
+        this(registry, generator, properties, policy, event -> {
+        });
+    }
+
+    QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
+            StarterQueryEngineProperties properties, QueryRelationOptionPolicy policy,
+            ApplicationEventPublisher observationEvents) {
         this.registry = registry;
         this.generator = generator;
         this.resultLimit = properties.getRelationOptionsLimit();
         this.policy = policy;
+        this.observationEvents = Objects.requireNonNull(observationEvents, "observationEvents");
     }
 
     public List<QueryRelationOption> listOptions(String entityKey, String fieldPath, String searchText) {
+        long startedAt = System.nanoTime();
+        QueryRelationOptionObservationEvent.Outcome outcome = QueryRelationOptionObservationEvent.Outcome.SUCCESS;
+        int resultCount = 0;
+        try {
+            List<QueryRelationOption> result = listOptionsInternal(entityKey, fieldPath, searchText);
+            resultCount = result.size();
+            return result;
+        } catch (AccessDeniedException exception) {
+            outcome = QueryRelationOptionObservationEvent.Outcome.DENIED;
+            throw exception;
+        } catch (IllegalArgumentException | org.springframework.web.server.ResponseStatusException exception) {
+            outcome = QueryRelationOptionObservationEvent.Outcome.REJECTED;
+            throw exception;
+        } catch (RuntimeException exception) {
+            outcome = QueryRelationOptionObservationEvent.Outcome.ERROR;
+            throw exception;
+        } finally {
+            publishObservation(new QueryRelationOptionObservationEvent(
+                    outcome, searchText != null && !searchText.isBlank(), resultCount,
+                    System.nanoTime() - startedAt));
+        }
+    }
+
+    private List<QueryRelationOption> listOptionsInternal(String entityKey, String fieldPath, String searchText) {
         if (searchText != null && searchText.length() > MAX_SEARCH_TEXT_LENGTH) {
             throw RestUtils.badRequest("relation option searchText must not exceed " + MAX_SEARCH_TEXT_LENGTH
                     + " characters");
@@ -79,6 +114,14 @@ public class QueryEngineRelationOptionService {
 
         options.sort(Comparator.comparing(QueryRelationOption::label, String.CASE_INSENSITIVE_ORDER));
         return options;
+    }
+
+    private void publishObservation(QueryRelationOptionObservationEvent event) {
+        try {
+            observationEvents.publishEvent(event);
+        } catch (RuntimeException ignored) {
+            // Telemetry must never change query behavior.
+        }
     }
 
     List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText,

@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +22,7 @@ import com.vireocode.vireo.spi.HistoryEventsRecorder;
 import com.vireocode.vireo.spi.OfflineChangeBroadcaster;
 import com.vireocode.vireo.spi.OfflineRevisionTracker;
 import com.vireocode.vireo.spi.QueryFilterCriteria;
+import com.vireocode.vireo.observability.QueryExecutionObservationEvent;
 import com.vireocode.vireo.web.RestUtils;
 import com.vireocode.vireo.web.SearchablePageable;
 
@@ -42,6 +44,8 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     FilterSpecificationBuilder filterSpecificationBuilder;
     OfflineChangeBroadcaster offlineChangeBroadcaster;
     OfflineRevisionTracker offlineRevisionTracker;
+    private ApplicationEventPublisher observationEvents = event -> {
+    };
 
     /**
      * Primary constructor accepting the full {@link EntityConfig}.
@@ -98,6 +102,31 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     }
 
     public Page<DTO> findAll(SearchablePageable pageable, QueryFilterCriteria filterRequest) {
+        long startedAt = System.nanoTime();
+        boolean searched = pageable.hasSearchText();
+        boolean filtered = filterRequest != null;
+        QueryExecutionObservationEvent.Outcome outcome = QueryExecutionObservationEvent.Outcome.SUCCESS;
+        long resultCount = 0;
+        try {
+            Page<DTO> result = executeFindAll(pageable, filterRequest);
+            resultCount = result.getNumberOfElements();
+            return result;
+        } catch (org.springframework.security.access.AccessDeniedException exception) {
+            outcome = QueryExecutionObservationEvent.Outcome.DENIED;
+            throw exception;
+        } catch (IllegalArgumentException | org.springframework.web.server.ResponseStatusException exception) {
+            outcome = QueryExecutionObservationEvent.Outcome.REJECTED;
+            throw exception;
+        } catch (RuntimeException exception) {
+            outcome = QueryExecutionObservationEvent.Outcome.ERROR;
+            throw exception;
+        } finally {
+            publishObservationEvent(new QueryExecutionObservationEvent(
+                    outcome, searched, filtered, resultCount, System.nanoTime() - startedAt));
+        }
+    }
+
+    private Page<DTO> executeFindAll(SearchablePageable pageable, QueryFilterCriteria filterRequest) {
         Specification<DOMAIN> specification = notDeletedSpecification();
 
         if (pageable.hasSearchText() && hasSearchableFields()) {
@@ -114,6 +143,14 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
         }
 
         return repository.findAll(specification, pageable.getPageable()).map(mapper::toDto);
+    }
+
+    private void publishObservationEvent(Object event) {
+        try {
+            observationEvents.publishEvent(event);
+        } catch (RuntimeException exception) {
+            log.debug("Vireo observation listener failed; the application operation remains authoritative.", exception);
+        }
     }
 
     public DTO getById(ID id) {
@@ -495,6 +532,11 @@ public abstract class BaseService<ID, DOMAIN extends BaseEntity, DTO> {
     @Autowired(required = false)
     void setOfflineRevisionTracker(OfflineRevisionTracker offlineRevisionTracker) {
         this.offlineRevisionTracker = offlineRevisionTracker;
+    }
+
+    @Autowired(required = false)
+    void setObservationEvents(ApplicationEventPublisher observationEvents) {
+        this.observationEvents = Objects.requireNonNull(observationEvents, "observationEvents");
     }
 
     private void validateConfiguredFields() {

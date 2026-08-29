@@ -5,6 +5,7 @@ dependencies {
     // Published V1 references app_user. Keep Auth at runtime so a fresh install
     // can apply that immutable migration before V2 removes the foreign key.
     runtimeOnly project(':vireo-auth')
+    compileOnly 'io.micrometer:micrometer-observation'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 }
 

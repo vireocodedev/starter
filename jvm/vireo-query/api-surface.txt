@@ -211,6 +211,26 @@ public final record com.vireocode.vireo.queryengine.QueryRelationOptionContext
     public java.lang.String com.vireocode.vireo.queryengine.QueryRelationOptionContext.sourceEntityKey()
     public java.lang.String com.vireocode.vireo.queryengine.QueryRelationOptionContext.targetEntityKey()
 
+public final record com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent
+    extends java.lang.Record
+    public com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent(com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome,boolean,long,long)
+    public boolean com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent.searched()
+    public com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent.outcome()
+    public final boolean com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent.equals(java.lang.Object)
+    public final int com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent.hashCode()
+    public final java.lang.String com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent.toString()
+    public long com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent.durationNanos()
+    public long com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent.resultCount()
+
+public static final enum com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome
+    extends java.lang.Enum<com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome>
+    public static final com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome.DENIED
+    public static final com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome.ERROR
+    public static final com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome.REJECTED
+    public static final com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome.SUCCESS
+    public static com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome.valueOf(java.lang.String)
+    public static com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome[] com.vireocode.vireo.queryengine.QueryRelationOptionObservationEvent$Outcome.values()
+
 public abstract interface com.vireocode.vireo.queryengine.QueryRelationOptionPolicy
     public abstract jakarta.persistence.criteria.Predicate com.vireocode.vireo.queryengine.QueryRelationOptionPolicy.scope(org.springframework.security.core.Authentication,com.vireocode.vireo.queryengine.QueryRelationOptionContext,jakarta.persistence.criteria.Root<?>,jakarta.persistence.criteria.CriteriaBuilder)
 

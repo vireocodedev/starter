@@ -1,6 +1,7 @@
 package com.vireocode.vireo.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +30,7 @@ import com.vireocode.vireo.spi.HistoryEventsRecorder;
 import com.vireocode.vireo.spi.OfflineChangeBroadcaster;
 import com.vireocode.vireo.spi.OfflineRevisionTracker;
 import com.vireocode.vireo.spi.QueryFilterCriteria;
+import com.vireocode.vireo.observability.QueryExecutionObservationEvent;
 import com.vireocode.vireo.web.SearchablePageable;
 
 import jakarta.persistence.Id;
@@ -355,11 +358,19 @@ class BaseServiceTest {
         // only the query engine knows how to read one.
         QueryFilterCriteria filter = new QueryFilterCriteria() {
         };
+        List<Object> events = new ArrayList<>();
+        service.setObservationEvents(events::add);
 
         Page<TestDto> result = service.findAll(pageable, filter);
 
         assertEquals(1, result.getTotalElements());
         verify(builder).build(TestEntity.class, filter);
+        QueryExecutionObservationEvent event = (QueryExecutionObservationEvent) events.get(0);
+        assertEquals(QueryExecutionObservationEvent.Outcome.SUCCESS, event.outcome());
+        assertTrue(event.searched());
+        assertTrue(event.filtered());
+        assertEquals(1, event.resultCount());
+        assertFalse(event.toString().contains("query"));
     }
 
     @Test

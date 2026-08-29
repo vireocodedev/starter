@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
@@ -37,6 +38,23 @@ class QueryEngineRelationOptionServiceTest {
 
         assertEquals(400, exception.getStatusCode().value());
         assertEquals("relation option searchText must not exceed 128 characters", exception.getReason());
+    }
+
+    @Test
+    void rejectedObservationDoesNotCopyEntityFieldOrSearchValues() {
+        List<Object> events = new ArrayList<>();
+        QueryEngineRelationOptionService service = new QueryEngineRelationOptionService(
+                mock(QueryEngineRegistry.class), mock(QueryEngineMetadataGenerator.class),
+                new StarterQueryEngineProperties(), new DenyAllQueryRelationOptionPolicy(), events::add);
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.listOptions("tenant-secret", "private-field", "payload-" + "x".repeat(129)));
+
+        QueryRelationOptionObservationEvent event = (QueryRelationOptionObservationEvent) events.get(0);
+        assertEquals(QueryRelationOptionObservationEvent.Outcome.REJECTED, event.outcome());
+        org.junit.jupiter.api.Assertions.assertFalse(event.toString().contains("tenant-secret"));
+        org.junit.jupiter.api.Assertions.assertFalse(event.toString().contains("private-field"));
+        org.junit.jupiter.api.Assertions.assertFalse(event.toString().contains("payload"));
     }
 
     @Test

@@ -4,9 +4,12 @@ import java.util.List;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -32,6 +35,20 @@ import tools.jackson.databind.ObjectMapper;
 @AutoConfiguration
 @EnableConfigurationProperties(StarterOfflineProperties.class)
 public class StarterOfflineAutoConfiguration {
+
+    /** Optional backend-neutral observation bridge. */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(name = "io.micrometer.observation.ObservationRegistry")
+    @ConditionalOnBean(type = "io.micrometer.observation.ObservationRegistry")
+    static class StarterOfflineObservabilityConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(name = "starterOfflineMicrometerObservations")
+        OfflineMicrometerObservations starterOfflineMicrometerObservations(
+                io.micrometer.observation.ObservationRegistry registry) {
+            return new OfflineMicrometerObservations(registry);
+        }
+    }
 
     @Bean
     StarterFlywayModule offlineFlywayModule() {
@@ -66,8 +83,8 @@ public class StarterOfflineAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     OfflineHeartbeatService starterOfflineHeartbeatService(Clock clock,
-            OfflineSseAudienceResolver audienceResolver) {
-        return new OfflineHeartbeatService(clock, audienceResolver);
+            OfflineSseAudienceResolver audienceResolver, ApplicationEventPublisher events) {
+        return new OfflineHeartbeatService(clock, audienceResolver, events);
     }
 
     /**
@@ -108,9 +125,11 @@ public class StarterOfflineAutoConfiguration {
             List<OfflineSyncReplayHandler> replayHandlers,
             QueryEngineFilterSpecificationBuilder filterSpecificationBuilder, StarterOfflineProperties properties,
             Clock clock, OfflineSyncTransactionOperations transactionOperations,
-            OfflineDataLifecyclePolicy lifecyclePolicy, OfflineDataLifecycleService lifecycleService) {
+            OfflineDataLifecyclePolicy lifecyclePolicy, OfflineDataLifecycleService lifecycleService,
+            ApplicationEventPublisher events) {
         return new OfflineSyncService(offlineHeartbeatService, repository, objectMapper, actorResolver, replayHandlers,
-                filterSpecificationBuilder, properties, clock, transactionOperations, lifecyclePolicy, lifecycleService);
+                filterSpecificationBuilder, properties, clock, transactionOperations, lifecyclePolicy, lifecycleService,
+                events);
     }
 
     @Bean

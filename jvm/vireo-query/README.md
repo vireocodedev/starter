@@ -41,6 +41,11 @@ Entity keys are normalized to upper case and must be unique. Entity types must b
 
 Relation options fail closed: the auto-configured fallback policy denies every request. An application policy may throw access denied for a field or return a Criteria predicate that enforces owner, tenant, deletion, retention, and other domain visibility rules. Returning `criteriaBuilder.conjunction()` is an explicit decision that all registered target rows are visible to that caller.
 
+Query execution and relation-option lookups publish safe completion events and,
+when an application provides a Micrometer `ObservationRegistry`, bounded
+observations. See [`docs/OBSERVABILITY.md`](../../docs/OBSERVABILITY.md) for names,
+tags, and the data-exclusion contract.
+
 `isPublic` means discoverable by other authenticated users, not editable by them. Domain record authorization remains an application responsibility and should be enforced before applying a filter to protected data.
 
 ## Configuration

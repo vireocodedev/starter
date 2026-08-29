@@ -4,4 +4,5 @@ dependencies {
     api project(':vireo-core')
     api project(':vireo-query')
     implementation project(':vireo-auth')
+    compileOnly 'io.micrometer:micrometer-observation'
 }

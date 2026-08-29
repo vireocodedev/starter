@@ -14,6 +14,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration;
 import org.springframework.boot.flyway.autoconfigure.FlywayMigrationStrategy;
 import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
@@ -55,6 +56,20 @@ import com.vireocode.vireo.web.GlobalExceptionHandler;
 @EnableConfigurationProperties(StarterCoreProperties.class)
 @Import({ StarterPackagesRegistrar.class, JsonConfig.class })
 public class StarterCoreAutoConfiguration {
+
+    /** Activates the optional Micrometer bridge without requiring a registry or backend. */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(name = "io.micrometer.observation.ObservationRegistry")
+    @ConditionalOnBean(type = "io.micrometer.observation.ObservationRegistry")
+    static class StarterCoreObservabilityConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(name = "starterCoreMicrometerObservations")
+        CoreMicrometerObservations starterCoreMicrometerObservations(
+                io.micrometer.observation.ObservationRegistry registry) {
+            return new CoreMicrometerObservations(registry);
+        }
+    }
 
     @Bean
     @ConditionalOnMissingBean

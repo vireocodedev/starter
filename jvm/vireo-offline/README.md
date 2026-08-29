@@ -35,6 +35,11 @@ The default policy accepts only `POST`, `PUT`, `PATCH`, and `DELETE` beneath `/a
 
 Request bodies and headers are omitted from `OfflineSyncCommandDto.toString()`. Downstream exception bodies are not returned to clients. Duplicate IDs inside one batch and oversized batches fail before replay.
 
+Batch, replay, queue, SSE, and lifecycle paths publish structured events that
+contain only bounded operation/outcome enums, counts, and elapsed time. An
+optional Micrometer bridge activates only when the application provides an
+`ObservationRegistry`; see [`docs/OBSERVABILITY.md`](../../docs/OBSERVABILITY.md).
+
 They are also omitted from persistence by the safe-default
 `OfflineDataLifecyclePolicy`; idempotency uses the SHA-256 request fingerprint,
 not a stored payload. New commands expire after 30 days and each owner partition

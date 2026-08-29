@@ -5,9 +5,11 @@ import java.time.Clock;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.vireocode.vireo.spi.HistoryEventsRecorder;
@@ -27,6 +29,20 @@ import tools.jackson.databind.ObjectMapper;
 @AutoConfiguration
 @EnableConfigurationProperties(StarterHistoryProperties.class)
 public class StarterHistoryAutoConfiguration {
+
+    /** Optional Micrometer bridge for the existing safe lifecycle events. */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(name = "io.micrometer.observation.ObservationRegistry")
+    @ConditionalOnBean(type = "io.micrometer.observation.ObservationRegistry")
+    static class StarterHistoryObservabilityConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(name = "starterHistoryMicrometerObservations")
+        HistoryMicrometerObservations starterHistoryMicrometerObservations(
+                io.micrometer.observation.ObservationRegistry registry) {
+            return new HistoryMicrometerObservations(registry);
+        }
+    }
 
     @Bean
     StarterFlywayModule historyFlywayModule() {

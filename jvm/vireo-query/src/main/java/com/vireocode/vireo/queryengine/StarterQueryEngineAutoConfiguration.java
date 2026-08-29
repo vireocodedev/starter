@@ -4,9 +4,13 @@ import java.util.List;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.vireocode.vireo.auth.StarterUserRepository;
 import com.vireocode.vireo.flyway.StarterFlywayModule;
@@ -30,6 +34,20 @@ import com.vireocode.vireo.spi.FilterSpecificationBuilder;
 @AutoConfiguration
 @EnableConfigurationProperties(StarterQueryEngineProperties.class)
 public class StarterQueryEngineAutoConfiguration {
+
+    /** Optional Micrometer bridge; safe events remain available without it. */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(name = "io.micrometer.observation.ObservationRegistry")
+    @ConditionalOnBean(type = "io.micrometer.observation.ObservationRegistry")
+    static class StarterQueryEngineObservabilityConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(name = "starterQueryEngineMicrometerObservations")
+        QueryEngineMicrometerObservations starterQueryEngineMicrometerObservations(
+                io.micrometer.observation.ObservationRegistry registry) {
+            return new QueryEngineMicrometerObservations(registry);
+        }
+    }
 
     @Bean
     StarterFlywayModule queryEngineFlywayModule() {
@@ -73,8 +91,8 @@ public class StarterQueryEngineAutoConfiguration {
     @ConditionalOnMissingBean
     QueryEngineRelationOptionService queryEngineRelationOptionService(QueryEngineRegistry registry,
             QueryEngineMetadataGenerator generator, StarterQueryEngineProperties properties,
-            QueryRelationOptionPolicy relationOptionPolicy) {
-        return new QueryEngineRelationOptionService(registry, generator, properties, relationOptionPolicy);
+            QueryRelationOptionPolicy relationOptionPolicy, ApplicationEventPublisher events) {
+        return new QueryEngineRelationOptionService(registry, generator, properties, relationOptionPolicy, events);
     }
 
     @Bean

@@ -138,6 +138,50 @@ public final record com.vireocode.vireo.offline.OfflineHydrationVersionsResponse
     public java.time.Instant com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.serverTime()
     public java.util.List<com.vireocode.vireo.offline.OfflineHydrationEntityVersionDto> com.vireocode.vireo.offline.OfflineHydrationVersionsResponseDto.versions()
 
+public final record com.vireocode.vireo.offline.OfflineObservationEvent
+    extends java.lang.Record
+    public com.vireocode.vireo.offline.OfflineObservationEvent(com.vireocode.vireo.offline.OfflineObservationEvent$Operation,com.vireocode.vireo.offline.OfflineObservationEvent$Outcome,long,long)
+    public com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent.operation()
+    public com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent.outcome()
+    public final boolean com.vireocode.vireo.offline.OfflineObservationEvent.equals(java.lang.Object)
+    public final int com.vireocode.vireo.offline.OfflineObservationEvent.hashCode()
+    public final java.lang.String com.vireocode.vireo.offline.OfflineObservationEvent.toString()
+    public long com.vireocode.vireo.offline.OfflineObservationEvent.durationNanos()
+    public long com.vireocode.vireo.offline.OfflineObservationEvent.itemCount()
+
+public static final enum com.vireocode.vireo.offline.OfflineObservationEvent$Operation
+    extends java.lang.Enum<com.vireocode.vireo.offline.OfflineObservationEvent$Operation>
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.BATCH
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.QUEUE
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.REPLAY
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.SSE_BATCH
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.SSE_CHANGE
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.SSE_CONNECT
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.SSE_HEARTBEAT
+    public static com.vireocode.vireo.offline.OfflineObservationEvent$Operation com.vireocode.vireo.offline.OfflineObservationEvent$Operation.valueOf(java.lang.String)
+    public static com.vireocode.vireo.offline.OfflineObservationEvent$Operation[] com.vireocode.vireo.offline.OfflineObservationEvent$Operation.values()
+
+public static final enum com.vireocode.vireo.offline.OfflineObservationEvent$Outcome
+    extends java.lang.Enum<com.vireocode.vireo.offline.OfflineObservationEvent$Outcome>
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.ADMITTED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.ALREADY_APPLIED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.APPLIED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.COMPLETED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.CONFLICT
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.CONNECTED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.DELIVERED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.DENIED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.DISCARDED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.DISCONNECTED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.ERROR
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.PARTIAL
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.REJECTED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.RETRYABLE
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.RETRY_LIMIT_EXCEEDED
+    public static final com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.RETRY_SCHEDULED
+    public static com.vireocode.vireo.offline.OfflineObservationEvent$Outcome com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.valueOf(java.lang.String)
+    public static com.vireocode.vireo.offline.OfflineObservationEvent$Outcome[] com.vireocode.vireo.offline.OfflineObservationEvent$Outcome.values()
+
 public abstract interface com.vireocode.vireo.offline.OfflineSseAudienceResolver
     public abstract java.util.Optional<java.lang.String> com.vireocode.vireo.offline.OfflineSseAudienceResolver.resolveCurrentAudience()
 

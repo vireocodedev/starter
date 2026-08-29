@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.vireocode.vireo.queryengine.QueryEngineFilterSpecificationBuilder;
 import com.vireocode.vireo.queryengine.QueryFilterRequest;
@@ -60,6 +62,7 @@ public class OfflineSyncService {
     private final OfflineSyncTransactionOperations transactionOperations;
     private final OfflineDataLifecyclePolicy lifecyclePolicy;
     private final OfflineDataLifecycleService lifecycleService;
+    private final ApplicationEventPublisher observationEvents;
 
     public OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
             OfflineSyncCommandRepository offlineSyncCommandRepository,
@@ -97,6 +100,24 @@ public class OfflineSyncService {
             OfflineSyncTransactionOperations transactionOperations,
             OfflineDataLifecyclePolicy lifecyclePolicy,
             OfflineDataLifecycleService lifecycleService) {
+        this(offlineHeartbeatService, offlineSyncCommandRepository, objectMapper, offlineActorResolver, replayHandlers,
+                queryEngineFilterSpecificationBuilder, properties, clock, transactionOperations, lifecyclePolicy,
+                lifecycleService, event -> {
+                });
+    }
+
+    OfflineSyncService(OfflineHeartbeatService offlineHeartbeatService,
+            OfflineSyncCommandRepository offlineSyncCommandRepository,
+            ObjectMapper objectMapper,
+            OfflineActorResolver offlineActorResolver,
+            List<OfflineSyncReplayHandler> replayHandlers,
+            QueryEngineFilterSpecificationBuilder queryEngineFilterSpecificationBuilder,
+            StarterOfflineProperties properties,
+            Clock clock,
+            OfflineSyncTransactionOperations transactionOperations,
+            OfflineDataLifecyclePolicy lifecyclePolicy,
+            OfflineDataLifecycleService lifecycleService,
+            ApplicationEventPublisher observationEvents) {
         this.offlineHeartbeatService = offlineHeartbeatService;
         this.offlineSyncCommandRepository = offlineSyncCommandRepository;
         this.objectMapper = objectMapper;
@@ -113,9 +134,41 @@ public class OfflineSyncService {
                 ? new OfflineDataLifecycleService(offlineSyncCommandRepository, properties, clock, event -> {
                 })
                 : lifecycleService;
+        this.observationEvents = java.util.Objects.requireNonNull(observationEvents, "observationEvents");
     }
 
     public OfflineSyncBatchResponseDto processBatch(OfflineSyncBatchRequestDto request,
+            HttpServletRequest sourceRequest) {
+        long startedAt = System.nanoTime();
+        OfflineObservationEvent.Outcome outcome = OfflineObservationEvent.Outcome.COMPLETED;
+        long itemCount = request == null ? 0 : request.commands().size();
+        try {
+            OfflineSyncBatchResponseDto result = processBatchInternalContract(request, sourceRequest);
+            outcome = result.failed() == 0
+                    ? OfflineObservationEvent.Outcome.COMPLETED
+                    : OfflineObservationEvent.Outcome.PARTIAL;
+            return result;
+        } catch (AccessDeniedException exception) {
+            outcome = OfflineObservationEvent.Outcome.DENIED;
+            throw exception;
+        } catch (org.springframework.web.server.ResponseStatusException exception) {
+            outcome = exception.getStatusCode().value() == 401 || exception.getStatusCode().value() == 403
+                    ? OfflineObservationEvent.Outcome.DENIED
+                    : OfflineObservationEvent.Outcome.REJECTED;
+            throw exception;
+        } catch (IllegalArgumentException exception) {
+            outcome = OfflineObservationEvent.Outcome.REJECTED;
+            throw exception;
+        } catch (RuntimeException exception) {
+            outcome = OfflineObservationEvent.Outcome.ERROR;
+            throw exception;
+        } finally {
+            publishObservation(new OfflineObservationEvent(
+                    OfflineObservationEvent.Operation.BATCH, outcome, itemCount, System.nanoTime() - startedAt));
+        }
+    }
+
+    private OfflineSyncBatchResponseDto processBatchInternalContract(OfflineSyncBatchRequestDto request,
             HttpServletRequest sourceRequest) {
         java.util.Objects.requireNonNull(request, "request");
         java.util.Objects.requireNonNull(sourceRequest, "sourceRequest");
@@ -224,12 +277,18 @@ public class OfflineSyncService {
             OfflineActor actor, String ownerKey) {
         List<OfflineSyncCommandResultDto> results = new ArrayList<>(request.commands().size());
         for (OfflineSyncCommandDto command : request.commands()) {
+            long startedAt = System.nanoTime();
+            OfflineSyncCommandResultDto result;
             try {
-                results.add(processCommand(command, actor, ownerKey));
+                result = processCommand(command, actor, ownerKey);
             } catch (RuntimeException ex) {
                 log.warn("Offline command {} persistence transition failed.", command.commandId(), ex);
-                results.add(failed(command, 500, "Command persistence failed."));
+                result = failed(command, 500, "Command persistence failed.");
             }
+            results.add(result);
+            publishObservation(new OfflineObservationEvent(
+                    OfflineObservationEvent.Operation.REPLAY, replayOutcome(result), 1,
+                    System.nanoTime() - startedAt));
         }
 
         int accepted = (int) results.stream().filter(OfflineSyncCommandResultDto::success).count();
@@ -275,6 +334,8 @@ public class OfflineSyncService {
         existing.setStatus(OfflineSyncCommandStatus.PENDING);
         existing.setErrorMessage(null);
         offlineSyncCommandRepository.save(existing);
+        publishObservation(new OfflineObservationEvent(
+                OfflineObservationEvent.Operation.QUEUE, OfflineObservationEvent.Outcome.RETRY_SCHEDULED, 1, 0));
         return CommandClaim.replay(existing);
     }
 
@@ -338,7 +399,30 @@ public class OfflineSyncService {
         lifecycleService.admit(entity);
         offlineSyncCommandRepository.saveAndFlush(entity);
         lifecycleService.redacted();
+        publishObservation(new OfflineObservationEvent(
+                OfflineObservationEvent.Operation.QUEUE, OfflineObservationEvent.Outcome.ADMITTED, 1, 0));
         return CommandClaim.replay(entity);
+    }
+
+    private OfflineObservationEvent.Outcome replayOutcome(OfflineSyncCommandResultDto result) {
+        if (result.status() == 409) {
+            return OfflineObservationEvent.Outcome.CONFLICT;
+        }
+        return switch (result.reason()) {
+            case APPLIED -> OfflineObservationEvent.Outcome.APPLIED;
+            case ALREADY_APPLIED -> OfflineObservationEvent.Outcome.ALREADY_APPLIED;
+            case RETRYABLE -> OfflineObservationEvent.Outcome.RETRYABLE;
+            case REJECTED -> OfflineObservationEvent.Outcome.REJECTED;
+            case RETRY_LIMIT_EXCEEDED -> OfflineObservationEvent.Outcome.RETRY_LIMIT_EXCEEDED;
+        };
+    }
+
+    private void publishObservation(OfflineObservationEvent event) {
+        try {
+            observationEvents.publishEvent(event);
+        } catch (RuntimeException exception) {
+            log.debug("Offline observation listener failed; replay behavior remains authoritative.", exception);
+        }
     }
 
     private OfflineSyncCommandResultDto dispatchCommand(OfflineSyncCommandDto command) {

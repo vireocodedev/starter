@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -58,6 +59,25 @@ class OfflineHeartbeatServiceTest {
         OfflineSseBatchContext after = OfflineSseBatchContextHolder.getContext();
         assertTrue(after.getEvents().isEmpty());
         assertFalse(after.isFlushScheduled());
+    }
+
+    @Test
+    void sseOperationalEventsNeverCopyAudienceEntityOrPayload() {
+        List<Object> observations = new ArrayList<>();
+        OfflineHeartbeatService service = new OfflineHeartbeatService(
+                Clock.systemUTC(), () -> Optional.of("tenant-secret"), observations::add);
+
+        service.publishCreateEvent("PrivateOrder", java.util.Map.of("token", "payload-secret"), 3L);
+
+        List<OfflineObservationEvent> events = observations.stream()
+                .filter(OfflineObservationEvent.class::isInstance)
+                .map(OfflineObservationEvent.class::cast)
+                .toList();
+        assertFalse(events.isEmpty());
+        String rendered = events.toString();
+        assertFalse(rendered.contains("tenant-secret"));
+        assertFalse(rendered.contains("PrivateOrder"));
+        assertFalse(rendered.contains("payload-secret"));
     }
 
     @Test

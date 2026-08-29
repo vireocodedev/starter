@@ -131,6 +131,27 @@ public final record com.vireocode.vireo.flyway.StarterFlywayModule
     public java.lang.String com.vireocode.vireo.flyway.StarterFlywayModule.name()
     public java.lang.String com.vireocode.vireo.flyway.StarterFlywayModule.vendorLocation(java.lang.String)
 
+public final record com.vireocode.vireo.observability.QueryExecutionObservationEvent
+    extends java.lang.Record
+    public com.vireocode.vireo.observability.QueryExecutionObservationEvent(com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome,boolean,boolean,long,long)
+    public boolean com.vireocode.vireo.observability.QueryExecutionObservationEvent.filtered()
+    public boolean com.vireocode.vireo.observability.QueryExecutionObservationEvent.searched()
+    public com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome com.vireocode.vireo.observability.QueryExecutionObservationEvent.outcome()
+    public final boolean com.vireocode.vireo.observability.QueryExecutionObservationEvent.equals(java.lang.Object)
+    public final int com.vireocode.vireo.observability.QueryExecutionObservationEvent.hashCode()
+    public final java.lang.String com.vireocode.vireo.observability.QueryExecutionObservationEvent.toString()
+    public long com.vireocode.vireo.observability.QueryExecutionObservationEvent.durationNanos()
+    public long com.vireocode.vireo.observability.QueryExecutionObservationEvent.resultCount()
+
+public static final enum com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome
+    extends java.lang.Enum<com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome>
+    public static final com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome.DENIED
+    public static final com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome.ERROR
+    public static final com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome.REJECTED
+    public static final com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome.SUCCESS
+    public static com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome.valueOf(java.lang.String)
+    public static com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome[] com.vireocode.vireo.observability.QueryExecutionObservationEvent$Outcome.values()
+
 public final class com.vireocode.vireo.security.SecurityExpressions
     public static final java.lang.String com.vireocode.vireo.security.SecurityExpressions.IS_AUTHENTICATED
     public static final java.lang.String com.vireocode.vireo.security.SecurityExpressions.PERMIT_ALL

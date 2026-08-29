@@ -42,6 +42,10 @@ The V3 migration redacts pre-policy snapshots and marks them immediately eligibl
 for scoped purge. See [`docs/DATA_LIFECYCLE.md`](../../docs/DATA_LIFECYCLE.md) for
 erasure, scheduling, and observability responsibilities.
 
+Lifecycle events also feed an optional Micrometer bridge when the application
+provides an `ObservationRegistry`. Observation tags contain only the bounded
+operation enum; see [`docs/OBSERVABILITY.md`](../../docs/OBSERVABILITY.md).
+
 ## Documentation
 
 The unified Vireo Starter Storybook contains the live History guide. The source displayed there is compiled by `vireo-starter-documentation-examples`; Javadocs remain the complete API reference.

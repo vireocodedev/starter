@@ -16,6 +16,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.vireocode.vireo.spi.OfflineChangeBroadcaster;
 
@@ -33,6 +34,7 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
     private final AtomicInteger activeSyncs = new AtomicInteger();
     private final Clock clock;
     private final OfflineSseAudienceResolver audienceResolver;
+    private final ApplicationEventPublisher observationEvents;
 
     public OfflineHeartbeatService() {
         this(Clock.systemUTC(), new DenyAllOfflineSseAudienceResolver());
@@ -43,8 +45,15 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
     }
 
     OfflineHeartbeatService(Clock clock, OfflineSseAudienceResolver audienceResolver) {
+        this(clock, audienceResolver, event -> {
+        });
+    }
+
+    OfflineHeartbeatService(Clock clock, OfflineSseAudienceResolver audienceResolver,
+            ApplicationEventPublisher observationEvents) {
         this.clock = Objects.requireNonNull(clock, "clock");
         this.audienceResolver = Objects.requireNonNull(audienceResolver, "audienceResolver");
+        this.observationEvents = Objects.requireNonNull(observationEvents, "observationEvents");
     }
 
     public SseEmitter createEmitter() {
@@ -55,11 +64,12 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
         String audience = requireCurrentAudience();
         AudienceEmitter audienceEmitter = new AudienceEmitter(audience, emitter);
         emitters.add(audienceEmitter);
+        publishObservation(new OfflineObservationEvent(
+                OfflineObservationEvent.Operation.SSE_CONNECT, OfflineObservationEvent.Outcome.CONNECTED, 1, 0));
 
-        final Runnable clearCallback = () -> emitters.remove(audienceEmitter);
-        emitter.onCompletion(clearCallback);
-        emitter.onTimeout(clearCallback);
-        emitter.onError(error -> clearCallback.run());
+        emitter.onCompletion(() -> removeEmitter(audienceEmitter, OfflineObservationEvent.Outcome.DISCONNECTED));
+        emitter.onTimeout(() -> removeEmitter(audienceEmitter, OfflineObservationEvent.Outcome.DISCONNECTED));
+        emitter.onError(error -> removeEmitter(audienceEmitter, OfflineObservationEvent.Outcome.ERROR));
 
         sendHeartbeatToEmitter(audienceEmitter);
         return emitter;
@@ -118,7 +128,7 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
     }
 
     private void sendHeartbeatToEmitter(AudienceEmitter audienceEmitter) {
-        sendEventToEmitter(audienceEmitter, HEARTBEAT_EVENT, getCurrentHeartbeat());
+        sendEventToEmitter(audienceEmitter, HEARTBEAT_EVENT, getCurrentHeartbeat(), 1);
     }
 
     private void queueEntityChange(String action, String entity, Object payload, Long revision) {
@@ -128,10 +138,14 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
                 .orElse(null);
         if (audience == null) {
             log.debug("Discarding offline SSE payload because no application audience was resolved.");
+            publishObservation(new OfflineObservationEvent(
+                    OfflineObservationEvent.Operation.SSE_CHANGE, OfflineObservationEvent.Outcome.DISCARDED, 1, 0));
             return;
         }
         OfflineSseBatchContext context = OfflineSseBatchContextHolder.getContext();
         context.addEvent(audience, new OfflineSseBatchItem(action, entity, payload, revision));
+        publishObservation(new OfflineObservationEvent(
+                OfflineObservationEvent.Operation.SSE_CHANGE, OfflineObservationEvent.Outcome.ADMITTED, 1, 0));
 
         if (context.isFlushScheduled()) {
             return;
@@ -168,18 +182,55 @@ public class OfflineHeartbeatService implements OfflineChangeBroadcaster {
     }
 
     private void sendEventToEmitter(AudienceEmitter audienceEmitter, String eventName, Object payload) {
+        long itemCount = payload instanceof OfflineSseBatchEvent batch ? batch.events().size() : 1;
+        sendEventToEmitter(audienceEmitter, eventName, payload, itemCount);
+    }
+
+    private void sendEventToEmitter(AudienceEmitter audienceEmitter, String eventName, Object payload,
+            long itemCount) {
         SseEmitter emitter = audienceEmitter.emitter();
+        long startedAt = System.nanoTime();
         try {
             emitter.send(SseEmitter.event()
                     .name(eventName)
                     .data(payload));
+            publishObservation(new OfflineObservationEvent(
+                    sseOperation(eventName), OfflineObservationEvent.Outcome.DELIVERED, itemCount,
+                    System.nanoTime() - startedAt));
         } catch (AsyncRequestNotUsableException e) {
             log.debug("Offline heartbeat emitter is no longer usable.");
             emitters.remove(audienceEmitter);
+            publishObservation(new OfflineObservationEvent(
+                    sseOperation(eventName), OfflineObservationEvent.Outcome.DISCONNECTED, itemCount,
+                    System.nanoTime() - startedAt));
         } catch (IOException e) {
             log.debug("Removing offline heartbeat emitter after send failure.", e);
             emitter.completeWithError(e);
             emitters.remove(audienceEmitter);
+            publishObservation(new OfflineObservationEvent(
+                    sseOperation(eventName), OfflineObservationEvent.Outcome.ERROR, itemCount,
+                    System.nanoTime() - startedAt));
+        }
+    }
+
+    private OfflineObservationEvent.Operation sseOperation(String eventName) {
+        return BATCH_EVENT.equals(eventName)
+                ? OfflineObservationEvent.Operation.SSE_BATCH
+                : OfflineObservationEvent.Operation.SSE_HEARTBEAT;
+    }
+
+    private void removeEmitter(AudienceEmitter audienceEmitter, OfflineObservationEvent.Outcome outcome) {
+        if (emitters.remove(audienceEmitter)) {
+            publishObservation(new OfflineObservationEvent(
+                    OfflineObservationEvent.Operation.SSE_CONNECT, outcome, 1, 0));
+        }
+    }
+
+    private void publishObservation(OfflineObservationEvent event) {
+        try {
+            observationEvents.publishEvent(event);
+        } catch (RuntimeException exception) {
+            log.debug("Offline SSE observation listener failed; delivery remains authoritative.", exception);
         }
     }
 

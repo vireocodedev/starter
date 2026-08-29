@@ -17,6 +17,9 @@ dependencies {
     // inherit Flyway; the migration strategy is @ConditionalOnClass.
     compileOnly 'org.flywaydb:flyway-core'
     compileOnly 'org.springframework.boot:spring-boot-flyway'
+    // Observations activate only when the consumer provides an ObservationRegistry.
+    // No metrics/tracing backend is pulled into the published runtime.
+    compileOnly 'io.micrometer:micrometer-observation'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-flyway'
