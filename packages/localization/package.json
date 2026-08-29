@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/localization",
   "version": "0.2.1",
-  "description": "Foundation i18n toolkit and shared platform translations for the vireocodedev starter product.",
+  "description": "Vireo localization toolkit and shared, validated application translations.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/localization"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "i18n",

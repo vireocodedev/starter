@@ -1,7 +1,7 @@
 {
   "name": "create-vireo",
   "version": "0.4.2",
-  "description": "Create a production-shaped Vireo React application, with an optional Spring Boot backend, from the pinned golden-path Template.",
+  "description": "Create a production-shaped Vireo Framework React application, with an optional Spring Boot backend, from the pinned Starter Template.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/create-vireo"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "create",

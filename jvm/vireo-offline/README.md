@@ -1,4 +1,4 @@
-# Vireo Starter Offline
+# Vireo Offline
 
 `vireo-offline` provides authenticated mutation replay, idempotent command tracking, per-entity hydration revisions, and transaction-aware server-sent change batches for row-shaped applications.
 

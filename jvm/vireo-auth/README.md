@@ -1,4 +1,4 @@
-# Vireo Starter Auth
+# Vireo Auth
 
 Replaceable database-backed session authentication for Spring Boot applications.
 

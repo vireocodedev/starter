@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/history",
   "version": "0.2.1",
-  "description": "Framework-free entity history definitions, diff nodes, and transport-neutral record schemas for the vireocodedev starter product.",
+  "description": "Framework-free Vireo entity-history definitions, diff nodes, and transport-neutral record schemas.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/history"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "history",

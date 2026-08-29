@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/infrastructure",
   "version": "0.2.1",
-  "description": "React-free browser infrastructure primitives for validated HTTP transport, connectivity, persistence, and execution-mode-aware services.",
+  "description": "React-free Vireo browser infrastructure for validated HTTP transport, connectivity, persistence, and execution modes.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/infrastructure"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "infrastructure",

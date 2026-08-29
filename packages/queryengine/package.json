@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/query",
   "version": "0.2.1",
-  "description": "Framework-free query schemas, transport ports, and parameterized SQLite execution for Vireo Starter.",
+  "description": "Framework-free Vireo query schemas, transport ports, and parameterized SQLite execution.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/queryengine"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "queryengine",

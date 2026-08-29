@@ -1,4 +1,4 @@
-# Vireo Starter Core
+# Vireo Core
 
 Foundational Spring Boot contracts for reusable CRUD services, auditing, search,
 stable API errors, optional-module integration, and library-owned Flyway

@@ -37,7 +37,7 @@ Choose the shortest path that matches what you are evaluating:
 The [public API map](docs/PUBLIC_API.md) is the package-level navigation surface.
 The repository-owned [evaluation evidence](docs/EVALUATION.md) remains available for
 maintainers and auditors after the user-facing guidance moved to vireocode.com.
-Starter UI has an additional [classified surface](packages/ui/docs/PUBLIC_SURFACE.md)
+Vireo UI has an additional [classified surface](packages/ui/docs/PUBLIC_SURFACE.md)
 covering every exported entry point. Canonical date, time, and timestamp ownership is
 documented in the [temporal values guide](docs/TEMPORAL_VALUES.md).
 
@@ -133,9 +133,9 @@ version-specific routes, generated API references, and release linkage.
 
 The normative [loading-state and skeleton standard](docs/LOADING_STATE_STANDARD.md)
 defines loading classification, structural skeleton behavior, geometry guarantees,
-accessibility, motion, and verification across Starter UI and consuming applications.
+accessibility, motion, and verification across Vireo UI and consuming applications.
 The [Phase 2 loading-state audit](docs/LOADING_STATE_AUDIT.md) records the current
-Starter UI baseline and prioritized remediation queue.
+Vireo UI baseline and prioritized remediation queue.
 
 `build` is artifact generation; `typecheck` owns full semantic source checking.
 Keeping those responsibilities separate lets the UI package use TypeScript's

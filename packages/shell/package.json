@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/shell",
   "version": "0.2.1",
-  "description": "Framework-free contracts for application sitemap construction, navigation metadata, auth redirects, and overlay history.",
+  "description": "Framework-free Vireo contracts for application sitemaps, navigation, auth redirects, and overlay history.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/shell"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "shell",

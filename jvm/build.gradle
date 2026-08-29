@@ -288,7 +288,17 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
             maven(MavenPublication) {
                 pom {
                     name = project.name
-                    url = 'https://github.com/vireocodedev/starter'
+                    description = project.description
+                    url = 'https://vireocode.com/reference/java/'
+                    inceptionYear = '2025'
+                    organization {
+                        name = 'Vireo Code'
+                        url = 'https://vireocode.com/'
+                    }
+                    issueManagement {
+                        system = 'GitHub Issues'
+                        url = 'https://github.com/vireocodedev/starter/issues'
+                    }
                     licenses {
                         license {
                             name = 'MIT'

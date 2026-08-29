@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/sqlite",
   "version": "0.2.2",
-  "description": "Reusable SQLite worker/client runtime primitives for the vireocodedev starter product.",
+  "description": "Reusable Vireo SQLite worker and client runtime primitives for browser persistence and offline workflows.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/sqlite"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "sqlite",

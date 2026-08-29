@@ -1,7 +1,7 @@
 {
   "name": "@vireocodedev/ui",
   "version": "0.2.2",
-  "description": "MUI-based UI component library (responsive cards, mobile tables, overlays, providers, hooks, formatters) for the vireocodedev starter product.",
+  "description": "MUI-based Vireo UI components for responsive application layouts, forms, tables, overlays, and providers.",
   "type": "module",
   "sideEffects": [
     "**/*.css",
@@ -12,6 +12,10 @@
     "type": "git",
     "url": "git+https://github.com/vireocodedev/starter.git",
     "directory": "packages/ui"
+  },
+  "homepage": "https://vireocode.com/reference/typescript/",
+  "bugs": {
+    "url": "https://github.com/vireocodedev/starter/issues"
   },
   "keywords": [
     "ui",

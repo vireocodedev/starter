@@ -1,4 +1,4 @@
-# Vireo Starter History
+# Vireo History
 
 Append-only create, update, and delete history for entities managed through `BaseService`.
 

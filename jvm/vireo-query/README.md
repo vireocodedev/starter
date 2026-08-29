@@ -1,4 +1,4 @@
-# Vireo Starter Query Engine
+# Vireo Query Engine
 
 `vireo-query` turns application-authored entity metadata into a validated filtering contract for Spring Data JPA and provides authenticated, per-user saved filters.
 
