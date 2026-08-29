@@ -115,6 +115,34 @@ test("dry run is non-writing and output mode renders a deterministic review tree
   assert.equal(first.schemaDigest, second.schemaDigest);
 });
 
+test("generated pages import only controls used by the schema", async () => {
+  const { root, schemaPath } = await projectFixture();
+  await writeFile(
+    schemaPath,
+    JSON.stringify(
+      schema({
+        fields: [
+          {
+            name: "displayName",
+            type: "string",
+            required: true,
+            query: { filterable: true, searchable: true, sortable: true },
+          },
+        ],
+      }),
+    ),
+  );
+
+  await generateEntity({ projectDirectory: root, schemaPath });
+  const page = await readFile(
+    join(root, "frontend/src/generated/api-clients/pages/AppPageApiClients.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(page, /\bCheckbox\b/u);
+  assert.doesNotMatch(page, /\bFormControlLabel\b/u);
+  assert.doesNotMatch(page, /\bMenuItem\b/u);
+});
+
 test("generation is idempotent, detects wire drift, refuses customization, and ejects without deleting code", async () => {
   const { root, schemaPath } = await projectFixture();
   const first = await generateEntity({ projectDirectory: root, schemaPath });

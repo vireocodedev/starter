@@ -664,23 +664,26 @@ function inputControl(field: EntityFieldSchema, names: EntityNames) {
 function renderPage(schema: VireoEntitySchema, names: EntityNames, digest: string) {
   const listFields = schema.fields.filter(field => field.ui?.list !== false).slice(0, 4);
   const primary = schema.fields.find(field => field.query?.searchable) ?? schema.fields[0];
+  const muiImports = [
+    "Alert",
+    "Box",
+    "Button",
+    ...(schema.fields.some(field => field.type === "boolean") ? ["Checkbox"] : []),
+    "CircularProgress",
+    "Dialog",
+    "DialogActions",
+    "DialogContent",
+    "DialogTitle",
+    ...(schema.fields.some(field => field.type === "boolean") ? ["FormControlLabel"] : []),
+    ...(schema.fields.some(field => field.type === "enum") ? ["MenuItem"] : []),
+    "Paper",
+    "Stack",
+    "TextField",
+    "Typography",
+  ];
   return `${generatedHeader("//", digest, "generated-once")}import React from "react";
 import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  MenuItem,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
+  ${muiImports.join(",\n  ")},
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppPreferences } from "@/app/ui/preferences/hooks/useAppPreferences";
