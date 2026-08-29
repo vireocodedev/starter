@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd https://dependency-check.github.io/DependencyCheck/dependency-suppression.1.4.xsd">
+  <!--
+    No vulnerability exceptions are currently approved.
+
+    A temporary false-positive or accepted-risk exception must use Dependency-
+    Check's narrow generated selector, declare `until` as a UTC ISO-8601 instant,
+    and include these newline-delimited notes:
+
+      owner=@github-handle-or-team
+      rationale=why the finding cannot be fixed immediately
+      tracking=https://github.com/vireocodedev/starter/security/...
+
+    The Gradle policy task rejects missing metadata and expired exceptions;
+    Dependency-Check rejects unused rules.
+  -->
+</suppressions>

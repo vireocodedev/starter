@@ -69,6 +69,25 @@ than build-system guessing. Dependency review blocks pull requests that introduc
 known vulnerability of moderate severity or higher. Dependabot alerts and security
 updates supplement those source-owned gates.
 
+Dependabot also opens weekly, grouped minor/patch updates for the root npm
+workspace lock graph and the `jvm/` multiproject Gradle graph; majors remain
+isolated for review. A separate Tuesday workflow installs the committed npm graph
+and runs `npm audit`, then resolves every production and test configuration in the
+Gradle multiproject build through OWASP Dependency-Check. Both lanes fail at
+moderate severity (CVSS 4.0 for JVM). The JVM lane requires the repository's
+`NVD_API_KEY` secret so advisory refreshes are authenticated and do not depend on
+the heavily rate-limited anonymous API. A missing key fails closed before analysis.
+The aggregate scanner runs without Gradle's configuration cache and parallel mode
+because its cross-project resolution is not compatible with either optimization.
+
+Vulnerability suppressions are deny-by-default. A JVM false-positive or temporary
+risk acceptance must be narrowly selected in
+`jvm/config/dependency-check-suppressions.xml`, identify `owner`, `rationale`, and
+`tracking` in its notes, and carry a future UTC `until` timestamp. The build rejects
+anonymous or expired entries and Dependency-Check rejects stale, unused rules.
+There are currently no approved exceptions. npm findings have no suppression lane:
+they require a dependency/override remediation or a reviewed change to this policy.
+
 These scanners are complementary: CodeQL examines source behavior, dependency
 review examines a pull request's dependency change, Dependabot monitors known
 vulnerabilities after merge, and Gitleaks scans history for credential-like

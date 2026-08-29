@@ -2,6 +2,65 @@ plugins {
     id 'java-base'
     id 'com.adarshr.test-logger' version '4.0.0' apply false
     id 'org.cyclonedx.bom' version '3.4.1'
+    id 'org.owasp.dependencycheck' version '12.2.2'
+}
+
+def dependencyCheckSuppressions = layout.projectDirectory.file('config/dependency-check-suppressions.xml')
+def nvdApiKey = providers.environmentVariable('NVD_API_KEY')
+
+dependencyCheck {
+    failBuildOnCVSS = 4.0
+    failOnError = true
+    failBuildOnUnusedSuppressionRule = true
+    formats = ['HTML', 'JSON']
+    skipTestGroups = false
+    suppressionFile = dependencyCheckSuppressions.asFile.absolutePath
+    if (nvdApiKey.isPresent()) {
+        nvd.apiKey = nvdApiKey.get()
+    }
+}
+
+// Dependency-Check enforces the `until` timestamp itself. This companion gate
+// makes the repository policy explicit: every temporary exception must also
+// identify an accountable owner, a rationale, and its private/public tracker.
+def dependencySuppressionPolicy = tasks.register('dependencySuppressionPolicy') {
+    group = 'verification'
+    description = 'Rejects anonymous, untracked, or expired dependency vulnerability suppressions.'
+    inputs.file(dependencyCheckSuppressions)
+
+    doLast {
+        def suppressions = new groovy.xml.XmlSlurper(false, false).parse(dependencyCheckSuppressions.asFile)
+        suppressions.suppress.eachWithIndex { suppression, index ->
+            def rule = index + 1
+            def until = suppression.@until.text()
+            if (!until) {
+                throw new GradleException("Dependency suppression ${rule} must declare an until timestamp.")
+            }
+
+            java.time.Instant expiry = null
+            try {
+                expiry = java.time.Instant.parse(until)
+            } catch (java.time.format.DateTimeParseException ignored) {
+                throw new GradleException(
+                        "Dependency suppression ${rule} has invalid until timestamp '${until}'; use UTC ISO-8601.")
+            }
+            if (!expiry.isAfter(java.time.Instant.now())) {
+                throw new GradleException("Dependency suppression ${rule} expired at ${until}.")
+            }
+
+            def notes = suppression.notes.text()
+            ['owner', 'rationale', 'tracking'].each { field ->
+                if (!(notes =~ /(?m)^${field}=\S.*$/).find()) {
+                    throw new GradleException(
+                            "Dependency suppression ${rule} notes must include '${field}=...'.")
+                }
+            }
+        }
+    }
+}
+
+tasks.named('dependencyCheckAggregate') {
+    dependsOn dependencySuppressionPolicy
 }
 
 // The artifacts a consumer resolves. Everything else in this build exists to

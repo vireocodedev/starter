@@ -1,5 +1,53 @@
 version: 2
 updates:
+  # The root lockfile is the single resolved graph for every npm workspace.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:07"
+      timezone: Europe/Zagreb
+    open-pull-requests-limit: 10
+    groups:
+      npm-production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      npm-development-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "deps(npm)"
+    labels:
+      - dependencies
+      - security
+
+  # jvm/settings.gradle owns the complete multi-project JVM dependency graph.
+  - package-ecosystem: gradle
+    directory: /jvm
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:12"
+      timezone: Europe/Zagreb
+    open-pull-requests-limit: 10
+    groups:
+      gradle-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "deps(gradle)"
+    labels:
+      - dependencies
+      - security
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -9,7 +57,7 @@ updates:
       timezone: Europe/Zagreb
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "ci"
+      prefix: "deps(actions)"
     labels:
       - dependencies
       - security
