@@ -55,6 +55,15 @@ export function validateReleaseLifecycle(
   if (lines.length === 0 || new Set(ids).size !== ids.length) {
     problems.push("support lines must be non-empty and have unique IDs");
   }
+  if (JSON.stringify(policy.transitions?.allowed) !== JSON.stringify(["active->deprecated", "deprecated->eol"])) {
+    problems.push("support-line transitions must be active->deprecated then deprecated->eol");
+  }
+  if (!Number.isInteger(policy.transitions?.minimumDeprecationDays) || policy.transitions.minimumDeprecationDays < 1) {
+    problems.push("support-line minimumDeprecationDays must be a positive integer");
+  }
+  if (policy.transitions?.requireReplacementOrExplicitNone !== true) {
+    problems.push("support-line withdrawal must require a replacement or explicit none");
+  }
   const releaseIds = new Set([ecosystem.current?.id, ...(ecosystem.compatibility?.sets ?? []).map(set => set.release)]);
   for (const line of lines) {
     if (!["active", "deprecated", "eol"].includes(line.status)) {
@@ -78,6 +87,23 @@ export function validateReleaseLifecycle(
     if (line.status === "eol" && (line.deprecatedOn === null || line.eolOn === null)) {
       problems.push(`EOL support line ${line.id} requires deprecation and EOL dates`);
     }
+    if (isoDate.test(line.introducedOn ?? "") && isoDate.test(line.statusEffectiveOn ?? "")) {
+      if (Date.parse(line.statusEffectiveOn) < Date.parse(line.introducedOn)) {
+        problems.push(`support line ${line.id} statusEffectiveOn predates introduction`);
+      }
+    }
+    if (isoDate.test(line.deprecatedOn ?? "") && isoDate.test(line.eolOn ?? "")) {
+      const deprecationDays = (Date.parse(line.eolOn) - Date.parse(line.deprecatedOn)) / 86_400_000;
+      if (deprecationDays < policy.transitions.minimumDeprecationDays) {
+        problems.push(
+          `support line ${line.id} provides ${deprecationDays} deprecation days; minimum is ${policy.transitions.minimumDeprecationDays}`,
+        );
+      }
+    }
+    if (line.replacement !== "none" && !ids.includes(line.replacement)) {
+      problems.push(`support line ${line.id} replacement must identify another line or be explicit none`);
+    }
+    if (line.replacement === line.id) problems.push(`support line ${line.id} cannot replace itself`);
     if (!releaseIds.has(line.release))
       problems.push(`support line ${line.id} references unknown release ${line.release}`);
     for (const field of ["compatibilityPolicy", "withdrawalGuide"]) {

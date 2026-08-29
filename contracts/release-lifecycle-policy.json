@@ -23,6 +23,7 @@
       "deprecatedOn": null,
       "eolOn": null,
       "maintenanceScope": "security-and-critical-correctness",
+      "replacement": "none",
       "compatibilityPolicy": "docs/COMPATIBILITY.md",
       "withdrawalGuide": "docs/RELEASE_LIFECYCLE.md"
     }
