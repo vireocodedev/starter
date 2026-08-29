@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { createVireo, TEMPLATE_COMMIT } from "../dist/index.js";
+import { createVireo, findExampleReferences, removeExample, TEMPLATE_COMMIT } from "../dist/index.js";
 
 async function fixture(root) {
   const template = join(root, "template");
@@ -54,6 +54,8 @@ async function fixture(root) {
   await writeFile(join(template, "frontend/vite.config.ts"), 'name: "Vireo Starter App", short_name: "Vireo"\n');
   await writeFile(join(template, "frontend/src/app/ui/localization/resources/app.en.ts"), 'name: "Vireo Starter"\n');
   await writeFile(join(template, "frontend/src/app/ui/localization/resources/app.hr.ts"), 'name: "Vireo Starter"\n');
+  await mkdir(join(template, "frontend/src/features/item"), { recursive: true });
+  await writeFile(join(template, "frontend/src/features/item/public.ts"), "export type Item = { id: number };\n");
   await writeFile(
     join(template, "src/main/java/com/vireocode/startertemplate/App.java"),
     "package com.vireocode.startertemplate;\n",
@@ -141,6 +143,38 @@ test("dry run validates without writing", async () => {
     const result = await createVireo({ directory: target, dryRun: true });
     assert.equal(result.dryRun, true);
     await assert.rejects(readFile(target), /ENOENT/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("remove-example is dry-run first, rejects drift, removes owned references, and is idempotent", async () => {
+  const root = await mkdtemp(join(tmpdir(), "remove-vireo-example-test-"));
+  try {
+    const template = await fixture(root);
+    const target = join(root, "sample-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+    const samplePath = join(target, "frontend/src/features/item/public.ts");
+
+    const preview = await removeExample(target);
+    assert.equal(preview.dryRun, true);
+    assert.equal(preview.state, "present");
+    assert.match(await readFile(samplePath, "utf8"), /Item/u);
+
+    await writeFile(samplePath, "export type Item = { id: number; customized: true };\n");
+    await assert.rejects(removeExample(target, true), /customized example file/u);
+    await writeFile(samplePath, "export type Item = { id: number };\n");
+
+    const unowned = join(target, "custom-item-note.md");
+    await writeFile(unowned, "The Item integration is customized here.\n");
+    await assert.rejects(removeExample(target, true), /unowned example references/u);
+    await rm(unowned);
+
+    const applied = await removeExample(target, true);
+    assert.equal(applied.state, "present");
+    assert.deepEqual(await findExampleReferences(target), []);
+    await assert.rejects(readFile(samplePath), /ENOENT/u);
+    assert.equal((await removeExample(target)).state, "removed");
   } finally {
     await rm(root, { recursive: true, force: true });
   }

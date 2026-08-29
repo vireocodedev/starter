@@ -22,11 +22,12 @@ corepack npm run vireo -- generate entity schema.json
 corepack npm run vireo -- check
 corepack npm run vireo -- eject entity-plural
 corepack npm run vireo -- upgrade --to VERSION
+corepack npm run vireo -- remove-example --dry-run
 ```
 
 ## Project scripts versus CLI commands
 
-`setup`, `dev`, `doctor` and `verify` are project scripts. `generate`, `check`, `eject` and `upgrade` are Vireo CLI commands. This distinction lets diagnostics and runtime composition vary by profile without expanding the global CLI surface.
+`setup`, `dev`, `doctor` and `verify` are project scripts. `generate`, `check`, `eject`, `remove-example` and `upgrade` are Vireo CLI commands. `remove-example` is non-writing by default, exposes `--status`, and requires `--apply` after its ownership checks pass. This distinction lets diagnostics and runtime composition vary by profile without expanding the global CLI surface.
 
 ## Machine-readable output
 

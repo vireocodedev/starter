@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { checkGeneratedEntities, ejectEntity, generateEntity } from "./entity-generator.js";
 import type { VireoGenerationTarget } from "./entity-renderer.js";
 import { upgradeVireoProject } from "./project-upgrade.js";
+import { removeExample } from "./remove-example.js";
 
 const HELP = `Vireo application development CLI.
 
@@ -10,6 +11,7 @@ Usage:
   vireo check [options]
   vireo eject <entity-plural> [options]
   vireo upgrade --to <version> [options]
+  vireo remove-example [options]
 
 Generate options:
   --project <directory>        Vireo application root (default: current directory)
@@ -30,6 +32,11 @@ Upgrade options:
   --dry-run                   Validate and show the migration plan (default)
   --apply                     Apply only the declared Vireo-managed migration
   --accept-application-owned  Required with --apply; acknowledges the manual Template boundary
+
+Remove-example options:
+  --dry-run                   Validate and show the complete removal plan (default)
+  --status                    Report whether the generated example is present or removed
+  --apply                     Apply only when every example-owned file is unchanged
 `;
 
 type CommonArguments = {
@@ -177,6 +184,31 @@ async function upgrade(values: string[]) {
   );
 }
 
+async function removeGeneratedExample(values: string[]) {
+  const { common, rest } = commonArguments(values);
+  let apply = false;
+  let status = false;
+  for (const value of rest) {
+    if (value === "--apply") apply = true;
+    else if (value === "--status") status = true;
+    else throw new Error(`Unknown remove-example option: ${value}`);
+  }
+  if (apply && (common.dryRun || status)) throw new Error("Choose either --apply, --dry-run, or --status.");
+  const result = await removeExample(common.project, apply);
+  if (common.json) return print(result, true);
+  if (status) return print(`Example status: ${result.state}.`, false);
+  print(
+    [
+      `${apply ? "Removed" : "Validated removal of"} the generated example (${result.files.length} file operations).`,
+      ...result.files.map(file => `${file.status.padEnd(7)} ${file.path}`),
+      apply
+        ? "Run the project verification gate before committing."
+        : "No files were written. Re-run with --apply to perform this reviewed plan.",
+    ],
+    false,
+  );
+}
+
 async function main() {
   const values = process.argv.slice(2);
   if (values.length === 0 || values[0] === "--help" || values[0] === "-h") {
@@ -188,6 +220,7 @@ async function main() {
   else if (command === "check") await check(values);
   else if (command === "eject") await eject(values);
   else if (command === "upgrade") await upgrade(values);
+  else if (command === "remove-example") await removeGeneratedExample(values);
   else throw new Error(`Unknown command: ${command}\n\n${HELP}`);
 }
 

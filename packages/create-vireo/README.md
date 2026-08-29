@@ -80,6 +80,24 @@ Use `--output <directory>` to inspect a standalone tree. An identical rerun is b
 
 The detailed contracts are in [frontend-only profile](../../docs/architecture/frontend-only-profile.md), [entity schema](../../docs/generators/entity-schema.md), [generated ownership](../../docs/architecture/generated-code-ownership.md), and [wire contracts](../../docs/architecture/wire-contracts.md).
 
+## Remove the generated example
+
+New projects include a content-addressed ownership manifest for the sample domain.
+Inspect the complete plan first, or ask only for its current state:
+
+```bash
+vireo remove-example --status
+vireo remove-example --dry-run
+vireo remove-example --apply
+```
+
+Dry run is the default. Apply proceeds only when every example-owned file still
+matches its generation-time digest and there are no unowned sample references.
+It removes the sample route, navigation, localization, adapters, frontend/backend
+domain files, migration, seed, tests, stories, and documentation references while
+retaining a minimal home surface. If a file was customized, move that work into a
+new capability or reconcile it manually; the command will not overwrite it.
+
 ## Upgrade a generated project
 
 Version 0.3 introduces the first supported release pair, from a project created by

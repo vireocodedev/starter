@@ -4,6 +4,7 @@ import { chmod, cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { format, resolveConfig } from "prettier";
+import { writeExampleManifest } from "./remove-example.js";
 
 export {
   checkGeneratedEntities,
@@ -45,6 +46,12 @@ export {
   type VireoUpgradeOptions,
   type VireoUpgradeResult,
 } from "./project-upgrade.js";
+export {
+  findExampleReferences,
+  removeExample,
+  type RemoveExampleFile,
+  type RemoveExampleResult,
+} from "./remove-example.js";
 
 export const TEMPLATE_COMMIT = "038df86f7e311ef771e0f01a4a44b698f27e4b28";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
@@ -493,6 +500,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
       join(staging, ".vireo", "project.json"),
       `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.4.2" }, null, 2)}\n`,
     );
+    await writeExampleManifest(staging, TEMPLATE_COMMIT, profile);
     if (options.git !== false) {
       const initialized = spawnSync("git", ["init", "--quiet"], { cwd: staging });
       if (initialized.status !== 0) throw new Error("Git initialization failed. Retry with `--no-git` or install Git.");
