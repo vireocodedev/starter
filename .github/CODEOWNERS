@@ -3,3 +3,5 @@
 /packages/ui/ @vireocodedev
 /jvm/ @vireocodedev
 /.github/ @vireocodedev
+/.release-impact/ @vireocodedev
+/contracts/release-impact-policy.json @vireocodedev

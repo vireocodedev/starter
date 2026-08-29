@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "2026-08-30.1",
+  "contractVersion": "2026-08-30.2",
   "maturity": "public-alpha",
   "product": {
     "id": "vireo-framework",
@@ -13,6 +13,7 @@
   },
   "policySources": {
     "platformSupport": "contracts/platform-support-policy.json",
+    "releaseImpact": "contracts/release-impact-policy.json",
     "documentationReleases": "contracts/documentation-release-policy.json",
     "publicArtifacts": "contracts/public-release-attestation-policy.json",
     "publicBetaEvidence": "contracts/public-beta-evidence-policy.json",

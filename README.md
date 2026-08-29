@@ -154,8 +154,13 @@ in the leather-production repository under `docs/STARTER_WORKFLOW.md`.
 
 ## Release (Changesets)
 
-1. `corepack npm exec changeset` — describe the change and select each package's
-   semver bump.
+Every artifact-affecting pull request must declare its release intent according
+to the [release-impact contract](docs/RELEASE_IMPACT.md). For npm packages, a
+Changeset is the release decision; a justified, reviewed `.release-impact` record
+is required when no package release is intended.
+
+1. `corepack npm exec changeset` — describe the change and select each affected
+   package's semver bump.
 2. Merge to `main`. **Maintain npm release PR** opens or refreshes the version PR.
 3. Review and merge that PR. This updates versions and changelogs but does not
    publish.
@@ -182,12 +187,14 @@ recovery procedure is in [Public npm release](docs/NPM_RELEASE.md).
 
 ## Release (JVM)
 
-The `jvm/` half has no Changesets equivalent, so its release is deliberately
-smaller:
+The `jvm/` half uses machine-readable `.release-impact` records as its Changesets
+equivalent. One version still covers all six artifacts — they are a set, and the
+BOM exists so a consumer never mixes them.
 
-1. Bump `version` in `jvm/gradle.properties` in the same pull request as the
-   change that warrants it. One version covers all six artifacts — they are a
-   set, and the BOM exists so a consumer never mixes them.
+1. Add a release-impact record for every affected module. On the release branch,
+   run `corepack npm run version:jvm-impact`; this applies the highest requested
+   bump to `jvm/gradle.properties`, writes the module summaries to
+   `jvm/CHANGELOG.md`, and consumes those release records.
 2. If the change moved the public API, run `./gradlew apiSurfaceUpdate` in `jvm/`
    and commit the updated `api-surface.txt` files. This is the forcing function:
    the check task fails the build until the snapshot matches, so a widened

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "metadataDirectory": ".release-impact",
+  "minimumJustificationLength": 24,
+  "minimumSummaryLength": 12,
+  "releaseDecisions": {
+    "npm": ["major", "minor", "patch"],
+    "jvm": ["major", "minor", "patch"],
+    "application": ["deploy"]
+  },
+  "artifacts": [
+    {
+      "id": "npm:create-vireo",
+      "kind": "npm",
+      "name": "create-vireo",
+      "pathPrefixes": ["packages/create-vireo/"]
+    },
+    {
+      "id": "npm:@vireocodedev/history",
+      "kind": "npm",
+      "name": "@vireocodedev/history",
+      "pathPrefixes": ["packages/history/"]
+    },
+    {
+      "id": "npm:@vireocodedev/infrastructure",
+      "kind": "npm",
+      "name": "@vireocodedev/infrastructure",
+      "pathPrefixes": ["packages/infrastructure/"]
+    },
+    {
+      "id": "npm:@vireocodedev/localization",
+      "kind": "npm",
+      "name": "@vireocodedev/localization",
+      "pathPrefixes": ["packages/localization/"]
+    },
+    {
+      "id": "npm:@vireocodedev/query",
+      "kind": "npm",
+      "name": "@vireocodedev/query",
+      "pathPrefixes": ["packages/queryengine/"]
+    },
+    {
+      "id": "npm:@vireocodedev/shell",
+      "kind": "npm",
+      "name": "@vireocodedev/shell",
+      "pathPrefixes": ["packages/shell/"]
+    },
+    {
+      "id": "npm:@vireocodedev/sqlite",
+      "kind": "npm",
+      "name": "@vireocodedev/sqlite",
+      "pathPrefixes": ["packages/sqlite/"]
+    },
+    {
+      "id": "npm:@vireocodedev/ui",
+      "kind": "npm",
+      "name": "@vireocodedev/ui",
+      "pathPrefixes": ["packages/ui/"]
+    },
+    {
+      "id": "jvm:vireo-bom",
+      "kind": "jvm",
+      "name": "com.vireocode:vireo-bom",
+      "pathPrefixes": ["jvm/vireo-bom/"]
+    },
+    {
+      "id": "jvm:vireo-core",
+      "kind": "jvm",
+      "name": "com.vireocode:vireo-core",
+      "pathPrefixes": ["jvm/vireo-core/"]
+    },
+    {
+      "id": "jvm:vireo-auth",
+      "kind": "jvm",
+      "name": "com.vireocode:vireo-auth",
+      "pathPrefixes": ["jvm/vireo-auth/"]
+    },
+    {
+      "id": "jvm:vireo-query",
+      "kind": "jvm",
+      "name": "com.vireocode:vireo-query",
+      "pathPrefixes": ["jvm/vireo-query/"]
+    },
+    {
+      "id": "jvm:vireo-offline",
+      "kind": "jvm",
+      "name": "com.vireocode:vireo-offline",
+      "pathPrefixes": ["jvm/vireo-offline/"]
+    },
+    {
+      "id": "jvm:vireo-history",
+      "kind": "jvm",
+      "name": "com.vireocode:vireo-history",
+      "pathPrefixes": ["jvm/vireo-history/"]
+    },
+    {
+      "id": "application:documentation-site",
+      "kind": "application",
+      "name": "Vireo documentation site",
+      "pathPrefixes": ["site/"]
+    }
+  ],
+  "sharedImpact": [
+    {
+      "pathPrefixes": ["jvm/buildSrc/", "jvm/gradle/"],
+      "paths": ["jvm/build.gradle", "jvm/settings.gradle"],
+      "artifactKinds": ["jvm"]
+    },
+    {
+      "paths": ["tsconfig.base.json"],
+      "artifactKinds": ["npm"]
+    }
+  ],
+  "nonImpactPaths": [".release-impact/README.md", "jvm/CHANGELOG.md", "jvm/gradle.properties"]
+}

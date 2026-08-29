@@ -6,6 +6,8 @@ node --test \
   scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
   scripts/package-bin.test.mjs \
+  scripts/release-impact-policy.test.mjs \
+  scripts/release-impact-version.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
   site/build.test.mjs
 sh -n site/bootstrap-vps.sh
