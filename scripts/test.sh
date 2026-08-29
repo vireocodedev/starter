@@ -3,6 +3,7 @@ set -eu
 
 node --test \
   scripts/changeset-publish-adapter.test.mjs \
+  scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
   scripts/package-bin.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \

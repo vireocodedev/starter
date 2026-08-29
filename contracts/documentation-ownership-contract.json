@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "contractId": "vireo-documentation-ownership",
+  "releasePolicy": "contracts/documentation-release-policy.json",
+  "categories": {
+    "canonical": {
+      "owner": "vireo-documentation",
+      "freshness": "update-with-current-product-behavior",
+      "purpose": "Authoritative current guidance for adopters and maintainers."
+    },
+    "generated": {
+      "owner": "generating-policy-or-source",
+      "freshness": "regenerate-during-documentation-build",
+      "purpose": "Derived reference or inventory that must not be edited as an independent source."
+    },
+    "exact-version": {
+      "owner": "artifact-maintainer",
+      "freshness": "bind-to-declared-release-snapshot",
+      "purpose": "Package, API, or compatibility guidance tied to exact released artifacts."
+    },
+    "historical": {
+      "owner": "vireo-governance",
+      "freshness": "immutable-except-status-or-link-repair",
+      "purpose": "Dated decision, evidence, migration, or roadmap context that is not current guidance."
+    },
+    "application-owned": {
+      "owner": "generated-application-owner",
+      "freshness": "update-with-application-behavior-and-identity",
+      "purpose": "Documentation rendered for a generated project and owned by that application after creation."
+    }
+  },
+  "inventory": {
+    "repository": "starter",
+    "extensions": [".md", ".mdx"],
+    "roots": ["docs/", "packages/", "site/content/"],
+    "paths": [
+      "CODE_OF_CONDUCT.md",
+      "CONTRIBUTING.md",
+      "GOVERNANCE.md",
+      "README.md",
+      "SECURITY.md",
+      "SUPPORT.md",
+      "VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md",
+      "jvm/README.md",
+      "site/README.md"
+    ],
+    "ignoredDirectoryNames": ["dist", "node_modules", "storybook-static"]
+  },
+  "rules": [
+    {
+      "id": "dated-roadmap-and-evidence",
+      "repository": "starter",
+      "category": "historical",
+      "paths": [
+        "VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md",
+        "docs/API_INVENTORY.md",
+        "docs/BACKEND_PARITY.md",
+        "docs/GAPS_FRED.md",
+        "docs/GAPS_LMS.md",
+        "docs/GAPS_TRIAGE.md",
+        "docs/LOADING_STATE_AUDIT.md",
+        "docs/security/recovery-exercise-2026-08-27.md"
+      ],
+      "prefixes": ["docs/migration/private-package-history/", "docs/roadmap/"]
+    },
+    {
+      "id": "released-package-documentation",
+      "repository": "starter",
+      "category": "exact-version",
+      "paths": [
+        "docs/ARCHITECTURE.md",
+        "docs/COMPATIBILITY.md",
+        "docs/OFFLINE_GUARANTEES.md",
+        "docs/PUBLIC_API.md",
+        "docs/TEMPORAL_VALUES.md",
+        "jvm/README.md"
+      ],
+      "prefixes": ["docs/documentation-archives/", "packages/"]
+    },
+    {
+      "id": "current-public-guidance",
+      "repository": "starter",
+      "category": "canonical",
+      "paths": [
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "GOVERNANCE.md",
+        "README.md",
+        "SECURITY.md",
+        "SUPPORT.md",
+        "site/README.md"
+      ],
+      "prefixes": ["docs/", "site/content/"]
+    },
+    {
+      "id": "generated-documentation-artifacts",
+      "repository": "generated-output",
+      "category": "generated",
+      "paths": [
+        "api/jvm/index.html",
+        "api/typescript/index.html",
+        "search-index.json",
+        "storybook/index.html",
+        "versions.json"
+      ],
+      "prefixes": []
+    },
+    {
+      "id": "rendered-application-documentation",
+      "repository": "generated-application",
+      "category": "application-owned",
+      "paths": [
+        "CONTRIBUTING.md",
+        "GOVERNANCE.md",
+        "README.md",
+        "SECURITY.md",
+        "SUPPORT.md",
+        "docs/architecture/application-boundaries.md"
+      ],
+      "prefixes": []
+    }
+  ],
+  "declaredExternalDocuments": [
+    { "repository": "generated-output", "path": "api/jvm/index.html", "category": "generated" },
+    { "repository": "generated-output", "path": "api/typescript/index.html", "category": "generated" },
+    { "repository": "generated-output", "path": "search-index.json", "category": "generated" },
+    { "repository": "generated-output", "path": "storybook/index.html", "category": "generated" },
+    { "repository": "generated-output", "path": "versions.json", "category": "generated" },
+    { "repository": "generated-application", "path": "README.md", "category": "application-owned" },
+    { "repository": "generated-application", "path": "SECURITY.md", "category": "application-owned" },
+    { "repository": "generated-application", "path": "SUPPORT.md", "category": "application-owned" }
+  ],
+  "duplicateTitleResolutions": [
+    {
+      "normalizedTitle": "architecture",
+      "canonicalPath": "site/content/architecture.md",
+      "paths": ["docs/ARCHITECTURE.md", "site/content/architecture.md"],
+      "purpose": "The site page is adopter guidance; the exact-version document records the package dependency architecture."
+    }
+  ],
+  "assertions": {
+    "unclassifiedDocumentsFail": true,
+    "ambiguousOwnershipFails": true,
+    "conflictingDuplicateTitlesFail": true,
+    "staleDuplicateResolutionsFail": true
+  }
+}

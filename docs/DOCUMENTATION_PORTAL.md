@@ -68,6 +68,8 @@ follow the existing documentation-release policy.
 
 Content must not be copied into several canonical locations. When a repository guide
 is migrated, the README or source guide points to the corresponding website route.
+The executable [documentation ownership model](DOCUMENTATION_OWNERSHIP.md) classifies
+every checked-in document and rejects unclassified or conflicting duplicate ownership.
 
 ## Local builds
 

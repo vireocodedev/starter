@@ -1,11 +1,15 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { checkCheckedInDocumentationOwnership } from "./lib/documentation-ownership-contract.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policyPath = join(root, "contracts/documentation-release-policy.json");
 const policy = readJson(policyPath);
 const problems = [];
+const ownershipContract = readJson(join(root, "contracts/documentation-ownership-contract.json"));
+const ownership = checkCheckedInDocumentationOwnership(root, ownershipContract);
+problems.push(...ownership.problems.map(problem => `ownership: ${problem}`));
 const artifactRequested = process.argv.includes("--artifact");
 const unexpectedArguments = process.argv.slice(2).filter(argument => argument !== "--artifact");
 
