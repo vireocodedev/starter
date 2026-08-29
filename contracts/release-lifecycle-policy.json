@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "channels": {
+    "stable": {
+      "status": "active",
+      "npmTag": "latest",
+      "versionPattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "prerelease": {
+      "status": "not-enabled",
+      "npmTag": "next",
+      "versionPattern": "^[0-9]+\\.[0-9]+\\.[0-9]+-(?:alpha|beta|rc)\\.[0-9]+$",
+      "mustNotReplaceStableCoordinates": true
+    }
+  },
+  "supportLines": [
+    {
+      "id": "0.2-alpha",
+      "status": "active",
+      "release": "npm-0.2.1_jvm-0.2.0",
+      "introducedOn": "2026-08-26",
+      "statusEffectiveOn": "2026-08-30",
+      "deprecatedOn": null,
+      "eolOn": null,
+      "maintenanceScope": "security-and-critical-correctness",
+      "compatibilityPolicy": "docs/COMPATIBILITY.md",
+      "withdrawalGuide": "docs/RELEASE_LIFECYCLE.md"
+    }
+  ],
+  "transitions": {
+    "allowed": ["active->deprecated", "deprecated->eol"],
+    "minimumDeprecationDays": 30,
+    "requireReplacementOrExplicitNone": true
+  }
+}

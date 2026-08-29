@@ -9,6 +9,7 @@ node --test \
   scripts/publish-verified-npm-candidates.test.mjs \
   scripts/release-impact-policy.test.mjs \
   scripts/release-impact-version.test.mjs \
+  scripts/release-lifecycle-policy.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
   site/build.test.mjs
 sh -n site/bootstrap-vps.sh

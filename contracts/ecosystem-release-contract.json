@@ -14,6 +14,7 @@
   "policySources": {
     "platformSupport": "contracts/platform-support-policy.json",
     "releaseImpact": "contracts/release-impact-policy.json",
+    "releaseLifecycle": "contracts/release-lifecycle-policy.json",
     "documentationReleases": "contracts/documentation-release-policy.json",
     "publicArtifacts": "contracts/public-release-attestation-policy.json",
     "publicBetaEvidence": "contracts/public-beta-evidence-policy.json",

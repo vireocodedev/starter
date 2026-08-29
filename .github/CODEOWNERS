@@ -5,3 +5,4 @@
 /.github/ @vireocodedev
 /.release-impact/ @vireocodedev
 /contracts/release-impact-policy.json @vireocodedev
+/contracts/release-lifecycle-policy.json @vireocodedev
