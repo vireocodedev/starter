@@ -2,7 +2,7 @@
 
 Append-only create, update, and delete history for entities managed through `BaseService`.
 
-History owns snapshot serialization, neutral actor attribution, persistence, bounded chronological retrieval, and a replaceable authenticated HTTP endpoint. Applications own entity kinds, actor identifiers, and record-level authorization.
+History owns snapshot serialization, neutral actor attribution, persistence, bounded chronological retrieval, and an optional policy-gated HTTP endpoint. Applications own entity kinds, actor identifiers, and record-level authorization.
 
 ## Supported API
 
@@ -23,6 +23,8 @@ The History 0.2 runtime still brings in Starter Auth solely so a fresh database 
 Recording participates in the owning service transaction. Missing identity, an empty event, snapshot serialization failure, or persistence failure aborts the operation. Malformed persisted snapshots fail retrieval explicitly. The module never converts those failures into partial records.
 
 System activity has a `null` actor. The default resolver attributes authenticated activity by principal name and leaves the optional actor ID empty.
+
+The read endpoint fails closed. The module does not install a permissive `HistoryReadAuthorizer`; even when `vireo.starter.history.endpoint-enabled=true`, no controller is published until the application supplies a bean named `historyReadAuthorizer`. That policy must decide access for the authenticated subject and the requested entity/entity ID, including owner, tenant, deletion, and field-redaction rules relevant to the application.
 
 ## Documentation
 

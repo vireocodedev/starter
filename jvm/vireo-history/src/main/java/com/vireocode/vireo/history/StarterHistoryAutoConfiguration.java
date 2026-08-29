@@ -3,6 +3,7 @@ package com.vireocode.vireo.history;
 import java.time.Clock;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,14 +44,9 @@ public class StarterHistoryAutoConfiguration {
         return new SecurityContextHistoryActorResolver();
     }
 
-    @Bean("historyReadAuthorizer")
-    @ConditionalOnMissingBean(HistoryReadAuthorizer.class)
-    HistoryReadAuthorizer starterHistoryReadAuthorizer() {
-        return new AuthenticatedHistoryReadAuthorizer();
-    }
-
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(HistoryReadAuthorizer.class)
     @ConditionalOnProperty(prefix = "vireo.starter.history", name = "endpoint-enabled", matchIfMissing = true)
     HistoryController starterHistoryController(HistoryRepository repository, ObjectMapper objectMapper,
             StarterHistoryProperties properties) {

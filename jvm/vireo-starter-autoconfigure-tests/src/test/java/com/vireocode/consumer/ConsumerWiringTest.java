@@ -91,9 +91,10 @@ class ConsumerWiringTest {
     }
 
     @Test
-    @DisplayName("gets the history stack")
+    @DisplayName("gets history recording but not a read endpoint without application policy")
     void getsTheHistoryStack() {
-        assertThat(context.containsBean("starterHistoryController")).isTrue();
+        assertThat(context.containsBean("starterHistoryRecorder")).isTrue();
+        assertThat(context.containsBean("starterHistoryController")).isFalse();
     }
 
     /**

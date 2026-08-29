@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 @Validated
 public class StarterHistoryProperties {
 
-    /** Whether the default History controller is enabled. */
+    /** Whether the default History controller may be enabled when an application read policy exists. */
     private boolean endpointEnabled = true;
 
     /** Path at which the default History controller is published. */

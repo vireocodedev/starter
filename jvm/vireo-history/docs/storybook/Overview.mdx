@@ -29,4 +29,4 @@ vireo.starter.history.default-limit=200
 vireo.starter.history.max-limit=500
 ```
 
-The endpoint requires an authenticated caller by default. Applications with record-level authorization requirements replace `HistoryReadAuthorizer`.
+Recording is available without an HTTP endpoint. The endpoint fails closed and is published only when the application supplies a bean named `historyReadAuthorizer`; the module provides no permissive default. The policy must authorize the subject against the requested entity and entity ID, including application owner, tenant, deletion, and field-redaction rules.

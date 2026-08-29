@@ -13,7 +13,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,11 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.vireocode.vireo.base.HistoryEntityType;
+import com.vireocode.vireo.history.HistoryReadAuthorizer;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
+@Import(HistoryControllerTest.AllowHistoryReads.class)
 @DisplayName("HistoryControllerIntegrationTests")
 class HistoryControllerTest {
 
@@ -191,6 +196,15 @@ class HistoryControllerTest {
                 .queryParam("entityId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class AllowHistoryReads {
+
+        @Bean("historyReadAuthorizer")
+        HistoryReadAuthorizer historyReadAuthorizer() {
+            return (authentication, entity, entityId) -> true;
+        }
     }
 
     private UUID saveEntry(HistoryEntityType entity, String entityId, Instant occurredAt,
