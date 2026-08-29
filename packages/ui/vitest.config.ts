@@ -11,35 +11,35 @@ export default defineConfig({
     tsconfigPaths: true,
     alias: [
       {
-        find: /^@vireocodedev\/starter-ui$/,
+        find: /^@vireocodedev\/ui$/,
         replacement: resolve(import.meta.dirname, "src/index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/country$/,
+        find: /^@vireocodedev\/ui\/country$/,
         replacement: resolve(import.meta.dirname, "src/capabilities/country/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/event-source$/,
+        find: /^@vireocodedev\/ui\/event-source$/,
         replacement: resolve(import.meta.dirname, "src/integrations/event-source/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/forms$/,
+        find: /^@vireocodedev\/ui\/forms$/,
         replacement: resolve(import.meta.dirname, "src/capabilities/forms/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/hello-pangea-dnd$/,
+        find: /^@vireocodedev\/ui\/hello-pangea-dnd$/,
         replacement: resolve(import.meta.dirname, "src/integrations/hello-pangea-dnd/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/localization$/,
+        find: /^@vireocodedev\/ui\/localization$/,
         replacement: resolve(import.meta.dirname, "src/integrations/localization/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/sonner$/,
+        find: /^@vireocodedev\/ui\/sonner$/,
         replacement: resolve(import.meta.dirname, "src/integrations/sonner/public.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-ui\/tanstack-query$/,
+        find: /^@vireocodedev\/ui\/tanstack-query$/,
         replacement: resolve(import.meta.dirname, "src/integrations/tanstack-query/public.ts"),
       },
       {
@@ -47,23 +47,23 @@ export default defineConfig({
         replacement: `${resolve(import.meta.dirname, "src")}/`,
       },
       {
-        find: /^@vireocodedev\/starter-infrastructure$/,
+        find: /^@vireocodedev\/infrastructure$/,
         replacement: resolve(import.meta.dirname, "../infrastructure/src/index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-infrastructure\/network-status$/,
+        find: /^@vireocodedev\/infrastructure\/network-status$/,
         replacement: resolve(import.meta.dirname, "../infrastructure/src/network/appNetworkStatus.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-infrastructure\/pagination$/,
+        find: /^@vireocodedev\/infrastructure\/pagination$/,
         replacement: resolve(import.meta.dirname, "../infrastructure/src/http/pagination.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-history$/,
+        find: /^@vireocodedev\/history$/,
         replacement: resolve(import.meta.dirname, "../history/src/index.ts"),
       },
       {
-        find: /^@vireocodedev\/starter-localization$/,
+        find: /^@vireocodedev\/localization$/,
         replacement: resolve(import.meta.dirname, "../localization/src/index.ts"),
       },
     ],

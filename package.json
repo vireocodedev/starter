@@ -43,7 +43,7 @@
     "dev": "sh scripts/with-declared-npm.sh turbo run dev",
     "typecheck": "sh scripts/with-declared-npm.sh turbo run typecheck --concurrency=5",
     "test": "sh scripts/with-declared-npm.sh sh scripts/test.sh",
-    "test:architecture": "node --test scripts/ui-architecture.test.mjs && node scripts/ui-architecture.mjs && node scripts/ui-loading-contracts.mjs",
+    "test:architecture": "node --test scripts/lib/module-graph.test.mjs scripts/ui-architecture.test.mjs && node scripts/ui-architecture.mjs && node scripts/ui-loading-contracts.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "api:inventory": "node scripts/api-inventory.mjs",

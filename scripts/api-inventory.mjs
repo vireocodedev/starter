@@ -28,9 +28,8 @@ import ts from "typescript";
 import {
   analyseExportsMap,
   collectExports,
-  PACKAGE_PREFIX,
+  matchWorkspaceSpecifier,
   readStarterPackages,
-  SCOPE,
   sourceForEntry,
   walkSources,
 } from "./lib/module-graph.mjs";
@@ -42,7 +41,7 @@ const args = process.argv.slice(2);
 const asJson = args.includes("--json");
 const appFlagIndex = args.indexOf("--app");
 const appRoot = resolve(
-  appFlagIndex === -1 ? join(repoRoot, "..", "leather-production", "frontend") : args[appFlagIndex + 1],
+  appFlagIndex === -1 ? join(repoRoot, "..", "starter-template", "frontend") : args[appFlagIndex + 1],
 );
 
 /* ------------------------------------------------------------------ *
@@ -69,12 +68,10 @@ function collectAppUsage(root) {
       if (!specifierNode || !ts.isStringLiteral(specifierNode)) continue;
 
       const specifier = specifierNode.text;
-      if (!specifier.startsWith(`${SCOPE}/${PACKAGE_PREFIX}`)) continue;
-
-      const withoutScope = specifier.slice(SCOPE.length + 1);
-      const slash = withoutScope.indexOf("/");
-      const packageName = slash === -1 ? withoutScope : withoutScope.slice(0, slash);
-      const subpath = slash === -1 ? "." : `.${withoutScope.slice(slash)}`;
+      const workspaceMatch = matchWorkspaceSpecifier(specifier, packagesRoot);
+      if (!workspaceMatch) continue;
+      const packageName = workspaceMatch.workspace.name;
+      const subpath = workspaceMatch.subpath;
 
       if (!usage.has(packageName)) usage.set(packageName, { symbols: new Map(), subpaths: new Map() });
       const record = usage.get(packageName);
@@ -128,7 +125,7 @@ function buildReport() {
 
     const exported = new Set(entries.flatMap(entry => entry.exports));
 
-    const record = appUsage?.get(manifest.name.slice(SCOPE.length + 1));
+    const record = appUsage?.get(manifest.name);
     const usedSymbols = record ? [...record.symbols.keys()].sort() : [];
     const usedSubpaths = record ? [...record.subpaths.keys()].sort() : [];
 

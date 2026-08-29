@@ -22,7 +22,7 @@ describe("starter-shell framework boundary", () => {
       const source = readFileSync(file, "utf8");
       const label = relative(packageRoot, file);
       expect(source, label).not.toMatch(
-        /(?:from\s+|import\s*\()["'](?:react(?:-dom)?|react-router|@mui\/|@tanstack\/react-|@preact\/signals-react|@vireocodedev\/starter-ui)/u,
+        /(?:from\s+|import\s*\()["'](?:react(?:-dom)?|react-router|@mui\/|@tanstack\/react-|@preact\/signals-react|@vireocodedev\/ui)/u,
       );
       expect(source, label).not.toMatch(/\bReact(?:Node|Element|Component|\.)/u);
       expect(source, label).not.toMatch(/(?:from\s+|import\s*\()["']@\//u);
@@ -42,7 +42,7 @@ describe("starter-shell framework boundary", () => {
 
     expect(
       dependencies.filter(dependency =>
-        /^(?:react|react-dom|react-router|@mui\/|@tanstack\/react-|@preact\/signals-react|@vireocodedev\/starter-ui)/u.test(
+        /^(?:react|react-dom|react-router|@mui\/|@tanstack\/react-|@preact\/signals-react|@vireocodedev\/ui)/u.test(
           dependency,
         ),
       ),

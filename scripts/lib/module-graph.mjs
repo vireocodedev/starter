@@ -15,7 +15,6 @@ import { dirname, join, relative, resolve } from "node:path";
 import ts from "typescript";
 
 export const SCOPE = "@vireocodedev";
-export const PACKAGE_PREFIX = "starter-";
 
 const SOURCE_EXTENSIONS = [".ts", ".tsx"];
 
@@ -84,20 +83,24 @@ export function resolveSpecifier(specifier, fromFile, srcRoot) {
  * it as an inert external dependency - hiding the fact that importing it also
  * imports React, MUI and every provider they pull in.
  */
+export function matchWorkspaceSpecifier(specifier, packagesRoot) {
+  const workspace = readStarterPackages(packagesRoot)
+    .sort((left, right) => right.name.length - left.name.length)
+    .find(entry => specifier === entry.name || specifier.startsWith(`${entry.name}/`));
+  if (!workspace) return undefined;
+
+  return {
+    workspace,
+    subpath: specifier === workspace.name ? "." : `.${specifier.slice(workspace.name.length)}`,
+  };
+}
+
 export function resolveWorkspaceSpecifier(specifier, packagesRoot) {
-  if (!specifier.startsWith(`${SCOPE}/${PACKAGE_PREFIX}`)) return undefined;
+  const match = matchWorkspaceSpecifier(specifier, packagesRoot);
+  if (!match) return undefined;
 
-  const withoutScope = specifier.slice(SCOPE.length + 1);
-  const slash = withoutScope.indexOf("/");
-  const directoryName = (slash === -1 ? withoutScope : withoutScope.slice(0, slash)).slice(PACKAGE_PREFIX.length);
-  const subpath = slash === -1 ? "." : `.${withoutScope.slice(slash)}`;
-
-  const directory = join(packagesRoot, directoryName);
-  if (!existsSync(directory)) return undefined;
-
-  const manifest = JSON.parse(readFileSync(join(directory, "package.json"), "utf8"));
-  const file = sourceForEntry(directory, manifest.exports?.[subpath]);
-  return file ? { file, srcRoot: join(directory, "src") } : undefined;
+  const file = sourceForEntry(match.workspace.directory, match.workspace.manifest.exports?.[match.subpath]);
+  return file ? { file, srcRoot: match.workspace.srcRoot } : undefined;
 }
 
 function hasExportModifier(node) {
