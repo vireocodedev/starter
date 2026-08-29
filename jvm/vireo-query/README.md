@@ -24,6 +24,7 @@ The artifact depends on Core and on Auth's default user model because saved filt
 3. Annotate only explicitly filterable entity fields with `@Filterable`.
 4. Add `@FilterableMetadata` when an entity needs a title or default relation label fields.
 5. Send a `QueryFilterRequest` whose entity key matches the service domain.
+6. Supply a `QueryRelationOptionPolicy` before using the relation-option endpoint. Its Criteria predicate must scope target rows for the current subject and application domain.
 
 Entity keys are normalized to upper case and must be unique. Entity types must be registered; Query Engine never invents a fallback key. Custom metadata providers and predicate resolvers are Spring beans, so dependency injection and replacement remain explicit.
 
@@ -31,10 +32,12 @@ Entity keys are normalized to upper case and must be unique. Entity types must b
 
 - Only paths and operators published in generated metadata are accepted by the auto-configured filter builder.
 - Invalid typed values fail with HTTP 400 rather than silently disappearing.
-- Relation-option searches inspect declared relation label fields and have a bounded result count.
+- Relation-option searches inspect declared relation label fields, have a bounded result count, and always apply the application policy predicate.
 - Saved-filter reads return the current user's filters plus public filters.
 - Only the owner may update or delete a saved filter; request JSON cannot assign `userId` or `username`.
 - All default endpoints require an authenticated caller.
+
+Relation options fail closed: the auto-configured fallback policy denies every request. An application policy may throw access denied for a field or return a Criteria predicate that enforces owner, tenant, deletion, retention, and other domain visibility rules. Returning `criteriaBuilder.conjunction()` is an explicit decision that all registered target rows are visible to that caller.
 
 `isPublic` means discoverable by other authenticated users, not editable by them. Domain record authorization remains an application responsibility and should be enforced before applying a filter to protected data.
 

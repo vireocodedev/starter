@@ -64,6 +64,7 @@ public class com.vireocode.vireo.queryengine.QueryEngineRegistry
 public class com.vireocode.vireo.queryengine.QueryEngineRelationOptionService
     public com.vireocode.vireo.queryengine.QueryEngineRelationOptionService(com.vireocode.vireo.queryengine.QueryEngineRegistry,com.vireocode.vireo.queryengine.QueryEngineMetadataGenerator)
     public com.vireocode.vireo.queryengine.QueryEngineRelationOptionService(com.vireocode.vireo.queryengine.QueryEngineRegistry,com.vireocode.vireo.queryengine.QueryEngineMetadataGenerator,com.vireocode.vireo.queryengine.StarterQueryEngineProperties)
+    public com.vireocode.vireo.queryengine.QueryEngineRelationOptionService(com.vireocode.vireo.queryengine.QueryEngineRegistry,com.vireocode.vireo.queryengine.QueryEngineMetadataGenerator,com.vireocode.vireo.queryengine.StarterQueryEngineProperties,com.vireocode.vireo.queryengine.QueryRelationOptionPolicy)
     public java.util.List<com.vireocode.vireo.queryengine.QueryRelationOption> com.vireocode.vireo.queryengine.QueryEngineRelationOptionService.listOptions(java.lang.String,java.lang.String,java.lang.String)
 
 public final record com.vireocode.vireo.queryengine.QueryEntityDefinition
@@ -198,6 +199,20 @@ public final record com.vireocode.vireo.queryengine.QueryRelationOption
     public final java.lang.String com.vireocode.vireo.queryengine.QueryRelationOption.toString()
     public java.lang.String com.vireocode.vireo.queryengine.QueryRelationOption.label()
     public java.lang.String com.vireocode.vireo.queryengine.QueryRelationOption.value()
+
+public final record com.vireocode.vireo.queryengine.QueryRelationOptionContext
+    extends java.lang.Record
+    public com.vireocode.vireo.queryengine.QueryRelationOptionContext(java.lang.String,java.lang.String,java.lang.String,java.lang.Class<?>)
+    public final boolean com.vireocode.vireo.queryengine.QueryRelationOptionContext.equals(java.lang.Object)
+    public final int com.vireocode.vireo.queryengine.QueryRelationOptionContext.hashCode()
+    public final java.lang.String com.vireocode.vireo.queryengine.QueryRelationOptionContext.toString()
+    public java.lang.Class<?> com.vireocode.vireo.queryengine.QueryRelationOptionContext.targetEntityType()
+    public java.lang.String com.vireocode.vireo.queryengine.QueryRelationOptionContext.fieldPath()
+    public java.lang.String com.vireocode.vireo.queryengine.QueryRelationOptionContext.sourceEntityKey()
+    public java.lang.String com.vireocode.vireo.queryengine.QueryRelationOptionContext.targetEntityKey()
+
+public abstract interface com.vireocode.vireo.queryengine.QueryRelationOptionPolicy
+    public abstract jakarta.persistence.criteria.Predicate com.vireocode.vireo.queryengine.QueryRelationOptionPolicy.scope(org.springframework.security.core.Authentication,com.vireocode.vireo.queryengine.QueryRelationOptionContext,jakarta.persistence.criteria.Root<?>,jakarta.persistence.criteria.CriteriaBuilder)
 
 public final enum com.vireocode.vireo.queryengine.RelationFilterMode
     extends java.lang.Enum<com.vireocode.vireo.queryengine.RelationFilterMode>

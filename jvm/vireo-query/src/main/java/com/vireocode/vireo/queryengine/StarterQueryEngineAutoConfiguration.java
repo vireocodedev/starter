@@ -65,9 +65,16 @@ public class StarterQueryEngineAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    QueryRelationOptionPolicy queryRelationOptionPolicy() {
+        return new DenyAllQueryRelationOptionPolicy();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     QueryEngineRelationOptionService queryEngineRelationOptionService(QueryEngineRegistry registry,
-            QueryEngineMetadataGenerator generator, StarterQueryEngineProperties properties) {
-        return new QueryEngineRelationOptionService(registry, generator, properties);
+            QueryEngineMetadataGenerator generator, StarterQueryEngineProperties properties,
+            QueryRelationOptionPolicy relationOptionPolicy) {
+        return new QueryEngineRelationOptionService(registry, generator, properties, relationOptionPolicy);
     }
 
     @Bean

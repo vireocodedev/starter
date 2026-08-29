@@ -19,10 +19,10 @@ dependencies {
 }
 ```
 
-The dependency auto-configures a `QueryEngineRegistry`, metadata generator, `FilterSpecificationBuilder`, relation-option service, authenticated HTTP endpoints, saved-filter service, and isolated Flyway migration. It depends on Auth's default user model because the current saved-filter schema owns a `StarterUser` relation.
+The dependency auto-configures a `QueryEngineRegistry`, metadata generator, `FilterSpecificationBuilder`, relation-option service, authenticated HTTP endpoints, saved-filter service, and isolated Flyway migration. Relation-option reads remain denied until the application supplies a `QueryRelationOptionPolicy` that scopes visible target rows. It depends on Auth's default user model because the current saved-filter schema owns a `StarterUser` relation.
 
 ## Ownership boundary
 
-Query Engine owns metadata generation, accepted-path and accepted-operator enforcement, typed predicate conversion, bounded relation lookup, and current-user saved-filter visibility. Applications own entity keys, annotations, custom field beans, protected-record authorization, and whether the default HTTP endpoints are appropriate.
+Query Engine owns metadata generation, accepted-path and accepted-operator enforcement, typed predicate conversion, bounded relation lookup, policy-predicate enforcement, and current-user saved-filter visibility. Applications own entity keys, annotations, custom field beans, the `QueryRelationOptionPolicy`, protected-record authorization, and whether the default HTTP endpoints are appropriate.
 
 The matching `@vireocodedev/query` package owns the browser-side filter model and compilation. JSON is the boundary; JVM code does not execute in Storybook.

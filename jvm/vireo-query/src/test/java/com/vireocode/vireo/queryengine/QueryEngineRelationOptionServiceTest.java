@@ -4,14 +4,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 class QueryEngineRelationOptionServiceTest {
 
@@ -76,6 +87,10 @@ class QueryEngineRelationOptionServiceTest {
         assertEquals("bravo · BR", result.get(1).label());
         assertEquals(List.of("name", "code"), service.labelFields);
         assertEquals("   ", service.searchText);
+        assertEquals("WIDGET", service.context.sourceEntityKey());
+        assertEquals("category", service.context.fieldPath());
+        assertEquals("CATEGORY", service.context.targetEntityKey());
+        assertEquals(Category.class, service.context.targetEntityType());
     }
 
     @Test
@@ -101,6 +116,50 @@ class QueryEngineRelationOptionServiceTest {
         assertEquals("", result.get(0).label());
         assertEquals("9", result.get(1).label());
         assertEquals("  TeSt  ", service.searchText);
+    }
+
+    @Test
+    void defaultPolicy_DeniesRelationOptionQueries() {
+        QueryRelationOptionPolicy policy = new DenyAllQueryRelationOptionPolicy();
+
+        assertThrows(AccessDeniedException.class,
+                () -> policy.scope(null, new QueryRelationOptionContext("WIDGET", "category", "CATEGORY",
+                        Category.class), null, null));
+    }
+
+    @Test
+    void searchEntities_AppliesPolicyBeforeExecutingTheDatabaseQuery() throws Exception {
+        QueryRelationOptionPolicy policy = mock(QueryRelationOptionPolicy.class);
+        EntityManager entityManager = mock(EntityManager.class);
+        CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
+        @SuppressWarnings("unchecked")
+        CriteriaQuery<Category> criteriaQuery = mock(CriteriaQuery.class);
+        @SuppressWarnings("unchecked")
+        Root<Category> root = mock(Root.class);
+        Authentication authentication = mock(Authentication.class);
+        QueryRelationOptionContext context = new QueryRelationOptionContext(
+                "WIDGET", "category", "CATEGORY", Category.class);
+        QueryEngineRelationOptionService service = new QueryEngineRelationOptionService(
+                mock(QueryEngineRegistry.class), mock(QueryEngineMetadataGenerator.class),
+                new StarterQueryEngineProperties(), policy);
+        setEntityManager(service, entityManager);
+
+        when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
+        when(criteriaBuilder.createQuery(Category.class)).thenReturn(criteriaQuery);
+        when(criteriaQuery.from(Category.class)).thenReturn(root);
+        when(criteriaQuery.select(root)).thenReturn(criteriaQuery);
+        when(policy.scope(authentication, context, root, criteriaBuilder))
+                .thenThrow(new AccessDeniedException("denied"));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        try {
+            assertThrows(AccessDeniedException.class,
+                    () -> service.searchEntities(Category.class, List.of("name"), "", context));
+            verify(policy).scope(authentication, context, root, criteriaBuilder);
+            verify(entityManager, never()).createQuery(same(criteriaQuery));
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     @Test
@@ -145,10 +204,18 @@ class QueryEngineRelationOptionServiceTest {
         return (T) method.invoke(target, args);
     }
 
+    private static void setEntityManager(QueryEngineRelationOptionService service, EntityManager entityManager)
+            throws Exception {
+        Field field = QueryEngineRelationOptionService.class.getDeclaredField("entityManager");
+        field.setAccessible(true);
+        field.set(service, entityManager);
+    }
+
     private static final class StubRelationOptionService extends QueryEngineRelationOptionService {
         private final List<?> results;
         private List<String> labelFields;
         private String searchText;
+        private QueryRelationOptionContext context;
 
         private StubRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
                 List<?> results) {
@@ -157,9 +224,11 @@ class QueryEngineRelationOptionServiceTest {
         }
 
         @Override
-        List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
+        List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText,
+                QueryRelationOptionContext context) {
             this.labelFields = labelFields;
             this.searchText = searchText;
+            this.context = context;
             return results;
         }
     }

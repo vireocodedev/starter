@@ -33,6 +33,7 @@ import com.vireocode.vireo.offline.OfflineActorResolver;
 import com.vireocode.vireo.offline.OfflineSyncService;
 import com.vireocode.vireo.offline.StarterOfflineActorResolver;
 import com.vireocode.vireo.queryengine.QueryEngineRegistry;
+import com.vireocode.vireo.queryengine.QueryRelationOptionPolicy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -95,6 +96,12 @@ class ConsumerOverrideTest {
     }
 
     @Test
+    @DisplayName("replaces the fail-closed relation-option policy")
+    void replacesRelationOptionPolicy() {
+        assertThat(context.getBean(QueryRelationOptionPolicy.class)).isInstanceOf(FixedRelationOptionPolicy.class);
+    }
+
+    @Test
     @DisplayName("replaces the offline actor resolver")
     void replacesTheOfflineActorResolver() {
         assertThat(context.getBean(OfflineActorResolver.class)).isInstanceOf(FixedActorResolver.class);
@@ -146,6 +153,11 @@ class ConsumerOverrideTest {
         @Bean("historyReadAuthorizer")
         HistoryReadAuthorizer consumerHistoryReadAuthorizer() {
             return new FixedHistoryReadAuthorizer();
+        }
+
+        @Bean
+        QueryRelationOptionPolicy consumerRelationOptionPolicy() {
+            return new FixedRelationOptionPolicy();
         }
 
         @Bean
@@ -202,6 +214,18 @@ class ConsumerOverrideTest {
         public boolean canRead(org.springframework.security.core.Authentication authentication,
                 String entity, String entityId) {
             return true;
+        }
+    }
+
+    static class FixedRelationOptionPolicy implements QueryRelationOptionPolicy {
+
+        @Override
+        public jakarta.persistence.criteria.Predicate scope(
+                org.springframework.security.core.Authentication authentication,
+                com.vireocode.vireo.queryengine.QueryRelationOptionContext context,
+                jakarta.persistence.criteria.Root<?> root,
+                jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
+            return criteriaBuilder.conjunction();
         }
     }
 }

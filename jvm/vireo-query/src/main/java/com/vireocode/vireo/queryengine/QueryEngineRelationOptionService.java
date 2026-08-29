@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
 import jakarta.persistence.PersistenceContext;
@@ -22,16 +24,23 @@ public class QueryEngineRelationOptionService {
     private final QueryEngineRegistry registry;
     private final QueryEngineMetadataGenerator generator;
     private final int resultLimit;
+    private final QueryRelationOptionPolicy policy;
 
     public QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator) {
-        this(registry, generator, new StarterQueryEngineProperties());
+        this(registry, generator, new StarterQueryEngineProperties(), new DenyAllQueryRelationOptionPolicy());
     }
 
     public QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
             StarterQueryEngineProperties properties) {
+        this(registry, generator, properties, new DenyAllQueryRelationOptionPolicy());
+    }
+
+    public QueryEngineRelationOptionService(QueryEngineRegistry registry, QueryEngineMetadataGenerator generator,
+            StarterQueryEngineProperties properties, QueryRelationOptionPolicy policy) {
         this.registry = registry;
         this.generator = generator;
         this.resultLimit = properties.getRelationOptionsLimit();
+        this.policy = policy;
     }
 
     public List<QueryRelationOption> listOptions(String entityKey, String fieldPath, String searchText) {
@@ -47,7 +56,10 @@ public class QueryEngineRelationOptionService {
         }
 
         Class<?> relationType = registry.requireEntityType(fieldDefinition.relationEntityKey());
-        List<?> results = searchEntities(relationType, fieldDefinition.relationSelectionLabelFields(), searchText);
+        QueryRelationOptionContext context = new QueryRelationOptionContext(
+                entityKey, fieldPath, fieldDefinition.relationEntityKey(), relationType);
+        List<?> results = searchEntities(relationType, fieldDefinition.relationSelectionLabelFields(), searchText,
+                context);
 
         List<QueryRelationOption> options = new ArrayList<>();
         for (Object entity : results) {
@@ -60,27 +72,37 @@ public class QueryEngineRelationOptionService {
         return options;
     }
 
-    List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText) {
-        return searchEntitiesTyped(entityType, labelFields, searchText);
+    List<?> searchEntities(Class<?> entityType, List<String> labelFields, String searchText,
+            QueryRelationOptionContext context) {
+        return searchEntitiesTyped(entityType, labelFields, searchText, context);
     }
 
-    private <T> List<T> searchEntitiesTyped(Class<T> entityType, List<String> labelFields, String searchText) {
+    private <T> List<T> searchEntitiesTyped(Class<T> entityType, List<String> labelFields, String searchText,
+            QueryRelationOptionContext context) {
         String normalizedSearchText = searchText == null ? "" : searchText.trim().toLowerCase(Locale.ROOT);
         var criteriaBuilder = entityManager.getCriteriaBuilder();
         var criteriaQuery = criteriaBuilder.createQuery(entityType);
         Root<T> root = criteriaQuery.from(entityType);
         criteriaQuery.select(root);
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Predicate policyScope = Objects.requireNonNull(
+                policy.scope(authentication, context, root, criteriaBuilder),
+                "QueryRelationOptionPolicy must return a predicate or deny access");
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(policyScope);
+
         if (!normalizedSearchText.isBlank()) {
             if (labelFields.isEmpty()) {
                 throw new IllegalArgumentException("Relation option search requires at least one label field");
             }
-            List<Predicate> predicates = labelFields.stream()
+            List<Predicate> searchPredicates = labelFields.stream()
                     .map(field -> criteriaBuilder.like(criteriaBuilder.lower(root.get(field).as(String.class)),
                             "%" + normalizedSearchText + "%"))
                     .toList();
-            criteriaQuery.where(criteriaBuilder.or(predicates.toArray(Predicate[]::new)));
+            predicates.add(criteriaBuilder.or(searchPredicates.toArray(Predicate[]::new)));
         }
+        criteriaQuery.where(criteriaBuilder.and(predicates.toArray(Predicate[]::new)));
 
         var query = entityManager.createQuery(criteriaQuery);
         query.setMaxResults(resultLimit);
