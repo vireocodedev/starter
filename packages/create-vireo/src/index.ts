@@ -53,8 +53,10 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-export const TEMPLATE_COMMIT = "eed5c2dc3f53f53ef48a44e1d4e3394cb67feeeb";
+export const TEMPLATE_COMMIT = "a24f9435d3f624fb1962c3d5c4e3457b69f5be28";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
+const CREATE_VIREO_PACKAGE_VERSION = "0.5.0";
+const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
 export type VireoDatabase = "postgresql" | "h2";
 export type VireoPackageManager = "npm";
@@ -504,7 +506,7 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       "pretest:pwa": requiredScript("pretest:pwa"),
       "test:pwa": requiredScript("test:pwa"),
       preview: packageJson.scripts.preview,
-      vireo: "npx --yes --package=create-vireo@0.5.0 vireo",
+      vireo: CREATE_VIREO_COMMAND,
       "generate:check": "corepack npm run vireo -- check",
       verify: "bash scripts/verify-frontend-profile.sh",
     };
@@ -558,7 +560,7 @@ async function pinGeneratedProjectCli(staging: string) {
     scripts?: Record<string, string>;
   };
   if (!packageJson.scripts) throw new Error("The pinned Template package.json does not declare scripts.");
-  packageJson.scripts.vireo = "npx --yes --package=create-vireo@0.5.0 vireo";
+  packageJson.scripts.vireo = CREATE_VIREO_COMMAND;
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 }
 
@@ -618,7 +620,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     await mkdir(join(staging, ".vireo"), { recursive: true });
     await writeFile(
       join(staging, ".vireo", "project.json"),
-      `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.5.0" }, null, 2)}\n`,
+      `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: `create-vireo@${CREATE_VIREO_PACKAGE_VERSION}` }, null, 2)}\n`,
     );
     await writeExampleManifest(staging, TEMPLATE_COMMIT, profile);
     if (options.git !== false) {

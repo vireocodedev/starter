@@ -13,6 +13,7 @@ import {
 } from "../dist/index.js";
 import { formatVireoUpgradeText, validateApplicationOwnedActions } from "../dist/project-upgrade.js";
 
+const createVireoVersion = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")).version;
 const sourceCommit = "2520c99b1550246c3b0c5299b3cc6055dd10ead7";
 const dependencies = {
   "@vireocodedev/history": "^0.2.1",
@@ -229,7 +230,7 @@ test("0.2.0 to 0.3.0 is dry-run-first, explicit, and idempotent", async () => {
       /Managed migration applied; application-owned actions remain pending/u,
     );
     const rootManifest = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
-    assert.equal(rootManifest.scripts.vireo, "npx --yes --package=create-vireo@0.5.0 vireo");
+    assert.equal(rootManifest.scripts.vireo, `npx --yes --package=create-vireo@${createVireoVersion} vireo`);
     assert.equal(rootManifest.scripts.test, "node --test");
     const frontendManifest = JSON.parse(await readFile(join(root, "frontend/package.json"), "utf8"));
     assert.deepEqual(

@@ -203,7 +203,7 @@ function validateArtifact(release, declaredPages) {
   }
   if (
     !visualLanguage.includes(
-      "https://github.com/vireocodedev/starter-template/blob/eed5c2dc3f53f53ef48a44e1d4e3394cb67feeeb/frontend/docs/VISUAL_LANGUAGE.md",
+      "https://github.com/vireocodedev/starter-template/blob/a24f9435d3f624fb1962c3d5c4e3457b69f5be28/frontend/docs/VISUAL_LANGUAGE.md",
     )
   )
     problems.push("generated visual-language page must retain pinned source provenance");

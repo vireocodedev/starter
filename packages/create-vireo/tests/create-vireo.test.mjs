@@ -5,6 +5,8 @@ import { join } from "node:path";
 import test from "node:test";
 import { createVireo, findExampleReferences, removeExample, TEMPLATE_COMMIT } from "../dist/index.js";
 
+const createVireoVersion = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")).version;
+
 async function fixture(root) {
   const template = join(root, "template");
   await mkdir(join(template, ".vireo"), { recursive: true });
@@ -110,12 +112,13 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.match(identity, /shortName: "Sample App"/u);
     assert.match(identity, /description: "Sample App is a production-oriented application\."/u);
     assert.doesNotMatch(identity, /Vireo Starter/u);
-    assert.match(await readFile(join(target, "package.json"), "utf8"), /create-vireo@0\.5\.0/u);
+    assert.ok((await readFile(join(target, "package.json"), "utf8")).includes(`create-vireo@${createVireoVersion}`));
     assert.match(
       await readFile(join(target, "src/main/java/dev/example/sample/App.java"), "utf8"),
       /package dev\.example\.sample/u,
     );
     const metadata = JSON.parse(await readFile(join(target, ".vireo/project.json"), "utf8"));
+    assert.equal(metadata.createdBy, `create-vireo@${createVireoVersion}`);
     assert.deepEqual(
       { projectName: metadata.projectName, javaPackage: metadata.javaPackage, database: metadata.database },
       { projectName: "sample-app", javaPackage: "dev.example.sample", database: "h2" },
