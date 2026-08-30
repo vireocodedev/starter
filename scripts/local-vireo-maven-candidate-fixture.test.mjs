@@ -133,16 +133,27 @@ test("JVM candidate lifecycle cleans up after success and aggregates primary and
   );
 });
 
-test("project upgrade fixture wires only a packed Maven candidate backend contract test", async () => {
-  const fixture = await readFile(join(repositoryRoot, "scripts", "project-upgrade-fixture.mjs"), "utf8");
+test("generated backend fixtures use packed Maven candidates and retain the PurchaseOrder integration", async () => {
+  const fixtures = await Promise.all(
+    ["project-upgrade-fixture.mjs", "generated-entity-fixture.mjs"].map(async name => ({
+      name,
+      source: await readFile(join(repositoryRoot, "scripts", name), "utf8"),
+    })),
+  );
   const helper = await readFile(
     join(repositoryRoot, "scripts", "lib", "local-vireo-maven-candidate-fixture.mjs"),
     "utf8",
   );
-  const sources = [fixture, helper].join("\n");
-  assert.match(fixture, /withLocalVireoMavenCandidates/u);
-  assert.match(fixture, /mavenCandidateConsumerCommand/u);
-  assert.match(fixture, /expectedVersion: targetRelease/u);
+  const sources = [...fixtures.map(fixture => fixture.source), helper].join("\n");
+  for (const fixture of fixtures) {
+    assert.match(fixture.source, /withLocalVireoMavenCandidates\(/u, fixture.name);
+    assert.match(fixture.source, /mavenCandidateConsumerCommand\(\{/u, fixture.name);
+    assert.match(fixture.source, /expectedVersion:/u, fixture.name);
+  }
+  const generatedEntityFixture = fixtures.find(fixture => fixture.name === "generated-entity-fixture.mjs").source;
+  assert.match(generatedEntityFixture, /contracts\/ecosystem-release-contract\.json/u);
+  assert.match(generatedEntityFixture, /current\?\.maven\?\.version/u);
+  assert.match(generatedEntityFixture, /expectedVersion: targetMavenVersion/u);
   assert.match(helper, /PurchaseOrderApiIntegrationTest/u);
   assert.doesNotMatch(sources, /publishToMavenLocal|mavenLocal|~\/\.m2/u);
   assert.doesNotMatch(sources, /writeFile\([^\n]*gradle\.properties/u);

@@ -1,12 +1,22 @@
 import { execFileSync } from "node:child_process";
-import { cp, mkdtemp, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkGeneratedEntities, createVireo, generateEntity } from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
+import {
+  mavenCandidateConsumerCommand,
+  withLocalVireoMavenCandidates,
+} from "./lib/local-vireo-maven-candidate-fixture.mjs";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+const ecosystemContract = JSON.parse(
+  await readFile(join(repositoryRoot, "contracts/ecosystem-release-contract.json"), "utf8"),
+);
+const targetMavenVersion = ecosystemContract.current?.maven?.version;
+if (typeof targetMavenVersion !== "string" || !targetMavenVersion.trim())
+  throw new Error("Ecosystem release contract must declare current.maven.version for the generated JVM fixture.");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-generated-fixture-"));
 const projectRoot = join(temporaryRoot, "generated-app");
 
@@ -41,7 +51,14 @@ try {
       join(projectRoot, "frontend"),
     );
   });
-  run("./gradlew", ["test", "--tests", "*PurchaseOrderApiIntegrationTest", "--console=plain"], projectRoot);
+  await withLocalVireoMavenCandidates(
+    projectRoot,
+    ({ initScript }) => {
+      const consumer = mavenCandidateConsumerCommand({ initScript });
+      run(consumer.command, consumer.args, projectRoot);
+    },
+    { expectedVersion: targetMavenVersion },
+  );
   console.log(`Generated ${first.files.length} planned artifacts; frontend and backend fixture verification passed.`);
 } finally {
   await rm(temporaryRoot, { recursive: true, force: true });
