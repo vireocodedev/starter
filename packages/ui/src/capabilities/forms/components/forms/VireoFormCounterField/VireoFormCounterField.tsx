@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -148,6 +149,8 @@ export const VireoFormCounterField = React.forwardRef<HTMLDivElement, VireoFormC
       onChange,
       onValueChange,
       readOnly = false,
+      readOnlyEmptyValue,
+      renderReadOnlyValue,
       required = false,
       size = "medium",
       slotProps = {},
@@ -172,6 +175,7 @@ export const VireoFormCounterField = React.forwardRef<HTMLDivElement, VireoFormC
       value: current.value,
     }));
     const submitting = useStore(field.form.store, current => current.isSubmitting);
+    const effectiveReadOnly = formContext.readOnly || readOnly;
 
     if (fieldState.value !== null && !Number.isFinite(fieldState.value)) {
       throw new Error(`${VIREO_FORM_COUNTER_FIELD_NAME} requires a finite number or null field value.`);
@@ -200,8 +204,8 @@ export const VireoFormCounterField = React.forwardRef<HTMLDivElement, VireoFormC
     const hasValue = fieldState.value !== null;
     const atMin = hasValue && min !== undefined && fieldState.value! <= min;
     const atMax = hasValue && max !== undefined && fieldState.value! >= max;
-    const decrementDisabled = disabled || readOnly || atMin;
-    const incrementDisabled = disabled || readOnly || atMax;
+    const decrementDisabled = disabled || effectiveReadOnly || atMin;
+    const incrementDisabled = disabled || effectiveReadOnly || atMax;
     const ownerState: VireoFormCounterFieldOwnerState = {
       atMax,
       atMin,
@@ -215,7 +219,7 @@ export const VireoFormCounterField = React.forwardRef<HTMLDivElement, VireoFormC
       invalid: fieldState.invalid,
       max,
       min,
-      readOnly,
+      readOnly: effectiveReadOnly,
       required,
       size,
       step,
@@ -364,6 +368,27 @@ export const VireoFormCounterField = React.forwardRef<HTMLDivElement, VireoFormC
       effectiveHelperText !== undefined ? helperTextId : undefined,
     );
     const effectiveError = error || validationErrorVisible;
+
+    if (effectiveReadOnly) {
+      return (
+        <VireoFormReadOnlyValue
+          {...other}
+          {...rootSlotOther}
+          ref={rootRef}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          empty={fieldState.value === null}
+          emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
+        >
+          {fieldState.value === null
+            ? null
+            : (renderReadOnlyValue?.(fieldState.value) ?? formatValue(fieldState.value))}
+        </VireoFormReadOnlyValue>
+      );
+    }
 
     const emitValue = (nextValue: number | null): void => {
       const normalizedValue = nextValue === null ? null : normalizeNumber(nextValue);

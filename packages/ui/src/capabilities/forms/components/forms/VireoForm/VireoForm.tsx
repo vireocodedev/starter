@@ -30,6 +30,7 @@ function useUtilityClasses(ownerState: VireoFormOwnerState, classes?: VireoFormP
         ownerState.submitting && "submitting",
         ownerState.validating && "validating",
         ownerState.invalid && "invalid",
+        ownerState.readOnly && "readOnly",
       ],
     } as const satisfies UtilityClassSlotMap<VireoFormSlotName, VireoFormClassKey>,
     getVireoFormUtilityClass,
@@ -77,6 +78,8 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
       noValidate = true,
       onReset,
       onSubmit,
+      readOnly = false,
+      readOnlyEmptyValue = "Not provided",
       slotProps = {},
       slots = {},
       style,
@@ -98,6 +101,7 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
       dirty: state.dirty,
       invalid: state.invalid,
       layoutWidth,
+      readOnly,
       submitting: state.submitting,
       validating: state.validating,
     };
@@ -106,7 +110,7 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
     useUnsavedChangesRegistration({
       busy: state.submitting || unsavedChangesBusy,
       dirty: state.dirty,
-      enabled: unsavedChangesGuard,
+      enabled: unsavedChangesGuard && !readOnly,
       scopeId: unsavedChangesScopeId,
     });
 
@@ -131,6 +135,7 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
       if (event.defaultPrevented) return;
 
       event.preventDefault();
+      if (readOnly) return;
       if (multiStepController && !multiStepController.getSnapshot().isLastStep) {
         void multiStepController.goToNextStep();
         return;
@@ -154,12 +159,21 @@ export const VireoForm = React.forwardRef<HTMLFormElement, VireoFormRuntimeProps
       if (event.defaultPrevented) return;
 
       event.preventDefault();
+      if (readOnly) return;
       form.reset();
     };
 
     return (
       <form.AppForm>
-        <VireoFormContext.Provider value={{ errorDisplay, formatError, submissionAttempts: state.submissionAttempts }}>
+        <VireoFormContext.Provider
+          value={{
+            errorDisplay,
+            formatError,
+            readOnly,
+            readOnlyEmptyValue,
+            submissionAttempts: state.submissionAttempts,
+          }}
+        >
           <VireoFormRoot
             {...inheritedRootProps}
             as={slots.root ?? "form"}

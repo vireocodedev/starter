@@ -103,6 +103,22 @@ For a genuinely nested section, use a full-row item, increment the heading level
 
 Prefer sibling top-level sections when the content does not logically belong to the parent.
 
+## Read-only presentation
+
+Set `readOnly` on `form.Form` when the same consumer form must present stored data without allowing edits:
+
+```tsx
+<form.Form readOnly readOnlyEmptyValue={t("common.notProvided")}>
+  {/* the same form.Field composition used by edit mode */}
+</form.Form>
+```
+
+Every bound field inherits the mode and renders a `VireoFormReadOnlyValue` instead of mounting its editable MUI control. Input chrome, picker and selection actions, helper/error rows, autofocus behavior, and the bound submit button are therefore absent. Submission and reset events are also ignored at the form boundary, and the unsaved-changes registration is disabled.
+
+A field-level `readOnly` can make one field read-only inside an editable form. It cannot loosen an enclosing read-only form. Use `readOnlyEmptyValue` on a field to override the form fallback, and use `renderReadOnlyValue` for domain-specific formatting such as localized booleans, currency, or rich option labels. Empty checks are type-aware: `0` and `false` remain real values, while null values, blank strings, and empty collections use the fallback.
+
+Core UI remains independent of an application translation runtime, so `form.Form` defaults to `"Not provided"` but applications should normally pass their translated value. External labels such as `VireoLabelBox` are consumer-owned; remove their required indicator in read-only mode (`required={!readOnly}`) because the bound field cannot infer or mutate its wrapper.
+
 ## Actions
 
 `form.Actions` preserves DOM order from least prominent to most prominent:

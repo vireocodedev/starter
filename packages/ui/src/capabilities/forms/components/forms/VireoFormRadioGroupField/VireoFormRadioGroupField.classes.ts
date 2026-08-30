@@ -6,7 +6,16 @@ import {
 } from "./VireoFormRadioGroupField.identity";
 
 type VireoFormRadioGroupFieldStateClassKey =
-  "dirty" | "touched" | "invalid" | "errorVisible" | "validating" | "submitting" | "disabled" | "row" | "hasValue";
+  | "dirty"
+  | "touched"
+  | "invalid"
+  | "errorVisible"
+  | "validating"
+  | "submitting"
+  | "disabled"
+  | "readOnly"
+  | "row"
+  | "hasValue";
 
 /** Utility classes available to VireoFormRadioGroupField. */
 export type VireoFormRadioGroupFieldClasses = Record<
@@ -34,6 +43,7 @@ export const vireoFormRadioGroupFieldClasses: VireoFormRadioGroupFieldClasses = 
     "validating",
     "submitting",
     "disabled",
+    "readOnly",
     "row",
     "hasValue",
   ],

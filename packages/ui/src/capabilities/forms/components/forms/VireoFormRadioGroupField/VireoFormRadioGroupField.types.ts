@@ -31,6 +31,7 @@ export type VireoFormRadioGroupFieldOwnerState = {
   errorVisible: boolean;
   hasValue: boolean;
   invalid: boolean;
+  readOnly: boolean;
   row: boolean;
   submitting: boolean;
   touched: boolean;
@@ -173,6 +174,9 @@ export type VireoFormRadioGroupFieldOwnProps<
   onChange?: NonNullable<RadioGroupProps["onChange"]>;
   /** Observes accepted option changes after cancelable handlers. */
   onValueChange?: (value: TValue) => void;
+  readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (value: TValue, option: TOption | undefined) => React.ReactNode;
   required?: boolean;
   "aria-describedby"?: string;
 };

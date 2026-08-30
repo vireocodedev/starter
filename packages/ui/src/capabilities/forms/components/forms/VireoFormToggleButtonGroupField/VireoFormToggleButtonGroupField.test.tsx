@@ -169,19 +169,15 @@ describe(VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME, () => {
   });
 
   it("keeps disabled and read-only choices unchanged without invoking callbacks", async () => {
-    const user = userEvent.setup();
     const onChange = vi.fn();
     const onValueChange = vi.fn();
     const { rerender } = render(<ExclusiveForm fieldProps={{ disabled: true, onChange, onValueChange }} />);
     expect(screen.getByRole("button", { name: "Compact" })).toBeDisabled();
 
     rerender(<ExclusiveForm fieldProps={{ readOnly: true, onChange, onValueChange }} />);
-    const group = screen.getByRole("group", { name: "Interface density" });
-    const compact = screen.getByRole("button", { name: "Compact" });
-    expect(group).toHaveAttribute("aria-readonly", "true");
-    expect(compact).not.toBeDisabled();
-    await user.click(compact);
-    expect(compact).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByRole("group", { name: "Interface density" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Compact" })).not.toBeInTheDocument();
+    expect(screen.getByText("Not provided")).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
     expect(onValueChange).not.toHaveBeenCalled();
   });

@@ -168,6 +168,11 @@ export type VireoFormToggleButtonGroupFieldSharedProps<TValue extends VireoFormT
     helperText?: React.ReactNode;
     orientation?: ToggleButtonGroupProps["orientation"];
     readOnly?: boolean;
+    readOnlyEmptyValue?: React.ReactNode;
+    renderReadOnlyValue?: (
+      value: TValue | readonly TValue[] | null,
+      selectedOptions: readonly VireoFormToggleButtonGroupFieldOption<TValue>[],
+    ) => React.ReactNode;
     required?: boolean;
     size?: ToggleButtonGroupProps["size"];
     onBlur?: NonNullable<ToggleButtonGroupProps["onBlur"]>;

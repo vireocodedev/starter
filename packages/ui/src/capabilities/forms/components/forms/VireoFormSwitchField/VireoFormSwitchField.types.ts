@@ -24,6 +24,7 @@ export type VireoFormSwitchFieldOwnerState = {
   disabled: boolean;
   errorVisible: boolean;
   invalid: boolean;
+  readOnly: boolean;
   submitting: boolean;
   touched: boolean;
   validating: boolean;
@@ -126,6 +127,9 @@ export type VireoFormSwitchFieldOwnProps = VireoFormSwitchFieldSlotsAndSlotProps
   labelPlacement?: FormControlLabelProps["labelPlacement"];
   onBlur?: NonNullable<SwitchProps["onBlur"]>;
   onChange?: NonNullable<SwitchProps["onChange"]>;
+  readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (value: boolean) => React.ReactNode;
   required?: boolean;
 };
 

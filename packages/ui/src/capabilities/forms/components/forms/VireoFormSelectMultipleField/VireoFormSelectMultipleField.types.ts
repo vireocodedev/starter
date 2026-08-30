@@ -253,6 +253,8 @@ export type VireoFormSelectMultipleFieldOwnProps<
   /** Observes accepted selection and clear-all changes after cancelable slot handlers. */
   onValueChange?: (value: TValue[]) => void;
   readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (values: readonly TValue[], selectedOptions: readonly TOption[]) => React.ReactNode;
   required?: boolean;
 };
 

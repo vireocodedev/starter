@@ -125,6 +125,10 @@ export type VireoFormTextFieldOwnProps = VireoFormTextFieldSlotsAndSlotProps & {
   onBlur?: NonNullable<TextFieldProps["onBlur"]>;
   onChange?: NonNullable<TextFieldProps["onChange"]>;
   readOnly?: boolean;
+  /** Overrides the enclosing form's fallback for an empty read-only value. */
+  readOnlyEmptyValue?: React.ReactNode;
+  /** Replaces the default string presentation in read-only mode. */
+  renderReadOnlyValue?: (value: string) => React.ReactNode;
   required?: boolean;
 };
 

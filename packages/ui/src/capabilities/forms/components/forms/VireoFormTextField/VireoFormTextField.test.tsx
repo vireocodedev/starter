@@ -373,7 +373,8 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
 
     const root = screen.getByTestId("form").querySelector("[data-read-only='true']");
     expect(root).toHaveClass(vireoFormTextFieldClasses.readOnly, "custom-read-only");
-    expect(screen.getByRole("textbox", { name: "Name" })).toHaveAttribute("readonly");
+    expect(screen.queryByRole("textbox", { name: "Name" })).not.toBeInTheDocument();
+    expect(screen.getByText("Northstar")).toBeInTheDocument();
   });
 
   it("reports submission state without automatically disabling the field", async () => {
@@ -416,7 +417,6 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
             root: { marginTop: 11 },
             htmlInput: { letterSpacing: "3px" },
             inputLabel: { color: "rgb(123, 45, 67)" },
-            readOnly: { opacity: 0.75 },
           },
         },
       },
@@ -424,14 +424,14 @@ describe(VIREO_FORM_TEXT_FIELD_NAME, () => {
 
     render(
       <ThemeProvider theme={theme}>
-        <TestForm initialValue="Northstar" fieldProps={{ readOnly: true }} />
+        <TestForm initialValue="Northstar" />
       </ThemeProvider>,
     );
 
     const input = screen.getByRole("textbox", { name: "Name" });
     const root = input.closest(".MuiFormControl-root");
-    expect(root).toHaveClass("MuiTextField-root", vireoFormTextFieldClasses.readOnly);
-    expect(root).toHaveStyle({ marginTop: "11px", opacity: "0.75" });
+    expect(root).toHaveClass("MuiTextField-root");
+    expect(root).toHaveStyle({ marginTop: "11px" });
     expect(input).toHaveStyle({ letterSpacing: "3px" });
     expect(root?.querySelector("label")).toHaveStyle({ color: "rgb(123, 45, 67)" });
     expect(root?.querySelector(".MuiInputBase-sizeSmall")).toBeInTheDocument();

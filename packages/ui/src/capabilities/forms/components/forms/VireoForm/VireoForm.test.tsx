@@ -39,6 +39,30 @@ function FormHarness({ formProps, onSubmit = vi.fn(() => undefined) }: HarnessPr
 }
 
 describe(VIREO_FORM_NAME, () => {
+  it("inherits read-only presentation across bound fields and suppresses submission", () => {
+    const onSubmit = vi.fn();
+
+    function ReadOnlyHarness() {
+      const form = useVireoForm({ defaultValues: { name: "" }, onSubmit });
+      return (
+        <form.Form aria-label="Read-only profile" readOnly readOnlyEmptyValue="No value">
+          <form.Field name="name">{field => <field.TextField label="Name" readOnly={false} />}</form.Field>
+          <form.SubmitButton>Save</form.SubmitButton>
+        </form.Form>
+      );
+    }
+
+    render(<ReadOnlyHarness />);
+    const root = screen.getByRole("form", { name: "Read-only profile" });
+    expect(root).toHaveClass(vireoFormClasses.readOnly);
+    expect(screen.getByText("No value")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Name" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+
+    fireEvent.submit(root);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("renders a native form with Vireo defaults, refs, and merged root customization", () => {
     const forwardedRef = React.createRef<HTMLFormElement>();
     const rootSlotRef = React.createRef<HTMLFormElement>();

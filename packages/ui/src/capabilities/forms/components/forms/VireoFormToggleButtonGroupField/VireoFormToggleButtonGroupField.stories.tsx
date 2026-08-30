@@ -112,15 +112,14 @@ export const DisabledAndReadOnly: Story = {
   render: () => <DisabledAndReadOnlyExample />,
   parameters: createSourceParameters(
     disabledAndReadOnlySource,
-    "Compares unavailable buttons with focusable, inspectable read-only buttons that reject changes.",
+    "Compares unavailable buttons with the value-only presentation used by read-only forms.",
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const readOnlyGroup = canvas.getByRole("group", { name: "Read-only role" });
-    const owner = within(readOnlyGroup).getByRole("button", { name: "Owner" });
-    await expect(owner).toBeEnabled();
-    await userEvent.click(owner);
-    await expect(owner).toHaveAttribute("aria-pressed", "false");
+    const readOnlyLabelBox = canvas.getByText("Read only").closest(".VireoLabelBox-root");
+    await expect(readOnlyLabelBox).not.toBeNull();
+    await expect(within(readOnlyLabelBox as HTMLElement).queryByRole("group")).not.toBeInTheDocument();
+    await expect(within(readOnlyLabelBox as HTMLElement).getByText("Editor")).toBeInTheDocument();
   },
 };
 

@@ -319,6 +319,8 @@ export type VireoFormFileListFieldOwnProps = VireoFormFileListFieldSlotsAndSlotP
   previewRenderer?: VireoFilePreviewRenderer;
   /** Prevents picker, drop, removal, clear-all, and reordering while retaining normal presentation. */
   readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (files: readonly File[]) => React.ReactNode;
   /** Accessible label for one reorder handle. */
   reorderFileLabel?: (file: File, index: number, count: number) => string;
   /** Announcement emitted after a successful reorder. */

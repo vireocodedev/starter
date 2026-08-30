@@ -147,17 +147,14 @@ describe(VIREO_FORM_COUNTER_FIELD_NAME, () => {
 
   it("keeps disabled and read-only counters unchanged", async () => {
     const onValueChange = vi.fn();
-    const user = userEvent.setup();
     const first = render(<TestForm fieldProps={{ disabled: true, onValueChange }} />);
     expect(screen.getByRole("spinbutton", { name: "Quantity" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Increase" })).toBeDisabled();
     first.unmount();
     render(<TestForm fieldProps={{ readOnly: true, onValueChange }} />);
-    const input = screen.getByRole("spinbutton", { name: "Quantity" });
-    expect(input).toHaveAttribute("aria-readonly", "true");
-    expect(screen.getByRole("button", { name: "Increase" })).toBeDisabled();
-    await user.type(input, "9");
-    expect(input).toHaveValue("1");
+    expect(screen.queryByRole("spinbutton", { name: "Quantity" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Increase" })).not.toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
     expect(onValueChange).not.toHaveBeenCalled();
   });
 

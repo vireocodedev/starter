@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -122,7 +123,9 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
     options,
     orientation = "horizontal",
     readOnly = false,
+    readOnlyEmptyValue,
     renderOption,
+    renderReadOnlyValue,
     required = false,
     size = "medium",
     slotProps = {},
@@ -148,6 +151,7 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
     value: current.value,
   }));
   const submitting = useStore(field.form.store, current => current.isSubmitting);
+  const effectiveReadOnly = formContext.readOnly || readOnly;
   const errorDisplay = errorDisplayProp ?? formContext.errorDisplay;
   const errorVisible =
     fieldState.invalid &&
@@ -172,7 +176,7 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
     invalid: fieldState.invalid,
     multiple,
     orientation,
-    readOnly,
+    readOnly: effectiveReadOnly,
     required,
     size,
     submitting,
@@ -237,13 +241,44 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
       ? multipleValue.some(selectedValue => valuesEqual(value, selectedValue))
       : valuesEqual(value, exclusiveValue);
 
+  if (effectiveReadOnly) {
+    const selectedOptions = options.filter(option => isSelected(option.value));
+    const readOnlyValue = multiple ? multipleValue : exclusiveValue;
+    return (
+      <VireoFormReadOnlyValue
+        {...other}
+        {...rootSlotOther}
+        ref={rootRef}
+        aria-label={ariaLabel ?? groupSlotAriaLabel}
+        aria-labelledby={ariaLabelledBy ?? groupSlotAriaLabelledBy}
+        className={joinClassNames(classes.root, className, rootSlotClassName)}
+        empty={!hasValue}
+        emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+        style={{ ...style, ...rootSlotStyle }}
+        sx={mergeSx(sx, rootSlotSx)}
+      >
+        {renderReadOnlyValue?.(readOnlyValue, selectedOptions) ??
+          selectedOptions.map((option, index) => (
+            <React.Fragment key={`${typeof option.value}:${String(option.value)}`}>
+              {index > 0 ? ", " : null}
+              {renderOption?.(option, {
+                disabled: Boolean(option.disabled),
+                index: options.indexOf(option),
+                selected: true,
+              }) ?? option.label}
+            </React.Fragment>
+          ))}
+      </VireoFormReadOnlyValue>
+    );
+  }
+
   const normalizeMultipleValue = (candidate: unknown): TValue[] => {
     const values = Array.isArray(candidate) ? candidate : [];
     return options.filter(option => values.some(value => valuesEqual(option.value, value))).map(option => option.value);
   };
 
   const handleChange: GroupChangeHandler = (event, candidateValue) => {
-    if (disabled || readOnly) return;
+    if (disabled || effectiveReadOnly) return;
 
     const nextValue = multiple
       ? normalizeMultipleValue(candidateValue)
@@ -299,7 +334,7 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
         aria-invalid={effectiveError || isAriaInvalid(groupSlotAriaInvalid) || undefined}
         aria-label={ariaLabel ?? groupSlotAriaLabel}
         aria-labelledby={ariaLabelledBy ?? groupSlotAriaLabelledBy}
-        aria-readonly={readOnly || undefined}
+        aria-readonly={effectiveReadOnly || undefined}
         aria-required={required || undefined}
         className={joinClassNames(classes.toggleButtonGroup, groupSlotClassName)}
         color={color}

@@ -212,6 +212,7 @@ This baseline was reviewed on 2026-08-19. Update the ledger whenever a path is a
 | `capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteField/**`         | `capabilities/forms/components/forms`        | Migrated    | Known-or-created string autocomplete with normalization and blur commit.                  |
 | `capabilities/forms/components/forms/VireoFormFreeSoloAutocompleteMultipleField/**` | `capabilities/forms/components/forms`        | Migrated    | Ordered free-solo strings with normalization and compact selections.                      |
 | `capabilities/forms/components/data-display/VireoFileImagePreview/**`               | `capabilities/forms/components/data-display` | Migrated    | Opt-in object-URL-backed image-file preview presentation.                                 |
+| `capabilities/forms/components/data-display/VireoFormReadOnlyValue/**`              | `capabilities/forms/components/data-display` | Migrated    | Shared themeable display surface for bound fields in inherited read-only mode.            |
 | `capabilities/forms/components/forms/VireoFormSubmitButton/**`                      | `capabilities/forms/components/forms`        | Migrated    | Capability-bound submit action with automatic async loading state.                        |
 
 ## Hook inventory

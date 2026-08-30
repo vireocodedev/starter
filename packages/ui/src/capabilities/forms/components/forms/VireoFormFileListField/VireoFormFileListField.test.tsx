@@ -263,8 +263,9 @@ describe(VIREO_FORM_FILE_LIST_FIELD_NAME, () => {
     expect(screen.getByText("1 file")).toBeInTheDocument();
 
     rerender(<TestForm initialValue={[initial]} fieldProps={{ readOnly: true }} />);
-    expect(fieldRoot()).toHaveAttribute("aria-readonly", "true");
-    expect(screen.getByRole("button", { name: "Add more files" })).toBeDisabled();
+    expect(screen.getByText("locked.pdf")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add more files" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove locked.pdf" })).not.toBeInTheDocument();
   });
 
   it("renders one opt-in preview on each file row", () => {

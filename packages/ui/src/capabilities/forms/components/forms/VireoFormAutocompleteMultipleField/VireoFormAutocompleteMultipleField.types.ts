@@ -228,6 +228,11 @@ export type VireoFormAutocompleteMultipleFieldOwnProps<
     classes?: Partial<VireoFormAutocompleteMultipleFieldClasses>;
     disabled?: boolean;
     readOnly?: boolean;
+    readOnlyEmptyValue?: React.ReactNode;
+    renderReadOnlyValue?: (
+      values: readonly TValue[],
+      selections: readonly VireoFormAutocompleteMultipleFieldSelection<TOption, TValue>[],
+    ) => React.ReactNode;
     required?: boolean;
     error?: boolean;
     errorDisplay?: VireoFormErrorDisplay;

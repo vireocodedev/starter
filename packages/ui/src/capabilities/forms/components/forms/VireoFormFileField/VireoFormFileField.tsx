@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import {
@@ -151,6 +152,8 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
       onFileRejected,
       previewRenderer: PreviewRenderer,
       readOnly = false,
+      readOnlyEmptyValue,
+      renderReadOnlyValue,
       replaceFileLabel = "Replace file",
       required = false,
       slotProps = {},
@@ -170,6 +173,7 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
       value: current.value,
     }));
     const submitting = useStore(field.form.store, current => current.isSubmitting);
+    const effectiveReadOnly = formContext.readOnly || readOnly;
     const [rejection, setRejection] = React.useState<VireoFileRejection>();
     const [dragActive, setDragActive] = React.useState(false);
     const [dragReject, setDragReject] = React.useState(false);
@@ -202,7 +206,7 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
       errorVisible,
       invalid: error || fieldState.invalid,
       populated: value !== null,
-      readOnly,
+      readOnly: effectiveReadOnly,
       rejected: rejection !== undefined,
       submitting,
       touched: fieldState.touched,
@@ -271,7 +275,7 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
     const mergedFileSizeRef = useForkRef(fileSizeRef, fileSizeSlotRef);
     const inputId = inputSlotId ?? generatedInputId;
     const helperId = helperTextSlotId ?? generatedHelperId;
-    const interactive = !disabled && !readOnly;
+    const interactive = !disabled && !effectiveReadOnly;
 
     React.useEffect(() => {
       if (nativeInput.current) nativeInput.current.value = "";
@@ -295,6 +299,32 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
       },
       [accept, field, maxSize, reject],
     );
+
+    if (effectiveReadOnly) {
+      return (
+        <VireoFormReadOnlyValue
+          {...other}
+          {...rootSlotOther}
+          ref={rootRef}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          empty={value === null}
+          emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
+        >
+          {value === null
+            ? null
+            : (renderReadOnlyValue?.(value) ??
+              (hideFileSize ? (
+                value.name
+              ) : (
+                <>
+                  {value.name} · {formatFileSize(value.size)}
+                </>
+              )))}
+        </VireoFormReadOnlyValue>
+      );
+    }
 
     const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = event => {
       inputSlotOnChange?.(event);
@@ -358,7 +388,7 @@ export const VireoFormFileField = React.forwardRef<HTMLDivElement, VireoFormFile
         ref={rootRef}
         ownerState={ownerState}
         aria-disabled={disabled || undefined}
-        aria-readonly={readOnly || undefined}
+        aria-readonly={effectiveReadOnly || undefined}
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}

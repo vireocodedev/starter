@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -47,6 +48,7 @@ function useUtilityClasses(
         ownerState.validating && "validating",
         ownerState.submitting && "submitting",
         ownerState.disabled && "disabled",
+        ownerState.readOnly && "readOnly",
         ownerState.row && "row",
         ownerState.hasValue && "hasValue",
       ],
@@ -101,7 +103,10 @@ function VireoFormRadioGroupFieldImpl<TOption, TValue extends VireoFormRadioGrou
     onChange,
     onValueChange,
     options,
+    readOnly = false,
+    readOnlyEmptyValue,
     renderOption,
+    renderReadOnlyValue,
     required = false,
     row = false,
     slotProps = {},
@@ -122,6 +127,7 @@ function VireoFormRadioGroupFieldImpl<TOption, TValue extends VireoFormRadioGrou
     value: current.value,
   }));
   const submitting = useStore(field.form.store, current => current.isSubmitting);
+  const effectiveReadOnly = formContext.readOnly || readOnly;
   const errorDisplay = errorDisplayProp ?? formContext.errorDisplay;
   const errorVisible =
     fieldState.invalid &&
@@ -138,6 +144,7 @@ function VireoFormRadioGroupFieldImpl<TOption, TValue extends VireoFormRadioGrou
     errorVisible,
     hasValue: fieldState.value !== null,
     invalid: fieldState.invalid,
+    readOnly: effectiveReadOnly,
     row,
     submitting,
     touched: fieldState.touched,
@@ -203,6 +210,31 @@ function VireoFormRadioGroupFieldImpl<TOption, TValue extends VireoFormRadioGrou
     effectiveHelperText !== undefined ? formHelperTextId : undefined,
   );
   const encodedValue = fieldState.value === null ? "" : encodeOptionValue(fieldState.value);
+
+  if (effectiveReadOnly) {
+    const selectedOption = options.find(option =>
+      fieldState.value === null ? false : Object.is(getOptionValue(option), fieldState.value),
+    );
+    return (
+      <VireoFormReadOnlyValue
+        {...other}
+        {...rootSlotOther}
+        ref={rootRef}
+        aria-label={ariaLabel ?? radioGroupSlotAriaLabel}
+        aria-labelledby={ariaLabelledBy ?? radioGroupSlotAriaLabelledBy}
+        className={joinClassNames(classes.root, className, rootSlotClassName)}
+        empty={fieldState.value === null}
+        emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+        style={{ ...style, ...rootSlotStyle }}
+        sx={mergeSx(sx, rootSlotSx)}
+      >
+        {fieldState.value === null
+          ? null
+          : (renderReadOnlyValue?.(fieldState.value, selectedOption) ??
+            (selectedOption === undefined ? String(fieldState.value) : renderOption(selectedOption)))}
+      </VireoFormReadOnlyValue>
+    );
+  }
 
   const handleChange: RadioGroupChangeHandler = (event, nextEncodedValue) => {
     const restoreCheckedValue = () => {

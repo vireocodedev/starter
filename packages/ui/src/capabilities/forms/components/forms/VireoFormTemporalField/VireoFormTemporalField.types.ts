@@ -15,6 +15,7 @@ import type {
   PickersOutlinedInput,
 } from "@mui/x-date-pickers";
 import type React from "react";
+import type { Dayjs } from "dayjs";
 import {
   type VireoFormTemporalFieldClasses,
   type VireoFormTemporalFieldClassKey,
@@ -163,6 +164,8 @@ type VireoFormTemporalFieldCommonProps = VireoFormTemporalFieldSlotsAndSlotProps
   /** Canonical value used only to choose initial picker focus when the bound value is null. */
   referenceValue?: string;
   readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (value: string, parsedValue: Dayjs) => React.ReactNode;
   required?: boolean;
   /** @default true */
   clearable?: boolean;

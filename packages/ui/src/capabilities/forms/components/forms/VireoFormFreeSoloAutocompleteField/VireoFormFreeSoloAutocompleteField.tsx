@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -153,8 +154,10 @@ function VireoFormFreeSoloAutocompleteFieldImpl<TOption>(
     placeholder,
     popupIcon,
     readOnly = false,
+    readOnlyEmptyValue,
     renderGroupLabel,
     renderOption,
+    renderReadOnlyValue,
     required = false,
     normalizeValue = value => value.trim(),
     slotProps = {},
@@ -178,6 +181,7 @@ function VireoFormFreeSoloAutocompleteFieldImpl<TOption>(
     value: current.value,
   }));
   const submitting = useStore(field.form.store, current => current.isSubmitting);
+  const effectiveReadOnly = formContext.readOnly || readOnly;
   const [internalInputValue, setInternalInputValue] = React.useState(defaultInputValue);
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
   const [focused, setFocused] = React.useState(false);
@@ -233,7 +237,7 @@ function VireoFormFreeSoloAutocompleteFieldImpl<TOption>(
     hasValue: selected !== null,
     loading,
     open: effectiveOpen,
-    readOnly,
+    readOnly: effectiveReadOnly,
     required,
     submitting,
     touched: fieldState.touched,
@@ -253,6 +257,24 @@ function VireoFormFreeSoloAutocompleteFieldImpl<TOption>(
     () => createFilterOptions<VireoFormFreeSoloAutocompleteFieldSelection<TOption>>(),
     [],
   );
+  if (effectiveReadOnly) {
+    const empty = selected === null || selected.value.trim().length === 0;
+    return (
+      <VireoFormReadOnlyValue
+        {...rootOther}
+        ref={rootRef}
+        aria-label={htmlInputSlotProps["aria-label"] as string | undefined}
+        className={joinClassNames(classes.root, className, rootClassName as string)}
+        empty={empty}
+        emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+        label={label}
+        style={{ ...style, ...(rootStyle as React.CSSProperties) }}
+        sx={mergeSx(sx, rootSx as never)}
+      >
+        {selected === null ? null : (renderReadOnlyValue?.(selected.value, selected) ?? selected.label)}
+      </VireoFormReadOnlyValue>
+    );
+  }
   const filterOptions = (
     items: VireoFormFreeSoloAutocompleteFieldSelection<TOption>[],
     state: { inputValue: string },
@@ -288,7 +310,7 @@ function VireoFormFreeSoloAutocompleteFieldImpl<TOption>(
     next: VireoFormFreeSoloAutocompleteFieldSelection<TOption> | string | null,
     reason: string,
   ) => {
-    if (readOnly || disabled) return;
+    if (effectiveReadOnly || disabled) return;
     const previousValue = fieldState.value;
     if (reason === "clear" || next === null) {
       field.handleChange(null);

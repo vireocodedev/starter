@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -175,10 +176,12 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
     placeholder,
     popupIcon,
     readOnly = false,
+    readOnlyEmptyValue,
     removeOnBackspace = false,
     renderGroupLabel,
     renderOption,
     renderSelectedOptions,
+    renderReadOnlyValue,
     required = false,
     selectedOptions = [],
     size,
@@ -201,6 +204,7 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
     value: current.value,
   }));
   const submitting = useStore(field.form.store, current => current.isSubmitting);
+  const effectiveReadOnly = formContext.readOnly || readOnly;
   const [internalInputValue, setInternalInputValue] = React.useState(defaultInputValue);
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
   const [focused, setFocused] = React.useState(false);
@@ -267,7 +271,7 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
     hasValue: selections.length > 0,
     loading,
     open: effectiveOpen,
-    readOnly,
+    readOnly: effectiveReadOnly,
     required,
     submitting,
     touched: fieldState.touched,
@@ -288,6 +292,23 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
     () => createFilterOptions<VireoFormAutocompleteMultipleFieldSelection<TOption, TValue>>(),
     [],
   );
+  if (effectiveReadOnly) {
+    return (
+      <VireoFormReadOnlyValue
+        {...rootOther}
+        ref={rootRef}
+        aria-label={htmlInputProps["aria-label"] as string | undefined}
+        className={joinClassNames(classes.root, className, rootClassName as string)}
+        empty={selections.length === 0}
+        emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+        label={label}
+        style={{ ...style, ...(rootStyle as React.CSSProperties) }}
+        sx={mergeSx(sx, rootSx as never)}
+      >
+        {renderReadOnlyValue?.(fieldState.value, selections) ?? selections.map(item => item.label).join(", ")}
+      </VireoFormReadOnlyValue>
+    );
+  }
   const filterOptions = (
     items: VireoFormAutocompleteMultipleFieldSelection<TOption, TValue>[],
     state: { inputValue: string },
@@ -303,7 +324,7 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
     return items.filter(item => allowed.has(item.value));
   };
   const emitRemove = (selection: VireoFormAutocompleteMultipleFieldSelection<TOption, TValue>) => {
-    if (disabled || readOnly) return;
+    if (disabled || effectiveReadOnly) return;
     const next = fieldState.value.filter(value => value !== selection.value);
     field.handleChange(next);
     onValueChange?.(next, { reason: "removeOption", option: selection.option, value: selection.value });
@@ -314,7 +335,7 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
     reason: string,
     details?: { option?: VireoFormAutocompleteMultipleFieldSelection<TOption, TValue> },
   ) => {
-    if (disabled || readOnly) return;
+    if (disabled || effectiveReadOnly) return;
     if (reason === "clear") {
       const previousValues = [...fieldState.value];
       field.handleChange([]);

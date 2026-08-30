@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -115,7 +116,9 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
     options,
     placeholder,
     readOnly = false,
+    readOnlyEmptyValue,
     renderOption,
+    renderReadOnlyValue,
     required = false,
     slotProps = {},
     slots = {},
@@ -135,6 +138,7 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
     value: current.value,
   }));
   const submitting = useStore(field.form.store, current => current.isSubmitting);
+  const effectiveReadOnly = formContext.readOnly || readOnly;
   const errorDisplay = errorDisplayProp ?? formContext.errorDisplay;
   const errorVisible =
     fieldState.invalid &&
@@ -151,7 +155,7 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
     errorVisible,
     hasValue: fieldState.value !== null,
     invalid: fieldState.invalid,
-    readOnly,
+    readOnly: effectiveReadOnly,
     submitting,
     touched: fieldState.touched,
     validating: fieldState.validating,
@@ -224,7 +228,28 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
   const selectedOption = options.find(option => getOptionValue(option) === fieldState.value);
   const effectiveError = error || fieldState.invalid;
   const effectiveHelperText = errorVisible ? formattedError : helperText;
-  const clearable = ownerState.hasValue && !disabled && !readOnly && !disableClearable;
+  const clearable = ownerState.hasValue && !disabled && !effectiveReadOnly && !disableClearable;
+
+  if (effectiveReadOnly) {
+    return (
+      <VireoFormReadOnlyValue
+        {...rootSlotOther}
+        ref={rootRef}
+        aria-label={htmlInputSlotOther["aria-label"] as string | undefined}
+        className={joinClassNames(classes.root, className, rootSlotClassName)}
+        empty={fieldState.value === null}
+        emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+        label={label}
+        style={{ ...style, ...rootSlotStyle }}
+        sx={mergeSx(sx, rootSlotSx)}
+      >
+        {fieldState.value === null
+          ? null
+          : (renderReadOnlyValue?.(fieldState.value, selectedOption) ??
+            (selectedOption === undefined ? String(fieldState.value) : renderOption(selectedOption)))}
+      </VireoFormReadOnlyValue>
+    );
+  }
 
   const handleChange: SelectChangeHandler = (event, child) => {
     selectSlotOnChange?.(event, child);
@@ -333,7 +358,7 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
                 {clearAdornment}
               </>
             ),
-            readOnly: readOnly || inputSlotReadOnly,
+            readOnly: effectiveReadOnly || inputSlotReadOnly,
           },
           htmlInput: {
             ...htmlInputSlotOther,
@@ -353,7 +378,7 @@ function VireoFormSelectFieldImpl<TOption, TValue extends VireoFormSelectFieldVa
               ...selectSlotInputProps,
               "aria-invalid": effectiveError || isAriaInvalid(selectSlotInputProps?.["aria-invalid"]) || undefined,
               name: field.name,
-              readOnly,
+              readOnly: effectiveReadOnly,
             },
             multiple: false,
             native: false,

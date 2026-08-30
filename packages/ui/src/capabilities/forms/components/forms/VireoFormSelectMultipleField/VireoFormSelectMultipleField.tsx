@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -135,7 +136,9 @@ function VireoFormSelectMultipleFieldImpl<TOption, TValue extends VireoFormSelec
     options,
     placeholder,
     readOnly = false,
+    readOnlyEmptyValue,
     renderOption,
+    renderReadOnlyValue,
     renderSelectedOptions,
     required = false,
     slotProps = {},
@@ -157,6 +160,7 @@ function VireoFormSelectMultipleFieldImpl<TOption, TValue extends VireoFormSelec
     value: current.value,
   }));
   const submitting = useStore(field.form.store, current => current.isSubmitting);
+  const effectiveReadOnly = formContext.readOnly || readOnly;
   const errorDisplay = errorDisplayProp ?? formContext.errorDisplay;
   const errorVisible =
     fieldState.invalid &&
@@ -173,7 +177,7 @@ function VireoFormSelectMultipleFieldImpl<TOption, TValue extends VireoFormSelec
     errorVisible,
     hasValue: fieldState.value.length > 0,
     invalid: fieldState.invalid,
-    readOnly,
+    readOnly: effectiveReadOnly,
     submitting,
     touched: fieldState.touched,
     validating: fieldState.validating,
@@ -255,7 +259,34 @@ function VireoFormSelectMultipleFieldImpl<TOption, TValue extends VireoFormSelec
   const hiddenCount = selectedOptions.length - displayedOptions.length;
   const effectiveError = error || fieldState.invalid;
   const effectiveHelperText = errorVisible ? formattedError : helperText;
-  const clearable = ownerState.hasValue && !disabled && !readOnly && !disableClearable;
+  const clearable = ownerState.hasValue && !disabled && !effectiveReadOnly && !disableClearable;
+
+  if (effectiveReadOnly) {
+    return (
+      <VireoFormReadOnlyValue
+        {...rootSlotOther}
+        ref={rootRef}
+        aria-label={htmlInputSlotOther["aria-label"] as string | undefined}
+        className={joinClassNames(classes.root, className, rootSlotClassName)}
+        empty={fieldState.value.length === 0}
+        emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+        label={label}
+        style={{ ...style, ...rootSlotStyle }}
+        sx={mergeSx(sx, rootSlotSx)}
+      >
+        {renderReadOnlyValue?.(fieldState.value, selectedOptions) ??
+          fieldState.value.map((value, index) => {
+            const option = options.find(candidate => getOptionValue(candidate) === value);
+            return (
+              <React.Fragment key={`${typeof value}:${String(value)}`}>
+                {index > 0 ? ", " : null}
+                {option === undefined ? String(value) : renderOption(option)}
+              </React.Fragment>
+            );
+          })}
+      </VireoFormReadOnlyValue>
+    );
+  }
 
   const normalizeChangedValue = (value: unknown): TValue[] => {
     if (Array.isArray(value)) return value as TValue[];
@@ -422,7 +453,7 @@ function VireoFormSelectMultipleFieldImpl<TOption, TValue extends VireoFormSelec
                 {clearAdornment}
               </>
             ),
-            readOnly: readOnly || inputSlotReadOnly,
+            readOnly: effectiveReadOnly || inputSlotReadOnly,
           },
           htmlInput: {
             ...htmlInputSlotOther,
@@ -442,7 +473,7 @@ function VireoFormSelectMultipleFieldImpl<TOption, TValue extends VireoFormSelec
               ...selectSlotInputProps,
               "aria-invalid": effectiveError || isAriaInvalid(selectSlotInputProps?.["aria-invalid"]) || undefined,
               name: field.name,
-              readOnly,
+              readOnly: effectiveReadOnly,
             },
             multiple: true,
             native: false,

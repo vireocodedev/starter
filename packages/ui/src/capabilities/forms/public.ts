@@ -52,4 +52,5 @@ export type { VireoFormApi } from "./hooks/useVireoForm/useVireoForm";
 export * from "./hooks/useVireoMultiStepForm/useVireoMultiStepForm";
 export type * from "./types/vireoMultiStep.types";
 export * from "./components/data-display/VireoFileImagePreview";
+export * from "./components/data-display/VireoFormReadOnlyValue";
 export * from "./form-overlays/components/overlays/VireoResponsiveFormOverlay";

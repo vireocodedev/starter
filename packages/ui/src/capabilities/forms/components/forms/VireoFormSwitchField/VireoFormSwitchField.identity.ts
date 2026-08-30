@@ -22,6 +22,7 @@ export const VIREO_FORM_SWITCH_FIELD_STATES = [
   "validating",
   "submitting",
   "disabled",
+  "readOnly",
 ] as const;
 
 /** Public slot names exposed by VireoFormSwitchField. */

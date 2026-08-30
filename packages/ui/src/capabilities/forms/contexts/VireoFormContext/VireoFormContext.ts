@@ -7,6 +7,8 @@ import type {
 export type VireoFormContextValue = {
   errorDisplay: VireoFormErrorDisplay;
   formatError?: VireoFormErrorFormatter;
+  readOnly: boolean;
+  readOnlyEmptyValue: React.ReactNode;
   submissionAttempts: number;
 };
 

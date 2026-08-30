@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -85,9 +86,12 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
       fullWidth = true,
       helperText = " ",
       inputRef,
+      label,
       onBlur,
       onChange,
       readOnly = false,
+      readOnlyEmptyValue,
+      renderReadOnlyValue,
       required = false,
       select = false,
       slotProps = {},
@@ -108,6 +112,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
       value: current.value,
     }));
     const submitting = useStore(field.form.store, current => current.isSubmitting);
+    const effectiveReadOnly = formContext.readOnly || readOnly;
     const errorDisplay = errorDisplayProp ?? formContext.errorDisplay;
     const errorVisible =
       fieldState.invalid &&
@@ -123,7 +128,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
       disabled,
       errorVisible,
       invalid: fieldState.invalid,
-      readOnly,
+      readOnly: effectiveReadOnly,
       submitting,
       touched: fieldState.touched,
       validating: fieldState.validating,
@@ -171,6 +176,26 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
     const nativeInputRef = useForkRef(inputRef, htmlInputSlotRef);
 
+    if (effectiveReadOnly) {
+      const empty = fieldState.value.trim().length === 0;
+
+      return (
+        <VireoFormReadOnlyValue
+          {...rootSlotOther}
+          ref={rootRef}
+          aria-label={htmlInputSlotOther["aria-label"] as string | undefined}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          empty={empty}
+          emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+          label={label}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
+        >
+          {renderReadOnlyValue?.(fieldState.value) ?? fieldState.value}
+        </VireoFormReadOnlyValue>
+      );
+    }
+
     const handleChange: InputChangeHandler = event => {
       (htmlInputSlotOnChange as InputChangeHandler | undefined)?.(event);
       if (event.defaultPrevented) return;
@@ -213,6 +238,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
         onBlur={handleBlur}
         onChange={handleChange}
         required={required}
+        label={label}
         select={select}
         slots={
           {
@@ -246,7 +272,7 @@ export const VireoFormTextField = React.forwardRef<HTMLDivElement, VireoFormText
             input: {
               ...inputSlotOther,
               className: joinClassNames(classes.input, inputSlotClassName),
-              readOnly: readOnly || inputSlotReadOnly,
+              readOnly: effectiveReadOnly || inputSlotReadOnly,
             },
             htmlInput: {
               ...htmlInputSlotOther,

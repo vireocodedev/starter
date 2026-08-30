@@ -221,6 +221,11 @@ export type VireoFormFreeSoloAutocompleteMultipleFieldOwnProps<TOption> =
       classes?: Partial<VireoFormFreeSoloAutocompleteMultipleFieldClasses>;
       disabled?: boolean;
       readOnly?: boolean;
+      readOnlyEmptyValue?: React.ReactNode;
+      renderReadOnlyValue?: (
+        values: readonly string[],
+        selections: readonly VireoFormFreeSoloAutocompleteMultipleFieldSelection<TOption>[],
+      ) => React.ReactNode;
       required?: boolean;
       error?: boolean;
       errorDisplay?: VireoFormErrorDisplay;

@@ -20,6 +20,7 @@ export type VireoFormOwnerState = {
   dirty: boolean;
   invalid: boolean;
   layoutWidth: VireoFormLayoutWidth;
+  readOnly: boolean;
   submitting: boolean;
   validating: boolean;
 };
@@ -55,6 +56,10 @@ export type VireoFormOwnProps = VireoFormSlotsAndSlotProps & {
   focusInvalidFieldOnSubmit?: boolean;
   /** Constrains and centers the form using Vireo's standard content-width presets. @default 'standard' */
   layoutWidth?: VireoFormLayoutWidth;
+  /** Presents every bound field as a non-editable display value and suppresses form submission. @default false */
+  readOnly?: boolean;
+  /** Fallback shown by read-only fields with no meaningful value. @default 'Not provided' */
+  readOnlyEmptyValue?: React.ReactNode;
   /** Registers this form with the unsaved-changes capability while it is dirty. @default false */
   unsavedChangesGuard?: boolean;
   /** Adds non-form busy work to the unsaved-changes registration. @default false */

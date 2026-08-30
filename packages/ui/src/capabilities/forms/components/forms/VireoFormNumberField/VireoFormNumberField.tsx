@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -95,11 +96,14 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
       fullWidth = true,
       helperText = " ",
       inputRef,
+      label,
       max,
       min,
       onBlur,
       onChange,
       readOnly = false,
+      readOnlyEmptyValue,
+      renderReadOnlyValue,
       required = false,
       slotProps = {},
       slots = {},
@@ -119,10 +123,11 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
       value: current.value,
     }));
     const submitting = useStore(field.form.store, current => current.isSubmitting);
+    const effectiveReadOnly = formContext.readOnly || readOnly;
     const [inputValue, setInputValue] = React.useState(() => formatNumber(fieldState.value));
 
     React.useEffect(() => {
-      if (fieldState.value === null || !Number.isFinite(fieldState.value)) {
+      if (effectiveReadOnly || fieldState.value === null || !Number.isFinite(fieldState.value)) {
         setInputValue("");
         return;
       }
@@ -130,7 +135,7 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
       const clampedValue = clampNumber(fieldState.value, min, max);
       setInputValue(current => (current !== "" && Number(current) === clampedValue ? current : String(clampedValue)));
       if (clampedValue !== fieldState.value) field.handleChange(clampedValue);
-    }, [field, fieldState.value, max, min]);
+    }, [effectiveReadOnly, field, fieldState.value, max, min]);
 
     const errorDisplay = errorDisplayProp ?? formContext.errorDisplay;
     const errorVisible =
@@ -147,7 +152,7 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
       disabled,
       errorVisible,
       invalid: fieldState.invalid,
-      readOnly,
+      readOnly: effectiveReadOnly,
       submitting,
       touched: fieldState.touched,
       validating: fieldState.validating,
@@ -191,6 +196,27 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
     const { className: formHelperTextSlotClassName, ...formHelperTextSlotOther } = resolvedFormHelperTextSlotProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
     const nativeInputRef = useForkRef(inputRef, htmlInputSlotRef);
+
+    if (effectiveReadOnly) {
+      const empty = fieldState.value === null || !Number.isFinite(fieldState.value);
+      return (
+        <VireoFormReadOnlyValue
+          {...rootSlotOther}
+          ref={rootRef}
+          aria-label={htmlInputSlotOther["aria-label"] as string | undefined}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          empty={empty}
+          emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+          label={label}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
+        >
+          {fieldState.value === null
+            ? null
+            : (renderReadOnlyValue?.(fieldState.value) ?? formatNumber(fieldState.value))}
+        </VireoFormReadOnlyValue>
+      );
+    }
 
     const handleChange: InputChangeHandler = event => {
       (htmlInputSlotOnChange as InputChangeHandler | undefined)?.(event);
@@ -255,6 +281,7 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
         name={field.name}
         onBlur={handleBlur}
         onChange={handleChange}
+        label={label}
         required={required}
         slots={
           {
@@ -285,7 +312,7 @@ export const VireoFormNumberField = React.forwardRef<HTMLDivElement, VireoFormNu
             input: {
               ...inputSlotOther,
               className: joinClassNames(classes.input, inputSlotClassName),
-              readOnly: readOnly || inputSlotReadOnly,
+              readOnly: effectiveReadOnly || inputSlotReadOnly,
             },
             htmlInput: {
               ...htmlInputSlotOther,

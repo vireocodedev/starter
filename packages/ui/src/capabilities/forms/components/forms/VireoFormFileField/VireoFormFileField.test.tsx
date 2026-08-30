@@ -164,8 +164,9 @@ describe(VIREO_FORM_FILE_FIELD_NAME, () => {
     expect(screen.getByText("locked.pdf")).toBeInTheDocument();
 
     rerender(<TestForm initialValue={existing} fieldProps={{ readOnly: true }} />);
-    expect(fieldRoot()).toHaveAttribute("aria-readonly", "true");
-    expect(screen.getByRole("button", { name: "Replace file" })).toBeDisabled();
+    expect(screen.getByText(/locked\.pdf/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Replace file" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear selected file" })).not.toBeInTheDocument();
   });
 
   it("renders an opt-in preview on a dedicated line", () => {

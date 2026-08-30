@@ -174,6 +174,8 @@ export type VireoFormCounterFieldOwnProps = VireoFormCounterFieldSlotsAndSlotPro
   /** Called after a complete edit or step resolves to a different stored value. */
   onValueChange?: (value: number | null) => void;
   readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (value: number) => React.ReactNode;
   required?: boolean;
   /** @default 'medium' */
   size?: VireoFormCounterFieldSize;

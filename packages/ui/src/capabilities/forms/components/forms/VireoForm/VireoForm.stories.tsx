@@ -2,6 +2,8 @@ import DefaultExample from "@/capabilities/forms/components/forms/VireoForm/inte
 import defaultExampleSource from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/DefaultExample.tsx?raw";
 import LayoutWidthsExample from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/LayoutWidthsExample";
 import layoutWidthsExampleSource from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/LayoutWidthsExample.tsx?raw";
+import ReadOnlyModeExample from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/ReadOnlyModeExample";
+import readOnlyModeExampleSource from "@/capabilities/forms/components/forms/VireoForm/internal/storybook/ReadOnlyModeExample.tsx?raw";
 import { useVireoForm } from "@/capabilities/forms/hooks/useVireoForm/useVireoForm";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { VireoFormProps } from "./VireoForm.types";
@@ -35,7 +37,7 @@ const meta = {
 
 ### Why it exists
 
-TanStack Form deliberately leaves rendering and application conventions to consumers. Vireo owns the recurring form-root plumbing so every form gets consistent submission, reset, invalid-field focus, theming, and optional unsaved-change behavior without hiding TanStack's native API. Obtain it from \`useVireoForm\` as \`form.Form\`; use a plain native form when none of these shared contracts are needed.`,
+TanStack Form deliberately leaves rendering and application conventions to consumers. Vireo owns the recurring form-root plumbing so every form gets consistent submission, reset, invalid-field focus, theming, optional unsaved-change behavior, and an inherited read-only display mode without hiding TanStack's native API. Obtain it from \`useVireoForm\` as \`form.Form\`; use a plain native form when none of these shared contracts are needed.`,
       },
     },
   },
@@ -57,4 +59,9 @@ export const Default: Story = {
 export const LayoutWidths: Story = {
   render: () => <LayoutWidthsExample />,
   parameters: createSourceParameters(layoutWidthsExampleSource),
+};
+
+export const ReadOnlyMode: Story = {
+  render: () => <ReadOnlyModeExample />,
+  parameters: createSourceParameters(readOnlyModeExampleSource),
 };

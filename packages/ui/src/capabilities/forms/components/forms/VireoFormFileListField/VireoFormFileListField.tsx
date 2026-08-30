@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import {
@@ -272,6 +273,8 @@ export const VireoFormFileListField = React.forwardRef<HTMLDivElement, VireoForm
       onFileRemoved,
       previewRenderer: PreviewRenderer,
       readOnly = false,
+      readOnlyEmptyValue,
+      renderReadOnlyValue,
       removeFileLabel = (file: File) => `Remove ${file.name}`,
       reorderAnnouncement = (file: File, _previousIndex: number, nextIndex: number, count: number) =>
         `Moved ${file.name} to position ${nextIndex + 1} of ${count}.`,
@@ -300,6 +303,7 @@ export const VireoFormFileListField = React.forwardRef<HTMLDivElement, VireoForm
       value: current.value,
     }));
     const submitting = useStore(field.form.store, current => current.isSubmitting);
+    const effectiveReadOnly = formContext.readOnly || readOnly;
     const files = React.useMemo(
       () =>
         Array.isArray(fieldState.value)
@@ -351,7 +355,7 @@ export const VireoFormFileListField = React.forwardRef<HTMLDivElement, VireoForm
       maxFiles: normalizedMaxFiles,
       maxTotalSize: normalizedMaxTotalSize,
       populated: files.length > 0,
-      readOnly,
+      readOnly: effectiveReadOnly,
       rejected: rejections.length > 0,
       reordering: draggingIndex !== undefined,
       reorderable,
@@ -364,7 +368,7 @@ export const VireoFormFileListField = React.forwardRef<HTMLDivElement, VireoForm
     const classes = useUtilityClasses(ownerState, classesProp);
     const rowIds = useFileRowIds(files);
     const displayedNames = useDisplayedFileNames(files, rowIds, fileNameTruncation, hideFileSize);
-    const interactive = !disabled && !readOnly;
+    const interactive = !disabled && !effectiveReadOnly;
     const additionsEnabled = interactive && !capacityReached;
 
     React.useEffect(() => {
@@ -490,6 +494,23 @@ export const VireoFormFileListField = React.forwardRef<HTMLDivElement, VireoForm
       ],
     );
 
+    if (effectiveReadOnly) {
+      return (
+        <VireoFormReadOnlyValue
+          {...other}
+          {...rootSlotOther}
+          ref={rootRef}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          empty={files.length === 0}
+          emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
+        >
+          {renderReadOnlyValue?.(files) ?? files.map(file => file.name).join(", ")}
+        </VireoFormReadOnlyValue>
+      );
+    }
+
     const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = event => {
       inputSlotOnChange?.(event);
       if (!event.defaultPrevented && additionsEnabled) processFiles(Array.from(event.currentTarget.files ?? []));
@@ -587,7 +608,7 @@ export const VireoFormFileListField = React.forwardRef<HTMLDivElement, VireoForm
         ref={rootRef}
         ownerState={ownerState}
         aria-disabled={disabled || undefined}
-        aria-readonly={readOnly || undefined}
+        aria-readonly={effectiveReadOnly || undefined}
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         style={{ ...style, ...rootSlotStyle }}
         sx={mergeSx(sx, rootSlotSx)}

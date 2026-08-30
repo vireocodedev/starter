@@ -1,3 +1,4 @@
+import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
 import { useVireoTanStackFormContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { useOptionalVireoMultiStepContext } from "@/capabilities/forms/contexts/VireoMultiStepContext/VireoMultiStepContext";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -57,6 +58,7 @@ export const VireoFormSubmitButton = React.forwardRef<HTMLButtonElement, VireoFo
       ...other
     } = props;
     const form = useVireoTanStackFormContext();
+    const { readOnly } = useVireoFormContext();
     const submitting = useStore(form.store, current => current.isSubmitting);
     const multiStep = useOptionalVireoMultiStepContext();
     const multiStepState = React.useSyncExternalStore(
@@ -91,7 +93,7 @@ export const VireoFormSubmitButton = React.forwardRef<HTMLButtonElement, VireoFo
     void _rootSlotHref;
     void _rootSlotLoading;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
-    if (!available && visibility === "auto") return null;
+    if (readOnly || (!available && visibility === "auto")) return null;
 
     return (
       <VireoFormSubmitButtonRoot

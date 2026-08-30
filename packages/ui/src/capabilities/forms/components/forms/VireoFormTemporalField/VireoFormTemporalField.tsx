@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -201,6 +202,8 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
       pickerProps = {},
       precision = "minute",
       readOnly = false,
+      readOnlyEmptyValue,
+      renderReadOnlyValue,
       referenceValue,
       required = false,
       secondStep = 1,
@@ -222,6 +225,7 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
       value: current.value,
     }));
     const submitting = useStore(field.form.store, current => current.isSubmitting);
+    const effectiveReadOnly = formContext.readOnly || readOnly;
     const [draftValue, setDraftValue] = React.useState<Dayjs | null>(() => parseTemporalValue(mode, fieldState.value));
     const [draftError, setDraftError] = React.useState<string | null>(null);
     const pickerOpenRef = React.useRef(false);
@@ -277,8 +281,12 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
     const temporalError = draftError ?? canonicalError;
 
     React.useLayoutEffect(() => {
-      setTemporalFormError(field.form as unknown as TemporalErrorFormApi, field.name, temporalError);
-    }, [field, temporalError]);
+      setTemporalFormError(
+        field.form as unknown as TemporalErrorFormApi,
+        field.name,
+        effectiveReadOnly ? null : temporalError,
+      );
+    }, [effectiveReadOnly, field, temporalError]);
 
     const commitValue = React.useCallback(
       (candidate: Dayjs | null, pickerError?: VireoFormTemporalFieldPickerError) => {
@@ -358,7 +366,7 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
       hasValue: fieldState.value !== null,
       invalid,
       mode,
-      readOnly,
+      readOnly: effectiveReadOnly,
       submitting,
       touched: fieldState.touched,
       validating: fieldState.validating,
@@ -413,6 +421,28 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
         : variant === "standard"
           ? VireoFormTemporalFieldStandardInput
           : VireoFormTemporalFieldOutlinedInput);
+
+    if (effectiveReadOnly) {
+      const parsedValue = parseTemporalValue(mode, fieldState.value);
+      return (
+        <VireoFormReadOnlyValue
+          {...other}
+          {...rootSlotOther}
+          ref={rootRef}
+          aria-label={(htmlInputSlotOther as React.InputHTMLAttributes<HTMLInputElement>)["aria-label"]}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          empty={fieldState.value === null || parsedValue === null}
+          emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+          label={(advancedPickerProps as { label?: React.ReactNode }).label}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
+        >
+          {fieldState.value === null || parsedValue === null
+            ? null
+            : (renderReadOnlyValue?.(fieldState.value, parsedValue) ?? fieldState.value)}
+        </VireoFormReadOnlyValue>
+      );
+    }
 
     const handleChange = (nextValue: Dayjs | null, context: { validationError: VireoFormTemporalFieldPickerError }) => {
       setDraftValue(nextValue);
@@ -537,7 +567,7 @@ export const VireoFormTemporalField = React.forwardRef<HTMLDivElement, VireoForm
       onOpen: () => {
         pickerOpenRef.current = true;
       },
-      readOnly,
+      readOnly: effectiveReadOnly,
       referenceDate: referenceDate ?? undefined,
       slotProps: createPickerSlotProps(),
       slots: {

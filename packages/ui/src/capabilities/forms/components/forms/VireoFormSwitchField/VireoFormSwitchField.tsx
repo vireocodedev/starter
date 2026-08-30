@@ -1,4 +1,5 @@
 import { useVireoFormContext } from "@/capabilities/forms/contexts/VireoFormContext/VireoFormContext";
+import { VireoFormReadOnlyValue } from "@/capabilities/forms/components/data-display/VireoFormReadOnlyValue/VireoFormReadOnlyValue";
 import { useVireoFieldContext } from "@/capabilities/forms/contexts/VireoFormHookContexts/VireoFormHookContexts";
 import { formatFirstVireoFormError, shouldDisplayVireoFormError } from "@/capabilities/forms/utils/vireoFormErrors";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
@@ -34,6 +35,7 @@ function useUtilityClasses(ownerState: VireoFormSwitchFieldOwnerState, classes?:
         ownerState.validating && "validating",
         ownerState.submitting && "submitting",
         ownerState.disabled && "disabled",
+        ownerState.readOnly && "readOnly",
       ],
       formControlLabel: ["formControlLabel"],
       switch: ["switch"],
@@ -81,6 +83,9 @@ export const VireoFormSwitchField = React.forwardRef<HTMLDivElement, VireoFormSw
       labelPlacement = "end",
       onBlur,
       onChange,
+      readOnly = false,
+      readOnlyEmptyValue,
+      renderReadOnlyValue,
       required = false,
       slotProps = {},
       slots = {},
@@ -100,6 +105,7 @@ export const VireoFormSwitchField = React.forwardRef<HTMLDivElement, VireoFormSw
       value: current.value,
     }));
     const submitting = useStore(field.form.store, current => current.isSubmitting);
+    const effectiveReadOnly = formContext.readOnly || readOnly;
     const errorDisplay = errorDisplayProp ?? formContext.errorDisplay;
     const errorVisible =
       fieldState.invalid &&
@@ -116,6 +122,7 @@ export const VireoFormSwitchField = React.forwardRef<HTMLDivElement, VireoFormSw
       disabled,
       errorVisible,
       invalid: fieldState.invalid,
+      readOnly: effectiveReadOnly,
       submitting,
       touched: fieldState.touched,
       validating: fieldState.validating,
@@ -163,6 +170,26 @@ export const VireoFormSwitchField = React.forwardRef<HTMLDivElement, VireoFormSw
       switchSlotInputProps?.["aria-describedby"],
       effectiveHelperText !== undefined ? formHelperTextId : undefined,
     );
+
+    if (effectiveReadOnly) {
+      const empty = fieldState.value == null;
+      return (
+        <VireoFormReadOnlyValue
+          {...other}
+          {...rootSlotOther}
+          ref={rootRef}
+          aria-label={switchSlotInputProps?.["aria-label"]}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          empty={empty}
+          emptyValue={readOnlyEmptyValue ?? formContext.readOnlyEmptyValue}
+          label={label}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
+        >
+          {renderReadOnlyValue?.(fieldState.value) ?? (fieldState.value ? "Yes" : "No")}
+        </VireoFormReadOnlyValue>
+      );
+    }
 
     const handleChange: SwitchChangeHandler = (event, checked) => {
       const restoreCheckedValue = () => {

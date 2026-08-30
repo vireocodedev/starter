@@ -190,6 +190,8 @@ export type VireoFormSelectFieldOwnProps<
   /** Observes accepted option and clear changes after cancelable slot handlers. */
   onValueChange?: (value: TValue | null) => void;
   readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (value: TValue, option: TOption | undefined) => React.ReactNode;
   required?: boolean;
 };
 

@@ -27,6 +27,7 @@ export type VireoFormCheckboxFieldOwnerState = {
   disabled: boolean;
   errorVisible: boolean;
   invalid: boolean;
+  readOnly: boolean;
   submitting: boolean;
   touched: boolean;
   validating: boolean;
@@ -137,6 +138,9 @@ export type VireoFormCheckboxFieldOwnProps = VireoFormCheckboxFieldSlotsAndSlotP
   labelPlacement?: FormControlLabelProps["labelPlacement"];
   onBlur?: NonNullable<CheckboxProps["onBlur"]>;
   onChange?: NonNullable<CheckboxProps["onChange"]>;
+  readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (value: boolean) => React.ReactNode;
   required?: boolean;
 };
 

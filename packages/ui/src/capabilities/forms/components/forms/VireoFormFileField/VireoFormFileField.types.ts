@@ -159,6 +159,8 @@ export type VireoFormFileFieldOwnProps = VireoFormFileFieldSlotsAndSlotProps & {
   previewRenderer?: VireoFilePreviewRenderer;
   /** Prevents picker, drop, and clear changes while retaining normal presentation. */
   readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (file: File) => React.ReactNode;
   /** Content of the selection action while a value exists. @default 'Replace file' */
   replaceFileLabel?: React.ReactNode;
   /** Adds native required semantics; validation remains owned by TanStack Form or the supplied schema. */

@@ -128,6 +128,8 @@ export type VireoFormNumberFieldOwnProps = VireoFormNumberFieldSlotsAndSlotProps
   onBlur?: NonNullable<TextFieldProps["onBlur"]>;
   onChange?: NonNullable<TextFieldProps["onChange"]>;
   readOnly?: boolean;
+  readOnlyEmptyValue?: React.ReactNode;
+  renderReadOnlyValue?: (value: number) => React.ReactNode;
   required?: boolean;
 };
 
