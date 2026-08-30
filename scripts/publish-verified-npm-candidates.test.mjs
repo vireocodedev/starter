@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -38,7 +38,7 @@ function fixture() {
   writeFileSync(
     join(root, "release-manifest.json"),
     `${JSON.stringify({
-      schemaVersion: 1,
+      schemaVersion: 2,
       evidenceClass: "unsigned-release-candidate",
       source: { commit, clean: true },
       versions: { npm: Object.fromEntries(packages.map((name, index) => [name, `0.2.${index + 1}`])) },
@@ -57,6 +57,17 @@ test("binds every expected coordinate to unchanged candidate bytes from the exac
 
 test("rejects a candidate assembled for another commit", () => {
   assert.throws(() => verifyNpmCandidates(fixture(), "b".repeat(40)), /does not match/u);
+});
+
+test("accepts only the generated release-manifest schema", () => {
+  for (const schemaVersion of [1, 3]) {
+    const root = fixture();
+    const manifestPath = join(root, "release-manifest.json");
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    manifest.schemaVersion = schemaVersion;
+    writeFileSync(manifestPath, `${JSON.stringify(manifest)}\n`);
+    assert.throws(() => verifyNpmCandidates(root, commit), /Unsupported release candidate manifest/u);
+  }
 });
 
 test("rejects candidate bytes changed after verification", () => {

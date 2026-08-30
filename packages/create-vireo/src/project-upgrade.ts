@@ -71,6 +71,13 @@ export class VireoUpgradeError extends Error {
 }
 
 const policyUrl = new URL("../schema/vireo-upgrade-policy.json", import.meta.url);
+const managedSurfaces = [
+  "package.json#scripts.vireo",
+  "frontend/package.json#dependencies",
+  'frontend/package-lock.json#packages[""].dependencies',
+  "gradle.properties#starterVersion",
+  ".vireo/project.json#templateCommit,lastUpgradedBy,lastUpgrade",
+] as const;
 
 async function readJson<T>(path: string): Promise<T> {
   try {
@@ -188,6 +195,7 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
   const expected = alreadyTarget ? policy.target : source!;
   if (!alreadyTarget)
     assertEqual(metadata.templateCommit, source!.templateCommit, "source Template commit", "VIR-UPG-002");
+  else assertEqual(metadata.templateCommit, policy.targetTemplateCommit, "target Template commit", "VIR-UPG-002");
   assertEqual(rootManifest.scripts?.vireo, expected.rootVireoScript, "package.json scripts.vireo");
   const starterVersion = /^starterVersion=(.+)$/mu.exec(gradleProperties)?.[1];
   assertEqual(starterVersion, expected.starterJvmVersion, "gradle.properties starterVersion");
@@ -212,13 +220,35 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
     ...targetRootManifest.scripts,
     vireo: policy.target.rootVireoScript,
   };
+  const targetFrontendManifest = structuredClone(frontendManifest);
+  targetFrontendManifest.dependencies = {
+    ...targetFrontendManifest.dependencies,
+    ...policy.target.frontendDependencies,
+  };
+  const targetFrontendLock = structuredClone(frontendLock);
+  targetFrontendLock.packages = {
+    ...targetFrontendLock.packages,
+    "": {
+      ...targetFrontendLock.packages?.[""],
+      dependencies: {
+        ...targetFrontendLock.packages?.[""]?.dependencies,
+        ...policy.target.frontendDependencies,
+      },
+    },
+  };
+  const targetGradleProperties = gradleProperties.replace(
+    /^starterVersion=.+$/mu,
+    `starterVersion=${policy.target.starterJvmVersion}`,
+  );
   const targetMetadata = structuredClone(metadata);
+  targetMetadata.templateCommit = policy.targetTemplateCommit;
   targetMetadata.lastUpgradedBy = `create-vireo@${policy.targetRelease}`;
   if (!alreadyTarget)
     targetMetadata.lastUpgrade = {
       schemaVersion: 1,
       from: recordedRelease,
       to: policy.targetRelease,
+      sourceTemplateCommit: metadata.templateCommit,
       targetTemplateCommit: policy.targetTemplateCommit,
       applicationOwnedTemplateChanges: "manual-review-required",
     };
@@ -229,6 +259,12 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
   const originalSourceRelease = alreadyTarget ? previousUpgrade?.from : recordedRelease;
   if (typeof originalSourceRelease !== "string")
     throw new VireoUpgradeError("VIR-UPG-002", "Target-version metadata is missing its source release record.");
+  const originalSourceTemplateCommit =
+    alreadyTarget && typeof previousUpgrade?.sourceTemplateCommit === "string"
+      ? previousUpgrade.sourceTemplateCommit
+      : metadata.templateCommit;
+  if (typeof originalSourceTemplateCommit !== "string")
+    throw new VireoUpgradeError("VIR-UPG-002", "Target-version metadata is missing its source Template commit record.");
   const recordPath = join(
     projectDirectory,
     ".vireo",
@@ -238,9 +274,9 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
     schemaVersion: 1,
     from: originalSourceRelease,
     to: policy.targetRelease,
-    sourceTemplateCommit: metadata.templateCommit,
+    sourceTemplateCommit: originalSourceTemplateCommit,
     targetTemplateCommit: policy.targetTemplateCommit,
-    managedSurfaces: ["package.json#scripts.vireo", ".vireo/project.json"],
+    managedSurfaces,
     applicationOwnedTemplateChanges: "manual-review-required",
   };
   const recordContents = `${JSON.stringify(record, null, 2)}\n`;
@@ -261,6 +297,17 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
       contents: `${JSON.stringify(targetRootManifest, null, 2)}\n`,
       previous: rootManifestText,
     },
+    {
+      path: frontendManifestPath,
+      contents: `${JSON.stringify(targetFrontendManifest, null, 2)}\n`,
+      previous: frontendManifestText,
+    },
+    {
+      path: frontendLockPath,
+      contents: `${JSON.stringify(targetFrontendLock, null, 2)}\n`,
+      previous: frontendLockText,
+    },
+    { path: gradlePropertiesPath, contents: targetGradleProperties, previous: gradleProperties },
     { path: metadataPath, contents: `${JSON.stringify(targetMetadata, null, 2)}\n`, previous: metadataText },
     { path: recordPath, contents: recordContents, previous: priorRecord },
   ];
@@ -280,7 +327,7 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
   );
   const manualActions = [
     `Review and selectively port application-owned changes from Template ${metadata.templateCommit} to ${policy.targetTemplateCommit}.`,
-    "Review package changelogs, refresh lockfiles if declarations change, and run setup plus the full verification gate.",
+    "Review package changelogs, refresh resolved lockfile entries after the managed declaration update, and run setup plus the full verification gate.",
     "Rehearse database, deployment order, and rollback in the application-owned target environment.",
   ];
   const checks: VireoUpgradeCheck[] = [

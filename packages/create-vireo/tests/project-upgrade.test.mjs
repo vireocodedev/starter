@@ -14,6 +14,15 @@ const dependencies = {
   "@vireocodedev/shell": "^0.2.1",
   "@vireocodedev/ui": "^0.2.1",
 };
+const targetDependencies = {
+  "@vireocodedev/history": "^0.2.2",
+  "@vireocodedev/infrastructure": "^0.2.2",
+  "@vireocodedev/localization": "^0.2.2",
+  "@vireocodedev/query": "^0.2.2",
+  "@vireocodedev/shell": "^0.2.2",
+  "@vireocodedev/ui": "^0.3.0",
+};
+const targetCommit = "26f21c0fe3203f2b91a74fa75b29056ad028b42d";
 
 async function fixture() {
   const root = await mkdtemp(join(tmpdir(), "vireo-upgrade-test-"));
@@ -26,12 +35,15 @@ async function fixture() {
   );
   await writeFile(
     join(root, "package.json"),
-    `${JSON.stringify({ scripts: { vireo: "npx --yes --package=create-vireo@0.2.0 vireo" } }, null, 2)}\n`,
+    `${JSON.stringify({ scripts: { vireo: "npx --yes --package=create-vireo@0.2.0 vireo", test: "node --test" } }, null, 2)}\n`,
   );
-  await writeFile(join(root, "frontend/package.json"), `${JSON.stringify({ dependencies }, null, 2)}\n`);
+  await writeFile(
+    join(root, "frontend/package.json"),
+    `${JSON.stringify({ dependencies: { ...dependencies, react: "^19.0.0" } }, null, 2)}\n`,
+  );
   await writeFile(
     join(root, "frontend/package-lock.json"),
-    `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies } } }, null, 2)}\n`,
+    `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies: { ...dependencies, react: "^19.0.0" } } } }, null, 2)}\n`,
   );
   await writeFile(join(root, "gradle.properties"), "starterVersion=0.2.0\n");
   await writeFile(join(root, "src/main/resources/db/migration/V1__baseline.sql"), "SELECT 1;\n");
@@ -41,11 +53,30 @@ async function fixture() {
 test("0.2.0 to 0.3.0 is dry-run-first, explicit, and idempotent", async () => {
   const root = await fixture();
   try {
-    const before = await readFile(join(root, "package.json"), "utf8");
+    const managedInputPaths = [
+      ".vireo/project.json",
+      "package.json",
+      "frontend/package.json",
+      "frontend/package-lock.json",
+      "gradle.properties",
+    ];
+    const before = {};
+    for (const path of managedInputPaths) before[path] = await readFile(join(root, path), "utf8");
     const dryRun = await upgradeVireoProject({ projectDirectory: root, targetRelease: "0.3.0" });
     assert.equal(dryRun.dryRun, true);
     assert.equal(dryRun.checks.find(check => check.id === "application-owned").status, "manual");
-    assert.equal(await readFile(join(root, "package.json"), "utf8"), before);
+    assert.deepEqual(
+      dryRun.files.map(file => file.path),
+      [
+        "package.json",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "gradle.properties",
+        ".vireo/project.json",
+        ".vireo/upgrade-0.2.0-to-0.3.0.json",
+      ],
+    );
+    for (const path of managedInputPaths) assert.equal(await readFile(join(root, path), "utf8"), before[path]);
 
     await assert.rejects(
       upgradeVireoProject({ projectDirectory: root, targetRelease: "0.3.0", dryRun: false }),
@@ -58,10 +89,37 @@ test("0.2.0 to 0.3.0 is dry-run-first, explicit, and idempotent", async () => {
       acceptApplicationOwned: true,
     });
     assert.equal(applied.dryRun, false);
-    assert.match(await readFile(join(root, "package.json"), "utf8"), /create-vireo@0\.3\.0/u);
+    const rootManifest = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+    assert.equal(rootManifest.scripts.vireo, "npx --yes --package=create-vireo@0.5.0 vireo");
+    assert.equal(rootManifest.scripts.test, "node --test");
+    const frontendManifest = JSON.parse(await readFile(join(root, "frontend/package.json"), "utf8"));
+    assert.deepEqual(
+      Object.fromEntries(Object.keys(targetDependencies).map(name => [name, frontendManifest.dependencies[name]])),
+      targetDependencies,
+    );
+    assert.equal(frontendManifest.dependencies.react, "^19.0.0");
+    const frontendLock = JSON.parse(await readFile(join(root, "frontend/package-lock.json"), "utf8"));
+    assert.deepEqual(
+      Object.fromEntries(
+        Object.keys(targetDependencies).map(name => [name, frontendLock.packages[""].dependencies[name]]),
+      ),
+      targetDependencies,
+    );
+    assert.equal(frontendLock.packages[""].dependencies.react, "^19.0.0");
+    assert.equal(await readFile(join(root, "gradle.properties"), "utf8"), "starterVersion=0.3.0\n");
     const metadata = JSON.parse(await readFile(join(root, ".vireo/project.json"), "utf8"));
     assert.equal(metadata.createdBy, "create-vireo@0.2.0");
+    assert.equal(metadata.templateCommit, targetCommit);
     assert.equal(metadata.lastUpgradedBy, "create-vireo@0.3.0");
+    assert.equal(metadata.lastUpgrade.sourceTemplateCommit, sourceCommit);
+    const record = JSON.parse(await readFile(join(root, ".vireo/upgrade-0.2.0-to-0.3.0.json"), "utf8"));
+    assert.deepEqual(record.managedSurfaces, [
+      "package.json#scripts.vireo",
+      "frontend/package.json#dependencies",
+      'frontend/package-lock.json#packages[""].dependencies',
+      "gradle.properties#starterVersion",
+      ".vireo/project.json#templateCommit,lastUpgradedBy,lastUpgrade",
+    ]);
     const repeated = await upgradeVireoProject({ projectDirectory: root, targetRelease: "0.3.0" });
     assert.ok(repeated.files.every(file => file.status === "unchanged"));
   } finally {

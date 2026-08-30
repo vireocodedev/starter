@@ -28,7 +28,7 @@ export function verifyNpmCandidates(evidenceRoot, expectedCommit) {
   if (!existsSync(manifestPath)) throw new Error(`Missing release candidate manifest: ${manifestPath}`);
 
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-  if (manifest.schemaVersion !== 1 || manifest.evidenceClass !== "unsigned-release-candidate") {
+  if (manifest.schemaVersion !== 2 || manifest.evidenceClass !== "unsigned-release-candidate") {
     throw new Error("Unsupported release candidate manifest");
   }
   if (!/^[0-9a-f]{40}$/u.test(expectedCommit) || manifest.source?.commit !== expectedCommit) {

@@ -463,7 +463,7 @@ globalThis.__vireoTemporalLocalizationProvider = VireoTemporalLocalizationProvid
     "The clean install resolved a valid dependency tree and compiled every entry point with skipLibCheck disabled.",
   );
   console.log("Source-map publication and portable source paths match the reviewed package policy.");
-  console.log("npm supplied a content integrity digest for every tarball.");
+  console.log("A locally computed and recorded content-integrity digest covers every tarball.");
 } finally {
   rmSync(auditRoot, { recursive: true, force: true });
 }

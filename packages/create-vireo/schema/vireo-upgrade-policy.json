@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "targetRelease": "0.3.0",
-  "targetTemplateCommit": "dd9c25405decf881ab2f39b2248ac136ab0499d2",
+  "targetTemplateCommit": "26f21c0fe3203f2b91a74fa75b29056ad028b42d",
   "target": {
-    "rootVireoScript": "npx --yes --package=create-vireo@0.3.0 vireo",
-    "starterJvmVersion": "0.2.0",
+    "rootVireoScript": "npx --yes --package=create-vireo@0.5.0 vireo",
+    "starterJvmVersion": "0.3.0",
     "frontendDependencies": {
-      "@vireocodedev/history": "^0.2.1",
-      "@vireocodedev/infrastructure": "^0.2.1",
-      "@vireocodedev/localization": "^0.2.1",
-      "@vireocodedev/query": "^0.2.1",
-      "@vireocodedev/shell": "^0.2.1",
-      "@vireocodedev/ui": "^0.2.1"
+      "@vireocodedev/history": "^0.2.2",
+      "@vireocodedev/infrastructure": "^0.2.2",
+      "@vireocodedev/localization": "^0.2.2",
+      "@vireocodedev/query": "^0.2.2",
+      "@vireocodedev/shell": "^0.2.2",
+      "@vireocodedev/ui": "^0.3.0"
     }
   },
   "supportedSources": [
