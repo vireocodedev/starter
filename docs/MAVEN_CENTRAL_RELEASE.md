@@ -1,8 +1,10 @@
 # Maven Central release
 
-Vireo JVM releases use a two-step, user-managed Central Portal deployment. The
-automation may upload and validate a release candidate, but only a human can
-make the immutable publication decision.
+Vireo JVM releases use a two-step Central Portal deployment. The protected
+workflow always uploads a `USER_MANAGED` candidate and validates it before any
+publication. Staging is the default; an explicitly selected protected run may
+promote that same validated deployment after it verifies its identity and exact
+six-artifact package URL set.
 
 ## One-time controls
 
@@ -37,10 +39,11 @@ Central's current requirements and Publisher API are documented in its
 4. Merge the reviewed version change to `main`. Maven Central releases are
    immutable; never reuse a version, even after a failed or incorrect release.
 
-## Stage and validate
+## Stage, validate, and optionally publish
 
 From GitHub Actions, run **Stage Maven Central release** on `main` and enter the
-exact version. The protected job:
+exact version. Leave **Publish the validated deployment** unchecked to stage
+only. The protected job:
 
 1. rejects a mismatched or already-public version;
 2. repeats the JVM and isolated-consumer gates;
@@ -52,19 +55,33 @@ exact version. The protected job:
 7. waits until Central reports `VALIDATED` or fails with Central's diagnostics.
 
 The workflow deliberately has read-only GitHub permissions. Successful CI means
-the deployment is valid and waiting; it does not mean it is public.
+the deployment is valid and waiting; it does not mean it is public when
+stage-only mode was selected.
+
+To request publication, dispatch the same workflow with **Publish the validated
+deployment** checked. After validation, it re-reads Central status and requires:
+
+- the requested and reported UUID to match;
+- `VALIDATED` state;
+- the requested non-SNAPSHOT version; and
+- exactly the six expected `pkg:maven/com.vireocode/vireo-*` package URLs at
+  that version, with no extras.
+
+Only then does it send the authenticated Central `publish` request, accepts only
+HTTP `204`, and waits until Central reports `PUBLISHED`. The upload remains
+`USER_MANAGED`; the opt-in promotion is a separate, auditable protected action.
 
 ## Publish and prove consumption
 
-1. Open [Central Portal deployments](https://central.sonatype.com/publishing/deployments).
-2. Inspect the deployment ID recorded in the workflow summary, its coordinates,
-   validation result, and file set.
-3. Click **Publish** only when the candidate is correct. Drop it instead if there
-   is any doubt.
-4. After Central reports `PUBLISHED`, run **Verify Maven Central release** with
+1. For a stage-only run, open [Central Portal deployments](https://central.sonatype.com/publishing/deployments),
+   inspect the deployment ID, coordinates, validation result, and file set, then
+   publish or drop it deliberately in the Portal.
+2. For an opt-in publication run, inspect the workflow summary and confirm
+   Central reported `PUBLISHED` for the recorded deployment ID.
+3. After Central reports `PUBLISHED`, run **Verify Maven Central release** with
    the same version. It waits for all six POMs, then resolves the BOM and every
    versionless module anonymously with a fresh Gradle home.
-5. Create the signed or protected `jvm-v<version>` tag only after this public
+4. Create the signed or protected `jvm-v<version>` tag only after this public
    consumer proof succeeds.
 
 The template's ordinary Gradle build uses only `mavenCentral()` and must remain
@@ -78,6 +95,9 @@ way to substitute Maven Local during coordinated development.
 - A `FAILED` or incorrect user-managed deployment should remain available while
   diagnosing it, then be dropped in Central Portal.
 - A `VALIDATED` deployment is still reversible: drop it instead of publishing.
+- An opt-in publication run fails closed unless Central returns the exact UUID,
+  versioned six-artifact package URL set, and HTTP `204` promotion response. It
+  never retries a rejected or ambiguous promotion request automatically.
 - A `PUBLISHED` version cannot be replaced or deleted through the release flow.
   Correct it with a new version and document the superseded release.
 - If a token or signing secret appears in logs or source, stop the release,

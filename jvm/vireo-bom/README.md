@@ -65,4 +65,11 @@ All Vireo JVM artifacts intentionally share one version. Upgrade the BOM and the
 
 `./gradlew :vireo-bom:check` verifies both the declared Gradle platform model and the generated Maven BOM. The gate fails if an aligned module is missing or extra, a coordinate or version drifts, the Spring Boot import changes unexpectedly, or Maven publication stops producing a real BOM.
 
-The repository's release workflow stages one signed, user-managed Maven Central deployment. After manual publication, a separate workflow resolves the public BOM and every versionless module from Maven Central with a cold Gradle cache. See the unified Vireo Starter Storybook under **JVM → BOM** for consumption and release guidance.
+The repository's protected release workflow stages one signed, `USER_MANAGED`
+Maven Central deployment by default. An explicit opt-in input may promote only
+that validated deployment after it verifies the UUID and exact six-artifact
+package-URL set; stage-only releases remain available for Portal review. After
+Central reports publication, a separate workflow resolves the public BOM and
+every versionless module from Maven Central with a cold Gradle cache. See the
+unified Vireo Starter Storybook under **JVM → BOM** for consumption and release
+guidance.

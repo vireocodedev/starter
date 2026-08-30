@@ -7,6 +7,11 @@ on:
         description: Exact JVM version from jvm/gradle.properties
         required: true
         type: string
+      publish:
+        description: Publish the validated deployment to Maven Central (defaults to staging only)
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: maven-central-${{ inputs.version }}
@@ -16,10 +21,13 @@ permissions: {}
 
 jobs:
   stage:
-    name: Verify, sign, and stage ${{ inputs.version }}
+    name: Verify, sign, and release ${{ inputs.version }}
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    # A Central validation and post-publish visibility transition may each take
+    # up to twenty minutes. Keep the protected job alive long enough to prove
+    # the requested publication rather than leaving an ambiguous handoff.
+    timeout-minutes: 65
     environment: maven-central
     permissions:
       contents: read
@@ -92,17 +100,33 @@ jobs:
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
         run: ./scripts/wait-central-validation.sh "${{ steps.central.outputs.deployment-id }}"
 
-      - name: Record the manual publication handoff
+      - name: Publish the validated Central deployment
+        if: inputs.publish
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: ./scripts/publish-central-deployment.sh "${{ steps.central.outputs.deployment-id }}" "${{ steps.bundle.outputs.version }}"
+
+      - name: Record the Central publication state
         env:
           VERSION: ${{ steps.bundle.outputs.version }}
           DEPLOYMENT_ID: ${{ steps.central.outputs.deployment-id }}
+          PUBLISH_REQUESTED: ${{ inputs.publish }}
         run: |
           {
-            echo "## Maven Central deployment validated"
+            echo "## Maven Central deployment"
             echo
             echo "- Version: \`$VERSION\`"
             echo "- Deployment: \`$DEPLOYMENT_ID\`"
-            echo "- Publication mode: \`USER_MANAGED\`"
+            echo "- Upload mode: \`USER_MANAGED\`"
             echo
-            echo "Review and publish it from https://central.sonatype.com/publishing/deployments"
+            if [[ "$PUBLISH_REQUESTED" == "true" ]]; then
+              echo "- Publication mode: \`PUBLISHED_AFTER_VALIDATION\`"
+              echo
+              echo "Central confirmed this exact deployment is published. Run **Verify Maven Central release** with \`$VERSION\` to prove anonymous consumption."
+            else
+              echo "- Publication mode: \`STAGE_ONLY\`"
+              echo
+              echo "Review and publish it from https://central.sonatype.com/publishing/deployments, then run **Verify Maven Central release** with \`$VERSION\`."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

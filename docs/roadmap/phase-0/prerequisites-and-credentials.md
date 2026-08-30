@@ -36,17 +36,17 @@ applicable. Broader host/device evidence remains tracked by G-112.
 
 ## Credential matrix
 
-| Workflow                          | Credential today                                    | Why                                                                                                         | Desired public state                                  |
-| --------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Clone either repository           | None                                                | Both repositories are public.                                                                               | Keep public source anonymously cloneable.             |
-| Contributor `npm ci` in Starter   | None in the audited checkout                        | Workspace dependencies resolve locally. Existing docs incorrectly imply a package token is always required. | No credential.                                        |
-| Starter JVM build                 | None for repository modules                         | All modules resolve inside the included build.                                                              | No credential.                                        |
-| Starter Template frontend install | None                                                | Six consumed Vireo packages resolve anonymously from public npm.                                            | Keep public npm consumption tokenless.                |
-| Starter Template JVM build        | None                                                | Vireo artifacts and BOM resolve anonymously from Maven Central.                                             | Keep Maven Central consumption tokenless.             |
-| CI consumption of Vireo packages  | None                                                | Both ecosystems use public registries.                                                                      | No long-lived read token.                             |
-| Publish npm artifacts             | Protected GitHub OIDC identity                      | npm trusted publishing records provenance; ordinary builds receive no publish identity.                     | Maintainer-only, short-lived, least privilege.        |
-| Publish Maven artifacts           | Protected Central credentials and in-memory PGP key | User-managed Central deployment signs the immutable artifact family.                                        | Maintainer-only, environment-scoped, least privilege. |
-| GitHub administration             | Maintainer repository/org permissions               | Repository metadata, visibility, topics, security, releases, and branch protection.                         | Maintainer-only; adopters need none.                  |
+| Workflow                          | Credential today                                    | Why                                                                                                          | Desired public state                                  |
+| --------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| Clone either repository           | None                                                | Both repositories are public.                                                                                | Keep public source anonymously cloneable.             |
+| Contributor `npm ci` in Starter   | None in the audited checkout                        | Workspace dependencies resolve locally. Existing docs incorrectly imply a package token is always required.  | No credential.                                        |
+| Starter JVM build                 | None for repository modules                         | All modules resolve inside the included build.                                                               | No credential.                                        |
+| Starter Template frontend install | None                                                | Six consumed Vireo packages resolve anonymously from public npm.                                             | Keep public npm consumption tokenless.                |
+| Starter Template JVM build        | None                                                | Vireo artifacts and BOM resolve anonymously from Maven Central.                                              | Keep Maven Central consumption tokenless.             |
+| CI consumption of Vireo packages  | None                                                | Both ecosystems use public registries.                                                                       | No long-lived read token.                             |
+| Publish npm artifacts             | Protected GitHub OIDC identity                      | npm trusted publishing records provenance; ordinary builds receive no publish identity.                      | Maintainer-only, short-lived, least privilege.        |
+| Publish Maven artifacts           | Protected Central credentials and in-memory PGP key | A protected workflow signs, stages, and optionally promotes one validated `USER_MANAGED` Central deployment. | Maintainer-only, environment-scoped, least privilege. |
+| GitHub administration             | Maintainer repository/org permissions               | Repository metadata, visibility, topics, security, releases, and branch protection.                          | Maintainer-only; adopters need none.                  |
 
 The original empty-cache failures without GitHub Packages credentials are retained
 as historical evidence of the former blocker. The 2026-08-27 public-registry runs
@@ -61,7 +61,9 @@ supersede them and pass without a token.
 - The protected `maven-central` environment owns the four release-only secrets:
   Central username/password and in-memory signing key/passphrase.
 - Release automation has read-only GitHub permissions, produces and verifies one
-  signed atomic bundle, and uploads it as `USER_MANAGED`.
+  signed atomic bundle, and uploads it as `USER_MANAGED`. Staging is the default;
+  an explicit protected workflow input can promote only the same validated UUID
+  after exact six-artifact package-URL verification.
 - The `0.2.0` Central publication and cold public-registry consumer run are complete.
 
 ### Post-baseline npm activation — 2026-08-27
