@@ -2,9 +2,29 @@
 
 ## Executive assessment
 
-Vireo has an unusually strong component-authoring architecture: all 70 first-class components satisfy the canonical eight-file contract, the architecture ledger covers 1,058 files with no legacy exceptions, and the unit/type baselines are green. The system is structurally disciplined, but it is not yet at a premium reusable-product quality bar because visual foundations remain Storybook-private, accessibility debt is explicitly waived in stable stories, and alternate visual-mode coverage reaches only a small representative subset.
+At audit entry, Vireo had an unusually strong component-authoring architecture: all 70 first-class components satisfied the canonical eight-file contract, the architecture ledger had no legacy exceptions, and the unit/type baselines were green. The system was structurally disciplined, but it was not yet at a premium reusable-product quality bar because visual foundations remained Storybook-private, accessibility debt was explicitly waived in stable stories, and alternate visual-mode coverage reached only a small representative subset.
 
-The highest-leverage work is therefore systemic rather than cosmetic: establish a canonical consumer theme, close accessible-name and label/control relationships, make browser quality gates representative, and prevent public APIs from exposing components that are invalid outside their owning facade.
+The remediation therefore focused on systemic contracts rather than isolated cosmetics: a canonical consumer theme, accessible-name and label/control relationships, representative browser quality gates, interaction semantics, and facade-safe public APIs.
+
+## Final remediation result
+
+The source-level remediation selected from this audit is complete on `codex/ui-ux-system-hardening-2026-08-30`. The findings below remain as the historical evidence that drove the work; they no longer describe the branch's current implementation.
+
+- **Visual system:** `createVireoTheme` is public through `./theme`; light and dark schemes share semantic surface, border, focus, elevation, type, shape, and motion foundations. Storybook consumes the same implementation, consumer density remains inheritable, reduced motion is centralized, and filled controls use system colors in forced-colors mode.
+- **Accessibility and interaction:** overlays require accessible names; label boxes associate labels and helper text with controls; navigation is a named landmark with native links; canvas scrolling is non-trapping by default and has keyboard controls; live status, clipboard outcomes, target sizes, and cancellable event composition are covered by tests.
+- **Responsive verification:** the desktop-dark suite covers the full catalog. Eleven representative story modules also run in mobile dark, desktop light, reduced motion, RTL, forced colors, and mobile landscape modes. The matrix found and drove fixes for label forwarding, canvas assertions, pagination contrast, buttons, and chips.
+- **API and authoring integrity:** facade-only runtimes are no longer public, drag-and-drop roots follow the canonical module boundary, all component stories carry the required metadata, public surfaces are reconciled, and strict consumer compilation covers every published entry point.
+- **Debt governance:** the 45 pre-existing Storybook axe exemptions are now a reduction-only, owned, expiring ratchet. The branch does not represent those findings as resolved; it prevents silent growth and makes their remaining lifecycle explicit.
+
+Final automated evidence:
+
+- Unit tests: 116 files and 801 tests passing.
+- Architecture: 1,055 inventoried files, zero exact legacy exceptions; loading-state contracts passing.
+- Browser contracts: 321 desktop-dark tests plus 43 tests in each of six alternate modes, for 579 passing executions and one intentional skip.
+- UI package typecheck, build, and production Storybook build passing.
+- Documentation, API policy, public-surface snapshot, strict-consumer types, and release-impact checks passing; both affected release artifacts have an explicit decision.
+
+Manual VoiceOver/NVDA journeys, browser zoom review, and image-baseline curation remain release-validation activities. Automated axe, interaction, semantic, and mode contracts support those reviews but do not substitute for them.
 
 ## Evidence baseline
 
@@ -21,17 +41,11 @@ The worktree already contained a broad forms/read-only change. The audit treated
 
 ## Remediation status
 
-### Fixed in this audit
+The original three early fixes and the former critical-next-work items are all complete:
 
-1. `createDarkTheme` now preserves consumer spacing, breakpoints, shadows, z-index, direction, secondary palette, custom theme extensions, and CSS-variable configuration while regenerating dark-mode variable channels.
-2. Confirmation dialogs and responsive form overlays now connect their visible heading IDs to the rendered dialog, drawer, bottom-sheet, or docked-panel surface.
-3. `VireoBottomDrawer` now forwards standard accessible-name attributes to its actual modal paper rather than leaving them on a non-dialog wrapper.
-
-### Critical next work
-
-1. **Make responsive overlay naming misuse-resistant.** The raw frame now forwards `aria-label` and `aria-labelledby` correctly, but its public type should eventually require one accessible-name strategy. Coordinate that breaking pre-1.0 API change with all consumers.
-2. **Replace visual-only labelling with a control-association contract.** `VireoLabelBox` does not programmatically connect its label or helper text to a child control. The mobile responsive-table sort select is a verified unnamed control.
-3. **Publish a canonical Vireo consumer theme.** The recognizable palette, type family, and radius currently live only in the Storybook provider. Consumers following installation documentation receive ordinary MUI defaults rather than a coherent Vireo product language.
+1. `createDarkTheme` preserves consumer foundations while regenerating correct dark-mode CSS variables, and `createVireoTheme` now provides the canonical public foundation.
+2. Confirmation dialogs, responsive form overlays, bottom drawers, and raw responsive overlay frames expose stable accessible names on their actual rendered surfaces; raw frames require a naming strategy at the type boundary.
+3. `VireoLabelBox` owns a tested label/helper association contract, including correct native-input forwarding in its outlined-input examples, and responsive-table sort controls are named.
 
 ## Prioritized findings
 
