@@ -5,7 +5,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { publishVerifiedCandidates, verifyNpmCandidates } from "./publish-verified-npm-candidates.mjs";
+import {
+  inspectExistingTag,
+  publishVerifiedCandidates,
+  reconcileCandidateTags,
+  registryConfirmationSettings,
+  verifyNpmCandidates,
+} from "./publish-verified-npm-candidates.mjs";
 
 const commit = "a".repeat(40);
 const packages = [
@@ -52,6 +58,7 @@ test("binds every expected coordinate to unchanged candidate bytes from the exac
   const candidates = verifyNpmCandidates(fixture(), commit);
   assert.equal(candidates.length, 8);
   assert.equal(candidates[0].coordinate, "@vireocodedev/history@0.2.2");
+  assert.match(candidates[0].integrity, /^sha512-/u);
   assert.equal(candidates.at(-1).coordinate, "create-vireo@0.2.1");
 });
 
@@ -76,21 +83,275 @@ test("rejects candidate bytes changed after verification", () => {
   assert.throws(() => verifyNpmCandidates(root, commit), /changed after review/u);
 });
 
-test("publishes only missing immutable coordinates and reports the exact set", async () => {
-  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
-  const published = [];
-  const result = await publishVerifiedCandidates(candidates, {
-    fetchRegistry: async url => ({ ok: url.includes("history"), status: url.includes("history") ? 200 : 404 }),
-    publish: async candidate => published.push(candidate.coordinate),
+test("uses the established bounded npm visibility budget and rejects malformed environment overrides", () => {
+  assert.deepEqual(registryConfirmationSettings({}), { retryAttempts: 80, retryDelay: 15_000 });
+  assert.deepEqual(
+    registryConfirmationSettings({
+      NPM_CANDIDATE_CONFIRM_ATTEMPTS: "3",
+      NPM_CANDIDATE_CONFIRM_INTERVAL_MS: "25",
+    }),
+    { retryAttempts: 3, retryDelay: 25 },
+  );
+  assert.throws(
+    () => registryConfirmationSettings({ NPM_CANDIDATE_CONFIRM_ATTEMPTS: "zero" }),
+    /NPM_CANDIDATE_CONFIRM_ATTEMPTS must be a positive integer/u,
+  );
+  assert.throws(
+    () => registryConfirmationSettings({ NPM_CANDIDATE_CONFIRM_INTERVAL_MS: "0" }),
+    /NPM_CANDIDATE_CONFIRM_INTERVAL_MS must be a positive integer/u,
+  );
+});
+
+function gitFailure(status) {
+  return Object.assign(new Error(`git exited ${status}`), { status });
+}
+
+test("inspects only an exact annotated release tag ref before peeling it to a commit", () => {
+  const tag = "@vireocodedev/ui@0.2.8";
+  const calls = [];
+  const target = inspectExistingTag(tag, args => {
+    calls.push(args);
+    if (args[0] === "show-ref") return "";
+    if (args[0] === "cat-file") return "tag";
+    if (args[0] === "for-each-ref") return tag;
+    if (args[0] === "rev-parse") return commit;
+    assert.fail(`Unexpected git command: ${args.join(" ")}`);
   });
-  assert.deepEqual(result, ["@vireocodedev/infrastructure@0.2.3"]);
-  assert.deepEqual(published, result);
+  assert.equal(target, commit);
+  assert.deepEqual(calls, [
+    ["show-ref", "--verify", "--quiet", `refs/tags/${tag}`],
+    ["cat-file", "-t", `refs/tags/${tag}`],
+    ["for-each-ref", "--format=%(contents:subject)", `refs/tags/${tag}`],
+    ["rev-parse", "--verify", `refs/tags/${tag}^{commit}`],
+  ]);
+});
+
+test("treats only an exact absent tag as missing and rejects lightweight, malformed, or corrupt tags", () => {
+  const tag = "create-vireo@0.2.1";
+  assert.equal(
+    inspectExistingTag(tag, () => {
+      throw gitFailure(1);
+    }),
+    null,
+  );
+  assert.throws(
+    () =>
+      inspectExistingTag(tag, () => {
+        throw gitFailure(128);
+      }),
+    /Could not verify release tag ref/u,
+  );
+  assert.throws(
+    () =>
+      inspectExistingTag(tag, args => {
+        if (args[0] === "show-ref") return "";
+        if (args[0] === "cat-file") return "commit";
+        assert.fail(`Unexpected git command: ${args.join(" ")}`);
+      }),
+    /annotated tag object/u,
+  );
+  assert.throws(
+    () =>
+      inspectExistingTag(tag, args => {
+        if (args[0] === "show-ref") return "";
+        if (args[0] === "cat-file") return "tag";
+        if (args[0] === "for-each-ref") return tag;
+        if (args[0] === "rev-parse") throw gitFailure(128);
+        assert.fail(`Unexpected git command: ${args.join(" ")}`);
+      }),
+    /could not be peeled to a commit/u,
+  );
+});
+
+test("rejects an annotated tag with a non-coordinate message", () => {
+  const tag = "create-vireo@0.2.1";
+  assert.throws(
+    () =>
+      inspectExistingTag(tag, args => {
+        if (args[0] === "show-ref") return "";
+        if (args[0] === "cat-file") return "tag";
+        if (args[0] === "for-each-ref") return "wrong message";
+        assert.fail(`Unexpected git command: ${args.join(" ")}`);
+      }),
+    /annotation message/u,
+  );
+});
+
+function metadataResponse(candidate, overrides = {}) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      name: candidate.name,
+      version: candidate.version,
+      dist: { integrity: candidate.integrity },
+      ...overrides,
+    }),
+  };
+}
+
+function notFoundResponse() {
+  return { ok: false, status: 404 };
+}
+
+function candidateFromUrl(candidates, url) {
+  const candidate = candidates.find(({ name, version }) =>
+    url.endsWith(`/${encodeURIComponent(name)}/${encodeURIComponent(version)}`),
+  );
+  assert.ok(candidate, `Unexpected registry URL: ${url}`);
+  return candidate;
+}
+
+function tagOperations({ existingTags = new Map() } = {}) {
+  const created = [];
+  const logs = [];
+  return {
+    created,
+    logs,
+    options: {
+      resolveTag: async tag => existingTags.get(tag) ?? null,
+      createTag: async (...args) => created.push(args),
+      log: line => logs.push(line),
+    },
+  };
+}
+
+test("publishes a missing candidate, confirms its exact reviewed bytes, then creates its tag", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const published = [];
+  const tags = tagOperations();
+  let checks = 0;
+  const result = await publishVerifiedCandidates([candidate], {
+    expectedCommit: commit,
+    fetchRegistry: async () => (checks++ === 0 ? notFoundResponse() : metadataResponse(candidate)),
+    publish: async ({ coordinate }) => published.push(coordinate),
+    sleep: async () => assert.fail("registry confirmation should not need a retry"),
+    ...tags.options,
+  });
+  assert.deepEqual(result, [candidate.coordinate]);
+  assert.deepEqual(published, [candidate.coordinate]);
+  assert.deepEqual(tags.created, [[candidate.coordinate, candidate.coordinate, commit]]);
+  assert.deepEqual(tags.logs, [`New tag: ${candidate.coordinate}`]);
+});
+
+test("accepts an existing coordinate only when registry metadata matches the reviewed tarball", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, commit]]) });
+  const result = await publishVerifiedCandidates([candidate], {
+    expectedCommit: commit,
+    fetchRegistry: async () => metadataResponse(candidate),
+    publish: async () => assert.fail("exact existing candidate must not publish"),
+    ...tags.options,
+  });
+  assert.deepEqual(result, []);
+  assert.deepEqual(tags.created, []);
+  assert.deepEqual(tags.logs, []);
+});
+
+test("fails closed before publication or tagging when registry integrity differs", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations();
+  await assert.rejects(
+    publishVerifiedCandidates([candidate], {
+      expectedCommit: commit,
+      fetchRegistry: async () => metadataResponse(candidate, { dist: { integrity: "sha512-not-reviewed" } }),
+      publish: async () => assert.fail("mismatched registry candidate must not publish"),
+      ...tags.options,
+    }),
+    /does not match reviewed candidate bytes/u,
+  );
+  assert.deepEqual(tags.created, []);
+});
+
+test("retries registry propagation after publish and waits only between unresolved checks", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations();
+  const responses = [notFoundResponse(), notFoundResponse(), notFoundResponse(), metadataResponse(candidate)];
+  const sleeps = [];
+  await publishVerifiedCandidates([candidate], {
+    expectedCommit: commit,
+    fetchRegistry: async () => responses.shift(),
+    publish: async () => {},
+    retryAttempts: 3,
+    retryDelay: 25,
+    sleep: async delay => sleeps.push(delay),
+    ...tags.options,
+  });
+  assert.deepEqual(sleeps, [25, 25]);
+  assert.deepEqual(tags.created, [[candidate.coordinate, candidate.coordinate, commit]]);
+});
+
+test("defers every tag operation until all candidate registry confirmations succeed", async () => {
+  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
+  const tags = tagOperations();
+  let firstCandidateChecks = 0;
+  await assert.rejects(
+    publishVerifiedCandidates(candidates, {
+      expectedCommit: commit,
+      fetchRegistry: async url => {
+        const candidate = candidateFromUrl(candidates, url);
+        if (candidate === candidates[0])
+          return firstCandidateChecks++ === 0 ? notFoundResponse() : metadataResponse(candidate);
+        return { ok: false, status: 503 };
+      },
+      publish: async () => {},
+      sleep: async () => {},
+      ...tags.options,
+    }),
+    /HTTP 503/u,
+  );
+  assert.deepEqual(tags.created, []);
+  assert.deepEqual(tags.logs, []);
+});
+
+test("does not create any tags when a pre-existing tag peels to another commit", async () => {
+  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
+  const tags = tagOperations({ existingTags: new Map([[candidates[1].coordinate, "b".repeat(40)]]) });
+  await assert.rejects(
+    publishVerifiedCandidates(candidates, {
+      expectedCommit: commit,
+      fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+      publish: async () => assert.fail("existing candidates must not publish"),
+      ...tags.options,
+    }),
+    /not expected commit/u,
+  );
+  assert.deepEqual(tags.created, []);
+});
+
+test("recovers all registry-existing candidates by creating only missing tags", async () => {
+  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
+  const tags = tagOperations();
+  const result = await publishVerifiedCandidates(candidates, {
+    expectedCommit: commit,
+    fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+    publish: async () => assert.fail("existing candidates must not publish"),
+    ...tags.options,
+  });
+  assert.deepEqual(result, []);
+  assert.deepEqual(
+    tags.created,
+    candidates.map(candidate => [candidate.coordinate, candidate.coordinate, commit]),
+  );
+  assert.deepEqual(
+    tags.logs,
+    candidates.map(candidate => `New tag: ${candidate.coordinate}`),
+  );
+});
+
+test("keeps an exact duplicate without tags markers", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, commit]]) });
+  const created = await reconcileCandidateTags([candidate], commit, tags.options);
+  assert.deepEqual(created, []);
+  assert.deepEqual(tags.logs, []);
 });
 
 test("fails closed on registry errors before publishing", async () => {
-  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 1);
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
   await assert.rejects(
-    publishVerifiedCandidates(candidates, {
+    publishVerifiedCandidates([candidate], {
+      expectedCommit: commit,
       fetchRegistry: async () => ({ ok: false, status: 503 }),
       publish: async () => assert.fail("publish must not run"),
     }),

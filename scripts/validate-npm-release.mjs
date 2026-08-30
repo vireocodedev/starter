@@ -63,12 +63,12 @@ for (const manifest of manifests) {
   else throw new Error(`npm registry returned HTTP ${response.status} while checking ${coordinate}.`);
 }
 
-if (unpublished.length === 0) {
-  throw new Error("Every manifest version is already immutable on npm; there is nothing to publish.");
+if (unpublished.length > 0) {
+  console.log("Unpublished npm release candidates:");
+  for (const coordinate of unpublished) console.log(`  - ${coordinate}`);
+} else {
+  console.log("All manifest versions are already immutable on npm; continuing with exact-byte and tag recovery.");
 }
-
-console.log("Unpublished npm release candidates:");
-for (const coordinate of unpublished) console.log(`  - ${coordinate}`);
 if (alreadyPublished.length > 0) {
   console.log("Already-published workspace versions (Changesets will skip these):");
   for (const coordinate of alreadyPublished) console.log(`  - ${coordinate}`);
