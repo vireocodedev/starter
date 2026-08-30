@@ -233,6 +233,48 @@ async function renderPwaIdentity(path: string, identity: PwaIdentity) {
   await writeFile(path, source);
 }
 
+async function renderLegacyTemplateIdentity(root: string, identity: PwaIdentity) {
+  const replaceExactlyOnce = async (path: string, baseline: string, rendered: string) => {
+    const source = await readFile(path, "utf8");
+    const occurrences = source.split(baseline).length - 1;
+    if (occurrences !== 1) {
+      throw new Error(`Legacy Template identity must contain exactly one ${baseline}.`);
+    }
+    await writeFile(path, source.replace(baseline, rendered));
+  };
+
+  await replaceExactlyOnce(
+    join(root, "frontend", "vite.config.ts"),
+    'name: "Vireo Starter App"',
+    `name: ${JSON.stringify(identity.name)}`,
+  );
+  await replaceExactlyOnce(
+    join(root, "frontend", "vite.config.ts"),
+    'short_name: "Vireo"',
+    `short_name: ${JSON.stringify(identity.shortName)}`,
+  );
+  for (const locale of ["app.en.ts", "app.hr.ts"]) {
+    await replaceExactlyOnce(
+      join(root, "frontend", "src", "app", "ui", "localization", "resources", locale),
+      'name: "Vireo Starter"',
+      `name: ${JSON.stringify(identity.name)}`,
+    );
+  }
+}
+
+async function renderTemplateIdentity(root: string, identity: PwaIdentity) {
+  try {
+    await renderPwaIdentity(join(root, "frontend", "pwa-policy.mjs"), identity);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    // Release-pair upgrade fixtures intentionally materialize historical
+    // Templates that predate the shared PWA identity authority. Keep their
+    // original, strict identity contract readable without weakening the
+    // fail-closed checks for current Templates.
+    await renderLegacyTemplateIdentity(root, identity);
+  }
+}
+
 async function renameJavaPackage(root: string, javaPackage: string) {
   for (const sourceSet of ["main", "test"]) {
     const source = join(root, "src", sourceSet, "java", "com", "vireocode", "startertemplate");
@@ -568,7 +610,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     ]);
     const productName = displayName(projectName);
     await replaceTextFile(join(staging, "README.md"), [["# Vireo Starter Template", `# ${productName}`]]);
-    await renderPwaIdentity(join(staging, "frontend", "pwa-policy.mjs"), createPwaIdentity(projectName, productName));
+    await renderTemplateIdentity(staging, createPwaIdentity(projectName, productName));
     await renameJavaPackage(staging, javaPackage);
     if (profile === "frontend") await projectFrontendTemplate(staging, projectName, productName);
     else await pinGeneratedProjectCli(staging);

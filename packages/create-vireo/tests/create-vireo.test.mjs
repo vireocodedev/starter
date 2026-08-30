@@ -225,11 +225,59 @@ test("fails closed when the pinned template does not provide the PWA identity ba
   }
 });
 
-test("generator source uses the PWA identity renderer instead of obsolete Vite and locale substitutions", async () => {
+test("supports the strict identity baseline used by historical pre-policy templates", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-legacy-pwa-test-"));
+  try {
+    const template = await fixture(root);
+    await rm(join(template, "frontend/pwa-policy.mjs"));
+    await writeFile(
+      join(template, "frontend/vite.config.ts"),
+      'const manifest = { name: "Vireo Starter App", short_name: "Vireo" };\n',
+    );
+    for (const locale of ["app.en.ts", "app.hr.ts"]) {
+      await writeFile(
+        join(template, "frontend/src/app/ui/localization/resources", locale),
+        'export default { brand: { name: "Vireo Starter" } };\n',
+      );
+    }
+
+    const target = join(root, "supercalifragilistic-legacy-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+    assert.match(
+      await readFile(join(target, "frontend/vite.config.ts"), "utf8"),
+      /name: "Supercalifragilistic Legacy App"/u,
+    );
+    assert.match(await readFile(join(target, "frontend/vite.config.ts"), "utf8"), /short_name: "Supercalifra"/u);
+    for (const locale of ["app.en.ts", "app.hr.ts"]) {
+      assert.match(
+        await readFile(join(target, "frontend/src/app/ui/localization/resources", locale), "utf8"),
+        /name: "Supercalifragilistic Legacy App"/u,
+      );
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("fails closed when neither the current nor historical identity baseline exists", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-pwa-test-"));
+  try {
+    const template = await fixture(root);
+    await rm(join(template, "frontend/pwa-policy.mjs"));
+    await assert.rejects(
+      createVireo({ directory: join(root, "sample-app"), git: false, templateDirectory: template }),
+      /Legacy Template identity/u,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("generator source uses the current PWA identity renderer and isolates historical substitutions", async () => {
   const source = await readFile(new URL("../src/index.ts", import.meta.url), "utf8");
-  assert.match(source, /renderPwaIdentity\(\s*join\(staging, "frontend", "pwa-policy\.mjs"\)/u);
-  assert.doesNotMatch(source, /join\(staging, "frontend", "vite\.config\.ts"\)/u);
-  assert.doesNotMatch(source, /app\.en\.ts", "app\.hr\.ts/u);
+  assert.match(source, /renderPwaIdentity\(join\(root, "frontend", "pwa-policy\.mjs"\)/u);
+  assert.match(source, /async function renderLegacyTemplateIdentity/u);
+  assert.match(source, /await renderTemplateIdentity\(staging,/u);
 });
 
 test("dry run validates without writing", async () => {

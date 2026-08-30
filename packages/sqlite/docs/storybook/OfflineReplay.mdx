@@ -1,7 +1,9 @@
 import { Meta } from "@storybook/addon-docs/blocks";
 import { ExecutablePackageExample } from "@vireo-storybook/documentation";
 import { runOfflineReplayExample } from "../examples/offlineReplay.example";
+import { runOrderQuantityOfflineReplayExample } from "../examples/orderQuantityOfflineReplay.example";
 import offlineReplaySource from "../examples/offlineReplay.example.ts?raw";
+import orderQuantityOfflineReplaySource from "../examples/orderQuantityOfflineReplay.example.ts?raw";
 
 <Meta title="TypeScript/SQLite/Offline Replay" />
 
@@ -12,3 +14,9 @@ import offlineReplaySource from "../examples/offlineReplay.example.ts?raw";
 The application supplies the network call and domain cleanup. SQLite queue clients supply the remaining dependencies without coupling replay to an HTTP library.
 
 <ExecutablePackageExample run={runOfflineReplayExample} source={offlineReplaySource} />
+
+## Domain command contract
+
+Offline replay stays opt-in at the application boundary. This order-quantity example captures a UUID-addressed domain command and replays it with the same command identifier expected by the paired JVM handler. Applications still own admission, durable storage, idempotency, and conflict recovery.
+
+<ExecutablePackageExample run={runOrderQuantityOfflineReplayExample} source={orderQuantityOfflineReplaySource} />
