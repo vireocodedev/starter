@@ -55,7 +55,7 @@ export {
 
 export const TEMPLATE_COMMIT = "a24f9435d3f624fb1962c3d5c4e3457b69f5be28";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
-const CREATE_VIREO_PACKAGE_VERSION = "0.5.0";
+const CREATE_VIREO_PACKAGE_VERSION = "0.5.1";
 const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
 export type VireoDatabase = "postgresql" | "h2";

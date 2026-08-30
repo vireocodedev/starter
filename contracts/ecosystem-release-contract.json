@@ -22,9 +22,9 @@
     "thirdPartyLicenses": "contracts/third-party-license-policy.json"
   },
   "current": {
-    "id": "npm-0.5.0_jvm-0.3.0",
+    "id": "npm-0.5.1_jvm-0.3.0",
     "npm": [
-      { "name": "create-vireo", "version": "0.5.0", "role": "project-scaffolder" },
+      { "name": "create-vireo", "version": "0.5.1", "role": "project-scaffolder" },
       { "name": "@vireocodedev/history", "version": "0.2.2", "role": "history-domain" },
       { "name": "@vireocodedev/infrastructure", "version": "0.2.2", "role": "browser-infrastructure" },
       { "name": "@vireocodedev/localization", "version": "0.2.2", "role": "localization-resources" },
@@ -52,9 +52,9 @@
       {
         "id": "current-alpha",
         "status": "supported",
-        "release": "npm-0.5.0_jvm-0.3.0",
+        "release": "npm-0.5.1_jvm-0.3.0",
         "npm": {
-          "create-vireo": "0.5.0",
+          "create-vireo": "0.5.1",
           "@vireocodedev/history": "0.2.2",
           "@vireocodedev/infrastructure": "0.2.2",
           "@vireocodedev/localization": "0.2.2",
@@ -71,27 +71,15 @@
   "gates": {
     "fast": {
       "command": "corepack npm run verify -- silent",
-      "execution": {
-        "executable": "corepack",
-        "arguments": ["npm", "run", "verify", "--", "silent"]
-      },
+      "execution": { "executable": "corepack", "arguments": ["npm", "run", "verify", "--", "silent"] },
       "scope": "typescript-merge",
       "requiredTools": ["node", "npm"],
       "evidenceSubjects": ["npm-workspaces", "npm-license-inventory", "packed-consumers", "storybook-static"],
-      "hosted": [
-        {
-          "workflow": "ci.yml",
-          "job": "build",
-          "command": "corepack npm run gate:fast"
-        }
-      ]
+      "hosted": [{ "workflow": "ci.yml", "job": "build", "command": "corepack npm run gate:fast" }]
     },
     "full": {
       "command": "corepack npm run verify:all -- silent",
-      "execution": {
-        "executable": "corepack",
-        "arguments": ["npm", "run", "verify:all", "--", "silent"]
-      },
+      "execution": { "executable": "corepack", "arguments": ["npm", "run", "verify:all", "--", "silent"] },
       "scope": "ecosystem-local",
       "requiredTools": ["node", "npm", "java", "gradle"],
       "evidenceSubjects": [
@@ -108,10 +96,7 @@
     },
     "release": {
       "command": "sh scripts/verify-release-candidate.sh",
-      "execution": {
-        "executable": "sh",
-        "arguments": ["scripts/verify-release-candidate.sh"]
-      },
+      "execution": { "executable": "sh", "arguments": ["scripts/verify-release-candidate.sh"] },
       "scope": "packed-npm-candidates",
       "requiredTools": ["node", "npm", "java", "gradle"],
       "evidenceSubjects": [
@@ -121,13 +106,7 @@
         "third-party-license-inventory",
         "release-evidence"
       ],
-      "hosted": [
-        {
-          "workflow": "release-npm.yml",
-          "job": "verify",
-          "command": "corepack npm run gate:release"
-        }
-      ]
+      "hosted": [{ "workflow": "release-npm.yml", "job": "verify", "command": "corepack npm run gate:release" }]
     }
   },
   "channels": {
@@ -139,7 +118,7 @@
       "id": "0.3-alpha",
       "status": "active",
       "claim": "public-alpha",
-      "release": "npm-0.5.0_jvm-0.3.0",
+      "release": "npm-0.5.1_jvm-0.3.0",
       "eol": null,
       "compatibilityPolicy": "docs/COMPATIBILITY.md"
     }
