@@ -15,7 +15,7 @@ const source = (code: string) => ({ docs: { source: { code, language: "tsx", typ
 const meta = {
   title: "TypeScript/UI/Core/Data Display/VireoJsonViewer",
   component: VireoJsonViewer,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   args: {
     data: null,
     copyLabel: "Copy JSON to clipboard",

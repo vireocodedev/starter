@@ -16,7 +16,7 @@ function createSourceParameters(code: string) {
 const meta = {
   title: "TypeScript/UI/Core/Feedback/VireoLoadingRegion",
   component: VireoLoadingRegion,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
     controls: { disable: true },
     docs: {

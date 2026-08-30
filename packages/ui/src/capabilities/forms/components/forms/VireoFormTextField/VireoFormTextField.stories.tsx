@@ -23,7 +23,7 @@ function createSourceParameters(code: string, description?: string) {
 const meta = {
   title: "TypeScript/UI/Capabilities/Forms/Fields/VireoFormTextField",
   component: VireoFormTextField,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
     controls: { disable: true },
     docs: {

@@ -15,7 +15,7 @@ const source = (code: string) => ({ docs: { source: { code, language: "tsx", typ
 const meta = {
   title: "TypeScript/UI/Capabilities/Overlays/VireoBottomDrawer",
   component: VireoBottomDrawer,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   args: { open: false, onClose: fn(), children: null },
   parameters: {
     viewport: { defaultViewport: "mobile1" },

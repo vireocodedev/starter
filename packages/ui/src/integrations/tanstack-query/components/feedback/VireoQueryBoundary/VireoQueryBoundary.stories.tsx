@@ -25,7 +25,7 @@ const source = (code: string) => ({ docs: { source: { code, language: "tsx", typ
 const meta = {
   title: "TypeScript/UI/Integrations/TanStack Query/VireoQueryBoundary",
   component: VireoQueryBoundary,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   args: { children: null },
   parameters: {
     controls: { disable: true },

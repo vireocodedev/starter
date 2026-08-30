@@ -33,7 +33,7 @@ function createSourceParameters(code: string) {
 const meta = {
   title: "TypeScript/UI/Capabilities/Tables/VireoResponsiveTable",
   component: VireoResponsiveTable,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
     controls: { disable: true },
     docs: {

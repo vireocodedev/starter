@@ -5,7 +5,7 @@ import { VireoInfiniteCanvas } from "./VireoInfiniteCanvas";
 const meta = {
   title: "TypeScript/UI/Capabilities/Infinite Canvas/VireoInfiniteCanvas",
   component: VireoInfiniteCanvas,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
     controls: { disable: true },
     docs: {

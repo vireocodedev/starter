@@ -5,7 +5,7 @@ import { VireoPage } from "./VireoPage";
 const meta = {
   title: "TypeScript/UI/Capabilities/Page Layout/VireoPage",
   component: VireoPage,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vireo-matrix"],
   parameters: {
     controls: { disable: true },
     docs: {
