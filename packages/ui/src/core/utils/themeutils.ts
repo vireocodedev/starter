@@ -286,19 +286,14 @@ function stripChannelKeys(obj: Record<string, unknown>): Record<string, unknown>
 }
 
 function deriveDarkPalette(lightTheme: Theme): PaletteOptions {
-  const {
-    action: _action,
-    background: _background,
-    divider: _divider,
-    mode: _mode,
-    text: _text,
-    ...palette
-  } = lightTheme.palette;
+  const derivedKeys = new Set(["action", "background", "divider", "mode", "text"]);
   return Object.fromEntries(
-    Object.entries(palette).map(([key, value]) => [
-      key,
-      value && typeof value === "object" ? stripChannelKeys(value as Record<string, unknown>) : value,
-    ]),
+    Object.entries(lightTheme.palette)
+      .filter(([key]) => !derivedKeys.has(key))
+      .map(([key, value]) => [
+        key,
+        value && typeof value === "object" ? stripChannelKeys(value as Record<string, unknown>) : value,
+      ]),
   ) as PaletteOptions;
 }
 
