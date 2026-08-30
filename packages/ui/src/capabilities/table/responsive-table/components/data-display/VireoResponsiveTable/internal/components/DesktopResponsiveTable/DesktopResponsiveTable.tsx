@@ -220,6 +220,7 @@ export function DesktopResponsiveTable<
             borderTop: 1,
             borderColor: "divider",
             bgcolor: "surface.base",
+            color: "text.primary",
             pointerEvents: skeleton ? "none" : "auto",
           }}
         />
