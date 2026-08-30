@@ -20,10 +20,13 @@ The main documentation is organized around decisions and tasks:
 - **Start** gets an application running and explains the two ownership profiles.
 - **Core concepts** explains architecture, adapters, contracts and generated-code ownership.
 - **Build** covers the frontend, Spring modules, offline behavior and components.
+- **Design system** records Vireo's visual language, responsive composition, motion, async states, forms, recovery, localization and release-quality contracts.
 - **CLI** covers creation, diagnostics, generation, integrity checks, ejection and upgrades.
 - **Operate** covers deployment, security, accessibility and troubleshooting.
 
 Use [Storybook](/storybook/) when an interactive state is more useful than prose. Use the [TypeScript and Java reference](/reference/) when you need an exact exported signature or JVM member.
+
+For product-facing UI decisions, start with the [Design system](/docs/design-system/). It makes the accessibility and component principles concrete without taking ownership of your product identity or workflows.
 
 ## What Vireo owns
 

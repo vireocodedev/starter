@@ -105,6 +105,9 @@ function validateArtifact(release, declaredPages) {
     `docs/${release.documentationVersion}/index.html`,
     "docs/getting-started/index.html",
     "docs/concepts/architecture/index.html",
+    "docs/design-system/index.html",
+    "docs/design-system/visual-language/index.html",
+    "docs/design-system/loading-states/index.html",
     "docs/cli/doctor/index.html",
     "examples/index.html",
     "healthz",
@@ -127,6 +130,8 @@ function validateArtifact(release, declaredPages) {
 
   const landing = readFileSync(join(outputRoot, "index.html"), "utf8");
   const docs = readFileSync(join(outputRoot, "docs/index.html"), "utf8");
+  const designSystem = readFileSync(join(outputRoot, "docs/design-system/index.html"), "utf8");
+  const visualLanguage = readFileSync(join(outputRoot, "docs/design-system/visual-language/index.html"), "utf8");
   const generated = readJson(join(outputRoot, "site.json"));
   const versions = readJson(join(outputRoot, "versions.json"));
   const search = readJson(join(outputRoot, "search-index.json"));
@@ -184,10 +189,24 @@ function validateArtifact(release, declaredPages) {
     "Vireo documentation",
     "On this page",
     "/docs/concepts/architecture/",
+    "/docs/design-system/",
+    "Design system",
     `Vireo ${release.documentationVersion}`,
   ]) {
     if (!docs.includes(expected)) problems.push(`generated documentation home is missing ${expected}`);
   }
+  for (const expected of ["Visual language", "Loading states", "Ownership boundaries"]) {
+    if (!designSystem.includes(expected)) problems.push(`generated design-system overview is missing ${expected}`);
+  }
+  for (const expected of ["semantic surfaces", "VISUAL_LANGUAGE.md"]) {
+    if (!visualLanguage.includes(expected)) problems.push(`generated visual-language page is missing ${expected}`);
+  }
+  if (
+    !visualLanguage.includes(
+      "https://github.com/vireocodedev/starter-template/blob/11e1795a798d5dbaee9344b8ff207d5b0ea59657/frontend/docs/VISUAL_LANGUAGE.md",
+    )
+  )
+    problems.push("generated visual-language page must retain pinned source provenance");
   for (const forbidden of [
     "undefined",
     "javascript:",
@@ -203,6 +222,8 @@ function validateArtifact(release, declaredPages) {
     problems.push("website sitemap must include every canonical page and the landing page");
   if (!sitemap.includes("https://vireocode.com/docs/getting-started/"))
     problems.push("website sitemap must include documentation routes");
+  if (!sitemap.includes("https://vireocode.com/docs/design-system/loading-states/"))
+    problems.push("website sitemap must include design-system routes");
   if (countFiles(outputRoot, "index.html") < 50)
     problems.push("website artifact must contain the current and version-specific multi-page route set");
 }

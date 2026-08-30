@@ -2,6 +2,8 @@
 
 The component guide explains the intent of Vireo's public React component families. Storybook remains the interactive catalogue for props, states, controls and responsive examples.
 
+Use the [Design system](/docs/design-system/) for the cross-component contracts: semantic surfaces, responsive composition, motion, async behavior, forms, recovery, localization, and release evidence.
+
 ## Page and navigation composition
 
 Use page-layout and application-navigation primitives to keep title, actions, loading, empty states and narrow-screen behavior consistent. Product routes and authorization decisions remain application composition.
@@ -23,6 +25,8 @@ Form sections, actions and responsive overlays keep validation and submission st
 ## Feedback and loading
 
 Loading regions, skeletons, initialization boundaries and status indicators distinguish initial load, background refresh, empty state and failure. Avoid replacing every state with an undifferentiated spinner.
+
+The [loading-state standard](/docs/design-system/loading-states/) defines boundary ownership, geometry, timing, accessible announcements, and the required state evidence.
 
 ## Hooks and utilities
 

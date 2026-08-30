@@ -99,6 +99,20 @@ test("makes manifest metadata the sole page H1", () => {
   );
 });
 
+test("pins Design system documentation to reviewable source contracts", () => {
+  const designSystem = contentManifest.sections.find(section => section.label === "Design system");
+  assert.equal(designSystem?.pages.length, 9);
+  for (const page of designSystem?.pages ?? []) {
+    assert.match(
+      page.sourceUrl ?? "",
+      /^https:\/\/github\.com\/vireocodedev\/(?:starter|starter-template)\/blob\/[a-f0-9]{40}\//u,
+    );
+    assert.doesNotMatch(page.sourceUrl ?? "", /\/main\//u);
+    assert.equal(typeof page.sourceLabel, "string");
+    assert.ok(page.sourceLabel.trim().length > 0);
+  }
+});
+
 test("builds the complete multi-page, searchable and versioned website artifact", () => {
   const outputRoot = mkdtempSync(join(tmpdir(), "vireo-website-"));
   try {
@@ -125,6 +139,9 @@ test("builds the complete multi-page, searchable and versioned website artifact"
       "docs/0.3/index.html",
       "docs/getting-started/frontend-only/index.html",
       "docs/concepts/architecture/index.html",
+      "docs/design-system/index.html",
+      "docs/design-system/visual-language/index.html",
+      "docs/design-system/loading-states/index.html",
       "docs/cli/doctor/index.html",
       "storybook/index.html",
       "reference/typescript/index.html",
@@ -140,8 +157,11 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     const landing = readFileSync(join(outputRoot, "index.html"), "utf8");
     const docs = readFileSync(join(outputRoot, "docs/index.html"), "utf8");
     const components = readFileSync(join(outputRoot, "docs/components/index.html"), "utf8");
+    const designSystem = readFileSync(join(outputRoot, "docs/design-system/index.html"), "utf8");
+    const visualLanguage = readFileSync(join(outputRoot, "docs/design-system/visual-language/index.html"), "utf8");
     const examples = readFileSync(join(outputRoot, "examples/index.html"), "utf8");
     const snapshot = readFileSync(join(outputRoot, "docs/0.3/index.html"), "utf8");
+    const sitemap = readFileSync(join(outputRoot, "sitemap.xml"), "utf8");
     for (const page of result.pages) {
       const html = readFileSync(
         page.path === "/" ? join(outputRoot, "index.html") : join(outputRoot, page.path.slice(1), "index.html"),
@@ -168,6 +188,7 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     assert.match(landing, /current pinned Starter Template/u);
     assert.match(docs, /Vireo documentation/u);
     assert.match(docs, /On this page/u);
+    assert.match(docs, /Design system/u);
     assert.match(docs, /data-navigation-toggle/u);
     const componentHeader = components.match(/<nav class="site-nav"[^>]*>.*?<\/nav>/su)?.[0] ?? "";
     const componentSidebar = components.match(/<aside class="docs-sidebar"[^>]*>.*?<\/aside>/su)?.[0] ?? "";
@@ -177,8 +198,18 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     assert.match(examplesHeader, /href="\/examples\/" aria-current="page"/u);
     assert.match(componentSidebar, /href="\/examples\/"/u);
     assert.match(componentSidebar, /href="\/reference\/"/u);
+    assert.match(componentSidebar, /href="\/docs\/design-system\/"/u);
     assert.match(components, /data-theme-target="light"/u);
     assert.match(components, /data-theme-icon="dark"/u);
+    assert.match(designSystem, /Visual language/u);
+    assert.match(designSystem, /Loading states/u);
+    assert.match(visualLanguage, /semantic surfaces/u);
+    assert.match(visualLanguage, /VISUAL_LANGUAGE\.md/u);
+    assert.match(
+      visualLanguage,
+      /href="https:\/\/github\.com\/vireocodedev\/starter-template\/blob\/11e1795a798d5dbaee9344b8ff207d5b0ea59657\/frontend\/docs\/VISUAL_LANGUAGE\.md"/u,
+    );
+    assert.match(sitemap, /https:\/\/vireocode\.com\/docs\/design-system\/loading-states\//u);
     assert.match(snapshot, /Vireo 0.3 snapshot/u);
     assert.match(snapshot, /rel="canonical" href="https:\/\/vireocode.com\/docs\/"/u);
   } finally {

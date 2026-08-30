@@ -300,6 +300,14 @@ function validateContentManifest({ contentManifest, root, website }) {
     for (const field of ["title", "description", "category", "file"]) {
       if (typeof record[field] !== "string" || !record[field].trim()) throw new Error(`${path} has no ${field}`);
     }
+    if (record.sourceUrl !== undefined) {
+      if (typeof record.sourceUrl !== "string" || !record.sourceUrl.startsWith("https://"))
+        throw new Error(`${path} sourceUrl must be an HTTPS URL`);
+    }
+    if (record.sourceLabel !== undefined) {
+      if (typeof record.sourceLabel !== "string" || !record.sourceLabel.trim())
+        throw new Error(`${path} sourceLabel must be a non-empty string when provided`);
+    }
     if (!existsSync(join(root, "site/content", record.file)))
       throw new Error(`${path} is missing content file ${record.file}`);
   }
