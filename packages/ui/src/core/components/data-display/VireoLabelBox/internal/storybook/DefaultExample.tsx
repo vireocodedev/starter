@@ -6,7 +6,9 @@ export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
       <VireoLabelBox label="Account name">
-        {({ controlProps }) => <OutlinedInput {...controlProps} placeholder="Acme Ltd." size="small" fullWidth />}
+        {({ controlProps }) => (
+          <OutlinedInput slotProps={{ input: controlProps }} placeholder="Acme Ltd." size="small" fullWidth />
+        )}
       </VireoLabelBox>
     </VireoStorybookProvider>
   );

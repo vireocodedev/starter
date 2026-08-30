@@ -40,8 +40,11 @@ export const KeyboardControls: Story = {
     const surface = canvas.getByRole("region", { name: "Keyboard navigation canvas" });
 
     surface.focus();
-    await userEvent.keyboard("{ArrowRight}=");
-    await expect(canvas.getByText("Pan -40, 0 · Zoom 110%")).toBeInTheDocument();
+    await userEvent.keyboard("{ArrowRight}");
+    await expect(canvas.getByText("Pan -40, 0 · Zoom 100%")).toBeInTheDocument();
+
+    await userEvent.keyboard("=");
+    await expect(canvas.getByText(/Zoom 110%$/u)).toBeInTheDocument();
 
     await userEvent.keyboard("0");
     await expect(canvas.getByText("Pan 0, 0 · Zoom 100%")).toBeInTheDocument();

@@ -25,7 +25,7 @@ export default function ContainerResponsiveLayoutExample() {
             <Paper variant="outlined" sx={{ mt: 0.5, p: 2 }}>
               <VireoLabelBox label="Workspace name" helperText="Shown to every member">
                 {({ controlProps }) => (
-                  <OutlinedInput {...controlProps} defaultValue="Northstar" size="small" fullWidth />
+                  <OutlinedInput slotProps={{ input: controlProps }} defaultValue="Northstar" size="small" fullWidth />
                 )}
               </VireoLabelBox>
             </Paper>

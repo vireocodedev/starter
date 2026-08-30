@@ -1,4 +1,4 @@
-import { ThemeProvider, createTheme } from "@mui/material";
+import { OutlinedInput, ThemeProvider, createTheme } from "@mui/material";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";
@@ -53,6 +53,20 @@ describe(VIREO_LABEL_BOX_NAME, () => {
     expect(control).toHaveAccessibleDescription("Used on invoices");
     expect(helperText).toHaveAttribute("id", control.getAttribute("aria-describedby"));
     expect(control).toHaveAttribute("aria-required", "true");
+  });
+
+  it("associates MUI composite inputs through their native input slot", () => {
+    render(
+      <VireoLabelBox label="Billing contact" helperText="Used on invoices" required>
+        {({ controlProps }) => <OutlinedInput slotProps={{ input: controlProps }} />}
+      </VireoLabelBox>,
+    );
+
+    const control = screen.getByRole("textbox", { name: "Billing contact" });
+    expect(control).toHaveAccessibleDescription("Used on invoices");
+    expect(control).toHaveAttribute("aria-required", "true");
+    expect(control.parentElement).not.toHaveAttribute("aria-labelledby");
+    expect(control.parentElement).not.toHaveAttribute("aria-required");
   });
 
   it("keeps consumer slot IDs as the source of associated control relationships", () => {

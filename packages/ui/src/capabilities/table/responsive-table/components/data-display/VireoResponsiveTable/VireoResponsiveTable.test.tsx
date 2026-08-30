@@ -299,8 +299,10 @@ describe(VIREO_RESPONSIVE_TABLE_NAME, () => {
     const { container } = render(<VireoResponsiveTable {...requiredProps} data={[]} skeleton />);
 
     const skeletonRow = container.querySelector<HTMLElement>("tbody tr");
+    const pagination = container.querySelector<HTMLElement>(".MuiTablePagination-root");
     expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
     expect(skeletonRow).toHaveStyle({ visibility: "hidden" });
+    expect(pagination).not.toHaveStyle({ opacity: "0.55" });
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(VIREO_LOADING_TOKENS.revealDelay));
