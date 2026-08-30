@@ -14,7 +14,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runLicensePolicy } from "./third-party-license-policy.mjs";
 import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
@@ -109,7 +109,7 @@ function packedManifest(tarball) {
   return JSON.parse(command("tar", ["-xOf", tarball, "package/package.json"]));
 }
 
-function generatePackedNpmSbom(tarball, destination, expected) {
+function generatePackedNpmSbom(tarball, destination, expected, candidatesByName) {
   const temporaryRoot = mkdtempSync(join(tmpdir(), "vireo-sbom-"));
   try {
     command("tar", ["-xzf", tarball, "-C", temporaryRoot]);
@@ -125,6 +125,15 @@ function generatePackedNpmSbom(tarball, destination, expected) {
     // packed manifest so a dependency that is also used during development is
     // not incorrectly omitted from the release SBOM.
     delete manifest.devDependencies;
+    for (const packageName of Object.keys(manifest.dependencies ?? {})) {
+      const candidate = candidatesByName.get(packageName);
+      if (!candidate) continue;
+      const candidatesRoot = join(temporaryRoot, "candidates");
+      mkdirSync(candidatesRoot, { recursive: true });
+      const candidateName = basename(candidate);
+      copyFileSync(candidate, join(candidatesRoot, candidateName));
+      manifest.dependencies[packageName] = `file:../candidates/${candidateName}`;
+    }
     writeFileSync(join(packageRoot, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
     command(
       "corepack",
@@ -148,13 +157,18 @@ function generatePackedNpmSbom(tarball, destination, expected) {
 
 console.log("Generating one CycloneDX SBOM from each packed npm package...");
 const npmCoordinates = new Map();
-for (const tarball of readdirSync(npmRoot).filter(file => file.endsWith(".tgz"))) {
-  const path = join(npmRoot, tarball);
-  const manifest = packedManifest(path);
+const npmCandidates = readdirSync(npmRoot)
+  .filter(file => file.endsWith(".tgz"))
+  .map(tarball => {
+    const path = join(npmRoot, tarball);
+    return { manifest: packedManifest(path), path, tarball };
+  });
+const candidatesByName = new Map(npmCandidates.map(candidate => [candidate.manifest.name, candidate.path]));
+for (const { manifest, path, tarball } of npmCandidates) {
   const declared = policy.npm.packages.find(entry => entry.name === manifest.name);
   if (!declared) throw new Error(`${manifest.name} is packed but has no SBOM policy`);
   npmCoordinates.set(`npm/${tarball}`, `${manifest.name}@${manifest.version}`);
-  generatePackedNpmSbom(path, join(sbomRoot, `${declared.sbomId}.cdx.json`), manifest);
+  generatePackedNpmSbom(path, join(sbomRoot, `${declared.sbomId}.cdx.json`), manifest, candidatesByName);
 }
 
 console.log("Publishing JVM release candidates to the evidence repository...");
