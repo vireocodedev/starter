@@ -46,21 +46,35 @@ function CanvasControls() {
 export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
-      <VireoInfiniteCanvas sx={{ height: 480 }} defaultTransform={{ scale: 1, pan: { x: 160, y: 110 } }}>
-        <VireoInfiniteCanvasBody>
-          <Paper sx={{ left: 0, p: 2, position: "absolute", top: 0, width: 220 }}>
-            <Typography variant="h6">Research</Typography>
-            <Typography color="text.secondary">Drag the canvas and use the mouse wheel to navigate.</Typography>
-          </Paper>
-          <Paper sx={{ left: 340, p: 2, position: "absolute", top: 170, width: 220 }}>
-            <Typography variant="h6">Prototype</Typography>
-            <Typography color="text.secondary">World content shares one transform.</Typography>
-          </Paper>
-        </VireoInfiniteCanvasBody>
-        <VireoInfiniteCanvasOverlay position="top-right">
-          <CanvasControls />
-        </VireoInfiniteCanvasOverlay>
-      </VireoInfiniteCanvas>
+      <Stack spacing={1.5}>
+        <Typography id="infinite-canvas-title" variant="subtitle2">
+          Product planning canvas
+        </Typography>
+        <Typography id="infinite-canvas-instructions" color="text.secondary" variant="body2">
+          Focus the canvas, then use Arrow keys to pan, + or - to zoom, and 0 to reset. Pointer dragging is also
+          available.
+        </Typography>
+        <VireoInfiniteCanvas
+          aria-describedby="infinite-canvas-instructions"
+          aria-labelledby="infinite-canvas-title"
+          sx={{ height: 480 }}
+          defaultTransform={{ scale: 1, pan: { x: 160, y: 110 } }}
+        >
+          <VireoInfiniteCanvasBody>
+            <Paper sx={{ left: 0, p: 2, position: "absolute", top: 0, width: 220 }}>
+              <Typography variant="h6">Research</Typography>
+              <Typography color="text.secondary">Drag or use the keyboard to navigate the spatial surface.</Typography>
+            </Paper>
+            <Paper sx={{ left: 340, p: 2, position: "absolute", top: 170, width: 220 }}>
+              <Typography variant="h6">Prototype</Typography>
+              <Typography color="text.secondary">World content shares one transform.</Typography>
+            </Paper>
+          </VireoInfiniteCanvasBody>
+          <VireoInfiniteCanvasOverlay position="top-right">
+            <CanvasControls />
+          </VireoInfiniteCanvasOverlay>
+        </VireoInfiniteCanvas>
+      </Stack>
     </VireoStorybookProvider>
   );
 }

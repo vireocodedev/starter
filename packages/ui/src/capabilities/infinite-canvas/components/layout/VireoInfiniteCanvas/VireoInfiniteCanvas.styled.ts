@@ -28,5 +28,9 @@ export const VireoInfiniteCanvasRoot: StyledSlotComponent<BoxProps, VireoInfinit
     touchAction: ownerState.panEnabled && ownerState.touchPanEnabled ? "none" : "auto",
     userSelect: "none",
     width: "100%",
+    "&:focus-visible": {
+      outline: `3px solid ${theme.vireo?.focus.ring ?? theme.palette.primary.main}`,
+      outlineOffset: -3,
+    },
   };
 });

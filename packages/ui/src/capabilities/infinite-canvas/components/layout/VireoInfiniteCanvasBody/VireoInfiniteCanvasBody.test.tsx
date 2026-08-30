@@ -6,7 +6,7 @@ import { vireoInfiniteCanvasBodyClasses } from "./VireoInfiniteCanvasBody.classe
 describe("VireoInfiniteCanvasBody", () => {
   it("applies the shared world transform", () => {
     render(
-      <VireoInfiniteCanvas defaultTransform={{ scale: 2, pan: { x: 10, y: 20 } }}>
+      <VireoInfiniteCanvas aria-label="Workflow canvas" defaultTransform={{ scale: 2, pan: { x: 10, y: 20 } }}>
         <VireoInfiniteCanvasBody>World</VireoInfiniteCanvasBody>
       </VireoInfiniteCanvas>,
     );

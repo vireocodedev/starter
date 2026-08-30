@@ -16,7 +16,10 @@ import { VireoInfiniteCanvasRoot } from "./VireoInfiniteCanvas.styled";
 import type { VireoInfiniteCanvasOwnerState, VireoInfiniteCanvasProps } from "./VireoInfiniteCanvas.types";
 
 const DEFAULT_TRANSFORM: VireoCanvasTransform = { scale: 1, pan: { x: 0, y: 0 } };
-function useUtilityClasses(classes?: VireoInfiniteCanvasProps["classes"]) {
+const DEFAULT_KEYBOARD_PAN_STEP = 40;
+const KEYBOARD_SHORTCUTS = "ArrowUp ArrowDown ArrowLeft ArrowRight + - 0";
+
+function useUtilityClasses(_ownerState: VireoInfiniteCanvasOwnerState, classes?: VireoInfiniteCanvasProps["classes"]) {
   return composeClasses(
     { root: ["root"] } as const satisfies UtilityClassSlotMap<VireoInfiniteCanvasSlotName, VireoInfiniteCanvasClassKey>,
     getVireoInfiniteCanvasUtilityClass,
@@ -29,14 +32,19 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
   function VireoInfiniteCanvas(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_INFINITE_CANVAS_NAME });
     const {
+      "aria-label": ariaLabel,
+      "aria-labelledby": ariaLabelledBy,
       children,
       className,
       classes: classesProp,
       defaultTransform = DEFAULT_TRANSFORM,
       gridSize = 24,
       horizontalGridFactor = 1,
+      keyboardControlsEnabled = true,
+      keyboardPanStep: keyboardPanStepProp = DEFAULT_KEYBOARD_PAN_STEP,
       maxScale = 10,
       minScale = 0.1,
+      onKeyDown,
       onTransformChange,
       panEnabled = true,
       slotProps = {},
@@ -50,6 +58,8 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       zoomStep = 1.1,
       ...other
     } = props;
+    const keyboardPanStep =
+      Number.isFinite(keyboardPanStepProp) && keyboardPanStepProp > 0 ? keyboardPanStepProp : DEFAULT_KEYBOARD_PAN_STEP;
     const initialTransform = React.useRef(normalizeCanvasTransform(defaultTransform, minScale, maxScale));
     const [internalTransform, setInternalTransform] = React.useState(initialTransform.current);
     const transform = normalizeCanvasTransform(controlledTransform ?? internalTransform, minScale, maxScale);
@@ -62,14 +72,17 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       gridSize,
       horizontalGridFactor,
       verticalGridFactor,
+      keyboardControlsEnabled,
+      keyboardPanStep,
       panEnabled,
       touchPanEnabled,
       panning,
     };
-    const classes = useUtilityClasses(classesProp);
+    const classes = useUtilityClasses(ownerState, classesProp);
     const root = resolveSlotProps(slotProps.root, ownerState);
     const {
       className: rootSlotClassName,
+      onKeyDown: rootSlotOnKeyDown,
       onPointerCancel: rootSlotOnPointerCancel,
       onPointerDown: rootSlotOnPointerDown,
       onPointerMove: rootSlotOnPointerMove,
@@ -176,6 +189,80 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       },
       [target, transform.scale, zoomAtClient],
     );
+    const handleKeyDown = React.useCallback<NonNullable<React.HTMLAttributes<HTMLDivElement>["onKeyDown"]>>(
+      event => {
+        rootSlotOnKeyDown?.(event);
+        if (event.defaultPrevented) return;
+
+        onKeyDown?.(event);
+        if (event.defaultPrevented) return;
+
+        if (
+          !keyboardControlsEnabled ||
+          event.target !== event.currentTarget ||
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey
+        ) {
+          return;
+        }
+
+        switch (event.key) {
+          case "ArrowUp":
+            event.preventDefault();
+            setTransform({
+              scale: transform.scale,
+              pan: { x: transform.pan.x, y: transform.pan.y + keyboardPanStep },
+            });
+            break;
+          case "ArrowDown":
+            event.preventDefault();
+            setTransform({
+              scale: transform.scale,
+              pan: { x: transform.pan.x, y: transform.pan.y - keyboardPanStep },
+            });
+            break;
+          case "ArrowLeft":
+            event.preventDefault();
+            setTransform({
+              scale: transform.scale,
+              pan: { x: transform.pan.x + keyboardPanStep, y: transform.pan.y },
+            });
+            break;
+          case "ArrowRight":
+            event.preventDefault();
+            setTransform({
+              scale: transform.scale,
+              pan: { x: transform.pan.x - keyboardPanStep, y: transform.pan.y },
+            });
+            break;
+          case "+":
+          case "=":
+            event.preventDefault();
+            zoomFromCenter(zoomStep);
+            break;
+          case "-":
+          case "_":
+            event.preventDefault();
+            zoomFromCenter(1 / zoomStep);
+            break;
+          case "0":
+            event.preventDefault();
+            setTransform(initialTransform.current);
+            break;
+        }
+      },
+      [
+        keyboardControlsEnabled,
+        keyboardPanStep,
+        onKeyDown,
+        rootSlotOnKeyDown,
+        setTransform,
+        transform,
+        zoomFromCenter,
+        zoomStep,
+      ],
+    );
     const context = React.useMemo(
       () => ({
         transform,
@@ -219,7 +306,13 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
           as={slots.root ?? "div"}
           ref={ref}
           ownerState={ownerState}
+          role="region"
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          tabIndex={keyboardControlsEnabled ? 0 : undefined}
+          aria-keyshortcuts={keyboardControlsEnabled ? KEYBOARD_SHORTCUTS : undefined}
           data-vireo-canvas-pan-surface=""
+          onKeyDown={handleKeyDown}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endPan}
