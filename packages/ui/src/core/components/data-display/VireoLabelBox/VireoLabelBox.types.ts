@@ -109,7 +109,7 @@ export type VireoLabelBoxOwnProps = VireoLabelBoxSlotsAndSlotProps & {
   color?: VireoLabelBoxColor;
   /** Shows a visual required indicator after the label. @default false */
   required?: boolean;
-  /** Font weight applied to the label header. @default 600 */
+  /** Font weight applied to the label header. @default theme.typography.subtitle2.fontWeight */
   fontWeight?: React.CSSProperties["fontWeight"];
   /** Lays out the label anatomy above or beside its content. @default 'column' */
   direction?: VireoLabelBoxDirection;

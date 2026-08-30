@@ -29,21 +29,19 @@ export const VireoLabelBoxHeader: VireoLabelBoxStyledSlotComponent<BoxProps> = s
   overridesResolver: (_props, styles) => styles.header,
 })<VireoLabelBoxStyledSlotProps>(({ ownerState, theme }) =>
   theme.unstable_sx({
+    ...theme.typography.subtitle2,
     minWidth: 0,
-    minHeight: "1rem",
     flex: ownerState.direction === "row" ? "0 1 auto" : undefined,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 2,
-    fontSize: "0.875rem",
+    gap: theme.spacing(2),
     fontWeight: ownerState.fontWeight,
-    lineHeight: "1rem",
     [COMPACT_CONTAINER_QUERY]: {
       flexDirection: "column",
       alignItems: "flex-start",
       justifyContent: "flex-start",
-      gap: 0.5,
+      gap: theme.spacing(0.5),
       ...(ownerState.direction === "row" && {
         flexBasis: "40%",
       }),
@@ -72,11 +70,9 @@ export const VireoLabelBoxHelperText: VireoLabelBoxStyledSlotComponent<BoxProps>
   slot: "HelperText",
   overridesResolver: (_props, styles) => styles.helperText,
 })<VireoLabelBoxStyledSlotProps>(({ theme }) => ({
+  ...theme.typography.caption,
   marginLeft: "auto",
   color: theme.palette.text.secondary,
-  fontSize: "0.75rem",
-  fontWeight: 400,
-  lineHeight: "1rem",
   overflowWrap: "anywhere",
   [COMPACT_CONTAINER_QUERY]: {
     marginLeft: 0,

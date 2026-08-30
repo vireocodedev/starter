@@ -11,25 +11,32 @@ export const VireoLabeledIconButtonRoot: Slot<ButtonProps> = styled(Button, {
   name: VIREO_LABELED_ICON_BUTTON_NAME,
   slot: "Root",
   overridesResolver: (_p, s) => s.root,
-})<OwnerProps>({ flexDirection: "column", borderRadius: 8, gap: 4, minWidth: 88, maxWidth: 88, textTransform: "none" });
+})<OwnerProps>(({ theme }) => ({
+  flexDirection: "column",
+  borderRadius: theme.shape.borderRadius,
+  gap: theme.spacing(0.5),
+  minWidth: theme.spacing(11),
+  maxWidth: theme.spacing(11),
+  textTransform: theme.typography.button.textTransform,
+}));
 export const VireoLabeledIconButtonVisual: Slot<BoxProps> = styled(Box, {
   name: VIREO_LABELED_ICON_BUTTON_NAME,
   slot: "Visual",
   overridesResolver: (_p, s) => s.visual,
-})<OwnerProps>({
+})<OwnerProps>(({ theme }) => ({
   borderRadius: "50%",
-  padding: 8,
+  padding: theme.spacing(1),
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-});
+}));
 export const VireoLabeledIconButtonStatusDot: Slot<BoxProps> = styled(Box, {
   name: VIREO_LABELED_ICON_BUTTON_NAME,
   slot: "StatusDot",
   overridesResolver: (_p, s) => s.statusDot,
 })<OwnerProps>(({ theme }) => ({
-  width: 16,
-  height: 16,
+  width: theme.spacing(2),
+  height: theme.spacing(2),
   borderRadius: "50%",
   backgroundColor: theme.palette.success.main,
 }));
@@ -38,9 +45,7 @@ export const VireoLabeledIconButtonLabel: Slot<TypographyProps> = styled(Typogra
   slot: "Label",
   overridesResolver: (_p, s) => s.label,
 })<OwnerProps>(({ ownerState, theme }) => ({
-  fontWeight: 400,
-  fontSize: "0.75rem",
-  lineHeight: "1.25rem",
+  ...theme.typography.caption,
   overflow: "hidden",
   textOverflow: "ellipsis",
   maxWidth: "100%",

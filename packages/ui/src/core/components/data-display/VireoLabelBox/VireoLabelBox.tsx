@@ -1,6 +1,6 @@
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/utils/muiutils";
 import { unstable_composeClasses as composeClasses } from "@mui/material";
-import { useThemeProps } from "@mui/material/styles";
+import { useTheme, useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
 import React from "react";
 import { type VireoLabelBoxClassKey, getVireoLabelBoxUtilityClass } from "./VireoLabelBox.classes";
@@ -44,6 +44,7 @@ function useUtilityClasses(_ownerState: VireoLabelBoxOwnerState, classes?: Vireo
 export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps>(
   function VireoLabelBox(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_LABEL_BOX_NAME });
+    const theme = useTheme();
     const generatedId = React.useId();
     const {
       children,
@@ -51,7 +52,7 @@ export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps
       classes: classesProp,
       color = DEFAULT_LABEL_COLOR,
       direction = "column",
-      fontWeight = 600,
+      fontWeight,
       helperText,
       label,
       required = false,
@@ -62,10 +63,12 @@ export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps
       ...other
     } = props;
 
+    const resolvedFontWeight =
+      fontWeight ?? theme.typography.subtitle2.fontWeight ?? theme.typography.fontWeightMedium ?? 500;
     const ownerState: VireoLabelBoxOwnerState = {
       direction,
       color,
-      fontWeight,
+      fontWeight: resolvedFontWeight,
       required,
       hasLabel: label !== undefined && label !== null,
       hasHelperText: helperText !== undefined && helperText !== null,

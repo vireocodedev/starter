@@ -150,4 +150,34 @@ describe(VIREO_LABEL_BOX_NAME, () => {
     });
     expect(screen.getByText("Theme label")).toHaveStyle({ color: "rgb(123, 45, 67)" });
   });
+
+  it("derives label anatomy typography and spacing from the consumer theme", () => {
+    const theme = createTheme({
+      spacing: 10,
+      typography: {
+        subtitle2: { fontSize: "15px", fontWeight: 530, lineHeight: 1.7 },
+        caption: { fontSize: "11px", fontWeight: 420, lineHeight: 1.5 },
+      },
+    });
+
+    render(
+      <ThemeProvider theme={theme}>
+        <VireoLabelBox label="Project" helperText="Optional">
+          Content
+        </VireoLabelBox>
+      </ThemeProvider>,
+    );
+
+    const label = screen.getByText("Project");
+    const root = label.closest(`.${vireoLabelBoxClasses.root}`);
+    const header = label.closest(`.${vireoLabelBoxClasses.header}`);
+
+    expect(root).toHaveStyle({ gap: "10px" });
+    expect(header).toHaveStyle({ fontSize: "15px", fontWeight: "530", gap: "20px", lineHeight: "1.7" });
+    expect(screen.getByText("Optional")).toHaveStyle({
+      fontSize: "11px",
+      fontWeight: "420",
+      lineHeight: "1.5",
+    });
+  });
 });

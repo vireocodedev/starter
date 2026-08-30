@@ -97,4 +97,28 @@ describe(VIREO_ACTION_PREVIEW_BUTTON_NAME, () => {
     expect(screen.getByRole("button")).toHaveClass("MuiButton-contained");
     expect(screen.getByText("Adds one record to Items")).toHaveStyle({ fontWeight: "800" });
   });
+
+  it("derives action and preview typography and density from the consumer theme", () => {
+    const theme = createTheme({
+      spacing: 10,
+      typography: {
+        button: { fontSize: "17px", fontWeight: 580, lineHeight: 1.6 },
+        caption: { fontSize: "11px", fontWeight: 420, lineHeight: 1.5 },
+      },
+    });
+
+    render(
+      <ThemeProvider theme={theme}>
+        <VireoActionPreviewButton label="Publish" preview="Makes this version public" />
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByRole("button")).toHaveStyle({ minHeight: "70px", textTransform: "uppercase" });
+    expect(screen.getByText("Publish")).toHaveStyle({ fontSize: "17px", fontWeight: "580", lineHeight: "1.6" });
+    expect(screen.getByText("Makes this version public")).toHaveStyle({
+      fontSize: "11px",
+      fontWeight: "420",
+      lineHeight: "1.5",
+    });
+  });
 });

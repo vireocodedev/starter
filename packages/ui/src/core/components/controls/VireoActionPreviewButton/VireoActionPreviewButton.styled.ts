@@ -14,13 +14,13 @@ export const VireoActionPreviewButtonRoot: VireoActionPreviewButtonStyledSlotCom
   name: VIREO_ACTION_PREVIEW_BUTTON_NAME,
   slot: "Root",
   overridesResolver: (_props, styles) => styles.root,
-})<VireoActionPreviewButtonStyledSlotProps>(({ ownerState }) => ({
+})<VireoActionPreviewButtonStyledSlotProps>(({ ownerState, theme }) => ({
   alignItems: "center",
   justifyContent: ownerState.align === "center" ? "center" : "flex-start",
-  minHeight: 56,
-  paddingBlock: 7,
+  minHeight: theme.spacing(7),
+  paddingBlock: theme.spacing(0.875),
   textAlign: ownerState.align === "center" ? "center" : "start",
-  textTransform: "none",
+  textTransform: theme.typography.button.textTransform,
 }));
 
 export const VireoActionPreviewButtonContent: VireoActionPreviewButtonStyledSlotComponent<BoxProps> = styled(Box, {
@@ -41,12 +41,10 @@ export const VireoActionPreviewButtonLabel: VireoActionPreviewButtonStyledSlotCo
     slot: "Label",
     overridesResolver: (_props, styles) => styles.label,
   },
-)<VireoActionPreviewButtonStyledSlotProps>({
+)<VireoActionPreviewButtonStyledSlotProps>(({ theme }) => ({
+  ...theme.typography.button,
   color: "inherit",
-  fontSize: "0.875rem",
-  fontWeight: 750,
-  lineHeight: 1.25,
-});
+}));
 
 export const VireoActionPreviewButtonPreview: VireoActionPreviewButtonStyledSlotComponent<TypographyProps> = styled(
   Typography,
@@ -55,10 +53,8 @@ export const VireoActionPreviewButtonPreview: VireoActionPreviewButtonStyledSlot
     slot: "Preview",
     overridesResolver: (_props, styles) => styles.preview,
   },
-)<VireoActionPreviewButtonStyledSlotProps>({
+)<VireoActionPreviewButtonStyledSlotProps>(({ theme }) => ({
+  ...theme.typography.caption,
   color: "inherit",
-  fontSize: "0.75rem",
-  fontWeight: 500,
-  lineHeight: 1.3,
   opacity: 0.72,
-});
+}));

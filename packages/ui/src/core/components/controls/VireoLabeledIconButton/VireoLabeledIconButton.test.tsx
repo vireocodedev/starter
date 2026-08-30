@@ -54,4 +54,35 @@ describe(VIREO_LABELED_ICON_BUTTON_NAME, () => {
     expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("Selected")).toHaveStyle({ fontWeight: "700" });
   });
+
+  it("derives its dimensions, shape, and label type from the consumer theme", () => {
+    const theme = createTheme({
+      shape: { borderRadius: 14 },
+      spacing: 10,
+      typography: {
+        button: { textTransform: "uppercase" },
+        caption: { fontSize: "13px", lineHeight: 1.6 },
+      },
+    });
+
+    render(
+      <ThemeProvider theme={theme}>
+        <VireoIconRegistryProvider>
+          <VireoLabeledIconButton label="Notifications" showStatusDot />
+        </VireoIconRegistryProvider>
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByRole("button")).toHaveStyle({
+      borderRadius: "14px",
+      gap: "5px",
+      minWidth: "110px",
+      textTransform: "uppercase",
+    });
+    expect(screen.getByText("Notifications")).toHaveStyle({ fontSize: "13px", lineHeight: "1.6" });
+    expect(document.querySelector(`.${vireoLabeledIconButtonClasses.statusDot}`)).toHaveStyle({
+      height: "20px",
+      width: "20px",
+    });
+  });
 });
