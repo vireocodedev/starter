@@ -114,6 +114,7 @@ vi.mock("@mui/material", async importOriginal => {
 });
 
 const requiredProps = {
+  "aria-label": "Customer details",
   open: true,
   onClose: vi.fn(),
   children: <span>Overlay content</span>,
@@ -141,6 +142,28 @@ describe(VIREO_RESPONSIVE_OVERLAY_FRAME_NAME, () => {
     expect(screen.getByTestId("desktop-dialog")).toHaveTextContent("Overlay content");
     expect(screen.getByTestId("desktop-dialog")).toHaveAttribute("data-max-width", "lg");
     expect(screen.queryByTestId("mobile-drawer")).not.toBeInTheDocument();
+  });
+
+  it("forwards its required accessible name to dialog and panel surfaces", () => {
+    render(<VireoResponsiveOverlayFrame {...requiredProps} desktopSurface="overlaySidePanel" />);
+
+    const paper = (testState.drawerProps?.slotProps as { paper: Record<string, unknown> }).paper;
+    expect(paper).toMatchObject({ "aria-label": "Customer details", role: "dialog" });
+
+    cleanup();
+    render(
+      <VireoResponsiveOverlayFrame
+        aria-labelledby="customer-details-title"
+        open
+        onClose={requiredProps.onClose}
+        desktopSurface="dockedSidePanel"
+      >
+        <h2 id="customer-details-title">Customer details</h2>
+      </VireoResponsiveOverlayFrame>,
+    );
+    expect(testState.dockedProps?.slotProps).toMatchObject({
+      surface: { "aria-labelledby": "customer-details-title" },
+    });
   });
 
   it("selects the mobile bottom sheet and applies height precedence", () => {

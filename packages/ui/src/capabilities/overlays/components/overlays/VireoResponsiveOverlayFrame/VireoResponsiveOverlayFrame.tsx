@@ -191,6 +191,7 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
             paper: {
               "aria-label": ariaLabel,
               "aria-labelledby": ariaLabelledby,
+              role: "dialog",
               ref: sidePanelResizeEnabled ? sidePanelResize.rootRef : undefined,
               style: sidePanelResizeStyle,
               sx: mergeSx(
@@ -225,7 +226,6 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
             surface: {
               "aria-label": ariaLabel,
               "aria-labelledby": ariaLabelledby,
-              role: ariaLabel || ariaLabelledby ? "region" : undefined,
               sx: desktopSidePanelSx,
             },
           }}

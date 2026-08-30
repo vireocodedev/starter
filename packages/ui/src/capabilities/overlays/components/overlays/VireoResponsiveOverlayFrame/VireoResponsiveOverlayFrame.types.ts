@@ -54,48 +54,64 @@ export type VireoResponsiveOverlayFrameSlotsAndSlotProps = CreateSlotsAndSlotPro
   }
 >;
 
+/** An explicit accessible name for every responsive overlay surface. */
+export type VireoResponsiveOverlayFrameAccessibleName =
+  | {
+      /** Direct accessible name for the selected overlay surface. */
+      "aria-label": string;
+      /** Optional visible heading relationship; takes precedence for assistive technology. */
+      "aria-labelledby"?: string;
+    }
+  | {
+      /** Optional direct fallback when the referenced heading is unavailable. */
+      "aria-label"?: string;
+      /** ID of the visible heading that names the selected overlay surface. */
+      "aria-labelledby": string;
+    };
+
 /** Props owned by {@link VireoResponsiveOverlayFrame}. */
-export type VireoResponsiveOverlayFrameOwnProps = VireoResponsiveOverlayFrameSlotsAndSlotProps & {
-  /** Whether the selected overlay surface is open. */
-  open: boolean;
-  /** Closes the selected overlay surface. */
-  onClose: () => void;
-  /** Called after the selected overlay surface finishes leaving. */
-  onExited?: () => void;
-  /** Maximum width of the desktop dialog surface. @default 'lg' */
-  maxWidth?: DialogProps["maxWidth"];
-  /** Surface used on mobile. @default 'fullScreenDialog' */
-  mobileSurface?: VireoResponsiveOverlayFrameMobileSurface;
-  /** Fixed height of the mobile bottom sheet. Ignored by the full-screen dialog surface. */
-  mobileHeight?: string;
-  /** Maximum height of a content-sized mobile bottom sheet. Ignored by the full-screen dialog surface. @default '92dvh' */
-  mobileMaxHeight?: string;
-  /** MUI system customization for the desktop dialog paper. */
-  desktopPaperSx?: SxProps<Theme>;
-  /** Requested width of desktop side-panel surfaces. */
-  desktopSidePanelWidth?: VireoResponsiveOverlayFrameDesktopSidePanelWidth;
-  /** Minimum width of desktop side-panel surfaces. @default 360 */
-  desktopSidePanelMinWidth?: number;
-  /** Minimum workspace width retained beside a docked panel. */
-  desktopSidePanelMinContentWidth?: number;
-  /** MUI system customization for desktop side-panel papers. */
-  desktopSidePanelSx?: SxProps<Theme>;
-  /** Surface used on desktop. @default 'dialog' */
-  desktopSurface?: VireoResponsiveOverlayFrameDesktopSurface;
-  /** Enables pointer and keyboard resizing for desktop side-panel surfaces. @default false */
-  allowSidePanelResize?: boolean;
-  /** Width reserved by desktop navigation when deciding whether a docked panel fits. @default 0 */
-  desktopNavWidth?: number;
-  /** Contents rendered inside the selected surface. */
-  children: React.ReactNode;
-  /** Override or extend the utility classes applied to each slot. */
-  classes?: Partial<VireoResponsiveOverlayFrameClasses>;
-};
+export type VireoResponsiveOverlayFrameOwnProps = VireoResponsiveOverlayFrameSlotsAndSlotProps &
+  VireoResponsiveOverlayFrameAccessibleName & {
+    /** Whether the selected overlay surface is open. */
+    open: boolean;
+    /** Closes the selected overlay surface. */
+    onClose: () => void;
+    /** Called after the selected overlay surface finishes leaving. */
+    onExited?: () => void;
+    /** Maximum width of the desktop dialog surface. @default 'lg' */
+    maxWidth?: DialogProps["maxWidth"];
+    /** Surface used on mobile. @default 'fullScreenDialog' */
+    mobileSurface?: VireoResponsiveOverlayFrameMobileSurface;
+    /** Fixed height of the mobile bottom sheet. Ignored by the full-screen dialog surface. */
+    mobileHeight?: string;
+    /** Maximum height of a content-sized mobile bottom sheet. Ignored by the full-screen dialog surface. @default '92dvh' */
+    mobileMaxHeight?: string;
+    /** MUI system customization for the desktop dialog paper. */
+    desktopPaperSx?: SxProps<Theme>;
+    /** Requested width of desktop side-panel surfaces. */
+    desktopSidePanelWidth?: VireoResponsiveOverlayFrameDesktopSidePanelWidth;
+    /** Minimum width of desktop side-panel surfaces. @default 360 */
+    desktopSidePanelMinWidth?: number;
+    /** Minimum workspace width retained beside a docked panel. */
+    desktopSidePanelMinContentWidth?: number;
+    /** MUI system customization for desktop side-panel papers. */
+    desktopSidePanelSx?: SxProps<Theme>;
+    /** Surface used on desktop. @default 'dialog' */
+    desktopSurface?: VireoResponsiveOverlayFrameDesktopSurface;
+    /** Enables pointer and keyboard resizing for desktop side-panel surfaces. @default false */
+    allowSidePanelResize?: boolean;
+    /** Width reserved by desktop navigation when deciding whether a docked panel fits. @default 0 */
+    desktopNavWidth?: number;
+    /** Contents rendered inside the selected surface. */
+    children: React.ReactNode;
+    /** Override or extend the utility classes applied to each slot. */
+    classes?: Partial<VireoResponsiveOverlayFrameClasses>;
+  };
 
 /** Props VireoResponsiveOverlayFrame inherits from its default root after excluding component-owned props. */
 export type VireoResponsiveOverlayFrameInheritedProps = Omit<
   BoxProps<"div">,
-  "children" | "component" | "maxWidth" | "ref"
+  "aria-label" | "aria-labelledby" | "children" | "component" | "maxWidth" | "ref"
 >;
 
 /** Props accepted by {@link VireoResponsiveOverlayFrame}. */

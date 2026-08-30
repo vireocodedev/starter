@@ -21,7 +21,7 @@ const meta = {
   title: "TypeScript/UI/Capabilities/Overlays/VireoResponsiveOverlayFrame",
   component: VireoResponsiveOverlayFrame,
   tags: ["autodocs"],
-  args: { open: false, onClose: fn(), children: null },
+  args: { "aria-label": "Customer details", open: false, onClose: fn(), children: null },
   parameters: {
     layout: "fullscreen",
     controls: { disable: true },

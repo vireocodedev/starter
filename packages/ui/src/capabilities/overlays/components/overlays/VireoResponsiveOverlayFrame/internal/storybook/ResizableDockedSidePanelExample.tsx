@@ -14,6 +14,7 @@ export default function ResizableDockedSidePanelExample() {
     <VireoStorybookProvider>
       <VireoResponsiveOverlayFrameWorkspace onOpen={() => setOpen(true)}>
         <VireoResponsiveOverlayFrame
+          aria-label="Customer details"
           open={open}
           onClose={close}
           desktopSurface="dockedSidePanel"

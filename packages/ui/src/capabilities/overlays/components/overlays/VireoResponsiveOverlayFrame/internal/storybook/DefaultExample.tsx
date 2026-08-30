@@ -20,7 +20,7 @@ export default function DefaultExample({ onClose }: Pick<VireoResponsiveOverlayF
   return (
     <VireoStorybookProvider>
       <VireoResponsiveOverlayFrameWorkspace onOpen={() => setOpen(true)}>
-        <VireoResponsiveOverlayFrame open={open} onClose={close}>
+        <VireoResponsiveOverlayFrame aria-label="Customer details" open={open} onClose={close}>
           <VireoResponsiveOverlayFrameCustomerDetails
             header={<VireoOverlayHeader title="Customer details" closeLabel="Close customer details" onClose={close} />}
             onClose={close}

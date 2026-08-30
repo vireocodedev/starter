@@ -113,7 +113,7 @@ export type VireoResponsiveFormOverlayOwnProps = VireoResponsiveFormOverlaySlots
 /** Props VireoResponsiveFormOverlay inherits from its default root after excluding component-owned props. */
 export type VireoResponsiveFormOverlayInheritedProps = Omit<
   VireoResponsiveOverlayFrameProps,
-  "children" | "classes" | "onClose" | "open" | "slotProps" | "slots" | "title"
+  "aria-label" | "aria-labelledby" | "children" | "classes" | "onClose" | "open" | "slotProps" | "slots" | "title"
 > & {
   open: boolean;
   onClose: () => void;

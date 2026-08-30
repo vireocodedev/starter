@@ -13,7 +13,7 @@ export default function MobileFullScreenDialogExample() {
   return (
     <VireoStorybookProvider>
       <VireoResponsiveOverlayFrameWorkspace onOpen={() => setOpen(true)}>
-        <VireoResponsiveOverlayFrame open={open} onClose={close}>
+        <VireoResponsiveOverlayFrame aria-label="Customer details" open={open} onClose={close}>
           <VireoResponsiveOverlayFrameCustomerDetails
             header={<VireoOverlayHeader title="Customer details" closeLabel="Close customer details" onClose={close} />}
             onClose={close}
