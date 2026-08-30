@@ -3,22 +3,26 @@ import { fileURLToPath } from "node:url";
 
 const vitestCli = fileURLToPath(new URL("../../node_modules/vitest/vitest.mjs", import.meta.url));
 const projects = [
-  "storybook-desktop-dark",
-  "storybook-mobile-dark",
-  "storybook-light",
-  "storybook-reduced-motion",
-  "storybook-rtl",
-  "storybook-forced-colors",
-  "storybook-mobile-landscape",
+  { matrixCorpus: false, name: "storybook-desktop-dark" },
+  { matrixCorpus: true, name: "storybook-mobile-dark" },
+  { matrixCorpus: true, name: "storybook-light" },
+  { matrixCorpus: true, name: "storybook-reduced-motion" },
+  { matrixCorpus: true, name: "storybook-rtl" },
+  { matrixCorpus: true, name: "storybook-forced-colors" },
+  { matrixCorpus: true, name: "storybook-mobile-landscape" },
 ];
 
 for (const project of projects) {
+  const environment = { ...process.env, VIREO_STORYBOOK_CONTRACTS: "true" };
+  if (project.matrixCorpus) environment.VIREO_STORYBOOK_MATRIX = "true";
+  else delete environment.VIREO_STORYBOOK_MATRIX;
+
   const result = spawnSync(
     process.execPath,
-    [vitestCli, "--config", "vitest.storybook.config.ts", "--run", "--project", project],
+    [vitestCli, "--config", "vitest.storybook.config.ts", "--run", "--project", project.name],
     {
       cwd: import.meta.dirname,
-      env: { ...process.env, VIREO_STORYBOOK_CONTRACTS: "true" },
+      env: environment,
       stdio: "inherit",
     },
   );

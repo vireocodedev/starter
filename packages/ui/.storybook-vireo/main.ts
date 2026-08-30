@@ -2,6 +2,7 @@ import type { StorybookConfig } from "@storybook/react-vite";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mergeConfig } from "vite";
+import { vireoStorybookMatrixStories } from "./testing/storybook-matrix-stories.ts";
 
 const storybookDirectory = import.meta.dirname;
 const addonDocsBlocksEntry = fileURLToPath(import.meta.resolve("@storybook/addon-docs/blocks"));
@@ -9,20 +10,23 @@ const storybookProviderEntry =
   process.env.VIREO_STORYBOOK_CONTRACTS === "true"
     ? resolve(storybookDirectory, "./testing/storybook-entry.tsx")
     : resolve(storybookDirectory, "../storybook/index.ts");
+const fullStorybookCorpus = [
+  "../docs/storybook/**/*.mdx",
+  "../../history/docs/storybook/**/*.mdx",
+  "../../infrastructure/docs/storybook/**/*.mdx",
+  "../../localization/docs/storybook/**/*.mdx",
+  "../../queryengine/docs/storybook/**/*.mdx",
+  "../../shell/docs/storybook/**/*.mdx",
+  "../../sqlite/docs/storybook/**/*.mdx",
+  "../../../jvm/docs/storybook/**/*.mdx",
+  "../../../jvm/*/docs/storybook/**/*.mdx",
+  "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)",
+];
+const storybookStories =
+  process.env.VIREO_STORYBOOK_MATRIX === "true" ? [...vireoStorybookMatrixStories] : fullStorybookCorpus;
 
 const config: StorybookConfig = {
-  stories: [
-    "../docs/storybook/**/*.mdx",
-    "../../history/docs/storybook/**/*.mdx",
-    "../../infrastructure/docs/storybook/**/*.mdx",
-    "../../localization/docs/storybook/**/*.mdx",
-    "../../queryengine/docs/storybook/**/*.mdx",
-    "../../shell/docs/storybook/**/*.mdx",
-    "../../sqlite/docs/storybook/**/*.mdx",
-    "../../../jvm/docs/storybook/**/*.mdx",
-    "../../../jvm/*/docs/storybook/**/*.mdx",
-    "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)",
-  ],
+  stories: storybookStories,
   addons: ["@storybook/addon-docs", "@storybook/addon-a11y", "@storybook/addon-vitest"],
   framework: {
     name: "@storybook/react-vite",

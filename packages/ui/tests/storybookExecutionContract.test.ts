@@ -71,6 +71,10 @@ describe("Storybook executable contract gate", () => {
     expect(config.match(/browser: "chromium"/gu)).toHaveLength(7);
     expect(runner).toContain("spawnSync");
     expect(runner.match(/"storybook-[a-z-]+"/gu)).toHaveLength(7);
+    expect(runner).toContain('{ matrixCorpus: false, name: "storybook-desktop-dark" }');
+    expect(runner.match(/matrixCorpus: true/gu)).toHaveLength(6);
+    expect(runner).toContain('if (project.matrixCorpus) environment.VIREO_STORYBOOK_MATRIX = "true"');
+    expect(runner).toContain("delete environment.VIREO_STORYBOOK_MATRIX");
 
     for (const story of [
       "src/capabilities/application-navigation/components/navigation/VireoMobileBottomNavigation/VireoMobileBottomNavigation.stories.tsx",
@@ -119,6 +123,16 @@ describe("Storybook executable contract gate", () => {
     expect(publishedProvider).toContain("themeMode ?? inheritedTheme.mode");
     expect(publishedProvider).toContain("themeDirection ?? inheritedTheme.direction");
     expect(preview).toContain("themeDirection={themeDirection}");
+  });
+
+  it("uses the explicit matrix corpus only for adaptive contract projects", () => {
+    const main = readPackageFile(".storybook-vireo/main.ts");
+    const matrixStories = readPackageFile(".storybook-vireo/testing/storybook-matrix-stories.ts");
+
+    expect(main).toContain('process.env.VIREO_STORYBOOK_MATRIX === "true"');
+    expect(main).toContain("[...vireoStorybookMatrixStories]");
+    expect(main).toContain('"../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"');
+    expect(matrixStories.match(/\.stories\.tsx/g)).toHaveLength(11);
   });
 
   it("keeps browser-discovered legacy debt explicit and bounded", () => {

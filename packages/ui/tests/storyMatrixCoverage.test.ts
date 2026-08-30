@@ -2,9 +2,11 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { vireoStorybookMatrixStories } from "../.storybook-vireo/testing/storybook-matrix-stories";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = join(packageRoot, "src");
+const storybookDirectory = join(packageRoot, ".storybook-vireo");
 const matrixTag = '"vireo-matrix"';
 
 const representativeStories = {
@@ -24,7 +26,7 @@ function findStoryFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) return findStoryFiles(path);
-    return entry.name.endsWith(".stories.tsx") ? [path] : [];
+    return /\.stories\.[cm]?[jt]sx?$/u.test(entry.name) ? [path] : [];
   });
 }
 
@@ -43,5 +45,18 @@ describe("Storybook mode matrix coverage", () => {
       matrixStories.length,
       `matrix stories:\n${matrixStories.map(path => relative(sourceRoot, path)).join("\n")}`,
     ).toBeGreaterThanOrEqual(11);
+  });
+
+  it("keeps the explicit matrix corpus equal to every vireo-matrix story", () => {
+    const taggedStories = findStoryFiles(sourceRoot)
+      .filter(path => readFileSync(path, "utf8").includes(matrixTag))
+      .map(path => relative(sourceRoot, path))
+      .sort();
+    const matrixCorpus = vireoStorybookMatrixStories
+      .map(story => relative(sourceRoot, resolve(storybookDirectory, story)))
+      .sort();
+
+    expect(new Set(matrixCorpus).size).toBe(11);
+    expect(matrixCorpus).toEqual(taggedStories);
   });
 });
