@@ -182,6 +182,7 @@ command(
     "cyclonedxBom",
     ...policy.maven.modules.map(module => `:${module.name}:cyclonedxDirectBom`),
     "--no-build-cache",
+    "--no-configuration-cache",
   ],
   { stdio: "inherit" },
 );

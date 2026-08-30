@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -140,4 +140,29 @@ test("rejects checksum files containing an unrelated subject", t => {
   writeFileSync(join(root, manifest.sboms[0].checksums), `${"f".repeat(64)}  npm/not-the-subject.tgz\n`);
   const problems = validateReleaseSbomManifest(manifest, policy, { root });
   assert.ok(problems.some(problem => problem.includes("does not contain exactly its mapped subjects")));
+});
+
+function evidenceGradleInvocation(path, label) {
+  const source = readFileSync(new URL(path, import.meta.url), "utf8");
+  const start = source.indexOf(label);
+  assert.notEqual(start, -1, `Could not find the ${label} evidence command`);
+  const end = source.indexOf("\n);", start);
+  assert.notEqual(end, -1, `Could not find the end of the ${label} evidence command`);
+  return source.slice(start, end);
+}
+
+test("JVM evidence Gradle invocations bypass both build and configuration caches", () => {
+  const candidateInvocation = evidenceGradleInvocation(
+    "./generate-release-evidence.mjs",
+    'console.log("Publishing JVM release candidates to the evidence repository...");',
+  );
+  const publicInvocation = evidenceGradleInvocation(
+    "./collect-public-release-evidence.mjs",
+    'console.log("Generating one CycloneDX SBOM for each published Maven module...");',
+  );
+
+  for (const invocation of [candidateInvocation, publicInvocation]) {
+    assert.match(invocation, /"--no-build-cache",/u);
+    assert.match(invocation, /"--no-configuration-cache",/u);
+  }
 });
