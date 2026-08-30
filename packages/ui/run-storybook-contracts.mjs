@@ -2,7 +2,15 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const vitestCli = fileURLToPath(new URL("../../node_modules/vitest/vitest.mjs", import.meta.url));
-const projects = ["storybook-desktop-dark", "storybook-mobile-dark", "storybook-light", "storybook-reduced-motion"];
+const projects = [
+  "storybook-desktop-dark",
+  "storybook-mobile-dark",
+  "storybook-light",
+  "storybook-reduced-motion",
+  "storybook-rtl",
+  "storybook-forced-colors",
+  "storybook-mobile-landscape",
+];
 
 for (const project of projects) {
   const result = spawnSync(

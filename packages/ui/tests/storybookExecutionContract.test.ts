@@ -24,7 +24,7 @@ describe("Storybook executable contract gate", () => {
     expect(preview).toContain('a11y: { test: "error" }');
     expect(preview).toContain('test: "todo"');
     expect(a11yDebt).toContain("vireoStorybookA11yDebtGroups");
-    expect(preview).toContain('initialGlobals: { vireoTheme: "dark" }');
+    expect(preview).toContain('initialGlobals: { vireoDirection: "ltr", vireoTheme: "dark" }');
   });
 
   it("keeps accessibility debt reduction-only, owned, and time-bounded", () => {
@@ -47,7 +47,7 @@ describe("Storybook executable contract gate", () => {
     }
   });
 
-  it("runs a bounded desktop, mobile, light-theme, and reduced-motion matrix", () => {
+  it("runs a bounded adaptive visual-mode matrix", () => {
     const config = readPackageFile("vitest.storybook.config.ts");
     const runner = readPackageFile("run-storybook-contracts.mjs");
 
@@ -55,17 +55,22 @@ describe("Storybook executable contract gate", () => {
     expect(config).toContain('name: "mobile-dark"');
     expect(config).toContain('name: "desktop-light"');
     expect(config).toContain('name: "desktop-reduced"');
+    expect(config).toContain('name: "desktop-rtl"');
+    expect(config).toContain('name: "desktop-forced-colors"');
+    expect(config).toContain('name: "mobile-landscape"');
     expect(config).toContain('initialGlobals: { vireoTheme: "light" }');
+    expect(config).toContain('initialGlobals: { vireoDirection: "rtl", vireoTheme: "dark" }');
     expect(config).toContain('reducedMotion: "reduce"');
-    expect(config.match(/include: \["vireo-matrix"\]/gu)).toHaveLength(3);
-    expect(config.match(/skip: \["contract-debt"\]/gu)).toHaveLength(4);
+    expect(config).toContain('forcedColors: "active"');
+    expect(config.match(/include: \["vireo-matrix"\]/gu)).toHaveLength(6);
+    expect(config.match(/skip: \["contract-debt"\]/gu)).toHaveLength(7);
     expect(config).toContain("fileParallelism: false");
     expect(config).toContain("maxWorkers: 1");
-    expect(config.match(/permissions: \["clipboard-read", "clipboard-write"\]/gu)).toHaveLength(4);
+    expect(config.match(/permissions: \["clipboard-read", "clipboard-write"\]/gu)).toHaveLength(7);
     expect(config).toContain('include: ["react/jsx-dev-runtime"]');
-    expect(config.match(/browser: "chromium"/gu)).toHaveLength(4);
+    expect(config.match(/browser: "chromium"/gu)).toHaveLength(7);
     expect(runner).toContain("spawnSync");
-    expect(runner.match(/"storybook-(?:desktop-dark|mobile-dark|light|reduced-motion)"/gu)).toHaveLength(4);
+    expect(runner.match(/"storybook-[a-z-]+"/gu)).toHaveLength(7);
 
     for (const story of [
       "src/capabilities/application-navigation/components/navigation/VireoMobileBottomNavigation/VireoMobileBottomNavigation.stories.tsx",
@@ -109,10 +114,11 @@ describe("Storybook executable contract gate", () => {
     expect(main).toContain('process.env.VIREO_STORYBOOK_CONTRACTS === "true"');
     expect(main).toContain("/^@vireocodedev\\/ui\\/storybook$/");
     expect(testProvider).toContain('export * from "../../storybook"');
-    expect(publishedProvider).toContain('light: createVireoTheme({ mode: "light" })');
-    expect(publishedProvider).toContain('dark: createVireoTheme({ mode: "dark" })');
-    expect(publishedProvider).toContain("themeMode ?? inheritedThemeMode");
-    expect(preview).toContain("<VireoStorybookProvider themeMode={themeMode}>");
+    expect(publishedProvider).toContain('"light-ltr": createVireoTheme({ mode: "light", direction: "ltr" })');
+    expect(publishedProvider).toContain('"dark-rtl": createVireoTheme({ mode: "dark", direction: "rtl" })');
+    expect(publishedProvider).toContain("themeMode ?? inheritedTheme.mode");
+    expect(publishedProvider).toContain("themeDirection ?? inheritedTheme.direction");
+    expect(preview).toContain("themeDirection={themeDirection}");
   });
 
   it("keeps browser-discovered legacy debt explicit and bounded", () => {

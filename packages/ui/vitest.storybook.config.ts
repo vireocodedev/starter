@@ -97,6 +97,70 @@ export default defineConfig({
           },
         },
       },
+      {
+        plugins: [
+          storybookTest({
+            configDir: configDirectory,
+            initialGlobals: { vireoDirection: "rtl", vireoTheme: "dark" },
+            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+          }),
+        ],
+        test: {
+          name: "storybook-rtl",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({
+              contextOptions: { colorScheme: "dark", permissions: ["clipboard-read", "clipboard-write"] },
+            }),
+            instances: [{ browser: "chromium", name: "desktop-rtl", viewport: desktopViewport }],
+          },
+        },
+      },
+      {
+        plugins: [
+          storybookTest({
+            configDir: configDirectory,
+            initialGlobals: { vireoTheme: "dark" },
+            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+          }),
+        ],
+        test: {
+          name: "storybook-forced-colors",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({
+              contextOptions: {
+                colorScheme: "dark",
+                forcedColors: "active",
+                permissions: ["clipboard-read", "clipboard-write"],
+              },
+            }),
+            instances: [{ browser: "chromium", name: "desktop-forced-colors", viewport: desktopViewport }],
+          },
+        },
+      },
+      {
+        plugins: [
+          storybookTest({
+            configDir: configDirectory,
+            initialGlobals: { vireoTheme: "dark" },
+            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+          }),
+        ],
+        test: {
+          name: "storybook-mobile-landscape",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({
+              contextOptions: { colorScheme: "dark", permissions: ["clipboard-read", "clipboard-write"] },
+            }),
+            instances: [{ browser: "chromium", name: "mobile-landscape", viewport: { height: 390, width: 844 } }],
+          },
+        },
+      },
     ],
   },
 });

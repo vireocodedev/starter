@@ -9,29 +9,43 @@ export type VireoStorybookProviderProps = {
   temporalLocale?: VireoTemporalLocale;
   /** Review color scheme. Nested providers inherit the nearest explicit mode. @default 'dark' */
   themeMode?: VireoThemeMode;
+  /** Review writing direction. Nested providers inherit the nearest explicit direction. @default 'ltr' */
+  themeDirection?: "ltr" | "rtl";
 };
 
 const vireoStorybookReviewThemes = {
-  dark: createVireoTheme({ mode: "dark" }),
-  light: createVireoTheme({ mode: "light" }),
+  "dark-ltr": createVireoTheme({ mode: "dark", direction: "ltr" }),
+  "dark-rtl": createVireoTheme({ mode: "dark", direction: "rtl" }),
+  "light-ltr": createVireoTheme({ mode: "light", direction: "ltr" }),
+  "light-rtl": createVireoTheme({ mode: "light", direction: "rtl" }),
 } as const;
 
-const VireoStorybookThemeModeContext = React.createContext<VireoThemeMode>("dark");
+const VireoStorybookThemeContext = React.createContext<{ direction: "ltr" | "rtl"; mode: VireoThemeMode }>({
+  direction: "ltr",
+  mode: "dark",
+});
 
 /** Reproduces the shared dark Vireo review surface used by executable Storybook examples. */
-export function VireoStorybookProvider({ children, temporalLocale = "en", themeMode }: VireoStorybookProviderProps) {
-  const inheritedThemeMode = React.useContext(VireoStorybookThemeModeContext);
-  const resolvedThemeMode = themeMode ?? inheritedThemeMode;
+export function VireoStorybookProvider({
+  children,
+  temporalLocale = "en",
+  themeDirection,
+  themeMode,
+}: VireoStorybookProviderProps) {
+  const inheritedTheme = React.useContext(VireoStorybookThemeContext);
+  const resolvedThemeMode = themeMode ?? inheritedTheme.mode;
+  const resolvedThemeDirection = themeDirection ?? inheritedTheme.direction;
+  const reviewTheme = vireoStorybookReviewThemes[`${resolvedThemeMode}-${resolvedThemeDirection}`];
   return (
-    <VireoStorybookThemeModeContext.Provider value={resolvedThemeMode}>
-      <ThemeProvider theme={vireoStorybookReviewThemes[resolvedThemeMode]}>
+    <VireoStorybookThemeContext.Provider value={{ direction: resolvedThemeDirection, mode: resolvedThemeMode }}>
+      <ThemeProvider theme={reviewTheme}>
         <VireoTemporalLocalizationProvider locale={temporalLocale}>
           <CssBaseline />
-          <Box color="text.primary" sx={{ minWidth: 0, width: "100%" }}>
+          <Box color="text.primary" dir={resolvedThemeDirection} sx={{ minWidth: 0, width: "100%" }}>
             {children}
           </Box>
         </VireoTemporalLocalizationProvider>
       </ThemeProvider>
-    </VireoStorybookThemeModeContext.Provider>
+    </VireoStorybookThemeContext.Provider>
   );
 }

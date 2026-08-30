@@ -6,13 +6,13 @@ import { VireoStorybookProvider } from "../storybook/VireoStorybookProvider";
 
 function ThemeProbe() {
   const theme = useTheme();
-  return <output>{`${theme.palette.mode}:${theme.vireo.surface.canvas}`}</output>;
+  return <output>{`${theme.palette.mode}:${theme.direction}:${theme.vireo.surface.canvas}`}</output>;
 }
 
 describe("VireoStorybookProvider", () => {
   it.each([
-    ["light", "light:#f8fafc"],
-    ["dark", "dark:#080d18"],
+    ["light", "light:ltr:#f8fafc"],
+    ["dark", "dark:ltr:#080d18"],
   ] as const)("renders the canonical %s review theme", (themeMode, expected) => {
     render(
       <VireoStorybookProvider themeMode={themeMode}>
@@ -32,6 +32,19 @@ describe("VireoStorybookProvider", () => {
       </VireoStorybookProvider>,
     );
 
-    expect(screen.getByRole("status")).toHaveTextContent("light:#f8fafc");
+    expect(screen.getByRole("status")).toHaveTextContent("light:ltr:#f8fafc");
+  });
+
+  it("applies and inherits right-to-left review direction", () => {
+    render(
+      <VireoStorybookProvider themeDirection="rtl">
+        <VireoStorybookProvider>
+          <ThemeProbe />
+        </VireoStorybookProvider>
+      </VireoStorybookProvider>,
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent("dark:rtl:#080d18");
+    expect(screen.getByRole("status").closest('[dir="rtl"]')).not.toBeNull();
   });
 });

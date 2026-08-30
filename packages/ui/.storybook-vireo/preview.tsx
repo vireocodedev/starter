@@ -9,11 +9,12 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const themeMode = context.globals.vireoTheme === "light" ? "light" : "dark";
+      const themeDirection = context.globals.vireoDirection === "rtl" ? "rtl" : "ltr";
       if (hasVireoStorybookA11yDebt(context.title, context.name)) {
         context.parameters.a11y = { ...context.parameters.a11y, test: "todo" };
       }
       return (
-        <VireoStorybookProvider themeMode={themeMode}>
+        <VireoStorybookProvider themeMode={themeMode} themeDirection={themeDirection}>
           <div className="vireo-story-surface">
             <Story />
           </div>
@@ -22,6 +23,17 @@ const preview: Preview = {
     },
   ],
   globalTypes: {
+    vireoDirection: {
+      description: "Writing direction used by executable Storybook contracts",
+      defaultValue: "ltr",
+      toolbar: {
+        icon: "transfer",
+        items: [
+          { title: "Left to right", value: "ltr" },
+          { title: "Right to left", value: "rtl" },
+        ],
+      },
+    },
     vireoTheme: {
       description: "Theme used by executable Storybook contracts",
       defaultValue: "dark",
@@ -34,7 +46,7 @@ const preview: Preview = {
       },
     },
   },
-  initialGlobals: { vireoTheme: "dark" },
+  initialGlobals: { vireoDirection: "ltr", vireoTheme: "dark" },
   parameters: {
     a11y: { test: "error" },
     layout: "padded",
