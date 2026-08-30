@@ -39,6 +39,31 @@ describe("createVireoTheme", () => {
     expect(theme.palette.surface.raised).toBe("#24150a");
     expect(theme.components?.MuiButton?.defaultProps).toMatchObject({ disableElevation: true, size: "small" });
   });
+
+  it("uses system colors for filled controls when forced colors are active", () => {
+    const theme = createVireoTheme();
+
+    expect(theme.components?.MuiButton?.styleOverrides?.root).toMatchObject({
+      "@media (forced-colors: active)": {
+        "&.MuiButton-contained": {
+          backgroundColor: "ButtonFace",
+          border: "1px solid ButtonText",
+          color: "ButtonText",
+          forcedColorAdjust: "none",
+        },
+      },
+    });
+    expect(theme.components?.MuiChip?.styleOverrides?.root).toMatchObject({
+      "@media (forced-colors: active)": {
+        "&.MuiChip-filled": {
+          backgroundColor: "Canvas",
+          border: "1px solid CanvasText",
+          color: "CanvasText",
+          forcedColorAdjust: "none",
+        },
+      },
+    });
+  });
 });
 
 describe("createDarkTheme", () => {

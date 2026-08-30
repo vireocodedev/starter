@@ -120,7 +120,21 @@ export const VIREO_THEME_BASE_OPTIONS = {
     button: { fontSize: "0.875rem", fontWeight: 650, letterSpacing: 0, lineHeight: 1.25, textTransform: "none" },
   },
   components: {
-    MuiButton: { defaultProps: { disableElevation: true } },
+    MuiButton: {
+      defaultProps: { disableElevation: true },
+      styleOverrides: {
+        root: {
+          "@media (forced-colors: active)": {
+            "&.MuiButton-contained": {
+              backgroundColor: "ButtonFace",
+              border: "1px solid ButtonText",
+              color: "ButtonText",
+              forcedColorAdjust: "none",
+            },
+          },
+        },
+      },
+    },
     MuiButtonBase: {
       styleOverrides: {
         root: ({ theme }) => ({
@@ -129,6 +143,20 @@ export const VIREO_THEME_BASE_OPTIONS = {
       },
     },
     MuiCard: { defaultProps: { elevation: 0, variant: "outlined" } },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          "@media (forced-colors: active)": {
+            "&.MuiChip-filled": {
+              backgroundColor: "Canvas",
+              border: "1px solid CanvasText",
+              color: "CanvasText",
+              forcedColorAdjust: "none",
+            },
+          },
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: theme => ({
         body: { backgroundColor: theme.vireo.surface.canvas },
