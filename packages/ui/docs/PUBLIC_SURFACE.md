@@ -24,16 +24,16 @@ internal must remain unreachable through `package.json#exports`.
 
 | Entry point                               | Stability  | Exported symbols | Growth disposition   |
 | ----------------------------------------- | ---------- | ---------------- | -------------------- |
-| `.`                                       | supported  | 757              | `freeze-growth`      |
+| `.`                                       | supported  | 765              | `freeze-growth`      |
 | `./country`                               | supported  | 21               | `retain`             |
 | `./event-source`                          | advanced   | 7                | `retain`             |
-| `./forms`                                 | supported  | 539              | `freeze-growth`      |
+| `./forms`                                 | supported  | 551              | `freeze-growth`      |
 | `./hello-pangea-dnd`                      | advanced   | 56               | `retain`             |
 | `./localization`                          | supported  | 5                | `retain`             |
 | `./react-i18next`                         | advanced   | 3                | `retain`             |
 | `./sonner`                                | advanced   | 19               | `retain`             |
 | `./tanstack-query`                        | advanced   | 30               | `retain`             |
-| `./theme`                                 | supported  | 10               | `retain`             |
+| `./theme`                                 | supported  | 11               | `retain`             |
 | `./storybook`                             | deprecated | 5                | `extract-next-major` |
 | `./storybook/VireoIconContainer`          | deprecated | 2                | `extract-next-major` |
 | `./storybook/VireoDockedSidePanel`        | deprecated | 2                | `extract-next-major` |

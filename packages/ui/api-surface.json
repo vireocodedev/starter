@@ -72,6 +72,7 @@
         "VIREO_PAGE_LAYOUT_MIN_WIDTH",
         "VIREO_PAGE_LAYOUT_WIDE_ENTER_WIDTH",
         "VIREO_PAGE_LAYOUT_WIDE_EXIT_WIDTH",
+        "VIREO_REDUCED_MOTION_MEDIA_QUERY",
         "VireoActionPreviewButton",
         "VireoActionPreviewButtonAlignment",
         "VireoActionPreviewButtonClassKey",
@@ -266,6 +267,7 @@
         "VireoIconSlots",
         "VireoIconSlotsAndSlotProps",
         "VireoInfiniteCanvas",
+        "VireoInfiniteCanvasAccessibleNameProps",
         "VireoInfiniteCanvasBody",
         "VireoInfiniteCanvasBodyClassKey",
         "VireoInfiniteCanvasBodyClasses",
@@ -325,15 +327,18 @@
         "VireoJsonViewerOwnerState",
         "VireoJsonViewerProps",
         "VireoJsonViewerRootSlotPropsOverrides",
-        "VireoJsonViewerStatusSlotPropsOverrides",
         "VireoJsonViewerSlots",
         "VireoJsonViewerSlotsAndSlotProps",
+        "VireoJsonViewerStatusSlotPropsOverrides",
         "VireoJsonViewerToolbarSlotPropsOverrides",
         "VireoLabelBox",
+        "VireoLabelBoxAssociatedControlProps",
         "VireoLabelBoxClassKey",
         "VireoLabelBoxClasses",
         "VireoLabelBoxColor",
         "VireoLabelBoxContentSlotPropsOverrides",
+        "VireoLabelBoxControlAssociation",
+        "VireoLabelBoxControlProps",
         "VireoLabelBoxDirection",
         "VireoLabelBoxHeaderSlotPropsOverrides",
         "VireoLabelBoxHelperTextSlotPropsOverrides",
@@ -346,6 +351,7 @@
         "VireoLabelBoxRootSlotPropsOverrides",
         "VireoLabelBoxSlots",
         "VireoLabelBoxSlotsAndSlotProps",
+        "VireoLabelBoxStaticContentProps",
         "VireoLabeledIconButton",
         "VireoLabeledIconButtonClassKey",
         "VireoLabeledIconButtonClasses",
@@ -498,6 +504,7 @@
         "VireoResponsiveFormOverlaySlots",
         "VireoResponsiveFormOverlaySlotsAndSlotProps",
         "VireoResponsiveOverlayFrame",
+        "VireoResponsiveOverlayFrameAccessibleName",
         "VireoResponsiveOverlayFrameClassKey",
         "VireoResponsiveOverlayFrameClasses",
         "VireoResponsiveOverlayFrameDesktopSidePanelWidth",
@@ -777,8 +784,6 @@
         "@mui/material",
         "@mui/material/styles",
         "@mui/material/utils",
-        "@vireocodedev/history",
-        "@vireocodedev/infrastructure/network-status",
         "country-flag-icons/react/3x2",
         "dayjs",
         "react",
@@ -816,7 +821,6 @@
         "@mui/material",
         "@mui/material/styles",
         "@mui/material/utils",
-        "@vireocodedev/infrastructure/network-status",
         "country-flag-icons/react/3x2",
         "dayjs",
         "react",
@@ -1409,7 +1413,6 @@
         "@mui/x-date-pickers",
         "@mui/x-date-pickers/hooks",
         "@tanstack/react-form",
-        "@vireocodedev/infrastructure/network-status",
         "dayjs",
         "react",
         "react-dom"
@@ -1482,7 +1485,6 @@
         "@mui/material",
         "@mui/material/styles",
         "@mui/material/utils",
-        "@vireocodedev/infrastructure/network-status",
         "dayjs",
         "react",
         "react-dom"
@@ -1516,7 +1518,6 @@
         "useQueryEngineTranslation"
       ],
       "dependencies": [
-        "@vireocodedev/localization",
         "react-i18next"
       ],
       "workerSafe": false
@@ -1548,7 +1549,6 @@
         "@mui/material",
         "@mui/material/styles",
         "@mui/material/utils",
-        "@vireocodedev/infrastructure/network-status",
         "dayjs",
         "react",
         "react-dom",
@@ -1597,13 +1597,31 @@
         "@mui/material/styles",
         "@mui/material/utils",
         "@tanstack/react-query",
-        "@vireocodedev/infrastructure/network-status",
-        "@vireocodedev/query",
         "dayjs",
         "react",
         "react-dom",
         "react-error-boundary",
-        "sonner"
+        "sonner",
+        "zod"
+      ],
+      "workerSafe": false
+    },
+    "./theme": {
+      "exports": [
+        "VIREO_THEME_BASE_OPTIONS",
+        "VIREO_THEME_FOUNDATIONS",
+        "VIREO_THEME_SHADOWS",
+        "VireoPaletteSurfaces",
+        "VireoSemanticTokenOptions",
+        "VireoSemanticTokens",
+        "VireoThemeMode",
+        "VireoThemeOptions",
+        "createDarkTheme",
+        "createVireoTheme",
+        "reverseNumericScale"
+      ],
+      "dependencies": [
+        "@mui/material/styles"
       ],
       "workerSafe": false
     },
@@ -1617,7 +1635,14 @@
       ],
       "dependencies": [
         "@mui/material",
-        "@vireocodedev/ui/localization",
+        "@mui/material/styles",
+        "@mui/x-date-pickers/AdapterDayjs",
+        "@mui/x-date-pickers/LocalizationProvider",
+        "@mui/x-date-pickers/locales",
+        "dayjs",
+        "dayjs/locale/en",
+        "dayjs/locale/hr",
+        "dayjs/plugin/utc",
         "react"
       ],
       "workerSafe": false

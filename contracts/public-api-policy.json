@@ -52,7 +52,7 @@
         ".": {
           "audience": "application",
           "environment": ["browser"],
-          "symbolBudget": 757,
+          "symbolBudget": 765,
           "disposition": "freeze-growth",
           "stability": "supported",
           "guidance": "Default application entry point for Vireo components, hooks, providers, and layout contracts."
@@ -76,7 +76,7 @@
         "./forms": {
           "audience": "application",
           "environment": ["browser"],
-          "symbolBudget": 539,
+          "symbolBudget": 551,
           "disposition": "freeze-growth",
           "stability": "supported",
           "guidance": "Canonical TanStack Form bindings and Vireo form components; prefer this subpath for form-only consumers."
@@ -124,7 +124,7 @@
         "./theme": {
           "audience": "application",
           "environment": ["browser"],
-          "symbolBudget": 10,
+          "symbolBudget": 11,
           "disposition": "retain",
           "stability": "supported",
           "guidance": "Canonical Vireo theme factory, semantic tokens, and light/dark foundations for ordinary applications."
@@ -172,11 +172,12 @@
     "com.vireocode:vireo-core": {
       "audience": "application",
       "role": "server-foundation",
-      "declarationBudget": 29,
+      "declarationBudget": 31,
       "packageIntents": {
         "com.vireocode.vireo.base": "domain-base-and-mapping-api",
         "com.vireocode.vireo.config": "spring-auto-configuration-api",
         "com.vireocode.vireo.flyway": "migration-extension-api",
+        "com.vireocode.vireo.observability": "operational-observation-events",
         "com.vireocode.vireo.security": "security-expression-api",
         "com.vireocode.vireo.spi": "consumer-extension-points",
         "com.vireocode.vireo.web": "http-and-error-contracts"
@@ -191,19 +192,19 @@
     "com.vireocode:vireo-query": {
       "audience": "application",
       "role": "server-query-engine",
-      "declarationBudget": 33,
+      "declarationBudget": 37,
       "packageIntents": { "com.vireocode.vireo.queryengine": "query-language-and-persistence-api" }
     },
     "com.vireocode:vireo-offline": {
       "audience": "application",
       "role": "offline-sync-server",
-      "declarationBudget": 29,
+      "declarationBudget": 41,
       "packageIntents": { "com.vireocode.vireo.offline": "offline-protocol-and-persistence-api" }
     },
     "com.vireocode:vireo-history": {
       "audience": "application",
       "role": "server-history",
-      "declarationBudget": 7,
+      "declarationBudget": 15,
       "packageIntents": { "com.vireocode.vireo.history": "history-recording-and-query-api" }
     },
     "com.vireocode:vireo-bom": { "audience": "build-tooling", "role": "version-alignment" }
