@@ -122,6 +122,7 @@ describe("package entry points", () => {
       "./react-i18next",
       "./sonner",
       "./tanstack-query",
+      "./theme",
       "./storybook",
       "./storybook/VireoIconContainer",
       "./storybook/VireoDockedSidePanel",

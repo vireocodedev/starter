@@ -1,12 +1,13 @@
 import { VireoIconRegistryProvider, VireoProviderComposer, type VireoProviderWrapper } from "@vireocodedev/ui";
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
-import { CssBaseline, Paper, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { CssBaseline, Paper, Stack, ThemeProvider, Typography, createTheme, useTheme } from "@mui/material";
 import React from "react";
 
 const WorkspaceContext = React.createContext<string | null>(null);
-const theme = createTheme({ palette: { mode: "dark", primary: { main: "#36c7fa" } } });
 
 export default function DefaultExample() {
+  const outerTheme = useTheme();
+  const theme = React.useMemo(() => createTheme(outerTheme), [outerTheme]);
   const providers = [
     children => (
       <ThemeProvider theme={theme}>

@@ -31,13 +31,14 @@ npm install sonner
 
 ## Minimal setup
 
-Vireo uses the active MUI theme. Applications own theme creation and whether `CssBaseline` is mounted:
+Use Vireo's canonical theme factory for coherent light/dark colors, surfaces, typography, elevation, focus, and reduced-motion behavior. Applications still own mode selection and whether `CssBaseline` is mounted:
 
 ```tsx
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import { VireoIconRegistryProvider, VireoThemeColorMeta } from "@vireocodedev/ui";
+import { createVireoTheme } from "@vireocodedev/ui/theme";
 
-const theme = createTheme({ palette: { mode: "dark" } });
+const theme = createVireoTheme({ mode: "dark" });
 
 export function AppRoot() {
   return (

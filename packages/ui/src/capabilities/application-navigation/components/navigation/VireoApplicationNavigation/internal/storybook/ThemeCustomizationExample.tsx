@@ -1,18 +1,26 @@
 import { SettingsOutlined } from "@mui/icons-material";
-import { Box, List, ThemeProvider, createTheme } from "@mui/material";
+import { Box, List, ThemeProvider, createTheme, type Theme, useTheme } from "@mui/material";
 import { VireoApplicationNavigation, VireoApplicationNavigationItem } from "@vireocodedev/ui";
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
-
-const theme = createTheme({
-  palette: { mode: "dark", primary: { main: "#a78bfa" } },
-  components: {
-    VireoApplicationNavigation: {
-      styleOverrides: { content: { background: "linear-gradient(180deg, #17132d, #090712)" } },
-    },
-  },
-});
+import React from "react";
 
 export default function ThemeCustomizationExample() {
+  const outerTheme = useTheme();
+  const theme = React.useMemo(
+    () =>
+      createTheme(outerTheme, {
+        components: {
+          VireoApplicationNavigation: {
+            styleOverrides: {
+              content: ({ theme: activeTheme }: { theme: Theme }) => ({
+                background: `linear-gradient(180deg, ${activeTheme.vireo.surface.raised}, ${activeTheme.vireo.surface.sunken})`,
+              }),
+            },
+          },
+        },
+      }),
+    [outerTheme],
+  );
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={theme}>

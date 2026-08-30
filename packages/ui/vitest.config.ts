@@ -43,6 +43,10 @@ export default defineConfig({
         replacement: resolve(import.meta.dirname, "src/integrations/tanstack-query/public.ts"),
       },
       {
+        find: /^@vireocodedev\/ui\/theme$/,
+        replacement: resolve(import.meta.dirname, "src/core/utils/themeutils.ts"),
+      },
+      {
         find: /^@\//,
         replacement: `${resolve(import.meta.dirname, "src")}/`,
       },

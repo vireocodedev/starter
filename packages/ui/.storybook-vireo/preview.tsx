@@ -1,6 +1,5 @@
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import { hasVireoStorybookA11yDebt } from "./testing/storybook-a11y-debt";
-import { VireoStorybookThemeModeContext } from "./testing/storybook-theme-context";
 import { vireoStorybookTheme } from "./storybook-theme";
 import "./preview.css";
 import type { Preview } from "@storybook/react-vite";
@@ -14,13 +13,11 @@ const preview: Preview = {
         context.parameters.a11y = { ...context.parameters.a11y, test: "todo" };
       }
       return (
-        <VireoStorybookThemeModeContext.Provider value={themeMode}>
-          <VireoStorybookProvider>
-            <div className="vireo-story-surface">
-              <Story />
-            </div>
-          </VireoStorybookProvider>
-        </VireoStorybookThemeModeContext.Provider>
+        <VireoStorybookProvider themeMode={themeMode}>
+          <div className="vireo-story-surface">
+            <Story />
+          </div>
+        </VireoStorybookProvider>
       );
     },
   ],

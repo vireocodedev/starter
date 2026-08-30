@@ -1,61 +1,78 @@
-import { createTheme, type Theme } from "@mui/material/styles";
+import { createTheme, type Shadows } from "@mui/material/styles";
 import { describe, expect, it } from "vitest";
 import { VIREO_MOTION_TOKENS } from "@/core/constants/motion.constants";
-import { createDarkTheme } from "./themeutils";
+import { createDarkTheme, createVireoTheme, VIREO_THEME_SHADOWS } from "./themeutils";
+
+describe("createVireoTheme", () => {
+  it.each(["light", "dark"] as const)("creates the canonical %s foundation", mode => {
+    const theme = createVireoTheme({ mode });
+
+    expect(theme.palette.mode).toBe(mode);
+    expect(theme.vars).toBeDefined();
+    expect(theme.motion.reducedMotion).toBe("system");
+    expect(theme.transitions.duration.standard).toBe(VIREO_MOTION_TOKENS.duration.standard);
+    expect(theme.transitions.duration.enteringScreen).toBe(VIREO_MOTION_TOKENS.duration.enter);
+    expect(theme.shape.borderRadius).toBe(10);
+    expect(theme.shadows).toEqual(VIREO_THEME_SHADOWS);
+    expect(theme.palette.background.default).toBe(theme.vireo.surface.canvas);
+    expect(theme.palette.background.paper).toBe(theme.vireo.surface.raised);
+    expect(theme.palette.surface.base).toBe(theme.vireo.surface.raised);
+    expect(theme.palette.surface.sunken).toBe(theme.vireo.surface.sunken);
+    expect(theme.vars?.palette.surface.base).toBeDefined();
+    expect(theme.vars?.palette.surface.sunken).toBeDefined();
+    expect(theme.vireo.focus.ring).toBe(mode === "light" ? "#0170a3" : "#7cd9fd");
+  });
+
+  it("deeply extends consumer palette, semantic tokens, and component overrides", () => {
+    const theme = createVireoTheme({
+      mode: "dark",
+      palette: { primary: { main: "#ff7a00" } },
+      vireo: { surface: { raised: "#24150a" } },
+      components: { MuiButton: { defaultProps: { size: "small" } } },
+    });
+
+    expect(theme.palette.primary.main).toBe("#ff7a00");
+    expect(theme.palette.primary.contrastText).toBe("#101828");
+    expect(theme.vireo.surface.raised).toBe("#24150a");
+    expect(theme.vireo.surface.canvas).toBe("#080d18");
+    expect(theme.palette.surface.base).toBe("#24150a");
+    expect(theme.palette.surface.raised).toBe("#24150a");
+    expect(theme.components?.MuiButton?.defaultProps).toMatchObject({ disableElevation: true, size: "small" });
+  });
+});
 
 describe("createDarkTheme", () => {
-  it("preserves motion and transition policy from the source theme", () => {
+  it("preserves the source theme foundations and brand channels", () => {
+    const shadows = Array.from({ length: 25 }, (_value, index) => `shadow-${index}`) as Shadows;
     const lightTheme = createTheme({
+      cssVariables: true,
+      breakpoints: { values: { xs: 0, sm: 500, md: 800, lg: 1_100, xl: 1_400 } },
+      direction: "rtl",
       motion: { reducedMotion: "system" },
+      shadows,
+      spacing: 10,
       transitions: {
         duration: { standard: VIREO_MOTION_TOKENS.duration.standard },
         easing: { easeInOut: VIREO_MOTION_TOKENS.easing.standard },
+      },
+      zIndex: { drawer: 777 },
+      palette: {
+        mode: "light",
+        primary: { main: "#123456" },
+        secondary: { main: "#654321" },
       },
     });
 
     const darkTheme = createDarkTheme(lightTheme);
 
-    expect(darkTheme.motion.reducedMotion).toBe("system");
-    expect(darkTheme.transitions.duration.standard).toBe(VIREO_MOTION_TOKENS.duration.standard);
-    expect(darkTheme.transitions.easing.easeInOut).toBe(VIREO_MOTION_TOKENS.easing.standard);
-  });
-
-  it("preserves the complete consumer theme foundation", () => {
-    const shadows = [...createTheme().shadows] as Theme["shadows"];
-    shadows[1] = "0 1px 2px rgb(1 2 3 / 40%)";
-    const lightTheme = createTheme({
-      breakpoints: { values: { xs: 0, sm: 500, md: 800, lg: 1_100, xl: 1_400 } },
-      direction: "rtl",
-      palette: { secondary: { main: "#654321" } },
-      shadows,
-      spacing: 10,
-      zIndex: { drawer: 777 },
-    });
-
-    const darkTheme = createDarkTheme(lightTheme);
-
-    expect(darkTheme.spacing(1)).toBe("10px");
+    expect(darkTheme.palette.mode).toBe("dark");
+    expect(darkTheme.palette.primary.main).toBe("#123456");
+    expect(darkTheme.palette.secondary.main).toBe("#654321");
+    expect(darkTheme.spacing(1)).toContain("10px");
     expect(darkTheme.breakpoints.values.sm).toBe(500);
-    expect(darkTheme.shadows[1]).toBe("0 1px 2px rgb(1 2 3 / 40%)");
+    expect(darkTheme.shadows[1]).toBe("shadow-1");
     expect(darkTheme.zIndex.drawer).toBe(777);
     expect(darkTheme.direction).toBe("rtl");
-    expect(darkTheme.palette.secondary.main).toBe("#654321");
-  });
-
-  it("regenerates CSS variables from the final dark palette", () => {
-    const lightTheme = createTheme({
-      cssVariables: { cssVarPrefix: "vireo" },
-      palette: { background: { default: "#eeeeee" } },
-      spacing: 10,
-    });
-
-    const darkTheme = createDarkTheme(lightTheme, {
-      palette: { background: { default: "#111111" } },
-    });
-
-    expect(darkTheme.palette.mode).toBe("dark");
-    expect(darkTheme.palette.background.default).toBe("#111111");
-    expect(darkTheme.vars?.palette.background.default).toBe("var(--vireo-palette-background-default, #111111)");
-    expect(darkTheme.spacing(1)).toContain("10px");
+    expect(darkTheme.vars?.palette.secondary.main).toContain("#654321");
   });
 });

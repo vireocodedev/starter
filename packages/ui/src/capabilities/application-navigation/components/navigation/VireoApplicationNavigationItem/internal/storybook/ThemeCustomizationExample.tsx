@@ -1,18 +1,22 @@
 import { HomeOutlined } from "@mui/icons-material";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider, createTheme, useTheme } from "@mui/material";
 import { VireoApplicationNavigationItem } from "@vireocodedev/ui";
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
-
-const theme = createTheme({
-  palette: { mode: "dark", primary: { main: "#f59e0b" } },
-  components: {
-    VireoApplicationNavigationItem: {
-      styleOverrides: { root: { border: "1px solid rgba(245, 158, 11, 0.45)" } },
-    },
-  },
-});
+import React from "react";
 
 export default function ThemeCustomizationExample() {
+  const outerTheme = useTheme();
+  const theme = React.useMemo(
+    () =>
+      createTheme(outerTheme, {
+        components: {
+          VireoApplicationNavigationItem: {
+            styleOverrides: { root: { border: "1px solid rgba(245, 158, 11, 0.45)" } },
+          },
+        },
+      }),
+    [outerTheme],
+  );
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={theme}>

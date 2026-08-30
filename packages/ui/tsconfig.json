@@ -13,6 +13,7 @@
       "@vireocodedev/ui/localization": ["./src/integrations/localization/public.ts"],
       "@vireocodedev/ui/sonner": ["./src/integrations/sonner/public.ts"],
       "@vireocodedev/ui/tanstack-query": ["./src/integrations/tanstack-query/public.ts"],
+      "@vireocodedev/ui/theme": ["./src/core/utils/themeutils.ts"],
       "@vireocodedev/ui/storybook": ["./storybook/index.ts"],
       "@vireocodedev/ui/storybook/VireoDockedSidePanel": ["./storybook/VireoDockedSidePanel/index.ts"],
       "@vireocodedev/ui/storybook/VireoIconContainer": ["./storybook/VireoIconContainer/index.ts"],

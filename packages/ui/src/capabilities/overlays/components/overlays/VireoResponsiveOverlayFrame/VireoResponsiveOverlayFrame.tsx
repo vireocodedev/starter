@@ -15,7 +15,13 @@ import {
   getNumericDesktopSidePanelWidth,
   resolveDockedSidePanelWidth,
 } from "@/capabilities/overlays/utils/overlay.utils";
-import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
+import {
+  VIREO_MOTION_TOKENS,
+  type UtilityClassSlotMap,
+  joinClassNames,
+  mergeSx,
+  resolveSlotProps,
+} from "@/core/public";
 import { Dialog, Drawer, Slide, unstable_composeClasses as composeClasses, useMediaQuery } from "@mui/material";
 import { useTheme, useThemeProps } from "@mui/material/styles";
 import { type TransitionProps } from "@mui/material/transitions";
@@ -39,7 +45,9 @@ const MobileFullScreenTransition = React.forwardRef<
   unknown,
   TransitionProps & { children: React.ReactElement<unknown> }
 >(function MobileFullScreenTransition(transitionProps, ref) {
-  return <Slide direction="up" ref={ref} {...transitionProps} />;
+  const { timeout = { enter: VIREO_MOTION_TOKENS.duration.enter, exit: VIREO_MOTION_TOKENS.duration.exit }, ...other } =
+    transitionProps;
+  return <Slide direction="up" disablePrefersReducedMotion={false} timeout={timeout} ref={ref} {...other} />;
 });
 
 function useUtilityClasses(

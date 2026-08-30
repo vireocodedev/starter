@@ -33,6 +33,7 @@ internal must remain unreachable through `package.json#exports`.
 | `./react-i18next`                         | advanced   | 3                | `retain`             |
 | `./sonner`                                | advanced   | 19               | `retain`             |
 | `./tanstack-query`                        | advanced   | 30               | `retain`             |
+| `./theme`                                 | supported  | 10               | `retain`             |
 | `./storybook`                             | deprecated | 5                | `extract-next-major` |
 | `./storybook/VireoIconContainer`          | deprecated | 2                | `extract-next-major` |
 | `./storybook/VireoDockedSidePanel`        | deprecated | 2                | `extract-next-major` |
@@ -50,6 +51,7 @@ silently widening either barrel.
 - Use `./forms` when a consumer needs the form contract without treating the root
   barrel as its primary dependency.
 - Use `./localization` around every Vireo temporal field.
+- Use `./theme` to create the canonical light or dark Vireo consumer theme without importing the component barrel.
 - Adopt the advanced integration subpaths only when the application already owns
   the corresponding peer and its runtime policy.
 - Do not add dependencies on `./storybook*`. Keep equivalent frames local until a

@@ -28,4 +28,7 @@ export const VIREO_MOTION_TOKENS = {
   },
 } as const;
 
+/** Shared authored-CSS branch matching the canonical theme's system reduced-motion policy. */
+export const VIREO_REDUCED_MOTION_MEDIA_QUERY = "@media (prefers-reduced-motion: reduce)" as const;
+
 export type VireoMotionTokens = typeof VIREO_MOTION_TOKENS;

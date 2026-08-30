@@ -121,6 +121,14 @@
           "stability": "advanced",
           "guidance": "Query-boundary and mutation helpers for applications that own a TanStack Query client."
         },
+        "./theme": {
+          "audience": "application",
+          "environment": ["browser"],
+          "symbolBudget": 10,
+          "disposition": "retain",
+          "stability": "supported",
+          "guidance": "Canonical Vireo theme factory, semantic tokens, and light/dark foundations for ordinary applications."
+        },
         "./storybook": {
           "audience": "authoring-tooling",
           "environment": ["browser"],

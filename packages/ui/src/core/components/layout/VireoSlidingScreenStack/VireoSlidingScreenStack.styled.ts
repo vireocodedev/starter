@@ -1,3 +1,4 @@
+import { VIREO_MOTION_TOKENS, VIREO_REDUCED_MOTION_MEDIA_QUERY } from "@/core/constants/motion.constants";
 import { type StyledSlotComponent, type StyledSlotProps } from "@/core/utils/muiutils";
 import { Box, type BoxProps } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -40,7 +41,8 @@ export const VireoSlidingScreenStackScreen: Slot = styled(Box, {
   minWidth: 0,
   minHeight: 0,
   transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.standard,
-    easing: theme.transitions.easing.easeInOut,
+    duration: VIREO_MOTION_TOKENS.duration.standard,
+    easing: VIREO_MOTION_TOKENS.easing.standard,
   }),
+  [VIREO_REDUCED_MOTION_MEDIA_QUERY]: { transition: "none" },
 }));

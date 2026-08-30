@@ -70,6 +70,11 @@
       "import": "./dist/integrations/tanstack-query/public.js",
       "default": "./dist/integrations/tanstack-query/public.js"
     },
+    "./theme": {
+      "types": "./dist/core/utils/themeutils.d.ts",
+      "import": "./dist/core/utils/themeutils.js",
+      "default": "./dist/core/utils/themeutils.js"
+    },
     "./storybook": {
       "types": "./dist/storybook/index.d.ts",
       "import": "./dist/storybook/index.js",

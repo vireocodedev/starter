@@ -6,7 +6,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 ![STABLE](https://img.shields.io/badge/STABLE-green?style=flat-square)
 
-Vireo is built on Material UI's theming system. All components respect the MUI theme, so customization is done through standard MUI theme configuration.
+Vireo is built on Material UI's theming system. `createVireoTheme` supplies the supported visual foundation and accepts standard MUI theme customization, so applications get coherent defaults without losing MUI extensibility.
 
 ## Table of Contents
 
@@ -23,15 +23,10 @@ Vireo is built on Material UI's theming system. All components respect the MUI t
 Every Vireo application must be wrapped in `ThemeProvider`:
 
 ```tsx
-import { createTheme } from "@mui/material/styles";
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import { createVireoTheme } from "@vireocodedev/ui/theme";
 
-const theme = createTheme({
-  palette: {
-    primary: { main: "#1976d2" },
-    secondary: { main: "#dc004e" },
-  },
-});
+const theme = createVireoTheme({ mode: "light" });
 
 function App() {
   return (
@@ -43,14 +38,15 @@ function App() {
 }
 ```
 
-Vireo uses MUI's `ThemeProvider` directly. Mount `CssBaseline` explicitly when the application wants it.
+Vireo uses MUI's `ThemeProvider` directly. Mount `CssBaseline` explicitly to apply the canonical canvas, selection, and global MUI baseline. The factory enables CSS variables and sets MUI's system reduced-motion policy.
 
 ## Custom Palette
 
 Define brand colors through the palette:
 
 ```tsx
-const theme = createTheme({
+const theme = createVireoTheme({
+  mode: "light",
   palette: {
     primary: {
       main: "#2563eb",
@@ -75,22 +71,18 @@ const theme = createTheme({
     info: {
       main: "#0891b2",
     },
-    background: {
-      default: "#f8fafc",
-      paper: "#ffffff",
-    },
   },
 });
 ```
 
-All Vireo components automatically use the active theme colors.
+All Vireo components automatically use the active theme colors. Prefer semantic palette roles (`background`, `text`, `divider`, `action`) and `theme.vireo.surface`, `theme.vireo.border`, and `theme.vireo.focus` over numbered color shades in reusable UI.
 
 ## Typography
 
 Customize fonts and text styles:
 
 ```tsx
-const theme = createTheme({
+const theme = createVireoTheme({
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
@@ -119,7 +111,7 @@ const theme = createTheme({
 Override default styles for MUI components used by Vireo:
 
 ```tsx
-const theme = createTheme({
+const theme = createVireoTheme({
   shape: {
     borderRadius: 8,
   },
@@ -154,10 +146,10 @@ const theme = createTheme({
         root: {
           padding: "12px 16px",
         },
-        head: {
+        head: ({ theme }) => ({
           fontWeight: 600,
-          backgroundColor: "var(--mui-palette-grey-50)",
-        },
+          backgroundColor: theme.vireo.surface.sunken,
+        }),
       },
     },
   },
@@ -171,14 +163,10 @@ These overrides affect both MUI components and all Vireo components that use the
 ### Static Dark Theme
 
 ```tsx
-const darkTheme = createTheme({
+const darkTheme = createVireoTheme({
+  mode: "dark",
   palette: {
-    mode: "dark",
     primary: { main: "#60a5fa" },
-    background: {
-      default: "#0f172a",
-      paper: "#1e293b",
-    },
   },
 });
 
@@ -190,8 +178,8 @@ const darkTheme = createTheme({
 ### Dynamic Theme Switching
 
 ```tsx
-import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material";
+import { createVireoTheme } from "@vireocodedev/ui/theme";
 import React from "react";
 
 function App() {
@@ -199,9 +187,9 @@ function App() {
 
   const theme = React.useMemo(
     () =>
-      createTheme({
+      createVireoTheme({
+        mode: darkMode ? "dark" : "light",
         palette: {
-          mode: darkMode ? "dark" : "light",
           primary: { main: "#2563eb" },
         },
       }),
@@ -261,7 +249,7 @@ declare module "@mui/material/styles" {
   }
 }
 
-const theme = createTheme({
+const theme = createVireoTheme({
   palette: {
     brand: {
       main: "#ff6b2b",

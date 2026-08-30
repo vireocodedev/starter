@@ -100,17 +100,19 @@ describe("Storybook executable contract gate", () => {
     }
   });
 
-  it("uses a test-only theme provider without changing the published provider", () => {
+  it("uses one mode-aware provider in normal Storybook and contract execution", () => {
     const main = readPackageFile(".storybook-vireo/main.ts");
     const testProvider = readPackageFile(".storybook-vireo/testing/storybook-entry.tsx");
     const publishedProvider = readPackageFile("storybook/VireoStorybookProvider.tsx");
+    const preview = readPackageFile(".storybook-vireo/preview.tsx");
 
     expect(main).toContain('process.env.VIREO_STORYBOOK_CONTRACTS === "true"');
     expect(main).toContain("/^@vireocodedev\\/ui\\/storybook$/");
-    expect(testProvider).toContain("Test-only provider selected by the Storybook contract runner");
-    expect(testProvider).toContain('mode: "light"');
-    expect(testProvider).toContain('mode: "dark"');
-    expect(publishedProvider).not.toContain("VIREO_STORYBOOK_CONTRACTS");
+    expect(testProvider).toContain('export * from "../../storybook"');
+    expect(publishedProvider).toContain('light: createVireoTheme({ mode: "light" })');
+    expect(publishedProvider).toContain('dark: createVireoTheme({ mode: "dark" })');
+    expect(publishedProvider).toContain("themeMode ?? inheritedThemeMode");
+    expect(preview).toContain("<VireoStorybookProvider themeMode={themeMode}>");
   });
 
   it("keeps browser-discovered legacy debt explicit and bounded", () => {

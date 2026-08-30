@@ -127,6 +127,10 @@ const config: StorybookConfig = {
             replacement: storybookProviderEntry,
           },
           {
+            find: /^@vireocodedev\/ui\/theme$/,
+            replacement: resolve(storybookDirectory, "../src/core/utils/themeutils.ts"),
+          },
+          {
             find: /^@vireocodedev\/starter-ui\/storybook$/,
             replacement: storybookProviderEntry,
           },

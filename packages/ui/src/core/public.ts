@@ -32,5 +32,5 @@ export * from "./utils/mathutils";
 export * from "./utils/muiutils";
 export * from "./utils/objectutils";
 export * from "./utils/strings";
-export * from "./utils/themeutils";
+export { createDarkTheme, reverseNumericScale } from "./utils/themeutils";
 export * from "./utils/tsutils";

@@ -1,26 +1,25 @@
 import { VireoToaster, toast } from "@vireocodedev/ui/sonner";
-import { Button, CssBaseline, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Button, Stack, ThemeProvider, Typography, createTheme, useTheme } from "@mui/material";
+import React from "react";
 
 const toasterId = "theme-customization";
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: { main: "#a78bfa" },
-    background: { default: "#080d18", paper: "#17132b" },
-  },
-  shape: { borderRadius: 14 },
-  components: {
-    VireoToaster: {
-      defaultProps: { duration: 5000 },
-      styleOverrides: { root: { "& [data-sonner-toast]": { borderInlineStart: "4px solid #a78bfa" } } },
-    },
-  },
-});
-
 export default function ThemeCustomizationExample() {
+  const outerTheme = useTheme();
+  const theme = React.useMemo(
+    () =>
+      createTheme(outerTheme, {
+        shape: { borderRadius: 14 },
+        components: {
+          VireoToaster: {
+            defaultProps: { duration: 5000 },
+            styleOverrides: { root: { "& [data-sonner-toast]": { borderInlineStart: "4px solid #a78bfa" } } },
+          },
+        },
+      }),
+    [outerTheme],
+  );
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
       <Stack
         spacing={2}
         sx={{
