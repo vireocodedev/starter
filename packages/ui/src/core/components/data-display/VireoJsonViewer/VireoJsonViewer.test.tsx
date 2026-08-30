@@ -1,5 +1,5 @@
 import { ThemeProvider, createTheme } from "@mui/material";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { VireoJsonViewer } from "./VireoJsonViewer";
@@ -89,12 +89,14 @@ describe(VIREO_JSON_VIEWER_NAME, () => {
   });
 
   it("announces clipboard failures and keeps the copy action available", async () => {
+    vi.useFakeTimers();
     writeText.mockRejectedValueOnce(new Error("Denied"));
     render(<VireoJsonViewer {...requiredProps} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Copy JSON" }));
+    await act(async () => Promise.resolve());
 
-    await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+    expect(writeText).toHaveBeenCalledOnce();
     expect(screen.getByRole("button", { name: "Unable to copy JSON" })).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Unable to copy JSON");
   });
