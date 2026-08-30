@@ -1,7 +1,0 @@
-{
-  "schemaVersion": 1,
-  "artifact": "jvm:vireo-bom",
-  "decision": "release",
-  "bump": "patch",
-  "summary": "Align the coordinated JVM family after adding optional observability integration."
-}

@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/query",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Framework-free Vireo query schemas, transport ports, and parameterized SQLite execution.",
   "type": "module",
   "sideEffects": false,

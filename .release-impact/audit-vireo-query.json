@@ -1,7 +1,0 @@
-{
-  "schemaVersion": 1,
-  "artifact": "jvm:vireo-query",
-  "decision": "release",
-  "bump": "minor",
-  "summary": "Add safe query and relation-option observability events with an optional Micrometer bridge."
-}

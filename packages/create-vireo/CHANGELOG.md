@@ -1,5 +1,16 @@
 # create-vireo
 
+## 0.5.0
+
+### Minor Changes
+
+- 348989f: Add a content-addressed, dry-run-first `vireo remove-example` workflow for removing the generated sample domain without overwriting customized files.
+
+### Patch Changes
+
+- 05fb1fd: Report the supported Ubuntu verification host in generated frontend Doctor output and surface it beside project prerequisites.
+- 706cac2: Standardize Vireo Framework product terminology and publish canonical documentation, issue, and source routes in registry metadata.
+
 ## 0.4.2
 
 ### Patch Changes

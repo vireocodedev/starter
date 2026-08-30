@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/history",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Framework-free Vireo entity-history definitions, diff nodes, and transport-neutral record schemas.",
   "type": "module",
   "sideEffects": false,

@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/localization",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Vireo localization toolkit and shared, validated application translations.",
   "type": "module",
   "sideEffects": false,

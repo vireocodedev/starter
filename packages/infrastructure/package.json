@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/infrastructure",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "React-free Vireo browser infrastructure for validated HTTP transport, connectivity, persistence, and execution modes.",
   "type": "module",
   "sideEffects": false,

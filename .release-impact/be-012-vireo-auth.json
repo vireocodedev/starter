@@ -1,7 +1,0 @@
-{
-  "schemaVersion": 1,
-  "artifact": "jvm:vireo-auth",
-  "decision": "release",
-  "bump": "patch",
-  "summary": "Serialize authentication errors with Boot's Jackson 3 mapper."
-}

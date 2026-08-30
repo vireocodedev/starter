@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/shell",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Framework-free Vireo contracts for application sitemaps, navigation, auth redirects, and overlay history.",
   "type": "module",
   "sideEffects": false,

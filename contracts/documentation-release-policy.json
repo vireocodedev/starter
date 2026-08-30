@@ -9,14 +9,14 @@
       "documentationLabel": "Vireo 0.2",
       "status": "current",
       "npm": [
-        { "package": "create-vireo", "version": "0.4.2" },
-        { "package": "@vireocodedev/history", "version": "0.2.1" },
-        { "package": "@vireocodedev/infrastructure", "version": "0.2.1" },
-        { "package": "@vireocodedev/localization", "version": "0.2.1" },
-        { "package": "@vireocodedev/query", "version": "0.2.1" },
-        { "package": "@vireocodedev/shell", "version": "0.2.1" },
-        { "package": "@vireocodedev/sqlite", "version": "0.2.2" },
-        { "package": "@vireocodedev/ui", "version": "0.2.2" }
+        { "package": "create-vireo", "version": "0.5.0" },
+        { "package": "@vireocodedev/history", "version": "0.2.2" },
+        { "package": "@vireocodedev/infrastructure", "version": "0.2.2" },
+        { "package": "@vireocodedev/localization", "version": "0.2.2" },
+        { "package": "@vireocodedev/query", "version": "0.2.2" },
+        { "package": "@vireocodedev/shell", "version": "0.2.2" },
+        { "package": "@vireocodedev/sqlite", "version": "0.2.3" },
+        { "package": "@vireocodedev/ui", "version": "1.0.0" }
       ],
       "jvm": {
         "group": "com.vireocode",

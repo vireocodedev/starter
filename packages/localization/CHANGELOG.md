@@ -1,5 +1,11 @@
 # @vireocodedev/localization
 
+## 0.2.2
+
+### Patch Changes
+
+- 706cac2: Standardize Vireo Framework product terminology and publish canonical documentation, issue, and source routes in registry metadata.
+
 ## 0.2.1
 
 ### Patch Changes

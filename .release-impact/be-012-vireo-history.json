@@ -1,7 +1,0 @@
-{
-  "schemaVersion": 1,
-  "artifact": "jvm:vireo-history",
-  "decision": "release",
-  "bump": "major",
-  "summary": "Expose history snapshots as Jackson 3 tree contracts."
-}

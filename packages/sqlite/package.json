@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/sqlite",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Reusable Vireo SQLite worker and client runtime primitives for browser persistence and offline workflows.",
   "type": "module",
   "sideEffects": false,
