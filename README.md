@@ -15,7 +15,7 @@ adversarial admission checklist are in
 [Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
 current runnable full-stack composition.
 
-[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/038df86f7e311ef771e0f01a4a44b698f27e4b28/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
+[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/26f21c0fe3203f2b91a74fa75b29056ad028b42d/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
 
 This is the current Template pinned by the release contract, not a concept render. [Try the disposable live demo](https://demo.vireocode.com), follow the [guided build](https://vireocode.com/docs/getting-started/), or read [who Vireo does and does not fit](https://vireocode.com/docs/getting-started/choose-your-profile/) before installing.
 
@@ -67,14 +67,14 @@ Public-beta evaluation is open, but readiness and independent adoption are not y
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.4.2   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
-| [`@vireocodedev/ui`](packages/ui)                         | 0.2.2   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
-| [`@vireocodedev/query`](packages/queryengine)             | 0.2.1   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
-| [`@vireocodedev/shell`](packages/shell)                   | 0.2.1   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
-| [`@vireocodedev/localization`](packages/localization)     | 0.2.1   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
-| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.2   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
-| [`@vireocodedev/history`](packages/history)               | 0.2.1   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
-| [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.1   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
+| [`create-vireo`](packages/create-vireo)                   | 0.5.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
+| [`@vireocodedev/ui`](packages/ui)                         | 0.3.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
+| [`@vireocodedev/query`](packages/queryengine)             | 0.2.2   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
+| [`@vireocodedev/shell`](packages/shell)                   | 0.2.2   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
+| [`@vireocodedev/localization`](packages/localization)     | 0.2.2   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
+| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.3   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
+| [`@vireocodedev/history`](packages/history)               | 0.2.2   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
+| [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.2   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
 
 Versions above are the current package lines. `packages/*/package.json` remains the source of truth.
 

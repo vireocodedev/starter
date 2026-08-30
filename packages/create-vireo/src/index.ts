@@ -53,7 +53,7 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-export const TEMPLATE_COMMIT = "038df86f7e311ef771e0f01a4a44b698f27e4b28";
+export const TEMPLATE_COMMIT = "26f21c0fe3203f2b91a74fa75b29056ad028b42d";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";
@@ -387,7 +387,7 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       "architecture:check": packageJson.scripts["architecture:check"],
       "bundle:check": packageJson.scripts["bundle:check"],
       preview: packageJson.scripts.preview,
-      vireo: "npx --yes --package=create-vireo@0.4.2 vireo",
+      vireo: "npx --yes --package=create-vireo@0.5.0 vireo",
       "generate:check": "corepack npm run vireo -- check",
       verify: "bash scripts/verify-frontend-profile.sh",
     };
@@ -430,7 +430,7 @@ async function pinGeneratedProjectCli(staging: string) {
     scripts?: Record<string, string>;
   };
   if (!packageJson.scripts) throw new Error("The pinned Template package.json does not declare scripts.");
-  packageJson.scripts.vireo = "npx --yes --package=create-vireo@0.4.2 vireo";
+  packageJson.scripts.vireo = "npx --yes --package=create-vireo@0.5.0 vireo";
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 }
 
@@ -498,7 +498,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     await mkdir(join(staging, ".vireo"), { recursive: true });
     await writeFile(
       join(staging, ".vireo", "project.json"),
-      `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.4.2" }, null, 2)}\n`,
+      `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: "create-vireo@0.5.0" }, null, 2)}\n`,
     );
     await writeExampleManifest(staging, TEMPLATE_COMMIT, profile);
     if (options.git !== false) {

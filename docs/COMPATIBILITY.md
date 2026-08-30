@@ -17,15 +17,15 @@ the package manifests:
 
 | Artifact                       | Current version |
 | ------------------------------ | --------------: |
-| `create-vireo`                 |           0.4.2 |
-| `@vireocodedev/history`        |           0.2.1 |
-| `@vireocodedev/infrastructure` |           0.2.1 |
-| `@vireocodedev/localization`   |           0.2.1 |
-| `@vireocodedev/query`          |           0.2.1 |
-| `@vireocodedev/shell`          |           0.2.1 |
-| `@vireocodedev/sqlite`         |           0.2.2 |
-| `@vireocodedev/ui`             |           0.2.2 |
-| `com.vireocode:vireo-*`        |           0.2.0 |
+| `create-vireo`                 |           0.5.0 |
+| `@vireocodedev/history`        |           0.2.2 |
+| `@vireocodedev/infrastructure` |           0.2.2 |
+| `@vireocodedev/localization`   |           0.2.2 |
+| `@vireocodedev/query`          |           0.2.2 |
+| `@vireocodedev/shell`          |           0.2.2 |
+| `@vireocodedev/sqlite`         |           0.2.3 |
+| `@vireocodedev/ui`             |           0.3.0 |
+| `com.vireocode:vireo-*`        |           0.3.0 |
 
 `create-vireo` includes the frontend profile. Version 0.2.0 remains the first
 supported project-upgrade source for the explicit 0.2.0→0.3.0 pair. Numeric

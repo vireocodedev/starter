@@ -93,13 +93,13 @@ test("builds the complete multi-page, searchable and versioned website artifact"
   try {
     const result = buildWebsite({ outputRoot });
 
-    assert.equal(result.website.documentation.version, "0.2");
+    assert.equal(result.website.documentation.version, "0.3");
     assert.ok(result.pages.length >= 50);
     assert.ok(result.searchIndex.length > 1_000);
     for (const path of [
       "index.html",
       "docs/index.html",
-      "docs/0.2/index.html",
+      "docs/0.3/index.html",
       "docs/getting-started/frontend-only/index.html",
       "docs/concepts/architecture/index.html",
       "docs/cli/doctor/index.html",
@@ -118,7 +118,7 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     const docs = readFileSync(join(outputRoot, "docs/index.html"), "utf8");
     const components = readFileSync(join(outputRoot, "docs/components/index.html"), "utf8");
     const examples = readFileSync(join(outputRoot, "examples/index.html"), "utf8");
-    const snapshot = readFileSync(join(outputRoot, "docs/0.2/index.html"), "utf8");
+    const snapshot = readFileSync(join(outputRoot, "docs/0.3/index.html"), "utf8");
     for (const page of result.pages) {
       const html = readFileSync(
         page.path === "/" ? join(outputRoot, "index.html") : join(outputRoot, page.path.slice(1), "index.html"),
@@ -156,7 +156,7 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     assert.match(componentSidebar, /href="\/reference\/"/u);
     assert.match(components, /data-theme-target="light"/u);
     assert.match(components, /data-theme-icon="dark"/u);
-    assert.match(snapshot, /Vireo 0.2 snapshot/u);
+    assert.match(snapshot, /Vireo 0.3 snapshot/u);
     assert.match(snapshot, /rel="canonical" href="https:\/\/vireocode.com\/docs\/"/u);
   } finally {
     rmSync(outputRoot, { recursive: true, force: true });

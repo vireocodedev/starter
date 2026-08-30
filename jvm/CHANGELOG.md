@@ -1,6 +1,6 @@
 # Vireo JVM changelog
 
-## 1.0.0
+## 0.3.0
 
 - **vireo-bom:** Align the coordinated JVM family after adding optional observability integration.
 - **vireo-query:** Add safe query and relation-option observability events with an optional Micrometer bridge.

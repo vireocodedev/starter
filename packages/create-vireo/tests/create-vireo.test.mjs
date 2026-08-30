@@ -79,7 +79,7 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.match(await readFile(join(target, "settings.gradle"), "utf8"), /sample-app/u);
     assert.equal(await readFile(join(target, "README.md"), "utf8"), "# Sample App\n");
     assert.match(await readFile(join(target, "frontend/vite.config.ts"), "utf8"), /name: "Sample App"/u);
-    assert.match(await readFile(join(target, "package.json"), "utf8"), /create-vireo@0\.4\.2/u);
+    assert.match(await readFile(join(target, "package.json"), "utf8"), /create-vireo@0\.5\.0/u);
     assert.match(
       await readFile(join(target, "src/main/java/dev/example/sample/App.java"), "utf8"),
       /package dev\.example\.sample/u,

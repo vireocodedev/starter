@@ -14,7 +14,7 @@ experience.
 | Route                | Content                                                 |
 | -------------------- | ------------------------------------------------------- |
 | `/docs/`             | Current friendly documentation line                     |
-| `/docs/0.2/`         | Version-specific copy of the current Vireo 0.2 guides   |
+| `/docs/0.3/`         | Version-specific copy of the current Vireo 0.3 guides   |
 | `/examples/`         | End-to-end and interactive example paths                |
 | `/storybook/`        | Curated Storybook entry and exact snapshot link         |
 | `/reference/`        | TypeScript, Java, Storybook, and release reference map  |
@@ -44,7 +44,7 @@ Main-site search federates every checked TypeScript export and JVM public type i
 
 ## Version contract
 
-The human-facing version is a Vireo minor line such as `0.2`. It maps to independent
+The human-facing version is a Vireo minor line such as `0.3`. It maps to independent
 artifact versions rather than replacing them. The current mapping includes:
 
 - the exact `create-vireo` release;
@@ -53,7 +53,7 @@ artifact versions rather than replacing them. The current mapping includes:
 - the exact starter-template commit; and
 - the immutable GitHub Pages reference snapshot.
 
-The machine release ID, currently `npm-0.2.1_jvm-0.2.0`, remains an internal exact
+The machine release ID, currently `npm-0.5.0_jvm-0.3.0`, remains an internal exact
 snapshot key. It is deliberately not the primary navigation label.
 
 When a future documentation line becomes current, retain the prior friendly route as

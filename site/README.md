@@ -38,7 +38,7 @@ release, evidence, and deep implementation material may remain repository-owned.
 Storybook owns interactive component states. Generated TypeScript and Java pages
 own exhaustive signatures. Neither replaces explanatory website content.
 
-The current alias is `/docs/`; the friendly snapshot is `/docs/0.2/`. Exact
+The current alias is `/docs/`; the friendly snapshot is `/docs/0.3/`. Exact
 reference snapshots keep the independent machine release identifier used by the
 GitHub Pages portal.
 

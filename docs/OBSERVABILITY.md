@@ -8,16 +8,16 @@ the libraries.
 
 ## Observation names and tags
 
-| Observation | Low-cardinality tags |
-| --- | --- |
-| `vireo.query.execution` | `outcome`, `searched`, `filtered` |
-| `vireo.query.relation.options` | `outcome`, `searched` |
-| `vireo.offline.batch` | `operation`, `outcome` |
-| `vireo.offline.replay` | `operation`, `outcome` |
-| `vireo.offline.queue` | `operation`, `outcome` |
-| `vireo.offline.sse` | `operation`, `outcome` |
-| `vireo.offline.lifecycle` | `operation` |
-| `vireo.history.lifecycle` | `operation` |
+| Observation                    | Low-cardinality tags              |
+| ------------------------------ | --------------------------------- |
+| `vireo.query.execution`        | `outcome`, `searched`, `filtered` |
+| `vireo.query.relation.options` | `outcome`, `searched`             |
+| `vireo.offline.batch`          | `operation`, `outcome`            |
+| `vireo.offline.replay`         | `operation`, `outcome`            |
+| `vireo.offline.queue`          | `operation`, `outcome`            |
+| `vireo.offline.sse`            | `operation`, `outcome`            |
+| `vireo.offline.lifecycle`      | `operation`                       |
+| `vireo.history.lifecycle`      | `operation`                       |
 
 Every tag value comes from a bounded enum or boolean. Entity names, relation
 fields, URLs, search strings, command IDs, partition/owner/actor identifiers,

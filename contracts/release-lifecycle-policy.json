@@ -15,9 +15,9 @@
   },
   "supportLines": [
     {
-      "id": "0.2-alpha",
+      "id": "0.3-alpha",
       "status": "active",
-      "release": "npm-0.2.1_jvm-0.2.0",
+      "release": "npm-0.5.0_jvm-0.3.0",
       "introducedOn": "2026-08-26",
       "statusEffectiveOn": "2026-08-30",
       "deprecatedOn": null,
