@@ -1,6 +1,0 @@
-{
-  "schemaVersion": 1,
-  "artifact": "npm:create-vireo",
-  "decision": "no-release",
-  "justification": "Reconciles the generated API snapshot for the already-versioned remove-example workflow; packed runtime bytes and behavior are unchanged."
-}
