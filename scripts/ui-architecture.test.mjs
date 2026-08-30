@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { expandBraces, globToRegExp, isExecutableStoryExample, matchesGlob } from "./ui-architecture.mjs";
+import {
+  expandBraces,
+  globToRegExp,
+  isExecutableStoryExample,
+  isStructuralComponentsDirectory,
+  matchesGlob,
+  missingVireoRuntimeOrchestration,
+} from "./ui-architecture.mjs";
 
 describe("UI architecture path matching", () => {
   it("expands each explicit brace alternative", () => {
@@ -42,6 +49,40 @@ describe("UI architecture path matching", () => {
     assert.equal(
       isExecutableStoryExample("core/components/surfaces/VireoIconContainer/internal/storybook/fixtures.tsx"),
       false,
+    );
+  });
+
+  it("enumerates integration-owned public component roots", () => {
+    assert.equal(isStructuralComponentsDirectory("core/components"), true);
+    assert.equal(isStructuralComponentsDirectory("capabilities/forms/components"), true);
+    assert.equal(isStructuralComponentsDirectory("integrations/hello-pangea-dnd/components"), true);
+    assert.equal(
+      isStructuralComponentsDirectory(
+        "integrations/hello-pangea-dnd/components/layout/VireoDropZone/internal/components",
+      ),
+      false,
+    );
+  });
+
+  it("requires public runtime orchestration in the canonical component module", () => {
+    const canonicalSource = `
+      function useUtilityClasses() {}
+      useThemeProps({});
+      resolveSlotProps({}, {});
+      useForkRef();
+    `;
+
+    assert.deepEqual(missingVireoRuntimeOrchestration(canonicalSource), []);
+    assert.deepEqual(missingVireoRuntimeOrchestration("useThemeProps({});"), [
+      "private useUtilityClasses",
+      "resolveSlotProps call",
+      "useForkRef call",
+    ]);
+    assert.deepEqual(
+      missingVireoRuntimeOrchestration(
+        "// function useUtilityClasses() {} resolveSlotProps({}, {}); useForkRef();\nuseThemeProps({});",
+      ),
+      ["private useUtilityClasses", "resolveSlotProps call", "useForkRef call"],
     );
   });
 });

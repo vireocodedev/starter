@@ -74,6 +74,7 @@ const RULES = new Set([
   "target-empty-directory",
   "vireo-name",
   "vireo-root-contract",
+  "vireo-runtime-contract",
   "vireo-theme-contract",
 ]);
 
@@ -448,17 +449,45 @@ function isPrivateComponentDirectory(path) {
   return /(?:^|\/)internal\/components\/[^/]+$/u.test(path);
 }
 
-function collectComponentViolations(directories, files, violations) {
-  const structuralComponents = directories.filter(path => {
-    const segments = path.split("/");
-    if (segments.at(-1) !== "components" || segments.at(-2) === "internal") return false;
+export function isStructuralComponentsDirectory(path) {
+  const segments = path.split("/");
+  if (segments.at(-1) !== "components" || segments.at(-2) === "internal") return false;
 
-    return (
-      path === "core/components" ||
-      /^capabilities\/[^/]+\/components$/u.test(path) ||
-      /^capabilities\/[^/]+\/[^/]+\/components$/u.test(path)
-    );
-  });
+  return (
+    path === "core/components" ||
+    /^capabilities\/[^/]+\/components$/u.test(path) ||
+    /^capabilities\/[^/]+\/[^/]+\/components$/u.test(path) ||
+    /^integrations\/[^/]+\/components$/u.test(path)
+  );
+}
+
+export function missingVireoRuntimeOrchestration(source) {
+  const parsed = ts.createSourceFile("VireoComponent.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const found = new Set();
+
+  function visit(node) {
+    if (ts.isFunctionDeclaration(node) && node.name?.text === "useUtilityClasses") {
+      found.add("private useUtilityClasses");
+    }
+
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+      if (node.expression.text === "useThemeProps") found.add("useThemeProps call");
+      if (node.expression.text === "resolveSlotProps") found.add("resolveSlotProps call");
+      if (node.expression.text === "useForkRef") found.add("useForkRef call");
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(parsed);
+
+  return ["private useUtilityClasses", "useThemeProps call", "resolveSlotProps call", "useForkRef call"].filter(
+    label => !found.has(label),
+  );
+}
+
+function collectComponentViolations(directories, files, violations) {
+  const structuralComponents = directories.filter(isStructuralComponentsDirectory);
 
   for (const componentsPath of structuralComponents) {
     const absoluteComponentsPath = resolve(srcRoot, componentsPath);
@@ -513,6 +542,7 @@ function collectComponentViolations(directories, files, violations) {
         ]);
         const actualEntries = immediateEntries(resolve(absoluteComponentsPath, entry.name, component.name));
         const typesPath = resolve(absoluteComponentsPath, entry.name, component.name, `${component.name}.types.ts`);
+        const implementationPath = resolve(absoluteComponentsPath, entry.name, component.name, `${component.name}.tsx`);
 
         if (existsSync(typesPath)) {
           const typesSource = readFileSync(typesPath, "utf8");
@@ -548,6 +578,20 @@ function collectComponentViolations(directories, files, violations) {
                 "vireo-root-contract",
                 `${componentPath}/${expectedFile}`,
                 "required Vireo root file is missing",
+              ),
+            );
+          }
+        }
+
+        if (existsSync(implementationPath)) {
+          const missingOrchestration = missingVireoRuntimeOrchestration(readFileSync(implementationPath, "utf8"));
+
+          if (missingOrchestration.length > 0) {
+            violations.push(
+              violation(
+                "vireo-runtime-contract",
+                `${componentPath}/${component.name}.tsx`,
+                `canonical implementation is missing ${missingOrchestration.join(", ")}`,
               ),
             );
           }

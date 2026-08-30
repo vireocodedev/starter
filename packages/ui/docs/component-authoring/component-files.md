@@ -27,6 +27,8 @@ Order a component implementation as follows:
 
 The optional sections exist only when component behavior requires them. Preserve dependency order rather than creating empty sections.
 
+Render-prop integrations may need a private bridge component so hooks remain legal after an adapter supplies render-time state. Keep that bridge in the canonical `VireoComponent.tsx` module with the public component. The canonical module still owns theme-prop resolution, owner state, utility classes, slot resolution, ref composition, prop precedence, and final JSX composition; do not move that orchestration into `internal/components`.
+
 ## Imports
 
 Import contracts from their owning modules:
