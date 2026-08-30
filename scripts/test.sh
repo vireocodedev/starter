@@ -9,6 +9,7 @@ node --test \
   scripts/local-vireo-maven-candidate-fixture.test.mjs \
   scripts/package-bin.test.mjs \
   scripts/publish-verified-npm-candidates.test.mjs \
+  scripts/reference-symbol-anchors.test.mjs \
   scripts/release-impact-policy.test.mjs \
   scripts/release-impact-version.test.mjs \
   scripts/release-lifecycle-policy.test.mjs \

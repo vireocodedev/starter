@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkCheckedInDocumentationOwnership } from "./lib/documentation-ownership-contract.mjs";
+import { countHtmlIdAttributes } from "./lib/reference-symbol-anchors.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policyPath = join(root, "contracts/documentation-release-policy.json");
@@ -176,6 +177,11 @@ function validateArtifact(release) {
   if (!existsSync(join(versionRoot, "search-index.json"))) return;
 
   const search = readJson(join(versionRoot, "search-index.json"));
+  const typeScriptSearch = search.filter(entry => entry.category === "TypeScript API");
+  const typeScriptUrls = typeScriptSearch.map(entry => entry.url);
+  if (typeScriptUrls.some(url => typeof url !== "string") || new Set(typeScriptUrls).size !== typeScriptUrls.length) {
+    problems.push("generated TypeScript search URLs must be unique strings");
+  }
   const generatedVersions = readJson(join(outputRoot, "versions.json"));
   if (generatedVersions.currentRelease !== policy.currentRelease) {
     problems.push("generated version index does not identify the current documentation release");
@@ -241,9 +247,14 @@ function validateArtifact(release) {
     });
     if (!hasResult) problems.push(`generated search example ${query} has no result`);
   }
-  const htmlCache = new Map();
+  const htmlIdCounts = new Map();
   for (const entry of search) {
+    if (typeof entry?.url !== "string") continue;
     const [urlWithoutFragment, fragment] = entry.url.split("#", 2);
+    if (entry.category === "TypeScript API" && !fragment) {
+      problems.push(`TypeScript search entry ${entry.label} must include a symbol anchor`);
+      continue;
+    }
     const targetPath = decodeURIComponent(urlWithoutFragment.split("?", 1)[0]);
     let resolvedTarget = join(versionRoot, targetPath);
     if (existsSync(resolvedTarget) && statSync(resolvedTarget).isDirectory()) {
@@ -254,9 +265,12 @@ function validateArtifact(release) {
       if (problems.length > 30) return;
     }
     if (entry.category === "TypeScript API" && fragment && existsSync(resolvedTarget)) {
-      if (!htmlCache.has(resolvedTarget)) htmlCache.set(resolvedTarget, readFileSync(resolvedTarget, "utf8"));
-      if (!htmlCache.get(resolvedTarget).includes(`id="${decodeURIComponent(fragment)}"`)) {
-        problems.push(`TypeScript search entry ${entry.label} links to missing anchor ${entry.url}`);
+      if (!htmlIdCounts.has(resolvedTarget)) {
+        htmlIdCounts.set(resolvedTarget, countHtmlIdAttributes(readFileSync(resolvedTarget, "utf8")));
+      }
+      const anchorCount = htmlIdCounts.get(resolvedTarget).get(decodeURIComponent(fragment)) ?? 0;
+      if (anchorCount !== 1) {
+        problems.push(`TypeScript search entry ${entry.label} must link to exactly one anchor ${entry.url}`);
         if (problems.length > 30) return;
       }
     }

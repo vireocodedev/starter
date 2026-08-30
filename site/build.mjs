@@ -1,6 +1,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { allocateReferenceSymbolAnchors } from "../scripts/lib/reference-symbol-anchors.mjs";
 import { renderWebsitePage } from "./app.mjs";
 import { renderMarkdown } from "./markdown.mjs";
 
@@ -99,13 +100,15 @@ export function createReferenceSearchIndex({ root = repositoryRoot, website }) {
       const pageName = `${manifest.name.replace(/^@/u, "").replaceAll("/", "-")}--${
         entryPoint === "." ? "root" : entryPoint.slice(2).replaceAll("/", "-")
       }.html`;
-      for (const symbol of contract.exports ?? []) {
+      const symbols = contract.exports ?? [];
+      const anchors = allocateReferenceSymbolAnchors(symbols);
+      for (const [index, symbol] of symbols.entries()) {
         records.push({
           category: "TypeScript API",
           description: `Public export from ${importPath}`,
           label: symbol,
           text: `${symbol} ${importPath}`,
-          url: `${snapshot}api/typescript/${pageName}#${referenceSymbolAnchor(symbol)}`,
+          url: `${snapshot}api/typescript/${pageName}#${anchors[index]}`,
           version: website.documentation.version,
         });
       }
@@ -130,10 +133,6 @@ export function createReferenceSearchIndex({ root = repositoryRoot, website }) {
     }
   }
   return records;
-}
-
-function referenceSymbolAnchor(symbol) {
-  return `symbol-${symbol.toLocaleLowerCase().replace(/[^a-z0-9_-]+/gu, "-")}`;
 }
 
 export function createWebsiteModel({ documentationPolicy, sitePolicy }) {

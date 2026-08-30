@@ -150,9 +150,22 @@ function validateArtifact(release, declaredPages) {
     problems.push("generated website template pin drifted from documentation policy");
   if (versions.currentDocumentationVersion !== release.documentationVersion)
     problems.push("generated versions index has the wrong friendly version");
-  if (search.length !== declaredPages.length)
-    problems.push(`search index must contain all ${declaredPages.length} canonical content pages`);
-  if (new Set(search.map(entry => entry.url)).size !== search.length) problems.push("search index URLs must be unique");
+  if (!Array.isArray(search)) {
+    problems.push("search index must be an array");
+  } else {
+    const searchUrls = [];
+    for (const entry of search) {
+      if (typeof entry?.url !== "string") problems.push("every search index entry must provide a string URL");
+      else searchUrls.push(entry.url);
+    }
+    if (new Set(searchUrls).size !== searchUrls.length || searchUrls.length !== search.length)
+      problems.push("search index URLs must be unique");
+    for (const page of declaredPages) {
+      const canonicalUrl = normalizeRoute(page.path);
+      const count = searchUrls.filter(url => url === canonicalUrl).length;
+      if (count !== 1) problems.push(`search index must contain canonical content URL ${canonicalUrl} exactly once`);
+    }
+  }
 
   for (const expected of [
     sitePolicy.canonicalUrl,
@@ -201,6 +214,10 @@ function countFiles(directory, fileName) {
     else if (entry.name === fileName) count += 1;
   }
   return count;
+}
+
+function normalizeRoute(route) {
+  return route === "/" || route.endsWith("/") ? route : `${route}/`;
 }
 
 function readJson(path) {

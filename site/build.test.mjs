@@ -41,6 +41,7 @@ const documentationPolicy = {
     },
   ],
 };
+const contentManifest = JSON.parse(readFileSync(new URL("./content/manifest.json", import.meta.url), "utf8"));
 
 test("derives friendly and exact release identities from one policy", () => {
   const website = createWebsiteModel({ documentationPolicy, sitePolicy });
@@ -72,10 +73,20 @@ test("federates exact TypeScript and JVM symbols into main-site search", () => {
   const index = createReferenceSearchIndex({ website });
   const pageLayout = index.find(entry => entry.label === "VireoPageLayout");
   const baseService = index.find(entry => entry.label === "BaseService");
+  const entityNames = index.find(entry => entry.label === "EntityNames");
+  const entityNamesValue = index.find(entry => entry.label === "entityNames");
+  const formActionsClasses = index.find(entry => entry.label === "VireoFormActionsClasses");
+  const formActionsClassesValue = index.find(entry => entry.label === "vireoFormActionsClasses");
 
   assert.ok(index.length > 1_000);
   assert.match(pageLayout?.url ?? "", /api\/typescript\/vireocodedev-ui--root\.html#symbol-vireopagelayout$/u);
   assert.match(baseService?.url ?? "", /api\/jvm\/com\/vireocode\/vireo\/base\/BaseService\.html$/u);
+  assert.match(entityNames?.url ?? "", /create-vireo--root\.html#symbol-entitynames$/u);
+  assert.match(entityNamesValue?.url ?? "", /create-vireo--root\.html#symbol-entitynames-2$/u);
+  assert.match(formActionsClasses?.url ?? "", /vireocodedev-ui--root\.html#symbol-vireoformactionsclasses$/u);
+  assert.match(formActionsClassesValue?.url ?? "", /vireocodedev-ui--root\.html#symbol-vireoformactionsclasses-2$/u);
+  const typeScriptUrls = index.filter(entry => entry.category === "TypeScript API").map(entry => entry.url);
+  assert.equal(new Set(typeScriptUrls).size, typeScriptUrls.length);
 });
 
 test("makes manifest metadata the sole page H1", () => {
@@ -96,6 +107,18 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     assert.equal(result.website.documentation.version, "0.3");
     assert.ok(result.pages.length >= 50);
     assert.ok(result.searchIndex.length > 1_000);
+    const manifestCanonicalUrls = [
+      ...contentManifest.sections.flatMap(section => section.pages),
+      ...contentManifest.standalone,
+    ].map(page => (page.path.endsWith("/") ? page.path : `${page.path}/`));
+    assert.ok(
+      result.searchIndex.length > manifestCanonicalUrls.length,
+      "federated search must be a superset of canonical content",
+    );
+    assert.equal(new Set(result.searchIndex.map(entry => entry.url)).size, result.searchIndex.length);
+    for (const url of manifestCanonicalUrls) {
+      assert.equal(result.searchIndex.filter(entry => entry.url === url).length, 1, `${url} must remain searchable`);
+    }
     for (const path of [
       "index.html",
       "docs/index.html",

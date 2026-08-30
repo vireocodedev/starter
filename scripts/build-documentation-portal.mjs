@@ -2,6 +2,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, write
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { allocateReferenceSymbolAnchors } from "./lib/reference-symbol-anchors.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputRoot = join(root, "packages/ui/storybook-static");
@@ -125,16 +126,20 @@ function buildTypeScriptReference(destinationRoot, currentRelease) {
       const moduleSymbol = sourceFile && checker.getSymbolAtLocation(sourceFile);
       if (!moduleSymbol) fail(`could not inspect declarations for ${packageRecord.manifest.name} ${entryPoint}`);
       const exportsByName = new Map(checker.getExportsOfModule(moduleSymbol).map(symbol => [symbol.getName(), symbol]));
-      const symbols = surface.exports.map(name => {
+      const anchors = allocateReferenceSymbolAnchors(surface.exports);
+      const symbols = surface.exports.map((name, index) => {
         const exportedSymbol = exportsByName.get(name);
         if (!exportedSymbol) fail(`${packageRecord.manifest.name} ${entryPoint} cannot resolve ${name}`);
-        return describeSymbol({
-          checker,
-          exportedSymbol,
-          packageRoot: packageRecord.packageRoot,
-          printer,
-          sourceFile,
-        });
+        return {
+          ...describeSymbol({
+            checker,
+            exportedSymbol,
+            packageRoot: packageRecord.packageRoot,
+            printer,
+            sourceFile,
+          }),
+          anchor: anchors[index],
+        };
       });
       const pageName = entryPointFileName(packageRecord.manifest.name, entryPoint);
       const importPath =
@@ -188,7 +193,6 @@ function describeSymbol({ checker, exportedSymbol, packageRoot, printer, sourceF
   }
   const documentation = ts.displayPartsToString(symbol.getDocumentationComment(checker)).trim();
   return {
-    anchor: slug(exportedSymbol.getName()),
     documentation,
     kind: declarationKind(printableDeclarations[0]),
     name: exportedSymbol.getName(),
@@ -430,10 +434,6 @@ function entryPointFileName(packageName, entryPoint) {
   const packagePart = packageName.replace(/^@/, "").replaceAll("/", "-");
   const entryPart = entryPoint === "." ? "root" : entryPoint.slice(2).replaceAll("/", "-");
   return `${packagePart}--${entryPart}.html`;
-}
-
-function slug(value) {
-  return `symbol-${value.toLocaleLowerCase().replace(/[^a-z0-9_-]+/g, "-")}`;
 }
 
 function escapeHtml(value) {
