@@ -116,7 +116,7 @@ export const AlignmentContract: Story = {
   render: () => <AlignmentContractExample />,
   parameters: createSourceParameters(alignmentContractExampleSource),
   play: async ({ canvasElement }) => {
-    await waitFor(() => expect(canvasElement.querySelectorAll('[role="status"]')).toHaveLength(2));
+    await waitFor(() => expect(canvasElement.querySelectorAll("[data-alignment-state]")).toHaveLength(4));
 
     for (const pair of canvasElement.querySelectorAll<HTMLElement>("[data-alignment-pair]")) {
       const loaded = pair.querySelector<HTMLElement>('[data-alignment-state="loaded"]')!;
