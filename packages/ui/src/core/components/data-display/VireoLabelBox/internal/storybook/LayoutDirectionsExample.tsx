@@ -11,7 +11,7 @@ export default function LayoutDirectionsExample() {
             Column
           </Typography>
           <VireoLabelBox label="Project code" helperText="Optional">
-            <OutlinedInput aria-label="Column project code" defaultValue="NORTHSTAR" size="small" fullWidth />
+            {({ controlProps }) => <OutlinedInput {...controlProps} defaultValue="NORTHSTAR" size="small" fullWidth />}
           </VireoLabelBox>
         </Paper>
 
@@ -20,7 +20,7 @@ export default function LayoutDirectionsExample() {
             Row
           </Typography>
           <VireoLabelBox label="Project code" helperText="Optional" direction="row">
-            <OutlinedInput aria-label="Row project code" defaultValue="NORTHSTAR" size="small" fullWidth />
+            {({ controlProps }) => <OutlinedInput {...controlProps} defaultValue="NORTHSTAR" size="small" fullWidth />}
           </VireoLabelBox>
         </Paper>
       </Stack>

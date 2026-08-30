@@ -270,19 +270,12 @@ Using VireoLabelBox for consistent form field styling:
 ```tsx
 import { VireoLabelBox } from "@vireocodedev/ui";
 
-function FormField({ label, required, helperText, children }) {
-  return (
-    <VireoLabelBox label={label} required={required} helperText={helperText}>
-      {children}
-    </VireoLabelBox>
-  );
-}
-
-// Usage
-<FormField label="User Name" required helperText="Enter your full name">
-  <TextField fullWidth />
-</FormField>;
+<VireoLabelBox label="User name" required helperText="Enter your full name">
+  {({ controlProps }) => <TextField {...controlProps} fullWidth />}
+</VireoLabelBox>;
 ```
+
+The render-prop form supplies ready-to-spread `controlProps` plus generated `labelId` and optional `helperTextId` values for controls with specialized association APIs. Apply the relationships to the single associated control. Static children remain available for grouped content that owns its own semantics.
 
 ## Theme Customization Patterns
 

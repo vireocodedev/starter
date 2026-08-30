@@ -21,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Provides consistent external label, helper-text, required-indicator, and content anatomy around controls or grouped content.\n\n### Why it exists\n\nComposite controls and grouped content cannot always use a control's built-in MUI label, which otherwise leads consumers to recreate spacing, required indicators, and helper-text placement. This component supplies that shared external-label contract. Prefer the underlying control's native label when it already provides the correct semantics and layout.",
+          "Provides consistent external label, helper-text, required-indicator, and accessible control-association anatomy.\n\n### Why it exists\n\nComposite controls cannot always use a built-in MUI label, which otherwise leads consumers to recreate spacing and manually synchronize accessible names, descriptions, and required state. Use the render-prop form to apply Vireo's generated relationship props to one control; keep static children for grouped content that manages its own semantics, and prefer a control's native label when it already provides the correct anatomy.",
       },
     },
   },

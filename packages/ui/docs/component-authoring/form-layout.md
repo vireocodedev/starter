@@ -18,7 +18,7 @@ return (
       <form.Field name="email">
         {field => (
           <VireoLabelBox label="Email">
-            <field.TextField slotProps={{ htmlInput: { "aria-label": "Email" } }} />
+            {({ controlProps }) => <field.TextField slotProps={{ htmlInput: controlProps }} />}
           </VireoLabelBox>
         )}
       </form.Field>

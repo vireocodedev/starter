@@ -381,37 +381,43 @@ export function MobileResponsiveTable<
             {sortableColumns.length > 0 ? (
               <Stack spacing={2}>
                 <VireoLabelBox label={labels.sortBy}>
-                  <Select
-                    fullWidth
-                    value={sortableColumns.some(column => column.sort === filters.sortBy) ? filters.sortBy : ""}
-                    onChange={event => handleMobileSortColumnChange(event.target.value)}
-                  >
-                    {sortableColumns.map(column => (
-                      <MenuItem key={column.id} value={column.sort}>
-                        {column.renderHeader()}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  {({ controlProps, labelId }) => (
+                    <Select
+                      {...controlProps}
+                      labelId={labelId}
+                      fullWidth
+                      value={sortableColumns.some(column => column.sort === filters.sortBy) ? filters.sortBy : ""}
+                      onChange={event => handleMobileSortColumnChange(event.target.value)}
+                    >
+                      {sortableColumns.map(column => (
+                        <MenuItem key={column.id} value={column.sort}>
+                          {column.renderHeader()}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
                 </VireoLabelBox>
                 <VireoLabelBox label={labels.sortDirection}>
-                  <ToggleButtonGroup
-                    exclusive
-                    fullWidth
-                    value={filters.sortDirection}
-                    onChange={(_, direction: VireoResponsiveTableSortDirection | null) =>
-                      handleMobileSortDirectionChange(direction)
-                    }
-                    aria-label={labels.sortDirection}
-                  >
-                    <ToggleButton value="asc" aria-label={labels.ascendingSortDirection}>
-                      <ArrowUpwardRoundedIcon fontSize="small" sx={{ mr: 0.75 }} />
-                      {labels.ascending}
-                    </ToggleButton>
-                    <ToggleButton value="desc" aria-label={labels.descendingSortDirection}>
-                      <ArrowDownwardRoundedIcon fontSize="small" sx={{ mr: 0.75 }} />
-                      {labels.descending}
-                    </ToggleButton>
-                  </ToggleButtonGroup>
+                  {({ controlProps }) => (
+                    <ToggleButtonGroup
+                      {...controlProps}
+                      exclusive
+                      fullWidth
+                      value={filters.sortDirection}
+                      onChange={(_, direction: VireoResponsiveTableSortDirection | null) =>
+                        handleMobileSortDirectionChange(direction)
+                      }
+                    >
+                      <ToggleButton value="asc" aria-label={labels.ascendingSortDirection}>
+                        <ArrowUpwardRoundedIcon fontSize="small" sx={{ mr: 0.75 }} />
+                        {labels.ascending}
+                      </ToggleButton>
+                      <ToggleButton value="desc" aria-label={labels.descendingSortDirection}>
+                        <ArrowDownwardRoundedIcon fontSize="small" sx={{ mr: 0.75 }} />
+                        {labels.descending}
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  )}
                 </VireoLabelBox>
               </Stack>
             ) : null}

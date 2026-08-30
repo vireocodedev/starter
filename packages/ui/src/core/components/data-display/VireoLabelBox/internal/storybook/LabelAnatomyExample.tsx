@@ -6,7 +6,9 @@ export default function LabelAnatomyExample() {
   return (
     <VireoStorybookProvider>
       <VireoLabelBox label="Billing contact" helperText="Used on invoices" required>
-        <OutlinedInput aria-label="Billing contact" placeholder="billing@example.com" size="small" fullWidth />
+        {({ controlProps }) => (
+          <OutlinedInput {...controlProps} placeholder="billing@example.com" size="small" fullWidth />
+        )}
       </VireoLabelBox>
     </VireoStorybookProvider>
   );

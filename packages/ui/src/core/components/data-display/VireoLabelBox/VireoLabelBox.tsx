@@ -13,7 +13,13 @@ import {
   VireoLabelBoxRequiredIndicator,
   VireoLabelBoxRoot,
 } from "./VireoLabelBox.styled";
-import { type VireoLabelBoxColor, type VireoLabelBoxOwnerState, type VireoLabelBoxProps } from "./VireoLabelBox.types";
+import {
+  type VireoLabelBoxColor,
+  type VireoLabelBoxControlAssociation,
+  type VireoLabelBoxControlProps,
+  type VireoLabelBoxOwnerState,
+  type VireoLabelBoxProps,
+} from "./VireoLabelBox.types";
 
 const DEFAULT_LABEL_COLOR: VireoLabelBoxColor = theme => theme.palette.text.primary;
 
@@ -38,6 +44,7 @@ function useUtilityClasses(_ownerState: VireoLabelBoxOwnerState, classes?: Vireo
 export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps>(
   function VireoLabelBox(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_LABEL_BOX_NAME });
+    const generatedId = React.useId();
     const {
       children,
       className,
@@ -83,11 +90,29 @@ export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
 
     const { className: headerSlotClassName, ...headerSlotOther } = resolvedHeaderSlotProps;
-    const { className: labelSlotClassName, ...labelSlotOther } = resolvedLabelSlotProps;
+    const { className: labelSlotClassName, id: labelSlotId, ...labelSlotOther } = resolvedLabelSlotProps;
     const { className: requiredIndicatorSlotClassName, ...requiredIndicatorSlotOther } =
       resolvedRequiredIndicatorSlotProps;
-    const { className: helperTextSlotClassName, ...helperTextSlotOther } = resolvedHelperTextSlotProps;
+    const {
+      className: helperTextSlotClassName,
+      id: helperTextSlotId,
+      ...helperTextSlotOther
+    } = resolvedHelperTextSlotProps;
     const { className: contentSlotClassName, ...contentSlotOther } = resolvedContentSlotProps;
+
+    const labelId = labelSlotId || `${generatedId}-label`;
+    const helperTextId = helperTextSlotId || `${generatedId}-helper-text`;
+    const controlProps: VireoLabelBoxControlProps = {
+      "aria-labelledby": labelId,
+      ...(ownerState.hasHelperText ? { "aria-describedby": helperTextId } : {}),
+      ...(required ? { "aria-required": true as const } : {}),
+    };
+    const association: VireoLabelBoxControlAssociation = {
+      controlProps,
+      labelId,
+      ...(ownerState.hasHelperText ? { helperTextId } : {}),
+    };
+    const content = typeof children === "function" ? children(association) : children;
 
     return (
       <VireoLabelBoxRoot
@@ -114,6 +139,7 @@ export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps
                 as={slots.label}
                 ownerState={ownerState}
                 className={joinClassNames(classes.label, labelSlotClassName)}
+                id={labelId}
               >
                 {label}
                 {required && (
@@ -138,6 +164,7 @@ export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps
                 as={slots.helperText}
                 ownerState={ownerState}
                 className={joinClassNames(classes.helperText, helperTextSlotClassName)}
+                id={helperTextId}
               >
                 {helperText}
               </VireoLabelBoxHelperText>
@@ -151,7 +178,7 @@ export const VireoLabelBox = React.forwardRef<HTMLDivElement, VireoLabelBoxProps
           ownerState={ownerState}
           className={joinClassNames(classes.content, contentSlotClassName)}
         >
-          {children}
+          {content}
         </VireoLabelBoxContent>
       </VireoLabelBoxRoot>
     );

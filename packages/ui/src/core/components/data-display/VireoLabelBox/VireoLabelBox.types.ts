@@ -65,12 +65,44 @@ export type VireoLabelBoxSlotsAndSlotProps = CreateSlotsAndSlotProps<
   }
 >;
 
-/** Props owned by {@link VireoLabelBox}. */
-export type VireoLabelBoxOwnProps = VireoLabelBoxSlotsAndSlotProps & {
+/** Accessibility props generated for the single control associated with a label box. */
+export type VireoLabelBoxControlProps = {
+  /** References the rendered visible label. */
+  "aria-labelledby": string;
+  /** References the rendered helper text when one is present. */
+  "aria-describedby"?: string;
+  /** Mirrors the visible required indicator when `required` is true. */
+  "aria-required"?: true;
+};
+
+/** Generated relationships supplied to associated-control render content. */
+export type VireoLabelBoxControlAssociation = {
+  /** Apply every property to controls that accept standard ARIA relationship props. */
+  controlProps: VireoLabelBoxControlProps;
+  /** Use for controls such as MUI Select that expose a dedicated label-ID prop. */
+  labelId: string;
+  /** Use for controls that expose a dedicated description-ID prop. */
+  helperTextId?: string;
+};
+
+/** Content that opts into the generated accessible control association. */
+export type VireoLabelBoxAssociatedControlProps = {
+  /** Visible label content used as the associated control's accessible name. */
+  label: React.ReactNode;
+  /** Render the single associated control and apply its generated accessibility relationships. */
+  children: (association: VireoLabelBoxControlAssociation) => React.ReactNode;
+};
+
+/** Backward-compatible static content that manages its own accessible relationships. */
+export type VireoLabelBoxStaticContentProps = {
   /** Content laid out beneath or beside the label anatomy. */
   children: React.ReactNode;
   /** Optional visible label content. */
   label?: React.ReactNode;
+};
+
+/** Props owned by {@link VireoLabelBox}. */
+export type VireoLabelBoxOwnProps = VireoLabelBoxSlotsAndSlotProps & {
   /** Optional supporting content aligned opposite the label. */
   helperText?: React.ReactNode;
   /** Color applied to the visible label and required indicator. @default theme.palette.text.primary */
@@ -92,7 +124,9 @@ export type VireoLabelBoxInheritedProps = Omit<
 >;
 
 /** Props accepted by {@link VireoLabelBox}. */
-export type VireoLabelBoxProps = VireoLabelBoxOwnProps & VireoLabelBoxInheritedProps;
+export type VireoLabelBoxProps = VireoLabelBoxOwnProps &
+  (VireoLabelBoxAssociatedControlProps | VireoLabelBoxStaticContentProps) &
+  VireoLabelBoxInheritedProps;
 
 declare module "@mui/material/styles" {
   interface Components<Theme = unknown> {

@@ -120,6 +120,25 @@ describe(VIREO_RESPONSIVE_TABLE_NAME, () => {
     expect(atlasSummary).toHaveAttribute("aria-expanded", "true");
   });
 
+  it("names the mobile sort controls from their visible labels", async () => {
+    render(
+      <VireoResponsiveTable
+        {...requiredProps}
+        layout="mobile"
+        titleColumn="name"
+        getRowKey={row => row.id}
+        renderMobileFilters={() => null}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+
+    const sortControl = await screen.findByRole("combobox", { name: "Sort by" });
+    expect(sortControl).toHaveAttribute("aria-labelledby");
+    expect(document.getElementById(sortControl.getAttribute("aria-labelledby")!)).toHaveTextContent("Sort by");
+    expect(screen.getByRole("group", { name: "Sort direction" })).toHaveAttribute("aria-labelledby");
+  });
+
   it("expands a mobile row without rerendering every loaded row", () => {
     const renderName = vi.fn((row: (typeof rows)[number]) => row.name);
     const performanceColumns = [

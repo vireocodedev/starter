@@ -339,13 +339,13 @@ Use realistic invalid and valid values, render the corresponding bound `field.*`
 
 ### Bound form-field composition
 
-Every executable story for an input-like `field.*` component composes the input inside `VireoLabelBox`. Put the visible field label on `VireoLabelBox`, not on the underlying MUI input label. Suppress that internal label and retain an accessible name on the actual control through its supported slot props.
+Every executable story for an input-like `field.*` component composes the input inside `VireoLabelBox`. Put the visible field label on `VireoLabelBox`, not on the underlying MUI input label. Suppress that internal label and use `VireoLabelBox`'s render-prop form to apply its generated accessible name, description, and required-state props to the actual control through the control's supported slot props.
 
 ```tsx
 <form.Field name="projectName">
   {field => (
     <VireoLabelBox label="Project name">
-      <field.TextField placeholder="Northstar" slotProps={{ htmlInput: { "aria-label": "Project name" } }} />
+      {({ controlProps }) => <field.TextField placeholder="Northstar" slotProps={{ htmlInput: controlProps }} />}
     </VireoLabelBox>
   )}
 </form.Field>

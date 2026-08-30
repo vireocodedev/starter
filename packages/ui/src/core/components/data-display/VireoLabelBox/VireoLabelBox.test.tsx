@@ -29,6 +29,49 @@ describe(VIREO_LABEL_BOX_NAME, () => {
     expect(screen.getByText("*")).toHaveAttribute("aria-hidden", "true");
   });
 
+  it("associates its visible label with render-prop control content", () => {
+    render(<VireoLabelBox label="Account name">{({ controlProps }) => <input {...controlProps} />}</VireoLabelBox>);
+
+    const control = screen.getByRole("textbox", { name: "Account name" });
+    const label = screen.getByText("Account name");
+
+    expect(label).toHaveAttribute("id", control.getAttribute("aria-labelledby"));
+    expect(control).not.toHaveAttribute("aria-describedby");
+    expect(control).not.toHaveAttribute("aria-required");
+  });
+
+  it("describes and marks its associated control from helper and required anatomy", () => {
+    render(
+      <VireoLabelBox label="Billing contact" helperText="Used on invoices" required>
+        {({ controlProps }) => <input {...controlProps} />}
+      </VireoLabelBox>,
+    );
+
+    const control = screen.getByRole("textbox", { name: "Billing contact" });
+    const helperText = screen.getByText("Used on invoices");
+
+    expect(control).toHaveAccessibleDescription("Used on invoices");
+    expect(helperText).toHaveAttribute("id", control.getAttribute("aria-describedby"));
+    expect(control).toHaveAttribute("aria-required", "true");
+  });
+
+  it("keeps consumer slot IDs as the source of associated control relationships", () => {
+    render(
+      <VireoLabelBox
+        label="Project"
+        helperText="Choose one project"
+        slotProps={{ label: { id: "project-label" }, helperText: { id: "project-description" } }}
+      >
+        {({ controlProps }) => <select {...controlProps} />}
+      </VireoLabelBox>,
+    );
+
+    const control = screen.getByRole("combobox", { name: "Project" });
+    expect(control).toHaveAttribute("aria-labelledby", "project-label");
+    expect(control).toHaveAttribute("aria-describedby", "project-description");
+    expect(control).toHaveAccessibleDescription("Choose one project");
+  });
+
   it("forwards refs and merges inherited and root slot customization", () => {
     const forwardedRef = React.createRef<HTMLDivElement>();
     const rootSlotRef = React.createRef<HTMLDivElement>();
