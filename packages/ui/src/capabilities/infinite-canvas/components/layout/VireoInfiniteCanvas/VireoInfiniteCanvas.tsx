@@ -44,8 +44,9 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       style,
       sx,
       transform: controlledTransform,
+      touchPanEnabled = false,
       verticalGridFactor = 1,
-      wheelZoomEnabled = true,
+      wheelZoomEnabled = false,
       zoomStep = 1.1,
       ...other
     } = props;
@@ -61,6 +62,8 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       gridSize,
       horizontalGridFactor,
       verticalGridFactor,
+      panEnabled,
+      touchPanEnabled,
       panning,
     };
     const classes = useUtilityClasses(classesProp);
@@ -97,6 +100,7 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
     }, [target, transform.scale, wheelZoomEnabled, zoomAtClient, zoomStep]);
     const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
       if (!panEnabled || event.button !== 0) return;
+      if (event.pointerType === "touch" && !touchPanEnabled) return;
       const eventTarget = event.target as HTMLElement;
       if (eventTarget !== event.currentTarget && !eventTarget.hasAttribute("data-vireo-canvas-pan-surface")) return;
       event.currentTarget.setPointerCapture?.(event.pointerId);

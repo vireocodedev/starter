@@ -1,16 +1,17 @@
 import { useVireoInfiniteCanvas } from "@/capabilities/infinite-canvas/hooks/useVireoInfiniteCanvas/useVireoInfiniteCanvas";
 import { Button } from "@mui/material";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { VireoInfiniteCanvas } from "./VireoInfiniteCanvas";
 import { vireoInfiniteCanvasClasses } from "./VireoInfiniteCanvas.classes";
 function Controls() {
-  const { isFullscreen, isFullscreenSupported, resetTransform, scale, setTransform } = useVireoInfiniteCanvas();
+  const { isFullscreen, isFullscreenSupported, pan, resetTransform, scale, setTransform } = useVireoInfiniteCanvas();
   return (
     <>
       <span>Scale {scale}</span>
+      <span>Pan {pan.x}</span>
       <span>{isFullscreen ? "Fullscreen" : "Embedded"}</span>
       <span>{isFullscreenSupported ? "Fullscreen supported" : "Fullscreen unsupported"}</span>
       <Button onClick={() => setTransform({ scale: 99, pan: { x: 4, y: 5 } })}>Set</Button>
@@ -36,5 +37,44 @@ describe("VireoInfiniteCanvas", () => {
     const ref = React.createRef<HTMLDivElement>();
     render(<VireoInfiniteCanvas ref={ref} />);
     expect(ref.current).toHaveClass(vireoInfiniteCanvasClasses.root);
+  });
+
+  it("preserves ordinary wheel and touch scrolling by default", () => {
+    render(
+      <VireoInfiniteCanvas aria-label="Workflow canvas">
+        <Controls />
+      </VireoInfiniteCanvas>,
+    );
+
+    const canvas = screen.getByLabelText("Workflow canvas");
+    const wheelEvent = new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 });
+    canvas.dispatchEvent(wheelEvent);
+
+    expect(wheelEvent.defaultPrevented).toBe(false);
+    expect(screen.getByText("Scale 1")).toBeInTheDocument();
+    expect(canvas).toHaveStyle({ touchAction: "auto" });
+
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 10, clientY: 10, pointerId: 1, pointerType: "touch" });
+    fireEvent.pointerMove(canvas, { clientX: 30, clientY: 10, pointerId: 1, pointerType: "touch" });
+    expect(screen.getByText("Pan 0")).toBeInTheDocument();
+  });
+
+  it("captures wheel and touch gestures only when explicitly enabled", () => {
+    render(
+      <VireoInfiniteCanvas aria-label="Workflow canvas" wheelZoomEnabled touchPanEnabled>
+        <Controls />
+      </VireoInfiniteCanvas>,
+    );
+
+    const canvas = screen.getByLabelText("Workflow canvas");
+    const wheelWasNotCancelled = fireEvent.wheel(canvas, { deltaY: -100, clientX: 0, clientY: 0 });
+
+    expect(wheelWasNotCancelled).toBe(false);
+    expect(screen.getByText("Scale 1.1")).toBeInTheDocument();
+    expect(canvas).toHaveStyle({ touchAction: "none" });
+
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 10, clientY: 10, pointerId: 1, pointerType: "touch" });
+    fireEvent.pointerMove(canvas, { clientX: 30, clientY: 10, pointerId: 1, pointerType: "touch" });
+    expect(screen.getByText("Pan 20")).toBeInTheDocument();
   });
 });

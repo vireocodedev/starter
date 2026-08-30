@@ -11,6 +11,8 @@ export type VireoInfiniteCanvasOwnerState = {
   gridSize: number;
   horizontalGridFactor: number;
   verticalGridFactor: number;
+  panEnabled: boolean;
+  touchPanEnabled: boolean;
   panning: boolean;
 };
 export interface VireoInfiniteCanvasRootSlotPropsOverrides {
@@ -33,6 +35,9 @@ export type VireoInfiniteCanvasOwnProps = VireoInfiniteCanvasSlotsAndSlotProps &
   horizontalGridFactor?: number;
   verticalGridFactor?: number;
   panEnabled?: boolean;
+  /** Captures single-finger touch gestures for canvas panning. Keep disabled when the canvas is embedded in a scrollable page. @default false */
+  touchPanEnabled?: boolean;
+  /** Captures wheel gestures for pointer-centered zooming. Keep disabled when the canvas is embedded in a scrollable page. @default false */
   wheelZoomEnabled?: boolean;
   classes?: Partial<VireoInfiniteCanvasClasses>;
 };
