@@ -37,7 +37,8 @@ export const VireoTruncatedContentToggle: VireoTruncatedContentStyledSlotCompone
   slot: "Toggle",
   overridesResolver: (_props, styles) => styles.toggle,
 })<VireoTruncatedContentStyledSlotProps>(({ ownerState }) => ({
-  minWidth: 0,
+  minWidth: 24,
+  minHeight: 24,
   padding: 0,
   fontSize: "0.75rem",
   lineHeight: 1.5,

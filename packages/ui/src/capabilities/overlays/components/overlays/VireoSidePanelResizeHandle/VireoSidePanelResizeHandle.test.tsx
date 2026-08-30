@@ -1,6 +1,10 @@
 import { VireoSidePanelResizeHandle } from "./VireoSidePanelResizeHandle";
 import { vireoSidePanelResizeHandleClasses } from "./VireoSidePanelResizeHandle.classes";
 import { VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME } from "./VireoSidePanelResizeHandle.identity";
+import {
+  SIDE_PANEL_RESIZE_HANDLE_WIDTH,
+  SIDE_PANEL_RESIZE_HITBOX_WIDTH,
+} from "@/capabilities/overlays/constants/overlay.constants";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -48,6 +52,21 @@ describe(VIREO_SIDE_PANEL_RESIZE_HANDLE_NAME, () => {
     fireEvent.doubleClick(screen.getByRole("presentation"));
     expect(onResizeStart).toHaveBeenCalledOnce();
     expect(onResizeDoubleClick).toHaveBeenCalledOnce();
+  });
+
+  it("provides a 24px interaction target without enlarging the visible resize rail", () => {
+    const onResizeStart = vi.fn();
+    render(<VireoSidePanelResizeHandle onResizeStart={onResizeStart} onResizeDoubleClick={() => undefined} />);
+
+    const handle = screen.getByRole("presentation");
+    const handleStyle = getComputedStyle(handle);
+    expect(Number.parseFloat(handleStyle.width)).toBeGreaterThanOrEqual(24);
+    expect(Number.parseFloat(handleStyle.minHeight)).toBeGreaterThanOrEqual(24);
+    expect(SIDE_PANEL_RESIZE_HITBOX_WIDTH).toBe(24);
+    expect(SIDE_PANEL_RESIZE_HANDLE_WIDTH).toBe(6);
+
+    fireEvent.pointerDown(handle);
+    expect(onResizeStart).toHaveBeenCalledOnce();
   });
 
   it("becomes an accessible separator when keyboard resizing is configured", () => {

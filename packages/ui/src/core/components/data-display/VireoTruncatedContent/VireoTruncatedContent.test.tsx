@@ -3,6 +3,7 @@ import { vireoTruncatedContentClasses } from "./VireoTruncatedContent.classes";
 import { VIREO_TRUNCATED_CONTENT_NAME } from "./VireoTruncatedContent.identity";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -137,6 +138,30 @@ describe(VIREO_TRUNCATED_CONTENT_NAME, () => {
     expect(screen.getByRole("button", { name: "Show more" })).toHaveAttribute("aria-expanded", "false");
     expect(viewport).toHaveStyle({ maxHeight: "40px", overflow: "hidden" });
     expect(onExpandedChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it("keeps the compact toggle keyboard-operable within a 24px minimum target", async () => {
+    setDefaultContentDimensions({ scrollHeight: 80 });
+    const onExpandedChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <VireoTruncatedContent {...requiredProps} onExpandedChange={onExpandedChange}>
+        Long content
+      </VireoTruncatedContent>,
+    );
+
+    const toggle = screen.getByRole("button", { name: "Show more" });
+    const toggleStyle = getComputedStyle(toggle);
+    expect(Number.parseFloat(toggleStyle.minWidth)).toBeGreaterThanOrEqual(24);
+    expect(Number.parseFloat(toggleStyle.minHeight)).toBeGreaterThanOrEqual(24);
+    expect(toggleStyle.fontSize).toBe("12px");
+    expect(toggleStyle.paddingTop).toBe("0px");
+    expect(toggleStyle.paddingBottom).toBe("0px");
+
+    toggle.focus();
+    await user.keyboard("{Enter}");
+    expect(onExpandedChange).toHaveBeenCalledWith(true);
+    expect(screen.getByRole("button", { name: "Show less" })).toHaveFocus();
   });
 
   it("reveals the toggle for horizontal overflow", () => {

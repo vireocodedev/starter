@@ -29,6 +29,7 @@ export const VireoSidePanelResizeHandleRoot: VireoSidePanelResizeHandleStyledSlo
     left: 0,
     width: SIDE_PANEL_RESIZE_HITBOX_WIDTH,
     height: "100%",
+    minHeight: 24,
     cursor: "col-resize",
     touchAction: "none",
     zIndex: 1300,
