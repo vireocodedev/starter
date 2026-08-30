@@ -65,6 +65,7 @@ export const CopyInteraction: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: "Copy JSON to clipboard" }));
-    await expect(canvas.getByRole("button", { name: "JSON copied" })).toBeInTheDocument();
+    const copiedButton = await canvas.findByRole("button", { name: "JSON copied" });
+    await expect(copiedButton).toBeInTheDocument();
   },
 };
