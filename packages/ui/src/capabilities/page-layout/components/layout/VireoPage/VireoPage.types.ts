@@ -17,10 +17,15 @@ export type VireoPageSlotsAndSlotProps = CreateSlotsAndSlotProps<
 >;
 export type VireoPageOwnProps = VireoPageSlotsAndSlotProps & {
   children: React.ReactNode;
+  /** Controls the page-layout mode without measuring a container. */
   mode?: VireoPageLayoutMode;
+  /** Resolves compact mode without measuring a container. @default false */
   forceCompact?: boolean;
+  /** Measures the page's parent instead of the page root. @default false */
   measureParent?: boolean;
+  /** Suspends measurement while preserving the last resolved mode. @default false */
   measurementPaused?: boolean;
+  /** Inline space to subtract from the measured container width. @default 0 */
   reservedInlineSize?: number;
   classes?: Partial<VireoPageClasses>;
 };
