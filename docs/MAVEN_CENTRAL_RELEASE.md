@@ -4,7 +4,7 @@ Vireo JVM releases use a two-step Central Portal deployment. The protected
 workflow always uploads a `USER_MANAGED` candidate and validates it before any
 publication. Staging is the default; an explicitly selected protected run may
 promote that same validated deployment after it verifies its identity and exact
-six-artifact package URL set.
+set of six artifacts represented by seven PURLs.
 
 ## One-time controls
 
@@ -66,10 +66,11 @@ Central status and requires:
 - the requested and reported UUID to match;
 - `VALIDATED` state;
 - the requested non-SNAPSHOT version; and
-- exactly the six expected `pkg:maven/com.vireocode/vireo-*` package URLs at
-  that version, with no extras. The BOM is the canonical
-  `pkg:maven/com.vireocode/vireo-bom@<version>?type=pom`; the five libraries
-  use their bare default-JAR PURLs.
+- exactly seven expected `pkg:maven/com.vireocode/vireo-*` PURLs for the six
+  artifacts at that version, with no extras. Central reports the BOM in both
+  base `pkg:maven/com.vireocode/vireo-bom@<version>` and canonical
+  `pkg:maven/com.vireocode/vireo-bom@<version>?type=pom` forms; the five
+  libraries use bare default-JAR PURLs.
 
 Only then does it send the authenticated Central `publish` request, accepts only
 HTTP `204`, and waits until Central reports `PUBLISHED`. The upload remains
@@ -102,9 +103,10 @@ Maven Central deployment** on `main` with the exact version, the deployment UUID
 recorded by the original run, and the typed confirmation
 `PUBLISH_VALIDATED_DEPLOYMENT`. The recovery job confirms the checked-in version
 and that the BOM is still `404` on Central, then asks the existing strict
-promotion helper to re-read that deployment's UUID, state, and exact PURLs before
-its one publication request. It never builds or uploads a new Central bundle, so
-the original validated candidate remains the only deployment under review.
+promotion helper to re-read that deployment's UUID, state, and exact seven-PURL
+identity for six artifacts before its one publication request. It never builds or
+uploads a new Central bundle, so the original validated candidate remains the
+only deployment under review.
 
 The template's ordinary Gradle build uses only `mavenCentral()` and must remain
 credential-free. Its explicit `-PuseLocalStarter=true` mode is the only supported
@@ -120,8 +122,9 @@ way to substitute Maven Local during coordinated development.
   do not rerun staging. Use the Portal or the existing-ID recovery workflow when
   it should be promoted.
 - An opt-in publication run fails closed unless Central returns the exact UUID,
-  versioned six-artifact package URL set, and HTTP `204` promotion response. It
-  never retries a rejected or ambiguous promotion request automatically.
+  versioned six-artifact, seven-exact-PURL set, and HTTP `204` promotion
+  response. It never retries a rejected or ambiguous promotion request
+  automatically.
 - A `PUBLISHED` version cannot be replaced or deleted through the release flow.
   Correct it with a new version and document the superseded release.
 - If a token or signing secret appears in logs or source, stop the release,

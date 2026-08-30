@@ -45,6 +45,7 @@ max_time_seconds="${CENTRAL_MAX_TIME_SECONDS:-30}"
 }
 expected_purls=(
     "pkg:maven/com.vireocode/vireo-auth@$version"
+    "pkg:maven/com.vireocode/vireo-bom@$version"
     "pkg:maven/com.vireocode/vireo-bom@$version?type=pom"
     "pkg:maven/com.vireocode/vireo-core@$version"
     "pkg:maven/com.vireocode/vireo-history@$version"
@@ -104,7 +105,7 @@ actual_purls="$(jq -cer '.purls | if type == "array" and all(.[]; type == "strin
 }
 expected_purls_json="$(printf '%s\n' "${expected_purls[@]}" | jq -R . | jq -sc 'sort')"
 [[ "$actual_purls" == "$expected_purls_json" ]] || {
-    echo "Central deployment package URLs do not exactly match the six reviewed com.vireocode $version artifacts." >&2
+    echo "Central deployment package URLs do not exactly match the seven reviewed PURLs for six com.vireocode $version artifacts." >&2
     echo "Expected PURLs: $expected_purls_json" >&2
     echo "Actual PURLs: $actual_purls" >&2
     exit 1

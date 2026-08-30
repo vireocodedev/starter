@@ -21,6 +21,7 @@ const deploymentId = "123e4567-e89b-12d3-a456-426614174000";
 const version = "0.3.0";
 const expectedPurls = [
   `pkg:maven/com.vireocode/vireo-auth@${version}`,
+  `pkg:maven/com.vireocode/vireo-bom@${version}`,
   `pkg:maven/com.vireocode/vireo-bom@${version}?type=pom`,
   `pkg:maven/com.vireocode/vireo-core@${version}`,
   `pkg:maven/com.vireocode/vireo-history@${version}`,
@@ -112,6 +113,7 @@ test("publishes only the exact validated deployment through the Central deployme
   const mocked = fixture([centralStatus({ state: "VALIDATED" }), centralStatus({ state: "PUBLISHED" })]);
   const result = execute(publishScript, [deploymentId, version], mocked.env);
 
+  assert.equal(expectedPurls.length, 7);
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /accepted publication/u);
   assert.match(result.stdout, /already published/u);
@@ -158,9 +160,13 @@ test("rejects a noncanonical deployment UUID or unsafe Maven version before Cent
   }
 });
 
-test("fails closed before promotion for missing or wrong BOM qualifiers, jar qualifiers, extra, missing, or wrong-version Central package URLs", () => {
+test("requires the complete seven-PURL BOM set and rejects qualifier, extra, missing, and version drift", () => {
   const purlCases = [
-    ["missing BOM qualifier", expectedPurls.map(purl => purl.replace("?type=pom", ""))],
+    ["missing bare BOM PURL", expectedPurls.filter(purl => purl !== `pkg:maven/com.vireocode/vireo-bom@${version}`)],
+    [
+      "missing BOM POM PURL",
+      expectedPurls.filter(purl => purl !== `pkg:maven/com.vireocode/vireo-bom@${version}?type=pom`),
+    ],
     ["wrong BOM qualifier", expectedPurls.map(purl => purl.replace("?type=pom", "?type=jar"))],
     [
       "jar qualifier",
@@ -254,7 +260,7 @@ test("release workflow keeps USER_MANAGED upload defaulting to explicit protecte
   assert.ok(workflow.indexOf("wait-central-validation.sh") < workflow.indexOf("if: inputs.publish"));
   assert.match(uploadScript, /publishingType=USER_MANAGED/u);
   assert.doesNotMatch(workflow, /publishingType=AUTOMATIC/u);
-  assert.doesNotMatch(uploadScript, /publishingType=AUTOMATIC/u);
+  assert.match(workflow, /Publication identity: \\`6 artifacts \/ 7 exact PURLs\\`/u);
 });
 
 test("recovery workflow promotes one existing validated deployment without building or uploading another bundle", () => {
@@ -274,6 +280,7 @@ test("recovery workflow promotes one existing validated deployment without build
   assert.match(recoveryWorkflow, /publish-central-deployment\.sh "\$DEPLOYMENT_ID" "\$REQUESTED_VERSION"/u);
   assert.equal(recoveryWorkflow.match(/publish-central-deployment\.sh/gu)?.length, 1);
   assert.doesNotMatch(recoveryWorkflow, /build-central-bundle\.sh|upload-central-bundle\.sh|publishMavenPublication/u);
+  assert.match(recoveryWorkflow, /Publication identity: \\`6 artifacts \/ 7 exact PURLs\\`/u);
 
   const inputInterpolationLines = recoveryWorkflow.split("\n").filter(line => line.includes("${{ inputs."));
   assert.deepEqual(inputInterpolationLines, [

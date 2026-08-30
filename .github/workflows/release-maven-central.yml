@@ -119,6 +119,7 @@ jobs:
             echo "- Version: \`$VERSION\`"
             echo "- Deployment: \`$DEPLOYMENT_ID\`"
             echo "- Upload mode: \`USER_MANAGED\`"
+            echo "- Publication identity: \`6 artifacts / 7 exact PURLs\`"
             echo
             if [[ "$PUBLISH_REQUESTED" == "true" ]]; then
               echo "- Publication mode: \`PUBLISHED_AFTER_VALIDATION\`"

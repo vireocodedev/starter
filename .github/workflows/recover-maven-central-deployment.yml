@@ -84,6 +84,7 @@ jobs:
             echo "- Version: \`$VERSION\`"
             echo "- Deployment: \`$DEPLOYMENT_ID\`"
             echo "- Recovery mode: \`EXISTING_VALIDATED_DEPLOYMENT\`"
+            echo "- Publication identity: \`6 artifacts / 7 exact PURLs\`"
             echo
             echo "Central confirmed this exact deployment is published. Run **Verify Maven Central release** with \`$VERSION\` to prove anonymous consumption."
           } >> "$GITHUB_STEP_SUMMARY"
