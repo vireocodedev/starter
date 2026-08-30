@@ -168,4 +168,18 @@ describe("package entry points", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("keeps form-bound field implementations behind the useVireoForm facade", () => {
+    const formsEntry = readFileSync(join(srcRoot, "capabilities", "forms", "public.ts"), "utf8");
+
+    expect(formsEntry).not.toMatch(
+      /export \* from "\.\/components\/forms\/VireoFormFreeSoloAutocomplete(?:Multiple)?Field";/,
+    );
+    expect(formsEntry).toContain(
+      'export type * from "./components/forms/VireoFormFreeSoloAutocompleteField/VireoFormFreeSoloAutocompleteField.types";',
+    );
+    expect(formsEntry).toContain(
+      'export type * from "./components/forms/VireoFormFreeSoloAutocompleteMultipleField/VireoFormFreeSoloAutocompleteMultipleField.types";',
+    );
+  });
 });
