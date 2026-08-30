@@ -52,11 +52,13 @@ describe("createModeAwareApi", () => {
       }
     }
     class OfflineApi {
-      @transactional()
       async save(value: string) {
         return `offline:${value}`;
       }
     }
+    transactional<OfflineApi, [string], string>()(OfflineApi.prototype.save, {
+      private: false,
+    } as ClassMethodDecoratorContext<OfflineApi, OfflineApi["save"]>);
 
     let online = true;
     const api = createModeAwareApi({

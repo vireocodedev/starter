@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 describe("transactional", () => {
   it("marks decorated async methods without changing their behavior", async () => {
     class ExampleApi {
-      @transactional()
       async save(value: string) {
         return `saved:${value}`;
       }
@@ -13,6 +12,9 @@ describe("transactional", () => {
         return "read";
       }
     }
+    transactional<ExampleApi, [string], string>()(ExampleApi.prototype.save, {
+      private: false,
+    } as ClassMethodDecoratorContext<ExampleApi, ExampleApi["save"]>);
 
     const api = new ExampleApi();
     expect(getTransactionalMetadata(ExampleApi.prototype.save)).toBe(true);
