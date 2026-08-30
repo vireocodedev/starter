@@ -12,12 +12,16 @@ const waitScript = join(repositoryRoot, "jvm/scripts/wait-central-validation.sh"
 const publishScriptSource = readFileSync(publishScript, "utf8");
 const waitScriptSource = readFileSync(waitScript, "utf8");
 const workflow = readFileSync(join(repositoryRoot, ".github/workflows/release-maven-central.yml"), "utf8");
+const recoveryWorkflow = readFileSync(
+  join(repositoryRoot, ".github/workflows/recover-maven-central-deployment.yml"),
+  "utf8",
+);
 const uploadScript = readFileSync(join(repositoryRoot, "jvm/scripts/upload-central-bundle.sh"), "utf8");
 const deploymentId = "123e4567-e89b-12d3-a456-426614174000";
 const version = "0.3.0";
 const expectedPurls = [
   `pkg:maven/com.vireocode/vireo-auth@${version}`,
-  `pkg:maven/com.vireocode/vireo-bom@${version}`,
+  `pkg:maven/com.vireocode/vireo-bom@${version}?type=pom`,
   `pkg:maven/com.vireocode/vireo-core@${version}`,
   `pkg:maven/com.vireocode/vireo-history@${version}`,
   `pkg:maven/com.vireocode/vireo-offline@${version}`,
@@ -154,8 +158,14 @@ test("rejects a noncanonical deployment UUID or unsafe Maven version before Cent
   }
 });
 
-test("fails closed before promotion for missing, extra, or wrong-version Central package URLs", () => {
+test("fails closed before promotion for missing or wrong BOM qualifiers, jar qualifiers, extra, missing, or wrong-version Central package URLs", () => {
   const purlCases = [
+    ["missing BOM qualifier", expectedPurls.map(purl => purl.replace("?type=pom", ""))],
+    ["wrong BOM qualifier", expectedPurls.map(purl => purl.replace("?type=pom", "?type=jar"))],
+    [
+      "jar qualifier",
+      expectedPurls.map(purl => purl.replace(`vireo-auth@${version}`, `vireo-auth@${version}?type=jar`)),
+    ],
     ["missing", expectedPurls.slice(1)],
     ["extra", [...expectedPurls, `pkg:maven/com.vireocode/vireo-unexpected@${version}`]],
     ["wrong version", expectedPurls.map(purl => purl.replace(`@${version}`, "@0.3.1"))],
@@ -165,6 +175,8 @@ test("fails closed before promotion for missing, extra, or wrong-version Central
     const result = execute(publishScript, [deploymentId, version], mocked.env);
     assert.notEqual(result.status, 0, name);
     assert.match(result.stderr, /do not exactly match/u);
+    assert.ok(result.stderr.includes(`Expected PURLs: ${JSON.stringify([...expectedPurls].sort())}`));
+    assert.ok(result.stderr.includes(`Actual PURLs: ${JSON.stringify([...purls].sort())}`));
     assert.equal(promotionRequests(mocked.curlLog).length, 0, name);
   }
 });
@@ -243,6 +255,37 @@ test("release workflow keeps USER_MANAGED upload defaulting to explicit protecte
   assert.match(uploadScript, /publishingType=USER_MANAGED/u);
   assert.doesNotMatch(workflow, /publishingType=AUTOMATIC/u);
   assert.doesNotMatch(uploadScript, /publishingType=AUTOMATIC/u);
+});
+
+test("recovery workflow promotes one existing validated deployment without building or uploading another bundle", () => {
+  assert.match(recoveryWorkflow, /^name: Recover validated Maven Central deployment$/mu);
+  assert.match(recoveryWorkflow, /workflow_dispatch:\n\s+inputs:\n\s+version:/u);
+  assert.match(recoveryWorkflow, /deployment_id:/u);
+  assert.match(recoveryWorkflow, /confirmation:/u);
+  assert.match(recoveryWorkflow, /if: github\.ref == 'refs\/heads\/main'/u);
+  assert.match(recoveryWorkflow, /environment: maven-central/u);
+  assert.match(recoveryWorkflow, /permissions:\n\s+contents: read/u);
+  assert.match(recoveryWorkflow, /PUBLISH_VALIDATED_DEPLOYMENT/u);
+  assert.match(recoveryWorkflow, /case "\$status" in\n\s+404\)/u);
+  assert.match(
+    recoveryWorkflow,
+    /DEPLOYMENT_ID: \$\{\{ inputs\.deployment_id \}\}\n\s+REQUESTED_VERSION: \$\{\{ inputs\.version \}\}/u,
+  );
+  assert.match(recoveryWorkflow, /publish-central-deployment\.sh "\$DEPLOYMENT_ID" "\$REQUESTED_VERSION"/u);
+  assert.equal(recoveryWorkflow.match(/publish-central-deployment\.sh/gu)?.length, 1);
+  assert.doesNotMatch(recoveryWorkflow, /build-central-bundle\.sh|upload-central-bundle\.sh|publishMavenPublication/u);
+
+  const inputInterpolationLines = recoveryWorkflow.split("\n").filter(line => line.includes("${{ inputs."));
+  assert.deepEqual(inputInterpolationLines, [
+    "  group: maven-central-recovery-${{ inputs.deployment_id }}",
+    "    name: Recover ${{ inputs.version }} from ${{ inputs.deployment_id }}",
+    "          CONFIRMATION: ${{ inputs.confirmation }}",
+    "          REQUESTED_VERSION: ${{ inputs.version }}",
+    "          DEPLOYMENT_ID: ${{ inputs.deployment_id }}",
+    "          REQUESTED_VERSION: ${{ inputs.version }}",
+    "          VERSION: ${{ inputs.version }}",
+    "          DEPLOYMENT_ID: ${{ inputs.deployment_id }}",
+  ]);
 });
 
 test("status reads have bounded retries and timeouts while the irreversible publication request is a single timed call", () => {

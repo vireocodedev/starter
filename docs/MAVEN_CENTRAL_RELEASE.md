@@ -42,8 +42,9 @@ Central's current requirements and Publisher API are documented in its
 ## Stage, validate, and optionally publish
 
 From GitHub Actions, run **Stage Maven Central release** on `main` and enter the
-exact version. Leave **Publish the validated deployment** unchecked to stage
-only. The protected job:
+exact version. Select **Publish the validated deployment** before dispatch when
+the reviewed release is ready to promote as soon as Central validates it; leave
+it unchecked to stage only. The protected job:
 
 1. rejects a mismatched or already-public version;
 2. repeats the JVM and isolated-consumer gates;
@@ -58,14 +59,17 @@ The workflow deliberately has read-only GitHub permissions. Successful CI means
 the deployment is valid and waiting; it does not mean it is public when
 stage-only mode was selected.
 
-To request publication, dispatch the same workflow with **Publish the validated
-deployment** checked. After validation, it re-reads Central status and requires:
+To request publication through the stage workflow, select **Publish the
+validated deployment** on its initial dispatch. After validation, it re-reads
+Central status and requires:
 
 - the requested and reported UUID to match;
 - `VALIDATED` state;
 - the requested non-SNAPSHOT version; and
 - exactly the six expected `pkg:maven/com.vireocode/vireo-*` package URLs at
-  that version, with no extras.
+  that version, with no extras. The BOM is the canonical
+  `pkg:maven/com.vireocode/vireo-bom@<version>?type=pom`; the five libraries
+  use their bare default-JAR PURLs.
 
 Only then does it send the authenticated Central `publish` request, accepts only
 HTTP `204`, and waits until Central reports `PUBLISHED`. The upload remains
@@ -73,16 +77,34 @@ HTTP `204`, and waits until Central reports `PUBLISHED`. The upload remains
 
 ## Publish and prove consumption
 
-1. For a stage-only run, open [Central Portal deployments](https://central.sonatype.com/publishing/deployments),
+1. An initial dispatch may opt into publication; it promotes only after Central
+   validates the exact deployment checks above.
+2. For a stage-only run, open [Central Portal deployments](https://central.sonatype.com/publishing/deployments),
    inspect the deployment ID, coordinates, validation result, and file set, then
    publish or drop it deliberately in the Portal.
-2. For an opt-in publication run, inspect the workflow summary and confirm
+3. If a stage-only run or an opt-in publication run fails after Central accepts
+   the deployment, use the Portal or **Recover validated Maven Central
+   deployment** with that existing ID. Never rerun staging for the same accepted
+   deployment or version.
+4. For an opt-in publication run, inspect the workflow summary and confirm
    Central reported `PUBLISHED` for the recorded deployment ID.
-3. After Central reports `PUBLISHED`, run **Verify Maven Central release** with
+5. After Central reports `PUBLISHED`, run **Verify Maven Central release** with
    the same version. It waits for all six POMs, then resolves the BOM and every
    versionless module anonymously with a fresh Gradle home.
-4. Create the signed or protected `jvm-v<version>` tag only after this public
+6. Create the signed or protected `jvm-v<version>` tag only after this public
    consumer proof succeeds.
+
+## Recover an already-validated deployment
+
+If a protected publication run stopped after Central accepted a valid
+`USER_MANAGED` deployment, do not stage a second bundle. Run **Recover validated
+Maven Central deployment** on `main` with the exact version, the deployment UUID
+recorded by the original run, and the typed confirmation
+`PUBLISH_VALIDATED_DEPLOYMENT`. The recovery job confirms the checked-in version
+and that the BOM is still `404` on Central, then asks the existing strict
+promotion helper to re-read that deployment's UUID, state, and exact PURLs before
+its one publication request. It never builds or uploads a new Central bundle, so
+the original validated candidate remains the only deployment under review.
 
 The template's ordinary Gradle build uses only `mavenCentral()` and must remain
 credential-free. Its explicit `-PuseLocalStarter=true` mode is the only supported
@@ -94,7 +116,9 @@ way to substitute Maven Local during coordinated development.
   rerun the same version only if it has never been uploaded or published.
 - A `FAILED` or incorrect user-managed deployment should remain available while
   diagnosing it, then be dropped in Central Portal.
-- A `VALIDATED` deployment is still reversible: drop it instead of publishing.
+- A `VALIDATED` deployment is still reversible: drop it instead of publishing;
+  do not rerun staging. Use the Portal or the existing-ID recovery workflow when
+  it should be promoted.
 - An opt-in publication run fails closed unless Central returns the exact UUID,
   versioned six-artifact package URL set, and HTTP `204` promotion response. It
   never retries a rejected or ambiguous promotion request automatically.
