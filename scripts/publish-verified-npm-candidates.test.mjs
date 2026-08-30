@@ -304,19 +304,34 @@ test("defers every tag operation until all candidate registry confirmations succ
   assert.deepEqual(tags.logs, []);
 });
 
-test("does not create any tags when a pre-existing tag peels to another commit", async () => {
+test("preserves an immutable historical tag for a registry-existing candidate", async () => {
   const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
   const tags = tagOperations({ existingTags: new Map([[candidates[1].coordinate, "b".repeat(40)]]) });
+  const result = await publishVerifiedCandidates(candidates, {
+    expectedCommit: commit,
+    fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+    publish: async () => assert.fail("existing candidates must not publish"),
+    ...tags.options,
+  });
+  assert.deepEqual(result, []);
+  assert.deepEqual(tags.created, [[candidates[0].coordinate, candidates[0].coordinate, commit]]);
+  assert.deepEqual(tags.logs, [`New tag: ${candidates[0].coordinate}`]);
+});
+
+test("fails before publication when an unpublished candidate tag belongs to another commit", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, "b".repeat(40)]]) });
   await assert.rejects(
-    publishVerifiedCandidates(candidates, {
+    publishVerifiedCandidates([candidate], {
       expectedCommit: commit,
-      fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
-      publish: async () => assert.fail("existing candidates must not publish"),
+      fetchRegistry: async () => notFoundResponse(),
+      publish: async () => assert.fail("conflicting tag must block publication"),
       ...tags.options,
     }),
     /not expected commit/u,
   );
   assert.deepEqual(tags.created, []);
+  assert.deepEqual(tags.logs, []);
 });
 
 test("recovers all registry-existing candidates by creating only missing tags", async () => {
@@ -344,6 +359,26 @@ test("keeps an exact duplicate without tags markers", async () => {
   const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, commit]]) });
   const created = await reconcileCandidateTags([candidate], commit, tags.options);
   assert.deepEqual(created, []);
+  assert.deepEqual(tags.logs, []);
+});
+
+test("recovers an all-published release without moving historical tags or emitting new tags", async () => {
+  const allCandidates = verifyNpmCandidates(fixture(), commit);
+  const candidates = [allCandidates[0], allCandidates.at(-1)];
+  const tags = tagOperations({
+    existingTags: new Map([
+      [candidates[0].coordinate, "b".repeat(40)],
+      [candidates[1].coordinate, commit],
+    ]),
+  });
+  const result = await publishVerifiedCandidates(candidates, {
+    expectedCommit: commit,
+    fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+    publish: async () => assert.fail("all-published recovery must not republish"),
+    ...tags.options,
+  });
+  assert.deepEqual(result, []);
+  assert.deepEqual(tags.created, []);
   assert.deepEqual(tags.logs, []);
 });
 

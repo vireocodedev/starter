@@ -183,12 +183,17 @@ export async function reconcileCandidateTags(candidates, expectedCommit, options
   const resolveTag = options.resolveTag ?? inspectExistingTag;
   const createTag = options.createTag ?? createAnnotatedTag;
   const log = options.log ?? console.log;
+  const registryExisting = options.registryExisting ?? new Set();
   const missingTags = [];
 
   for (const candidate of candidates) {
     const target = await resolveTag(candidate.coordinate);
     if (target === null || target === undefined) missingTags.push(candidate);
-    else if (target !== expectedCommit) {
+    // A package version which was already immutable in the registry can be an
+    // older workspace artifact. Its annotated tag is immutable provenance too,
+    // so preserve that historical commit instead of trying to recreate or move
+    // it for a later release containing the same package version.
+    else if (target !== expectedCommit && !registryExisting.has(candidate.coordinate)) {
       throw new Error(
         `Release tag ${candidate.coordinate} resolves to ${target}, not expected commit ${expectedCommit}`,
       );
@@ -200,6 +205,25 @@ export async function reconcileCandidateTags(candidates, expectedCommit, options
     log(`New tag: ${candidate.coordinate}`);
   }
   return missingTags.map(candidate => candidate.coordinate);
+}
+
+async function validateCandidateTagBindings(candidates, expectedCommit, options) {
+  const registryExisting = options.registryExisting ?? new Set();
+  const resolveTag = options.resolveTag ?? inspectExistingTag;
+
+  for (const candidate of candidates) {
+    const target = await resolveTag(candidate.coordinate);
+    if (
+      target !== null &&
+      target !== undefined &&
+      target !== expectedCommit &&
+      !registryExisting.has(candidate.coordinate)
+    ) {
+      throw new Error(
+        `Release tag ${candidate.coordinate} resolves to ${target}, not expected commit ${expectedCommit}`,
+      );
+    }
+  }
 }
 
 export async function publishVerifiedCandidates(candidates, options = {}) {
@@ -224,15 +248,30 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
   if (!/^[0-9a-f]{40}$/u.test(expectedCommit ?? ""))
     throw new Error("Expected release commit must be a full Git commit.");
   const published = [];
+  const registryExisting = new Set();
+  const unpublished = [];
 
   for (const candidate of candidates) {
-    if (await registryCandidate(candidate, fetchRegistry)) continue;
+    if (await registryCandidate(candidate, fetchRegistry)) {
+      registryExisting.add(candidate.coordinate);
+      continue;
+    }
+    unpublished.push(candidate);
+  }
+
+  // Do this before publication. A candidate that is not already immutable on
+  // npm must never be published when its release tag belongs to another
+  // commit. Registry-existing candidates may legitimately retain historical
+  // immutable tags, but are still byte-checked above.
+  await validateCandidateTagBindings(candidates, expectedCommit, { ...options, registryExisting });
+
+  for (const candidate of unpublished) {
     await publish(candidate);
     await confirmPublishedCandidate(candidate, { fetchRegistry, sleep, retryAttempts, retryDelay });
     published.push(candidate.coordinate);
   }
 
-  await reconcileCandidateTags(candidates, expectedCommit, options);
+  await reconcileCandidateTags(candidates, expectedCommit, { ...options, registryExisting });
   return published;
 }
 

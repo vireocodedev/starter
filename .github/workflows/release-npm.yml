@@ -86,18 +86,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-      - name: Require at least one publication
+      - name: Verify the anonymous public release
+        run: corepack npm run release:verify-public
+      - name: Record publication or recovery summary
         env:
           PUBLISHED: ${{ steps.changesets.outputs.published }}
-        run: test "$PUBLISHED" = "true"
-      - name: Record publication summary
-        env:
           PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
         run: |
           {
-            echo "## Published npm packages"
+            if [ "$PUBLISHED" = "true" ]; then
+              echo "## Published npm packages"
+            else
+              echo "## Recovered npm release"
+              echo
+              echo "All reviewed candidate bytes were already public; anonymous verification completed successfully."
+            fi
             echo
             echo '```json'
-            echo "$PUBLISHED_PACKAGES"
+            echo "${PUBLISHED_PACKAGES:-[]}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
