@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { VireoInfiniteCanvas } from "./VireoInfiniteCanvas";
 import { vireoInfiniteCanvasClasses } from "./VireoInfiniteCanvas.classes";
 function Controls() {
@@ -75,6 +75,43 @@ describe("VireoInfiniteCanvas", () => {
 
     fireEvent.pointerDown(canvas, { button: 0, clientX: 10, clientY: 10, pointerId: 1, pointerType: "touch" });
     fireEvent.pointerMove(canvas, { clientX: 30, clientY: 10, pointerId: 1, pointerType: "touch" });
+    expect(screen.getByText("Pan 20")).toBeInTheDocument();
+  });
+
+  it("runs root pointer handlers first and honors default prevention", () => {
+    const onPointerDown = vi.fn<React.PointerEventHandler<HTMLDivElement>>(event => event.preventDefault());
+    const onPointerMove = vi.fn<React.PointerEventHandler<HTMLDivElement>>();
+    const onPointerUp = vi.fn<React.PointerEventHandler<HTMLDivElement>>();
+    const { rerender } = render(
+      <VireoInfiniteCanvas
+        aria-label="Workflow canvas"
+        slotProps={{ root: { onPointerDown, onPointerMove, onPointerUp } }}
+      >
+        <Controls />
+      </VireoInfiniteCanvas>,
+    );
+
+    const canvas = screen.getByLabelText("Workflow canvas");
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 10, clientY: 10, pointerId: 1, pointerType: "mouse" });
+    fireEvent.pointerMove(canvas, { clientX: 30, clientY: 10, pointerId: 1, pointerType: "mouse" });
+    fireEvent.pointerUp(canvas, { pointerId: 1, pointerType: "mouse" });
+    expect(onPointerDown).toHaveBeenCalledOnce();
+    expect(onPointerMove).toHaveBeenCalledOnce();
+    expect(onPointerUp).toHaveBeenCalledOnce();
+    expect(screen.getByText("Pan 0")).toBeInTheDocument();
+
+    onPointerDown.mockImplementation(() => undefined);
+    rerender(
+      <VireoInfiniteCanvas
+        aria-label="Workflow canvas"
+        slotProps={{ root: { onPointerDown, onPointerMove, onPointerUp } }}
+      >
+        <Controls />
+      </VireoInfiniteCanvas>,
+    );
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 10, clientY: 10, pointerId: 2, pointerType: "mouse" });
+    fireEvent.pointerMove(canvas, { clientX: 30, clientY: 10, pointerId: 2, pointerType: "mouse" });
+    fireEvent.pointerUp(canvas, { pointerId: 2, pointerType: "mouse" });
     expect(screen.getByText("Pan 20")).toBeInTheDocument();
   });
 });

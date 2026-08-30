@@ -68,7 +68,18 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
     };
     const classes = useUtilityClasses(classesProp);
     const root = resolveSlotProps(slotProps.root, ownerState);
-    const ref = useForkRef(forwardedRef, root.ref, setTarget);
+    const {
+      className: rootSlotClassName,
+      onPointerCancel: rootSlotOnPointerCancel,
+      onPointerDown: rootSlotOnPointerDown,
+      onPointerMove: rootSlotOnPointerMove,
+      onPointerUp: rootSlotOnPointerUp,
+      ref: rootSlotRef,
+      style: rootSlotStyle,
+      sx: rootSlotSx,
+      ...rootSlotOther
+    } = root;
+    const ref = useForkRef(forwardedRef, rootSlotRef, setTarget);
     const setTransform = React.useCallback(
       (next: VireoCanvasTransform) => {
         const normalized = normalizeCanvasTransform(next, minScale, maxScale);
@@ -99,6 +110,8 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       return () => target.removeEventListener("wheel", handler);
     }, [target, transform.scale, wheelZoomEnabled, zoomAtClient, zoomStep]);
     const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+      rootSlotOnPointerDown?.(event);
+      if (event.defaultPrevented) return;
       if (!panEnabled || event.button !== 0) return;
       if (event.pointerType === "touch" && !touchPanEnabled) return;
       const eventTarget = event.target as HTMLElement;
@@ -108,6 +121,8 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       setPanning(true);
     };
     const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+      rootSlotOnPointerMove?.(event);
+      if (event.defaultPrevented) return;
       if (!dragRef.current) return;
       const previous = dragRef.current;
       dragRef.current = { x: event.clientX, y: event.clientY };
@@ -116,7 +131,10 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
         pan: { x: transform.pan.x + event.clientX - previous.x, y: transform.pan.y + event.clientY - previous.y },
       });
     };
-    const endPan = () => {
+    const endPan = (event: React.PointerEvent<HTMLDivElement>) => {
+      const slotHandler = event.type === "pointercancel" ? rootSlotOnPointerCancel : rootSlotOnPointerUp;
+      slotHandler?.(event);
+      if (event.defaultPrevented) return;
       dragRef.current = null;
       setPanning(false);
     };
@@ -197,7 +215,7 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
       <VireoInfiniteCanvasContext.Provider value={context}>
         <VireoInfiniteCanvasRoot
           {...other}
-          {...root}
+          {...rootSlotOther}
           as={slots.root ?? "div"}
           ref={ref}
           ownerState={ownerState}
@@ -206,9 +224,9 @@ export const VireoInfiniteCanvas = React.forwardRef<HTMLDivElement, VireoInfinit
           onPointerMove={onPointerMove}
           onPointerUp={endPan}
           onPointerCancel={endPan}
-          className={joinClassNames(classes.root, className, root.className)}
-          style={{ ...style, ...root.style }}
-          sx={mergeSx(sx, root.sx)}
+          className={joinClassNames(classes.root, className, rootSlotClassName)}
+          style={{ ...style, ...rootSlotStyle }}
+          sx={mergeSx(sx, rootSlotSx)}
         >
           {children}
         </VireoInfiniteCanvasRoot>
