@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "2026-08-30.4",
+  "contractVersion": "2026-08-30.5",
   "maturity": "public-alpha",
   "product": {
     "id": "vireo-framework",
@@ -40,7 +40,7 @@
     },
     "template": {
       "repository": "https://github.com/vireocodedev/starter-template",
-      "commit": "11e1795a798d5dbaee9344b8ff207d5b0ea59657",
+      "commit": "eed5c2dc3f53f53ef48a44e1d4e3394cb67feeeb",
       "profiles": ["frontend", "full-stack"],
       "databases": ["h2", "postgresql"]
     }
@@ -64,7 +64,7 @@
           "@vireocodedev/ui": "0.3.0"
         },
         "mavenBom": "com.vireocode:vireo-bom:0.3.0",
-        "templateCommit": "11e1795a798d5dbaee9344b8ff207d5b0ea59657"
+        "templateCommit": "eed5c2dc3f53f53ef48a44e1d4e3394cb67feeeb"
       }
     ]
   },

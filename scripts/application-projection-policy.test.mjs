@@ -39,6 +39,62 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
     "substitution-required",
   );
   assert.equal(classifyProjectionPath(contract, "scripts/setup.mjs", "full-stack")?.category, "managed");
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/pwa-policy.mjs", "full-stack")?.category,
+    "substitution-required",
+  );
+  assert.equal(classifyProjectionPath(contract, "pwa-policy.mjs", "frontend")?.category, "substitution-required");
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/scripts/app-identity-html.mjs", "full-stack")?.category,
+    "managed",
+  );
+  assert.equal(classifyProjectionPath(contract, "scripts/app-identity-html.mjs", "frontend")?.category, "managed");
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/scripts/app-identity-html.d.mts", "full-stack")?.category,
+    "managed",
+  );
+  assert.equal(classifyProjectionPath(contract, "scripts/app-identity-html.d.mts", "frontend")?.category, "managed");
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/tests/contract/pwa-contract.test.mjs", "full-stack")?.category,
+    "managed",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "tests/contract/pwa-contract.test.mjs", "frontend")?.category,
+    "managed",
+  );
+  assert.equal(classifyProjectionPath(contract, ".gitignore", "frontend")?.category, "managed");
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/tests/pwa/production-pwa.spec.ts", "full-stack")?.category,
+    "managed",
+  );
+  assert.equal(classifyProjectionPath(contract, "tests/pwa/production-pwa.spec.ts", "frontend")?.category, "managed");
+  assert.equal(classifyProjectionPath(contract, "frontend/vite.config.ts", "full-stack")?.category, "managed");
+  assert.equal(classifyProjectionPath(contract, "vite.config.ts", "frontend")?.category, "managed");
+  for (const path of [
+    "index.html",
+    "nginx.conf",
+    "playwright.pwa.config.ts",
+    "scripts/verify-frontend-profile.sh",
+    "scripts/vireo-frontend-doctor.mjs",
+  ]) {
+    assert.equal(classifyProjectionPath(contract, path, "frontend")?.category, "managed", path);
+  }
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/src/app/ui/localization/resources/app.en.ts", "full-stack")?.category,
+    "application-owned",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "src/app/ui/localization/resources/app.en.ts", "frontend")?.category,
+    "application-owned",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/public/icons/icon-192x192.png", "full-stack")?.category,
+    "application-owned",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "public/icons/icon-192x192.png", "frontend")?.category,
+    "application-owned",
+  );
   assert.equal(classifyProjectionPath(contract, "new-maintainer-surface.txt", "full-stack"), undefined);
 });
 

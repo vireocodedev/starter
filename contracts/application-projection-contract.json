@@ -141,9 +141,7 @@
         ".env.example",
         "frontend/package-lock.json",
         "frontend/package.json",
-        "frontend/src/app/ui/localization/resources/app.en.ts",
-        "frontend/src/app/ui/localization/resources/app.hr.ts",
-        "frontend/vite.config.ts",
+        "frontend/pwa-policy.mjs",
         "settings.gradle"
       ],
       "prefixes": ["src/main/java/com/vireocode/startertemplate/", "src/test/java/com/vireocode/startertemplate/"]
@@ -156,9 +154,8 @@
         "frontend/.env.example",
         "frontend/package-lock.json",
         "frontend/package.json",
-        "frontend/src/app/ui/localization/resources/app.en.ts",
-        "frontend/src/app/ui/localization/resources/app.hr.ts",
-        "frontend/vite.config.ts"
+        "frontend/pwa-policy.mjs",
+        "pwa-policy.mjs"
       ],
       "prefixes": []
     },
@@ -178,17 +175,30 @@
         ".nvmrc",
         "Dockerfile",
         "build.gradle",
+        "frontend/scripts/app-identity-html.d.mts",
+        "frontend/pwa-policy.d.mts",
+        "frontend/tests/contract/app-identity-html.test.mjs",
+        "frontend/tests/contract/pwa-contract.test.mjs",
+        "frontend/vite.config.ts",
         "gradle.properties",
         "gradlew",
         "gradlew.bat"
       ],
-      "prefixes": ["contracts/", "frontend/.storybook/", "frontend/scripts/", "gradle/", "scripts/"]
+      "prefixes": [
+        "contracts/",
+        "frontend/.storybook/",
+        "frontend/scripts/",
+        "frontend/tests/pwa/",
+        "gradle/",
+        "scripts/"
+      ]
     },
     {
       "id": "frontend-framework-integration",
       "category": "managed",
       "profiles": ["frontend"],
       "paths": [
+        ".gitignore",
         "frontend/.dockerignore",
         "frontend/.prettierignore",
         "frontend/.prettierrc",
@@ -204,9 +214,20 @@
         "frontend/tsconfig.local-starter.json",
         "frontend/tsconfig.node.json",
         "frontend/vitest.config.ts",
-        "frontend/vitest.storybook.config.ts"
+        "frontend/vitest.storybook.config.ts",
+        "frontend/scripts/app-identity-html.d.mts",
+        "frontend/pwa-policy.d.mts",
+        "frontend/tests/contract/app-identity-html.test.mjs",
+        "frontend/tests/contract/pwa-contract.test.mjs",
+        "index.html",
+        "nginx.conf",
+        "pwa-policy.d.mts",
+        "playwright.pwa.config.ts",
+        "tests/contract/app-identity-html.test.mjs",
+        "tests/contract/pwa-contract.test.mjs",
+        "vite.config.ts"
       ],
-      "prefixes": ["frontend/.storybook/", "frontend/scripts/"]
+      "prefixes": ["frontend/.storybook/", "frontend/scripts/", "frontend/tests/pwa/"]
     },
     {
       "id": "application-runtime",
@@ -241,10 +262,36 @@
         "frontend/docs/",
         "frontend/public/",
         "frontend/src/",
+        "src/",
         "frontend/tests/integration/",
         "frontend/tests/mocks/",
         "frontend/tests/unit/"
       ]
+    },
+    {
+      "id": "frontend-projected-pwa-integration",
+      "category": "managed",
+      "profiles": ["frontend"],
+      "paths": [
+        "scripts/app-identity-html.mjs",
+        "scripts/app-identity-html.d.mts",
+        "scripts/check-pwa-contract.mjs",
+        "scripts/prepare-pwa-update-fixture.mjs",
+        "scripts/pwa-contract.mjs",
+        "scripts/pwa-update-fixture.d.mts",
+        "scripts/pwa-update-fixture.mjs",
+        "scripts/serve-pwa-update-fixture.mjs",
+        "scripts/verify-frontend-profile.sh",
+        "scripts/vireo-frontend-doctor.mjs"
+      ],
+      "prefixes": ["tests/pwa/"]
+    },
+    {
+      "id": "frontend-projected-pwa-runtime",
+      "category": "application-owned",
+      "profiles": ["frontend"],
+      "paths": [],
+      "prefixes": ["public/icons/"]
     },
     {
       "id": "selected-examples-and-tools",
@@ -257,8 +304,7 @@
         "docs/recipes/",
         "docs/tutorials/",
         "frontend/tests/demo/",
-        "frontend/tests/e2e/",
-        "frontend/tests/pwa/"
+        "frontend/tests/e2e/"
       ]
     }
   ],
@@ -271,6 +317,33 @@
     { "path": "frontend/package.json", "profile": "frontend", "category": "substitution-required" },
     { "path": "gradle/wrapper/gradle-wrapper.properties", "profile": "full-stack", "category": "managed" },
     { "path": "frontend/scripts/verify.sh", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/pwa-policy.mjs", "profile": "full-stack", "category": "substitution-required" },
+    { "path": "frontend/pwa-policy.mjs", "profile": "frontend", "category": "substitution-required" },
+    { "path": "pwa-policy.mjs", "profile": "frontend", "category": "substitution-required" },
+    { "path": "frontend/pwa-policy.d.mts", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/pwa-policy.d.mts", "profile": "full-stack", "category": "managed" },
+    { "path": "pwa-policy.d.mts", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/scripts/app-identity-html.mjs", "profile": "full-stack", "category": "managed" },
+    { "path": "scripts/app-identity-html.mjs", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/scripts/prepare-pwa-update-fixture.mjs", "profile": "full-stack", "category": "managed" },
+    { "path": "scripts/prepare-pwa-update-fixture.mjs", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/scripts/pwa-update-fixture.mjs", "profile": "full-stack", "category": "managed" },
+    { "path": "scripts/pwa-update-fixture.mjs", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/scripts/app-identity-html.d.mts", "profile": "full-stack", "category": "managed" },
+    { "path": "scripts/app-identity-html.d.mts", "profile": "frontend", "category": "managed" },
+    { "path": "index.html", "profile": "frontend", "category": "managed" },
+    { "path": "nginx.conf", "profile": "frontend", "category": "managed" },
+    { "path": "playwright.pwa.config.ts", "profile": "frontend", "category": "managed" },
+    { "path": "scripts/verify-frontend-profile.sh", "profile": "frontend", "category": "managed" },
+    { "path": "scripts/vireo-frontend-doctor.mjs", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/tests/contract/pwa-contract.test.mjs", "profile": "full-stack", "category": "managed" },
+    { "path": "frontend/tests/contract/pwa-contract.test.mjs", "profile": "frontend", "category": "managed" },
+    { "path": "tests/contract/pwa-contract.test.mjs", "profile": "frontend", "category": "managed" },
+    { "path": ".gitignore", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/tests/pwa/production-pwa.spec.ts", "profile": "full-stack", "category": "managed" },
+    { "path": "tests/pwa/production-pwa.spec.ts", "profile": "frontend", "category": "managed" },
+    { "path": "frontend/public/icons/icon-192x192.png", "profile": "full-stack", "category": "application-owned" },
+    { "path": "public/icons/icon-192x192.png", "profile": "frontend", "category": "application-owned" },
     { "path": "frontend/src/app/App.tsx", "profile": "full-stack", "category": "application-owned" },
     { "path": "src/main/resources/application.properties", "profile": "full-stack", "category": "application-owned" },
     { "path": ".vireo/examples/purchase-order.entity.json", "profile": "frontend", "category": "optional" }

@@ -51,6 +51,15 @@ await createVireo({ directory: "my-app", database: "h2", git: false });
 
 The package performs no telemetry and prints no environment variables or credentials.
 
+## Generated PWA identity
+
+Creation renders the generated application's stable manifest ID, name, short name,
+description, and HTML metadata into `pwa-policy.mjs`. The identity comes from the
+project name; it is not configured through `VITE_APP_NAME`. The generated frontend
+keeps source and built PWA contract checks plus the opt-in two-production-build
+update-lifecycle fixture. Those automated checks do not replace browser-brand or
+physical-device install evidence, which remains experimental/not run.
+
 ## Generate a capability
 
 The package includes a second executable, `vireo`, while preserving

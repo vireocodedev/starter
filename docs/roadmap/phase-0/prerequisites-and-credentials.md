@@ -85,23 +85,23 @@ supersede them and pass without a token.
 
 ## Runtime configuration
 
-| Variable or port             | Scope                | Purpose/default                                   |
-| ---------------------------- | -------------------- | ------------------------------------------------- |
-| `SPRING_DATASOURCE_URL`      | Backend              | Database JDBC URL.                                |
-| `SPRING_DATASOURCE_USERNAME` | Backend              | Database user.                                    |
-| `SPRING_DATASOURCE_PASSWORD` | Backend              | Database password.                                |
-| `SESSION_COOKIE_SECURE`      | Backend              | Secure-cookie behavior outside local development. |
-| `POSTGRES_PASSWORD`          | Compose              | PostgreSQL container password.                    |
-| `VITE_API_BASE_URL`          | Frontend             | API base URL; defaults to `/api`.                 |
-| `VITE_APP_NAME`              | Frontend             | Application display name.                         |
-| `USE_LOCAL_STARTER`          | Template development | Select locally published Starter artifacts.       |
-| `USE_LOCAL_STARTER_SOURCE`   | Template development | Select Starter source integration.                |
-| `STORYBOOK`                  | Frontend tooling     | Storybook-specific runtime behavior.              |
-| `CI`                         | Verification         | Enables CI-specific behavior.                     |
-| `3000`                       | Frontend             | Development/preview and Playwright web server.    |
-| `8080`                       | Backend              | Spring Boot and Playwright API server.            |
-| `6007`                       | Storybook            | Storybook server.                                 |
-| `5432`                       | PostgreSQL           | Container database port.                          |
+| Variable or port                 | Scope                | Purpose/default                                                                              |
+| -------------------------------- | -------------------- | -------------------------------------------------------------------------------------------- |
+| `SPRING_DATASOURCE_URL`          | Backend              | Database JDBC URL.                                                                           |
+| `SPRING_DATASOURCE_USERNAME`     | Backend              | Database user.                                                                               |
+| `SPRING_DATASOURCE_PASSWORD`     | Backend              | Database password.                                                                           |
+| `SESSION_COOKIE_SECURE`          | Backend              | Secure-cookie behavior outside local development.                                            |
+| `POSTGRES_PASSWORD`              | Compose              | PostgreSQL container password.                                                               |
+| `VITE_API_BASE_URL`              | Frontend             | API base URL; defaults to `/api`.                                                            |
+| PWA identity in `pwa-policy.mjs` | Frontend             | Generated manifest/HTML identity; supersedes the baseline's former `VITE_APP_NAME` guidance. |
+| `USE_LOCAL_STARTER`              | Template development | Select locally published Starter artifacts.                                                  |
+| `USE_LOCAL_STARTER_SOURCE`       | Template development | Select Starter source integration.                                                           |
+| `STORYBOOK`                      | Frontend tooling     | Storybook-specific runtime behavior.                                                         |
+| `CI`                             | Verification         | Enables CI-specific behavior.                                                                |
+| `3000`                           | Frontend             | Development/preview and Playwright web server.                                               |
+| `8080`                           | Backend              | Spring Boot and Playwright API server.                                                       |
+| `6007`                           | Storybook            | Storybook server.                                                                            |
+| `5432`                           | PostgreSQL           | Container database port.                                                                     |
 
 ## Documentation discrepancies found
 

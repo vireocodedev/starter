@@ -38,6 +38,9 @@ public class OfflineReplayConfigurationExample {
 
     static final class OrderQuantityReplayHandler implements OfflineSyncReplayHandler {
 
+        private static final String UUID_V4_PATTERN = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB]"
+                + "[0-9a-fA-F]{3}-[0-9a-fA-F]{12}";
+
         private final ObjectMapper objectMapper;
         private final OrderCommands orderCommands;
 
@@ -48,7 +51,7 @@ public class OfflineReplayConfigurationExample {
 
         @Override
         public boolean supports(OfflineSyncCommandDto command, HttpMethod method) {
-            return method == HttpMethod.PATCH && command.url().matches("/api/orders/[0-9a-fA-F-]+/quantity");
+            return method == HttpMethod.PATCH && command.url().matches("/api/orders/" + UUID_V4_PATTERN + "/quantity");
         }
 
         @Override

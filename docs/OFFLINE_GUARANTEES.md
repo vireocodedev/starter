@@ -21,6 +21,20 @@ Vireo separates three claims that must not be collapsed:
 Generated schema v1 deliberately requires `capabilities.offline: false`. Turning a
 field or package on does not create an offline-safe domain workflow.
 
+## Paired opt-in command example
+
+The compile-checked [TypeScript order-quantity example](../packages/sqlite/docs/examples/orderQuantityOfflineReplay.example.ts)
+captures and replays exactly one `PATCH /api/orders/{uuid}/quantity` command with
+the body `{ "quantity": number }`. Its paired, compile-checked [JVM replay handler](../jvm/vireo-starter-documentation-examples/src/main/java/com/vireocode/docs/offline/OfflineReplayConfigurationExample.java)
+admits that same route and normalizes that body into `ChangeQuantity` before it
+calls the application's order command.
+
+Treat this as a starting contract, not a generated feature: deliberately admit the
+specific command, connect capture to durable SQLite storage, keep server-side
+idempotency and authorization, and implement conflict/recovery UI before exposing
+it. The Template remains an offline shell and does not enable this route or any
+offline CRUD by default.
+
 ## Primitive guarantees
 
 | Concern          | Guarantee                                                                                                                                                                                                                                                                                             | Boundary or limit                                                                                                                                                                                                                                                                                                                 |

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:@vireocodedev/sqlite",
+  "decision": "no-release",
+  "justification": "Documentation example and contract test only; packed runtime bytes and public API are unchanged."
+}

@@ -53,7 +53,7 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-export const TEMPLATE_COMMIT = "11e1795a798d5dbaee9344b8ff207d5b0ea59657";
+export const TEMPLATE_COMMIT = "eed5c2dc3f53f53ef48a44e1d4e3394cb67feeeb";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";
@@ -179,6 +179,60 @@ async function replaceTextFile(path: string, replacements: Array<[string, string
   await writeFile(path, text);
 }
 
+type PwaIdentity = {
+  id: string;
+  name: string;
+  shortName: string;
+  description: string;
+};
+
+function createPwaIdentity(projectName: string, productName: string): PwaIdentity {
+  const words = productName.split(/\s+/u).filter(Boolean);
+  let shortName = "";
+  for (const word of words) {
+    const candidate = shortName ? `${shortName} ${word}` : word;
+    if (candidate.length > 12) break;
+    shortName = candidate;
+  }
+  if (shortName.length < 6 && words.length > 1) {
+    shortName = productName.replaceAll(" ", "").slice(0, 12);
+  }
+  if (!shortName) shortName = words[0]?.slice(0, 12) ?? "";
+  if (!shortName) throw new Error("Project name cannot produce a PWA short name.");
+  return {
+    id: `/${projectName}`,
+    name: productName,
+    shortName,
+    description: `${productName} is a production-oriented application.`,
+  };
+}
+
+/**
+ * Render the one identity authority copied from the pinned Template. The
+ * baseline checks deliberately fail closed if a future Template reshapes this
+ * object, rather than silently leaving Vireo identity in a generated app.
+ */
+async function renderPwaIdentity(path: string, identity: PwaIdentity) {
+  let source = await readFile(path, "utf8");
+  const fields: Array<[string, string]> = [
+    ['id: "/vireo-starter"', `id: ${JSON.stringify(identity.id)}`],
+    ['name: "Vireo Starter"', `name: ${JSON.stringify(identity.name)}`],
+    ['shortName: "Vireo"', `shortName: ${JSON.stringify(identity.shortName)}`],
+    [
+      'description: "A production-oriented full-stack PWA built on Vireo Starter."',
+      `description: ${JSON.stringify(identity.description)}`,
+    ],
+  ];
+  for (const [baseline, rendered] of fields) {
+    const occurrences = source.split(baseline).length - 1;
+    if (occurrences !== 1) {
+      throw new Error(`Pinned Template PWA identity must contain exactly one ${baseline}.`);
+    }
+    source = source.replace(baseline, rendered);
+  }
+  await writeFile(path, source);
+}
+
 async function renameJavaPackage(root: string, javaPackage: string) {
   for (const sourceSet of ["main", "test"]) {
     const source = join(root, "src", sourceSet, "java", "com", "vireocode", "startertemplate");
@@ -204,7 +258,9 @@ steps=(
   "Lint|corepack npm run lint"
   "Types|corepack npm run typecheck"
   "Tests|corepack npm run test"
+  "PWA source contract|corepack npm run pwa:check:source"
   "Application build|corepack npm run build"
+  "PWA built contract|corepack npm run pwa:check:built"
 )
 
 for step in "\${steps[@]}"; do
@@ -221,6 +277,7 @@ const FRONTEND_DOCTOR_SCRIPT = `import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { createConnection } from "node:net";
 import { resolve } from "node:path";
+import { checkPwaSourceContract, formatPwaContractProblems } from "./pwa-contract.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const results = [];
@@ -301,6 +358,14 @@ add(
   "Declare VITE_API_MODE=mock or http.",
 );
 
+const pwaProblems = checkPwaSourceContract({ frontendRoot: root });
+add(
+  "VIR-PWA-001",
+  pwaProblems.length === 0 ? "pass" : "fail",
+  pwaProblems.length === 0 ? "PWA source contract" : formatPwaContractProblems(pwaProblems),
+  "Restore the shared PWA policy, metadata, and icons; run corepack npm run pwa:check:source for details.",
+);
+
 const portAvailable = await new Promise(resolveCheck => {
   const socket = createConnection({ host: "127.0.0.1", port: 3000 });
   socket.unref();
@@ -369,6 +434,12 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       scripts: Record<string, string>;
     };
     packageJson.name = projectName;
+    const requiredScript = (name: string) => {
+      const script = packageJson.scripts?.[name];
+      if (typeof script !== "string" || script.trim().length === 0)
+        throw new Error(`Pinned Template frontend package.json must define ${name}.`);
+      return script;
+    };
     packageJson.scripts = {
       setup: "corepack npm ci",
       doctor: "node scripts/vireo-frontend-doctor.mjs",
@@ -386,6 +457,10 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       "starter:boundary:check": packageJson.scripts["starter:boundary:check"],
       "architecture:check": packageJson.scripts["architecture:check"],
       "bundle:check": packageJson.scripts["bundle:check"],
+      "pwa:check:source": requiredScript("pwa:check:source"),
+      "pwa:check:built": requiredScript("pwa:check:built"),
+      "pretest:pwa": requiredScript("pretest:pwa"),
+      "test:pwa": requiredScript("test:pwa"),
       preview: packageJson.scripts.preview,
       vireo: "npx --yes --package=create-vireo@0.5.0 vireo",
       "generate:check": "corepack npm run vireo -- check",
@@ -406,9 +481,20 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       join(projection, "README.md"),
       `# ${productName}\n\nA standalone Vireo frontend. It runs without Java or a database by default through application-owned mock adapters.\n\nThe authoritative local verification host is Ubuntu 24.04 x86-64 with GNU time/coreutils. Other Linux releases, macOS, Windows/WSL2, and ARM64 may work for development but remain untested; Doctor reports this boundary.\n\n\`\`\`bash\ncorepack npm run setup\ncorepack npm run doctor\ncorepack npm run dev\n\`\`\`\n\nSign in with \`demo\` / \`demo123\`. Replace the adapters exported from \`src/app/adapters/public.ts\` when connecting the company API. See \`docs/architecture/frontend-only-adoption.md\`.\n`,
     );
+    await writeFile(join(projection, ".env.development"), "VITE_API_MODE=mock\nVITE_API_BASE_URL=/api\n");
     await writeFile(
-      join(projection, ".env.development"),
-      `VITE_API_MODE=mock\nVITE_API_BASE_URL=/api\nVITE_APP_NAME=${productName}\n`,
+      join(projection, ".gitignore"),
+      `node_modules/
+dist/
+.pwa-update-fixture/
+playwright-report/
+test-results/
+storybook-static/
+.env
+.env.*
+!.env.example
+!.env.development
+`,
     );
     await writeFile(join(projection, "scripts", "verify-frontend-profile.sh"), FRONTEND_VERIFY_SCRIPT);
     await chmod(join(projection, "scripts", "verify-frontend-profile.sh"), 0o755);
@@ -482,15 +568,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     ]);
     const productName = displayName(projectName);
     await replaceTextFile(join(staging, "README.md"), [["# Vireo Starter Template", `# ${productName}`]]);
-    await replaceTextFile(join(staging, "frontend", "vite.config.ts"), [
-      ['name: "Vireo Starter App"', `name: "${productName}"`],
-      ['short_name: "Vireo"', `short_name: "${productName}"`],
-    ]);
-    for (const locale of ["app.en.ts", "app.hr.ts"]) {
-      await replaceTextFile(join(staging, "frontend", "src", "app", "ui", "localization", "resources", locale), [
-        ['name: "Vireo Starter"', `name: "${productName}"`],
-      ]);
-    }
+    await renderPwaIdentity(join(staging, "frontend", "pwa-policy.mjs"), createPwaIdentity(projectName, productName));
     await renameJavaPackage(staging, javaPackage);
     if (profile === "frontend") await projectFrontendTemplate(staging, projectName, productName);
     else await pinGeneratedProjectCli(staging);

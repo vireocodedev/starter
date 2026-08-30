@@ -3,5 +3,5 @@
   "artifact": "application:documentation-site",
   "decision": "release",
   "bump": "deploy",
-  "summary": "Deploy federated API search, exact flagship proof, and updated public release contracts."
+  "summary": "Deploy current PWA identity, platform evidence, and offline-boundary documentation."
 }

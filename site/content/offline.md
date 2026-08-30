@@ -10,7 +10,11 @@ Vireo provides an offline-capable application shell, explicit local-storage prim
 - Update availability is surfaced deliberately.
 - Loading, unavailable and retry states remain visible.
 
-These guarantees are exercised by production PWA lifecycle tests.
+Generated applications derive their manifest and HTML identity from the rendered
+`pwa-policy.mjs` rather than a `VITE_APP_NAME` environment override. Source and
+built contract checks, including an automated two-production-build activation and
+reload lifecycle, exercise this bounded shell behavior. Installed-PWA support is
+experimental. Branded-browser and physical-device evidence is not run.
 
 ## Domain operations require policy
 
