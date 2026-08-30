@@ -135,6 +135,35 @@ describe("Storybook executable contract gate", () => {
     expect(matrixStories.match(/\.stories\.tsx/g)).toHaveLength(11);
   });
 
+  it("prioritizes matrix contracts, then executable CSF contracts, then the complete Storybook corpus", () => {
+    const main = readPackageFile(".storybook-vireo/main.ts");
+    const routing = main.slice(main.indexOf("const storybookStories ="), main.indexOf("\n\nconst config"));
+    const executableCorpus =
+      'const executableStorybookCorpus = ["../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"];';
+    const fullCorpus = "const fullStorybookCorpus = [";
+    const documentationGlobs = [
+      "../docs/storybook/**/*.mdx",
+      "../../history/docs/storybook/**/*.mdx",
+      "../../infrastructure/docs/storybook/**/*.mdx",
+      "../../localization/docs/storybook/**/*.mdx",
+      "../../queryengine/docs/storybook/**/*.mdx",
+      "../../shell/docs/storybook/**/*.mdx",
+      "../../sqlite/docs/storybook/**/*.mdx",
+      "../../../jvm/docs/storybook/**/*.mdx",
+      "../../../jvm/*/docs/storybook/**/*.mdx",
+    ];
+
+    expect(main).toContain(executableCorpus);
+    expect(main).toContain(fullCorpus);
+    for (const documentationGlob of documentationGlobs) expect(main).toContain(`"${documentationGlob}"`);
+    expect(routing.indexOf('process.env.VIREO_STORYBOOK_MATRIX === "true"')).toBeLessThan(
+      routing.indexOf('process.env.VIREO_STORYBOOK_CONTRACTS === "true"'),
+    );
+    expect(routing.indexOf('process.env.VIREO_STORYBOOK_CONTRACTS === "true"')).toBeLessThan(
+      routing.indexOf(": fullStorybookCorpus"),
+    );
+  });
+
   it("keeps browser-discovered legacy debt explicit and bounded", () => {
     const historyEntryStories = readPackageFile(
       "src/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.stories.tsx",

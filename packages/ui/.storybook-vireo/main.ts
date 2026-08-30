@@ -22,8 +22,13 @@ const fullStorybookCorpus = [
   "../../../jvm/*/docs/storybook/**/*.mdx",
   "../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)",
 ];
+const executableStorybookCorpus = ["../src/**/{Vireo,useVireo}*.stories.@(js|jsx|mjs|ts|tsx)"];
 const storybookStories =
-  process.env.VIREO_STORYBOOK_MATRIX === "true" ? [...vireoStorybookMatrixStories] : fullStorybookCorpus;
+  process.env.VIREO_STORYBOOK_MATRIX === "true"
+    ? [...vireoStorybookMatrixStories]
+    : process.env.VIREO_STORYBOOK_CONTRACTS === "true"
+      ? executableStorybookCorpus
+      : fullStorybookCorpus;
 
 const config: StorybookConfig = {
   stories: storybookStories,

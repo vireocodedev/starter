@@ -1,13 +1,16 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { vireoStorybookMatrixStories } from "../.storybook-vireo/testing/storybook-matrix-stories";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const repositoryRoot = resolve(packageRoot, "../..");
 const sourceRoot = join(packageRoot, "src");
 const storybookDirectory = join(packageRoot, ".storybook-vireo");
 const matrixTag = '"vireo-matrix"';
+const ignoredRepositoryDirectories = new Set([".git", "build", "coverage", "dist", "node_modules"]);
+const executableStoryFileName = /^(?:Vireo|useVireo).*\.stories\.(?:js|jsx|mjs|ts|tsx)$/u;
 
 const representativeStories = {
   data: "core/components/data-display/VireoJsonViewer/VireoJsonViewer.stories.tsx",
@@ -25,7 +28,7 @@ const representativeStories = {
 function findStoryFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
-    if (entry.isDirectory()) return findStoryFiles(path);
+    if (entry.isDirectory()) return ignoredRepositoryDirectories.has(entry.name) ? [] : findStoryFiles(path);
     return /\.stories\.[cm]?[jt]sx?$/u.test(entry.name) ? [path] : [];
   });
 }
@@ -58,5 +61,18 @@ describe("Storybook mode matrix coverage", () => {
 
     expect(new Set(matrixCorpus).size).toBe(11);
     expect(matrixCorpus).toEqual(taggedStories);
+  });
+
+  it("keeps every executable CSF story inside the UI source corpus", () => {
+    const repositoryExecutableStories = findStoryFiles(repositoryRoot).filter(path =>
+      executableStoryFileName.test(basename(path)),
+    );
+    const outsideUiSource = repositoryExecutableStories
+      .filter(path => !path.startsWith(`${sourceRoot}${sep}`))
+      .map(path => relative(repositoryRoot, path));
+
+    expect(outsideUiSource, `executable CSF stories outside packages/ui/src:\n${outsideUiSource.join("\n")}`).toEqual(
+      [],
+    );
   });
 });
