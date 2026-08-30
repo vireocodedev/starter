@@ -67,7 +67,7 @@ Public-beta evaluation is open, but readiness and independent adoption are not y
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.5.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
+| [`create-vireo`](packages/create-vireo)                   | 0.5.1   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
 | [`@vireocodedev/ui`](packages/ui)                         | 0.3.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.2   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.2   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |

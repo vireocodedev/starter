@@ -1,11 +1,7 @@
 {
   "schemaVersion": 1,
   "channels": {
-    "stable": {
-      "status": "active",
-      "npmTag": "latest",
-      "versionPattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
-    },
+    "stable": { "status": "active", "npmTag": "latest", "versionPattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
     "prerelease": {
       "status": "not-enabled",
       "npmTag": "next",
@@ -17,7 +13,7 @@
     {
       "id": "0.3-alpha",
       "status": "active",
-      "release": "npm-0.5.0_jvm-0.3.0",
+      "release": "npm-0.5.1_jvm-0.3.0",
       "introducedOn": "2026-08-26",
       "statusEffectiveOn": "2026-08-30",
       "deprecatedOn": null,

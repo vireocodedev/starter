@@ -3,7 +3,7 @@
   "targetRelease": "0.3.0",
   "targetTemplateCommit": "11e1795a798d5dbaee9344b8ff207d5b0ea59657",
   "target": {
-    "rootVireoScript": "npx --yes --package=create-vireo@0.5.0 vireo",
+    "rootVireoScript": "npx --yes --package=create-vireo@0.5.1 vireo",
     "starterJvmVersion": "0.3.0",
     "frontendDependencies": {
       "@vireocodedev/history": "^0.2.2",

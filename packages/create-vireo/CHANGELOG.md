@@ -1,5 +1,12 @@
 # create-vireo
 
+## 0.5.1
+
+### Patch Changes
+
+- b068ba6: Render generated PWA identity from the shared policy, preserve frontend PWA checks
+  and update-lifecycle fixtures, and include PWA diagnostics in the frontend Doctor.
+
 ## 0.5.0
 
 ### Minor Changes
