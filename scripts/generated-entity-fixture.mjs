@@ -3,14 +3,21 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { checkGeneratedEntities, createVireo, generateEntity } from "../packages/create-vireo/dist/index.js";
+import {
+  checkGeneratedEntities,
+  createVireo,
+  generateEntity,
+  TEMPLATE_COMMIT,
+} from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
+import { assertGeneratedFixtureTemplatePinFromRepository } from "./lib/generated-fixture-template-pin.mjs";
 import {
   mavenCandidateConsumerCommand,
   withLocalVireoMavenCandidates,
 } from "./lib/local-vireo-maven-candidate-fixture.mjs";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+await assertGeneratedFixtureTemplatePinFromRepository({ repositoryRoot, templateCommit: TEMPLATE_COMMIT });
 const ecosystemContract = JSON.parse(
   await readFile(join(repositoryRoot, "contracts/ecosystem-release-contract.json"), "utf8"),
 );

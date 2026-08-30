@@ -4,8 +4,14 @@ import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { checkGeneratedEntities, createVireo, upgradeVireoProject } from "../packages/create-vireo/dist/index.js";
+import {
+  checkGeneratedEntities,
+  createVireo,
+  TEMPLATE_COMMIT,
+  upgradeVireoProject,
+} from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
+import { assertGeneratedFixtureTemplatePinFromRepository } from "./lib/generated-fixture-template-pin.mjs";
 import {
   mavenCandidateConsumerCommand,
   withLocalVireoMavenCandidates,
@@ -22,6 +28,7 @@ const pendingActionIds = [
 ];
 const sourceTemplateCommit = "2520c99b1550246c3b0c5299b3cc6055dd10ead7";
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+await assertGeneratedFixtureTemplatePinFromRepository({ repositoryRoot, templateCommit: TEMPLATE_COMMIT });
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-upgrade-fixture-"));
 const sourceTemplate = join(temporaryRoot, "source-template");
 const projectRoot = join(temporaryRoot, "upgrade-app");

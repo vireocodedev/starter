@@ -1,10 +1,19 @@
 import { execFileSync } from "node:child_process";
 import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, relative } from "node:path";
-import { checkGeneratedEntities, createVireo, generateEntity } from "../packages/create-vireo/dist/index.js";
+import { dirname, join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  checkGeneratedEntities,
+  createVireo,
+  generateEntity,
+  TEMPLATE_COMMIT,
+} from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
+import { assertGeneratedFixtureTemplatePinFromRepository } from "./lib/generated-fixture-template-pin.mjs";
 
+const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+await assertGeneratedFixtureTemplatePinFromRepository({ repositoryRoot, templateCommit: TEMPLATE_COMMIT });
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-frontend-fixture-"));
 const projectRoot = join(temporaryRoot, "frontend-app");
 

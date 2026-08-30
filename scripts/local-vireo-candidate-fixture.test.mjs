@@ -217,15 +217,48 @@ test("does not rerun cleanup after callback failure because cleanup completed be
   assert.deepEqual(events, ["install", "assert", "restore", "cleanup", "callback"]);
 });
 
-test("keeps fixture wiring on Corepack, full workspace builds, and a frozen legacy schema", async () => {
-  const [workflow, testScript, verifyScript, upgradeFixture, legacySchema] = await Promise.all([
+test("keeps fixture commands self-preparing on Corepack and guards their template pin", async () => {
+  const [
+    workflow,
+    packageJson,
+    testScript,
+    verifyScript,
+    entityFixture,
+    frontendFixture,
+    upgradeFixture,
+    legacySchema,
+  ] = await Promise.all([
     readFile(join(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
+    readFile(join(repositoryRoot, "package.json"), "utf8"),
     readFile(join(repositoryRoot, "scripts/test.sh"), "utf8"),
     readFile(join(repositoryRoot, "scripts/verify.sh"), "utf8"),
+    readFile(join(repositoryRoot, "scripts/generated-entity-fixture.mjs"), "utf8"),
+    readFile(join(repositoryRoot, "scripts/generated-frontend-fixture.mjs"), "utf8"),
     readFile(join(repositoryRoot, "scripts/project-upgrade-fixture.mjs"), "utf8"),
     readFile(join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.0.2.0.entity.json"), "utf8"),
   ]);
-  assert.equal((workflow.match(/corepack npm run build$/gmu) ?? []).length, 3);
+  const fixtureCommands = [
+    ["generate:entity:fixture", "generated-entity-fixture.mjs", entityFixture],
+    ["generate:frontend:fixture", "generated-frontend-fixture.mjs", frontendFixture],
+    ["upgrade:project:fixture", "project-upgrade-fixture.mjs", upgradeFixture],
+  ];
+  const scripts = JSON.parse(packageJson).scripts;
+  for (const [command, script, fixture] of fixtureCommands) {
+    assert.equal(scripts[command], `corepack npm run build && node scripts/${script}`);
+    assert.match(workflow, new RegExp(`- run: corepack npm run ${command}`, "u"));
+    assert.doesNotMatch(workflow, new RegExp(`corepack npm run build\\n\\s*- run: corepack npm run ${command}`, "u"));
+    assert.match(fixture, /TEMPLATE_COMMIT/u);
+    assert.match(fixture, /assertGeneratedFixtureTemplatePinFromRepository/u);
+    assert.ok(
+      fixture.indexOf("await assertGeneratedFixtureTemplatePinFromRepository") < fixture.indexOf("await createVireo"),
+      `${command} must validate TEMPLATE_COMMIT before scaffolding.`,
+    );
+  }
+  assert.ok(
+    upgradeFixture.indexOf("await assertGeneratedFixtureTemplatePinFromRepository") <
+      upgradeFixture.indexOf("await fetch"),
+    "Project upgrade must validate TEMPLATE_COMMIT before downloading its source scaffold.",
+  );
   assert.doesNotMatch(workflow, /npm run build --workspace=create-vireo/u);
   assert.doesNotMatch(testScript, /(?<!corepack )npm run/u);
   assert.match(verifyScript, /corepack npm --version/u);

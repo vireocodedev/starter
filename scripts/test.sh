@@ -6,6 +6,7 @@ node --test \
   scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
   scripts/local-vireo-candidate-fixture.test.mjs \
+  scripts/generated-fixture-template-pin.test.mjs \
   scripts/local-vireo-maven-candidate-fixture.test.mjs \
   scripts/package-bin.test.mjs \
   scripts/publish-verified-npm-candidates.test.mjs \
