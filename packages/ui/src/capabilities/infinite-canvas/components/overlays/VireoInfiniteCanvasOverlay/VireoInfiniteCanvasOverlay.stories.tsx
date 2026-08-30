@@ -5,12 +5,13 @@ import { VireoInfiniteCanvasOverlay } from "./VireoInfiniteCanvasOverlay";
 const meta = {
   title: "TypeScript/UI/Capabilities/Infinite Canvas/VireoInfiniteCanvasOverlay",
   component: VireoInfiniteCanvasOverlay,
+  tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
         component:
-          "VireoInfiniteCanvasOverlay anchors interactive controls to eight fixed canvas positions.\n\n## Why it exists\n\nToolbars, minimaps, and zoom controls must stay in viewport coordinates and must not begin canvas panning. Use this overlay inside VireoInfiniteCanvas, outside its transformed body.",
+          "VireoInfiniteCanvasOverlay anchors interactive controls to eight fixed canvas positions.\n\n### Why it exists\n\nToolbars, minimaps, and zoom controls must stay in viewport coordinates and must not begin canvas panning. Use this overlay inside VireoInfiniteCanvas, outside its transformed body.",
       },
     },
   },

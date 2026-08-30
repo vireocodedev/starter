@@ -10,12 +10,13 @@ import { VireoConfirmationDialog } from "./VireoConfirmationDialog";
 const meta = {
   title: "TypeScript/UI/Capabilities/Overlays/VireoConfirmationDialog",
   component: VireoConfirmationDialog,
+  tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
         component:
-          "VireoConfirmationDialog presents a controlled confirmation decision with safe React content, explicit loading behavior, and replaceable semantic slots.\n\n## Why it exists\n\nDestructive and consequential actions otherwise recreate subtly different dialogs and frequently mix action execution with presentation state. Vireo centralizes the accessible surface while VireoConfirmationProvider offers an optional promise-based decision API. Message strings remain text; use React nodes when rich content is required.",
+          "VireoConfirmationDialog presents a controlled confirmation decision with safe React content, explicit loading behavior, and replaceable semantic slots.\n\n### Why it exists\n\nDestructive and consequential actions otherwise recreate subtly different dialogs and frequently mix action execution with presentation state. Vireo centralizes the accessible surface while VireoConfirmationProvider offers an optional promise-based decision API. Message strings remain text; use React nodes when rich content is required.",
       },
     },
   },

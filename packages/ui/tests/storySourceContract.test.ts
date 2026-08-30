@@ -71,6 +71,53 @@ function propertyValue(object: ts.ObjectLiteralExpression, name: string): ts.Nod
   return property && ts.isPropertyAssignment(property) ? property.initializer : undefined;
 }
 
+function unwrapExpression(node: ts.Node | undefined): ts.Node | undefined {
+  let current = node;
+  while (
+    current &&
+    (ts.isParenthesizedExpression(current) ||
+      ts.isAsExpression(current) ||
+      ts.isSatisfiesExpression(current) ||
+      ts.isTypeAssertionExpression(current))
+  ) {
+    current = current.expression;
+  }
+  return current;
+}
+
+function objectValue(node: ts.Node | undefined): ts.ObjectLiteralExpression | undefined {
+  const expression = unwrapExpression(node);
+  return expression && ts.isObjectLiteralExpression(expression) ? expression : undefined;
+}
+
+function staticString(node: ts.Node | undefined): string | undefined {
+  const expression = unwrapExpression(node);
+  return expression && (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression))
+    ? expression.text
+    : undefined;
+}
+
+function defaultMetadata(source: ts.SourceFile): ts.ObjectLiteralExpression | undefined {
+  const defaultExport = source.statements.find(
+    statement => ts.isExportAssignment(statement) && !statement.isExportEquals,
+  );
+  if (!defaultExport || !ts.isExportAssignment(defaultExport)) return undefined;
+
+  const exported = unwrapExpression(defaultExport.expression);
+  if (exported && ts.isObjectLiteralExpression(exported)) return exported;
+  if (!exported || !ts.isIdentifier(exported)) return undefined;
+
+  for (const statement of source.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.name.text === exported.text) {
+        return objectValue(declaration.initializer);
+      }
+    }
+  }
+  return undefined;
+}
+
 function referencesIdentifier(node: ts.Node | undefined, name: string): boolean {
   if (!node) return false;
   if (ts.isIdentifier(node) && node.text === name) return true;
@@ -168,6 +215,65 @@ describe("Vireo executable story-source contract", () => {
           ),
       )
       .map(file => `${relative(packageRoot, file)}: expected a TypeScript/UI/Capabilities/Forms/Fields story title`);
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps component metadata discoverable, canonical, and decision-oriented", () => {
+    const violations = storyFiles.flatMap(storyFile => {
+      const source = parse(storyFile);
+      const meta = defaultMetadata(source);
+      const location = relative(packageRoot, storyFile);
+      const expectedName = basename(storyFile, ".stories.tsx");
+      const errors: string[] = [];
+
+      if (!meta) return [`${location}: default export must resolve to static component metadata`];
+
+      const title = staticString(propertyValue(meta, "title"));
+      if (!title) {
+        errors.push(`${location}: meta.title must be a string literal`);
+      } else if (title.split("/").at(-1) !== expectedName) {
+        errors.push(`${location}: meta.title must end with /${expectedName}`);
+      }
+
+      const tags = unwrapExpression(propertyValue(meta, "tags"));
+      const hasAutodocs =
+        tags !== undefined &&
+        ts.isArrayLiteralExpression(tags) &&
+        tags.elements.some(element => staticString(element) === "autodocs");
+      if (!hasAutodocs) errors.push(`${location}: meta.tags must include autodocs`);
+
+      const parameters = objectValue(propertyValue(meta, "parameters"));
+      const docs = objectValue(parameters && propertyValue(parameters, "docs"));
+      const description = objectValue(docs && propertyValue(docs, "description"));
+      const componentDescription = staticString(description && propertyValue(description, "component"));
+      if (!componentDescription) {
+        errors.push(`${location}: parameters.docs.description.component must be a static string`);
+        return errors;
+      }
+
+      const rationaleHeadings = componentDescription.match(/^#{1,6} Why it exists$/gmu) ?? [];
+      if (rationaleHeadings.length !== 1 || rationaleHeadings[0] !== "### Why it exists") {
+        errors.push(`${location}: description must contain exactly one literal ### Why it exists heading`);
+        return errors;
+      }
+
+      const sections = componentDescription.split("\n\n### Why it exists\n\n");
+      if (sections.length !== 2) {
+        errors.push(`${location}: description must separate its summary and rationale with blank lines`);
+        return errors;
+      }
+
+      const [summary, rationale] = sections.map(section => section.trim());
+      if (!summary || summary.includes("\n") || !/[.!?]$/u.test(summary)) {
+        errors.push(`${location}: description must open with one concise sentence or paragraph`);
+      }
+      if (!rationale || !/[.!?]$/u.test(rationale)) {
+        errors.push(`${location}: Why it exists must contain a substantive rationale`);
+      }
+
+      return errors;
+    });
 
     expect(violations).toEqual([]);
   });

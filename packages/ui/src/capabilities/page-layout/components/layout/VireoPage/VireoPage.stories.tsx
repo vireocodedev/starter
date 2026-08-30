@@ -5,12 +5,13 @@ import { VireoPage } from "./VireoPage";
 const meta = {
   title: "TypeScript/UI/Capabilities/Page Layout/VireoPage",
   component: VireoPage,
+  tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
         component:
-          "VireoPage establishes the bounded page frame and container-measured layout context.\n\n## Why it exists\n\nPage content must react to the space actually allocated by navigation and side surfaces, not merely viewport breakpoints. Use VireoPage as the root of a standard application page; provide mode only for an intentionally controlled layout.",
+          "VireoPage establishes the bounded page frame and container-measured layout context.\n\n### Why it exists\n\nPage content must react to the space actually allocated by navigation and side surfaces, not merely viewport breakpoints. Use VireoPage as the root of a standard application page; provide mode only for an intentionally controlled layout.",
       },
     },
   },

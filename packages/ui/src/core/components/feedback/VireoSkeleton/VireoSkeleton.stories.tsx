@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "A silent visual leaf for text, icon, and media placeholders. Prefer wrapping known content to preserve its exact typography and geometry; let a VireoLoadingRegion own timing and announcements.",
+          "A silent visual leaf for text, icon, and media placeholders.\n\n### Why it exists\n\nLoading surfaces need geometry-preserving placeholders without duplicate announcements or layout shifts. Use VireoSkeleton around known content whose shape should remain stable; let VireoLoadingRegion own reveal timing and accessible loading status.",
       },
     },
   },

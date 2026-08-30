@@ -5,12 +5,13 @@ import { VireoResponsiveCard } from "./VireoResponsiveCard";
 const meta = {
   title: "TypeScript/UI/Capabilities/Page Layout/VireoResponsiveCard",
   component: VireoResponsiveCard,
+  tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
         component:
-          "VireoResponsiveCard keeps stable card markup and adapts its visual surface to the nearest Vireo page-layout mode.\n\n## Why it exists\n\nCards often become edge-to-edge content in compact containers. Vireo removes only the compact visual chrome, preserving refs, semantics, state, and child lifecycles across layout changes.",
+          "VireoResponsiveCard keeps stable card markup and adapts its visual surface to the nearest Vireo page-layout mode.\n\n### Why it exists\n\nCards often become edge-to-edge content in compact containers. Vireo removes only the compact visual chrome, preserving refs, semantics, state, and child lifecycles across layout changes.",
       },
     },
   },

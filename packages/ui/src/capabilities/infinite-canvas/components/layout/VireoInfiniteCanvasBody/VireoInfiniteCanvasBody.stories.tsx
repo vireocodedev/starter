@@ -5,12 +5,13 @@ import { VireoInfiniteCanvasBody } from "./VireoInfiniteCanvasBody";
 const meta = {
   title: "TypeScript/UI/Capabilities/Infinite Canvas/VireoInfiniteCanvasBody",
   component: VireoInfiniteCanvasBody,
+  tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
         component:
-          "VireoInfiniteCanvasBody applies the current world transform to positioned canvas content.\n\n## Why it exists\n\nWorld nodes must pan and scale together while overlays remain fixed. Use this component only inside VireoInfiniteCanvas for the transformed content plane.",
+          "VireoInfiniteCanvasBody applies the current world transform to positioned canvas content.\n\n### Why it exists\n\nWorld nodes must pan and scale together while overlays remain fixed. Use this component only inside VireoInfiniteCanvas for the transformed content plane.",
       },
     },
   },

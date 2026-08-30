@@ -5,12 +5,13 @@ import { VireoPageHeader } from "./VireoPageHeader";
 const meta = {
   title: "TypeScript/UI/Capabilities/Page Layout/VireoPageHeader",
   component: VireoPageHeader,
+  tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
         component:
-          "VireoPageHeader aligns leading navigation, a truncating title, and trailing page actions.\n\n## Why it exists\n\nPage headers otherwise drift in spacing, semantic structure, title overflow, and action alignment. Use it for the primary header row inside VireoPage.",
+          "VireoPageHeader aligns leading navigation, a truncating title, and trailing page actions.\n\n### Why it exists\n\nPage headers otherwise drift in spacing, semantic structure, title overflow, and action alignment. Use it for the primary header row inside VireoPage.",
       },
     },
   },

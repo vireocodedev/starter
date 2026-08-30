@@ -22,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "A stable loading boundary that owns delayed placeholder reveal, aria-busy, and one polite status announcement. Children may use its render state to preserve their real layout before and during loading. Refreshing, empty, error, and alignment states remain the responsibility of the surface composed inside the boundary.",
+          "A stable loading boundary that owns delayed placeholder reveal, aria-busy, and one polite status announcement.\n\n### Why it exists\n\nAsynchronous surfaces otherwise duplicate timing, busy semantics, and announcements while exposing inconsistent flashes. Use VireoLoadingRegion to coordinate initial loading around geometry-preserving content; keep refreshing, empty, error, and alignment states in the composed surface.",
       },
     },
   },

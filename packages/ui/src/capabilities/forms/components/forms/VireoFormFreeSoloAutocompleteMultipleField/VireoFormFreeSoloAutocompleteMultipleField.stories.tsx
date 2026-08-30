@@ -21,6 +21,7 @@ const source = (code: string) => ({ docs: { source: { code, language: "tsx" } } 
 const meta = {
   title: "TypeScript/UI/Capabilities/Forms/Fields/VireoFormFreeSoloAutocompleteMultipleField",
   component: VireoFormFreeSoloAutocompleteMultipleField,
+  tags: ["autodocs"],
   parameters: {
     controls: { disable: true },
     docs: {
