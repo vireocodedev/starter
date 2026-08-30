@@ -5,7 +5,26 @@ import { createTheme, type Theme, type ThemeOptions } from "@mui/material/styles
  * These are reversed when generating a dark theme so that lighter shades
  * become darker and vice-versa.
  */
-const PALETTE_CHANNELS_WITH_NUMERIC_SCALE = ["primary", "grey", "success", "warning", "info", "error"] as const;
+const PALETTE_CHANNELS_WITH_NUMERIC_SCALE = [
+  "primary",
+  "secondary",
+  "grey",
+  "success",
+  "warning",
+  "info",
+  "error",
+] as const;
+
+const DERIVED_THEME_KEYS = [
+  "colorSchemes",
+  "defaultColorScheme",
+  "generateStyleSheets",
+  "generateThemeVars",
+  "getColorSchemeSelector",
+  "getCssVar",
+  "shouldSkipGeneratingVar",
+  "vars",
+] as const;
 
 /**
  * Strips MUI-internal `*Channel` properties (e.g. `mainChannel`, `paperChannel`)
@@ -82,26 +101,40 @@ export function createDarkTheme(lightTheme: Theme, overrides?: ThemeOptions): Th
     };
   }
 
-  // Build the final theme in a single createTheme call so that MUI computes
-  // all CSS variable channels (paperChannel, defaultChannel, mainChannel, etc.)
-  // from the definitive values in one pass — no stale channels survive.
+  const darkPaletteDefaults = createTheme({ palette: { mode: "dark" } }).palette;
+  const sourceThemeOptions = { ...lightTheme } as Record<string, unknown>;
+
+  const cssVariables = lightTheme.vars
+    ? ({
+        colorSchemeSelector: sourceThemeOptions.colorSchemeSelector,
+        cssVarPrefix: sourceThemeOptions.cssVarPrefix,
+        rootSelector: sourceThemeOptions.rootSelector,
+        shouldSkipGeneratingVar: sourceThemeOptions.shouldSkipGeneratingVar,
+      } as NonNullable<Exclude<ThemeOptions["cssVariables"], boolean>>)
+    : false;
+
+  // A resolved MUI theme contains derived color-scheme state and CSS-variable
+  // generators. Passing those values back into createTheme retains light-mode
+  // variable fallbacks, so remove them and let MUI regenerate the dark scheme.
+  for (const key of DERIVED_THEME_KEYS) delete sourceThemeOptions[key];
+
+  // Recreate the theme from the complete source foundation so consumer spacing,
+  // breakpoints, shadows, direction, z-index, mixins, and custom augmentations
+  // survive. Replace only mode-owned semantic palette values, then regenerate
+  // all CSS-variable channels from the definitive dark palette in one pass.
   return createTheme({
-    cssVariables: lightTheme.cssVariables,
-    components: lightTheme.components,
-    motion: { ...lightTheme.motion },
-    shape: { ...lightTheme.shape },
-    transitions: {
-      duration: { ...lightTheme.transitions.duration },
-      easing: { ...lightTheme.transitions.easing },
-    },
-    typography: { ...lightTheme.typography },
-    // Spread non-palette overrides (components, shape, typography, etc.)
+    ...sourceThemeOptions,
+    cssVariables,
     ...overrides,
     palette: {
+      ...stripChannelKeys(lightTheme.palette as unknown as Record<string, unknown>),
       mode: "dark",
       common: stripChannelKeys(lightTheme.palette.common as unknown as Record<string, unknown>),
+      text: stripChannelKeys(darkPaletteDefaults.text as unknown as Record<string, unknown>),
+      background: stripChannelKeys(darkPaletteDefaults.background as unknown as Record<string, unknown>),
+      divider: darkPaletteDefaults.divider,
+      action: stripChannelKeys(darkPaletteDefaults.action as unknown as Record<string, unknown>),
       ...reversedPalette,
-      // Spread palette overrides last so they take precedence
       ...overrides?.palette,
     },
   });
