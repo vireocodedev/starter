@@ -14,6 +14,7 @@ export default function ConstrainedHeightExample() {
         data={{ event: "batch.completed", records }}
         copyLabel="Copy JSON to clipboard"
         copiedLabel="JSON copied"
+        copyErrorLabel="Unable to copy JSON"
         maxHeight={220}
       />
     </VireoStorybookProvider>

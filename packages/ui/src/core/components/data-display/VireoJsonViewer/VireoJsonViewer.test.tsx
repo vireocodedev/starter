@@ -10,6 +10,7 @@ const requiredProps = {
   data: { id: 7, active: true },
   copyLabel: "Copy JSON",
   copiedLabel: "JSON copied",
+  copyErrorLabel: "Unable to copy JSON",
 };
 
 describe(VIREO_JSON_VIEWER_NAME, () => {
@@ -31,6 +32,7 @@ describe(VIREO_JSON_VIEWER_NAME, () => {
 
     expect(screen.getByText(/"id": 7/)).toHaveTextContent('{ "id": 7, "active": true }');
     expect(screen.getByRole("button", { name: "Copy JSON" })).toBeEnabled();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
   it("serializes errors and values that native JSON cannot represent", () => {
@@ -80,19 +82,21 @@ describe(VIREO_JSON_VIEWER_NAME, () => {
 
     expect(writeText).toHaveBeenCalledWith('{\n  "id": 7,\n  "active": true\n}');
     expect(screen.getByRole("button", { name: "JSON copied" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("JSON copied");
 
     act(() => vi.advanceTimersByTime(1500));
     expect(screen.getByRole("button", { name: "Copy JSON" })).toBeInTheDocument();
   });
 
-  it("keeps the copy action available when clipboard access fails", async () => {
+  it("announces clipboard failures and keeps the copy action available", async () => {
     writeText.mockRejectedValueOnce(new Error("Denied"));
     render(<VireoJsonViewer {...requiredProps} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Copy JSON" }));
 
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
-    expect(screen.getByRole("button", { name: "Copy JSON" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Unable to copy JSON" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Unable to copy JSON");
   });
 
   it("lets copy-button slot handlers prevent the built-in action", () => {
@@ -142,16 +146,18 @@ describe(VIREO_JSON_VIEWER_NAME, () => {
   });
 
   it("supports replacement slots and owner-state slot callbacks", () => {
+    const statusRef = React.createRef<HTMLSpanElement>();
     render(
       <VireoJsonViewer
         {...requiredProps}
         maxHeight={180}
-        slots={{ root: "section", content: "code" }}
+        slots={{ root: "section", status: "div", content: "code" }}
         slotProps={{
           root: ownerState => ({
             "aria-label": "Customized JSON viewer",
             "data-max-height": ownerState.maxHeight,
           }),
+          status: ownerState => ({ ref: statusRef, "data-copy-status": ownerState.copyStatus }),
           content: ownerState => ({ "data-copy-state": ownerState.copied ? "copied" : "ready" }),
         }}
       />,
@@ -163,6 +169,8 @@ describe(VIREO_JSON_VIEWER_NAME, () => {
     expect(root).toHaveAttribute("data-max-height", "180");
     expect(content.tagName).toBe("CODE");
     expect(content).toHaveAttribute("data-copy-state", "ready");
+    expect(statusRef.current).toBe(screen.getByRole("status"));
+    expect(statusRef.current).toHaveAttribute("data-copy-status", "idle");
   });
 
   it("uses theme defaults and overrides for multiple slots", () => {

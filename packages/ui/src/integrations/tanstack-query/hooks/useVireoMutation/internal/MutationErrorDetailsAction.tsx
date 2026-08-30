@@ -46,6 +46,7 @@ export function MutationErrorDetailsAction<TDetails>({
             maxHeight="60vh"
             copyLabel={options.copyLabel ?? "Copy JSON to clipboard"}
             copiedLabel={options.copiedLabel ?? "JSON copied"}
+            copyErrorLabel={options.copyErrorLabel ?? "Unable to copy JSON"}
           />
         </DialogContent>
       </Dialog>

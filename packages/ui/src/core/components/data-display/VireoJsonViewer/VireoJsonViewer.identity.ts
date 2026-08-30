@@ -9,6 +9,7 @@ export const VIREO_JSON_VIEWER_SLOTS = [
   "toolbar",
   "copyButton",
   "copyIcon",
+  "status",
   "content",
 ] as const satisfies VireoSlotNameTuple;
 

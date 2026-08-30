@@ -18,6 +18,7 @@ export default function NonJsonValuesExample() {
         }}
         copyLabel="Copy JSON to clipboard"
         copiedLabel="JSON copied"
+        copyErrorLabel="Unable to copy JSON"
       />
     </VireoStorybookProvider>
   );

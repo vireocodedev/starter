@@ -9,6 +9,7 @@ import type { VIREO_JSON_VIEWER_NAME, VireoJsonViewerSlotName } from "./VireoJso
 
 export type VireoJsonViewerOwnerState = {
   copied: boolean;
+  copyStatus: "idle" | "copied" | "failed";
   maxHeight: string | number;
 };
 
@@ -22,6 +23,9 @@ export interface VireoJsonViewerCopyButtonSlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;
 }
 export interface VireoJsonViewerCopyIconSlotPropsOverrides {
+  [key: `data-${string}`]: VireoDataAttributeValue;
+}
+export interface VireoJsonViewerStatusSlotPropsOverrides {
   [key: `data-${string}`]: VireoDataAttributeValue;
 }
 export interface VireoJsonViewerContentSlotPropsOverrides {
@@ -45,6 +49,8 @@ export type VireoJsonViewerSlotsAndSlotProps = CreateSlotsAndSlotProps<
     copyButton: SlotProps<typeof IconButton, VireoJsonViewerCopyButtonSlotPropsOverrides, VireoJsonViewerOwnerState>;
     /** @default ContentCopy */
     copyIcon: SlotProps<typeof ContentCopy, VireoJsonViewerCopyIconSlotPropsOverrides, VireoJsonViewerOwnerState>;
+    /** Visually hidden polite live region for copy success and failure feedback. @default 'span' */
+    status: SlotProps<"span", VireoJsonViewerStatusSlotPropsOverrides, VireoJsonViewerOwnerState>;
     /** @default 'pre' */
     content: SlotProps<"pre", VireoJsonViewerContentSlotPropsOverrides, VireoJsonViewerOwnerState>;
   }
@@ -58,6 +64,8 @@ export type VireoJsonViewerOwnProps = VireoJsonViewerSlotsAndSlotProps & {
   copyLabel: string;
   /** Accessible feedback shown briefly after copying succeeds. */
   copiedLabel: string;
+  /** Accessible feedback shown briefly after clipboard access fails. */
+  copyErrorLabel: string;
   /** Maximum height of the scrollable JSON content. @default '24rem' */
   maxHeight?: string | number;
   /** Override or extend the utility classes applied to each slot. */

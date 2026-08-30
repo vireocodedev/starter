@@ -48,6 +48,22 @@ export const VireoJsonViewerCopyIcon: VireoJsonViewerStyledSlotComponent<SvgIcon
   fontSize: 16,
 });
 
+export const VireoJsonViewerStatus: VireoJsonViewerStyledSlotComponent<BoxProps<"span">> = styled(Box, {
+  name: VIREO_JSON_VIEWER_NAME,
+  slot: "Status",
+  overridesResolver: (_props, styles) => styles.status,
+})<VireoJsonViewerStyledSlotProps>({
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+});
+
 export const VireoJsonViewerContent: VireoJsonViewerStyledSlotComponent<React.ComponentPropsWithoutRef<"pre">> = styled(
   "pre",
   {

@@ -114,6 +114,8 @@ export type VireoQueryBoundaryOwnProps = VireoQueryBoundarySlotsAndSlotProps & {
   copyErrorDetailsLabel?: string;
   /** @default 'Error details copied' */
   copiedErrorDetailsLabel?: string;
+  /** @default 'Unable to copy error details' */
+  copyErrorDetailsErrorLabel?: string;
   selectErrorDetails?: (error: unknown) => unknown;
   /** @default true */
   retryable?: boolean | ((error: unknown) => boolean);

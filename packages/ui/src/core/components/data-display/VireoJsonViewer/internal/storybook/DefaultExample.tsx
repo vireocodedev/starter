@@ -15,7 +15,12 @@ const diagnosticData = {
 export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
-      <VireoJsonViewer data={diagnosticData} copyLabel="Copy JSON to clipboard" copiedLabel="JSON copied" />
+      <VireoJsonViewer
+        data={diagnosticData}
+        copyLabel="Copy JSON to clipboard"
+        copiedLabel="JSON copied"
+        copyErrorLabel="Unable to copy JSON"
+      />
     </VireoStorybookProvider>
   );
 }

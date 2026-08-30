@@ -10,6 +10,7 @@ import {
   VireoJsonViewerCopyButton,
   VireoJsonViewerCopyIcon,
   VireoJsonViewerRoot,
+  VireoJsonViewerStatus,
   VireoJsonViewerToolbar,
 } from "./VireoJsonViewer.styled";
 import { type VireoJsonViewerOwnerState, type VireoJsonViewerProps } from "./VireoJsonViewer.types";
@@ -50,6 +51,7 @@ function useUtilityClasses(_ownerState: VireoJsonViewerOwnerState, classes?: Vir
       toolbar: ["toolbar"],
       copyButton: ["copyButton"],
       copyIcon: ["copyIcon"],
+      status: ["status"],
       content: ["content"],
     } as const satisfies UtilityClassSlotMap<VireoJsonViewerSlotName, VireoJsonViewerClassKey>,
     getVireoJsonViewerUtilityClass,
@@ -66,6 +68,7 @@ export const VireoJsonViewer = React.forwardRef<HTMLDivElement, VireoJsonViewerP
       classes: classesProp,
       copiedLabel,
       copyLabel,
+      copyErrorLabel,
       data,
       maxHeight = "24rem",
       slotProps = {},
@@ -75,17 +78,18 @@ export const VireoJsonViewer = React.forwardRef<HTMLDivElement, VireoJsonViewerP
       ...other
     } = props;
 
-    const [copied, setCopied] = React.useState(false);
+    const [copyStatus, setCopyStatus] = React.useState<VireoJsonViewerOwnerState["copyStatus"]>("idle");
     const copyFeedbackTimeoutRef = React.useRef<number | null>(null);
     const text = React.useMemo(() => stringifyJson(data), [data]);
 
-    const ownerState: VireoJsonViewerOwnerState = { copied, maxHeight };
+    const ownerState: VireoJsonViewerOwnerState = { copied: copyStatus === "copied", copyStatus, maxHeight };
     const classes = useUtilityClasses(ownerState, classesProp);
 
     const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
     const resolvedToolbarSlotProps = resolveSlotProps(slotProps.toolbar, ownerState);
     const resolvedCopyButtonSlotProps = resolveSlotProps(slotProps.copyButton, ownerState);
     const resolvedCopyIconSlotProps = resolveSlotProps(slotProps.copyIcon, ownerState);
+    const resolvedStatusSlotProps = resolveSlotProps(slotProps.status, ownerState);
     const resolvedContentSlotProps = resolveSlotProps(slotProps.content, ownerState);
     const {
       className: rootSlotClassName,
@@ -103,9 +107,18 @@ export const VireoJsonViewer = React.forwardRef<HTMLDivElement, VireoJsonViewerP
       ...copyButtonSlotOther
     } = resolvedCopyButtonSlotProps;
     const { className: copyIconSlotClassName, ...copyIconSlotOther } = resolvedCopyIconSlotProps;
+    const {
+      className: statusSlotClassName,
+      ref: statusSlotRef,
+      style: statusSlotStyle,
+      sx: statusSlotSx,
+      ...statusSlotOther
+    } = resolvedStatusSlotProps;
     const { className: contentSlotClassName, ...contentSlotOther } = resolvedContentSlotProps;
 
-    const currentCopyLabel = copied ? copiedLabel : copyLabel;
+    const currentCopyLabel =
+      copyStatus === "copied" ? copiedLabel : copyStatus === "failed" ? copyErrorLabel : copyLabel;
+    const copyStatusMessage = copyStatus === "idle" ? "" : currentCopyLabel;
     const clearCopyFeedbackTimeout = React.useCallback(() => {
       if (copyFeedbackTimeoutRef.current === null || typeof window === "undefined") return;
       window.clearTimeout(copyFeedbackTimeoutRef.current);
@@ -115,7 +128,7 @@ export const VireoJsonViewer = React.forwardRef<HTMLDivElement, VireoJsonViewerP
     React.useEffect(() => clearCopyFeedbackTimeout, [clearCopyFeedbackTimeout]);
     React.useEffect(() => {
       clearCopyFeedbackTimeout();
-      setCopied(false);
+      setCopyStatus("idle");
     }, [clearCopyFeedbackTimeout, text]);
 
     const handleCopyClick = React.useCallback<NonNullable<IconButtonProps["onClick"]>>(
@@ -123,17 +136,18 @@ export const VireoJsonViewer = React.forwardRef<HTMLDivElement, VireoJsonViewerP
         copyButtonSlotOnClick?.(event);
         if (event.defaultPrevented) return;
 
+        clearCopyFeedbackTimeout();
+        setCopyStatus("idle");
         try {
           await navigator.clipboard.writeText(text);
-          setCopied(true);
-          clearCopyFeedbackTimeout();
-          copyFeedbackTimeoutRef.current = window.setTimeout(() => {
-            copyFeedbackTimeoutRef.current = null;
-            setCopied(false);
-          }, COPY_FEEDBACK_DURATION_MS);
+          setCopyStatus("copied");
         } catch {
-          // Clipboard access may be unavailable or denied; keep the viewer usable.
+          setCopyStatus("failed");
         }
+        copyFeedbackTimeoutRef.current = window.setTimeout(() => {
+          copyFeedbackTimeoutRef.current = null;
+          setCopyStatus("idle");
+        }, COPY_FEEDBACK_DURATION_MS);
       },
       [clearCopyFeedbackTimeout, copyButtonSlotOnClick, text],
     );
@@ -176,6 +190,21 @@ export const VireoJsonViewer = React.forwardRef<HTMLDivElement, VireoJsonViewerP
             </VireoJsonViewerCopyButton>
           </Tooltip>
         </VireoJsonViewerToolbar>
+
+        <VireoJsonViewerStatus
+          {...statusSlotOther}
+          as={slots.status ?? "span"}
+          ref={statusSlotRef}
+          ownerState={ownerState}
+          className={joinClassNames(classes.status, statusSlotClassName)}
+          style={statusSlotStyle}
+          sx={statusSlotSx}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {copyStatusMessage}
+        </VireoJsonViewerStatus>
 
         <VireoJsonViewerContent
           {...contentSlotOther}

@@ -8,6 +8,7 @@ export default function CopyInteractionExample() {
         data={{ requestId: "req_01J5V8JH28X7K3P1", status: "failed" }}
         copyLabel="Copy JSON to clipboard"
         copiedLabel="JSON copied"
+        copyErrorLabel="Unable to copy JSON"
       />
     </VireoStorybookProvider>
   );

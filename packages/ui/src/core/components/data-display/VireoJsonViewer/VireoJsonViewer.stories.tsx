@@ -16,7 +16,12 @@ const meta = {
   title: "TypeScript/UI/Core/Data Display/VireoJsonViewer",
   component: VireoJsonViewer,
   tags: ["autodocs"],
-  args: { data: null, copyLabel: "Copy JSON to clipboard", copiedLabel: "JSON copied" },
+  args: {
+    data: null,
+    copyLabel: "Copy JSON to clipboard",
+    copiedLabel: "JSON copied",
+    copyErrorLabel: "Unable to copy JSON",
+  },
   parameters: {
     controls: { disable: true },
     docs: {

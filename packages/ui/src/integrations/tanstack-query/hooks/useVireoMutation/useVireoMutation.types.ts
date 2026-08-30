@@ -19,6 +19,8 @@ export type VireoMutationErrorDetails<TError, TDetails> = {
   copyLabel?: string;
   /** @default 'JSON copied' */
   copiedLabel?: string;
+  /** @default 'Unable to copy JSON' */
+  copyErrorLabel?: string;
 };
 
 export type UseVireoMutationOptions<

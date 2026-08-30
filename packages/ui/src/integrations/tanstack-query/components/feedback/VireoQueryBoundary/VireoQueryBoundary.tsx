@@ -93,6 +93,7 @@ const VireoQueryBoundaryFallback = React.forwardRef<HTMLDivElement, FallbackProp
       classes: classesProp,
       closeErrorDetailsLabel = "Close error details",
       copiedErrorDetailsLabel = "Error details copied",
+      copyErrorDetailsErrorLabel = "Unable to copy error details",
       copyErrorDetailsLabel = "Copy error details",
       error,
       errorDetailsLabel = "Show error details",
@@ -294,6 +295,7 @@ const VireoQueryBoundaryFallback = React.forwardRef<HTMLDivElement, FallbackProp
                     data={errorDetails}
                     copyLabel={copyErrorDetailsLabel}
                     copiedLabel={copiedErrorDetailsLabel}
+                    copyErrorLabel={copyErrorDetailsErrorLabel}
                   />
                 </DialogContent>
               </VireoQueryBoundaryErrorDetailsDialog>

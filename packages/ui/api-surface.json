@@ -325,6 +325,7 @@
         "VireoJsonViewerOwnerState",
         "VireoJsonViewerProps",
         "VireoJsonViewerRootSlotPropsOverrides",
+        "VireoJsonViewerStatusSlotPropsOverrides",
         "VireoJsonViewerSlots",
         "VireoJsonViewerSlotsAndSlotProps",
         "VireoJsonViewerToolbarSlotPropsOverrides",
