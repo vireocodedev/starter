@@ -1,6 +1,11 @@
 import { VireoOverlayHeader } from "@/capabilities/overlays/components/overlays/VireoOverlayHeader/VireoOverlayHeader";
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/public";
-import { CircularProgress, unstable_composeClasses as composeClasses } from "@mui/material";
+import {
+  CircularProgress,
+  unstable_composeClasses as composeClasses,
+  type ButtonProps,
+  type DialogProps,
+} from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useForkRef } from "@mui/material/utils";
 import React from "react";
@@ -64,21 +69,64 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
     const ownerState: VireoConfirmationDialogOwnerState = { open, loading, confirmColor };
     const classes = useUtilityClasses(classesProp);
     const rootProps = resolveSlotProps(slotProps.root, ownerState);
-    const { className: rootClassName, ref: rootSlotRef, style: rootStyle, sx: rootSx, ...rootOther } = rootProps;
+    const {
+      className: rootClassName,
+      onClose: rootSlotOnClose,
+      ref: rootSlotRef,
+      style: rootStyle,
+      sx: rootSx,
+      ...rootOther
+    } = rootProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
     const generatedTitleId = React.useId();
     const headerProps = resolveSlotProps(slotProps.header, ownerState);
-    const { titleId: headerTitleId, ...headerOther } = headerProps;
+    const {
+      className: headerClassName,
+      onClose: headerSlotOnClose,
+      titleId: headerTitleId,
+      ...headerOther
+    } = headerProps;
     const titleId = headerTitleId ?? generatedTitleId;
     const contentProps = resolveSlotProps(slotProps.content, ownerState);
     const actionsProps = resolveSlotProps(slotProps.actions, ownerState);
     const cancelProps = resolveSlotProps(slotProps.cancelButton, ownerState);
     const confirmProps = resolveSlotProps(slotProps.confirmButton, ownerState);
+    const { className: cancelClassName, onClick: cancelSlotOnClick, ...cancelOther } = cancelProps;
+    const { className: confirmClassName, onClick: confirmSlotOnClick, ...confirmOther } = confirmProps;
     const Header = slots.header ?? VireoOverlayHeader;
     const Content = slots.content ?? VireoConfirmationDialogContent;
     const Actions = slots.actions ?? VireoConfirmationDialogActions;
     const CancelButton = slots.cancelButton ?? VireoConfirmationDialogCancelButton;
     const ConfirmButton = slots.confirmButton ?? VireoConfirmationDialogConfirmButton;
+
+    const handleDialogClose = React.useCallback<NonNullable<DialogProps["onClose"]>>(
+      (event, reason) => {
+        rootSlotOnClose?.(event, reason);
+        if (!(event as { defaultPrevented?: boolean }).defaultPrevented) onClose();
+      },
+      [onClose, rootSlotOnClose],
+    );
+    const handleHeaderClose = React.useCallback<React.MouseEventHandler<HTMLButtonElement>>(
+      event => {
+        headerSlotOnClose?.(event);
+        if (!event.defaultPrevented) onClose();
+      },
+      [headerSlotOnClose, onClose],
+    );
+    const handleCancelClick = React.useCallback<NonNullable<ButtonProps["onClick"]>>(
+      event => {
+        cancelSlotOnClick?.(event);
+        if (!event.defaultPrevented) onClose();
+      },
+      [cancelSlotOnClick, onClose],
+    );
+    const handleConfirmClick = React.useCallback<NonNullable<ButtonProps["onClick"]>>(
+      event => {
+        confirmSlotOnClick?.(event);
+        if (!event.defaultPrevented) onConfirm();
+      },
+      [confirmSlotOnClick, onConfirm],
+    );
 
     return (
       <VireoConfirmationDialogRoot
@@ -89,7 +137,7 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
         ownerState={ownerState}
         aria-labelledby={titleId}
         open={open}
-        onClose={loading ? undefined : onClose}
+        onClose={loading ? undefined : handleDialogClose}
         onTransitionExited={onExited}
         maxWidth={maxWidth}
         fullWidth
@@ -100,12 +148,12 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
         <Header
           {...headerOther}
           ownerState={ownerState}
-          className={joinClassNames(classes.header, headerProps.className)}
+          className={joinClassNames(classes.header, headerClassName)}
           title={title}
           titleId={titleId}
           closeLabel={closeLabel}
           closeDisabled={loading}
-          onClose={onClose}
+          onClose={handleHeaderClose}
         />
         <Content
           {...contentProps}
@@ -120,24 +168,24 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
           className={joinClassNames(classes.actions, actionsProps.className)}
         >
           <CancelButton
-            {...cancelProps}
+            {...cancelOther}
             ownerState={ownerState}
-            className={joinClassNames(classes.cancelButton, cancelProps.className)}
+            className={joinClassNames(classes.cancelButton, cancelClassName)}
             color="inherit"
             disabled={loading}
-            onClick={onClose}
+            onClick={handleCancelClick}
           >
             {cancelLabel}
           </CancelButton>
           <ConfirmButton
-            {...confirmProps}
+            {...confirmOther}
             ownerState={ownerState}
-            className={joinClassNames(classes.confirmButton, confirmProps.className)}
+            className={joinClassNames(classes.confirmButton, confirmClassName)}
             variant="contained"
             color={confirmColor}
             disabled={loading}
             aria-busy={loading || undefined}
-            onClick={onConfirm}
+            onClick={handleConfirmClick}
             startIcon={loading ? <CircularProgress aria-hidden color="inherit" size={16} /> : undefined}
           >
             {confirmLabel}

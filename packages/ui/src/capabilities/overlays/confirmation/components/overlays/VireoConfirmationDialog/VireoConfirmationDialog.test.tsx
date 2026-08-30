@@ -28,6 +28,77 @@ describe("VireoConfirmationDialog", () => {
     expect(onConfirm).toHaveBeenCalledOnce();
   });
 
+  it("runs close and action slot handlers before the dialog callbacks", async () => {
+    const calls: string[] = [];
+    render(
+      <VireoConfirmationDialog
+        open
+        title="Delete item?"
+        message="This cannot be undone."
+        onClose={() => calls.push("close")}
+        onConfirm={() => calls.push("confirm")}
+        slotProps={{
+          root: { onClose: () => calls.push("root-slot") },
+          header: { onClose: () => calls.push("header-slot") },
+          cancelButton: { onClick: () => calls.push("cancel-slot") },
+          confirmButton: { onClick: () => calls.push("confirm-slot") },
+        }}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await userEvent.keyboard("{Escape}");
+
+    expect(calls).toEqual([
+      "confirm-slot",
+      "confirm",
+      "cancel-slot",
+      "close",
+      "header-slot",
+      "close",
+      "root-slot",
+      "close",
+    ]);
+  });
+
+  it("lets close and action slot handlers cancel the dialog callbacks", async () => {
+    const onClose = vi.fn();
+    const onConfirm = vi.fn();
+    const rootOnClose = vi.fn();
+    const preventDefault = (event: React.SyntheticEvent) => event.preventDefault();
+    render(
+      <VireoConfirmationDialog
+        open
+        title="Delete item?"
+        message="This cannot be undone."
+        onClose={onClose}
+        onConfirm={onConfirm}
+        slotProps={{
+          root: {
+            onClose: (event, reason) => {
+              rootOnClose(event, reason);
+              (event as React.SyntheticEvent).preventDefault();
+            },
+          },
+          header: { onClose: preventDefault },
+          cancelButton: { onClick: preventDefault },
+          confirmButton: { onClick: preventDefault },
+        }}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await userEvent.keyboard("{Escape}");
+
+    expect(rootOnClose).toHaveBeenCalledWith(expect.anything(), "escapeKeyDown");
+    expect(onConfirm).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("disables every exit while loading", () => {
     render(
       <VireoConfirmationDialog

@@ -1,5 +1,5 @@
 import { type UtilityClassSlotMap, joinClassNames, mergeSx, resolveSlotProps } from "@/core/utils/muiutils";
-import { unstable_composeClasses as composeClasses } from "@mui/material";
+import { unstable_composeClasses as composeClasses, type TabsProps } from "@mui/material";
 import { useThemeProps } from "@mui/material/styles";
 import { useControlled, useForkRef } from "@mui/material/utils";
 import React from "react";
@@ -49,15 +49,20 @@ export const VireoTabs = React.forwardRef<HTMLDivElement, VireoTabsProps>(functi
   const tab = resolveSlotProps(slotProps.tab, ownerState);
   const panel = resolveSlotProps(slotProps.panel, ownerState);
   const { className: rootClassName, ref: rootRef, style: rootStyle, sx: rootSx, ...rootOther } = root;
-  const { className: tabsClassName, ...tabsOther } = tabsSlot;
+  const { className: tabsClassName, onChange: tabsSlotOnChange, ...tabsOther } = tabsSlot;
   const { className: tabClassName, ...tabOther } = tab;
   const { className: panelClassName, ...panelOther } = panel;
   const ref = useForkRef(forwardedRef, rootRef);
   const id = React.useId();
-  const handleChange = (event: React.SyntheticEvent, nextValue: string) => {
-    setValue(nextValue);
-    onChange?.(nextValue, event);
-  };
+  const handleChange = React.useCallback<NonNullable<TabsProps["onChange"]>>(
+    (event, nextValue: string) => {
+      tabsSlotOnChange?.(event, nextValue);
+      if (event.defaultPrevented) return;
+      setValue(nextValue);
+      onChange?.(nextValue, event);
+    },
+    [onChange, setValue, tabsSlotOnChange],
+  );
 
   return (
     <VireoTabsRoot

@@ -26,6 +26,36 @@ describe(VIREO_TABS_NAME, () => {
     expect(screen.getByRole("tabpanel")).toHaveTextContent("Security content");
   });
 
+  it("runs the tabs slot change handler before built-in selection and the public callback", () => {
+    const calls: string[] = [];
+    render(
+      <VireoTabs
+        tabs={tabs}
+        onChange={() => calls.push("public")}
+        slotProps={{ tabs: { onChange: () => calls.push("slot") } }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Security" }));
+
+    expect(calls).toEqual(["slot", "public"]);
+    expect(screen.getByRole("tab", { name: "Security" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel")).toHaveTextContent("Security content");
+  });
+
+  it("lets the tabs slot change handler cancel built-in selection and the public callback", () => {
+    const onChange = vi.fn();
+    const slotOnChange = vi.fn((event: React.SyntheticEvent) => event.preventDefault());
+    render(<VireoTabs tabs={tabs} onChange={onChange} slotProps={{ tabs: { onChange: slotOnChange } }} />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Security" }));
+
+    expect(slotOnChange).toHaveBeenCalledOnce();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("tab", { name: "Profile" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel")).toHaveTextContent("Profile content");
+  });
+
   it("forwards refs and merges root customization", () => {
     const forwardedRef = React.createRef<HTMLDivElement>();
     const rootSlotRef = React.createRef<HTMLDivElement>();
