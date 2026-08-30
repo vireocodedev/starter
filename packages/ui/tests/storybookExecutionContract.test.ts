@@ -2,6 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import {
+  VIREO_STORYBOOK_A11Y_DEBT_LIMIT,
+  vireoStorybookA11yDebt,
+  vireoStorybookA11yDebtGroups,
+} from "../.storybook-vireo/testing/storybook-a11y-debt";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = resolve(packageRoot, "../..");
@@ -18,8 +23,28 @@ describe("Storybook executable contract gate", () => {
     expect(main).toContain('"@storybook/addon-vitest"');
     expect(preview).toContain('a11y: { test: "error" }');
     expect(preview).toContain('test: "todo"');
-    expect(a11yDebt.match(/^[ ]+".+::.+",$/gmu)).toHaveLength(45);
+    expect(a11yDebt).toContain("vireoStorybookA11yDebtGroups");
     expect(preview).toContain('initialGlobals: { vireoTheme: "dark" }');
+  });
+
+  it("keeps accessibility debt reduction-only, owned, and time-bounded", () => {
+    const groupedStories = vireoStorybookA11yDebtGroups.flatMap(group => group.stories);
+
+    expect(vireoStorybookA11yDebt.size).toBeGreaterThan(0);
+    expect(vireoStorybookA11yDebt.size).toBeLessThanOrEqual(VIREO_STORYBOOK_A11Y_DEBT_LIMIT);
+    expect(new Set(groupedStories).size, "duplicate accessibility-debt story keys").toBe(groupedStories.length);
+    expect(vireoStorybookA11yDebt.size).toBe(groupedStories.length);
+    expect(new Set(vireoStorybookA11yDebtGroups.map(group => group.owner)).size).toBe(
+      vireoStorybookA11yDebtGroups.length,
+    );
+
+    for (const group of vireoStorybookA11yDebtGroups) {
+      expect(group.owner).toMatch(/^(?:core|capabilities\/[a-z0-9-]+|integrations\/[a-z0-9-]+)$/u);
+      expect(group.expiresOn).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
+      expect(Date.parse(`${group.expiresOn}T23:59:59.999Z`), `${group.owner} expiry`).toBeGreaterThan(Date.now());
+      expect(group.stories.length, `${group.owner} debt`).toBeGreaterThan(0);
+      for (const story of group.stories) expect(story).toMatch(/^TypeScript\/UI\/.+::.+$/u);
+    }
   });
 
   it("runs a bounded desktop, mobile, light-theme, and reduced-motion matrix", () => {
