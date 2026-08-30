@@ -29,7 +29,7 @@ const meta = {
     controls: { disable: true },
     docs: {
       description: {
-        component: `Provides the responsive, resizable navigation surface used by desktop and mobile application shells.
+        component: `Provides a named, responsive navigation landmark used by desktop and mobile application shells.
 
 ### Why it exists
 
@@ -48,25 +48,25 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: { children: null },
+  args: { navigationLabel: "Primary navigation", children: null },
   render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),
 };
 
 export const LockedMode: Story = {
-  args: { children: null },
+  args: { navigationLabel: "Primary navigation", children: null },
   render: () => <LockedModeExample />,
   parameters: createSourceParameters(lockedModeExampleSource),
 };
 
 export const CustomizedSlots: Story = {
-  args: { children: null },
+  args: { navigationLabel: "Primary navigation", children: null },
   render: () => <CustomizedSlotsExample />,
   parameters: createSourceParameters(customizedSlotsExampleSource),
 };
 
 export const ThemeCustomization: Story = {
-  args: { children: null },
+  args: { navigationLabel: "Primary navigation", children: null },
   render: () => <ThemeCustomizationExample />,
   parameters: createSourceParameters(themeCustomizationExampleSource),
 };

@@ -7,8 +7,8 @@ export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
       <Stack spacing={1} sx={{ maxWidth: 320 }}>
-        <VireoApplicationNavigationItem icon={<DashboardOutlined />} label="Overview" selected />
-        <VireoApplicationNavigationItem icon={<Inventory2Outlined />} label="Inventory" />
+        <VireoApplicationNavigationItem href="#overview" icon={<DashboardOutlined />} label="Overview" selected />
+        <VireoApplicationNavigationItem href="#inventory" icon={<Inventory2Outlined />} label="Inventory" />
       </Stack>
     </VireoStorybookProvider>
   );

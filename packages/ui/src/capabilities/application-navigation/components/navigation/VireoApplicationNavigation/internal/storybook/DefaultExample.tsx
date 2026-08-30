@@ -9,9 +9,9 @@ import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 import React from "react";
 
 const destinations = [
-  { label: "Overview", icon: <DashboardOutlined /> },
-  { label: "Inventory", icon: <Inventory2Outlined /> },
-  { label: "Settings", icon: <SettingsOutlined /> },
+  { label: "Overview", href: "#overview", icon: <DashboardOutlined /> },
+  { label: "Inventory", href: "#inventory", icon: <Inventory2Outlined /> },
+  { label: "Settings", href: "#settings", icon: <SettingsOutlined /> },
 ];
 
 export default function DefaultExample() {
@@ -22,6 +22,7 @@ export default function DefaultExample() {
     <VireoStorybookProvider>
       <Box sx={{ display: "flex", height: 480, overflow: "hidden" }}>
         <VireoApplicationNavigation
+          navigationLabel="Primary navigation"
           mode={mode}
           expandedWidth={width}
           onModeChange={setMode}
@@ -42,6 +43,7 @@ export default function DefaultExample() {
                 {destinations.map((destination, index) => (
                   <VireoApplicationNavigationItem
                     key={destination.label}
+                    href={destination.href}
                     icon={destination.icon}
                     label={destination.label}
                     selected={index === 0}

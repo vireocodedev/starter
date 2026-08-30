@@ -25,9 +25,14 @@ export default function ThemeCustomizationExample() {
     <VireoStorybookProvider>
       <ThemeProvider theme={theme}>
         <Box sx={{ display: "flex", height: 360, overflow: "hidden" }}>
-          <VireoApplicationNavigation expandedWidth={300} resizable={false}>
+          <VireoApplicationNavigation navigationLabel="Primary navigation" expandedWidth={300} resizable={false}>
             <List sx={{ px: 1, py: 2 }}>
-              <VireoApplicationNavigationItem icon={<SettingsOutlined />} label="Workspace settings" selected />
+              <VireoApplicationNavigationItem
+                href="#settings"
+                icon={<SettingsOutlined />}
+                label="Workspace settings"
+                selected
+              />
             </List>
           </VireoApplicationNavigation>
           <Box sx={{ flex: 1, p: 3 }}>Theme defaults style every navigation instance.</Box>

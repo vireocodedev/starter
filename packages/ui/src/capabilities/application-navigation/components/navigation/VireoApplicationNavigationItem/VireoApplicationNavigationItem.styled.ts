@@ -8,6 +8,7 @@ import {
   type TypographyProps,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type React from "react";
 import { VIREO_APPLICATION_NAVIGATION_ITEM_NAME } from "./VireoApplicationNavigationItem.identity";
 import { type VireoApplicationNavigationItemOwnerState } from "./VireoApplicationNavigationItem.types";
 
@@ -16,9 +17,13 @@ type VireoApplicationNavigationItemStyledSlotComponent<TProps extends object> = 
   TProps,
   VireoApplicationNavigationItemOwnerState
 >;
+type VireoApplicationNavigationItemAnchorProps = ListItemButtonProps<"a"> & { href: string };
 
-export const VireoApplicationNavigationItemRoot: VireoApplicationNavigationItemStyledSlotComponent<ListItemButtonProps> =
-  styled(ListItemButton, {
+const VireoApplicationNavigationItemAnchor: React.ComponentType<VireoApplicationNavigationItemAnchorProps> =
+  ListItemButton;
+
+export const VireoApplicationNavigationItemRoot: VireoApplicationNavigationItemStyledSlotComponent<VireoApplicationNavigationItemAnchorProps> =
+  styled(VireoApplicationNavigationItemAnchor, {
     name: VIREO_APPLICATION_NAVIGATION_ITEM_NAME,
     slot: "Root",
     overridesResolver: (_props, styles) => styles.root,

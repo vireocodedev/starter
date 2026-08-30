@@ -9,8 +9,8 @@ import { describe, expect, it, vi } from "vitest";
 describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
   it("renders expanded application navigation with its configured width", () => {
     const { container } = render(
-      <VireoApplicationNavigation expandedWidth={312} resizable={false}>
-        <VireoApplicationNavigationItem icon={<span>icon</span>} label="Overview" />
+      <VireoApplicationNavigation navigationLabel="Primary" expandedWidth={312} resizable={false}>
+        <VireoApplicationNavigationItem href="/overview" icon={<span>icon</span>} label="Overview" />
       </VireoApplicationNavigation>,
     );
 
@@ -20,7 +20,13 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
 
   it("caps temporary navigation at the viewport without stretching wider layouts", () => {
     render(
-      <VireoApplicationNavigation variant="temporary" open expandedWidth={480} resizable={false}>
+      <VireoApplicationNavigation
+        navigationLabel="Primary"
+        variant="temporary"
+        open
+        expandedWidth={480}
+        resizable={false}
+      >
         Navigation
       </VireoApplicationNavigation>,
     );
@@ -40,8 +46,13 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
 
   it("provides compact mode to navigation items", () => {
     render(
-      <VireoApplicationNavigation mode="compact" resizable={false}>
-        <VireoApplicationNavigationItem icon={<span>icon</span>} label="Application settings" compactLabel="Settings" />
+      <VireoApplicationNavigation navigationLabel="Primary" mode="compact" resizable={false}>
+        <VireoApplicationNavigationItem
+          href="/settings"
+          icon={<span>icon</span>}
+          label="Application settings"
+          compactLabel="Settings"
+        />
       </VireoApplicationNavigation>,
     );
 
@@ -51,7 +62,7 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
 
   it("preserves the current compact mode when navigation is locked", () => {
     render(
-      <VireoApplicationNavigation mode="compact" locked resizable={false}>
+      <VireoApplicationNavigation navigationLabel="Primary" mode="compact" locked resizable={false}>
         {({ mode }) => <span>{mode}</span>}
       </VireoApplicationNavigation>,
     );
@@ -64,6 +75,7 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
     const onExpandedWidthChange = vi.fn();
     const { container } = render(
       <VireoApplicationNavigation
+        navigationLabel="Primary"
         expandedWidth={280}
         locked
         onModeChange={onModeChange}
@@ -84,7 +96,12 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
   it("exposes an explicit mode toggle to render-function children", () => {
     const onModeChange = vi.fn();
     render(
-      <VireoApplicationNavigation mode="expanded" onModeChange={onModeChange} resizable={false}>
+      <VireoApplicationNavigation
+        navigationLabel="Primary"
+        mode="expanded"
+        onModeChange={onModeChange}
+        resizable={false}
+      >
         {({ toggleMode }) => <button onClick={toggleMode}>Toggle</button>}
       </VireoApplicationNavigation>,
     );
@@ -96,7 +113,7 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
   it("snaps inward resizing to compact mode", () => {
     const onModeChange = vi.fn();
     const { container } = render(
-      <VireoApplicationNavigation expandedWidth={280} onModeChange={onModeChange}>
+      <VireoApplicationNavigation navigationLabel="Primary" expandedWidth={280} onModeChange={onModeChange}>
         Navigation
       </VireoApplicationNavigation>,
     );
@@ -115,6 +132,7 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
     const onExpandedWidthChange = vi.fn();
     const { container } = render(
       <VireoApplicationNavigation
+        navigationLabel="Primary"
         mode="compact"
         expandedWidth={320}
         onModeChange={onModeChange}
@@ -141,7 +159,11 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
   it("resets expanded width on resize-handle double click", () => {
     const onExpandedWidthChange = vi.fn();
     const { container } = render(
-      <VireoApplicationNavigation expandedWidth={340} onExpandedWidthChange={onExpandedWidthChange}>
+      <VireoApplicationNavigation
+        navigationLabel="Primary"
+        expandedWidth={340}
+        onExpandedWidthChange={onExpandedWidthChange}
+      >
         Navigation
       </VireoApplicationNavigation>,
     );
@@ -156,6 +178,7 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
     const onModeChange = vi.fn();
     render(
       <VireoApplicationNavigation
+        navigationLabel="Primary"
         expandedWidth={280}
         onExpandedWidthChange={onExpandedWidthChange}
         onModeChange={onModeChange}
@@ -177,16 +200,21 @@ describe(VIREO_APPLICATION_NAVIGATION_NAME, () => {
     const ref = React.createRef<HTMLDivElement>();
     render(
       <VireoApplicationNavigation
+        navigationLabel="Primary navigation"
         ref={ref}
         resizable={false}
         slots={{ root: "aside" }}
-        slotProps={{ root: { "aria-label": "Primary navigation", "data-origin": "slot" } }}
+        slotProps={{
+          root: { "data-origin": "slot" },
+          content: { "aria-label": "Ignored slot label" },
+        }}
       >
         Navigation
       </VireoApplicationNavigation>,
     );
 
-    const root = screen.getByRole("complementary", { name: "Primary navigation" });
+    const root = screen.getByRole("complementary");
+    expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
     expect(ref.current).toBe(root);
     expect(root).toHaveAttribute("data-origin", "slot");
     expect(root).toHaveClass(vireoApplicationNavigationClasses.root);

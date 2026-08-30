@@ -31,7 +31,7 @@ const meta = {
 
 ### Why it exists
 
-Application navigation items otherwise repeat mode-aware direction, icon alignment, captions, selection styling, compact tooltips, and accessible button behavior. Use it inside VireoApplicationNavigation; use ordinary buttons for actions that are not destinations.`,
+Application navigation items otherwise repeat mode-aware direction, icon alignment, captions, selection styling, compact tooltips, and destination-link semantics. Use it inside VireoApplicationNavigation; use ordinary buttons for actions that are not destinations.`,
       },
     },
   },
@@ -46,19 +46,19 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: { icon: null, label: "Navigation item" },
+  args: { href: "#navigation-item", icon: null, label: "Navigation item" },
   render: () => <DefaultExample />,
   parameters: createSourceParameters(defaultExampleSource),
 };
 
 export const CustomizedSlots: Story = {
-  args: { icon: null, label: "Navigation item" },
+  args: { href: "#navigation-item", icon: null, label: "Navigation item" },
   render: () => <CustomizedSlotsExample />,
   parameters: createSourceParameters(customizedSlotsExampleSource),
 };
 
 export const ThemeCustomization: Story = {
-  args: { icon: null, label: "Navigation item" },
+  args: { href: "#navigation-item", icon: null, label: "Navigation item" },
   render: () => <ThemeCustomizationExample />,
   parameters: createSourceParameters(themeCustomizationExampleSource),
 };

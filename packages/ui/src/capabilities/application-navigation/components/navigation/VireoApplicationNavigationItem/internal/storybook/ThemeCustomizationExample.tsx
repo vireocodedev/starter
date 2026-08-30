@@ -20,7 +20,13 @@ export default function ThemeCustomizationExample() {
   return (
     <VireoStorybookProvider>
       <ThemeProvider theme={theme}>
-        <VireoApplicationNavigationItem icon={<HomeOutlined />} label="Home" selected sx={{ maxWidth: 320 }} />
+        <VireoApplicationNavigationItem
+          href="#home"
+          icon={<HomeOutlined />}
+          label="Home"
+          selected
+          sx={{ maxWidth: 320 }}
+        />
       </ThemeProvider>
     </VireoStorybookProvider>
   );

@@ -6,6 +6,7 @@ export default function CustomizedSlotsExample() {
   return (
     <VireoStorybookProvider>
       <VireoApplicationNavigationItem
+        href="#settings"
         icon={<SettingsOutlined />}
         label="Application settings"
         compactLabel="Settings"

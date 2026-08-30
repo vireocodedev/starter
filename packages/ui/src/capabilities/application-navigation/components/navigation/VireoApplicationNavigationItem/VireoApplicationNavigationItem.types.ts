@@ -1,6 +1,6 @@
 import type { VireoDataAttributeValue, VireoThemeComponent } from "@/core/public";
 import type { VireoApplicationNavigationMode } from "@/capabilities/application-navigation/contexts/VireoApplicationNavigationContext/VireoApplicationNavigationContext";
-import type { Box, ListItemButton, ListItemButtonProps, Typography } from "@mui/material";
+import type { Box, ListItemButtonProps, Typography } from "@mui/material";
 import type { CreateSlotsAndSlotProps, SlotProps } from "@mui/material/utils";
 import type React from "react";
 import {
@@ -37,9 +37,9 @@ export type VireoApplicationNavigationItemSlots = {
 export type VireoApplicationNavigationItemSlotsAndSlotProps = CreateSlotsAndSlotProps<
   VireoApplicationNavigationItemSlots,
   {
-    /** @default ListItemButton */
+    /** @default ListItemButton rendered as an anchor */
     root: SlotProps<
-      typeof ListItemButton,
+      "a",
       VireoApplicationNavigationItemRootSlotPropsOverrides,
       VireoApplicationNavigationItemOwnerState
     >;
@@ -60,6 +60,8 @@ export type VireoApplicationNavigationItemSlotsAndSlotProps = CreateSlotsAndSlot
 
 /** Props owned by {@link VireoApplicationNavigationItem}. */
 export type VireoApplicationNavigationItemOwnProps = VireoApplicationNavigationItemSlotsAndSlotProps & {
+  /** Destination URL rendered by the default anchor root. */
+  href: string;
   /** Navigation item icon. */
   icon: React.ReactNode;
   /** Full developer-facing and accessible label. */
@@ -78,8 +80,8 @@ export type VireoApplicationNavigationItemOwnProps = VireoApplicationNavigationI
 
 /** Props VireoApplicationNavigationItem inherits from its default root after excluding component-owned props. */
 export type VireoApplicationNavigationItemInheritedProps = Omit<
-  ListItemButtonProps,
-  "children" | "component" | "selected"
+  ListItemButtonProps<"a">,
+  "children" | "component" | "href" | "selected"
 >;
 
 /** Props accepted by {@link VireoApplicationNavigationItem}. */

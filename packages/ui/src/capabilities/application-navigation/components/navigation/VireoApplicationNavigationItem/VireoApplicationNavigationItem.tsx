@@ -43,7 +43,7 @@ function useUtilityClasses(
 /**
  * Renders a destination consistently in expanded and compact application navigation.
  */
-export const VireoApplicationNavigationItem = React.forwardRef<HTMLDivElement, VireoApplicationNavigationItemProps>(
+export const VireoApplicationNavigationItem = React.forwardRef<HTMLAnchorElement, VireoApplicationNavigationItemProps>(
   function VireoApplicationNavigationItem(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_APPLICATION_NAVIGATION_ITEM_NAME });
     const {
@@ -51,9 +51,11 @@ export const VireoApplicationNavigationItem = React.forwardRef<HTMLDivElement, V
       classes: classesProp,
       compactLabel,
       disabled = false,
+      href,
       icon,
       label,
       mode: modeProp,
+      onClick,
       selected = false,
       slotProps = {},
       slots = {},
@@ -74,6 +76,7 @@ export const VireoApplicationNavigationItem = React.forwardRef<HTMLDivElement, V
     const resolvedRootSlotProps = resolveSlotProps(slotProps.root, ownerState);
     const {
       className: rootSlotClassName,
+      onClick: rootSlotOnClick,
       ref: rootSlotRef,
       style: rootSlotStyle,
       sx: rootSlotSx,
@@ -85,6 +88,14 @@ export const VireoApplicationNavigationItem = React.forwardRef<HTMLDivElement, V
     const { className: iconSlotClassName, ...iconSlotOther } = resolvedIconSlotProps;
     const { className: labelSlotClassName, ...labelSlotOther } = resolvedLabelSlotProps;
 
+    const handleClick = React.useCallback<NonNullable<VireoApplicationNavigationItemProps["onClick"]>>(
+      event => {
+        rootSlotOnClick?.(event);
+        if (!event.defaultPrevented) onClick?.(event);
+      },
+      [onClick, rootSlotOnClick],
+    );
+
     const item = (
       <VireoApplicationNavigationItemRoot
         {...other}
@@ -92,8 +103,11 @@ export const VireoApplicationNavigationItem = React.forwardRef<HTMLDivElement, V
         as={slots.root}
         ref={rootRef}
         ownerState={ownerState}
+        aria-label={label}
         aria-current={selected ? "page" : undefined}
         disabled={disabled}
+        href={href}
+        onClick={handleClick}
         selected={selected}
         className={joinClassNames(classes.root, className, rootSlotClassName)}
         style={{ ...style, ...rootSlotStyle }}

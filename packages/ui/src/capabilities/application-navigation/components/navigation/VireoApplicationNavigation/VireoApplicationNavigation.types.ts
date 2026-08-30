@@ -70,7 +70,7 @@ export type VireoApplicationNavigationSlotsAndSlotProps = CreateSlotsAndSlotProp
       VireoApplicationNavigationSurfaceSlotPropsOverrides,
       VireoApplicationNavigationOwnerState
     >;
-    /** @default 'div' */
+    /** @default 'nav' */
     content: SlotProps<
       typeof Box,
       VireoApplicationNavigationContentSlotPropsOverrides,
@@ -87,6 +87,8 @@ export type VireoApplicationNavigationSlotsAndSlotProps = CreateSlotsAndSlotProp
 
 /** Props owned by {@link VireoApplicationNavigation}. */
 export type VireoApplicationNavigationOwnProps = VireoApplicationNavigationSlotsAndSlotProps & {
+  /** Localized accessible name for the navigation landmark. */
+  navigationLabel: string;
   /** Current desktop navigation presentation. @default 'expanded' */
   mode?: VireoApplicationNavigationMode;
   /** Desktop or modal navigation surface. @default 'permanent' */

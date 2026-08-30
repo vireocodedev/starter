@@ -45,7 +45,7 @@ function useUtilityClasses(
 }
 
 /**
- * Provides a responsive, resizable application-navigation surface with persistent expanded and compact modes.
+ * Provides a named, responsive application-navigation landmark with persistent expanded and compact modes.
  */
 export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, VireoApplicationNavigationProps>(
   function VireoApplicationNavigation(inProps, forwardedRef) {
@@ -62,6 +62,7 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
       maxExpandedWidth = VIREO_APPLICATION_NAVIGATION_MAX_EXPANDED_WIDTH,
       minExpandedWidth = VIREO_APPLICATION_NAVIGATION_MIN_EXPANDED_WIDTH,
       mode = "expanded",
+      navigationLabel,
       onClose,
       onExpandedWidthChange,
       onModeChange,
@@ -246,7 +247,6 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
     );
 
     const SurfaceSlot = slots.surface ?? VireoApplicationNavigationSurface;
-    const ContentSlot = slots.content ?? VireoApplicationNavigationContent;
     const ResizeHandleSlot = slots.resizeHandle ?? VireoSidePanelResizeHandle;
     const renderState = { mode: activeMode, width, isResizing, toggleMode };
     const renderedChildren = typeof children === "function" ? children(renderState) : children;
@@ -278,11 +278,13 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
           onClose={onClose}
         >
           <VireoApplicationNavigationContext.Provider value={{ mode: activeMode }}>
-            <ContentSlot
+            <VireoApplicationNavigationContent
               {...contentSlotOther}
+              as={slots.content ?? "nav"}
               ownerState={ownerState}
               className={joinClassNames(classes.content, contentSlotClassName)}
               sx={contentSlotSx}
+              aria-label={navigationLabel}
             >
               {renderedChildren}
               {variant === "permanent" && (
@@ -307,7 +309,7 @@ export const VireoApplicationNavigation = React.forwardRef<HTMLDivElement, Vireo
                   )}
                 />
               )}
-            </ContentSlot>
+            </VireoApplicationNavigationContent>
           </VireoApplicationNavigationContext.Provider>
         </SurfaceSlot>
       </VireoApplicationNavigationRoot>

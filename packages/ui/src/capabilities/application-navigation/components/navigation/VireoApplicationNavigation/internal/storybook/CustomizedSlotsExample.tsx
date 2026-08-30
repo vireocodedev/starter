@@ -8,16 +8,23 @@ export default function CustomizedSlotsExample() {
     <VireoStorybookProvider>
       <Box sx={{ display: "flex", height: 360, overflow: "hidden" }}>
         <VireoApplicationNavigation
+          navigationLabel="Primary navigation"
           mode="compact"
           resizable={false}
           slots={{ root: "aside" }}
           slotProps={{
-            root: { "aria-label": "Compact application navigation" },
+            root: { "data-navigation-shell": "compact" },
             content: { sx: { bgcolor: "background.default", pt: 2 } },
           }}
         >
           <List sx={{ px: 1 }}>
-            <VireoApplicationNavigationItem icon={<HomeOutlined />} label="Dashboard" compactLabel="Home" selected />
+            <VireoApplicationNavigationItem
+              href="#dashboard"
+              icon={<HomeOutlined />}
+              label="Dashboard"
+              compactLabel="Home"
+              selected
+            />
           </List>
         </VireoApplicationNavigation>
         <Box sx={{ flex: 1, p: 3 }}>Custom root and content slots</Box>
