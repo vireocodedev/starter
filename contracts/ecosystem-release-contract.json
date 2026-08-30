@@ -40,7 +40,7 @@
     },
     "template": {
       "repository": "https://github.com/vireocodedev/starter-template",
-      "commit": "685e535fe07329c223696e07c108194f0c3dd589",
+      "commit": "11e1795a798d5dbaee9344b8ff207d5b0ea59657",
       "profiles": ["frontend", "full-stack"],
       "databases": ["h2", "postgresql"]
     }
@@ -64,7 +64,7 @@
           "@vireocodedev/ui": "0.3.0"
         },
         "mavenBom": "com.vireocode:vireo-bom:0.3.0",
-        "templateCommit": "685e535fe07329c223696e07c108194f0c3dd589"
+        "templateCommit": "11e1795a798d5dbaee9344b8ff207d5b0ea59657"
       }
     ]
   },

@@ -30,7 +30,7 @@ const targetDependencies = {
   "@vireocodedev/shell": "^0.2.2",
   "@vireocodedev/ui": "^0.3.0",
 };
-const targetCommit = "685e535fe07329c223696e07c108194f0c3dd589";
+const targetCommit = "11e1795a798d5dbaee9344b8ff207d5b0ea59657";
 const applicationOwnedActions = [
   {
     id: "navigation-landmark-and-links",
