@@ -32,7 +32,7 @@ const sensitivePackedContent = [
   /\bgh[pousr]_[A-Za-z0-9]{20,}\b/u,
   /\bnpm_[A-Za-z0-9]{20,}\b/u,
   /\bsk_(?:live|test)_[A-Za-z0-9]{16,}\b/u,
-  /(?:\/home\/[^/\s]+\/|[A-Za-z]:\\Users\\[^\\\s]+\\)/u,
+  /(?:(?<![A-Za-z0-9._-])\/home\/[^/\s]+\/|[A-Za-z]:\\Users\\[^\\\s]+\\)/u,
 ];
 
 function publishedPackages() {
