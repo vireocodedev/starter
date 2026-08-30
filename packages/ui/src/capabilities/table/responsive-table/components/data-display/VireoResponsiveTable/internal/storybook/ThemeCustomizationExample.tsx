@@ -10,6 +10,8 @@ const columns = [
 const labels: VireoResponsiveTableLabels = {
   table: "Releases",
   loadingTable: "Loading releases",
+  loadingNextPage: "Loading more releases",
+  loadedNextPage: "More releases loaded",
   noData: "No releases",
   showMore: "Show more",
   showLess: "Show less",

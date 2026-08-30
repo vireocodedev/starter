@@ -14,6 +14,8 @@ const columns = [
 const baseLabels: VireoResponsiveTableLabels = {
   table: "Accounts",
   loadingTable: "Loading alignment table",
+  loadingNextPage: "Loading more alignment rows",
+  loadedNextPage: "More alignment rows loaded",
   noData: "No accounts",
   showMore: "Show more",
   showLess: "Show less",

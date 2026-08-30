@@ -64,6 +64,8 @@ const columns = [
 const labels: VireoResponsiveTableLabels = {
   table: "Customer accounts",
   loadingTable: "Loading customer accounts",
+  loadingNextPage: "Loading more customer accounts",
+  loadedNextPage: "More customer accounts loaded",
   noData: "No customers found",
   showMore: "Show more",
   showLess: "Show less",

@@ -40,6 +40,8 @@ export type VireoResponsiveTableFilters = {
 export type VireoResponsiveTableLabels = {
   table: string;
   loadingTable: string;
+  loadingNextPage: string;
+  loadedNextPage: string;
   noData: string;
   showMore: string;
   showLess: string;

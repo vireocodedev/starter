@@ -61,6 +61,8 @@ The skeleton state is only for initial loading without usable rows. Refreshing a
     labels: {
       table: "Table",
       loadingTable: "Loading table",
+      loadingNextPage: "Loading more rows",
+      loadedNextPage: "More rows loaded",
       noData: "No data",
       showMore: "Show more",
       showLess: "Show less",

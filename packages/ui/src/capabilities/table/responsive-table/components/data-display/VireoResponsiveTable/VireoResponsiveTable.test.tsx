@@ -26,6 +26,8 @@ const columns = [
 const labels: VireoResponsiveTableLabels = {
   table: "Accounts",
   loadingTable: "Loading accounts",
+  loadingNextPage: "Loading more accounts",
+  loadedNextPage: "More accounts loaded",
   noData: "No accounts",
   showMore: "Show more",
   showLess: "Show less",
@@ -242,6 +244,29 @@ describe(VIREO_RESPONSIVE_TABLE_NAME, () => {
     fireEvent.scroll(viewport);
 
     expect(onLoadNextPage).toHaveBeenCalledOnce();
+  });
+
+  it("names incremental progress and announces its completion from a stable status region", () => {
+    const { rerender } = render(
+      <VireoResponsiveTable {...requiredProps} layout="mobile" titleColumn="name" hasNextPage isFetchingNextPage />,
+    );
+
+    const status = screen.getByRole("status");
+    expect(screen.getByRole("progressbar", { name: "Loading more accounts" })).toBeInTheDocument();
+    expect(status).toHaveTextContent("Loading more accounts");
+
+    rerender(
+      <VireoResponsiveTable
+        {...requiredProps}
+        layout="mobile"
+        titleColumn="name"
+        hasNextPage={false}
+        isFetchingNextPage={false}
+      />,
+    );
+    expect(screen.getByRole("status")).toBe(status);
+    expect(status).toHaveTextContent("More accounts loaded");
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
   it("keeps ordinary two-line desktop cells expanded without a false truncation action", () => {

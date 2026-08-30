@@ -212,10 +212,22 @@ export function MobileResponsiveTable<
     sortableColumns,
   } = state;
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const previousFetchingNextPageRef = useRef(isFetchingNextPage);
+  const [nextPageStatus, setNextPageStatus] = useState(isFetchingNextPage ? labels.loadingNextPage : "");
   const restoredMobileScrollRef = useRef(false);
   const [mobileViewport, setMobileViewport] = useState<HTMLDivElement | null>(null);
   const [mobileToolbar, setMobileToolbar] = useState<HTMLDivElement | null>(null);
   const [mobileToolbarHeightPx, setMobileToolbarHeightPx] = useState(0);
+
+  useEffect(() => {
+    const wasFetchingNextPage = previousFetchingNextPageRef.current;
+    previousFetchingNextPageRef.current = isFetchingNextPage;
+    if (isFetchingNextPage) {
+      setNextPageStatus(labels.loadingNextPage);
+    } else if (wasFetchingNextPage) {
+      setNextPageStatus(labels.loadedNextPage);
+    }
+  }, [isFetchingNextPage, labels.loadedNextPage, labels.loadingNextPage]);
 
   useEffect(() => {
     if (!mobileToolbar) {
@@ -507,7 +519,18 @@ export function MobileResponsiveTable<
 
       {!skeleton && (hasNextPage || isFetchingNextPage) ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-          {isFetchingNextPage ? <CircularProgress size={22} /> : null}
+          {isFetchingNextPage ? <CircularProgress aria-label={labels.loadingNextPage} size={22} /> : null}
+        </Box>
+      ) : null}
+      {!skeleton && data.length > 0 ? (
+        <Box
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          data-responsive-table-mobile-status
+          sx={{ position: "absolute", width: 1, height: 1, p: 0, m: -1, overflow: "hidden", clip: "rect(0 0 0 0)" }}
+        >
+          {nextPageStatus}
         </Box>
       ) : null}
     </Box>
