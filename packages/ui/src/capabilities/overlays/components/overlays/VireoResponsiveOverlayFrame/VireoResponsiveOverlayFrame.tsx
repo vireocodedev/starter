@@ -62,6 +62,8 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
   function VireoResponsiveOverlayFrame(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_RESPONSIVE_OVERLAY_FRAME_NAME });
     const {
+      "aria-label": ariaLabel,
+      "aria-labelledby": ariaLabelledby,
       allowSidePanelResize = false,
       children,
       className,
@@ -179,6 +181,8 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
           onClose={onClose}
           slotProps={{
             paper: {
+              "aria-label": ariaLabel,
+              "aria-labelledby": ariaLabelledby,
               ref: sidePanelResizeEnabled ? sidePanelResize.rootRef : undefined,
               style: sidePanelResizeStyle,
               sx: mergeSx(
@@ -209,7 +213,14 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
           isResizing={sidePanelResize.isResizing}
           ref={sidePanelResizeEnabled ? sidePanelResize.rootRef : undefined}
           style={sidePanelResizeStyle}
-          slotProps={desktopSidePanelSx ? { surface: { sx: desktopSidePanelSx } } : undefined}
+          slotProps={{
+            surface: {
+              "aria-label": ariaLabel,
+              "aria-labelledby": ariaLabelledby,
+              role: ariaLabel || ariaLabelledby ? "region" : undefined,
+              sx: desktopSidePanelSx,
+            },
+          }}
           resizeHandle={sidePanelResizeHandle}
           onExited={handleExited}
         >
@@ -219,12 +230,14 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
     } else {
       desktopFrame = (
         <Dialog
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
           open={open}
           onClose={onClose}
           maxWidth={maxWidth}
           fullWidth
           slotProps={{
-            ...(desktopPaperSx && { paper: { sx: desktopPaperSx } }),
+            paper: { "aria-label": ariaLabel, sx: desktopPaperSx },
             transition: { onExited },
           }}
         >
@@ -236,12 +249,14 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
     const mobileFrame =
       mobileSurface === "fullScreenDialog" ? (
         <Dialog
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
           open={open}
           onClose={onClose}
           fullScreen
           slots={{ transition: MobileFullScreenTransition }}
           slotProps={{
-            paper: { sx: { overflow: "hidden" } },
+            paper: { "aria-label": ariaLabel, sx: { overflow: "hidden" } },
             transition: { onExited: handleExited },
           }}
         >
@@ -249,6 +264,8 @@ export const VireoResponsiveOverlayFrame = React.forwardRef<HTMLDivElement, Vire
         </Dialog>
       ) : (
         <VireoBottomDrawer
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
           open={open}
           onClose={onClose}
           onExited={onExited}

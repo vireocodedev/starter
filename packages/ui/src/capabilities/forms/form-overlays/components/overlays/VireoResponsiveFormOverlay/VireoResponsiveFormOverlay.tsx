@@ -79,7 +79,13 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
       ...rootSlotOther
     } = resolvedRootSlotProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
-    const { className: headerSlotClassName, ...headerSlotOther } = resolveSlotProps(slotProps.header, ownerState);
+    const generatedTitleId = React.useId();
+    const {
+      className: headerSlotClassName,
+      titleId: headerSlotTitleId,
+      ...headerSlotOther
+    } = resolveSlotProps(slotProps.header, ownerState);
+    const titleId = headerSlotTitleId ?? generatedTitleId;
     const { className: bodySlotClassName, ...bodySlotOther } = resolveSlotProps(slotProps.body, ownerState);
     const { className: contentSlotClassName, ...contentSlotOther } = resolveSlotProps(slotProps.content, ownerState);
     const { className: actionsSlotClassName, ...actionsSlotOther } = resolveSlotProps(slotProps.actions, ownerState);
@@ -122,6 +128,7 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
         as={slots.root}
         ref={rootRef}
         ownerState={ownerState}
+        aria-labelledby={titleId}
         open={open}
         onClose={requestClose}
         className={joinClassNames(classes.root, className, rootSlotClassName)}
@@ -133,6 +140,7 @@ const VireoResponsiveFormOverlayContent = React.forwardRef<HTMLDivElement, Vireo
           ownerState={ownerState}
           className={joinClassNames(classes.header, headerSlotClassName)}
           title={title}
+          titleId={titleId}
           closeLabel={closeLabel}
           closeDisabled={closeDisabled}
           onClose={requestClose}

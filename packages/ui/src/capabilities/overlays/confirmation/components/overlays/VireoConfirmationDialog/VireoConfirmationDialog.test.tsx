@@ -22,6 +22,7 @@ describe("VireoConfirmationDialog", () => {
       />,
     );
     expect(document.querySelector(`.${vireoConfirmationDialogClasses.root}`)).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Delete item?" })).toBeInTheDocument();
     expect(screen.getByText("This cannot be undone.")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
     expect(onConfirm).toHaveBeenCalledOnce();

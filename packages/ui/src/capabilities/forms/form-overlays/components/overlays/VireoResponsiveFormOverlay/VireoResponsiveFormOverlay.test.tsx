@@ -34,6 +34,7 @@ describe(VIREO_RESPONSIVE_FORM_OVERLAY_NAME, () => {
         Profile form
       </VireoResponsiveFormOverlay>,
     );
+    expect(screen.getByRole("dialog", { name: "Edit profile" })).toBeInTheDocument();
     expect(screen.getByText("Edit profile")).toBeInTheDocument();
     expect(screen.getByText("Profile form")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();

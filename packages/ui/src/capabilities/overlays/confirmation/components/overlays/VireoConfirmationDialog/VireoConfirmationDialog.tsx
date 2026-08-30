@@ -66,7 +66,10 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
     const rootProps = resolveSlotProps(slotProps.root, ownerState);
     const { className: rootClassName, ref: rootSlotRef, style: rootStyle, sx: rootSx, ...rootOther } = rootProps;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
+    const generatedTitleId = React.useId();
     const headerProps = resolveSlotProps(slotProps.header, ownerState);
+    const { titleId: headerTitleId, ...headerOther } = headerProps;
+    const titleId = headerTitleId ?? generatedTitleId;
     const contentProps = resolveSlotProps(slotProps.content, ownerState);
     const actionsProps = resolveSlotProps(slotProps.actions, ownerState);
     const cancelProps = resolveSlotProps(slotProps.cancelButton, ownerState);
@@ -84,6 +87,7 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
         as={slots.root}
         ref={rootRef}
         ownerState={ownerState}
+        aria-labelledby={titleId}
         open={open}
         onClose={loading ? undefined : onClose}
         onTransitionExited={onExited}
@@ -94,10 +98,11 @@ export const VireoConfirmationDialog = React.forwardRef<HTMLDivElement, VireoCon
         sx={mergeSx(sx, rootSx)}
       >
         <Header
-          {...headerProps}
+          {...headerOther}
           ownerState={ownerState}
           className={joinClassNames(classes.header, headerProps.className)}
           title={title}
+          titleId={titleId}
           closeLabel={closeLabel}
           closeDisabled={loading}
           onClose={onClose}

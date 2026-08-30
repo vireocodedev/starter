@@ -18,6 +18,7 @@ vi.mock("@mui/material", async importOriginal => {
           <section
             ref={ref}
             role="dialog"
+            aria-label={(props.slotProps as { paper?: { "aria-label"?: string } } | undefined)?.paper?.["aria-label"]}
             className={props.className as string}
             data-testid="bottom-drawer"
             data-anchor={props.anchor}
@@ -57,6 +58,12 @@ describe(VIREO_BOTTOM_DRAWER_NAME, () => {
     expect(drawer).toHaveAttribute("data-anchor", "bottom");
     expect(drawer).toHaveTextContent("Drawer content");
     expect(drawer.querySelector(`.${vireoBottomDrawerClasses.puller}`)).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("forwards the accessible name to the modal drawer surface", () => {
+    render(<VireoBottomDrawer {...requiredProps} aria-label="Customer details" />);
+
+    expect(screen.getByRole("dialog", { name: "Customer details" })).toBeInTheDocument();
   });
 
   it("wires close, open, and exit lifecycle callbacks", () => {

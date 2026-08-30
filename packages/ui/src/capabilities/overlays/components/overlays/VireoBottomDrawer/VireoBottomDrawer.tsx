@@ -26,6 +26,8 @@ export const VireoBottomDrawer = React.forwardRef<HTMLDivElement, VireoBottomDra
   function VireoBottomDrawer(inProps, forwardedRef) {
     const props = useThemeProps({ props: inProps, name: VIREO_BOTTOM_DRAWER_NAME });
     const {
+      "aria-label": ariaLabel,
+      "aria-labelledby": ariaLabelledby,
       children,
       className,
       classes: classesProp,
@@ -101,6 +103,8 @@ export const VireoBottomDrawer = React.forwardRef<HTMLDivElement, VireoBottomDra
         keepMounted={keepMounted}
         slotProps={{
           paper: {
+            "aria-label": ariaLabel,
+            "aria-labelledby": ariaLabelledby,
             sx: {
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
