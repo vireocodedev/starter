@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -32,9 +32,7 @@ try {
     database: "h2",
     git: false,
   });
-  const fixture = join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.entity.json");
-  const schemaPath = join(projectRoot, ".vireo/purchase-order.entity.json");
-  await cp(fixture, schemaPath);
+  const schemaPath = join(projectRoot, ".vireo/examples/purchase-order.entity.json");
   const first = await generateEntity({ projectDirectory: projectRoot, schemaPath });
   const second = await generateEntity({ projectDirectory: projectRoot, schemaPath });
   if (!second.files.every(file => file.status === "unchanged"))

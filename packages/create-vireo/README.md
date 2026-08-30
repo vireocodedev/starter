@@ -113,7 +113,7 @@ lockfile drift, invalid/duplicate Flyway migration versions, and managed generat
 wire-contract drift. Apply changes only Vireo-managed metadata and the pinned CLI
 script. Template files, domain logic, deployment, data migration, and adopted/ejected
 code remain application-owned and must be reviewed against the target Template
-commit `57efdbe95c02082c3e46f0e870d331e5b765b1b2`. A managed dependency apply can
+commit `685e535fe07329c223696e07c108194f0c3dd589`. A managed dependency apply can
 leave a 0.2 project unable to compile: that project does not already contain the
 target Template's navigation, responsive-table, accessible-name, or surface-palette
 work. Complete the printed pending checklist before calling the upgrade complete:

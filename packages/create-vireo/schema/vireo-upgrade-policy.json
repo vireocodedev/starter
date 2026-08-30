@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "targetRelease": "0.3.0",
-  "targetTemplateCommit": "57efdbe95c02082c3e46f0e870d331e5b765b1b2",
+  "targetTemplateCommit": "685e535fe07329c223696e07c108194f0c3dd589",
   "target": {
     "rootVireoScript": "npx --yes --package=create-vireo@0.5.0 vireo",
     "starterJvmVersion": "0.3.0",

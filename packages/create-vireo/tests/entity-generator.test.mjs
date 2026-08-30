@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -109,6 +110,26 @@ async function legacyGeneratorFixture() {
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   return { root, schemaArtifact, manifest, manifestPath };
 }
+
+test("ships a parser-compatible public V4 example and the exact frozen V3 legacy fixture", async () => {
+  const [publicFixture, legacyBytes] = await Promise.all([
+    readFile(new URL("../fixtures/purchase-order.entity.json", import.meta.url), "utf8"),
+    readFile(new URL("../fixtures/purchase-order.0.2.0.entity.json", import.meta.url)),
+  ]);
+  const current = parseEntitySchema(JSON.parse(publicFixture));
+  const legacy = JSON.parse(legacyBytes.toString("utf8"));
+
+  assert.equal(current.database.migrationVersion, 4);
+  assert.equal(legacy.database.migrationVersion, 3);
+  assert.equal(
+    legacy.fields.some(field => Object.hasOwn(field, "example")),
+    false,
+  );
+  assert.equal(
+    createHash("sha256").update(legacyBytes).digest("hex"),
+    "d822e61a9d895cc2440918c2262ec7b97f01bb64550cda9a4fcdf20fec006b4b",
+  );
+});
 
 test("validates acronyms and explicit irregular plural names without inferring them", () => {
   const parsed = parseEntitySchema(schema());

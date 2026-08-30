@@ -33,6 +33,11 @@ full-stack project may explicitly use `--target frontend`.
 - Separate Zod transport/domain schemas, mapper functions, validated API adapter, TanStack Query CRUD page, responsive empty/loading/error/list/form states, route/navigation registration, English/Croatian resources, Storybook story, and contract test.
 - Spring API integration test, capability documentation, canonical schema copy, wire contract, and hash manifest.
 
+`database.migrationVersion` is an explicit, unused Flyway version selected by
+the application owner. Generation never silently renumbers it: choose a value
+that does not conflict with an existing `V<version>__...sql` migration before
+generating the entity.
+
 ### Frontend target
 
 - Zod transport/domain schemas, mappers, an explicit API interface and configurable

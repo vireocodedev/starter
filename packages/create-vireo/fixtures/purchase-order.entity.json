@@ -7,7 +7,7 @@
     "plural": "purchase-orders",
     "description": "Track customer purchase orders from intake through fulfilment."
   },
-  "database": { "table": "purchase_order", "migrationVersion": 3 },
+  "database": { "table": "purchase_order", "migrationVersion": 4 },
   "api": { "path": "/api/purchase-orders" },
   "permissions": {
     "read": "hasAnyRole('USER', 'SUPERADMIN')",

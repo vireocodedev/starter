@@ -1,12 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { cp, mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, relative } from "node:path";
 import { checkGeneratedEntities, createVireo, generateEntity } from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
 
-const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-frontend-fixture-"));
 const projectRoot = join(temporaryRoot, "frontend-app");
 
@@ -34,9 +32,7 @@ try {
   if (created.profile !== "frontend" || created.javaPackage || created.database)
     throw new Error(`Unexpected frontend project result: ${JSON.stringify(created)}`);
 
-  const fixture = join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.entity.json");
-  const schemaPath = join(projectRoot, ".vireo/purchase-order.entity.json");
-  await cp(fixture, schemaPath);
+  const schemaPath = join(projectRoot, ".vireo/examples/purchase-order.entity.json");
   const first = await generateEntity({ projectDirectory: projectRoot, schemaPath });
   const second = await generateEntity({ projectDirectory: projectRoot, schemaPath });
   if (first.target !== "frontend" || second.target !== "frontend")

@@ -53,7 +53,7 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-export const TEMPLATE_COMMIT = "57efdbe95c02082c3e46f0e870d331e5b765b1b2";
+export const TEMPLATE_COMMIT = "685e535fe07329c223696e07c108194f0c3dd589";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 
 export type VireoDatabase = "postgresql" | "h2";
