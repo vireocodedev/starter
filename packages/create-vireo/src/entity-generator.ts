@@ -14,6 +14,7 @@ import {
 } from "./entity-renderer.js";
 
 export const VIREO_GENERATOR_VERSION = "0.3.0";
+const LEGACY_GENERATOR_VERSION = "0.2.0";
 
 type ManifestFile = Pick<GeneratedFile, "ownership" | "path" | "role"> & {
   sha256: string;
@@ -386,19 +387,28 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
       if (!(await pathExists(schemaPath))) problems.push(`missing canonical schema ${record.schemaPath}`);
       else {
         try {
-          const schema = await readEntitySchema(schemaPath);
-          const canonical = stableJson(schema);
-          if (sha256(canonical) !== record.schemaDigest)
-            problems.push("canonical schema digest differs from the manifest");
-          const contract = stableJson(createWireContract(schema, record.target ?? project.profile ?? "full-stack"));
-          if (sha256(contract) !== record.contractDigest)
-            problems.push("derived wire contract digest differs from the schema");
+          if (record.generatorVersion === VIREO_GENERATOR_VERSION) {
+            const schema = await readEntitySchema(schemaPath);
+            const canonical = stableJson(schema);
+            if (sha256(canonical) !== record.schemaDigest)
+              problems.push("canonical schema digest differs from the manifest");
+            const contract = stableJson(createWireContract(schema, record.target ?? project.profile ?? "full-stack"));
+            if (sha256(contract) !== record.contractDigest)
+              problems.push("derived wire contract digest differs from the schema");
+          } else if (record.generatorVersion === LEGACY_GENERATOR_VERSION) {
+            if (sha256(stableJson(await readJson(schemaPath))) !== record.schemaDigest)
+              problems.push("legacy canonical schema digest differs from the manifest");
+          } else problems.push(`unsupported generator version ${JSON.stringify(record.generatorVersion)}`);
           const contractPath = join(root, ".vireo", "contracts", `${record.plural}.contract.json`);
           if (
             !(await pathExists(contractPath)) ||
             sha256(stableJson(await readJson(contractPath))) !== record.contractDigest
           )
-            problems.push("wire-contract artifact is missing or stale");
+            problems.push(
+              record.generatorVersion === LEGACY_GENERATOR_VERSION
+                ? "legacy wire-contract artifact is missing or stale"
+                : "wire-contract artifact is missing or stale",
+            );
         } catch (error) {
           problems.push(error instanceof Error ? error.message : String(error));
         }

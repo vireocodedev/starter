@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkGeneratedEntities, createVireo, generateEntity } from "../packages/create-vireo/dist/index.js";
+import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-frontend-fixture-"));
@@ -58,9 +59,10 @@ try {
   if (backendFiles.length > 0)
     throw new Error(`Frontend project unexpectedly contains backend files: ${backendFiles.join(", ")}`);
 
-  run("corepack", ["npm", "ci"], projectRoot);
-  run("corepack", ["npm", "run", "doctor"], projectRoot);
-  run("corepack", ["npm", "run", "verify"], projectRoot);
+  await withLocalVireoCandidates(projectRoot, () => {
+    run("corepack", ["npm", "run", "doctor"], projectRoot);
+    run("corepack", ["npm", "run", "verify"], projectRoot);
+  });
   console.log(
     `Generated ${first.files.length} frontend artifacts; standalone mock-backed fixture verification passed.`,
   );

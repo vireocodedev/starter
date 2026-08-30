@@ -85,12 +85,12 @@
     "public:audit": "sh scripts/public-repository-audit.sh",
     "ecosystem:check": "node --test scripts/ecosystem-contract-policy.test.mjs && node scripts/ecosystem-contract-policy.mjs",
     "identity:check": "node --test scripts/product-identity-policy.test.mjs && node scripts/product-identity-policy.mjs",
-    "public:check": "node scripts/ecosystem-contract-policy.mjs && npm run release:lifecycle:check && npm run release:sbom:check && node scripts/product-identity-policy.mjs && node scripts/public-contract-policy.mjs && node scripts/documentation-policy.mjs && node site/verify.mjs && node scripts/public-beta-evidence.mjs",
+    "public:check": "node scripts/ecosystem-contract-policy.mjs && corepack npm run release:lifecycle:check && corepack npm run release:sbom:check && node scripts/product-identity-policy.mjs && node scripts/public-contract-policy.mjs && node scripts/documentation-policy.mjs && node site/verify.mjs && node scripts/public-beta-evidence.mjs",
     "beta:evidence:check": "node scripts/public-beta-evidence.mjs",
     "security:secrets": "sh scripts/secret-scan.sh",
     "security:workflow": "node scripts/workflow-security-policy.mjs",
     "toolchain:check": "node scripts/toolchain-policy.mjs && node scripts/platform-support-policy.mjs",
-    "release": "sh scripts/with-declared-npm.sh sh -c 'npm run verify -- silent && npm run release:publish'",
+    "release": "sh scripts/with-declared-npm.sh sh -c 'corepack npm run verify -- silent && corepack npm run release:publish'",
     "release:publish": "sh scripts/with-declared-npm.sh node scripts/changeset-publish-adapter.mjs"
   },
   "devDependencies": {

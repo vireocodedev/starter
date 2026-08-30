@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { checkGeneratedEntities, ejectEntity, generateEntity } from "./entity-generator.js";
 import type { VireoGenerationTarget } from "./entity-renderer.js";
-import { upgradeVireoProject } from "./project-upgrade.js";
+import { formatVireoUpgradeText, upgradeVireoProject } from "./project-upgrade.js";
 import { removeExample } from "./remove-example.js";
 
 const HELP = `Vireo application development CLI.
@@ -169,19 +169,7 @@ async function upgrade(values: string[]) {
     acceptApplicationOwned,
   });
   if (common.json) return print(result, true);
-  print(
-    [
-      `${result.dryRun ? "Validated" : "Applied"} Vireo project upgrade ${result.sourceRelease} -> ${result.targetRelease}.`,
-      ...result.checks.map(check => `${check.status.toUpperCase().padEnd(6)} ${check.id}: ${check.detail}`),
-      ...result.files.map(file => `${file.status.padEnd(10)} ${file.path}`),
-      "Application-owned actions:",
-      ...result.manualActions.map(action => `  - ${action}`),
-      result.dryRun
-        ? "No files were written."
-        : "Commit the managed migration only after completing the application-owned review.",
-    ],
-    false,
-  );
+  print(formatVireoUpgradeText(result), false);
 }
 
 async function removeGeneratedExample(values: string[]) {

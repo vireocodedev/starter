@@ -10,9 +10,16 @@ type ReleaseRequirements = {
   starterJvmVersion: string;
   frontendDependencies: DependencyMap;
 };
+type ApplicationOwnedActionPolicy = {
+  id: string;
+  paths: string[];
+  requirement: string;
+  verificationCommands: string[];
+};
 type SourceRelease = ReleaseRequirements & {
   release: string;
   templateCommit: string;
+  applicationOwnedActions: ApplicationOwnedActionPolicy[];
 };
 type UpgradePolicy = {
   schemaVersion: number;
@@ -50,6 +57,7 @@ export type VireoUpgradeFile = {
   path: string;
   status: "create" | "update" | "unchanged";
 };
+export type VireoUpgradeManualAction = ApplicationOwnedActionPolicy & { status: "pending" };
 export type VireoUpgradeResult = {
   sourceRelease: string;
   targetRelease: string;
@@ -57,7 +65,7 @@ export type VireoUpgradeResult = {
   dryRun: boolean;
   checks: VireoUpgradeCheck[];
   files: VireoUpgradeFile[];
-  manualActions: string[];
+  manualActions: VireoUpgradeManualAction[];
 };
 
 export class VireoUpgradeError extends Error {
@@ -70,6 +78,24 @@ export class VireoUpgradeError extends Error {
   }
 }
 
+export function formatVireoUpgradeText(result: VireoUpgradeResult) {
+  return [
+    `${result.dryRun ? "Validated" : "Managed Vireo migration applied"} ${result.sourceRelease} -> ${result.targetRelease}.`,
+    ...result.checks.map(check => `${check.status.toUpperCase().padEnd(6)} ${check.id}: ${check.detail}`),
+    ...result.files.map(file => `${file.status.padEnd(10)} ${file.path}`),
+    "Application-owned actions remain pending:",
+    ...result.manualActions.flatMap(action => [
+      `  [${action.status.toUpperCase()}] ${action.id}`,
+      `    Requirement: ${action.requirement}`,
+      `    Affected paths: ${action.paths.join(", ")}`,
+      ...action.verificationCommands.map(command => `    Verify: ${command}`),
+    ]),
+    result.dryRun
+      ? "No files were written; application-owned actions remain pending."
+      : "Managed migration applied; application-owned actions remain pending before this upgrade is complete.",
+  ];
+}
+
 const policyUrl = new URL("../schema/vireo-upgrade-policy.json", import.meta.url);
 const managedSurfaces = [
   "package.json#scripts.vireo",
@@ -77,6 +103,13 @@ const managedSurfaces = [
   'frontend/package-lock.json#packages[""].dependencies',
   "gradle.properties#starterVersion",
   ".vireo/project.json#templateCommit,lastUpgradedBy,lastUpgrade",
+] as const;
+const expectedApplicationOwnedActionIds = [
+  "navigation-landmark-and-links",
+  "responsive-table-live-announcements",
+  "accessible-name-contracts",
+  "surface-palette-ownership",
+  "full-frontend-verification",
 ] as const;
 
 async function readJson<T>(path: string): Promise<T> {
@@ -93,7 +126,50 @@ async function readJson<T>(path: string): Promise<T> {
 async function readPolicy(): Promise<UpgradePolicy> {
   const policy = await readJson<UpgradePolicy>(fileURLToPath(policyUrl));
   if (policy.schemaVersion !== 1) throw new VireoUpgradeError("VIR-UPG-001", "Unsupported upgrade-policy schema.");
+  for (const source of policy.supportedSources) validateApplicationOwnedActions(source.applicationOwnedActions);
   return policy;
+}
+
+export function validateApplicationOwnedActions(actions: unknown): asserts actions is ApplicationOwnedActionPolicy[] {
+  if (!Array.isArray(actions) || actions.length !== expectedApplicationOwnedActionIds.length)
+    throw new VireoUpgradeError(
+      "VIR-UPG-001",
+      "Upgrade policy must declare every application-owned action exactly once.",
+    );
+  const seen = new Set<string>();
+  for (const action of actions) {
+    if (!action || typeof action !== "object")
+      throw new VireoUpgradeError("VIR-UPG-001", "Upgrade policy application-owned actions must be objects.");
+    const value = action as Partial<ApplicationOwnedActionPolicy>;
+    if (
+      typeof value.id !== "string" ||
+      !expectedApplicationOwnedActionIds.includes(value.id as never) ||
+      seen.has(value.id)
+    )
+      throw new VireoUpgradeError(
+        "VIR-UPG-001",
+        "Upgrade policy application-owned action IDs must be unique and supported.",
+      );
+    seen.add(value.id);
+    if (
+      !Array.isArray(value.paths) ||
+      value.paths.length === 0 ||
+      value.paths.some(path => typeof path !== "string" || path.trim() === "") ||
+      typeof value.requirement !== "string" ||
+      value.requirement.trim() === "" ||
+      !Array.isArray(value.verificationCommands) ||
+      value.verificationCommands.length === 0 ||
+      value.verificationCommands.some(command => typeof command !== "string" || command.trim() === "")
+    )
+      throw new VireoUpgradeError(
+        "VIR-UPG-001",
+        "Upgrade policy application-owned action details must be non-empty strings.",
+      );
+  }
+  for (const id of expectedApplicationOwnedActionIds) {
+    if (!seen.has(id))
+      throw new VireoUpgradeError("VIR-UPG-001", `Upgrade policy is missing application-owned action ${id}.`);
+  }
 }
 
 function releaseFrom(value: unknown) {
@@ -265,6 +341,16 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
       : metadata.templateCommit;
   if (typeof originalSourceTemplateCommit !== "string")
     throw new VireoUpgradeError("VIR-UPG-002", "Target-version metadata is missing its source Template commit record.");
+  const originalSource = policy.supportedSources.find(candidate => candidate.release === originalSourceRelease);
+  if (!originalSource)
+    throw new VireoUpgradeError(
+      "VIR-UPG-002",
+      `Release ${originalSourceRelease} has no application-owned action policy for ${policy.targetRelease}.`,
+    );
+  const manualActions = originalSource.applicationOwnedActions.map(action => ({
+    ...action,
+    status: "pending" as const,
+  }));
   const recordPath = join(
     projectDirectory,
     ".vireo",
@@ -278,6 +364,7 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
     targetTemplateCommit: policy.targetTemplateCommit,
     managedSurfaces,
     applicationOwnedTemplateChanges: "manual-review-required",
+    applicationOwnedActions: manualActions,
   };
   const recordContents = `${JSON.stringify(record, null, 2)}\n`;
   let priorRecord: string | undefined;
@@ -325,11 +412,6 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
       };
     }),
   );
-  const manualActions = [
-    `Review and selectively port application-owned changes from Template ${metadata.templateCommit} to ${policy.targetTemplateCommit}.`,
-    "Review package changelogs, refresh resolved lockfile entries after the managed declaration update, and run setup plus the full verification gate.",
-    "Rehearse database, deployment order, and rollback in the application-owned target environment.",
-  ];
   const checks: VireoUpgradeCheck[] = [
     { id: "source", status: "pass", detail: `${recordedRelease} is admitted for target ${policy.targetRelease}.` },
     {
@@ -348,7 +430,11 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
       status: "pass",
       detail: `${generated.length} managed generated capability contract(s) have no drift.`,
     },
-    { id: "application-owned", status: "manual", detail: manualActions[0] },
+    {
+      id: "application-owned",
+      status: "manual",
+      detail: `${manualActions.length} application-owned action(s) remain pending for Template ${policy.targetTemplateCommit}.`,
+    },
   ];
   const dryRun = options.dryRun ?? true;
   if (!dryRun) {

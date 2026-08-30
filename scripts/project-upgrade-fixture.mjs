@@ -1,12 +1,25 @@
+import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createVireo, upgradeVireoProject } from "../packages/create-vireo/dist/index.js";
+import { checkGeneratedEntities, createVireo, upgradeVireoProject } from "../packages/create-vireo/dist/index.js";
+import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
+import {
+  mavenCandidateConsumerCommand,
+  withLocalVireoMavenCandidates,
+} from "./lib/local-vireo-maven-candidate-fixture.mjs";
 
 const sourceRelease = "0.2.0";
 const targetRelease = "0.3.0";
+const pendingActionIds = [
+  "navigation-landmark-and-links",
+  "responsive-table-live-announcements",
+  "accessible-name-contracts",
+  "surface-palette-ownership",
+  "full-frontend-verification",
+];
 const sourceTemplateCommit = "2520c99b1550246c3b0c5299b3cc6055dd10ead7";
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-upgrade-fixture-"));
@@ -15,6 +28,39 @@ const projectRoot = join(temporaryRoot, "upgrade-app");
 
 function run(command, args, cwd) {
   execFileSync(command, args, { cwd, stdio: "inherit" });
+}
+
+async function generatedBytes(root, manifest) {
+  const paths = new Set([
+    `.vireo/generated/${manifest.plural}.json`,
+    manifest.schemaPath,
+    `.vireo/contracts/${manifest.plural}.contract.json`,
+    ...manifest.files.map(file => file.path),
+  ]);
+  return new Map(await Promise.all([...paths].sort().map(async path => [path, await readFile(join(root, path))])));
+}
+
+function assertSameGeneratedBytes(before, after) {
+  assert.equal(before.size, after.size, "Generated artifact set changed during project upgrade.");
+  for (const [path, contents] of before)
+    assert.deepEqual(after.get(path), contents, `Generated artifact changed during project upgrade: ${path}`);
+}
+
+function assertPendingActions(result) {
+  assert.deepEqual(
+    result.manualActions.map(action => action.id),
+    pendingActionIds,
+  );
+  assert.ok(result.manualActions.every(action => action.status === "pending"));
+  assert.deepEqual(
+    result.manualActions.find(action => action.id === "full-frontend-verification").verificationCommands,
+    [
+      "corepack npm install --package-lock-only --prefix frontend",
+      "corepack npm run setup",
+      "cd frontend && corepack npm run typecheck",
+      "./scripts/verify.sh",
+    ],
+  );
 }
 
 try {
@@ -50,7 +96,7 @@ try {
   packageJson.scripts.vireo = `npx --yes --package=create-vireo@${sourceRelease} vireo`;
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 
-  const entityFixture = join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.entity.json");
+  const entityFixture = join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.0.2.0.entity.json");
   const entitySchema = join(projectRoot, ".vireo/purchase-order.entity.json");
   await cp(entityFixture, entitySchema);
   run(
@@ -70,28 +116,56 @@ try {
     ],
     repositoryRoot,
   );
+  const generatedManifestPath = join(projectRoot, ".vireo/generated/purchase-orders.json");
+  const generatedManifest = JSON.parse(await readFile(generatedManifestPath, "utf8"));
+  if (generatedManifest.generatorVersion !== sourceRelease)
+    throw new Error(`Published create-vireo ${sourceRelease} emitted ${generatedManifest.generatorVersion}.`);
+  const beforeUpgradeChecks = await checkGeneratedEntities(projectRoot);
+  if (beforeUpgradeChecks.length !== 1 || !beforeUpgradeChecks[0].ok)
+    throw new Error(`Historical generated capability check failed: ${JSON.stringify(beforeUpgradeChecks)}`);
+  const beforeUpgradeGeneratedBytes = await generatedBytes(projectRoot, generatedManifest);
 
   const dryRun = await upgradeVireoProject({ projectDirectory: projectRoot, targetRelease });
   if (!dryRun.dryRun || !dryRun.files.some(file => file.status !== "unchanged"))
     throw new Error("Release-pair dry run did not produce a non-writing migration plan.");
-  await upgradeVireoProject({
+  assertPendingActions(dryRun);
+  const applied = await upgradeVireoProject({
     projectDirectory: projectRoot,
     targetRelease,
     dryRun: false,
     acceptApplicationOwned: true,
   });
+  assertPendingActions(applied);
+  assertSameGeneratedBytes(beforeUpgradeGeneratedBytes, await generatedBytes(projectRoot, generatedManifest));
+  const afterUpgradeChecks = await checkGeneratedEntities(projectRoot);
+  if (afterUpgradeChecks.length !== 1 || !afterUpgradeChecks[0].ok)
+    throw new Error(`Upgraded historical generated capability check failed: ${JSON.stringify(afterUpgradeChecks)}`);
   const repeated = await upgradeVireoProject({ projectDirectory: projectRoot, targetRelease });
   if (!repeated.files.every(file => file.status === "unchanged"))
     throw new Error("Applied project upgrade is not idempotent.");
+  assertPendingActions(repeated);
+  assertSameGeneratedBytes(beforeUpgradeGeneratedBytes, await generatedBytes(projectRoot, generatedManifest));
+  const repeatedChecks = await checkGeneratedEntities(projectRoot);
+  if (repeatedChecks.length !== 1 || !repeatedChecks[0].ok)
+    throw new Error(
+      `Repeated upgrade changed historical generated capability checks: ${JSON.stringify(repeatedChecks)}`,
+    );
 
-  run("corepack", ["npm", "ci"], join(projectRoot, "frontend"));
-  run("corepack", ["npm", "run", "typecheck"], join(projectRoot, "frontend"));
-  run(
-    "corepack",
-    ["npm", "run", "test", "--", "tests/contract/generated/purchaseOrder.wire-contract.test.ts"],
-    join(projectRoot, "frontend"),
+  await withLocalVireoCandidates(join(projectRoot, "frontend"), () => {
+    run(
+      "corepack",
+      ["npm", "run", "test", "--", "tests/contract/generated/purchaseOrder.wire-contract.test.ts"],
+      join(projectRoot, "frontend"),
+    );
+  });
+  await withLocalVireoMavenCandidates(
+    projectRoot,
+    ({ initScript }) => {
+      const consumer = mavenCandidateConsumerCommand({ initScript });
+      run(consumer.command, consumer.args, projectRoot);
+    },
+    { expectedVersion: targetRelease },
   );
-  run("./gradlew", ["test", "--tests", "*PurchaseOrderApiIntegrationTest", "--console=plain"], projectRoot);
   console.log(
     `Project upgrade fixture passed: create-vireo ${sourceRelease} -> ${targetRelease}, generated wire contract, frontend, Flyway, and backend.`,
   );

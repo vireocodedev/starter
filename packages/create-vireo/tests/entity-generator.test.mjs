@@ -9,6 +9,8 @@ import {
   EntitySchemaError,
   generateEntity,
   parseEntitySchema,
+  sha256,
+  stableJson,
 } from "../dist/index.js";
 
 function schema(overrides = {}) {
@@ -80,6 +82,32 @@ async function frontendProjectFixture() {
   const schemaPath = join(root, "api-client.entity.json");
   await writeFile(schemaPath, JSON.stringify(schema()));
   return { root, schemaPath };
+}
+
+async function legacyGeneratorFixture() {
+  const { root, schemaPath } = await projectFixture();
+  const currentSchema = schema();
+  currentSchema.fields[0] = {
+    ...currentSchema.fields[0],
+    example: "API-123",
+    constraints: { ...currentSchema.fields[0].constraints, pattern: "^API-[0-9]{3}$" },
+  };
+  await writeFile(schemaPath, JSON.stringify(currentSchema));
+  await generateEntity({ projectDirectory: root, schemaPath });
+
+  const legacySchema = structuredClone(currentSchema);
+  delete legacySchema.fields[0].example;
+  assert.throws(() => parseEntitySchema(legacySchema), /example is required/u);
+  const schemaArtifact = join(root, ".vireo/schemas/api-clients.json");
+  const manifestPath = join(root, ".vireo/generated/api-clients.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const legacyCanonicalSchema = stableJson(legacySchema);
+  manifest.generatorVersion = "0.2.0";
+  manifest.schemaDigest = sha256(legacyCanonicalSchema);
+  manifest.files.find(file => file.path === ".vireo/schemas/api-clients.json").sha256 = sha256(legacyCanonicalSchema);
+  await writeFile(schemaArtifact, legacyCanonicalSchema);
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  return { root, schemaArtifact, manifest, manifestPath };
 }
 
 test("validates acronyms and explicit irregular plural names without inferring them", () => {
@@ -179,6 +207,45 @@ test("requires constraint-valid examples for patterned fields", () => {
   const validExample = structuredClone(missingExample);
   validExample.fields[0].example = "PO-123";
   assert.equal(parseEntitySchema(validExample).fields[0].example, "PO-123");
+});
+
+test("checks admitted 0.2 manifests without reparsing their historical schema", async () => {
+  const fixture = await legacyGeneratorFixture();
+  assert.deepEqual(await checkGeneratedEntities(fixture.root), [{ entity: "APIClient", ok: true, problems: [] }]);
+
+  const mutations = [
+    async ({ schemaArtifact }) => {
+      const value = JSON.parse(await readFile(schemaArtifact, "utf8"));
+      value.entity.description = "Changed legacy schema";
+      await writeFile(schemaArtifact, stableJson(value));
+    },
+    async ({ root }) => {
+      const path = join(root, ".vireo/contracts/api-clients.contract.json");
+      const value = JSON.parse(await readFile(path, "utf8"));
+      value.entity = "ChangedContract";
+      await writeFile(path, stableJson(value));
+    },
+    async ({ root, manifest }) => {
+      const critical = manifest.files.find(file => file.path.includes("/models/"));
+      const path = join(root, critical.path);
+      await writeFile(path, `${await readFile(path, "utf8")}\n// changed\n`);
+    },
+  ];
+  for (const mutate of mutations) {
+    const mutationFixture = await legacyGeneratorFixture();
+    await mutate(mutationFixture);
+    assert.equal((await checkGeneratedEntities(mutationFixture.root))[0].ok, false);
+  }
+});
+
+test("rejects unknown generator versions in persisted manifests", async () => {
+  const { root, manifestPath } = await legacyGeneratorFixture();
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.generatorVersion = "0.2.1";
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  const [result] = await checkGeneratedEntities(root);
+  assert.equal(result.ok, false);
+  assert.match(result.problems.join("\n"), /unsupported generator version/u);
 });
 
 test("collects malformed patterns without evaluating them against examples", () => {

@@ -113,5 +113,20 @@ lockfile drift, invalid/duplicate Flyway migration versions, and managed generat
 wire-contract drift. Apply changes only Vireo-managed metadata and the pinned CLI
 script. Template files, domain logic, deployment, data migration, and adopted/ejected
 code remain application-owned and must be reviewed against the target Template
-commit printed by the command. The generated application contains the complete
+commit `57efdbe95c02082c3e46f0e870d331e5b765b1b2`. A managed dependency apply can
+leave a 0.2 project unable to compile: that project does not already contain the
+target Template's navigation, responsive-table, accessible-name, or surface-palette
+work. Complete the printed pending checklist before calling the upgrade complete:
+
+- navigation landmarks, localized labels, and real links;
+- responsive-table live announcements in both catalogues;
+- accessible names for overlays and frames;
+- the UI-owned `appSurface` palette contract; and
+- frontend lock refresh, setup, typecheck, and full verification.
+
+Historical 0.2 generated manifests are admitted only
+through their recorded raw schema digest, persisted wire-contract digest, and
+contract-critical file hashes; upgrading never regenerates them. Regenerating that
+capability later uses the current strict schema rules, including a constraint-valid
+example for every patterned field. The generated application contains the complete
 review, verification, and rollback procedure in `docs/project-upgrades.md`.

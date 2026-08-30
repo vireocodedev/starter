@@ -3,7 +3,15 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { generateEntity, upgradeVireoProject, VireoUpgradeError } from "../dist/index.js";
+import {
+  checkGeneratedEntities,
+  generateEntity,
+  sha256,
+  stableJson,
+  upgradeVireoProject,
+  VireoUpgradeError,
+} from "../dist/index.js";
+import { formatVireoUpgradeText, validateApplicationOwnedActions } from "../dist/project-upgrade.js";
 
 const sourceCommit = "2520c99b1550246c3b0c5299b3cc6055dd10ead7";
 const dependencies = {
@@ -22,7 +30,70 @@ const targetDependencies = {
   "@vireocodedev/shell": "^0.2.2",
   "@vireocodedev/ui": "^0.3.0",
 };
-const targetCommit = "26f21c0fe3203f2b91a74fa75b29056ad028b42d";
+const targetCommit = "57efdbe95c02082c3e46f0e870d331e5b765b1b2";
+const applicationOwnedActions = [
+  {
+    id: "navigation-landmark-and-links",
+    paths: [
+      "frontend/src/app/shell/layout/AppShellLayout.tsx",
+      "frontend/src/app/ui/localization/resources/app.en.ts",
+      "frontend/src/app/ui/localization/resources/app.hr.ts",
+    ],
+    requirement:
+      "Update AppShellLayout for the 0.3 navigation contract, add localized navigation.PRIMARY values in en and hr, pass the translated value as the navigationLabel prop, and replace placeholder destinations with real href values while preserving client-side navigation behavior.",
+    verificationCommands: ["cd frontend && corepack npm run typecheck"],
+  },
+  {
+    id: "responsive-table-live-announcements",
+    paths: [
+      "frontend/src/pages/**/AppPage*.tsx",
+      "frontend/src/pages/**/localization/resources/*.en.ts",
+      "frontend/src/pages/**/localization/resources/*.hr.ts",
+    ],
+    requirement:
+      "Update every AppPageItems use for the 0.3 responsive-table contract and add localized loadingNextPage and loadedNextPage messages in en and hr that announce page-load state without relying on visual table changes.",
+    verificationCommands: ["cd frontend && corepack npm run typecheck"],
+  },
+  {
+    id: "accessible-name-contracts",
+    paths: ["frontend/src/**/*.tsx", "frontend/src/**/*.ts"],
+    requirement:
+      "Resolve compiler-reported overlay and frame call sites with localized aria-label values or aria-labelledby connections to visible localized text; library default names are not sufficient for dialogs, drawers, frames, and overlays.",
+    verificationCommands: ["cd frontend && corepack npm run typecheck"],
+  },
+  {
+    id: "surface-palette-ownership",
+    paths: [
+      "frontend/src/app/ui/theme/config/theme.types.ts",
+      "frontend/src/app/ui/theme/config/theme.light.ts",
+      "frontend/src/app/ui/theme/config/theme.dark.ts",
+      "frontend/src/app/ui/theme/config/theme.components.ts",
+    ],
+    requirement:
+      "Remove conflicting application Palette.surface definitions, use the 0.3 appSurface pattern for canvas and overlay surfaces, and review default, elevated, and overlay states in both colour schemes for contrast, separators, focus rings, and scrims.",
+    verificationCommands: ["cd frontend && corepack npm run typecheck"],
+  },
+  {
+    id: "full-frontend-verification",
+    paths: ["frontend/package.json", "frontend/package-lock.json", "scripts/setup.mjs", "scripts/verify.sh"],
+    requirement:
+      "Refresh the frontend lockfile after the dependency updates, run frontend typecheck and the complete application verification suite, and resolve the pending contract errors before treating the upgrade as complete.",
+    verificationCommands: [
+      "corepack npm install --package-lock-only --prefix frontend",
+      "corepack npm run setup",
+      "cd frontend && corepack npm run typecheck",
+      "./scripts/verify.sh",
+    ],
+  },
+];
+
+function pendingActions() {
+  return applicationOwnedActions.map(action => ({ ...action, status: "pending" }));
+}
+
+function isPolicyError(error) {
+  return error?.name === "VireoUpgradeError" && error.code === "VIR-UPG-001";
+}
 
 async function fixture() {
   const root = await mkdtemp(join(tmpdir(), "vireo-upgrade-test-"));
@@ -50,6 +121,54 @@ async function fixture() {
   return root;
 }
 
+async function legacyGeneratedFixture(root) {
+  const sourceSchema = JSON.parse(
+    await readFile(new URL("../fixtures/purchase-order.entity.json", import.meta.url), "utf8"),
+  );
+  const schemaPath = join(root, "purchase-order.entity.json");
+  await writeFile(schemaPath, stableJson(sourceSchema));
+  await generateEntity({ projectDirectory: root, schemaPath });
+
+  const legacySchema = JSON.parse(
+    await readFile(new URL("../fixtures/purchase-order.0.2.0.entity.json", import.meta.url), "utf8"),
+  );
+  const canonicalLegacySchema = stableJson(legacySchema);
+  const manifestPath = join(root, ".vireo/generated/purchase-orders.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.generatorVersion = "0.2.0";
+  manifest.schemaDigest = sha256(canonicalLegacySchema);
+  manifest.files.find(file => file.path === manifest.schemaPath).sha256 = sha256(canonicalLegacySchema);
+  await writeFile(join(root, manifest.schemaPath), canonicalLegacySchema);
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  const paths = new Set([
+    `.vireo/generated/${manifest.plural}.json`,
+    manifest.schemaPath,
+    `.vireo/contracts/${manifest.plural}.contract.json`,
+    ...manifest.files.map(file => file.path),
+  ]);
+  return { manifest, paths: [...paths].sort() };
+}
+
+async function snapshot(root, paths) {
+  return new Map(await Promise.all(paths.map(async path => [path, await readFile(join(root, path))])));
+}
+
+function assertSameSnapshot(before, after) {
+  assert.deepEqual([...after.keys()], [...before.keys()]);
+  for (const [path, bytes] of before) assert.deepEqual(after.get(path), bytes, `${path} changed during upgrade.`);
+}
+
+test("upgrade policy rejects removed, duplicate, and malformed application-owned actions", () => {
+  assert.doesNotThrow(() => validateApplicationOwnedActions(applicationOwnedActions));
+  assert.throws(() => validateApplicationOwnedActions(applicationOwnedActions.slice(1)), isPolicyError);
+  const duplicate = structuredClone(applicationOwnedActions);
+  duplicate[1].id = duplicate[0].id;
+  assert.throws(() => validateApplicationOwnedActions(duplicate), isPolicyError);
+  const malformed = structuredClone(applicationOwnedActions);
+  malformed[0].verificationCommands = [];
+  assert.throws(() => validateApplicationOwnedActions(malformed), isPolicyError);
+});
+
 test("0.2.0 to 0.3.0 is dry-run-first, explicit, and idempotent", async () => {
   const root = await fixture();
   try {
@@ -64,6 +183,10 @@ test("0.2.0 to 0.3.0 is dry-run-first, explicit, and idempotent", async () => {
     for (const path of managedInputPaths) before[path] = await readFile(join(root, path), "utf8");
     const dryRun = await upgradeVireoProject({ projectDirectory: root, targetRelease: "0.3.0" });
     assert.equal(dryRun.dryRun, true);
+    assert.deepEqual(dryRun.manualActions, pendingActions());
+    assert.match(formatVireoUpgradeText(dryRun).join("\n"), /\[PENDING\] full-frontend-verification/u);
+    assert.match(formatVireoUpgradeText(dryRun).join("\n"), /Affected paths: frontend\/package\.json/u);
+    assert.match(formatVireoUpgradeText(dryRun).join("\n"), /Verify: corepack npm run setup/u);
     assert.equal(dryRun.checks.find(check => check.id === "application-owned").status, "manual");
     assert.deepEqual(
       dryRun.files.map(file => file.path),
@@ -89,6 +212,11 @@ test("0.2.0 to 0.3.0 is dry-run-first, explicit, and idempotent", async () => {
       acceptApplicationOwned: true,
     });
     assert.equal(applied.dryRun, false);
+    assert.deepEqual(applied.manualActions, pendingActions());
+    assert.match(
+      formatVireoUpgradeText(applied).at(-1),
+      /Managed migration applied; application-owned actions remain pending/u,
+    );
     const rootManifest = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
     assert.equal(rootManifest.scripts.vireo, "npx --yes --package=create-vireo@0.5.0 vireo");
     assert.equal(rootManifest.scripts.test, "node --test");
@@ -120,8 +248,35 @@ test("0.2.0 to 0.3.0 is dry-run-first, explicit, and idempotent", async () => {
       "gradle.properties#starterVersion",
       ".vireo/project.json#templateCommit,lastUpgradedBy,lastUpgrade",
     ]);
+    assert.deepEqual(record.applicationOwnedActions, pendingActions());
     const repeated = await upgradeVireoProject({ projectDirectory: root, targetRelease: "0.3.0" });
     assert.ok(repeated.files.every(file => file.status === "unchanged"));
+    assert.deepEqual(repeated.manualActions, pendingActions());
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("project upgrade preserves admitted 0.2 generated bytes and subsequent checks", async () => {
+  const root = await fixture();
+  try {
+    const generated = await legacyGeneratedFixture(root);
+    assert.deepEqual(await checkGeneratedEntities(root), [{ entity: "PurchaseOrder", ok: true, problems: [] }]);
+    const before = await snapshot(root, generated.paths);
+
+    await upgradeVireoProject({
+      projectDirectory: root,
+      targetRelease: "0.3.0",
+      dryRun: false,
+      acceptApplicationOwned: true,
+    });
+    assertSameSnapshot(before, await snapshot(root, generated.paths));
+    assert.deepEqual(await checkGeneratedEntities(root), [{ entity: "PurchaseOrder", ok: true, problems: [] }]);
+
+    const repeated = await upgradeVireoProject({ projectDirectory: root, targetRelease: "0.3.0" });
+    assert.ok(repeated.files.every(file => file.status === "unchanged"));
+    assertSameSnapshot(before, await snapshot(root, generated.paths));
+    assert.deepEqual(await checkGeneratedEntities(root), [{ entity: "PurchaseOrder", ok: true, problems: [] }]);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

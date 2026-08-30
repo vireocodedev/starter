@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "targetRelease": "0.3.0",
-  "targetTemplateCommit": "26f21c0fe3203f2b91a74fa75b29056ad028b42d",
+  "targetTemplateCommit": "57efdbe95c02082c3e46f0e870d331e5b765b1b2",
   "target": {
     "rootVireoScript": "npx --yes --package=create-vireo@0.5.0 vireo",
     "starterJvmVersion": "0.3.0",
@@ -27,7 +27,57 @@
         "@vireocodedev/query": "^0.2.1",
         "@vireocodedev/shell": "^0.2.1",
         "@vireocodedev/ui": "^0.2.1"
-      }
+      },
+      "applicationOwnedActions": [
+        {
+          "id": "navigation-landmark-and-links",
+          "paths": [
+            "frontend/src/app/shell/layout/AppShellLayout.tsx",
+            "frontend/src/app/ui/localization/resources/app.en.ts",
+            "frontend/src/app/ui/localization/resources/app.hr.ts"
+          ],
+          "requirement": "Update AppShellLayout for the 0.3 navigation contract, add localized navigation.PRIMARY values in en and hr, pass the translated value as the navigationLabel prop, and replace placeholder destinations with real href values while preserving client-side navigation behavior.",
+          "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+        },
+        {
+          "id": "responsive-table-live-announcements",
+          "paths": [
+            "frontend/src/pages/**/AppPage*.tsx",
+            "frontend/src/pages/**/localization/resources/*.en.ts",
+            "frontend/src/pages/**/localization/resources/*.hr.ts"
+          ],
+          "requirement": "Update every AppPageItems use for the 0.3 responsive-table contract and add localized loadingNextPage and loadedNextPage messages in en and hr that announce page-load state without relying on visual table changes.",
+          "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+        },
+        {
+          "id": "accessible-name-contracts",
+          "paths": ["frontend/src/**/*.tsx", "frontend/src/**/*.ts"],
+          "requirement": "Resolve compiler-reported overlay and frame call sites with localized aria-label values or aria-labelledby connections to visible localized text; library default names are not sufficient for dialogs, drawers, frames, and overlays.",
+          "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+        },
+        {
+          "id": "surface-palette-ownership",
+          "paths": [
+            "frontend/src/app/ui/theme/config/theme.types.ts",
+            "frontend/src/app/ui/theme/config/theme.light.ts",
+            "frontend/src/app/ui/theme/config/theme.dark.ts",
+            "frontend/src/app/ui/theme/config/theme.components.ts"
+          ],
+          "requirement": "Remove conflicting application Palette.surface definitions, use the 0.3 appSurface pattern for canvas and overlay surfaces, and review default, elevated, and overlay states in both colour schemes for contrast, separators, focus rings, and scrims.",
+          "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+        },
+        {
+          "id": "full-frontend-verification",
+          "paths": ["frontend/package.json", "frontend/package-lock.json", "scripts/setup.mjs", "scripts/verify.sh"],
+          "requirement": "Refresh the frontend lockfile after the dependency updates, run frontend typecheck and the complete application verification suite, and resolve the pending contract errors before treating the upgrade as complete.",
+          "verificationCommands": [
+            "corepack npm install --package-lock-only --prefix frontend",
+            "corepack npm run setup",
+            "cd frontend && corepack npm run typecheck",
+            "./scripts/verify.sh"
+          ]
+        }
+      ]
     }
   ]
 }

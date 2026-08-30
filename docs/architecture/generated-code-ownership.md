@@ -12,6 +12,14 @@ Vireo generates ordinary application code. It does not retain an invisible runti
 
 The manifest records every emitted path, ownership class, role, and SHA-256 digest. An identical rerun performs zero writes. An unmanaged collision fails with `VIR-GEN-003`; a changed schema fails with `VIR-GEN-004`; and customized managed files fail with `VIR-GEN-005`.
 
+The supported 0.2.0-to-0.3.0 project upgrade admits historical manifests without
+regeneration. `vireo check` fail-closes on the 0.2.0 allowlist by checking the raw
+stable schema digest, persisted canonical wire-contract digest, and every
+contract-critical file hash; other historical generator versions are rejected. This
+keeps already-applied code and migrations byte-stable during the upgrade. A later
+current-generator regeneration is a new reviewed change and must satisfy current
+schema rules, including a constraint-valid example for every patterned field.
+
 ## Safe paths
 
 - `--dry-run` validates and prints every status without writing.

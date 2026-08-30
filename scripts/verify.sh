@@ -192,7 +192,7 @@ printf 'Starter authoritative verification\n'
 printf 'Started:    %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 printf 'Repository: %s\n' "$REPOSITORY_ROOT"
 printf 'Node:       %s\n' "$(node --version)"
-printf 'npm:        %s\n' "$(npm --version)"
+printf 'npm:        %s\n' "$(corepack npm --version)"
 printf 'Output:     %s\n' "$([ "$SILENT" = 'true' ] && printf 'failures only' || printf 'full')"
 printf 'Steps:      %s\n' "$TOTAL_STEPS"
 

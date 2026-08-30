@@ -5,6 +5,8 @@ node --test \
   scripts/changeset-publish-adapter.test.mjs \
   scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
+  scripts/local-vireo-candidate-fixture.test.mjs \
+  scripts/local-vireo-maven-candidate-fixture.test.mjs \
   scripts/package-bin.test.mjs \
   scripts/publish-verified-npm-candidates.test.mjs \
   scripts/release-impact-policy.test.mjs \
@@ -16,8 +18,8 @@ node --test \
 sh -n site/bootstrap-vps.sh
 sh -n site/deploy-vps.sh
 sh -n site/stage-vps-bootstrap.sh
-npm run security:workflow
-npm run test:architecture
+corepack npm run security:workflow
+corepack npm run test:architecture
 turbo run test
-npm run surface
-npm run api:policy
+corepack npm run surface
+corepack npm run api:policy

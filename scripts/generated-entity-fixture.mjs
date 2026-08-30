@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkGeneratedEntities, createVireo, generateEntity } from "../packages/create-vireo/dist/index.js";
+import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-generated-fixture-"));
@@ -32,13 +33,14 @@ try {
   if (checks.length !== 1 || !checks[0].ok)
     throw new Error(`Generated fixture contract check failed: ${JSON.stringify(checks)}`);
 
-  run("corepack", ["npm", "ci"], join(projectRoot, "frontend"));
-  run("corepack", ["npm", "run", "typecheck"], join(projectRoot, "frontend"));
-  run(
-    "corepack",
-    ["npm", "run", "test", "--", "tests/contract/generated/purchaseOrder.wire-contract.test.ts"],
-    join(projectRoot, "frontend"),
-  );
+  await withLocalVireoCandidates(join(projectRoot, "frontend"), () => {
+    run("corepack", ["npm", "run", "typecheck"], join(projectRoot, "frontend"));
+    run(
+      "corepack",
+      ["npm", "run", "test", "--", "tests/contract/generated/purchaseOrder.wire-contract.test.ts"],
+      join(projectRoot, "frontend"),
+    );
+  });
   run("./gradlew", ["test", "--tests", "*PurchaseOrderApiIntegrationTest", "--console=plain"], projectRoot);
   console.log(`Generated ${first.files.length} planned artifacts; frontend and backend fixture verification passed.`);
 } finally {
