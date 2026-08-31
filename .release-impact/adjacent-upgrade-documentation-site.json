@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "release",
+  "bump": "deploy",
+  "summary": "Deploy create-vireo 0.7 coordinates, adjacent-upgrade guidance, and the refreshed release-pinned documentation snapshot."
+}
