@@ -1,7 +1,7 @@
 # Release recovery exercise — 2026-08-27
 
-Status: **source tabletop passed; desired provider controls are checked in; live
-application and backup-owner exercise remain open**
+Status: **source tabletop and authenticated provider application passed except
+environment administrator bypass; backup-owner exercise open**
 
 ## Scenario
 
@@ -51,10 +51,12 @@ sequence without reusing an immutable version.
 
 ## Findings and limitations
 
-- **Ready to apply, not yet live evidence:** the 2026-08-31 checked-in desired
-  state defines no-bypass main/tag rulesets, a narrowed Actions allowlist, and
-  exact environment branch/tag restrictions. An authenticated API export must
-  show those settings before these findings close.
+- **Applied and authenticated:** the 2026-08-31 record proves active no-bypass
+  main/tag rulesets, a narrowed Actions allowlist, exact environment branch/tag
+  restrictions, valid CODEOWNERS, and the re-audited security settings.
+- **Open UI-only provider action:** authenticated environment reads still report
+  administrator bypass enabled. GitHub's documented REST and GraphQL update
+  schemas do not expose this toggle.
 - **Open:** the interim single-owner ruleset cannot require an independent
   CODEOWNERS approval without creating a maintainer lockout.
 - **Open:** only one trusted recovery account is evidenced. This tabletop did not
@@ -67,6 +69,6 @@ sequence without reusing an immutable version.
   [`43426201`](https://github.com/vireocodedev/starter/attestations/43426201) covers
   all 27 Central artifacts.
 
-The runbook is technically actionable, but P1-09 remains partial until live
-provider controls are evidenced and the human backup-owner recovery exercise is
-completed.
+The runbook is technically actionable, but P1-09 remains partial until the four
+administrator-bypass toggles are disabled in GitHub's UI and the human
+backup-owner recovery exercise is completed.

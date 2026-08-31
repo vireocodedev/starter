@@ -112,10 +112,10 @@ replacement for that allowlist.
 
 ## Provider-control desired state and live-evidence boundary
 
-The reviewed, source-owned desired state is recorded in
-[`provider-controls-2026-08-31.md`](provider-controls-2026-08-31.md). An
-administrator must apply it and record a dated authenticated API export before a
-control becomes live evidence. Source validation cannot prove a provider setting.
+The reviewed, source-owned desired state and authenticated application record are
+in [`provider-controls-2026-08-31.md`](provider-controls-2026-08-31.md). Source
+validation cannot prove a provider setting, so live controls remain subject to
+the dated API export recorded there.
 
 The live application must cover:
 
@@ -131,10 +131,12 @@ The live application must cover:
 - give at least two trusted maintainers recoverable access to the organization,
   registries, environments, security inbox, and signing/provenance identities.
 
-The release-PR and npm publication workflows are split. The desired state restricts
-both publication environments and Pages, but the dated live API record is still
-the completion authority. Only one trusted maintainer is currently evidenced, so
-the interim rules cannot honestly require an independent CODEOWNERS approval.
+The release-PR and npm publication workflows are split. The authenticated record
+confirms the rulesets, Actions restrictions, and environment ref restrictions.
+The four environment administrator-bypass toggles remain enabled because GitHub
+offers no documented API update field for them. Only one trusted maintainer is
+currently evidenced, so the interim rules cannot honestly require an independent
+CODEOWNERS approval.
 
 ## Review and release rules
 

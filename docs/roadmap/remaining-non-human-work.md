@@ -47,25 +47,23 @@ broader.
 
 ### `P1-09` / `G-107` — Machine-controlled provider security
 
-Checked-in desired state is available in
+Checked-in desired state and the authenticated 2026-08-31 application record are available in
 [`docs/security/provider-controls-2026-08-31.md`](../security/provider-controls-2026-08-31.md),
-but no item below is complete until an authenticated live-provider export is
-recorded. The single-owner interim policy deliberately does not claim independent
-review.
+The single-owner interim policy deliberately does not claim independent review.
 
-- [ ] Add a `main` branch ruleset or equivalent branch protection to Starter.
-- [ ] Add a `main` branch ruleset or equivalent branch protection to Template.
-- [ ] Require review and successful checks for protected-branch changes.
-- [ ] Require review for release-workflow changes where GitHub controls permit it.
-- [ ] Narrow the organization/repository GitHub Actions allowlist from provider-wide
+- [x] Add a `main` branch ruleset or equivalent branch protection to Starter.
+- [x] Add a `main` branch ruleset or equivalent branch protection to Template.
+- [x] Require pull requests, resolved conversations, and successful checks for protected-branch changes.
+- [x] Put release-workflow changes behind the same PR/check controls; independent approval remains the documented human gap.
+- [x] Narrow the organization/repository GitHub Actions allowlist from provider-wide
       `all` while retaining every required pinned action.
-- [ ] Restrict the `maven-central` environment to intended branches/tags.
-- [ ] Restrict the `github-pages` environment to intended branches/tags.
+- [x] Restrict the `maven-central` environment to intended branches/tags.
+- [x] Restrict the `github-pages` environment to intended branches/tags.
 - [ ] Remove unnecessary administrator bypass from protected release/deployment
-      environments.
-- [ ] Re-audit private vulnerability reporting, secret scanning, push protection,
+      environments in the GitHub UI and retain the authenticated GET export.
+- [x] Re-audit private vulnerability reporting, secret scanning, push protection,
       Dependabot, default workflow permissions, and action-SHA enforcement.
-- [ ] Update the recovery exercise and `G-107` with provider evidence.
+- [x] Update the recovery exercise and `G-107` with provider evidence.
 - [ ] Mark the machine-controlled portion of `P1-09` complete.
 
 The backup-owner recovery exercise is not included here because it requires another

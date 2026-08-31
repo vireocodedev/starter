@@ -1,6 +1,6 @@
 # Provider-control desired state — 2026-08-31
 
-Status: **source-reviewed desired state; not evidence that GitHub has applied it**
+Status: **live machine controls applied and authenticated; environment administrator-bypass UI action open**
 
 The checked-in JSON under [`.github/rulesets`](../../.github/rulesets),
 [`.github/environments`](../../.github/environments), and
@@ -41,7 +41,32 @@ publication environments. These are availability safeguards for a single-owner
 repository, not evidence of independent review. A second trusted maintainer,
 independent review, and a backup-owner recovery exercise remain open.
 
-Before updating this file to a live-evidence record, capture the ruleset IDs and
-full settings/environment API responses, confirm their branch/tag policies, and
-record the authenticated actor and timestamp. Never mark `P1-09` or `G-107`
-complete from this desired-state file alone.
+## Authenticated live evidence
+
+GitHub user `@brunotot` applied and re-read the controls at
+`2026-08-31T21:05:49Z`:
+
+- Starter ruleset `21958171` actively protects `main` with no bypass actor,
+  PR-only updates, resolved conversations, deletion/force-push prevention, and
+  all 12 required checks bound to GitHub Actions app `15368` or Advanced
+  Security app `57789` as appropriate.
+- Starter ruleset `21958125` actively prevents update or deletion of every tag,
+  with no bypass actor. Template rulesets `21958166`, `21958135`, and `21926710`
+  protect `main`, `starter-template@0.7.0`, and `starter-template@0.6.0`.
+- both repositories report selected Actions, SHA pinning, the exact checked-in
+  external-action patterns, read-only default workflow permissions, and
+  `can_approve_pull_request_reviews: false`;
+- `package-release`, `maven-central`, and `github-pages` admit only branch
+  `main`; `template-release` admits only branch `main` and tag pattern
+  `starter-template@*`; publication environments retain the documented sole
+  interim reviewer; and
+- both CODEOWNERS error endpoints return an empty error list. Private
+  vulnerability reporting, Dependabot security updates, secret scanning,
+  non-provider patterns, push protection, and validity checks remain enabled in
+  both repositories.
+
+The authenticated environment reads still report `can_admins_bypass: true` for
+all four environments. GitHub exposes this value for reading but not through the
+documented REST or GraphQL update schemas, so disabling it in the GitHub UI and
+capturing a new GET export is the remaining machine-provider action. Independent
+approval and backup-owner recovery remain separate human gaps.
