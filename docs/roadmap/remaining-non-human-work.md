@@ -59,12 +59,12 @@ The single-owner interim policy deliberately does not claim independent review.
       `all` while retaining every required pinned action.
 - [x] Restrict the `maven-central` environment to intended branches/tags.
 - [x] Restrict the `github-pages` environment to intended branches/tags.
-- [ ] Remove unnecessary administrator bypass from protected release/deployment
+- [x] Remove unnecessary administrator bypass from protected release/deployment
       environments in the GitHub UI and retain the authenticated GET export.
 - [x] Re-audit private vulnerability reporting, secret scanning, push protection,
       Dependabot, default workflow permissions, and action-SHA enforcement.
 - [x] Update the recovery exercise and `G-107` with provider evidence.
-- [ ] Mark the machine-controlled portion of `P1-09` complete.
+- [x] Mark the machine-controlled portion of `P1-09` complete.
 
 The backup-owner recovery exercise is not included here because it requires another
 trusted person, even though it is an operational exercise rather than product-user

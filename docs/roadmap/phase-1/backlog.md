@@ -73,9 +73,10 @@ range, not an elapsed-date commitment.
   to populated npm/JVM CycloneDX SBOMs and verify their signer identity. A dated
   recovery tabletop records the provider evidence boundary and backup-owner gap.
   Authenticated 2026-08-31 evidence confirms the live main/tag rulesets, narrowed
-  Actions policy, workflow-token defaults, valid CODEOWNERS, and environment
-  branch/tag restrictions. Four UI-only environment administrator-bypass toggles
-  remain before the machine-controlled portion can close.
+  Actions policy, workflow-token defaults, valid CODEOWNERS, environment
+  branch/tag restrictions, and disabled administrator bypass for all four
+  protected environments. The machine-controlled portion is complete;
+  independent review and backup-owner recovery remain human gaps.
 - **P1-10: complete.** Both authoritative public-contract gates bind documented
   setup, verification, Storybook, and deployment commands to the hosted workflow
   steps that execute them. Clean Starter and Template verification now recurs on a

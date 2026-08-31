@@ -1,6 +1,6 @@
 # Provider-control desired state — 2026-08-31
 
-Status: **live machine controls applied and authenticated; environment administrator-bypass UI action open**
+Status: **live machine controls applied and authenticated; human continuity gaps remain**
 
 The checked-in JSON under [`.github/rulesets`](../../.github/rulesets),
 [`.github/environments`](../../.github/environments), and
@@ -65,8 +65,9 @@ GitHub user `@brunotot` applied and re-read the controls at
   non-provider patterns, push protection, and validity checks remain enabled in
   both repositories.
 
-The authenticated environment reads still report `can_admins_bypass: true` for
-all four environments. GitHub exposes this value for reading but not through the
-documented REST or GraphQL update schemas, so disabling it in the GitHub UI and
-capturing a new GET export is the remaining machine-provider action. Independent
-approval and backup-owner recovery remain separate human gaps.
+After the maintainer disabled administrator bypass in the GitHub UI, authenticated
+environment reads at `2026-08-31T21:32:11Z` report
+`can_admins_bypass: false` for `package-release`, `maven-central`,
+`github-pages`, and Template's `template-release`. This closes the
+machine-controlled provider-security portion of P1-09. Independent approval and
+backup-owner recovery remain separate human gaps.
