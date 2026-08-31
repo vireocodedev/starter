@@ -112,6 +112,12 @@ export function validateReleaseLifecycle(
       }
     }
     if (!line.maintenanceScope) problems.push(`support line ${line.id} requires maintenanceScope`);
+    if (!["latest-release-only", "not-applicable"].includes(line.fixMaintenance)) {
+      problems.push(`support line ${line.id} must distinguish latest-only fix maintenance`);
+    }
+    if (!["prior-current-release", "not-applicable"].includes(line.upgradeSourceWindow)) {
+      problems.push(`support line ${line.id} must declare its adjacent upgrade-source window`);
+    }
   }
   if (!lines.some(line => line.status === "active" && line.release === ecosystem.current?.id)) {
     problems.push("the current ecosystem release requires one active support line");

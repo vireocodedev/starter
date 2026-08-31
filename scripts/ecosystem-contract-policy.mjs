@@ -58,6 +58,79 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
   for (const [name, path] of Object.entries(contract.policySources ?? {})) {
     if (!existsSync(join(repositoryRoot, path))) problems.push(`policySources.${name} references missing ${path}`);
   }
+  const projectUpgradesPath = contract.policySources?.projectUpgrades;
+  if (projectUpgradesPath && existsSync(join(repositoryRoot, projectUpgradesPath))) {
+    const upgradeContract = readJson(projectUpgradesPath);
+    const packedPath = upgradeContract.packedPolicy;
+    if (!packedPath || !existsSync(join(repositoryRoot, packedPath))) {
+      problems.push("project upgrade contract must reference the packed create-vireo upgrade policy");
+    } else {
+      const packed = readJson(packedPath);
+      const graph = packed.releaseGraph;
+      if (upgradeContract.contractId !== "vireo-project-upgrade-graph" || upgradeContract.schemaVersion !== 1) {
+        problems.push("project upgrade contract has an unsupported identity");
+      }
+      if (
+        graph?.publicRelease !== upgradeContract.publicRelease ||
+        graph?.candidateRelease !== upgradeContract.candidateRelease ||
+        graph?.previousRelease !== upgradeContract.previousRelease
+      ) {
+        problems.push("project upgrade contract public/candidate/prior coordinates must match the packed policy");
+      }
+      const edges = new Set((graph?.edges ?? []).map(edge => `${edge.from}->${edge.to}`));
+      for (const edge of upgradeContract.requiredEdges ?? []) {
+        if (!edges.has(`${edge.from}->${edge.to}`))
+          problems.push(`packed upgrade policy is missing required edge ${edge.from}->${edge.to}`);
+      }
+      const nodes = new Map((graph?.releases ?? []).map(node => [node.release, node]));
+      for (const [release, coordinate] of Object.entries(upgradeContract.releaseCoordinates ?? {})) {
+        const node = nodes.get(release);
+        if (
+          !node ||
+          node.templateCommit !== coordinate.templateCommit ||
+          node.status !== coordinate.status ||
+          coordinate.createVireo !== release ||
+          coordinate.templateVersion !== release
+        ) {
+          problems.push(`packed upgrade policy does not match coordinate ${release}`);
+        }
+      }
+      if (
+        !edges.has(
+          `${upgradeContract.previousRelease}->${upgradeContract.candidateRelease ?? upgradeContract.publicRelease}`,
+        )
+      ) {
+        problems.push("packed upgrade policy must retain the prior-current adjacent edge");
+      }
+      const publicNode = nodes.get(upgradeContract.publicRelease);
+      const targetRelease = upgradeContract.candidateRelease ?? upgradeContract.publicRelease;
+      const targetNode = nodes.get(targetRelease);
+      if (
+        publicNode?.status !== "current" ||
+        (upgradeContract.candidateRelease && targetNode?.status !== "candidate")
+      ) {
+        problems.push("upgrade graph must distinguish the public current release from an unpublished candidate");
+      }
+      if (upgradeContract.publicationState === "candidate") {
+        if (
+          upgradeContract.finalization?.targetTemplateCommit !== "TEMPLATE_COMMIT_PENDING_RELEASE" ||
+          targetNode?.templateCommit !== "TEMPLATE_COMMIT_PENDING_RELEASE"
+        ) {
+          problems.push("candidate upgrade release must use the explicit Template finalization sentinel");
+        }
+      } else if (
+        upgradeContract.publicationState !== "final" ||
+        upgradeContract.candidateRelease !== undefined ||
+        targetNode !== publicNode ||
+        !/^[a-f0-9]{40}$/u.test(targetNode?.templateCommit ?? "") ||
+        targetNode?.templateCommit === nodes.get(upgradeContract.previousRelease)?.templateCommit
+      ) {
+        problems.push(
+          "published upgrade release requires a final terminal current node with a distinct immutable Template commit",
+        );
+      }
+    }
+  }
 
   const publicWorkspacePackages = readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
     .filter(entry => entry.isDirectory() && existsSync(join(repositoryRoot, "packages", entry.name, "package.json")))

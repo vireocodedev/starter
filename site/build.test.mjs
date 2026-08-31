@@ -130,7 +130,7 @@ test("pins offline documentation and refuses silent Vireo 0.3 snapshot drift", (
   const offline = pages.find(page => page.path === "/docs/offline/");
   assert.equal(
     offline?.sourceUrl,
-    "https://github.com/vireocodedev/starter-template/blob/5b123e60bd1ce733ae70711796552a17aaa60fe3/docs/offline.md",
+    "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/offline.md",
   );
   assert.match(offline?.sourceLabel ?? "", /Pinned Starter Template offline contract/u);
   assert.match(
@@ -400,7 +400,7 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     assert.match(visualLanguage, /VISUAL_LANGUAGE\.md/u);
     assert.match(
       visualLanguage,
-      /href="https:\/\/github\.com\/vireocodedev\/starter-template\/blob\/5b123e60bd1ce733ae70711796552a17aaa60fe3\/frontend\/docs\/VISUAL_LANGUAGE\.md"/u,
+      /href="https:\/\/github\.com\/vireocodedev\/starter-template\/blob\/a670d7f95f720a91705c7c156d19e605582fb4c8\/frontend\/docs\/VISUAL_LANGUAGE\.md"/u,
     );
     assert.match(sitemap, /https:\/\/vireocode\.com\/docs\/design-system\/loading-states\//u);
     assert.match(snapshot, /Vireo 0.3 snapshot/u);

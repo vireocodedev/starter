@@ -1,5 +1,11 @@
 # @vireocodedev/ui
 
+## 0.3.1
+
+### Patch Changes
+
+- c57f130: Fix accessible loading indicators, landmark semantics, and focus behavior across public UI components and executable Storybook examples.
+
 ## 0.3.0
 
 ### Major Changes

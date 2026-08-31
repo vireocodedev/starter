@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -376,6 +376,24 @@ test("generation is idempotent, detects wire drift, refuses customization, and e
   assert.match(await readFile(model, "utf8"), /@vireo-ejected/u);
   await stat(model);
   assert.deepEqual(await checkGeneratedEntities(root), []);
+});
+
+test("ejection refuses a symlinked managed manifest without writing outside the project", async () => {
+  const { root, schemaPath } = await projectFixture();
+  const outsideRoot = await mkdtemp(join(tmpdir(), "vireo-entity-outside-"));
+  const outsideManifest = join(outsideRoot, "api-clients.json");
+  try {
+    await generateEntity({ projectDirectory: root, schemaPath });
+    await writeFile(outsideManifest, "outside bytes\n");
+    const managedManifest = join(root, ".vireo/generated/api-clients.json");
+    await rm(managedManifest);
+    await symlink(outsideManifest, managedManifest);
+    await assert.rejects(ejectEntity(root, "api-clients"), /symbolic link/u);
+    assert.equal(await readFile(outsideManifest, "utf8"), "outside bytes\n");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+    await rm(outsideRoot, { recursive: true, force: true });
+  }
 });
 
 test("unmanaged collisions require both force and explicit overwrite acceptance", async () => {

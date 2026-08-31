@@ -13,12 +13,14 @@
     {
       "id": "0.3-alpha",
       "status": "active",
-      "release": "npm-0.6.0_jvm-0.3.0",
+      "release": "npm-0.7.0_jvm-0.3.0",
       "introducedOn": "2026-08-26",
       "statusEffectiveOn": "2026-08-30",
       "deprecatedOn": null,
       "eolOn": null,
       "maintenanceScope": "security-and-critical-correctness",
+      "fixMaintenance": "latest-release-only",
+      "upgradeSourceWindow": "prior-current-release",
       "replacement": "none",
       "compatibilityPolicy": "docs/COMPATIBILITY.md",
       "withdrawalGuide": "docs/RELEASE_LIFECYCLE.md"

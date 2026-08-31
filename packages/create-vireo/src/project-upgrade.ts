@@ -1,32 +1,42 @@
-import { randomBytes } from "node:crypto";
-import { readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { createHash, randomBytes } from "node:crypto";
+import { lstat, mkdir, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { format, resolveConfig } from "prettier";
 import { checkGeneratedEntities } from "./entity-generator.js";
 
 type DependencyMap = Record<string, string>;
-type ReleaseRequirements = {
-  rootVireoScript: string;
-  starterJvmVersion: string;
-  frontendDependencies: DependencyMap;
-};
+type ReleaseRequirements = { rootVireoScript: string; starterJvmVersion: string; frontendDependencies: DependencyMap };
 type ApplicationOwnedActionPolicy = {
   id: string;
   paths: string[];
   requirement: string;
   verificationCommands: string[];
 };
-type SourceRelease = ReleaseRequirements & {
+type ReleaseNode = ReleaseRequirements & {
   release: string;
   templateCommit: string;
-  applicationOwnedActions: ApplicationOwnedActionPolicy[];
+  status: "historical" | "current" | "candidate";
 };
+type UpgradeEdge = { from: string; to: string; applicationOwnedActions: ApplicationOwnedActionPolicy[] };
 type UpgradePolicy = {
-  schemaVersion: number;
-  targetRelease: string;
-  targetTemplateCommit: string;
-  target: ReleaseRequirements;
-  supportedSources: SourceRelease[];
+  schemaVersion: 2;
+  releaseGraph: {
+    publicRelease: string;
+    candidateRelease?: string;
+    previousRelease: string;
+    releases: ReleaseNode[];
+    edges: UpgradeEdge[];
+    baselines?: Record<string, Record<"full-stack" | "frontend", EdgeBaseline[]>>;
+  };
+};
+type EdgeBaseline = {
+  path: string;
+  operation: "add" | "update" | "delete";
+  sourceSha256?: string;
+  sourceContent?: string;
+  targetSha256?: string;
+  targetContent?: string;
 };
 type ProjectMetadata = Record<string, unknown> & {
   templateCommit?: unknown;
@@ -38,9 +48,8 @@ type PackageManifest = Record<string, unknown> & {
   scripts?: Record<string, unknown>;
   dependencies?: Record<string, unknown>;
 };
-type PackageLock = Record<string, unknown> & {
-  packages?: Record<string, { dependencies?: Record<string, unknown> }>;
-};
+type PackageLock = Record<string, unknown> & { packages?: Record<string, { dependencies?: Record<string, unknown> }> };
+type ManagedManifest = { schemaVersion: 1; templateCommit: string; files: Array<{ path: string; sha256: string }> };
 
 export type VireoUpgradeOptions = {
   projectDirectory: string;
@@ -53,10 +62,7 @@ export type VireoUpgradeCheck = {
   status: "pass" | "manual";
   detail: string;
 };
-export type VireoUpgradeFile = {
-  path: string;
-  status: "create" | "update" | "unchanged";
-};
+export type VireoUpgradeFile = { path: string; status: "create" | "update" | "delete" | "unchanged" };
 export type VireoUpgradeManualAction = ApplicationOwnedActionPolicy & { status: "pending" };
 export type VireoUpgradeResult = {
   sourceRelease: string;
@@ -66,6 +72,21 @@ export type VireoUpgradeResult = {
   checks: VireoUpgradeCheck[];
   files: VireoUpgradeFile[];
   manualActions: VireoUpgradeManualAction[];
+};
+export type VireoProjectStatus = {
+  recordedRelease: string | null;
+  templateCommit: string | null;
+  currentRelease: string;
+  targetRelease: string | null;
+  targetTemplateCommit: string | null;
+  nextHop: string | null;
+  interruptedUpgrade: boolean;
+  managedFiles: Array<{
+    path: string;
+    state: "clean" | "customized" | "missing" | "add" | "update" | "delete" | "unchanged" | "conflict" | "untracked";
+  }>;
+  applicationOwnedActions: VireoUpgradeManualAction[];
+  capabilities: Array<{ name: string; state: "managed" | "ejected" }>;
 };
 
 export class VireoUpgradeError extends Error {
@@ -92,7 +113,24 @@ export function formatVireoUpgradeText(result: VireoUpgradeResult) {
     ]),
     result.dryRun
       ? "No files were written; application-owned actions remain pending."
-      : "Managed migration applied; application-owned actions remain pending before this upgrade is complete.",
+      : "Managed migration applied; refresh the lockfile before verification.",
+  ];
+}
+export function formatVireoStatusText(result: VireoProjectStatus) {
+  return [
+    `Recorded create-vireo: ${result.recordedRelease ?? "unknown"}; Template: ${result.templateCommit ?? "unknown"}.`,
+    `Current public release: ${result.currentRelease}; target: ${result.targetRelease ?? "none"} (${result.targetTemplateCommit ?? "none"}); next hop: ${result.nextHop ?? "none"}.`,
+    ...(result.interruptedUpgrade
+      ? [
+          "PENDING    An interrupted upgrade journal is present; run vireo upgrade --apply to recover it before any preview or apply.",
+        ]
+      : []),
+    ...result.managedFiles.map(file => `${file.state.toUpperCase().padEnd(10)} ${file.path}`),
+    ...result.capabilities.map(
+      capability => `${capability.state.toUpperCase().padEnd(10)} generated capability ${capability.name}`,
+    ),
+    ...result.applicationOwnedActions.map(action => `PENDING    ${action.id}: ${action.requirement}`),
+    "Status is read-only; use the target CLI's upgrade --dry-run before applying an edge.",
   ];
 }
 
@@ -100,18 +138,10 @@ const policyUrl = new URL("../schema/vireo-upgrade-policy.json", import.meta.url
 const managedSurfaces = [
   "package.json#scripts.vireo",
   "frontend/package.json#dependencies",
-  'frontend/package-lock.json#packages[""].dependencies',
   "gradle.properties#starterVersion",
   ".vireo/project.json#templateCommit,lastUpgradedBy,lastUpgrade",
+  ".vireo/managed-files.json",
 ] as const;
-const expectedApplicationOwnedActionIds = [
-  "navigation-landmark-and-links",
-  "responsive-table-live-announcements",
-  "accessible-name-contracts",
-  "surface-palette-ownership",
-  "full-frontend-verification",
-] as const;
-
 async function readJson<T>(path: string): Promise<T> {
   try {
     return JSON.parse(await readFile(path, "utf8")) as T;
@@ -122,69 +152,164 @@ async function readJson<T>(path: string): Promise<T> {
     );
   }
 }
-
-async function readPolicy(): Promise<UpgradePolicy> {
-  const policy = await readJson<UpgradePolicy>(fileURLToPath(policyUrl));
-  if (policy.schemaVersion !== 1) throw new VireoUpgradeError("VIR-UPG-001", "Unsupported upgrade-policy schema.");
-  for (const source of policy.supportedSources) validateApplicationOwnedActions(source.applicationOwnedActions);
-  return policy;
-}
-
-export function validateApplicationOwnedActions(actions: unknown): asserts actions is ApplicationOwnedActionPolicy[] {
-  if (!Array.isArray(actions) || actions.length !== expectedApplicationOwnedActionIds.length)
-    throw new VireoUpgradeError(
-      "VIR-UPG-001",
-      "Upgrade policy must declare every application-owned action exactly once.",
-    );
-  const seen = new Set<string>();
-  for (const action of actions) {
-    if (!action || typeof action !== "object")
-      throw new VireoUpgradeError("VIR-UPG-001", "Upgrade policy application-owned actions must be objects.");
-    const value = action as Partial<ApplicationOwnedActionPolicy>;
-    if (
-      typeof value.id !== "string" ||
-      !expectedApplicationOwnedActionIds.includes(value.id as never) ||
-      seen.has(value.id)
-    )
-      throw new VireoUpgradeError(
-        "VIR-UPG-001",
-        "Upgrade policy application-owned action IDs must be unique and supported.",
-      );
-    seen.add(value.id);
-    if (
-      !Array.isArray(value.paths) ||
-      value.paths.length === 0 ||
-      value.paths.some(path => typeof path !== "string" || path.trim() === "") ||
-      typeof value.requirement !== "string" ||
-      value.requirement.trim() === "" ||
-      !Array.isArray(value.verificationCommands) ||
-      value.verificationCommands.length === 0 ||
-      value.verificationCommands.some(command => typeof command !== "string" || command.trim() === "")
-    )
-      throw new VireoUpgradeError(
-        "VIR-UPG-001",
-        "Upgrade policy application-owned action details must be non-empty strings.",
-      );
-  }
-  for (const id of expectedApplicationOwnedActionIds) {
-    if (!seen.has(id))
-      throw new VireoUpgradeError("VIR-UPG-001", `Upgrade policy is missing application-owned action ${id}.`);
+async function optionalJson<T>(path: string): Promise<T | undefined> {
+  try {
+    return JSON.parse(await readFile(path, "utf8")) as T;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
   }
 }
-
+async function optionalText(path: string) {
+  try {
+    return await readFile(path, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+async function pathExists(path: string) {
+  try {
+    await stat(path);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+    throw error;
+  }
+}
+function sha256(value: string | Uint8Array) {
+  return createHash("sha256").update(value).digest("hex");
+}
 function releaseFrom(value: unknown) {
-  const match = typeof value === "string" ? /^create-vireo@(\d+\.\d+\.\d+)$/u.exec(value) : undefined;
-  return match?.[1];
+  return typeof value === "string" ? /^create-vireo@(\d+\.\d+\.\d+)$/u.exec(value)?.[1] : undefined;
 }
-
 function assertEqual(actual: unknown, expected: unknown, surface: string, code = "VIR-UPG-003") {
   if (actual !== expected)
     throw new VireoUpgradeError(
       code,
-      `${surface} is ${JSON.stringify(actual)}; the supported source requires ${JSON.stringify(expected)}. Resolve or document this application-owned difference before upgrading.`,
+      `${surface} is ${JSON.stringify(actual)}; expected ${JSON.stringify(expected)}. Resolve this managed-file customization before upgrading.`,
     );
 }
 
+export function validateApplicationOwnedActions(actions: unknown): asserts actions is ApplicationOwnedActionPolicy[] {
+  validateEdgeActions(actions);
+  const expected = [
+    "navigation-landmark-and-links",
+    "responsive-table-live-announcements",
+    "accessible-name-contracts",
+    "surface-palette-ownership",
+    "full-frontend-verification",
+  ];
+  if (actions.length !== expected.length || expected.some(id => !actions.some(action => action.id === id)))
+    throw new VireoUpgradeError("VIR-UPG-001", "Historical 0.2.0-to-0.3.0 actions must remain complete.");
+}
+function validateEdgeActions(actions: unknown): asserts actions is ApplicationOwnedActionPolicy[] {
+  if (!Array.isArray(actions))
+    throw new VireoUpgradeError("VIR-UPG-001", "Upgrade edge application-owned actions must be an array.");
+  const seen = new Set<string>();
+  for (const action of actions) {
+    const value = action as Partial<ApplicationOwnedActionPolicy>;
+    if (
+      !value ||
+      typeof value.id !== "string" ||
+      !value.id.trim() ||
+      seen.has(value.id) ||
+      !Array.isArray(value.paths) ||
+      value.paths.length === 0 ||
+      value.paths.some(path => typeof path !== "string" || !path.trim()) ||
+      typeof value.requirement !== "string" ||
+      !value.requirement.trim() ||
+      !Array.isArray(value.verificationCommands) ||
+      value.verificationCommands.length === 0 ||
+      value.verificationCommands.some(command => typeof command !== "string" || !command.trim())
+    )
+      throw new VireoUpgradeError("VIR-UPG-001", "Upgrade edge application-owned actions must be unique and complete.");
+    seen.add(value.id);
+  }
+}
+async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
+  const policy = (override ?? (await readJson<UpgradePolicy>(fileURLToPath(policyUrl)))) as UpgradePolicy;
+  if (policy.schemaVersion !== 2) throw new VireoUpgradeError("VIR-UPG-001", "Unsupported upgrade-policy schema.");
+  const graph = policy.releaseGraph;
+  if (!graph || !Array.isArray(graph.releases) || !Array.isArray(graph.edges))
+    throw new VireoUpgradeError("VIR-UPG-001", "Upgrade policy requires a release graph.");
+  const releases = new Map(graph.releases.map(release => [release.release, release]));
+  if (releases.size !== graph.releases.length)
+    throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph release nodes must be unique.");
+  if (
+    graph.releases.filter(release => release.status === "current").length !== 1 ||
+    graph.releases.filter(release => release.status === "candidate").length > 1
+  )
+    throw new VireoUpgradeError(
+      "VIR-UPG-001",
+      "Upgrade graph must have one public current node and at most one candidate.",
+    );
+  if (
+    !releases.has(graph.publicRelease) ||
+    !releases.has(graph.previousRelease) ||
+    releases.get(graph.publicRelease)?.status !== "current"
+  )
+    throw new VireoUpgradeError(
+      "VIR-UPG-001",
+      "Upgrade graph public and previous releases must be declared, with a current public node.",
+    );
+  const targetRelease = graph.candidateRelease ?? graph.publicRelease;
+  if (!releases.has(targetRelease) || (graph.candidateRelease && releases.get(targetRelease)?.status !== "candidate"))
+    throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph candidate must be a declared candidate node.");
+  if (!graph.edges.some(edge => edge.from === graph.previousRelease && edge.to === targetRelease))
+    throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph must retain the prior-current edge.");
+  const edges = new Set<string>();
+  for (const edge of graph.edges) {
+    if (
+      !releases.has(edge.from) ||
+      !releases.has(edge.to) ||
+      edge.from === edge.to ||
+      edges.has(`${edge.from}->${edge.to}`)
+    )
+      throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph edges must be unique edges between declared releases.");
+    validateEdgeActions(edge.applicationOwnedActions);
+    edges.add(`${edge.from}->${edge.to}`);
+  }
+  for (const release of graph.releases) {
+    const outgoing = graph.edges.filter(edge => edge.from === release.release);
+    if (outgoing.length > 1)
+      throw new VireoUpgradeError("VIR-UPG-001", `Upgrade graph branches at ${release.release}.`);
+    if (release.status === "historical" && outgoing.length > 1)
+      throw new VireoUpgradeError("VIR-UPG-001", `Historical release ${release.release} must not branch.`);
+  }
+  if (graph.candidateRelease === undefined) {
+    const current = releases.get(graph.publicRelease)!;
+    if (graph.edges.some(edge => edge.from === current.release))
+      throw new VireoUpgradeError("VIR-UPG-001", "The final current release must be terminal.");
+  }
+  return policy;
+}
+function requirementsMatch(
+  manifest: PackageManifest,
+  frontend: PackageManifest,
+  gradle: string | undefined,
+  lock: PackageLock,
+  expected: ReleaseRequirements,
+  checkLock: boolean,
+) {
+  assertEqual(manifest.scripts?.vireo, expected.rootVireoScript, "package.json scripts.vireo");
+  if (gradle !== undefined)
+    assertEqual(
+      /^starterVersion=(.+)$/mu.exec(gradle)?.[1],
+      expected.starterJvmVersion,
+      "gradle.properties starterVersion",
+    );
+  for (const [name, version] of Object.entries(expected.frontendDependencies)) {
+    assertEqual(frontend.dependencies?.[name], version, `frontend dependency ${name}`);
+    if (checkLock)
+      assertEqual(
+        lock.packages?.[""]?.dependencies?.[name],
+        version,
+        `frontend lockfile declaration ${name}`,
+        "VIR-UPG-004",
+      );
+  }
+}
 async function migrationVersions(projectDirectory: string) {
   const directory = join(projectDirectory, "src/main/resources/db/migration");
   let entries;
@@ -201,225 +326,517 @@ async function migrationVersions(projectDirectory: string) {
     if (!match)
       throw new VireoUpgradeError("VIR-UPG-005", `Versioned migration has an unsupported filename: ${entry.name}`);
     const version = match[1].replaceAll("_", ".");
-    const duplicate = versions.get(version);
-    if (duplicate)
-      throw new VireoUpgradeError(
-        "VIR-UPG-005",
-        `Duplicate Flyway version ${version}: ${duplicate} and ${entry.name}.`,
-      );
+    if (versions.has(version)) throw new VireoUpgradeError("VIR-UPG-005", `Duplicate Flyway version ${version}.`);
     versions.set(version, entry.name);
   }
   return [...versions.values()].sort();
 }
-
-async function writeAtomically(changes: Array<{ path: string; contents: string; previous?: string }>) {
+async function recoverInterruptedUpgrade(projectDirectory: string) {
+  const journalPath = join(projectDirectory, ".vireo", "upgrade-journal.json");
+  const journal = await optionalJson<{
+    schemaVersion?: unknown;
+    changes?: Array<{ path?: unknown; previousBase64?: unknown }>;
+  }>(journalPath);
+  if (!journal) return;
+  if (journal.schemaVersion !== 1 || !Array.isArray(journal.changes))
+    throw new VireoUpgradeError(
+      "VIR-UPG-009",
+      "Upgrade journal is invalid; restore it from version control before retrying.",
+    );
+  for (const change of [...journal.changes].reverse()) {
+    if (typeof change.path !== "string")
+      throw new VireoUpgradeError("VIR-UPG-009", "Upgrade journal has an invalid path.");
+    assertBaselinePath(change.path);
+    await safeFileState(projectDirectory, change.path);
+    const path = join(projectDirectory, change.path);
+    if (change.previousBase64 === null) await rm(path, { force: true });
+    else if (typeof change.previousBase64 === "string")
+      await writeFile(path, Buffer.from(change.previousBase64, "base64"));
+    else throw new VireoUpgradeError("VIR-UPG-009", "Upgrade journal has invalid backup bytes.");
+  }
+  await rm(journalPath, { force: true });
+}
+async function writeAtomically(
+  projectDirectory: string,
+  changes: Array<{ path: string; contents: string | null; previous?: string }>,
+) {
   const suffix = randomBytes(6).toString("hex");
   const staged = changes.map(change => ({ ...change, temporary: `${change.path}.vireo-${suffix}.tmp` }));
+  const journalPath = join(projectDirectory, ".vireo", "upgrade-journal.json");
+  const journal = {
+    schemaVersion: 1,
+    changes: staged.map(change => ({
+      path: change.path.slice(projectDirectory.length + 1),
+      previousBase64: change.previous === undefined ? null : Buffer.from(change.previous).toString("base64"),
+    })),
+  };
+  await writeFile(journalPath, `${JSON.stringify(journal)}\n`);
   try {
-    for (const change of staged) await writeFile(change.temporary, change.contents);
-    for (const change of staged) await rename(change.temporary, change.path);
-  } catch (error) {
     for (const change of staged) {
-      await rm(change.temporary, { force: true });
-      if (change.previous === undefined) await rm(change.path, { force: true });
-      else await writeFile(change.path, change.previous);
+      if (change.contents !== null) {
+        await mkdir(dirname(change.path), { recursive: true });
+        await writeFile(change.temporary, change.contents);
+      }
     }
+    for (const change of staged) {
+      if (change.contents === null) await rm(change.path, { force: true });
+      else await rename(change.temporary, change.path);
+    }
+    await rm(journalPath, { force: true });
+  } catch (error) {
+    for (const change of staged) await rm(change.temporary, { force: true });
     throw error;
   }
 }
+async function managedManifest(
+  projectDirectory: string,
+  templateCommit: string,
+  frontendOnly = false,
+): Promise<ManagedManifest> {
+  const files = frontendOnly ? ["package.json"] : ["package.json", "frontend/package.json", "gradle.properties"];
+  return {
+    schemaVersion: 1,
+    templateCommit,
+    files: await Promise.all(
+      files.map(async path => ({ path, sha256: sha256(await readFile(join(projectDirectory, path))) })),
+    ),
+  };
+}
+async function ejectedCapabilities(projectDirectory: string) {
+  const value = await optionalJson<{ capabilities?: unknown }>(
+    join(projectDirectory, ".vireo/ejected-capabilities.json"),
+  );
+  return Array.isArray(value?.capabilities)
+    ? value.capabilities.filter((item): item is string => typeof item === "string")
+    : [];
+}
+async function legacyEjectedCapabilities(root: string, directory = root): Promise<string[]> {
+  const found: string[] = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if ([".git", "node_modules", ".vireo"].includes(entry.name)) continue;
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) found.push(...(await legacyEjectedCapabilities(root, path)));
+    else if (entry.isFile()) {
+      try {
+        if ((await readFile(path, "utf8")).includes("@vireo-ejected"))
+          found.push(`legacy:${path.slice(root.length + 1).replaceAll("\\", "/")}`);
+      } catch {
+        /* binary application-owned files are not evidence */
+      }
+    }
+  }
+  return found;
+}
+function assertBaselinePath(path: string) {
+  if (
+    !/^(?:\.vireo\/)?[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/u.test(path) ||
+    path.includes("\\") ||
+    path.split("/").some(segment => segment === "" || segment === "." || segment === "..")
+  ) {
+    throw new VireoUpgradeError("VIR-UPG-001", `Unsafe managed baseline path: ${path}`);
+  }
+}
+function validateManagedManifest(value: ManagedManifest | undefined): asserts value is ManagedManifest | undefined {
+  if (!value) return;
+  if (value.schemaVersion !== 1 || !/^[a-f0-9]{40}$/u.test(value.templateCommit) || !Array.isArray(value.files))
+    throw new VireoUpgradeError("VIR-UPG-001", "Managed-file provenance has an invalid schema.");
+  const paths = new Set<string>();
+  for (const file of value.files) {
+    assertBaselinePath(file.path);
+    if (paths.has(file.path) || !/^[a-f0-9]{64}$/u.test(file.sha256))
+      throw new VireoUpgradeError("VIR-UPG-001", "Managed-file provenance contains duplicate paths or invalid hashes.");
+    paths.add(file.path);
+  }
+}
+async function safeFileState(root: string, path: string) {
+  assertBaselinePath(path);
+  const target = resolve(root, path);
+  const inside = relative(root, target);
+  if (inside === "" || inside === ".." || inside.startsWith(`..${sep}`) || !target.startsWith(resolve(root) + sep)) {
+    throw new VireoUpgradeError("VIR-UPG-003", `Managed path escapes the project: ${path}`);
+  }
+  const realRoot = await realpath(resolve(root));
+  let cursor = resolve(root);
+  for (const segment of path.split("/")) {
+    cursor = join(cursor, segment);
+    try {
+      if ((await lstat(cursor)).isSymbolicLink())
+        throw new VireoUpgradeError("VIR-UPG-003", `Managed path contains a symbolic link: ${path}`);
+      const resolvedCursor = await realpath(cursor);
+      if (resolvedCursor !== realRoot && !resolvedCursor.startsWith(`${realRoot}${sep}`)) {
+        throw new VireoUpgradeError("VIR-UPG-003", `Managed path resolves outside the project: ${path}`);
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+      throw error;
+    }
+  }
+  return true;
+}
+function edgeBaselines(policy: UpgradePolicy, from: string | null, to: string | undefined, profile: unknown) {
+  if (!from || !to) return [];
+  const selectedProfile = profile === "frontend" ? "frontend" : "full-stack";
+  const files = policy.releaseGraph.baselines?.[`${from}->${to}`]?.[selectedProfile] ?? [];
+  const paths = new Set<string>();
+  for (const file of files) {
+    assertBaselinePath(file.path);
+    if (paths.has(file.path) || !["add", "update", "delete"].includes(file.operation))
+      throw new VireoUpgradeError("VIR-UPG-001", "Managed baseline paths and operations must be unique and supported.");
+    paths.add(file.path);
+    if (file.sourceSha256 && !/^[a-f0-9]{64}$/u.test(file.sourceSha256))
+      throw new VireoUpgradeError("VIR-UPG-001", `Invalid source hash for ${file.path}`);
+    if (file.targetSha256 && !/^[a-f0-9]{64}$/u.test(file.targetSha256))
+      throw new VireoUpgradeError("VIR-UPG-001", `Invalid target hash for ${file.path}`);
+    if (file.sourceContent !== undefined && sha256(file.sourceContent) !== file.sourceSha256)
+      throw new VireoUpgradeError("VIR-UPG-001", `Source content hash differs for ${file.path}`);
+    if (file.targetContent !== undefined && sha256(file.targetContent) !== file.targetSha256)
+      throw new VireoUpgradeError("VIR-UPG-001", `Target content hash differs for ${file.path}`);
+    if (
+      (file.operation === "add" || file.operation === "update") &&
+      (file.targetContent === undefined || !file.targetSha256)
+    )
+      throw new VireoUpgradeError(
+        "VIR-UPG-001",
+        `Managed ${file.operation} baseline requires target content for ${file.path}`,
+      );
+  }
+  return files;
+}
+function profileActions(actions: ApplicationOwnedActionPolicy[], profile: unknown): VireoUpgradeManualAction[] {
+  const lockRefresh =
+    profile === "frontend"
+      ? "corepack npm install --package-lock-only"
+      : "corepack npm install --package-lock-only --prefix frontend";
+  return actions.map(action => ({
+    ...action,
+    verificationCommands: action.verificationCommands.map(command =>
+      command.startsWith("corepack npm install --package-lock-only") ? lockRefresh : command,
+    ),
+    status: "pending" as const,
+  }));
+}
+async function baselineState(root: string, baseline: EdgeBaseline) {
+  const path = join(root, baseline.path);
+  const exists = await safeFileState(root, baseline.path);
+  const current = exists ? sha256(await readFile(path)) : undefined;
+  if (baseline.operation === "add")
+    return !exists
+      ? ("add" as const)
+      : current === baseline.targetSha256
+        ? ("unchanged" as const)
+        : ("conflict" as const);
+  if (baseline.operation === "delete")
+    return !exists
+      ? ("unchanged" as const)
+      : current === baseline.sourceSha256
+        ? ("delete" as const)
+        : ("conflict" as const);
+  return !exists
+    ? ("missing" as const)
+    : current === baseline.targetSha256
+      ? ("unchanged" as const)
+      : current === baseline.sourceSha256
+        ? ("update" as const)
+        : ("conflict" as const);
+}
 
-export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise<VireoUpgradeResult> {
+async function projectStatusWithPolicy(
+  projectDirectory: string,
+  policyOverride?: unknown,
+): Promise<VireoProjectStatus> {
+  const root = resolve(projectDirectory),
+    policy = await readPolicy(policyOverride);
+  const metadata = (await safeFileState(root, ".vireo/project.json"))
+    ? await optionalJson<ProjectMetadata>(join(root, ".vireo/project.json"))
+    : undefined;
+  const recordedRelease = releaseFrom(metadata?.lastUpgradedBy) ?? releaseFrom(metadata?.createdBy) ?? null,
+    edge = recordedRelease
+      ? policy.releaseGraph.edges.find(candidate => candidate.from === recordedRelease)
+      : undefined;
+  const manifest = (await safeFileState(root, ".vireo/managed-files.json"))
+    ? await optionalJson<ManagedManifest>(join(root, ".vireo/managed-files.json"))
+    : undefined;
+  validateManagedManifest(manifest);
+  const manifestFiles = manifest?.files
+    ? await Promise.all(
+        manifest.files.map(async file => {
+          const path = join(root, file.path);
+          if (!(await safeFileState(root, file.path))) return { path: file.path, state: "missing" as const };
+          return {
+            path: file.path,
+            state: sha256(await readFile(path)) === file.sha256 ? ("clean" as const) : ("customized" as const),
+          };
+        }),
+      )
+    : ["package.json", "frontend/package.json", "gradle.properties"].map(path => ({
+        path,
+        state: "untracked" as const,
+      }));
+  const baselineFiles = await Promise.all(
+    edgeBaselines(policy, recordedRelease, edge?.to, metadata?.profile).map(async baseline => ({
+      path: baseline.path,
+      state: await baselineState(root, baseline),
+    })),
+  );
+  const managedFiles = [
+    ...manifestFiles.filter(file => !baselineFiles.some(baseline => baseline.path === file.path)),
+    ...baselineFiles,
+  ];
+  const generatedDirectory = join(root, ".vireo/generated"),
+    managed = (await pathExists(generatedDirectory))
+      ? (await readdir(generatedDirectory)).filter(name => name.endsWith(".json")).map(name => name.slice(0, -5))
+      : [],
+    ejected = [...new Set([...(await ejectedCapabilities(root)), ...(await legacyEjectedCapabilities(root))])];
+  const target = edge ? policy.releaseGraph.releases.find(release => release.release === edge.to) : undefined;
+  const interruptedUpgrade = await safeFileState(root, ".vireo/upgrade-journal.json");
+  return {
+    recordedRelease,
+    templateCommit: typeof metadata?.templateCommit === "string" ? metadata.templateCommit : null,
+    currentRelease: policy.releaseGraph.publicRelease,
+    targetRelease: target?.release ?? null,
+    targetTemplateCommit: target?.templateCommit ?? null,
+    nextHop: edge?.to ?? null,
+    interruptedUpgrade,
+    managedFiles,
+    applicationOwnedActions: profileActions(edge?.applicationOwnedActions ?? [], metadata?.profile),
+    capabilities: [
+      ...managed.map(name => ({ name, state: "managed" as const })),
+      ...ejected.filter(name => !managed.includes(name)).map(name => ({ name, state: "ejected" as const })),
+    ].sort((a, b) => a.name.localeCompare(b.name)),
+  };
+}
+
+async function upgradeProjectWithPolicy(
+  options: VireoUpgradeOptions,
+  policyOverride?: unknown,
+): Promise<VireoUpgradeResult> {
   const projectDirectory = resolve(options.projectDirectory);
-  const policy = await readPolicy();
-  if (options.targetRelease !== policy.targetRelease)
+  const dryRun = options.dryRun ?? true;
+  if (await safeFileState(projectDirectory, ".vireo/upgrade-journal.json")) {
+    if (dryRun)
+      throw new VireoUpgradeError(
+        "VIR-UPG-009",
+        "An interrupted upgrade journal is present. Preview is read-only; run vireo upgrade --apply to recover it first.",
+      );
+    await recoverInterruptedUpgrade(projectDirectory);
+  }
+  const policy = await readPolicy(policyOverride),
+    graph = policy.releaseGraph,
+    target = graph.releases.find(release => release.release === options.targetRelease);
+  if (!target)
+    throw new VireoUpgradeError("VIR-UPG-002", `Target ${options.targetRelease} is not declared by this CLI.`);
+  for (const path of [".vireo/project.json", "package.json"]) await safeFileState(projectDirectory, path);
+  const metadataPath = join(projectDirectory, ".vireo/project.json"),
+    rootManifestPath = join(projectDirectory, "package.json");
+  const metadataText = await readFile(metadataPath, "utf8").catch(error => {
     throw new VireoUpgradeError(
-      "VIR-UPG-002",
-      `This CLI supports target ${policy.targetRelease}; requested ${options.targetRelease}. Install the requested target CLI explicitly.`,
+      "VIR-UPG-001",
+      `Project is missing required upgrade input: ${error instanceof Error ? error.message : String(error)}`,
     );
-
-  const metadataPath = join(projectDirectory, ".vireo/project.json");
-  const rootManifestPath = join(projectDirectory, "package.json");
-  const frontendManifestPath = join(projectDirectory, "frontend/package.json");
-  const frontendLockPath = join(projectDirectory, "frontend/package-lock.json");
-  const gradlePropertiesPath = join(projectDirectory, "gradle.properties");
-  const [metadataText, rootManifestText, frontendManifestText, frontendLockText, gradleProperties] = await Promise.all([
-    readFile(metadataPath, "utf8"),
+  });
+  const metadata = JSON.parse(metadataText) as ProjectMetadata,
+    frontendOnly = metadata.profile === "frontend";
+  const frontendManifestPath = frontendOnly ? rootManifestPath : join(projectDirectory, "frontend/package.json"),
+    frontendLockPath = frontendOnly
+      ? join(projectDirectory, "package-lock.json")
+      : join(projectDirectory, "frontend/package-lock.json"),
+    gradlePropertiesPath = join(projectDirectory, "gradle.properties");
+  for (const path of frontendOnly
+    ? ["package-lock.json"]
+    : ["frontend/package.json", "frontend/package-lock.json", "gradle.properties"])
+    await safeFileState(projectDirectory, path);
+  const [rootManifestText, frontendManifestText, frontendLockText, gradleProperties] = await Promise.all([
     readFile(rootManifestPath, "utf8"),
-    readFile(frontendManifestPath, "utf8"),
+    frontendOnly ? Promise.resolve("") : readFile(frontendManifestPath, "utf8"),
     readFile(frontendLockPath, "utf8"),
-    readFile(gradlePropertiesPath, "utf8"),
+    frontendOnly ? Promise.resolve(undefined) : readFile(gradlePropertiesPath, "utf8"),
   ]).catch(error => {
     throw new VireoUpgradeError(
       "VIR-UPG-001",
       `Project is missing required upgrade input: ${error instanceof Error ? error.message : String(error)}`,
     );
   });
-  const metadata = JSON.parse(metadataText) as ProjectMetadata;
-  const rootManifest = JSON.parse(rootManifestText) as PackageManifest;
-  const frontendManifest = JSON.parse(frontendManifestText) as PackageManifest;
-  const frontendLock = JSON.parse(frontendLockText) as PackageLock;
+  const rootManifest = JSON.parse(rootManifestText) as PackageManifest,
+    frontendManifest = frontendOnly ? rootManifest : (JSON.parse(frontendManifestText) as PackageManifest),
+    frontendLock = JSON.parse(frontendLockText) as PackageLock;
   const recordedRelease = releaseFrom(metadata.lastUpgradedBy) ?? releaseFrom(metadata.createdBy);
   if (!recordedRelease)
     throw new VireoUpgradeError("VIR-UPG-002", ".vireo/project.json has no recognized create-vireo release.");
-  const alreadyTarget = recordedRelease === policy.targetRelease;
-  const source = policy.supportedSources.find(candidate => candidate.release === recordedRelease);
-  if (!source && !alreadyTarget)
+  const source = graph.releases.find(release => release.release === recordedRelease);
+  if (!source) throw new VireoUpgradeError("VIR-UPG-002", `Release ${recordedRelease} is not declared by this CLI.`);
+  const edge = graph.edges.find(candidate => candidate.from === recordedRelease && candidate.to === target.release),
+    alreadyTarget = recordedRelease === target.release;
+  if (!edge && !alreadyTarget)
     throw new VireoUpgradeError(
       "VIR-UPG-002",
-      `Release ${recordedRelease} is not a supported source for ${policy.targetRelease}.`,
+      `No adjacent upgrade edge ${recordedRelease} -> ${target.release} is declared.`,
     );
-  const expected = alreadyTarget ? policy.target : source!;
-  if (!alreadyTarget)
-    assertEqual(metadata.templateCommit, source!.templateCommit, "source Template commit", "VIR-UPG-002");
-  else assertEqual(metadata.templateCommit, policy.targetTemplateCommit, "target Template commit", "VIR-UPG-002");
-  assertEqual(rootManifest.scripts?.vireo, expected.rootVireoScript, "package.json scripts.vireo");
-  const starterVersion = /^starterVersion=(.+)$/mu.exec(gradleProperties)?.[1];
-  assertEqual(starterVersion, expected.starterJvmVersion, "gradle.properties starterVersion");
-  for (const [name, version] of Object.entries(expected.frontendDependencies)) {
-    assertEqual(frontendManifest.dependencies?.[name], version, `frontend dependency ${name}`);
-    assertEqual(
-      frontendLock.packages?.[""]?.dependencies?.[name],
-      version,
-      `frontend lockfile declaration ${name}`,
-      "VIR-UPG-004",
-    );
+  assertEqual(metadata.templateCommit, source.templateCommit, "source Template commit", "VIR-UPG-002");
+  requirementsMatch(rootManifest, frontendManifest, gradleProperties, frontendLock, source, !alreadyTarget);
+  await safeFileState(projectDirectory, ".vireo/managed-files.json");
+  const existingManaged = await optionalJson<ManagedManifest>(join(projectDirectory, ".vireo/managed-files.json"));
+  validateManagedManifest(existingManaged);
+  if (existingManaged) {
+    for (const file of existingManaged.files) {
+      const path = join(projectDirectory, file.path);
+      if (!(await safeFileState(projectDirectory, file.path)) || sha256(await readFile(path)) !== file.sha256) {
+        throw new VireoUpgradeError(
+          "VIR-UPG-003",
+          `Managed baseline differs at ${file.path}; resolve or eject the customization before upgrading.`,
+        );
+      }
+    }
   }
-
-  const migrations = await migrationVersions(projectDirectory);
-  const generated = await checkGeneratedEntities(projectDirectory);
-  const generatedProblems = generated.flatMap(result => result.problems.map(problem => `${result.entity}: ${problem}`));
-  if (generatedProblems.length > 0)
+  const managedBaselines = edgeBaselines(policy, source.release, edge?.to, metadata.profile);
+  const baselineFiles = await Promise.all(
+    managedBaselines.map(async baseline => ({ baseline, state: await baselineState(projectDirectory, baseline) })),
+  );
+  const baselineConflicts = baselineFiles.filter(file => file.state === "conflict" || file.state === "missing");
+  if (baselineConflicts.length)
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `Managed baseline drift: ${baselineConflicts.map(file => file.baseline.path).join(", ")}`,
+    );
+  const migrations = await migrationVersions(projectDirectory),
+    generated = await checkGeneratedEntities(projectDirectory),
+    generatedProblems = generated.flatMap(result => result.problems.map(problem => `${result.entity}: ${problem}`));
+  if (generatedProblems.length)
     throw new VireoUpgradeError("VIR-UPG-006", `Generated/wire-contract drift: ${generatedProblems.join("; ")}`);
-
   const targetRootManifest = structuredClone(rootManifest);
-  targetRootManifest.scripts = {
-    ...targetRootManifest.scripts,
-    vireo: policy.target.rootVireoScript,
-  };
-  const targetFrontendManifest = structuredClone(frontendManifest);
-  targetFrontendManifest.dependencies = {
-    ...targetFrontendManifest.dependencies,
-    ...policy.target.frontendDependencies,
-  };
-  const targetFrontendLock = structuredClone(frontendLock);
-  targetFrontendLock.packages = {
-    ...targetFrontendLock.packages,
-    "": {
-      ...targetFrontendLock.packages?.[""],
-      dependencies: {
-        ...targetFrontendLock.packages?.[""]?.dependencies,
-        ...policy.target.frontendDependencies,
-      },
-    },
-  };
-  const targetGradleProperties = gradleProperties.replace(
+  targetRootManifest.scripts = { ...targetRootManifest.scripts, vireo: target.rootVireoScript };
+  const targetFrontendManifest = frontendOnly ? targetRootManifest : structuredClone(frontendManifest);
+  targetFrontendManifest.dependencies = { ...targetFrontendManifest.dependencies, ...target.frontendDependencies };
+  const targetGradleProperties = gradleProperties?.replace(
     /^starterVersion=.+$/mu,
-    `starterVersion=${policy.target.starterJvmVersion}`,
+    `starterVersion=${target.starterJvmVersion}`,
   );
   const targetMetadata = structuredClone(metadata);
-  targetMetadata.templateCommit = policy.targetTemplateCommit;
-  targetMetadata.lastUpgradedBy = `create-vireo@${policy.targetRelease}`;
-  if (!alreadyTarget)
+  targetMetadata.templateCommit = target.templateCommit;
+  targetMetadata.lastUpgradedBy = `create-vireo@${target.release}`;
+  if (edge)
     targetMetadata.lastUpgrade = {
-      schemaVersion: 1,
-      from: recordedRelease,
-      to: policy.targetRelease,
-      sourceTemplateCommit: metadata.templateCommit,
-      targetTemplateCommit: policy.targetTemplateCommit,
-      applicationOwnedTemplateChanges: "manual-review-required",
+      schemaVersion: 2,
+      from: source.release,
+      to: target.release,
+      sourceTemplateCommit: source.templateCommit,
+      targetTemplateCommit: target.templateCommit,
+      lockfileRefresh: "required",
     };
   const previousUpgrade =
     metadata.lastUpgrade && typeof metadata.lastUpgrade === "object"
       ? (metadata.lastUpgrade as Record<string, unknown>)
       : undefined;
-  const originalSourceRelease = alreadyTarget ? previousUpgrade?.from : recordedRelease;
-  if (typeof originalSourceRelease !== "string")
-    throw new VireoUpgradeError("VIR-UPG-002", "Target-version metadata is missing its source release record.");
-  const originalSourceTemplateCommit =
-    alreadyTarget && typeof previousUpgrade?.sourceTemplateCommit === "string"
-      ? previousUpgrade.sourceTemplateCommit
-      : metadata.templateCommit;
-  if (typeof originalSourceTemplateCommit !== "string")
-    throw new VireoUpgradeError("VIR-UPG-002", "Target-version metadata is missing its source Template commit record.");
-  const originalSource = policy.supportedSources.find(candidate => candidate.release === originalSourceRelease);
-  if (!originalSource)
-    throw new VireoUpgradeError(
-      "VIR-UPG-002",
-      `Release ${originalSourceRelease} has no application-owned action policy for ${policy.targetRelease}.`,
-    );
-  const manualActions = originalSource.applicationOwnedActions.map(action => ({
-    ...action,
-    status: "pending" as const,
-  }));
-  const recordPath = join(
-    projectDirectory,
-    ".vireo",
-    `upgrade-${originalSourceRelease}-to-${policy.targetRelease}.json`,
+  const recordedEdge =
+    edge ??
+    (typeof previousUpgrade?.from === "string"
+      ? graph.edges.find(candidate => candidate.from === previousUpgrade.from && candidate.to === target.release)
+      : undefined);
+  const recordSource = recordedEdge ? graph.releases.find(release => release.release === recordedEdge.from)! : source;
+  const actions = profileActions(recordedEdge?.applicationOwnedActions ?? [], metadata.profile),
+    recordPath = join(projectDirectory, ".vireo", `upgrade-${recordSource.release}-to-${target.release}.json`);
+  const recordContents = await format(
+    JSON.stringify({
+      schemaVersion: 2,
+      from: recordSource.release,
+      to: target.release,
+      sourceTemplateCommit: recordSource.templateCommit,
+      targetTemplateCommit: target.templateCommit,
+      managedSurfaces,
+      lockfileRefresh: "required",
+      applicationOwnedActions: actions,
+    }),
+    { ...(await resolveConfig(recordPath)), filepath: recordPath },
   );
-  const record = {
-    schemaVersion: 1,
-    from: originalSourceRelease,
-    to: policy.targetRelease,
-    sourceTemplateCommit: originalSourceTemplateCommit,
-    targetTemplateCommit: policy.targetTemplateCommit,
-    managedSurfaces,
-    applicationOwnedTemplateChanges: "manual-review-required",
-    applicationOwnedActions: manualActions,
-  };
-  const recordContents = `${JSON.stringify(record, null, 2)}\n`;
-  let priorRecord: string | undefined;
-  try {
-    priorRecord = await readFile(recordPath, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  }
-  if (priorRecord !== undefined && priorRecord !== recordContents)
-    throw new VireoUpgradeError(
-      "VIR-UPG-003",
-      `Existing upgrade record does not match the supported release pair: ${recordPath}`,
-    );
-  const changes: Array<{ path: string; contents: string; previous?: string }> = [
+  const sourceManaged =
+    existingManaged ?? (await managedManifest(projectDirectory, source.templateCommit, frontendOnly));
+  const targetManagedFiles = [
+    ...sourceManaged.files
+      .filter(
+        file =>
+          !baselineFiles.some(
+            baseline => baseline.baseline.path === file.path && baseline.baseline.operation === "delete",
+          ),
+      )
+      .map(file => ({
+        ...file,
+        sha256:
+          file.path === "package.json"
+            ? sha256(`${JSON.stringify(frontendOnly ? targetFrontendManifest : targetRootManifest, null, 2)}\n`)
+            : file.path === "frontend/package.json"
+              ? sha256(`${JSON.stringify(targetFrontendManifest, null, 2)}\n`)
+              : file.path === "gradle.properties" && targetGradleProperties !== undefined
+                ? sha256(targetGradleProperties)
+                : file.sha256,
+      })),
+    ...baselineFiles
+      .filter(
+        file =>
+          !sourceManaged.files.some(sourceFile => sourceFile.path === file.baseline.path) &&
+          file.baseline.operation !== "delete",
+      )
+      .map(file => ({ path: file.baseline.path, sha256: file.baseline.targetSha256! })),
+  ].sort((left, right) => left.path.localeCompare(right.path));
+  const managedContents = `${JSON.stringify({ schemaVersion: 1, templateCommit: target.templateCommit, files: targetManagedFiles }, null, 2)}\n`;
+  const candidates = [
     {
       path: rootManifestPath,
-      contents: `${JSON.stringify(targetRootManifest, null, 2)}\n`,
+      contents: `${JSON.stringify(frontendOnly ? targetFrontendManifest : targetRootManifest, null, 2)}\n`,
       previous: rootManifestText,
     },
-    {
-      path: frontendManifestPath,
-      contents: `${JSON.stringify(targetFrontendManifest, null, 2)}\n`,
-      previous: frontendManifestText,
-    },
-    {
-      path: frontendLockPath,
-      contents: `${JSON.stringify(targetFrontendLock, null, 2)}\n`,
-      previous: frontendLockText,
-    },
-    { path: gradlePropertiesPath, contents: targetGradleProperties, previous: gradleProperties },
+    ...(frontendOnly
+      ? []
+      : [
+          {
+            path: frontendManifestPath,
+            contents: `${JSON.stringify(targetFrontendManifest, null, 2)}\n`,
+            previous: frontendManifestText,
+          },
+          { path: gradlePropertiesPath, contents: targetGradleProperties!, previous: gradleProperties },
+        ]),
+    ...baselineFiles
+      .filter(file => file.state === "add" || file.state === "update" || file.state === "delete")
+      .map(file => ({
+        path: join(projectDirectory, file.baseline.path),
+        contents: file.baseline.operation === "delete" ? null : file.baseline.targetContent!,
+        previous: file.state === "add" ? undefined : undefined,
+      })),
     { path: metadataPath, contents: `${JSON.stringify(targetMetadata, null, 2)}\n`, previous: metadataText },
-    { path: recordPath, contents: recordContents, previous: priorRecord },
+    {
+      path: join(projectDirectory, ".vireo/managed-files.json"),
+      contents: managedContents,
+      previous: await optionalText(join(projectDirectory, ".vireo/managed-files.json")),
+    },
+    { path: recordPath, contents: recordContents, previous: await optionalText(recordPath) },
   ];
-  const files: VireoUpgradeFile[] = await Promise.all(
-    changes.map(async change => {
-      let current: string | undefined;
-      try {
-        current = await readFile(change.path, "utf8");
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      }
-      return {
-        path: change.path.slice(projectDirectory.length + 1),
-        status: current === change.contents ? "unchanged" : current === undefined ? "create" : "update",
-      };
-    }),
-  );
+  for (const candidate of candidates)
+    if (candidate.previous === undefined && (await pathExists(candidate.path)))
+      candidate.previous = await readFile(candidate.path, "utf8");
+  const files = candidates.map(change => ({
+    path: change.path.slice(projectDirectory.length + 1),
+    status:
+      change.contents === null
+        ? ("delete" as const)
+        : change.previous === change.contents
+          ? ("unchanged" as const)
+          : change.previous === undefined
+            ? ("create" as const)
+            : ("update" as const),
+  }));
+  const lockCommand = frontendOnly
+    ? "corepack npm install --package-lock-only"
+    : "corepack npm install --package-lock-only --prefix frontend";
   const checks: VireoUpgradeCheck[] = [
-    { id: "source", status: "pass", detail: `${recordedRelease} is admitted for target ${policy.targetRelease}.` },
+    { id: "source", status: "pass", detail: `${source.release} -> ${target.release} is a declared adjacent edge.` },
     {
       id: "dependencies",
       status: "pass",
-      detail: "Vireo npm declarations and JVM BOM version match the release pair.",
+      detail: "Vireo npm declarations and JVM BOM version match the release edge.",
     },
-    { id: "lockfile", status: "pass", detail: "Frontend lockfile root declarations match package.json." },
+    {
+      id: "lockfile",
+      status: "manual",
+      detail: `No resolved dependency versions were edited. Run ${lockCommand} before verification.`,
+    },
     {
       id: "migrations",
       status: "pass",
@@ -432,26 +849,50 @@ export async function upgradeVireoProject(options: VireoUpgradeOptions): Promise
     },
     {
       id: "application-owned",
-      status: "manual",
-      detail: `${manualActions.length} application-owned action(s) remain pending for Template ${policy.targetTemplateCommit}.`,
+      status: actions.length ? "manual" : "pass",
+      detail: actions.length
+        ? `${actions.length} application-owned action(s) remain pending.`
+        : "No application-owned actions are declared for this edge.",
     },
   ];
-  const dryRun = options.dryRun ?? true;
   if (!dryRun) {
+    if (!/^[a-f0-9]{40}$/u.test(target.templateCommit))
+      throw new VireoUpgradeError("VIR-UPG-008", "The target Template commit is not an immutable Git SHA.");
     if (!options.acceptApplicationOwned)
       throw new VireoUpgradeError(
         "VIR-UPG-007",
         "Apply requires --accept-application-owned after reviewing the target Template diff and rollback plan.",
       );
-    await writeAtomically(changes.filter((_, index) => files[index].status !== "unchanged"));
+    await writeAtomically(
+      projectDirectory,
+      candidates.filter((_, index) => files[index].status !== "unchanged"),
+    );
   }
   return {
-    sourceRelease: originalSourceRelease,
-    targetRelease: policy.targetRelease,
-    targetTemplateCommit: policy.targetTemplateCommit,
+    sourceRelease: source.release,
+    targetRelease: target.release,
+    targetTemplateCommit: target.templateCommit,
     dryRun,
     checks,
     files,
-    manualActions,
+    manualActions: actions,
   };
+}
+
+export function vireoProjectStatus(projectDirectory: string): Promise<VireoProjectStatus> {
+  return projectStatusWithPolicy(projectDirectory);
+}
+
+export function upgradeVireoProject(options: VireoUpgradeOptions): Promise<VireoUpgradeResult> {
+  return upgradeProjectWithPolicy(options);
+}
+
+/** @internal Test-only entry point; the package root never exports policy injection. */
+export function vireoProjectStatusForTest(projectDirectory: string, policy: unknown): Promise<VireoProjectStatus> {
+  return projectStatusWithPolicy(projectDirectory, policy);
+}
+
+/** @internal Test-only entry point; the package root never exports policy injection. */
+export function upgradeVireoProjectForTest(options: VireoUpgradeOptions, policy: unknown): Promise<VireoUpgradeResult> {
+  return upgradeProjectWithPolicy(options, policy);
 }

@@ -1,5 +1,14 @@
 # create-vireo
 
+## 0.7.0
+
+### Minor Changes
+
+- Declare and execute the public 0.6.0-to-0.7.0 adjacent project-upgrade edge, add
+  read-only `vireo status`, content-addressed managed-file provenance, and persistent
+  generated-capability ejection records. Upgrade plans now require a real lockfile
+  refresh instead of editing resolved lockfile declarations.
+
 ## 0.6.0
 
 ### Minor Changes

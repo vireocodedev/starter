@@ -59,10 +59,15 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
 
   const upgradePolicyPath = join(repositoryRoot, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json");
   const upgradePolicy = readJson(upgradePolicyPath);
-  if (typeof upgradePolicy.target?.rootVireoScript !== "string") {
-    throw new Error("create-vireo upgrade policy has no target root Vireo script");
+  const currentUpgradeRelease = upgradePolicy.releaseGraph?.releases?.find(
+    release =>
+      release.release === (upgradePolicy.releaseGraph?.candidateRelease ?? upgradePolicy.releaseGraph?.publicRelease),
+  );
+  if (!currentUpgradeRelease || typeof currentUpgradeRelease.rootVireoScript !== "string") {
+    throw new Error("create-vireo upgrade policy has no candidate/current release root Vireo script");
   }
-  upgradePolicy.target.rootVireoScript = `npx --yes --package=create-vireo@${createVireoVersion} vireo`;
+  currentUpgradeRelease.rootVireoScript = `npx --yes --package=create-vireo@${createVireoVersion} vireo`;
+  currentUpgradeRelease.templateCommit = templateCommit;
 
   const oldReleaseId = ecosystem.current?.id;
   if (!oldReleaseId || documentation.currentRelease !== oldReleaseId) {

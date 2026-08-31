@@ -15,7 +15,7 @@ adversarial admission checklist are in
 [Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
 current runnable full-stack composition.
 
-[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/5b123e60bd1ce733ae70711796552a17aaa60fe3/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
+[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
 
 This is the current Template pinned by the release contract, not a concept render. [Try the disposable live demo](https://demo.vireocode.com), follow the [guided build](https://vireocode.com/docs/getting-started/), or read [who Vireo does and does not fit](https://vireocode.com/docs/getting-started/choose-your-profile/) before installing.
 
@@ -67,8 +67,8 @@ Public-beta evaluation is open, but readiness and independent adoption are not y
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.6.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
-| [`@vireocodedev/ui`](packages/ui)                         | 0.3.0   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
+| [`create-vireo`](packages/create-vireo)                   | 0.7.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
+| [`@vireocodedev/ui`](packages/ui)                         | 0.3.1   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.2   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.2   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
 | [`@vireocodedev/localization`](packages/localization)     | 0.2.2   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
