@@ -34,7 +34,11 @@ policy](docs/COMPATIBILITY.md). Use the structured issue forms and the routing i
 - Describe user-visible behavior and verification performed.
 - Classify every new or changed async visual surface under the loading-state standard, declare its geometry level, and include the applicable canonical stories or documented omissions.
 - Do not commit credentials, generated build output, or local caches.
-- Obtain review before merging to `main`.
+- Obtain independent review before merging to `main` once a second trusted
+  maintainer is available. During the explicitly documented single-maintainer
+  interim state, the required checks and resolved conversations remain mandatory,
+  but an independent approval cannot be enforced without lockout; see the
+  [provider-control and backup-owner limitation](docs/security/provider-controls-2026-08-31.md).
 
 Maintainers make final merge and release decisions under
 [GOVERNANCE.md](GOVERNANCE.md). Contributions do not imply a response or delivery

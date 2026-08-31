@@ -16,9 +16,7 @@ workflow manually with `workflow_dispatch`.
 
 1. Open **Settings → Pages** in the GitHub repository.
 2. Under **Build and deployment**, select **GitHub Actions** as the source.
-3. Confirm that Actions may create deployments for the `github-pages`
-   environment. Add environment protection rules only when deployments should
-   require manual approval.
+3. Apply the checked-in [`github-pages` environment desired state](../.github/environments/github-pages.json): allow deployments only from `main` and disable administrator bypass. Capture an authenticated API export after applying it.
 4. Merge the deployment workflow into `main` or run it manually after merging.
 
 The workflow uses only `GITHUB_TOKEN`. Its build job needs `contents: read`; its

@@ -47,6 +47,12 @@ broader.
 
 ### `P1-09` / `G-107` — Machine-controlled provider security
 
+Checked-in desired state is available in
+[`docs/security/provider-controls-2026-08-31.md`](../security/provider-controls-2026-08-31.md),
+but no item below is complete until an authenticated live-provider export is
+recorded. The single-owner interim policy deliberately does not claim independent
+review.
+
 - [ ] Add a `main` branch ruleset or equivalent branch protection to Starter.
 - [ ] Add a `main` branch ruleset or equivalent branch protection to Template.
 - [ ] Require review and successful checks for protected-branch changes.

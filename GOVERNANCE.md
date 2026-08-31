@@ -34,8 +34,12 @@ request does not commit the project to a release date.
 
 ## Merge and release
 
-Changes require review, the authoritative verification gate, and compliance with
-[CONTRIBUTING.md](CONTRIBUTING.md). Only authorized maintainers may merge, publish
+Changes require independent review, the authoritative verification gate, and
+compliance with [CONTRIBUTING.md](CONTRIBUTING.md) once a second trusted maintainer
+is available. The current single-maintainer interim state requires the same checks
+and resolved conversations but cannot enforce independent approval without
+maintainer lockout; its [provider-control and backup-owner limitation](docs/security/provider-controls-2026-08-31.md)
+remains open. Only authorized maintainers may merge, publish
 npm or Maven artifacts, approve protected release environments, or issue security
 releases. Release compatibility follows [the compatibility policy](docs/COMPATIBILITY.md).
 

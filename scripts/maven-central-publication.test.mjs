@@ -16,6 +16,7 @@ const recoveryWorkflow = readFileSync(
   join(repositoryRoot, ".github/workflows/recover-maven-central-deployment.yml"),
   "utf8",
 );
+const verifyWorkflow = readFileSync(join(repositoryRoot, ".github/workflows/verify-maven-central.yml"), "utf8");
 const uploadScript = readFileSync(join(repositoryRoot, "jvm/scripts/upload-central-bundle.sh"), "utf8");
 const deploymentId = "123e4567-e89b-12d3-a456-426614174000";
 const version = "0.3.0";
@@ -261,6 +262,11 @@ test("release workflow keeps USER_MANAGED upload defaulting to explicit protecte
   assert.match(uploadScript, /publishingType=USER_MANAGED/u);
   assert.doesNotMatch(workflow, /publishingType=AUTOMATIC/u);
   assert.match(workflow, /Publication identity: \\`6 artifacts \/ 7 exact PURLs\\`/u);
+});
+
+test("anonymous public Maven verification cannot request the protected publication environment", () => {
+  assert.doesNotMatch(verifyWorkflow, /environment: maven-central/u);
+  assert.match(verifyWorkflow, /permissions:\n\s+contents: read/u);
 });
 
 test("recovery workflow promotes one existing validated deployment without building or uploading another bundle", () => {

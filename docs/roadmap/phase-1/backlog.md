@@ -71,8 +71,10 @@ range, not an elapsed-date commitment.
   collector validates all seven public npm tarballs and 27 Maven Central artifacts
   against registry hashes; GitHub OIDC/Sigstore attestations bind the exact subjects
   to populated npm/JVM CycloneDX SBOMs and verify their signer identity. A dated
-  recovery tabletop records the remaining branch/environment protection, provider
-  allowlist, and backup-owner gaps.
+  recovery tabletop records the provider evidence boundary and backup-owner gap.
+  Checked-in 2026-08-31 desired state covers rulesets, environments, Actions, and
+  workflow-token defaults, but must be applied and independently re-exported from
+  GitHub before it can close the machine-controlled portion.
 - **P1-10: complete.** Both authoritative public-contract gates bind documented
   setup, verification, Storybook, and deployment commands to the hosted workflow
   steps that execute them. Clean Starter and Template verification now recurs on a

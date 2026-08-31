@@ -3,6 +3,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const rootPackage = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const requiredFiles = [
   "README.md",
   "LICENSE",
@@ -28,6 +29,21 @@ const requiredFiles = [
   "site/content/manifest.json",
   "packages/ui/docs/PUBLIC_SURFACE.md",
   ".github/CODEOWNERS",
+  ".github/rulesets/main.json",
+  ".github/rulesets/release-tags.json",
+  ".github/settings/actions.json",
+  ".github/settings/selected-actions.json",
+  ".github/settings/workflow-permissions.json",
+  ".github/environments/package-release.json",
+  ".github/environments/package-release.deployment-branch-policies.json",
+  ".github/environments/package-release.live-assertions.json",
+  ".github/environments/maven-central.json",
+  ".github/environments/maven-central.deployment-branch-policies.json",
+  ".github/environments/maven-central.live-assertions.json",
+  ".github/environments/github-pages.json",
+  ".github/environments/github-pages.deployment-branch-policies.json",
+  ".github/environments/github-pages.live-assertions.json",
+  "scripts/repository-security-policy.mjs",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
   ".github/ISSUE_TEMPLATE/public_beta_feedback.yml",
@@ -63,6 +79,11 @@ requireText("README.md", [
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("GOVERNANCE.md", [".github/CODEOWNERS", "docs/COMPATIBILITY.md"]);
+if (
+  rootPackage.scripts?.["security:repository"] !== "node scripts/repository-security-policy.mjs" ||
+  !rootPackage.scripts?.["public:check"]?.includes("node scripts/repository-security-policy.mjs")
+)
+  problems.push("package.json must expose and run the repository security desired-state policy");
 const compatibility = requireText("docs/COMPATIBILITY.md", [
   "deprecat",
   "migration",

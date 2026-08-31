@@ -28,8 +28,7 @@ and provenance. Package versions are immutable after publication.
 
 1. Confirm that the `vireocodedev` npm organization is controlled by the release
    owners and that publishing accounts use two-factor authentication.
-2. In GitHub, create an environment named `package-release`. Restrict it to the
-   `main` branch and add the required maintainer reviewers.
+2. Apply the checked-in [`package-release` environment desired state](../.github/environments/package-release.json): restrict it to `main`, add its documented reviewer, and disable administrator bypass. Capture an authenticated API export after applying it.
 3. Only when bootstrapping a previously unpublished package, use a short-lived
    granular npm access token owned by the applicable package owner. Temporarily store it only as the `NPM_TOKEN` secret on the
    `package-release` environment and explicitly wire it into the publish step in
