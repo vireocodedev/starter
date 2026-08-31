@@ -16,8 +16,8 @@ The current supported 0.6.0-to-0.7.0 project upgrade admits declared manifests w
 regeneration. `vireo check` fail-closes on its declared allowlist by checking the raw
 stable schema digest, persisted canonical wire-contract digest, and every
 contract-critical file hash; other historical generator versions are rejected. This
-keeps already-applied code and migrations byte-stable during the upgrade. The retained
-current-generator regeneration is a new reviewed change and must satisfy current
+keeps already-applied code and migrations byte-stable during the upgrade. Any later
+regeneration with the current generator is a new reviewed change and must satisfy current
 schema rules, including a constraint-valid example for every patterned field.
 
 ## Safe paths

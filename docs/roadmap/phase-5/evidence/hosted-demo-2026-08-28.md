@@ -3,7 +3,8 @@
 ## Activated boundary
 
 - Public URL: <https://demo.vireocode.com>
-- Runtime revision: Template `aa7d17bb065626e9eac41b80e701b5b8a19552d8`
+- Initial activation revision: Template `aa7d17bb065626e9eac41b80e701b5b8a19552d8`
+- Current verified deployment: Template `a24f9435d3f624fb1962c3d5c4e3457b69f5be28` as recorded by the 2026-09-01 recovery rehearsal
 - Activation-policy revision: Template `802d488fac81e7ed829ce880197f55800df6f11f`
 - Data boundary: disposable public synthetic data only
 - Availability: best effort, no uptime or response-time SLA

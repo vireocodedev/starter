@@ -32,14 +32,16 @@ data, identities, or vulnerability details. Security findings go through the pri
 ## Colleague frontend-only start
 
 For a new frontend app, use the public 0.7.0 generator rather than cloning either
-framework repository:
+framework repository. Install the Node/Corepack versions listed in the canonical
+[getting-started guide](https://vireocode.com/docs/getting-started/) first:
 
 ```sh
 npm create vireo@0.7.0 my-frontend-app -- --profile frontend
 cd my-frontend-app
-npm run doctor
-npm run generate:check
-npm run verify
+corepack npm run setup
+corepack npm run doctor
+corepack npm run generate:check
+corepack npm run verify
 ```
 
 The generated project is application-owned. Start with the

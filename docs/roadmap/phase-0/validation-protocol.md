@@ -10,7 +10,9 @@ sessions completed
 > Owner-approved variance — 2026-08-27: Phase 0 used isolated AI evaluators as a
 > proxy for message comprehension, public onboarding, documentation, positioning
 > plausibility, and technical feasibility. That evidence does not satisfy the human
-> demand thresholds below. The protocol remains the future public-beta gate and no
+> demand thresholds below. The protocol runs during/after beta at the D-110
+> checkpoint (after three independent adopters or before 1.0), not as a public-beta
+> promotion gate, and no
 > human session is recorded as complete.
 
 This protocol tests the [product strategy](product-strategy.md) rather than seeking
