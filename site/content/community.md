@@ -32,3 +32,8 @@ Do not open a public issue for an unpatched vulnerability. Follow the private ro
 ## Evaluate honestly
 
 Vireo's current maturity is public `0.x`. Reports about confusing onboarding, missing workflows and unsuitable architecture are as valuable as code contributions.
+
+- [Record a sanitized public-beta evaluation](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml) after a bounded technical review.
+- [Open an independent adopter check-in](https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml) only when you control a non-fixture application and meet the qualification statements in the form.
+
+The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Do not include credentials, private source, application data, employer or client identity, or vulnerability details.

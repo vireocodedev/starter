@@ -500,3 +500,8 @@ The following open items are intentionally not checkboxes in this execution list
 
 These exclusions remain roadmap obligations. Completing every checkbox in this
 document does not satisfy or waive them.
+
+`P5-05` source-side intake machinery is tracked separately in the
+[external-gate readiness record](phase-5/evidence/external-gate-readiness-2026-09-01.md).
+Its reachable forms, desired label payloads, and aggregate validation do not alter
+the excluded `P5-06`/`P5-07` external-outcome requirements or the `HOLD` decision.

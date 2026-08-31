@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "release",
+  "bump": "deploy",
+  "summary": "Deploy direct external-evidence intake links and the refreshed current Vireo documentation snapshot."
+}

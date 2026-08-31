@@ -43,12 +43,17 @@ const requiredFiles = [
   ".github/environments/github-pages.json",
   ".github/environments/github-pages.deployment-branch-policies.json",
   ".github/environments/github-pages.live-assertions.json",
+  ".github/labels/bug.json",
+  ".github/labels/enhancement.json",
+  ".github/labels/beta-feedback.json",
+  ".github/labels/beta-adopter.json",
   "scripts/repository-security-policy.mjs",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
   ".github/ISSUE_TEMPLATE/public_beta_feedback.yml",
   ".github/ISSUE_TEMPLATE/adopter_check_in.yml",
   ".github/ISSUE_TEMPLATE/config.yml",
+  "docs/roadmap/phase-5/evidence/external-gate-readiness-2026-09-01.md",
 ];
 const problems = [];
 
@@ -76,6 +81,10 @@ requireText("README.md", [
   "docs/VERIFICATION_PERFORMANCE.md",
   "docs/DOCUMENTATION_PORTAL.md",
   "docs/roadmap/phase-5/feedback-and-evidence.md",
+]);
+requireText("docs/EVALUATION.md", [
+  "https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml",
+  "https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml",
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("GOVERNANCE.md", [".github/CODEOWNERS", "docs/COMPATIBILITY.md"]);

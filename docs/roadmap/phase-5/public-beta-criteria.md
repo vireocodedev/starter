@@ -12,7 +12,7 @@ Status: **engineering scope substantially complete; public-beta decision HOLD**.
 | Hosted evaluation    | Public revision, health, journey, reset policy, monitoring history, and incident contact         | Complete; best effort, no SLA             |
 | Production readiness | Phase 4 independent security/manual accessibility/device/field/target-environment evidence       | Open; no public-beta readiness claim      |
 | Independent adoption | Three unaffiliated active teams and one maintained production-like deployment through an upgrade | No qualifying team recorded               |
-| Feedback evidence    | Structured privacy-safe intake, triage, aggregate validation, and explicit gate status           | Engineering evidence complete; gate HOLD  |
+| Feedback evidence    | Structured privacy-safe intake, triage, aggregate validation, and explicit gate status           | Machine intake ready; gate HOLD           |
 
 ## Qualifying external workflow session
 
@@ -43,3 +43,7 @@ Do not declare public beta ready when any of these is true:
 - the flagship lacks an honest reset/privacy/availability boundary;
 - fewer than three qualifying teams are active or no qualifying deployment exists;
 - known limitations or support boundaries are contradicted by public copy.
+
+Machine intake readiness—reachable public forms, declared labels, public endpoints,
+or a green aggregate-validation workflow—does not satisfy any human workflow or
+independent-adoption row. The dated [external-gate readiness record](evidence/external-gate-readiness-2026-09-01.md) records the current zero-state and provider-label follow-up.

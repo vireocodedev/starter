@@ -41,6 +41,7 @@ const requiredLinks = [
   "migration",
   "discussions",
   "feedback",
+  "adopterCheckIn",
   "contributing",
 ];
 for (const name of requiredLinks) {
@@ -54,6 +55,10 @@ if (sitePolicy.links?.versions !== "https://vireocode.com/versions/")
   problems.push("the canonical versions link must be the main Vireo website");
 if (sitePolicy.links?.demo !== "https://demo.vireocode.com")
   problems.push("site demo link must use the canonical public flagship host");
+const community = readFileSync(join(root, "site/content/community.md"), "utf8");
+for (const link of [sitePolicy.links?.feedback, sitePolicy.links?.adopterCheckIn]) {
+  if (!community.includes(link)) problems.push(`community page must link directly to ${link}`);
+}
 
 const currentRelease = documentationPolicy.releases?.find(release => release.id === documentationPolicy.currentRelease);
 if (!currentRelease) {

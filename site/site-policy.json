@@ -26,6 +26,7 @@
     "migration": "https://vireocode.com/docs/upgrades/",
     "discussions": "https://github.com/vireocodedev/starter/discussions",
     "feedback": "https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml",
+    "adopterCheckIn": "https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml",
     "contributing": "https://github.com/vireocodedev/starter/blob/main/CONTRIBUTING.md"
   }
 }
