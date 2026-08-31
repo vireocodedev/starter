@@ -11,55 +11,55 @@
   "stages": {
     "toolchain": {
       "label": "Toolchain policy",
-      "baselineMs": 250,
+      "baselineMs": 219,
       "warningMs": 5000,
       "failureMs": 10000,
-      "baselineRssKiB": 80000,
+      "baselineRssKiB": 75120,
       "warningRssKiB": 262144,
       "failureRssKiB": 524288
     },
     "public-contract": {
       "label": "Public contract policy",
-      "baselineMs": 250,
+      "baselineMs": 932,
       "warningMs": 5000,
       "failureMs": 10000,
-      "baselineRssKiB": 80000,
+      "baselineRssKiB": 75668,
       "warningRssKiB": 262144,
       "failureRssKiB": 524288
     },
     "lint": {
       "label": "Lint",
-      "baselineMs": 13500,
+      "baselineMs": 12572,
       "warningMs": 30000,
       "failureMs": 60000,
-      "baselineRssKiB": 900000,
+      "baselineRssKiB": 948524,
       "warningRssKiB": 1572864,
       "failureRssKiB": 2097152
     },
     "format": {
       "label": "Formatting",
-      "baselineMs": 11000,
+      "baselineMs": 13697,
       "warningMs": 30000,
       "failureMs": 60000,
-      "baselineRssKiB": 600000,
+      "baselineRssKiB": 438216,
       "warningRssKiB": 1048576,
       "failureRssKiB": 1572864
     },
     "build": {
       "label": "Package builds",
-      "baselineMs": 3000,
+      "baselineMs": 11738,
       "warningMs": 30000,
       "failureMs": 60000,
-      "baselineRssKiB": 1800000,
+      "baselineRssKiB": 512656,
       "warningRssKiB": 3145728,
       "failureRssKiB": 4194304
     },
     "typecheck": {
       "label": "Type checking",
-      "baselineMs": 9000,
+      "baselineMs": 15178,
       "warningMs": 45000,
       "failureMs": 90000,
-      "baselineRssKiB": 3000000,
+      "baselineRssKiB": 4270372,
       "warningRssKiB": 4718592,
       "failureRssKiB": 6291456
     },
@@ -74,55 +74,55 @@
     },
     "strict-types": {
       "label": "Strict consumer declarations",
-      "baselineMs": 11000,
+      "baselineMs": 15690,
       "warningMs": 60000,
       "failureMs": 90000,
-      "baselineRssKiB": 3000000,
+      "baselineRssKiB": 964536,
       "warningRssKiB": 4718592,
       "failureRssKiB": 6291456
     },
     "generator": {
       "label": "Generator tests",
-      "baselineMs": 750,
+      "baselineMs": 845,
       "warningMs": 10000,
       "failureMs": 20000,
-      "baselineRssKiB": 100000,
+      "baselineRssKiB": 101972,
       "warningRssKiB": 524288,
       "failureRssKiB": 1048576
     },
     "release-smoke": {
       "label": "Packed release artifacts",
-      "baselineMs": 31000,
+      "baselineMs": 33598,
       "warningMs": 90000,
       "failureMs": 150000,
-      "baselineRssKiB": 3500000,
+      "baselineRssKiB": 977992,
       "warningRssKiB": 5242880,
       "failureRssKiB": 7340032
     },
     "storybook-contracts": {
       "label": "Storybook interaction and accessibility contracts",
-      "baselineMs": 300000,
+      "baselineMs": 182619,
       "warningMs": 420000,
       "failureMs": 600000,
-      "baselineRssKiB": 3000000,
+      "baselineRssKiB": 1398888,
       "warningRssKiB": 5242880,
       "failureRssKiB": 7340032
     },
     "storybook": {
       "label": "Vireo Starter Storybook build",
-      "baselineMs": 25000,
+      "baselineMs": 19729,
       "warningMs": 90000,
       "failureMs": 150000,
-      "baselineRssKiB": 3000000,
+      "baselineRssKiB": 1754972,
       "warningRssKiB": 5242880,
       "failureRssKiB": 7340032
     }
   },
   "total": {
-    "baselineMs": 465000,
+    "baselineMs": 496601,
     "warningMs": 690000,
     "failureMs": 960000,
-    "baselineRssKiB": 7298089,
+    "baselineRssKiB": 4270372,
     "warningRssKiB": 8388608,
     "failureRssKiB": 10485760
   }

@@ -19,8 +19,8 @@
     "privacyRule": "Only sanitized aggregate evidence is public; do not record identities, credentials, private source, application data, or identifying project information.",
     "handoff": "docs/roadmap/public-beta-human-handoff-2026-09-01.md",
     "pending": [
-      "professional-identity-and-trademark-clearance",
       "second-trusted-maintainer-and-independent-approval",
+      "npm-trusted-publisher-release-continuity",
       "independent-security-review",
       "manual-at-branded-browser-physical-device-and-installed-pwa-evidence",
       "low-end-device-and-real-user-field-performance",
@@ -29,9 +29,21 @@
       "qualifying-independent-adopters-and-maintained-upgrade"
     ],
     "obligations": [
-      {"id":"target-developer-persona-demand-and-controlled-competitor-validation","publicBetaHold":false,"currentState":"zero-human evidence; D-110 accepted-risk timing"},
-      {"id":"authentic-external-contribution-and-publication-permission","publicBetaHold":false,"currentState":"post-beta human-only; no authentic examples, testimonials, or case-study permission"},
-      {"id":"professional-identity-and-trademark-clearance","publicBetaHold":false,"currentState":"accepted pre-1.0/public-beta risk; professional clearance open"}
+      {
+        "id": "target-developer-persona-demand-and-controlled-competitor-validation",
+        "publicBetaHold": false,
+        "currentState": "zero-human evidence; D-110 accepted-risk timing"
+      },
+      {
+        "id": "authentic-external-contribution-and-publication-permission",
+        "publicBetaHold": false,
+        "currentState": "post-beta human-only; no authentic examples, testimonials, or case-study permission"
+      },
+      {
+        "id": "professional-identity-and-trademark-clearance",
+        "publicBetaHold": false,
+        "currentState": "accepted pre-1.0/public-beta risk; professional clearance open"
+      }
     ]
   },
   "adoptionSnapshot": {
@@ -39,8 +51,5 @@
     "qualifyingActiveTeams": 0,
     "maintainedDeploymentUpgrades": 0
   },
-  "postBetaNonblocking": [
-    "docs/roadmap/remaining-non-human-work.md",
-    "VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md"
-  ]
+  "postBetaNonblocking": ["docs/roadmap/remaining-non-human-work.md", "VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md"]
 }

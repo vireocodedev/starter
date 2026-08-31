@@ -8,18 +8,19 @@ engineering closure.
 
 ## Remaining human work
 
-| Gate | Current state | Required qualification and evidence path |
-| --- | --- | --- |
-| G-002 / P1-01 identity | Open accepted pre-1.0/public-beta risk | Professional trademark/identity clearance or documented fallback; retain dated professional decision in the Phase 1 record. |
-| G-107 / P1-09 continuity | Open | A second trusted maintainer verifies recovery access and independently approves protected changes; retain the restricted recovery exercise result. |
-| G-301 / P4-01 security | Open | Independent security review with no unresolved critical/high finding; use the private advisory route and retain sanitized conclusion. |
-| G-303 / P4-03 platforms | Open | Manual AT, branded browser, physical device and installed-PWA checklist results with release, hardware/software, operator, scenario and result. |
-| G-304 / P4-04 performance | Open | Representative low-end physical-device and real-user field measurements; retain method, environment and sanitized observations. |
-| G-305 / P4-05 recovery | Open | A second trusted person witnesses target restore, application acceptance and incident result. [Maintainer preparation](phase-4/evidence/target-recovery-2026-09-01.md) is complete but same-host backup is not an independent-failure-domain claim. |
-| P1-15 / P2-08 / P3-09 / P5-06 workflow | 0 sessions | Unfamiliar developers complete first run, first change, generation, customization, upgrade and deployment; retain only the privacy-safe aggregate in `phase-5/evidence/aggregate.json`. |
-| G-309 / P5-07 adoption | 0/3 teams; 0/1 upgrades | Three qualifying independent teams actively build with Vireo and one maintains a production-like deployment through an upgrade; submit only sanitized qualified check-ins. |
-| G-001 / G-005 / G-006 research | Post-beta human-only; zero human evidence | Run retained target-developer persona/job/demand and controlled competitor protocols under D-110 timing; this is an accepted risk, not a public-beta promotion hold. |
-| External contribution/publication | Post-beta human-only | Validate an authentic external contribution path; obtain permission before publishing adopter examples, testimonials, or case studies. This is not a beta-promotion hold. |
+| Gate | Public-beta hold? | Current state | Required qualification and evidence path |
+| --- | --- | --- | --- |
+| G-107 / P1-09 continuity | Yes | Open | A second trusted maintainer verifies recovery access and independently approves protected changes; retain the restricted recovery exercise result. |
+| npm release continuity | Yes | 0/8 trusted-publisher configurations verified after rename | An npm owner with login and 2FA must migrate each package's GitHub trusted publisher from `starter` to `vireo`; follow [NPM release migration](../../NPM_RELEASE.md#repository-rename-trusted-publisher-migration). |
+| G-301 / P4-01 security | Yes | Open | Independent security review with no unresolved critical/high finding; use the private advisory route and retain sanitized conclusion. |
+| G-303 / P4-03 platforms | Yes | Open | Manual AT, branded browser, physical device and installed-PWA checklist results with release, hardware/software, operator, scenario and result. |
+| G-304 / P4-04 performance | Yes | Open | Representative low-end physical-device and real-user field measurements; retain method, environment and sanitized observations. |
+| G-305 / P4-05 recovery | Yes | Open | A second trusted person witnesses target restore, application acceptance and incident result. [Maintainer preparation](phase-4/evidence/target-recovery-2026-09-01.md) is complete but same-host backup is not an independent-failure-domain claim. |
+| P1-15 / P2-08 / P3-09 / P5-06 workflow | Yes | 0 sessions | Unfamiliar developers complete first run, first change, generation, customization, upgrade and deployment; retain only the privacy-safe aggregate in `phase-5/evidence/aggregate.json`. |
+| G-309 / P5-07 adoption | Yes | 0/3 teams; 0/1 upgrades | Three qualifying independent teams actively build with Vireo and one maintains a production-like deployment through an upgrade; submit only sanitized qualified check-ins. |
+| G-002 / P1-01 identity | No | Accepted pre-1.0/public-beta risk | Professional trademark/identity clearance or documented fallback; retain dated professional decision in the Phase 1 record. |
+| G-001 / G-005 / G-006 research | No | Post-beta human-only; zero human evidence | Run retained target-developer persona/job/demand and controlled competitor protocols under D-110 timing. |
+| External contribution/publication | No | Post-beta human-only | Validate an authentic external contribution path; obtain permission before publishing adopter examples, testimonials, or case studies. |
 
 Use the public [evaluation form](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml)
 for sanitized outcomes, the [adopter check-in](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml)

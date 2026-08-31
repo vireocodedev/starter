@@ -39,7 +39,7 @@ and provenance. Package versions are immutable after publication.
    | Field                | Value             |
    | -------------------- | ----------------- |
    | Organization or user | `vireocodedev`    |
-   | Repository           | `starter`         |
+   | Repository           | `vireo`           |
    | Workflow filename    | `release-npm.yml` |
    | Environment          | `package-release` |
 
@@ -129,6 +129,26 @@ publisher received a success response.
 - Treat token, OIDC, provenance, signature, or unexpected-registry failures as a
   stopped release. Preserve the evidence and resolve the trust failure before
   continuing.
+
+## Repository-rename trusted-publisher migration
+
+Current public packages remain consumable through GitHub redirects, but future npm
+OIDC publishing is not proven until an npm owner with login and 2FA completes this
+for each of `create-vireo`, `@vireocodedev/history`, `@vireocodedev/infrastructure`,
+`@vireocodedev/localization`, `@vireocodedev/query`, `@vireocodedev/shell`,
+`@vireocodedev/sqlite`, and `@vireocodedev/ui`:
+
+1. Run `npm trust list <package> --json` and retain the sanitized result.
+2. In npm package settings, revoke the old GitHub trusted publisher for repository
+   `vireocodedev/starter`.
+3. Create a GitHub trusted publisher with organization `vireocodedev`, repository
+   `vireo`, workflow file `release-npm.yml`, and environment `package-release`; allow
+   publishing.
+4. Run `npm trust list <package> --json` again and verify the exact new identity.
+
+Do not perform this mutation from an unauthenticated environment. npm verifies the
+repository identity exactly; Maven Central uses protected credentials/environment,
+not repository-bound npm OIDC.
 
 Official references: [trusted publishers](https://docs.npmjs.com/trusted-publishers/),
 [provenance statements](https://docs.npmjs.com/generating-provenance-statements/),

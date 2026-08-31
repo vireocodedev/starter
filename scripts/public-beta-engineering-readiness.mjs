@@ -9,8 +9,8 @@ const aggregate = readJson(evidencePolicy.aggregatePath);
 const problems = [];
 const requiredMachine = ["P1-03", "P1-09-machine", "G-108", "G-305-maintainer", "G-308"];
 const requiredHuman = [
-  "professional-identity-and-trademark-clearance",
   "second-trusted-maintainer-and-independent-approval",
+  "npm-trusted-publisher-release-continuity",
   "independent-security-review",
   "manual-at-branded-browser-physical-device-and-installed-pwa-evidence",
   "low-end-device-and-real-user-field-performance",
