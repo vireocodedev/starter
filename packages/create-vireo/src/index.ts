@@ -12,6 +12,7 @@ import {
   validateApplicationIdentity,
   validateApplicationProjectionContract,
 } from "./application-projection-contract.mjs";
+import { sha256 } from "./entity-generator.js";
 
 export {
   checkGeneratedEntities,
@@ -47,7 +48,9 @@ export {
 } from "./entity-renderer.js";
 export {
   upgradeVireoProject,
+  vireoProjectStatus,
   VireoUpgradeError,
+  type VireoProjectStatus,
   type VireoUpgradeCheck,
   type VireoUpgradeFile,
   type VireoUpgradeOptions,
@@ -60,11 +63,11 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-const CREATE_VIREO_PACKAGE_VERSION = "0.6.0";
+const CREATE_VIREO_PACKAGE_VERSION = "0.7.0";
 const TEMPLATE_VERSION = CREATE_VIREO_PACKAGE_VERSION;
 const TEMPLATE_TAG = `starter-template@${TEMPLATE_VERSION}`;
 const INITIAL_APPLICATION_VERSION = "0.1.0";
-export const TEMPLATE_COMMIT = "5b123e60bd1ce733ae70711796552a17aaa60fe3";
+export const TEMPLATE_COMMIT = "a670d7f95f720a91705c7c156d19e605582fb4c8";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
@@ -293,6 +296,7 @@ async function projectTemplate(staging: string, profile: VireoProfile, ignoreWor
   const projection = `${staging}-project`;
   const selectedOptionalRules = new Set(applicationProjectionContract.defaultOptionalRuleIds ?? []);
   const destinations = new Set<string>();
+  const managedPaths = new Set<string>();
   try {
     for (const source of await walk(staging)) {
       const path = normalizedRelative(staging, source);
@@ -312,12 +316,14 @@ async function projectTemplate(staging: string, profile: VireoProfile, ignoreWor
       }
       if (destinations.has(destination)) throw new Error(`Pinned Template projects multiple files to ${destination}.`);
       destinations.add(destination);
+      if (classification.category === "managed") managedPaths.add(destination);
       const target = join(projection, destination);
       await mkdir(dirname(target), { recursive: true });
       await cp(source, target, { force: true, preserveTimestamps: true });
     }
     await rm(staging, { recursive: true, force: true });
     await rename(projection, staging);
+    return [...managedPaths].sort();
   } catch (error) {
     await rm(projection, { recursive: true, force: true });
     throw error;
@@ -667,6 +673,23 @@ try {
 } catch {
   add("VIR-PROJECT-001", "fail", "Project metadata is missing or invalid", "Restore .vireo/project.json.");
 }
+try {
+  const managed = JSON.parse(readFileSync(resolve(root, ".vireo/managed-files.json"), "utf8"));
+  const valid = managed.schemaVersion === 1 && typeof managed.templateCommit === "string" && Array.isArray(managed.files) && managed.files.every(file => typeof file?.path === "string" && /^[a-f0-9]{64}$/u.test(file?.sha256 ?? ""));
+  add(
+    "VIR-PROJECT-002",
+    valid ? "pass" : "fail",
+    valid ? "Managed-file provenance is ready" : "Managed-file provenance is invalid",
+    "Run the declared Vireo upgrade dry run and restore .vireo/managed-files.json before applying it.",
+  );
+} catch {
+  add(
+    "VIR-PROJECT-002",
+    "warn",
+    "Managed-file provenance is unavailable",
+    "Projects created before 0.7 receive provenance during the reviewed 0.6-to-0.7 upgrade.",
+  );
+}
 
 add(
   "VIR-DEPS-001",
@@ -739,6 +762,16 @@ console.log(
 );
 if (!ok) process.exitCode = 1;
 `;
+
+/**
+ * The frontend projection owns this script rather than the Template. Keep its
+ * renderer public so release evidence can independently reproduce the frozen
+ * managed baseline without reading the upgrade policy itself.
+ */
+export async function renderFrontendDoctorScript(path: string) {
+  const config = (await resolveConfig(path)) ?? {};
+  return format(FRONTEND_DOCTOR_SCRIPT, { ...config, filepath: path });
+}
 
 async function projectFrontendTemplate(staging: string, projectName: string, productName: string) {
   const packagePath = join(staging, "package.json");
@@ -820,8 +853,7 @@ storybook-static/
   await writeFile(join(staging, "scripts", "verify-frontend-profile.sh"), FRONTEND_VERIFY_SCRIPT);
   await chmod(join(staging, "scripts", "verify-frontend-profile.sh"), 0o755);
   const doctorPath = join(staging, "scripts", "vireo-frontend-doctor.mjs");
-  const doctorConfig = (await resolveConfig(doctorPath)) ?? {};
-  await writeFile(doctorPath, await format(FRONTEND_DOCTOR_SCRIPT, { ...doctorConfig, filepath: doctorPath }));
+  await writeFile(doctorPath, await renderFrontendDoctorScript(doctorPath));
 }
 
 async function pinGeneratedProjectCli(staging: string) {
@@ -1196,7 +1228,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
       // a target outside the Template; cp also skips local checkout artifacts.
       await copyLocalTemplateDirectory(templateDirectory, staging);
     } else await downloadTemplate(staging);
-    await projectTemplate(staging, profile, options.templateDirectory !== undefined);
+    const projectedManagedPaths = await projectTemplate(staging, profile, options.templateDirectory !== undefined);
     await replaceTextFiles(staging, [
       ["com.vireocode.startertemplate", javaPackage],
       ["starter_template", projectName.replaceAll("-", "_")],
@@ -1224,6 +1256,37 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     await writeFile(
       join(staging, ".vireo", "project.json"),
       `${JSON.stringify({ schemaVersion: 1, profile, ...identity, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, templateVersion: TEMPLATE_VERSION, templateTag: TEMPLATE_TAG, createdBy: `create-vireo@${CREATE_VIREO_PACKAGE_VERSION}` }, null, 2)}\n`,
+    );
+    const managedPaths = [
+      ...new Set([
+        ...projectedManagedPaths,
+        ...(profile === "full-stack"
+          ? ["package.json", "frontend/package.json", "gradle.properties"]
+          : ["package.json"]),
+      ]),
+    ].sort();
+    await writeFile(
+      join(staging, ".vireo", "managed-files.json"),
+      `${JSON.stringify(
+        {
+          schemaVersion: 1,
+          templateCommit: TEMPLATE_COMMIT,
+          files: (
+            await Promise.all(
+              managedPaths.map(async path => {
+                try {
+                  return { path, sha256: sha256(await readFile(join(staging, path))) };
+                } catch (error) {
+                  if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+                  throw error;
+                }
+              }),
+            )
+          ).filter((file): file is { path: string; sha256: string } => file !== undefined),
+        },
+        null,
+        2,
+      )}\n`,
     );
     await writeExampleManifest(staging, TEMPLATE_COMMIT, profile);
     if (options.git !== false) {

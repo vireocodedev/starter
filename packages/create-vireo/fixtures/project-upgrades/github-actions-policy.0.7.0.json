@@ -1,0 +1,27 @@
+{
+  "actions": {
+    "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "actions/dependency-review-action": "a1d282b36b6f3519aa1f3fc636f609c47dddb294",
+    "actions/setup-java": "dd06d9cba3e5552c54d9f8ea23572deb30010f7c",
+    "actions/setup-node": "820762786026740c76f36085b0efc47a31fe5020",
+    "actions/upload-artifact": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+    "github/codeql-action/analyze": "cdf488f595d80d6e07e03d4674febd5ab45fa938",
+    "github/codeql-action/autobuild": "cdf488f595d80d6e07e03d4674febd5ab45fa938",
+    "github/codeql-action/init": "cdf488f595d80d6e07e03d4674febd5ab45fa938",
+    "gradle/actions/setup-gradle": "9c971963bec38e04b3d30dcc455b5382be2fdbfb"
+  },
+  "containerImages": {
+    "ghcr.io/gitleaks/gitleaks": {
+      "version": "v8.30.1",
+      "digest": "sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
+    }
+  },
+  "canonicalRunner": "ubuntu-24.04",
+  "requirePinnedActions": true,
+  "requiredConcurrencyWorkflows": {
+    "ci.yml": {
+      "group": "verify-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}",
+      "cancelInProgress": true
+    }
+  }
+}

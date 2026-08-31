@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { format, resolveConfig } from "prettier";
 import { readEntitySchema } from "./entity-schema.js";
@@ -107,10 +107,58 @@ async function pathExists(path: string) {
 }
 
 function assertInside(root: string, candidate: string) {
+  if (
+    typeof candidate !== "string" ||
+    candidate.length === 0 ||
+    candidate.includes("\\") ||
+    isAbsolute(candidate) ||
+    candidate.split("/").some(segment => segment === "" || segment === "." || segment === "..")
+  )
+    throw new VireoGeneratorError("VIR-GEN-002", `Unsafe managed project path: ${candidate}`);
   const path = resolve(root, candidate);
   const rel = relative(root, path);
   if (rel === "" || (!rel.startsWith(`..${sep}`) && rel !== ".." && !isAbsolute(rel))) return path;
   throw new VireoGeneratorError("VIR-GEN-002", `Refusing path outside the project: ${candidate}`);
+}
+
+function assertPlural(plural: string) {
+  if (typeof plural !== "string" || !/^[a-z][a-z0-9-]*$/u.test(plural))
+    throw new VireoGeneratorError("VIR-GEN-002", `Invalid generated capability name: ${plural}`);
+}
+
+async function safeManagedPath(root: string, candidate: string) {
+  const target = assertInside(root, candidate);
+  let existingRoot = root;
+  while (true) {
+    try {
+      if ((await lstat(existingRoot)).isSymbolicLink())
+        throw new VireoGeneratorError("VIR-GEN-002", `Managed root contains a symbolic link: ${root}`);
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      const parent = dirname(existingRoot);
+      if (parent === existingRoot) throw error;
+      existingRoot = parent;
+    }
+  }
+  const realRoot = await realpath(existingRoot);
+  const rootSuffix = relative(existingRoot, root);
+  const segments = [...(rootSuffix === "" ? [] : rootSuffix.split(sep)), ...candidate.split("/")];
+  let cursor = existingRoot;
+  for (const segment of segments) {
+    cursor = join(cursor, segment);
+    try {
+      if ((await lstat(cursor)).isSymbolicLink())
+        throw new VireoGeneratorError("VIR-GEN-002", `Managed path contains a symbolic link: ${candidate}`);
+      const resolved = await realpath(cursor);
+      if (resolved !== realRoot && !resolved.startsWith(`${realRoot}${sep}`))
+        throw new VireoGeneratorError("VIR-GEN-002", `Managed path escapes the project: ${candidate}`);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return target;
+      throw error;
+    }
+  }
+  return target;
 }
 
 async function readJson(path: string): Promise<unknown> {
@@ -143,7 +191,7 @@ function parseProjectMetadata(value: unknown): VireoProjectMetadata {
 export async function readProjectMetadata(projectDirectory: string): Promise<VireoProjectMetadata> {
   const root = resolve(projectDirectory);
   for (const file of [".vireo/project.json", ".vireo/template.json"]) {
-    const path = join(root, file);
+    const path = await safeManagedPath(root, file);
     if (await pathExists(path)) return parseProjectMetadata(await readJson(path));
   }
   throw new VireoGeneratorError(
@@ -153,22 +201,41 @@ export async function readProjectMetadata(projectDirectory: string): Promise<Vir
 }
 
 function manifestPath(root: string, plural: string) {
+  assertPlural(plural);
   return join(root, ".vireo", "generated", `${plural}.json`);
 }
 
-async function readManifest(path: string): Promise<EntityGenerationManifest | null> {
-  if (!(await pathExists(path))) return null;
-  const value = await readJson(path);
+function validateManifest(manifest: EntityGenerationManifest) {
+  if (!Array.isArray(manifest.files) || typeof manifest.schemaPath !== "string")
+    throw new VireoGeneratorError("VIR-GEN-002", "Generation manifest has an invalid managed-file list.");
+  assertPlural(manifest.plural);
+  assertInside("/", manifest.schemaPath);
+  for (const file of manifest.files) {
+    if (!file || typeof file.path !== "string")
+      throw new VireoGeneratorError("VIR-GEN-002", "Generation manifest contains an invalid managed path.");
+    assertInside("/", file.path);
+  }
+}
+
+async function readManifest(root: string, path: string): Promise<EntityGenerationManifest | null> {
+  const managedPath = await safeManagedPath(root, relative(root, path).replaceAll("\\", "/"));
+  if (!(await pathExists(managedPath))) return null;
+  const value = await readJson(managedPath);
   if (!value || typeof value !== "object" || (value as EntityGenerationManifest).schemaVersion !== 1)
-    throw new VireoGeneratorError("VIR-GEN-002", `Invalid generation manifest: ${path}`);
-  return value as EntityGenerationManifest;
+    throw new VireoGeneratorError("VIR-GEN-002", `Invalid generation manifest: ${managedPath}`);
+  const manifest = value as EntityGenerationManifest;
+  validateManifest(manifest);
+  return manifest;
 }
 
 async function manifests(root: string) {
-  const directory = join(root, ".vireo", "generated");
+  const directory = await safeManagedPath(root, ".vireo/generated");
   if (!(await pathExists(directory))) return [];
   const files = (await readdir(directory)).filter(file => file.endsWith(".json")).sort();
-  return Promise.all(files.map(file => readManifest(join(directory, file)))) as Promise<EntityGenerationManifest[]>;
+  for (const file of files) assertPlural(file.slice(0, -".json".length));
+  return Promise.all(files.map(file => readManifest(root, join(directory, file)))) as Promise<
+    EntityGenerationManifest[]
+  >;
 }
 
 async function currentHash(path: string) {
@@ -183,7 +250,7 @@ async function classifyFiles(
   const previousByPath = new Map(previous?.files.map(file => [file.path, file]));
   return Promise.all(
     files.map(async file => {
-      const target = assertInside(root, file.path);
+      const target = await safeManagedPath(root, file.path);
       if (!(await pathExists(target))) return { path: file.path, role: file.role, status: "create" as const };
       const existingHash = await currentHash(target);
       const expectedHash = sha256(file.content);
@@ -208,7 +275,7 @@ async function writeAtomically(root: string, writes: Array<{ path: string; conte
   const originals = new Map<string, Uint8Array | null>();
   try {
     for (const file of writes) {
-      const target = assertInside(root, file.path);
+      const target = await safeManagedPath(root, file.path);
       originals.set(target, (await pathExists(target)) ? await readFile(target) : null);
       if (file.content === null) await rm(target, { force: true });
       else {
@@ -234,7 +301,7 @@ const prettierExtensions = new Set([".json", ".md", ".ts", ".tsx"]);
 async function formatGeneratedFile(root: string, file: GeneratedFile): Promise<GeneratedFile> {
   const extension = file.path.slice(file.path.lastIndexOf("."));
   if (!prettierExtensions.has(extension)) return file;
-  const filepath = join(root, file.path);
+  const filepath = await safeManagedPath(root, file.path);
   const config = (await resolveConfig(filepath)) ?? {};
   return { ...file, content: await format(file.content, { ...config, filepath }) };
 }
@@ -257,7 +324,9 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
   const generatedFiles = renderEntityFiles(schema, project, schemaDigest, target);
   const schemaFile = `.vireo/schemas/${names.plural}.json`;
   const contractFile = `.vireo/contracts/${names.plural}.contract.json`;
-  const priorManifest = options.outputDirectory ? null : await readManifest(manifestPath(projectRoot, names.plural));
+  const priorManifest = options.outputDirectory
+    ? null
+    : await readManifest(projectRoot, manifestPath(projectRoot, names.plural));
   const plannedFiles: GeneratedFile[] = await Promise.all(
     [
       ...generatedFiles,
@@ -300,7 +369,7 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
   const obsolete: EntityGenerationFileResult[] = [];
   if (priorManifest) {
     for (const file of priorManifest.files.filter(file => !plannedPaths.has(file.path))) {
-      const target = assertInside(outputRoot, file.path);
+      const target = await safeManagedPath(outputRoot, file.path);
       if (!(await pathExists(target))) continue;
       obsolete.push({
         path: file.path,
@@ -310,7 +379,7 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
     }
   }
   let collisions = classification.filter(file => file.status === "update" && !priorManifest);
-  const registryTarget = join(outputRoot, registryFile);
+  const registryTarget = await safeManagedPath(outputRoot, registryFile);
   if (collisions.some(file => file.path === registryFile) && (await pathExists(registryTarget))) {
     const currentRegistry = await readFile(registryTarget, "utf8");
     if (currentRegistry.startsWith("// @vireo-regenerated schema-v1"))
@@ -343,7 +412,7 @@ export async function generateEntity(options: GenerateEntityOptions): Promise<Ge
 
   const manifestRelative = `.vireo/generated/${names.plural}.json`;
   const manifestContent = stableJson(manifest);
-  const manifestTarget = join(outputRoot, manifestRelative);
+  const manifestTarget = await safeManagedPath(outputRoot, manifestRelative);
   const manifestStatus = !(await pathExists(manifestTarget))
     ? "create"
     : sha256(await readFile(manifestTarget)) === sha256(manifestContent)
@@ -383,7 +452,7 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
   return Promise.all(
     records.map(async record => {
       const problems: string[] = [];
-      const schemaPath = assertInside(root, record.schemaPath);
+      const schemaPath = await safeManagedPath(root, record.schemaPath);
       if (!(await pathExists(schemaPath))) problems.push(`missing canonical schema ${record.schemaPath}`);
       else {
         try {
@@ -399,7 +468,7 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
             if (sha256(stableJson(await readJson(schemaPath))) !== record.schemaDigest)
               problems.push("legacy canonical schema digest differs from the manifest");
           } else problems.push(`unsupported generator version ${JSON.stringify(record.generatorVersion)}`);
-          const contractPath = join(root, ".vireo", "contracts", `${record.plural}.contract.json`);
+          const contractPath = await safeManagedPath(root, `.vireo/contracts/${record.plural}.contract.json`);
           if (
             !(await pathExists(contractPath)) ||
             sha256(stableJson(await readJson(contractPath))) !== record.contractDigest
@@ -414,7 +483,7 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
         }
       }
       for (const file of record.files.filter(contractCritical)) {
-        const path = assertInside(root, file.path);
+        const path = await safeManagedPath(root, file.path);
         if (!(await pathExists(path))) problems.push(`missing contract-critical file ${file.path}`);
         else if ((await currentHash(path)) !== file.sha256) problems.push(`contract drift in ${file.path}`);
       }
@@ -425,25 +494,45 @@ export async function checkGeneratedEntities(projectDirectory: string): Promise<
 
 export async function ejectEntity(projectDirectory: string, plural: string, dryRun = false) {
   const root = resolve(projectDirectory);
+  assertPlural(plural);
   const project = await readProjectMetadata(root);
   const path = manifestPath(root, plural);
-  const manifest = await readManifest(path);
+  const manifest = await readManifest(root, path);
   if (!manifest) throw new VireoGeneratorError("VIR-GEN-006", `No managed generated capability named ${plural}.`);
   const remaining = (await manifests(root)).filter(record => record.plural !== plural);
   if (!dryRun) {
+    const writes: Array<{ path: string; content: string | null }> = [];
     for (const file of manifest.files.filter(file => file.ownership === "generated-once")) {
-      const target = assertInside(root, file.path);
+      const target = await safeManagedPath(root, file.path);
       if (!(await pathExists(target))) continue;
       const content = await readFile(target, "utf8");
-      await writeFile(target, content.replace("@vireo-generated-once", "@vireo-ejected"));
+      writes.push({ path: file.path, content: content.replace("@vireo-generated-once", "@vireo-ejected") });
     }
-    await writeFile(
-      join(root, `${project.profile === "frontend" ? "" : "frontend/"}src/generated/vireo.capabilities.ts`),
-      registryFromManifests(remaining),
-    );
-    await rm(path, { force: true });
-    await rm(join(root, ".vireo", "schemas", `${plural}.json`), { force: true });
-    await rm(join(root, ".vireo", "contracts", `${plural}.contract.json`), { force: true });
+    writes.push({
+      path: `${project.profile === "frontend" ? "" : "frontend/"}src/generated/vireo.capabilities.ts`,
+      content: registryFromManifests(remaining),
+    });
+    writes.push({ path: `.vireo/generated/${plural}.json`, content: null });
+    writes.push({ path: `.vireo/schemas/${plural}.json`, content: null });
+    writes.push({ path: `.vireo/contracts/${plural}.contract.json`, content: null });
+    const ejectedPath = await safeManagedPath(root, ".vireo/ejected-capabilities.json");
+    let ejected: string[] = [];
+    if (await pathExists(ejectedPath)) {
+      const value = await readJson(ejectedPath);
+      if (value && typeof value === "object" && Array.isArray((value as { capabilities?: unknown }).capabilities)) {
+        ejected = (value as { capabilities: unknown[] }).capabilities.filter(
+          (capability): capability is string => typeof capability === "string",
+        );
+      }
+    }
+    writes.push({
+      path: ".vireo/ejected-capabilities.json",
+      content: stableJson({
+        schemaVersion: 1,
+        capabilities: [...new Set([...ejected, plural])].sort((left, right) => left.localeCompare(right)),
+      }),
+    });
+    await writeAtomically(root, writes);
   }
   return { entity: manifest.entity, plural, dryRun, retainedFiles: manifest.files.map(file => file.path) };
 }

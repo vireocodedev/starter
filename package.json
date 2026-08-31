@@ -63,6 +63,7 @@
     "generate:entity:fixture": "corepack npm run build && node scripts/generated-entity-fixture.mjs",
     "generate:frontend:fixture": "corepack npm run build && node scripts/generated-frontend-fixture.mjs",
     "upgrade:project:fixture": "corepack npm run build && node scripts/project-upgrade-fixture.mjs",
+    "upgrade:project:baselines": "node scripts/check-project-upgrade-baselines.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",

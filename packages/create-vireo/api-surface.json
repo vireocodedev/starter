@@ -27,6 +27,7 @@
         "VireoGeneratorError",
         "VireoPackageManager",
         "VireoProfile",
+        "VireoProjectStatus",
         "VireoUpgradeCheck",
         "VireoUpgradeError",
         "VireoUpgradeFile",
@@ -44,9 +45,11 @@
         "readEntitySchema",
         "readProjectMetadata",
         "removeExample",
+        "renderFrontendDoctorScript",
         "sha256",
         "stableJson",
-        "upgradeVireoProject"
+        "upgradeVireoProject",
+        "vireoProjectStatus"
       ],
       "dependencies": [
         "node:child_process",

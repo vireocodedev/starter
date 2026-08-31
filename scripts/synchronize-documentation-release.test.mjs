@@ -74,8 +74,12 @@ test("synchronizes release contracts and public version documentation from sourc
       readFileSync(join(root, "packages", "create-vireo", "src", "index.ts"), "utf8"),
       /CREATE_VIREO_PACKAGE_VERSION = "0\.3\.0"/u,
     );
+    const upgradePolicy = readJson(join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json"));
     assert.equal(
-      readJson(join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json")).target.rootVireoScript,
+      upgradePolicy.releaseGraph.releases.find(
+        release =>
+          release.release === (upgradePolicy.releaseGraph.candidateRelease ?? upgradePolicy.releaseGraph.publicRelease),
+      ).rootVireoScript,
       "npx --yes --package=create-vireo@0.3.0 vireo",
     );
     const packageLock = readJson(join(root, "package-lock.json"));
@@ -145,7 +149,17 @@ function makeFixture() {
     `export const TEMPLATE_COMMIT = "${"b".repeat(40)}";\nconst CREATE_VIREO_PACKAGE_VERSION = "0.2.0";\n`,
   );
   writeJson(join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json"), {
-    target: { rootVireoScript: "npx --yes --package=create-vireo@0.2.0 vireo" },
+    schemaVersion: 2,
+    releaseGraph: {
+      publicRelease: "0.2.0",
+      candidateRelease: "0.3.0",
+      previousRelease: "0.2.0",
+      releases: [
+        { release: "0.2.0", status: "upgrade-source" },
+        { release: "0.3.0", status: "current", rootVireoScript: "npx --yes --package=create-vireo@0.2.0 vireo" },
+      ],
+      edges: [{ from: "0.2.0", to: "0.3.0", applicationOwnedActions: [] }],
+    },
   });
   writeJson(join(root, "packages", "sqlite", "package.json"), {
     name: "@vireocodedev/sqlite",

@@ -23,6 +23,9 @@ const rootLicense = readFileSync(join(repoRoot, "LICENSE"), "utf8");
 const expectedRepositoryUrl = "git+https://github.com/vireocodedev/starter.git";
 const expectedRegistry = "https://registry.npmjs.org";
 const portabilityPolicy = JSON.parse(readFileSync(join(repoRoot, "contracts/package-portability-policy.json"), "utf8"));
+const projectUpgradeContract = JSON.parse(
+  readFileSync(join(repoRoot, "contracts/project-upgrade-policy.json"), "utf8"),
+);
 const installLifecycleScripts = ["preinstall", "install", "postinstall", "prepare", "prepublish", "prepublishOnly"];
 const forbiddenPackedPath =
   /(?:^|\/)(?:\.env(?:\.|$)|\.git(?:\/|$)|\.npmrc$|__tests__(?:\/|$)|coverage(?:\/|$)|node_modules(?:\/|$)|src(?:\/|$)|storybook-static(?:\/|$)|tests?(?:\/|$))/iu;
@@ -149,6 +152,35 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
   }
   if (manifest.name === "create-vireo" && !existsSync(join(packageDirectory, "schema/vireo-upgrade-policy.json"))) {
     throw new Error("create-vireo must publish its project upgrade policy.");
+  }
+  if (manifest.name === "create-vireo") {
+    if (projectUpgradeContract.publicationState !== "final") {
+      throw new Error(
+        "create-vireo cannot be packed for publication while the project-upgrade release is a candidate.",
+      );
+    }
+    const upgradePolicy = JSON.parse(readFileSync(join(packageDirectory, "schema/vireo-upgrade-policy.json"), "utf8"));
+    const graph = upgradePolicy.releaseGraph;
+    const targetRelease = graph?.candidateRelease ?? graph?.publicRelease;
+    const targetNode = graph?.releases?.find(release => release.release === targetRelease);
+    if (
+      upgradePolicy.schemaVersion !== 2 ||
+      !graph?.edges?.some(
+        edge => edge.from === graph.previousRelease && edge.to === (graph.candidateRelease ?? graph.publicRelease),
+      ) ||
+      !graph?.releases?.some(release => release.release === graph.publicRelease && release.status === "current")
+    ) {
+      throw new Error("create-vireo must pack an executable adjacent project-upgrade graph.");
+    }
+    if (
+      graph?.candidateRelease !== undefined ||
+      targetNode?.status !== "current" ||
+      !/^[a-f0-9]{40}$/u.test(targetNode?.templateCommit ?? "") ||
+      targetNode.templateCommit ===
+        graph?.releases?.find(release => release.release === graph.previousRelease)?.templateCommit
+    ) {
+      throw new Error("create-vireo publication requires a distinct immutable target Template commit.");
+    }
   }
   if (readFileSync(join(packageDirectory, "LICENSE"), "utf8") !== rootLicense) {
     throw new Error(`${manifest.name} publishes license text that differs from the repository license.`);
@@ -381,6 +413,69 @@ try {
   );
   if (createDryRun.projectName !== "generated-smoke" || createDryRun.dryRun !== true) {
     throw new Error("The packed create-vireo executable failed its non-writing CLI smoke test.");
+  }
+  const packedPolicy = JSON.parse(readFileSync(join(createPackage, "schema/vireo-upgrade-policy.json"), "utf8"));
+  const packedSource = packedPolicy.releaseGraph.releases.find(
+    release => release.release === packedPolicy.releaseGraph.previousRelease,
+  );
+  const packedTarget = packedPolicy.releaseGraph.releases.find(
+    release => release.release === packedPolicy.releaseGraph.publicRelease,
+  );
+  const frontendDoctor =
+    packedPolicy.releaseGraph.baselines?.[`${packedSource.release}->${packedTarget.release}`]?.frontend?.[0];
+  if (!frontendDoctor?.sourceContent || !frontendDoctor?.targetContent) {
+    throw new Error("Packed create-vireo must carry the content-addressed frontend Doctor adjacent baseline.");
+  }
+  const upgradeFixture = join(auditRoot, "packed-0.6-upgrade-fixture");
+  mkdirSync(join(upgradeFixture, ".vireo"), { recursive: true });
+  mkdirSync(join(upgradeFixture, "scripts"), { recursive: true });
+  const upgradeDependencies = { ...packedSource.frontendDependencies, react: "^19.0.0" };
+  writeFileSync(
+    join(upgradeFixture, "package.json"),
+    `${JSON.stringify({ name: "packed-0.6-upgrade-fixture", scripts: { vireo: packedSource.rootVireoScript }, dependencies: upgradeDependencies }, null, 2)}\n`,
+  );
+  writeFileSync(
+    join(upgradeFixture, "package-lock.json"),
+    `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies: upgradeDependencies } } }, null, 2)}\n`,
+  );
+  writeFileSync(
+    join(upgradeFixture, ".vireo/project.json"),
+    `${JSON.stringify({ schemaVersion: 1, profile: "frontend", projectName: "packed-0.6-upgrade-fixture", templateCommit: packedSource.templateCommit, createdBy: `create-vireo@${packedSource.release}` }, null, 2)}\n`,
+  );
+  writeFileSync(join(upgradeFixture, frontendDoctor.path), frontendDoctor.sourceContent);
+  const packedStatus = JSON.parse(
+    execFileSync("node", [join(createPackage, "dist/vireo-cli.js"), "status", "--json", "--project", upgradeFixture], {
+      cwd: consumerRoot,
+      encoding: "utf8",
+    }),
+  );
+  if (
+    packedStatus.currentRelease !== projectUpgradeContract.publicRelease ||
+    packedStatus.nextHop !== packedTarget.release
+  ) {
+    throw new Error("The packed vireo status executable did not report the adjacent 0.6 upgrade graph.");
+  }
+  const packedUpgrade = JSON.parse(
+    execFileSync(
+      "node",
+      [
+        join(createPackage, "dist/vireo-cli.js"),
+        "upgrade",
+        "--to",
+        packedTarget.release,
+        "--dry-run",
+        "--json",
+        "--project",
+        upgradeFixture,
+      ],
+      { cwd: consumerRoot, encoding: "utf8" },
+    ),
+  );
+  if (
+    !packedUpgrade.dryRun ||
+    !packedUpgrade.files.some(file => file.path === frontendDoctor.path && file.status === "update")
+  ) {
+    throw new Error("The packed vireo executable did not produce a non-writing adjacent Doctor upgrade plan.");
   }
 
   const typecheckEntry = join(consumerRoot, "consumer.ts");

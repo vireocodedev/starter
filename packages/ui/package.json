@@ -1,6 +1,6 @@
 {
   "name": "@vireocodedev/ui",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MUI-based Vireo UI components for responsive application layouts, forms, tables, overlays, and providers.",
   "type": "module",
   "sideEffects": [

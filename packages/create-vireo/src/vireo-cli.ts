@@ -1,7 +1,12 @@
 import { resolve } from "node:path";
 import { checkGeneratedEntities, ejectEntity, generateEntity } from "./entity-generator.js";
 import type { VireoGenerationTarget } from "./entity-renderer.js";
-import { formatVireoUpgradeText, upgradeVireoProject } from "./project-upgrade.js";
+import {
+  formatVireoStatusText,
+  formatVireoUpgradeText,
+  upgradeVireoProject,
+  vireoProjectStatus,
+} from "./project-upgrade.js";
 import { removeExample } from "./remove-example.js";
 
 const HELP = `Vireo application development CLI.
@@ -10,6 +15,7 @@ Usage:
   vireo generate entity <schema.json> [options]
   vireo check [options]
   vireo eject <entity-plural> [options]
+  vireo status [options]
   vireo upgrade --to <version> [options]
   vireo remove-example [options]
 
@@ -32,6 +38,9 @@ Upgrade options:
   --dry-run                   Validate and show the migration plan (default)
   --apply                     Apply only the declared Vireo-managed migration
   --accept-application-owned  Required with --apply; acknowledges the manual Template boundary
+
+Status reports the recorded release, next declared hop, managed-file drift, and
+generated capability ownership. It never writes files.
 
 Remove-example options:
   --dry-run                   Validate and show the complete removal plan (default)
@@ -172,6 +181,14 @@ async function upgrade(values: string[]) {
   print(formatVireoUpgradeText(result), false);
 }
 
+async function status(values: string[]) {
+  const { common, rest } = commonArguments(values);
+  if (rest.length > 0) throw new Error(`Unknown status option: ${rest[0]}`);
+  const result = await vireoProjectStatus(common.project);
+  if (common.json) return print(result, true);
+  print(formatVireoStatusText(result), false);
+}
+
 async function removeGeneratedExample(values: string[]) {
   const { common, rest } = commonArguments(values);
   let apply = false;
@@ -207,6 +224,7 @@ async function main() {
   if (command === "generate") await generate(values);
   else if (command === "check") await check(values);
   else if (command === "eject") await eject(values);
+  else if (command === "status") await status(values);
   else if (command === "upgrade") await upgrade(values);
   else if (command === "remove-example") await removeGeneratedExample(values);
   else throw new Error(`Unknown command: ${command}\n\n${HELP}`);

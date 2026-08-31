@@ -213,13 +213,20 @@
     {
       "id": "template-release-operations",
       "category": "maintainer-only",
-      "profiles": ["full-stack"],
+      "profiles": ["full-stack", "frontend"],
       "paths": [
         ".github/workflows/template-release.yml",
+        ".github/environments/template-release.json",
+        ".github/rulesets/starter-template-0.6.0.json",
+        ".github/rulesets/starter-template-0.7.0.json",
         "contracts/template-release-policy.json",
+        "contracts/template-release-recovery.json",
+        "contracts/project-upgrade-policy.json",
         "scripts/template-release-policy.mjs",
         "scripts/template-release-policy.test.mjs",
-        "scripts/write-template-release-manifest.mjs"
+        "scripts/write-template-release-manifest.mjs",
+        "scripts/template-release-recovery-policy.mjs",
+        "scripts/template-release-recovery-policy.test.mjs"
       ],
       "prefixes": []
     },
@@ -429,7 +436,12 @@
     { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/workflows/template-release.yml", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/environments/template-release.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.6.0.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.7.0.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "contracts/template-release-policy.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "contracts/template-release-recovery.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "contracts/project-upgrade-policy.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "scripts/template-release-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "scripts/template-release-policy.test.mjs", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "scripts/write-template-release-manifest.mjs", "profile": "full-stack", "category": "maintainer-only" },
@@ -443,7 +455,12 @@
       "category": "maintainer-only"
     },
     { "path": ".github/workflows/template-release.yml", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/environments/template-release.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.6.0.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.7.0.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": "contracts/template-release-policy.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": "contracts/template-release-recovery.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": "contracts/project-upgrade-policy.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/template-release-policy.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/template-release-policy.test.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/write-template-release-manifest.mjs", "profile": "frontend", "category": "maintainer-only" },
