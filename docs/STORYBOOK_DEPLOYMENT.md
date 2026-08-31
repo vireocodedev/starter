@@ -1,7 +1,7 @@
 # Documentation deployment
 
 The repository-wide Vireo documentation portal is published as a static GitHub
-Pages site at <https://vireocodedev.github.io/starter/docs/>. Storybook remains at
+Pages site at <https://vireocodedev.github.io/vireo/docs/>. Storybook remains at
 the site root and is also preserved inside the current version-specific snapshot.
 
 The deployment workflow lives in

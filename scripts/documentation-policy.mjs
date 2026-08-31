@@ -16,7 +16,7 @@ const unexpectedArguments = process.argv.slice(2).filter(argument => argument !=
 
 if (unexpectedArguments.length > 0) problems.push(`unexpected arguments: ${unexpectedArguments.join(" ")}`);
 if (policy.schemaVersion !== 1) problems.push("documentation policy schemaVersion must be 1");
-if (policy.publicBaseUrl !== "https://vireocodedev.github.io/starter") {
+if (policy.publicBaseUrl !== "https://vireocodedev.github.io/vireo") {
   problems.push("documentation policy must use the canonical public GitHub Pages URL");
 }
 if (!Array.isArray(policy.releases) || policy.releases.length === 0) {
@@ -78,8 +78,8 @@ const packageRecords = readdirSync(join(root, "packages"), { withFileTypes: true
   .filter(record => record.manifest.private !== true);
 
 if (current) {
-  if (current.template?.repository !== "https://github.com/vireocodedev/starter-template") {
-    problems.push("documentation release must identify the canonical starter-template repository");
+  if (current.template?.repository !== "https://github.com/vireocodedev/vireo-template") {
+    problems.push("documentation release must identify the canonical vireo-template repository");
   }
   if (!/^[a-f0-9]{40}$/u.test(current.template?.commit ?? "")) {
     problems.push("documentation release must pin an exact starter-template commit");
@@ -89,7 +89,7 @@ if (current) {
   const createVireoVersion = createSource.match(/CREATE_VIREO_PACKAGE_VERSION = "([^"]+)"/u)?.[1];
   const templateTag = createVireoVersion ? `starter-template@${createVireoVersion}` : undefined;
   const templateReleaseUrl = templateTag
-    ? `https://github.com/vireocodedev/starter-template/releases/tag/${encodeURIComponent(templateTag)}`
+    ? `https://github.com/vireocodedev/vireo-template/releases/tag/${encodeURIComponent(templateTag)}`
     : undefined;
   if (current.template?.commit !== generatedTemplateCommit) {
     problems.push(`documentation template pin must match create-vireo ${generatedTemplateCommit ?? "source"}`);
@@ -136,6 +136,22 @@ if (current) {
   }
   if (current.releaseLinks?.template !== templateReleaseUrl) {
     problems.push("documentation release link template must match the encoded template tag");
+  }
+  const currentSourceSurfaces = ["README.md", "docs/architecture/frontend-only-profile.md", "site/content"];
+  const staleTemplatePin = /github\.com\/vireocodedev\/(?:starter-template|vireo-template)\/blob\/([a-f0-9]{40})/gu;
+  for (const surface of currentSourceSurfaces) {
+    const paths = surface.endsWith(".md")
+      ? [surface]
+      : readdirSync(join(root, surface), { withFileTypes: true })
+          .filter(entry => entry.isFile())
+          .map(entry => join(surface, entry.name));
+    for (const path of paths) {
+      const contents = readFileSync(join(root, path), "utf8");
+      for (const match of contents.matchAll(staleTemplatePin)) {
+        if (match[1] !== current.template.commit)
+          problems.push(`${path} pins stale Template commit ${match[1]}; expected ${current.template.commit}`);
+      }
+    }
   }
 }
 

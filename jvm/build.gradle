@@ -297,12 +297,12 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
                     }
                     issueManagement {
                         system = 'GitHub Issues'
-                        url = 'https://github.com/vireocodedev/starter/issues'
+                        url = 'https://github.com/vireocodedev/vireo/issues'
                     }
                     licenses {
                         license {
                             name = 'MIT'
-                            url = 'https://github.com/vireocodedev/starter/blob/main/LICENSE'
+                            url = 'https://github.com/vireocodedev/vireo/blob/main/LICENSE'
                         }
                     }
                     developers {
@@ -316,9 +316,9 @@ configure(subprojects.findAll { it.name in rootProject.ext.publishedModules }) {
                         }
                     }
                     scm {
-                        connection = 'scm:git:https://github.com/vireocodedev/starter.git'
-                        developerConnection = 'scm:git:ssh://git@github.com/vireocodedev/starter.git'
-                        url = 'https://github.com/vireocodedev/starter'
+                        connection = 'scm:git:https://github.com/vireocodedev/vireo.git'
+                        developerConnection = 'scm:git:ssh://git@github.com/vireocodedev/vireo.git'
+                        url = 'https://github.com/vireocodedev/vireo'
                         tag = 'HEAD'
                     }
                 }

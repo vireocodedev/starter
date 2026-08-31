@@ -1,19 +1,20 @@
-# Remaining work that does not require human evaluation
+# Superseded non-human public-beta planning record
 
-Baseline date: 2026-08-28
+Baseline date: 2026-08-28 · Superseded: 2026-09-01
 
-Status: **active planning checklist**
+Status: **historical planning record; not an active public-beta checklist**
 
-This checklist reconciles the remaining Vireo roadmap work that can be completed
-without unfamiliar-user studies, independent adopter evidence, independent expert
-assessment, or manual assistive-technology/device evaluation. It uses the numbered
-phase backlogs as the completion authority; unchecked boxes in the older master
-roadmap are not automatically evidence that already-implemented work remains open.
+The machine-controlled public-beta closure is now authoritative in
+[`contracts/public-beta-engineering-readiness.json`](../../contracts/public-beta-engineering-readiness.json)
+and `npm run beta:engineering:check`. The dated
+[human handoff](public-beta-human-handoff-2026-09-01.md) is the only active
+public-beta gate record. It intentionally remains HOLD for external/manual evidence.
 
-Phase 6 identifiers below are proposed planning identifiers until `P6-00` versions
-the official Phase 6 backlog. Deferred engineering is intentionally separated from
-the launch critical path and must not be admitted merely to make the product appear
-broader.
+The unchecked rows below are retained as historical planning context, including
+post-beta discovery/content/community ideas and deferred engineering. They are not
+machine blockers and must not be used to imply that Vireo is still awaiting
+non-human public-beta work. Revive an item only through a dated decision that gives
+it a scope, owner, acceptance criterion, and release classification.
 
 ## Completion rules
 
@@ -362,7 +363,7 @@ and is not included in the completable scope above.
 - [x] Add unit coverage and a clean generated frontend consumer job in hosted CI.
 - [x] Publish architecture, team ownership, OpenAPI-wrapper, capability-limitation,
       command, public API, and website guidance.
-- [x] Publish `create-vireo@0.4.0` with npm provenance and pin generated projects
+- [x] Historical milestone: publish `create-vireo@0.4.0` with npm provenance and pin generated projects; the current public frontend profile is `create-vireo@0.7.0`.
       to that CLI line.
 
 Engineering is complete in the adapter-enabled Template commit and the Starter

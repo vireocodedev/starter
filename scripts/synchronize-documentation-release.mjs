@@ -39,7 +39,7 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   if (!createVireoVersion) throw new Error("create-vireo has no public workspace manifest");
   const templateVersion = createVireoVersion;
   const templateTag = `starter-template@${templateVersion}`;
-  const templateReleaseUrl = `https://github.com/vireocodedev/starter-template/releases/tag/${encodeURIComponent(templateTag)}`;
+  const templateReleaseUrl = `https://github.com/vireocodedev/vireo-template/releases/tag/${encodeURIComponent(templateTag)}`;
 
   const gradleProperties = readFileSync(join(repositoryRoot, "jvm", "gradle.properties"), "utf8");
   const jvmVersion = gradleProperties.match(/^version=(.+)$/mu)?.[1];
@@ -103,7 +103,7 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   currentDocumentation.template.tag = templateTag;
   currentDocumentation.template.commit = templateCommit;
   currentDocumentation.template.releaseUrl = templateReleaseUrl;
-  currentDocumentation.releaseLinks.jvmTag = `https://github.com/vireocodedev/starter/releases/tag/jvm-v${jvmVersion}`;
+  currentDocumentation.releaseLinks.jvmTag = `https://github.com/vireocodedev/vireo/releases/tag/jvm-v${jvmVersion}`;
   currentDocumentation.releaseLinks.template = templateReleaseUrl;
   documentation.currentRelease = nextReleaseId;
   updateReleaseReferences(lifecycle.supportLines, oldReleaseId, nextReleaseId);

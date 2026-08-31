@@ -2,7 +2,8 @@
 
 - Decision: D-104
 - Date: 2026-08-26
-- Status: accepted; external renames deferred to the coordinated Phase 1 migration
+- Status: executed 2026-09-01; canonical provider names are active and prior names
+  are retained only as GitHub redirect/history compatibility paths
 
 ## Context
 
@@ -11,9 +12,9 @@ and an older private Template repository:
 
 | Current repository              | Baseline role                                                               | Finding                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `vireocodedev/starter`          | TypeScript and JVM libraries, contracts, generators, verification, and docs | Canonical framework source, but its name describes project history rather than the product        |
-| `vireocodedev/starter-template` | Active full-stack reference/golden-path consumer                            | Canonical Template implementation at the audited commit                                           |
-| `vireocodedev/vireo-template`   | Older template, last pushed 2026-08-07                                      | Name collision with the desired target; must be preserved under an archive name before transition |
+| `vireocodedev/vireo`          | TypeScript and JVM libraries, contracts, generators, verification, and docs | Canonical framework source |
+| `vireocodedev/vireo-template` | Active full-stack reference/golden-path consumer                            | Canonical Template implementation at the audited 0.7.0 commit |
+| `vireocodedev/starter` / `starter-template` | Historical provider names | GitHub redirects preserve old public links; they are not canonical release/source coordinates |
 
 Creating a repository for every deliverable would increase navigation, security,
 release, issue, and maintenance cost before the project has external contributors.
@@ -33,21 +34,19 @@ Use two canonical repositories now and authorize one deferred examples repositor
 Do not create separate CLI, website, contracts, benchmark, fixture, or demo-source
 repositories until the split criteria below are met.
 
-## Transition sequence
+## Executed transition sequence
 
-External repository changes occur only after identity activation prerequisites pass:
+The provider migration was completed after identity activation prerequisites passed:
 
-1. tag the last meaningful `vireocodedev/vireo-template` commit;
-2. rename it to `vireo-template-archive-2026-08`, replace its README with an archive
-   notice, and set it read-only/archived;
-3. rename `vireocodedev/starter` to `vireocodedev/vireo`;
-4. rename active `vireocodedev/starter-template` to
+1. preserve/archive the older conflicting Template name before the target became available;
+2. rename `vireocodedev/starter` to `vireocodedev/vireo`;
+3. rename active `vireocodedev/starter-template` to
    `vireocodedev/vireo-template`;
-5. update remotes, package metadata, badges, CODEOWNERS, workflows, release consumers,
+4. update remotes, package metadata, badges, CODEOWNERS, workflows, release consumers,
    branch protections, security settings, and cross-repository tokens;
-6. verify GitHub redirects from the old repository URLs and retain explicit pointer
+5. verify GitHub redirects from the old repository URLs and retain explicit pointer
    repositories if any integration does not follow redirects safely;
-7. perform the examples split only when Phase 2 defines the minimal Template.
+6. defer the examples split until Phase 2 defines the minimal Template.
 
 ## Why TypeScript and JVM stay together
 

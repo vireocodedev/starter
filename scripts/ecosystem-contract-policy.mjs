@@ -164,7 +164,7 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
   const createVireoManifest = packageRecords.find(manifest => manifest.name === "create-vireo");
   const templateTag = createVireoVersion ? `starter-template@${createVireoVersion}` : undefined;
   const templateReleaseUrl = templateTag
-    ? `https://github.com/vireocodedev/starter-template/releases/tag/${encodeURIComponent(templateTag)}`
+    ? `https://github.com/vireocodedev/vireo-template/releases/tag/${encodeURIComponent(templateTag)}`
     : undefined;
   requireEqual("Template commit", contract.current?.template?.commit, templateCommit);
   requireEqual("create-vireo source version", createVireoVersion, createVireoManifest?.version);

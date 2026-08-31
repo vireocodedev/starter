@@ -347,7 +347,7 @@ try {
   const evidence = {
     schemaVersion: 1,
     verifiedAt: new Date().toISOString(),
-    repository: "https://github.com/vireocodedev/starter",
+    repository: "https://github.com/vireocodedev/vireo",
     commit: process.env.GITHUB_SHA ?? null,
     registry,
     anonymousInstall: true,

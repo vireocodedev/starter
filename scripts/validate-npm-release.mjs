@@ -14,7 +14,7 @@ const expectedPackages = new Map([
   ["sqlite", "@vireocodedev/sqlite"],
   ["ui", "@vireocodedev/ui"],
 ]);
-const expectedRepository = "git+https://github.com/vireocodedev/starter.git";
+const expectedRepository = "git+https://github.com/vireocodedev/vireo.git";
 const expectedRegistry = "https://registry.npmjs.org";
 
 const pendingChangesets = readdirSync(join(repositoryRoot, ".changeset"))

@@ -69,7 +69,7 @@ test("generated projection assertions reject inherited public identity routes", 
     await writeFile(join(root, "SECURITY.md"), `${identity.securityContact}\n`);
     await writeFile(
       join(root, "SUPPORT.md"),
-      `${identity.supportUrl}\nhttps://github.com/vireocodedev/starter-template\n`,
+      `${identity.supportUrl}\nhttps://github.com/vireocodedev/vireo-template\n`,
     );
     await writeFile(
       join(root, ".github", "ISSUE_TEMPLATE", "config.yml"),

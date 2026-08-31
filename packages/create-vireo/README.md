@@ -2,7 +2,7 @@
 
 Creates either a full-stack Vireo application or a standalone Vireo frontend from
 an immutable, reviewed commit of the public
-[Vireo Starter Template](https://github.com/vireocodedev/starter-template).
+[Vireo Template](https://github.com/vireocodedev/vireo-template).
 
 ```bash
 npm create vireo@latest my-app

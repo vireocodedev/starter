@@ -22,11 +22,11 @@ test("rejects public workspace lockfile version drift", () => {
 
 test("compares documentation Template coordinates semantically", () => {
   const expected = {
-    repository: "https://github.com/vireocodedev/starter-template",
+    repository: "https://github.com/vireocodedev/vireo-template",
     version: "0.6.0",
     tag: "starter-template@0.6.0",
     commit: "a".repeat(40),
-    releaseUrl: "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.6.0",
+    releaseUrl: "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.6.0",
   };
   const reordered = {
     commit: expected.commit,

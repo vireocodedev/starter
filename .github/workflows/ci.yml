@@ -160,7 +160,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
-          repository: vireocodedev/starter-template
+          repository: vireocodedev/vireo-template
           ref: a670d7f95f720a91705c7c156d19e605582fb4c8
           path: starter-template
           persist-credentials: false

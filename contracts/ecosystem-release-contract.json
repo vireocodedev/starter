@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "2026-08-31.1",
+  "contractVersion": "2026-09-01.1",
   "maturity": "public-alpha",
   "product": {
     "id": "vireo-framework",
     "name": "Vireo Framework",
     "organization": "Vireo Code",
-    "sourceRepository": "https://github.com/vireocodedev/starter",
-    "documentation": "https://vireocodedev.github.io/starter",
-    "support": "https://github.com/vireocodedev/starter/blob/main/SUPPORT.md",
-    "security": "https://github.com/vireocodedev/starter/security/advisories/new"
+    "sourceRepository": "https://github.com/vireocodedev/vireo",
+    "documentation": "https://vireocodedev.github.io/vireo",
+    "support": "https://github.com/vireocodedev/vireo/blob/main/SUPPORT.md",
+    "security": "https://github.com/vireocodedev/vireo/security/advisories/new"
   },
   "policySources": {
     "platformSupport": "contracts/platform-support-policy.json",
@@ -40,13 +40,13 @@
       "modules": ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"]
     },
     "template": {
-      "repository": "https://github.com/vireocodedev/starter-template",
+      "repository": "https://github.com/vireocodedev/vireo-template",
       "commit": "a670d7f95f720a91705c7c156d19e605582fb4c8",
       "profiles": ["frontend", "full-stack"],
       "databases": ["h2", "postgresql"],
       "version": "0.7.0",
       "tag": "starter-template@0.7.0",
-      "releaseUrl": "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.7.0"
+      "releaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.7.0"
     }
   },
   "compatibility": {
@@ -71,7 +71,7 @@
         "templateCommit": "a670d7f95f720a91705c7c156d19e605582fb4c8",
         "templateVersion": "0.7.0",
         "templateTag": "starter-template@0.7.0",
-        "templateReleaseUrl": "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.7.0"
+        "templateReleaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.7.0"
       }
     ]
   },

@@ -4,11 +4,11 @@ Vireo is developed in public. Use the route that matches the type of feedback so
 
 ## Ask and discuss
 
-Use [GitHub Discussions](https://github.com/vireocodedev/starter/discussions) for architecture questions, adoption experiences, ideas and design exploration.
+Use [GitHub Discussions](https://github.com/vireocodedev/vireo/discussions) for architecture questions, adoption experiences, ideas and design exploration.
 
 ## Report a reproducible problem
 
-Use [GitHub Issues](https://github.com/vireocodedev/starter/issues) for confirmed bugs. Include:
+Use [GitHub Issues](https://github.com/vireocodedev/vireo/issues) for confirmed bugs. Include:
 
 - Exact Vireo documentation and package versions
 - Project profile
@@ -21,19 +21,19 @@ Remove secrets and private company data.
 
 ## Contribute
 
-Read the [contributing guide](https://github.com/vireocodedev/starter/blob/main/CONTRIBUTING.md) before opening a pull request. Public API changes require tests, documentation, compatibility consideration and a changeset where applicable.
+Read the [contributing guide](https://github.com/vireocodedev/vireo/blob/main/CONTRIBUTING.md) before opening a pull request. Public API changes require tests, documentation, compatibility consideration and a changeset where applicable.
 
-The `starter-template` repository demonstrates public consumer composition; the `starter` repository owns framework libraries, CLI, contracts, release automation and this website.
+The `vireo-template` repository demonstrates public consumer composition; the `vireo` repository owns framework libraries, CLI, contracts, release automation and this website.
 
 ## Security reports
 
-Do not open a public issue for an unpatched vulnerability. Follow the private route in the [security policy](https://github.com/vireocodedev/starter/security/policy).
+Do not open a public issue for an unpatched vulnerability. Follow the private route in the [security policy](https://github.com/vireocodedev/vireo/security/policy).
 
 ## Evaluate honestly
 
 Vireo's current maturity is public `0.x`. Reports about confusing onboarding, missing workflows and unsuitable architecture are as valuable as code contributions.
 
-- [Record a sanitized public-beta evaluation](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml) after a bounded technical review.
-- [Open an independent adopter check-in](https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml) only when you control a non-fixture application and meet the qualification statements in the form.
+- [Record a sanitized public-beta evaluation](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml) after a bounded technical review.
+- [Open an independent adopter check-in](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml) only when you control a non-fixture application and meet the qualification statements in the form.
 
 The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Do not include credentials, private source, application data, employer or client identity, or vulnerability details.

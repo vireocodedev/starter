@@ -38,13 +38,13 @@ range, not an elapsed-date commitment.
 | P1-00 | Freeze the passed Phase 0 scope and Phase 1 acceptance set                              | Complete      | 0 d                   | High       |
 | P1-01 | Activate and professionally clear the identity across canonical public surfaces         | Partial       | 1–3 d + external wait | Low        |
 | P1-02 | Productionize the accepted npm/Maven distribution and provenance architecture           | Complete      | 0 d                   | High       |
-| P1-03 | Finish repository migration and publish compatibility sequencing                        | Partial       | 2–4 d                 | Medium     |
+| P1-03 | Finish repository migration and publish compatibility sequencing                        | Complete      | 0 d                   | High       |
 | P1-04 | Publish credential-free npm artifacts through the selected trusted path                 | Complete      | 0 d                   | High       |
 | P1-05 | Publish credential-free Maven artifacts/BOM through the selected trusted path           | Complete      | 0 d                   | High       |
 | P1-06 | Correct repository metadata, topics, links, and public settings                         | Complete      | 0 d                   | High       |
 | P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Complete      | 0 d                   | High       |
 | P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Complete      | 0 d                   | High       |
-| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Partial       | 1–2 d + external wait | Medium     |
+| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Complete (machine) | 0 d; human continuity open | High     |
 | P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Complete      | 0 d                   | High       |
 | P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Complete      | 0 d                   | High       |
 | P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Complete      | 0 d                   | High       |
@@ -56,15 +56,17 @@ range, not an elapsed-date commitment.
 
 - **P1-02, P1-04, and P1-05: complete.** Seven public npm packages expose
   provenance and six signed Maven modules pass anonymous cold-consumer checks.
-- **P1-03 (package-coordinate portion): implemented.** Coordinates are
+- **P1-03: complete 2026-09-01.** Coordinates are
   `com.vireocode:vireo-{bom,core,auth,query,history,offline}` and public Java APIs
   live beneath `com.vireocode.vireo.*`; the Template and all JVM fixtures consume
-  them together. The approved repository rename/compatibility sequence remains.
+  them together. The provider migration establishes `vireocodedev/vireo` and
+  `vireocodedev/vireo-template` as canonical repositories, with old URLs retained
+  only through GitHub redirect/history compatibility.
 - **P1-06, P1-07, and P1-08: complete.** Both repositories are public with accurate
   metadata, homepages, topics, Discussions, and Template designation. Support,
   governance, issue intake, ownership, compatibility, deprecation, and upgrade
   surfaces pass manifest-derived local checks and return 200 anonymously.
-- **P1-09: partial.** Both repositories now have provider secret scanning, push
+- **P1-09: complete for machine controls.** Both repositories now have provider secret scanning, push
   protection, validity checks, Dependabot alerts/updates, private vulnerability
   reporting, read-only workflow defaults, and SHA enforcement. Source-owned lanes
   cover full-history Gitleaks, CodeQL, and dependency review. A credential-free

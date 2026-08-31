@@ -273,7 +273,7 @@ const manifest = {
   schemaVersion: 2,
   evidenceClass: "unsigned-release-candidate",
   source: {
-    repository: "https://github.com/vireocodedev/starter",
+    repository: "https://github.com/vireocodedev/vireo",
     commit,
     committedAt: command("git", ["show", "-s", "--format=%cI", commit]),
     clean: true,

@@ -31,7 +31,7 @@ const sitePolicy = {
 };
 
 const documentationPolicy = {
-  publicBaseUrl: "https://vireocodedev.github.io/starter",
+  publicBaseUrl: "https://vireocodedev.github.io/vireo",
   currentRelease: "npm-0.3.0_jvm-0.2.0",
   releases: [
     {
@@ -64,7 +64,7 @@ test("derives friendly and exact release identities from one policy", () => {
   assert.equal(website.currentRelease.createVireo, "0.3.0");
   assert.equal(
     website.links.storybook,
-    `https://vireocodedev.github.io/starter/versions/${documentationPolicy.currentRelease}/storybook/`,
+    `https://vireocodedev.github.io/vireo/versions/${documentationPolicy.currentRelease}/storybook/`,
   );
   assert.equal(website.links.source, documentationPolicy.releases[0].releaseLinks.source);
 });
@@ -130,7 +130,7 @@ test("pins offline documentation and refuses silent Vireo 0.3 snapshot drift", (
   const offline = pages.find(page => page.path === "/docs/offline/");
   assert.equal(
     offline?.sourceUrl,
-    "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/offline.md",
+    "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/offline.md",
   );
   assert.match(offline?.sourceLabel ?? "", /Pinned Starter Template offline contract/u);
   assert.match(

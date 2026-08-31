@@ -11,7 +11,7 @@
 
       owner=@github-handle-or-team
       rationale=why the finding cannot be fixed immediately
-      tracking=https://github.com/vireocodedev/starter/security/...
+      tracking=https://github.com/vireocodedev/vireo/security/...
 
     The Gradle policy task rejects missing metadata and expired exceptions;
     Dependency-Check rejects unused rules.

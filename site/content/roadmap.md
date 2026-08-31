@@ -27,4 +27,4 @@ Vireo is a public, production-shaped `0.x` framework. The source, packages, docu
 
 Vireo distinguishes implemented engineering from evaluated product quality. Automated checks can prove builds, contracts, security controls and deployments; they cannot prove that documentation is understandable or that teams want the product.
 
-Read the complete [master roadmap](https://github.com/vireocodedev/starter/blob/main/VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md) for detailed gates and historical evidence.
+Read the complete [master roadmap](https://github.com/vireocodedev/vireo/blob/main/VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md) for detailed gates and historical evidence.

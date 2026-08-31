@@ -26,7 +26,7 @@ The public Template is the canonical evaluation surface because it consumes Vire
 through the same npm and Maven boundaries as an independent application.
 
 ```bash
-git clone https://github.com/vireocodedev/starter-template.git
+git clone https://github.com/vireocodedev/vireo-template.git
 cd starter-template
 cp .env.example .env
 cd frontend
@@ -94,13 +94,13 @@ claim that an unreviewed clone is safe for a particular production workload.
 
 ## Record an external outcome
 
-After a bounded evaluation, [record a sanitized public-beta outcome](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml), including a blocker or objection if one occurred. If you control a non-fixture application and meet the qualification statements, [open an independent adopter check-in](https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml). The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Do not include credentials, private source, application data, employer/client identity, or vulnerability details.
+After a bounded evaluation, [record a sanitized public-beta outcome](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml), including a blocker or objection if one occurred. If you control a non-fixture application and meet the qualification statements, [open an independent adopter check-in](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml). The form definitions and submitted issues are public; opening or submitting the rendered forms requires GitHub sign-in. Do not include credentials, private source, application data, employer/client identity, or vulnerability details.
 
 Submitting a form makes the outcome available for privacy-safe qualification review. It does not make the public-beta gate pass or establish production readiness.
 
 ## Continue by use case
 
-- Full application: [Template customization](https://github.com/vireocodedev/starter-template/blob/main/docs/customizing-the-template.md)
+- Full application: [Template customization](https://github.com/vireocodedev/vireo-template/blob/main/docs/customizing-the-template.md)
 - Standalone frontend: [frontend-only project profile](architecture/frontend-only-profile.md)
 - Frontend packages and subpaths: [public API map](PUBLIC_API.md#frontend-entry-points)
 - React design system: [Starter UI classified surface](../packages/ui/docs/PUBLIC_SURFACE.md)

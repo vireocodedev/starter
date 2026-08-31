@@ -12,7 +12,7 @@
           "description": "Learn Vireo through task-oriented guides, framework concepts, working examples and explicit ownership boundaries.",
           "category": "Documentation",
           "file": "docs-overview.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/README.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/README.md",
           "sourceLabel": "Framework README"
         },
         {
@@ -21,7 +21,7 @@
           "description": "Create a Vireo application, validate the local environment and reach a working development loop.",
           "category": "Start",
           "file": "getting-started.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/getting-started.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/getting-started.md"
         },
         {
           "path": "/docs/getting-started/choose-your-profile/",
@@ -38,7 +38,7 @@
           "description": "Run Vireo without Java or a database and connect the React application to a separately owned company API.",
           "category": "Start",
           "file": "frontend-only.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/architecture/frontend-only-profile.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/architecture/frontend-only-profile.md"
         },
         {
           "path": "/docs/getting-started/full-stack/",
@@ -47,7 +47,7 @@
           "description": "Run the complete React and Spring Boot golden path with an embedded or PostgreSQL database.",
           "category": "Start",
           "file": "full-stack.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/getting-started.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/getting-started.md"
         }
       ]
     },
@@ -60,7 +60,7 @@
           "description": "Understand Vireo's layers, request paths, replaceable seams and application ownership model.",
           "category": "Core concepts",
           "file": "architecture.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/flagship-architecture.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/flagship-architecture.md"
         },
         {
           "path": "/docs/concepts/ownership-boundaries/",
@@ -76,7 +76,7 @@
           "description": "Replace mock or HTTP defaults through stable authentication, item, query and history adapter slots.",
           "category": "Core concepts",
           "file": "adapters.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/frontend/docs/architecture/frontend-only-adoption.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/frontend/docs/architecture/frontend-only-adoption.md"
         },
         {
           "path": "/docs/concepts/wire-contracts/",
@@ -84,7 +84,7 @@
           "description": "Keep generated frontend transports, schemas and backend DTO boundaries aligned without hiding domain decisions.",
           "category": "Core concepts",
           "file": "wire-contracts.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/architecture/wire-contracts.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/architecture/wire-contracts.md"
         },
         {
           "path": "/docs/concepts/generated-code/",
@@ -93,7 +93,7 @@
           "description": "Know what Vireo may regenerate, how drift is detected and when to eject a capability into application ownership.",
           "category": "Core concepts",
           "file": "generated-code.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/architecture/generated-code-ownership.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/architecture/generated-code-ownership.md"
         }
       ]
     },
@@ -106,7 +106,7 @@
           "description": "Use Vireo's React libraries for page composition, queries, forms, localization, history and offline-aware UX.",
           "category": "Build",
           "file": "frontend.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/PUBLIC_API.md"
         },
         {
           "path": "/docs/spring/",
@@ -114,7 +114,7 @@
           "description": "Adopt the coordinated Vireo BOM and Spring modules while keeping application domain and authorization policy explicit.",
           "category": "Build",
           "file": "spring.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/PUBLIC_API.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/PUBLIC_API.md"
         },
         {
           "path": "/docs/offline/",
@@ -122,7 +122,7 @@
           "description": "Understand the offline shell guarantee, queue boundaries and the domain decisions Vireo deliberately does not infer.",
           "category": "Build",
           "file": "offline.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/offline.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/offline.md",
           "sourceLabel": "Pinned Starter Template offline contract"
         },
         {
@@ -139,7 +139,7 @@
           "description": "Generate, inspect, run and verify one complete Purchase Order capability in a Vireo project.",
           "category": "Guide",
           "file": "vertical-slice.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/tutorials/30-minute-vertical-slice.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/tutorials/30-minute-vertical-slice.md"
         }
       ]
     },
@@ -153,7 +153,7 @@
           "description": "Apply Vireo's stable visual, responsive, interaction and quality contracts while retaining application-owned product decisions.",
           "category": "Design system",
           "file": "design-system-overview.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/VISUAL_LANGUAGE.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/VISUAL_LANGUAGE.md",
           "sourceLabel": "Design-system source contract"
         },
         {
@@ -162,7 +162,7 @@
           "description": "Compose operational interfaces with semantic surfaces, clear hierarchy, intentional color roles and accessible command surfaces.",
           "category": "Design system",
           "file": "design-system-visual-language.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/VISUAL_LANGUAGE.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/VISUAL_LANGUAGE.md",
           "sourceLabel": "Visual-language source contract"
         },
         {
@@ -171,7 +171,7 @@
           "description": "Preserve tasks, state and accessibility across wide and compact navigation, page and data-view compositions.",
           "category": "Design system",
           "file": "design-system-responsive-shell.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/routing-and-shell.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/routing-and-shell.md",
           "sourceLabel": "Shell source contract"
         },
         {
@@ -180,7 +180,7 @@
           "description": "Use calm, accessible feedback that explains change without depending on animation or adding visual noise.",
           "category": "Design system",
           "file": "design-system-motion.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/INTERACTION_MOTION.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/INTERACTION_MOTION.md",
           "sourceLabel": "Motion source contract"
         },
         {
@@ -189,7 +189,7 @@
           "description": "Preserve context, geometry and accessibility while pages, data, forms and actions perform asynchronous work.",
           "category": "Design system",
           "file": "design-system-loading-states.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/784aadb87a47da40bfc4c984a90a68fa502c0dea/docs/LOADING_STATE_STANDARD.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/LOADING_STATE_STANDARD.md",
           "sourceLabel": "Normative loading-state standard"
         },
         {
@@ -198,7 +198,7 @@
           "description": "Structure models, form modes, validation timing and submission feedback for accessible, reliable workflows.",
           "category": "Design system",
           "file": "design-system-forms-and-validation.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/models-forms-and-validation.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/models-forms-and-validation.md",
           "sourceLabel": "Form source contract"
         },
         {
@@ -207,7 +207,7 @@
           "description": "Normalize session, transport and rendering failures into accessible, contextual recovery experiences.",
           "category": "Design system",
           "file": "design-system-authentication-and-errors.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/authentication-and-errors.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/authentication-and-errors.md",
           "sourceLabel": "Authentication and error source contract"
         },
         {
@@ -216,7 +216,7 @@
           "description": "Keep copy, validation, accessible labels and temporal formatting consistent in every supported locale.",
           "category": "Design system",
           "file": "design-system-localization.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/localization.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/localization.md",
           "sourceLabel": "Localization source contract"
         },
         {
@@ -225,7 +225,7 @@
           "description": "Turn visual, responsive, accessibility and recovery expectations into repeatable release evidence.",
           "category": "Design system",
           "file": "design-system-quality-and-release.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/storybook-and-testing.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/architecture/storybook-and-testing.md",
           "sourceLabel": "Quality source contract"
         }
       ]
@@ -255,7 +255,7 @@
           "description": "Generate reviewable frontend or full-stack capabilities from a versioned entity schema and verify their integrity.",
           "category": "CLI",
           "file": "generate.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/docs/generators/entity-schema.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/generators/entity-schema.md"
         },
         {
           "path": "/docs/upgrades/",
@@ -263,7 +263,7 @@
           "description": "Preview supported Vireo-managed migrations, apply them deliberately and retain application-owned changes.",
           "category": "CLI",
           "file": "upgrades.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/project-upgrades.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/project-upgrades.md"
         }
       ]
     },
@@ -276,7 +276,7 @@
           "description": "Package and deploy Vireo applications with explicit profiles, health endpoints, secrets and rollback boundaries.",
           "category": "Operate",
           "file": "deployment.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/deployment.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/deployment.md"
         },
         {
           "path": "/docs/security/",
@@ -284,7 +284,7 @@
           "description": "Understand framework controls, application responsibilities, supported reporting and production-hardening boundaries.",
           "category": "Operate",
           "file": "security.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/security-hardening.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/security-hardening.md"
         },
         {
           "path": "/docs/accessibility/",
@@ -292,7 +292,7 @@
           "description": "Apply Vireo's keyboard, focus, responsive and semantic UI expectations to product-specific workflows.",
           "category": "Operate",
           "file": "accessibility.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/accessibility.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/accessibility.md"
         },
         {
           "path": "/docs/troubleshooting/",
@@ -300,7 +300,7 @@
           "description": "Resolve the most common environment, port, dependency, database, PWA and generated-contract failures.",
           "category": "Operate",
           "file": "troubleshooting.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/troubleshooting.md"
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/main/docs/troubleshooting.md"
         }
       ]
     }
@@ -354,7 +354,7 @@
       "description": "Understand Vireo's current public 0.x boundary, completed engineering evidence and deliberately open product work.",
       "category": "Project",
       "file": "roadmap.md",
-      "sourceUrl": "https://github.com/vireocodedev/starter/blob/main/VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md"
+      "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md"
     },
     {
       "path": "/community/",

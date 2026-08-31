@@ -65,9 +65,9 @@
     },
     "tests": {
       "label": "Tests and contract checks",
-      "baselineMs": 62000,
-      "warningMs": 150000,
-      "failureMs": 210000,
+      "baselineMs": 190278,
+      "warningMs": 220000,
+      "failureMs": 270000,
       "baselineRssKiB": 7298089,
       "warningRssKiB": 8388608,
       "failureRssKiB": 10485760

@@ -12,16 +12,17 @@ mechanisms for selected disconnected workflows; they do not make arbitrary busin
 logic synchronize safely. The exact primitive guarantees, conflict ownership, and
 adversarial admission checklist are in
 [`docs/OFFLINE_GUARANTEES.md`](docs/OFFLINE_GUARANTEES.md). See the public
-[Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
+[Vireo Template](https://github.com/vireocodedev/vireo-template) for the
 current runnable full-stack composition.
 
-[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
+[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/vireo-template/a670d7f95f720a91705c7c156d19e605582fb4c8/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
 
 This is the current Template pinned by the release contract, not a concept render. [Try the disposable live demo](https://demo.vireocode.com), follow the [guided build](https://vireocode.com/docs/getting-started/), or read [who Vireo does and does not fit](https://vireocode.com/docs/getting-started/choose-your-profile/) before installing.
 
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
 creation, doctor diagnostics, and target-aware entity generator are implemented.
-The standalone frontend profile is public in `create-vireo@0.4.0`. Its version-aware
+The standalone frontend profile was introduced in `create-vireo@0.4.0` and is current
+in `create-vireo@0.7.0`. Its version-aware
 project upgrade currently supports the explicit 0.2.0→0.3.0 release pair.
 
 ## Start here
