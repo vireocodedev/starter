@@ -13,7 +13,7 @@ their named human/provider evidence exists.
 
 | Claim surface        | Required evidence                                                                                | Current disposition                       |
 | -------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| First run            | Anonymous `npm create vireo@latest`, doctor, setup, and clean verification                       | Automated evidence exists; human row open |
+| First run            | Anonymous `npm create vireo@latest`, setup, doctor, and clean verification                       | Automated evidence exists; human row open |
 | Killer workflow      | Generate, run, customize, eject, and upgrade a realistic application-owned vertical slice        | Automated fixture exists; human row open  |
 | Flagship quality     | Responsive seeded application, accessible critical journey, explicit supported/unsupported scope | Engineering evidence complete             |
 | Hosted evaluation    | Public revision, health, journey, reset policy, monitoring history, and incident contact         | Complete; best effort, no SLA             |

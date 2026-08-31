@@ -46,7 +46,7 @@ corepack npm run verify
 
 The generated project is application-owned. Start with the
 [frontend-only adoption guide](../architecture/frontend-only-profile.md), make a
-small visible change, run `npm run verify` again, and commit the generated baseline
+small visible change, run `corepack npm run verify` again, and commit the generated baseline
 before adding product features. For full-stack composition, use the same command
 with `--profile full-stack`; do not mix local framework source into the generated
 application unless you are intentionally working on Vireo itself.
