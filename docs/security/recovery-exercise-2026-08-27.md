@@ -1,6 +1,7 @@
 # Release recovery exercise — 2026-08-27
 
-Status: **source and provider-control tabletop passed; backup-owner exercise open**
+Status: **source tabletop passed; desired provider controls are checked in; live
+application and backup-owner exercise remain open**
 
 ## Scenario
 
@@ -50,11 +51,12 @@ sequence without reusing an immutable version.
 
 ## Findings and limitations
 
-- **Open:** no branch protection or repository ruleset currently protects `main`.
-- **Open:** allowed Actions remain provider-wide `all`; repository policy rejects
-  unreviewed actions, but the provider allowlist should also be narrowed.
-- **Open:** `maven-central` lacks reviewers and branch/tag restrictions;
-  `github-pages` permits administrator bypass.
+- **Ready to apply, not yet live evidence:** the 2026-08-31 checked-in desired
+  state defines no-bypass main/tag rulesets, a narrowed Actions allowlist, and
+  exact environment branch/tag restrictions. An authenticated API export must
+  show those settings before these findings close.
+- **Open:** the interim single-owner ruleset cannot require an independent
+  CODEOWNERS approval without creating a maintainer lockout.
 - **Open:** only one trusted recovery account is evidenced. This tabletop did not
   prove a backup owner can receive a report, revoke identities, or restore release
   access without the primary maintainer.
@@ -65,5 +67,6 @@ sequence without reusing an immutable version.
   [`43426201`](https://github.com/vireocodedev/starter/attestations/43426201) covers
   all 27 Central artifacts.
 
-The runbook is technically actionable, but P1-09 remains partial until the open
-provider controls and human backup-owner recovery exercise are completed.
+The runbook is technically actionable, but P1-09 remains partial until live
+provider controls are evidenced and the human backup-owner recovery exercise is
+completed.

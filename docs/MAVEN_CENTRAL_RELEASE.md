@@ -12,7 +12,7 @@ set of six artifacts represented by seven PURLs.
   `vireocode.com`.
 - Keep the public signing key available from a public keyserver and keep its
   private key plus recovery material outside the repository.
-- Protect the GitHub `maven-central` environment with the desired reviewers.
+- Apply the checked-in [`maven-central` environment desired state](../.github/environments/maven-central.json): restrict it to `main`, add its documented reviewer, and disable administrator bypass. Capture an authenticated API export after applying it.
 - Store only these environment secrets:
   `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`, `MAVEN_SIGNING_KEY`, and
   `MAVEN_SIGNING_PASSWORD`.

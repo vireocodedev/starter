@@ -1,8 +1,8 @@
-* @vireocodedev
+* @brunotot
 
-/packages/ui/ @vireocodedev
-/jvm/ @vireocodedev
-/.github/ @vireocodedev
-/.release-impact/ @vireocodedev
-/contracts/release-impact-policy.json @vireocodedev
-/contracts/release-lifecycle-policy.json @vireocodedev
+/packages/ui/ @brunotot
+/jvm/ @brunotot
+/.github/ @brunotot
+/.release-impact/ @brunotot
+/contracts/release-impact-policy.json @brunotot
+/contracts/release-lifecycle-policy.json @brunotot

@@ -110,16 +110,19 @@ Repository-owned workflow policy still checks every action against a reviewed
 action/SHA/version map. Provider SHA enforcement is defense in depth rather than a
 replacement for that allowlist.
 
-## Remaining GitHub settings
+## Provider-control desired state and live-evidence boundary
 
-An administrator must record a dated API export or review note for each remaining
-item before the Phase 1 security gate closes:
+The reviewed, source-owned desired state is recorded in
+[`provider-controls-2026-08-31.md`](provider-controls-2026-08-31.md). An
+administrator must apply it and record a dated authenticated API export before a
+control becomes live evidence. Source validation cannot prove a provider setting.
+
+The live application must cover:
 
 - restrict allowed actions to GitHub-owned actions plus the reviewed Changesets
   and Gradle actions; repository SHA enforcement is already enabled;
-- protect `main`: require pull requests, current approving CODEOWNERS review for
-  `.github/**`, dismissal of stale approvals, conversation resolution, and the
-  TypeScript, JVM, workflow-policy, and secret-scan checks;
+- protect `main`: require pull requests, dismissal of stale approvals,
+  conversation resolution, and the exact named hosted checks;
 - prohibit force pushes and deletion of `main`; tightly limit bypass identities;
 - protect the `github-pages` environment and restrict it to the intended branch;
 - before moving publication to a public registry, split release-PR maintenance from
@@ -128,9 +131,10 @@ item before the Phase 1 security gate closes:
 - give at least two trusted maintainers recoverable access to the organization,
   registries, environments, security inbox, and signing/provenance identities.
 
-The release-PR and npm publication workflows are now split, and npm publication is
-protected by `package-release`. The Maven and Pages environment findings remain in
-the dated recovery exercise.
+The release-PR and npm publication workflows are split. The desired state restricts
+both publication environments and Pages, but the dated live API record is still
+the completion authority. Only one trusted maintainer is currently evidenced, so
+the interim rules cannot honestly require an independent CODEOWNERS approval.
 
 ## Review and release rules
 
