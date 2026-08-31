@@ -23,7 +23,8 @@ This public `0.x` line is production-shaped, not a production-readiness claim. P
 creation, doctor diagnostics, and target-aware entity generator are implemented.
 The standalone frontend profile was introduced in `create-vireo@0.4.0` and is current
 in `create-vireo@0.7.0`. Its version-aware
-project upgrade currently supports the explicit 0.2.0→0.3.0 release pair.
+project upgrade currently supports the explicit adjacent 0.6.0→0.7.0 release
+pair; the original 0.2.0→0.3.0 pair remains retained historical evidence.
 
 ## Start here
 
