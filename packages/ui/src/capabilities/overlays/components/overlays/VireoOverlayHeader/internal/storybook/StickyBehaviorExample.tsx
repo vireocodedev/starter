@@ -19,6 +19,7 @@ export default function StickyBehaviorExample() {
             <Box
               role="region"
               aria-label={example.regionLabel}
+              tabIndex={0}
               sx={{
                 height: 180,
                 mt: 0.5,
@@ -28,7 +29,7 @@ export default function StickyBehaviorExample() {
                 bgcolor: "background.paper",
               }}
             >
-              <VireoOverlayHeader title={`${example.label} header`} sticky={example.sticky} />
+              <VireoOverlayHeader slots={{ root: "div" }} title={`${example.label} header`} sticky={example.sticky} />
               <Box sx={{ minHeight: 360, p: 3, color: "text.secondary" }}>
                 Scrollable overlay content makes the positioning difference visible.
               </Box>

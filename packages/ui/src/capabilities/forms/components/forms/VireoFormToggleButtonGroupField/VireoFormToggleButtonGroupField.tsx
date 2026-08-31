@@ -89,10 +89,6 @@ function joinIds(...ids: Array<string | undefined>): string | undefined {
   return joined || undefined;
 }
 
-function isAriaInvalid(value: unknown): boolean {
-  return value === true || value === "true";
-}
-
 function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButtonGroupFieldValue>(
   inProps: VireoFormToggleButtonGroupFieldProps<TValue>,
   forwardedRef: React.ForwardedRef<HTMLDivElement>,
@@ -196,7 +192,6 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
   const resolvedGroupSlotProps = resolveSlotProps(slotProps.toggleButtonGroup, ownerState);
   const {
     "aria-describedby": groupSlotAriaDescribedBy,
-    "aria-invalid": groupSlotAriaInvalid,
     "aria-label": groupSlotAriaLabel,
     "aria-labelledby": groupSlotAriaLabelledBy,
     className: groupSlotClassName,
@@ -319,6 +314,7 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
       ownerState={ownerState}
       className={joinClassNames(classes.root, className, rootSlotClassName)}
       disabled={disabled}
+      data-vireo-field-invalid={effectiveError ? "true" : undefined}
       error={effectiveError}
       fullWidth={fullWidth}
       required={required}
@@ -331,11 +327,9 @@ function VireoFormToggleButtonGroupFieldImpl<TValue extends VireoFormToggleButto
         ref={groupSlotRef}
         ownerState={ownerState}
         aria-describedby={describedBy}
-        aria-invalid={effectiveError || isAriaInvalid(groupSlotAriaInvalid) || undefined}
         aria-label={ariaLabel ?? groupSlotAriaLabel}
         aria-labelledby={ariaLabelledBy ?? groupSlotAriaLabelledBy}
         aria-readonly={effectiveReadOnly || undefined}
-        aria-required={required || undefined}
         className={joinClassNames(classes.toggleButtonGroup, groupSlotClassName)}
         color={color}
         exclusive={!multiple}

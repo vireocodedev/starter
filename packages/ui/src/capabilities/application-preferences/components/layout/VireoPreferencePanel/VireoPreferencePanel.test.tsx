@@ -61,6 +61,48 @@ describe(VIREO_PREFERENCE_PANEL_NAME, () => {
     expect(screen.getByRole("button", { name: "Appearance" })).toHaveAttribute("aria-expanded", "true");
   });
 
+  it("gives every expanded accordion region one unique summary association", () => {
+    renderPanel({ defaultExpandedSectionIds: ["appearance", "layout"] });
+
+    const regions = screen.getAllByRole("region");
+    const regionIds = regions.map(region => region.id);
+    expect(new Set(regionIds).size).toBe(regionIds.length);
+
+    for (const region of regions) {
+      const summaryId = region.getAttribute("aria-labelledby");
+      expect(summaryId).toBeTruthy();
+      const summary = document.getElementById(summaryId ?? "");
+      if (!(summary instanceof HTMLElement)) throw new Error("Missing Accordion summary.");
+      expect(summary).toHaveAttribute("aria-controls", region.id);
+      expect(Array.from(document.querySelectorAll("[id]")).filter(element => element.id === region.id)).toHaveLength(1);
+    }
+  });
+
+  it("uses a div title by default while preserving title component customization", () => {
+    const { rerender } = renderPanel({ defaultExpandedSectionIds: ["appearance"] });
+    expect(screen.getByText("Dark mode").tagName).toBe("DIV");
+
+    rerender(
+      <VireoPreferencePanel
+        sections={sections}
+        emptyState="No preferences found."
+        defaultExpandedSectionIds={["appearance"]}
+        slots={{ itemTitle: "h3" }}
+      />,
+    );
+    expect(screen.getByRole("heading", { level: 3, name: "Dark mode" })).toBeInTheDocument();
+
+    rerender(
+      <VireoPreferencePanel
+        sections={sections}
+        emptyState="No preferences found."
+        defaultExpandedSectionIds={["appearance"]}
+        slotProps={{ itemTitle: { component: "h3" } }}
+      />,
+    );
+    expect(screen.getByRole("heading", { level: 3, name: "Dark mode" })).toBeInTheDocument();
+  });
+
   it("supports controlled expansion without mutating it internally", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

@@ -6,6 +6,8 @@ export default function FlagRegistryExample() {
   return (
     <VireoStorybookProvider>
       <Box
+        aria-label="Country flag registry"
+        tabIndex={0}
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",

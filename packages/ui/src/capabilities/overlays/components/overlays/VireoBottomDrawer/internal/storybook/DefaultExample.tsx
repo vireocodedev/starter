@@ -18,7 +18,7 @@ export default function DefaultExample({ onClose }: Pick<VireoBottomDrawerProps,
           Open customer filters
         </Button>
       </Box>
-      <VireoBottomDrawer open={open} onClose={close}>
+      <VireoBottomDrawer aria-label="Customer filters" open={open} onClose={close}>
         <VireoOverlayHeader title="Filter customers" closeLabel="Close filters" onClose={close} />
         <Stack spacing={2} sx={{ p: 3 }}>
           <Typography>Choose customer states.</Typography>

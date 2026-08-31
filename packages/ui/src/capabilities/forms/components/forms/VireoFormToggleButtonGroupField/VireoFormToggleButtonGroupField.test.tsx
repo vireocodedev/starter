@@ -286,10 +286,12 @@ describe(VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME, () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
     const error = await screen.findByText("Choose a density.");
     const group = screen.getByRole("group", { name: "Density" });
-    expect(group).toHaveAttribute("aria-invalid", "true");
-    expect(group).toHaveAttribute("aria-required", "true");
+    expect(group).not.toHaveAttribute("aria-invalid");
+    expect(group).not.toHaveAttribute("aria-required");
     expect(group).toHaveAttribute("aria-describedby", error.id);
-    expect(group.closest(".MuiFormControl-root")).toHaveClass(
+    const root = group.closest(".MuiFormControl-root");
+    expect(root).toHaveAttribute("data-vireo-field-invalid", "true");
+    expect(root).toHaveClass(
       vireoFormToggleButtonGroupFieldClasses.invalid,
       vireoFormToggleButtonGroupFieldClasses.errorVisible,
     );
@@ -309,7 +311,7 @@ describe(VIREO_FORM_TOGGLE_BUTTON_GROUP_FIELD_NAME, () => {
     );
     const group = screen.getByRole("group", { name: "Interface density" });
     const root = group.closest(".MuiFormControl-root");
-    expect(group).toHaveAttribute("aria-invalid", "true");
+    expect(group).not.toHaveAttribute("aria-invalid");
     expect(root).toHaveClass(vireoFormToggleButtonGroupFieldClasses.errorVisible);
     expect(screen.getByText("Server rejected this density")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Compact" })).toHaveAttribute("aria-pressed", "true");

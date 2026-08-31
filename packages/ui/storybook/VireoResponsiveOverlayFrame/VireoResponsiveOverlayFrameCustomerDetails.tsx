@@ -20,7 +20,9 @@ export function VireoResponsiveOverlayFrameCustomerDetails({
             <Typography variant="overline" color="text.secondary">
               CUS-10482
             </Typography>
-            <Typography variant="h5">Northstar Analytics</Typography>
+            <Typography component="h3" variant="h5">
+              Northstar Analytics
+            </Typography>
           </Box>
           <Divider />
           <Stack

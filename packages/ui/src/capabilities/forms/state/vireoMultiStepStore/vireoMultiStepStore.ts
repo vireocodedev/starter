@@ -237,7 +237,7 @@ export class VireoMultiStepStore {
     window.requestAnimationFrame(() => {
       const root = this.registeredSteps.get(owner.id);
       const target = root?.querySelector<HTMLElement>(
-        '[aria-invalid="true"] [data-vireo-field-focus-target="true"], [aria-invalid="true"]:not([disabled]), [aria-invalid="true"] input:not([disabled])',
+        '[data-vireo-field-invalid="true"] [data-vireo-field-focus-target="true"], [aria-invalid="true"] [data-vireo-field-focus-target="true"], [aria-invalid="true"]:not([disabled]), [aria-invalid="true"] input:not([disabled])',
       );
       (target ?? root)?.focus();
     });

@@ -75,7 +75,12 @@ export const VireoFormNextStepButton = React.forwardRef<HTMLButtonElement, Vireo
       sx: rootSlotSx,
       ...rootSlotOther
     } = resolvedRootSlotProps;
-    const { className: loadingClassName, ...loadingOther } = resolvedLoadingSlotProps;
+    const {
+      className: loadingClassName,
+      ["aria-label"]: loadingIndicatorAriaLabel,
+      ["aria-labelledby"]: loadingIndicatorAriaLabelledBy,
+      ...loadingOther
+    } = resolvedLoadingSlotProps;
     void _component;
     void _disabled;
     void _href;
@@ -83,6 +88,12 @@ export const VireoFormNextStepButton = React.forwardRef<HTMLButtonElement, Vireo
     void _indicator;
     const rootRef = useForkRef(forwardedRef, rootSlotRef);
     const LoadingIndicator = slots.loadingIndicator ?? VireoFormNextStepButtonLoadingIndicator;
+    const loadingIndicatorAriaProps =
+      typeof loadingIndicatorAriaLabelledBy === "string" && loadingIndicatorAriaLabelledBy.trim()
+        ? { "aria-labelledby": loadingIndicatorAriaLabelledBy }
+        : typeof loadingIndicatorAriaLabel === "string" && loadingIndicatorAriaLabel.trim()
+          ? { "aria-label": loadingIndicatorAriaLabel }
+          : { "aria-label": localeText.nextButton };
     if (state.isLastStep && visibility === "auto") return null;
     return (
       <VireoFormNextStepButtonRoot
@@ -98,6 +109,7 @@ export const VireoFormNextStepButton = React.forwardRef<HTMLButtonElement, Vireo
         loadingIndicator={
           <LoadingIndicator
             {...loadingOther}
+            {...loadingIndicatorAriaProps}
             ownerState={ownerState}
             size={16}
             className={joinClassNames(classes.loadingIndicator, loadingClassName)}

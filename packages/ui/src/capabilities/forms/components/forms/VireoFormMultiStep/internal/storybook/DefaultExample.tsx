@@ -17,26 +17,22 @@ export default function DefaultExample() {
         <form.StepProgress />
         <form.ErrorSummary scope="all" />
         <form.Step id="profile">
-          <form.Section label="Profile">
-            <form.Field name="name">
-              {field => (
-                <VireoLabelBox label="Display name">
-                  <field.TextField slotProps={{ htmlInput: { "aria-label": "Display name" } }} />
-                </VireoLabelBox>
-              )}
-            </form.Field>
-          </form.Section>
+          <form.Field name="name">
+            {field => (
+              <VireoLabelBox label="Display name">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Display name" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
         </form.Step>
         <form.Step id="contact">
-          <form.Section label="Contact">
-            <form.Field name="email">
-              {field => (
-                <VireoLabelBox label="Email">
-                  <field.TextField slotProps={{ htmlInput: { "aria-label": "Email" } }} />
-                </VireoLabelBox>
-              )}
-            </form.Field>
-          </form.Section>
+          <form.Field name="email">
+            {field => (
+              <VireoLabelBox label="Email">
+                <field.TextField slotProps={{ htmlInput: { "aria-label": "Email" } }} />
+              </VireoLabelBox>
+            )}
+          </form.Field>
         </form.Step>
         <form.Actions>
           <form.PreviousStepButton />

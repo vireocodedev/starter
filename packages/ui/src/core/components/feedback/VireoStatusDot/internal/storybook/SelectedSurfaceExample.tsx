@@ -1,4 +1,4 @@
-import { List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { VireoStatusDot } from "@vireocodedev/ui";
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
@@ -6,12 +6,14 @@ export default function SelectedSurfaceExample() {
   return (
     <VireoStorybookProvider>
       <List disablePadding sx={{ maxWidth: 360 }}>
-        <ListItemButton selected sx={{ borderRadius: 1 }}>
-          <ListItemIcon sx={{ minWidth: 28 }}>
-            <VireoStatusDot color="success" selected />
-          </ListItemIcon>
-          <ListItemText primary="Production" secondary="Selected environment · Operational" />
-        </ListItemButton>
+        <ListItem disablePadding>
+          <ListItemButton selected sx={{ borderRadius: 1 }}>
+            <ListItemIcon sx={{ minWidth: 28 }}>
+              <VireoStatusDot color="success" selected />
+            </ListItemIcon>
+            <ListItemText primary="Production" secondary="Selected environment · Operational" />
+          </ListItemButton>
+        </ListItem>
       </List>
     </VireoStorybookProvider>
   );

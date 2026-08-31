@@ -30,7 +30,7 @@ export type VireoFormStepSlots = {
 export type VireoFormStepSlotsAndSlotProps = CreateSlotsAndSlotProps<
   VireoFormStepSlots,
   {
-    /** @default 'div' */
+    /** @default 'section' */
     root: SlotProps<"section", VireoFormStepRootSlotPropsOverrides, VireoFormStepOwnerState>;
     /** @default Typography */
     label: SlotProps<typeof Typography, VireoFormStepLabelSlotPropsOverrides, VireoFormStepOwnerState>;

@@ -1,5 +1,5 @@
 import { HomeOutlined } from "@mui/icons-material";
-import { Box, List } from "@mui/material";
+import { Box, List, ListItem } from "@mui/material";
 import { VireoApplicationNavigation, VireoApplicationNavigationItem } from "@vireocodedev/ui";
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 
@@ -18,13 +18,15 @@ export default function CustomizedSlotsExample() {
           }}
         >
           <List sx={{ px: 1 }}>
-            <VireoApplicationNavigationItem
-              href="#dashboard"
-              icon={<HomeOutlined />}
-              label="Dashboard"
-              compactLabel="Home"
-              selected
-            />
+            <ListItem disablePadding>
+              <VireoApplicationNavigationItem
+                href="#dashboard"
+                icon={<HomeOutlined />}
+                label="Dashboard"
+                compactLabel="Home"
+                selected
+              />
+            </ListItem>
           </List>
         </VireoApplicationNavigation>
         <Box sx={{ flex: 1, p: 3 }}>Custom root and content slots</Box>

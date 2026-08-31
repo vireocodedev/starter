@@ -22,8 +22,8 @@ export default function ScopedToasterExample() {
             Notify admin
           </Button>
         </Stack>
-        <VireoToaster id="workspace" position="bottom-left" />
-        <VireoToaster id="admin" position="bottom-right" />
+        <VireoToaster containerAriaLabel="Workspace notifications" id="workspace" position="bottom-left" />
+        <VireoToaster containerAriaLabel="Admin notifications" id="admin" position="bottom-right" />
       </Stack>
     </VireoStorybookProvider>
   );

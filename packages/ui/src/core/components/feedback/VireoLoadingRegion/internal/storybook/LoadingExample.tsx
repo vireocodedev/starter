@@ -7,7 +7,7 @@ export default function LoadingExample() {
     <VireoStorybookProvider>
       <VireoLoadingRegion loading loadingLabel="Loading workspace summary">
         {({ loadingVisible }) => (
-          <Paper aria-label="Workspace summary" variant="outlined" sx={{ maxWidth: 420, p: 2 }}>
+          <Paper variant="outlined" sx={{ maxWidth: 420, p: 2 }}>
             {loadingVisible ? (
               <>
                 <VireoSkeleton>

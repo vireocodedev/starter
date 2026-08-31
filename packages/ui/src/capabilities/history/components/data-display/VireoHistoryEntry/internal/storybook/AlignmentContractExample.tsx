@@ -34,6 +34,7 @@ export default function AlignmentContractExample() {
               previous={{ id: "ACC-241", name: "Northstar", owner: "Maya Chen", status: "Trial" }}
               current={{ id: "ACC-241", name: "Northstar Labs", owner: "Maya Chen", status: "Active" }}
               rootMeta="Today at 14:32 · Niko Barić"
+              showRootEntityLabel={false}
             />
           )
         }

@@ -25,6 +25,33 @@ function Harness({ onSubmit = () => undefined }: { onSubmit?: () => void }) {
 }
 
 describe(VIREO_FORM_NEXT_STEP_BUTTON_NAME, () => {
+  it("names its loading progressbar by default and preserves a consumer label", () => {
+    function LoadingHarness({ label }: { label?: string }) {
+      const form = useVireoMultiStepForm({
+        defaultValues: {},
+        steps: [
+          { id: "first", label: "First" },
+          { id: "second", label: "Second" },
+        ],
+      });
+      return (
+        <form.Form>
+          <form.MultiStep>
+            <form.Step id="first">First content</form.Step>
+            <form.Step id="second">Second content</form.Step>
+            <form.NextStepButton loading slotProps={{ loadingIndicator: { "aria-label": label } }} />
+          </form.MultiStep>
+        </form.Form>
+      );
+    }
+
+    const { rerender } = render(<LoadingHarness />);
+    expect(screen.getByRole("progressbar", { name: "Next" })).toBeInTheDocument();
+
+    rerender(<LoadingHarness label="Validating profile" />);
+    expect(screen.getByRole("progressbar", { name: "Validating profile" })).toBeInTheDocument();
+  });
+
   it("advances before the final step and submits from the final step", async () => {
     const onSubmit = vi.fn();
     render(<Harness onSubmit={onSubmit} />);
