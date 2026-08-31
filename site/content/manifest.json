@@ -189,7 +189,7 @@
           "description": "Preserve context, geometry and accessibility while pages, data, forms and actions perform asynchronous work.",
           "category": "Design system",
           "file": "design-system-loading-states.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/main/docs/LOADING_STATE_STANDARD.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo/blob/784aadb87a47da40bfc4c984a90a68fa502c0dea/docs/LOADING_STATE_STANDARD.md",
           "sourceLabel": "Normative loading-state standard"
         },
         {
