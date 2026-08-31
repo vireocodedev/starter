@@ -27,6 +27,11 @@
       "witnessed-target-environment-recovery",
       "unfamiliar-user-workflow-sessions",
       "qualifying-independent-adopters-and-maintained-upgrade"
+    ],
+    "obligations": [
+      {"id":"target-developer-persona-demand-and-controlled-competitor-validation","publicBetaHold":false,"currentState":"zero-human evidence; D-110 accepted-risk timing"},
+      {"id":"authentic-external-contribution-and-publication-permission","publicBetaHold":false,"currentState":"post-beta human-only; no authentic examples, testimonials, or case-study permission"},
+      {"id":"professional-identity-and-trademark-clearance","publicBetaHold":false,"currentState":"accepted pre-1.0/public-beta risk; professional clearance open"}
     ]
   },
   "adoptionSnapshot": {

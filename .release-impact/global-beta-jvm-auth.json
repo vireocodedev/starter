@@ -1,0 +1,1 @@
+{"schemaVersion":1,"artifact":"jvm:vireo-auth","decision":"no-release","justification":"Only SCM/POM metadata coordinates changed; immutable 0.3.0 POM URLs redirect and runtime/API bytes are unchanged."}

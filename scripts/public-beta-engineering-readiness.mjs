@@ -25,6 +25,11 @@ if (readiness.machineClosure?.status !== "PASS") problems.push("machineClosure m
 if (readiness.humanGate?.status !== "HOLD") problems.push("humanGate must remain HOLD until external evidence is recorded");
 for (const id of requiredMachine) if (!readiness.machineClosure?.resolved?.includes(id)) problems.push(`machine closure is missing ${id}`);
 for (const id of requiredHuman) if (!readiness.humanGate?.pending?.includes(id)) problems.push(`human gate is missing ${id}`);
+for (const id of ["target-developer-persona-demand-and-controlled-competitor-validation", "authentic-external-contribution-and-publication-permission", "professional-identity-and-trademark-clearance"]) {
+  const obligation = readiness.humanGate?.obligations?.find(entry => entry?.id === id);
+  if (!obligation || typeof obligation.publicBetaHold !== "boolean" || !String(obligation.currentState ?? "").trim())
+    problems.push(`human obligation ${id} must declare publicBetaHold and currentState`);
+}
 if (!Array.isArray(readiness.machineClosure?.evidence) || readiness.machineClosure.evidence.length < 5)
   problems.push("machine closure must retain five evidence paths");
 for (const path of [...(readiness.machineClosure?.evidence ?? []), readiness.humanGate?.handoff]) {

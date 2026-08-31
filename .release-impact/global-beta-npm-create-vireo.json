@@ -1,0 +1,1 @@
+{"schemaVersion":1,"artifact":"npm:create-vireo","decision":"no-release","justification":"Repository metadata and embedded template source URL now use canonical names; public 0.7.0 already works through redirects and runtime/API semantics are unchanged."}

@@ -18,6 +18,8 @@ engineering closure.
 | G-305 / P4-05 recovery | Open | A second trusted person witnesses target restore, application acceptance and incident result. [Maintainer preparation](phase-4/evidence/target-recovery-2026-09-01.md) is complete but same-host backup is not an independent-failure-domain claim. |
 | P1-15 / P2-08 / P3-09 / P5-06 workflow | 0 sessions | Unfamiliar developers complete first run, first change, generation, customization, upgrade and deployment; retain only the privacy-safe aggregate in `phase-5/evidence/aggregate.json`. |
 | G-309 / P5-07 adoption | 0/3 teams; 0/1 upgrades | Three qualifying independent teams actively build with Vireo and one maintains a production-like deployment through an upgrade; submit only sanitized qualified check-ins. |
+| G-001 / G-005 / G-006 research | Post-beta human-only; zero human evidence | Run retained target-developer persona/job/demand and controlled competitor protocols under D-110 timing; this is an accepted risk, not a public-beta promotion hold. |
+| External contribution/publication | Post-beta human-only | Validate an authentic external contribution path; obtain permission before publishing adopter examples, testimonials, or case studies. This is not a beta-promotion hold. |
 
 Use the public [evaluation form](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml)
 for sanitized outcomes, the [adopter check-in](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml)
