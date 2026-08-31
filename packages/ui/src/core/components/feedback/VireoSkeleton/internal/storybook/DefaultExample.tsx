@@ -5,7 +5,7 @@ import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
 export default function DefaultExample() {
   return (
     <VireoStorybookProvider>
-      <Stack aria-label="Profile is loading" direction="row" spacing={2} sx={{ alignItems: "center", width: 320 }}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center", width: 320 }}>
         <VireoSkeleton variant="circular">
           <Avatar />
         </VireoSkeleton>

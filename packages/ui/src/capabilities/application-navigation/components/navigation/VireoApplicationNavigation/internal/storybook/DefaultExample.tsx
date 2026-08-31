@@ -1,5 +1,5 @@
 import { DashboardOutlined, Inventory2Outlined, SettingsOutlined } from "@mui/icons-material";
-import { Box, Button, Divider, List, Typography } from "@mui/material";
+import { Box, Button, Divider, List, ListItem, Typography } from "@mui/material";
 import {
   VireoApplicationNavigation,
   VireoApplicationNavigationItem,
@@ -41,13 +41,14 @@ export default function DefaultExample() {
               <Divider />
               <List sx={{ display: "grid", gap: 0.5, px: 1, py: 1.5 }}>
                 {destinations.map((destination, index) => (
-                  <VireoApplicationNavigationItem
-                    key={destination.label}
-                    href={destination.href}
-                    icon={destination.icon}
-                    label={destination.label}
-                    selected={index === 0}
-                  />
+                  <ListItem disablePadding key={destination.label}>
+                    <VireoApplicationNavigationItem
+                      href={destination.href}
+                      icon={destination.icon}
+                      label={destination.label}
+                      selected={index === 0}
+                    />
+                  </ListItem>
                 ))}
               </List>
             </>

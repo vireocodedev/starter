@@ -666,9 +666,21 @@ function VireoFormAutocompleteMultipleFieldImpl<TOption, TValue extends VireoFor
         }}
         renderInput={params => {
           const TextField = slots.textField ?? VireoFormAutocompleteMultipleFieldTextField;
+          const {
+            ["aria-label"]: loadingIndicatorAriaLabel,
+            ["aria-labelledby"]: loadingIndicatorAriaLabelledBy,
+            ...loadingIndicatorOther
+          } = resolved.loadingIndicator ?? {};
+          const loadingIndicatorAriaProps =
+            typeof loadingIndicatorAriaLabelledBy === "string" && loadingIndicatorAriaLabelledBy.trim()
+              ? { "aria-labelledby": loadingIndicatorAriaLabelledBy }
+              : typeof loadingIndicatorAriaLabel === "string" && loadingIndicatorAriaLabel.trim()
+                ? { "aria-label": loadingIndicatorAriaLabel }
+                : { "aria-label": "Loading options" };
           const loadingAdornment = loading ? (
             <LoadingIndicator
-              {...resolved.loadingIndicator}
+              {...loadingIndicatorOther}
+              {...loadingIndicatorAriaProps}
               size={18}
               className={joinClassNames(classes.loadingIndicator, resolved.loadingIndicator?.className as string)}
               ownerState={ownerState}

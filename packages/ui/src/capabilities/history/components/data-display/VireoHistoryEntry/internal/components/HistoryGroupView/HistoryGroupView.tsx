@@ -99,7 +99,6 @@ export function HistoryGroupView({
       data-expanded={expanded || undefined}
       style={{ "--VireoHistoryEntry-depth": Math.min(depth - 1, 4) } as React.CSSProperties}
       role={isRoot ? undefined : "group"}
-      aria-level={isRoot ? undefined : depth}
     >
       <div className={isRoot ? "VireoHistoryEntry-rootHeader" : "VireoHistoryEntry-nestedHeader"}>
         {hasVisibleChildren ? (

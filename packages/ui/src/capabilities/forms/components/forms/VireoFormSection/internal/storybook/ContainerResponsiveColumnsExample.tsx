@@ -16,7 +16,7 @@ function SectionAtWidth({ label, width }: { label: string; width: number }) {
       >
         {label}
       </Typography>
-      <VireoFormSection label="Customer" maxColumns={3}>
+      <VireoFormSection label={`${label} customer`} maxColumns={3}>
         {fields.map(field => (
           <VireoLabelBox key={field} label={field}>
             <TextField fullWidth slotProps={{ htmlInput: { "aria-label": field } }} />

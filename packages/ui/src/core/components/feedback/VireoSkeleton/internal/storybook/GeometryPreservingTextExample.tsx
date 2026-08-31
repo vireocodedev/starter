@@ -14,7 +14,7 @@ export default function GeometryPreservingTextExample() {
           <Typography variant="h5">{title}</Typography>
           <Typography color="text.secondary">{description}</Typography>
         </Paper>
-        <Paper aria-label="Same card while loading" variant="outlined" sx={{ flex: 1, p: 2 }}>
+        <Paper variant="outlined" sx={{ flex: 1, p: 2 }}>
           <VireoSkeleton>
             <Typography variant="overline">Loaded</Typography>
           </VireoSkeleton>

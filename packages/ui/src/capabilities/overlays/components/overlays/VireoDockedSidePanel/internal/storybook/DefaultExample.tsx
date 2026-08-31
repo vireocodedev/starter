@@ -41,7 +41,9 @@ export default function DefaultExample() {
             actions={<Chip label={`${resize.width}px wide`} size="small" />}
           />
           <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", p: 3 }}>
-            <Typography variant="h5">Northstar Analytics</Typography>
+            <Typography component="h3" variant="h5">
+              Northstar Analytics
+            </Typography>
             <Typography color="text.secondary" sx={{ mt: 1 }}>
               Drag the panel edge or focus it and use the arrow keys to resize. Double-click restores its initial width.
             </Typography>

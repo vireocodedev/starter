@@ -230,6 +230,7 @@ export const VireoDockedSidePanel = React.forwardRef<HTMLDivElement, VireoDocked
         style={{ ...style, ...rootSlotStyle }}
         sx={mergeSx(rootSizingSx, mergeSx(sx, rootSlotSx))}
         aria-hidden={!isPanelPresent}
+        inert={!isPanelPresent}
       >
         <VireoDockedSidePanelSurface
           {...surfaceSlotOther}
@@ -237,6 +238,7 @@ export const VireoDockedSidePanel = React.forwardRef<HTMLDivElement, VireoDocked
           ownerState={ownerState}
           className={joinClassNames(classes.surface, surfaceSlotClassName)}
           onTransitionEnd={handleTransitionEnd}
+          inert={!open}
           sx={mergeSx(surfaceSizingSx, surfaceSlotSx)}
         >
           {resizeHandle}

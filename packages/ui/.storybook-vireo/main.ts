@@ -132,6 +132,18 @@ const config: StorybookConfig = {
             replacement: resolve(storybookDirectory, "../storybook/VireoResponsiveOverlayFrame/index.ts"),
           },
           {
+            find: /^@vireocodedev\/ui\/country$/,
+            replacement: resolve(storybookDirectory, "../src/capabilities/country/public.ts"),
+          },
+          {
+            find: /^@vireocodedev\/ui\/forms$/,
+            replacement: resolve(storybookDirectory, "../src/capabilities/forms/public.ts"),
+          },
+          {
+            find: /^@vireocodedev\/ui\/storybook\/VireoResponsiveOverlayFrame$/,
+            replacement: resolve(storybookDirectory, "../storybook/VireoResponsiveOverlayFrame/index.ts"),
+          },
+          {
             find: /^@vireocodedev\/ui\/storybook$/,
             replacement: storybookProviderEntry,
           },
@@ -145,6 +157,10 @@ const config: StorybookConfig = {
           },
           {
             find: /^@vireocodedev\/starter-ui$/,
+            replacement: resolve(storybookDirectory, "./starter-ui-entry.ts"),
+          },
+          {
+            find: /^@vireocodedev\/ui$/,
             replacement: resolve(storybookDirectory, "./starter-ui-entry.ts"),
           },
           { find: "@", replacement: resolve(storybookDirectory, "../src") },

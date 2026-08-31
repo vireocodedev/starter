@@ -1,9 +1,22 @@
 import type { VireoHistoryEntryLabels } from "@/capabilities/history/components/data-display/VireoHistoryEntry/VireoHistoryEntry.types";
 import { VireoSkeleton } from "@/core/public";
 
-function LoadingLine({ visible, width }: { visible: boolean; width: string | number }) {
+function LoadingLine({
+  height = 16,
+  visible,
+  width,
+}: {
+  height?: string | number;
+  visible: boolean;
+  width: string | number;
+}) {
   return (
-    <VireoSkeleton height={16} variant="rounded" width={width} sx={{ visibility: visible ? "visible" : "hidden" }} />
+    <VireoSkeleton
+      height={height}
+      variant="rounded"
+      width={width}
+      sx={{ visibility: visible ? "visible" : "hidden" }}
+    />
   );
 }
 
@@ -19,14 +32,14 @@ function LoadingRow({ index, visible }: { index: number; visible: boolean }) {
         <VireoSkeleton height={22} variant="circular" width={22} sx={{ visibility: visible ? "visible" : "hidden" }} />
       </div>
       <div className="VireoHistoryEntry-fieldLabel">
-        <LoadingLine visible={visible} width={index === 0 ? "58%" : "72%"} />
+        <LoadingLine height="1lh" visible={visible} width={index === 0 ? "58%" : "72%"} />
       </div>
       <div className="VireoHistoryEntry-valueBlock" data-placement="previous">
-        <LoadingLine visible={visible} width={index === 0 ? "76%" : "62%"} />
+        <LoadingLine height="1lh" visible={visible} width={index === 0 ? "76%" : "62%"} />
       </div>
       <span className="VireoHistoryEntry-arrow">→</span>
       <div className="VireoHistoryEntry-valueBlock" data-placement="current">
-        <LoadingLine visible={visible} width={index === 0 ? "64%" : "84%"} />
+        <LoadingLine height="1lh" visible={visible} width={index === 0 ? "64%" : "84%"} />
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export default function DefaultExample() {
             alignItems: "center",
           }}
         >
-          <CircularProgress size={20} />
+          <CircularProgress aria-label="Loading report" size={20} />
           <Typography>Loading report…</Typography>
         </Stack>
       </VireoDelayedRender>

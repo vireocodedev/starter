@@ -46,6 +46,8 @@ export const VireoHistoryEntryRoot: VireoHistoryEntryStyledSlotComponent<BoxProp
     borderBottomColor: theme.palette.divider,
   },
   "& .VireoHistoryEntry-rootSummaryButton, & .VireoHistoryEntry-groupSummary": {
+    display: "flex",
+    alignItems: "center",
     minWidth: 0,
     justifyContent: "flex-start",
     gap: theme.spacing(1),

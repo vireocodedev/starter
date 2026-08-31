@@ -1,6 +1,6 @@
 import { VireoDndProvider, VireoDraggableItem, VireoDropZone } from "@vireocodedev/ui/hello-pangea-dnd";
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
-import { Button, Paper, Stack, Typography } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 
 export default function DefaultExample() {
   return (
@@ -17,7 +17,9 @@ export default function DefaultExample() {
                 }}
               >
                 <Typography>Review pull request</Typography>
-                <Button size="small">Open</Button>
+                <Typography color="text.secondary" variant="body2">
+                  Open details after dropping
+                </Typography>
               </Stack>
             </Paper>
           </VireoDraggableItem>

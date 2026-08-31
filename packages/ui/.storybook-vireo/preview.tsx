@@ -1,5 +1,4 @@
 import { VireoStorybookProvider } from "@vireocodedev/ui/storybook";
-import { hasVireoStorybookA11yDebt } from "./testing/storybook-a11y-debt";
 import { vireoStorybookTheme } from "./storybook-theme";
 import "./preview.css";
 import type { Preview } from "@storybook/react-vite";
@@ -10,9 +9,6 @@ const preview: Preview = {
     (Story, context) => {
       const themeMode = context.globals.vireoTheme === "light" ? "light" : "dark";
       const themeDirection = context.globals.vireoDirection === "rtl" ? "rtl" : "ltr";
-      if (hasVireoStorybookA11yDebt(context.title, context.name)) {
-        context.parameters.a11y = { ...context.parameters.a11y, test: "todo" };
-      }
       return (
         <VireoStorybookProvider themeMode={themeMode} themeDirection={themeDirection}>
           <div className="vireo-story-surface">

@@ -39,7 +39,7 @@ function useUtilityClasses(ownerState: VireoFormOwnerState, classes?: VireoFormP
 }
 
 function focusFirstInvalidField(root: HTMLFormElement | null): void {
-  const invalidRegion = root?.querySelector<HTMLElement>('[aria-invalid="true"]');
+  const invalidRegion = root?.querySelector<HTMLElement>('[data-vireo-field-invalid="true"], [aria-invalid="true"]');
   const candidate =
     invalidRegion?.querySelector<HTMLElement>('[data-vireo-field-focus-target="true"]:not([disabled])') ??
     root?.querySelector<HTMLElement>(

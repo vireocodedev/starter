@@ -193,6 +193,7 @@ export const VireoPreferencePanel = React.forwardRef<HTMLDivElement, VireoPrefer
     const {
       className: sectionSlotClassName,
       onChange: sectionSlotOnChange,
+      slotProps: sectionSlotProps,
       ...sectionSlotOther
     } = resolvedSectionSlotProps;
     const { className: sectionHeaderSlotClassName, ...sectionHeaderSlotOther } = resolvedSectionHeaderSlotProps;
@@ -202,7 +203,11 @@ export const VireoPreferencePanel = React.forwardRef<HTMLDivElement, VireoPrefer
     const { className: itemSlotClassName, ...itemSlotOther } = resolvedItemSlotProps;
     const { className: itemIconSlotClassName, ...itemIconSlotOther } = resolvedItemIconSlotProps;
     const { className: itemContentSlotClassName, ...itemContentSlotOther } = resolvedItemContentSlotProps;
-    const { className: itemTitleSlotClassName, ...itemTitleSlotOther } = resolvedItemTitleSlotProps;
+    const {
+      className: itemTitleSlotClassName,
+      component: itemTitleSlotComponent,
+      ...itemTitleSlotOther
+    } = resolvedItemTitleSlotProps;
     const { className: itemDescriptionSlotClassName, ...itemDescriptionSlotOther } = resolvedItemDescriptionSlotProps;
     const { className: itemControlSlotClassName, ...itemControlSlotOther } = resolvedItemControlSlotProps;
     const { className: emptyStateSlotClassName, ...emptyStateSlotOther } = resolvedEmptyStateSlotProps;
@@ -267,6 +272,15 @@ export const VireoPreferencePanel = React.forwardRef<HTMLDivElement, VireoPrefer
                 onChange={createSectionChangeHandler(section.id)}
                 className={joinClassNames(classes.section, sectionSlotClassName)}
                 data-section-id={section.id}
+                slotProps={{
+                  ...sectionSlotProps,
+                  region: {
+                    ...sectionSlotProps?.region,
+                    "aria-labelledby": sectionSummaryId,
+                    id: sectionDetailsId,
+                    role: "region",
+                  },
+                }}
               >
                 <VireoPreferencePanelSectionHeader
                   {...sectionHeaderSlotOther}
@@ -300,8 +314,6 @@ export const VireoPreferencePanel = React.forwardRef<HTMLDivElement, VireoPrefer
                   {...sectionDetailsSlotOther}
                   as={slots.sectionDetails}
                   ownerState={ownerState}
-                  id={sectionDetailsId}
-                  aria-labelledby={sectionSummaryId}
                   className={joinClassNames(classes.sectionDetails, sectionDetailsSlotClassName)}
                 >
                   {section.items.map(item => (
@@ -331,7 +343,7 @@ export const VireoPreferencePanel = React.forwardRef<HTMLDivElement, VireoPrefer
                         <VireoPreferencePanelItemTitle
                           variant="subtitle2"
                           {...itemTitleSlotOther}
-                          as={slots.itemTitle}
+                          as={slots.itemTitle ?? itemTitleSlotComponent ?? "div"}
                           ownerState={ownerState}
                           className={joinClassNames(classes.itemTitle, itemTitleSlotClassName)}
                         >

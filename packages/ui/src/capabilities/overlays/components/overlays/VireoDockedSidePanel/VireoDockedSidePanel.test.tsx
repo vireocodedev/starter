@@ -34,6 +34,8 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
     expect(surface).toHaveTextContent("Panel content");
     expect(surface.parentElement).toHaveClass(vireoDockedSidePanelClasses.root);
     expect(surface.parentElement).toHaveAttribute("aria-hidden", "false");
+    expect(surface.parentElement).not.toHaveAttribute("inert");
+    expect(surface).not.toHaveAttribute("inert");
   });
 
   it("renders the resize handle before panel content", () => {
@@ -53,6 +55,7 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
     rerender(<VireoDockedSidePanel {...requiredProps} open={false} onExited={onExited} />);
 
     expect(root).toHaveAttribute("aria-hidden", "false");
+    expect(surface).toHaveAttribute("inert");
     fireSurfaceTransitionEnd(surface, "width");
     expect(onExited).not.toHaveBeenCalled();
 
@@ -61,6 +64,7 @@ describe(VIREO_DOCKED_SIDE_PANEL_NAME, () => {
 
     expect(onExited).toHaveBeenCalledOnce();
     expect(root).toHaveAttribute("aria-hidden", "true");
+    expect(root).toHaveAttribute("inert");
   });
 
   it("composes the surface transition handler before internal behavior", () => {

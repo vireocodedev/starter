@@ -18,7 +18,6 @@ export default defineConfig({
           storybookTest({
             configDir: configDirectory,
             initialGlobals: { vireoTheme: "dark" },
-            tags: { skip: ["contract-debt"] },
           }),
         ],
         test: {
@@ -38,7 +37,7 @@ export default defineConfig({
           storybookTest({
             configDir: configDirectory,
             initialGlobals: { vireoTheme: "dark" },
-            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+            tags: { include: ["vireo-matrix"] },
           }),
         ],
         test: {
@@ -58,7 +57,7 @@ export default defineConfig({
           storybookTest({
             configDir: configDirectory,
             initialGlobals: { vireoTheme: "light" },
-            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+            tags: { include: ["vireo-matrix"] },
           }),
         ],
         test: {
@@ -78,7 +77,7 @@ export default defineConfig({
           storybookTest({
             configDir: configDirectory,
             initialGlobals: { vireoTheme: "dark" },
-            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+            tags: { include: ["vireo-matrix"] },
           }),
         ],
         test: {
@@ -102,7 +101,7 @@ export default defineConfig({
           storybookTest({
             configDir: configDirectory,
             initialGlobals: { vireoDirection: "rtl", vireoTheme: "dark" },
-            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+            tags: { include: ["vireo-matrix"] },
           }),
         ],
         test: {
@@ -122,7 +121,7 @@ export default defineConfig({
           storybookTest({
             configDir: configDirectory,
             initialGlobals: { vireoTheme: "dark" },
-            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+            tags: { include: ["vireo-matrix"] },
           }),
         ],
         test: {
@@ -146,7 +145,7 @@ export default defineConfig({
           storybookTest({
             configDir: configDirectory,
             initialGlobals: { vireoTheme: "dark" },
-            tags: { include: ["vireo-matrix"], skip: ["contract-debt"] },
+            tags: { include: ["vireo-matrix"] },
           }),
         ],
         test: {

@@ -49,6 +49,18 @@ async function choose(name: string) {
 }
 
 describe(VIREO_FORM_AUTOCOMPLETE_FIELD_NAME, () => {
+  it("names its loading progressbar by default and preserves a consumer label", () => {
+    const { rerender } = render(<TestForm fieldProps={{ loading: true }} />);
+    expect(screen.getByRole("progressbar", { name: "Loading options" })).toBeInTheDocument();
+
+    rerender(
+      <TestForm
+        fieldProps={{ loading: true, slotProps: { loadingIndicator: { "aria-label": "Customer results loading" } } }}
+      />,
+    );
+    expect(screen.getByRole("progressbar", { name: "Customer results loading" })).toBeInTheDocument();
+  });
+
   it("preserves MUI input resets and listbox presentation", async () => {
     render(<TestForm />);
     const input = screen.getByRole("combobox", { name: "Team" });
