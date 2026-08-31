@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-28",
-  "revision": "phase-5-engineering-baseline",
+  "updatedAt": "2026-09-01",
+  "revision": "checklist-9-machine-intake-readiness",
   "workflowSessions": {
     "total": 0,
     "completedWithoutHelp": 0,
@@ -23,6 +23,7 @@
   },
   "notes": [
     "No qualifying external workflow or adoption evidence has been recorded.",
+    "Machine intake readiness does not change the zero counts or the HOLD gate.",
     "Maintainer automation and the flagship demo are excluded from these counts."
   ]
 }

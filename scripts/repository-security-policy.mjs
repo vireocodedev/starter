@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -91,6 +91,57 @@ function validateEnvironment(path, { reviewers, policies }) {
     problems.push(`${path} must declare its exact custom deployment policies`);
 }
 
+const desiredLabels = readdirSync(join(root, ".github/labels"), { withFileTypes: true })
+  .filter(entry => entry.isFile() && entry.name.endsWith(".json"))
+  .map(entry => ({ path: `.github/labels/${entry.name}`, payload: readJson(`.github/labels/${entry.name}`) }));
+const expectedLabels = [
+  { name: "bug", color: "d73a4a", description: "Something isn't working" },
+  { name: "enhancement", color: "a2eeef", description: "New feature or request" },
+  { name: "beta-feedback", color: "5319e7", description: "Sanitized public-beta evaluation outcome" },
+  { name: "beta-adopter", color: "0e8a16", description: "Privacy-safe independent adopter qualification" },
+];
+const declaredIssueFormLabels = new Set();
+for (const { path, payload } of desiredLabels) {
+  if (
+    typeof payload.name !== "string" ||
+    payload.name.length === 0 ||
+    payload.name !== payload.name.trim() ||
+    !/^[0-9a-f]{6}$/u.test(payload.color ?? "") ||
+    typeof payload.description !== "string" ||
+    payload.description.length === 0 ||
+    payload.description !== payload.description.trim()
+  ) {
+    problems.push(`${path} must declare a non-empty name/description and lowercase six-hex color`);
+  }
+  if (declaredIssueFormLabels.has(payload.name))
+    problems.push(`${path} duplicates desired issue label ${payload.name}`);
+  declaredIssueFormLabels.add(payload.name);
+}
+requireExactSet(
+  [...declaredIssueFormLabels],
+  expectedLabels.map(label => label.name),
+  "desired issue labels",
+);
+for (const expected of expectedLabels) {
+  const label = desiredLabels.find(candidate => candidate.payload.name === expected.name);
+  if (!label || label.payload.color !== expected.color || label.payload.description !== expected.description) {
+    problems.push(`desired issue label ${expected.name} must retain its exact payload`);
+  }
+}
+for (const form of ["bug_report.yml", "feature_request.yml", "public_beta_feedback.yml", "adopter_check_in.yml"]) {
+  const match = readText(`.github/ISSUE_TEMPLATE/${form}`).match(/^labels:\s*\[([^\]]*)\]\s*$/mu);
+  const labels = match?.[1]
+    .split(",")
+    .map(label => label.trim().replace(/^['"]|['"]$/gu, ""))
+    .filter(Boolean);
+  if (!labels?.length) {
+    problems.push(`${form} must declare at least one issue label`);
+  } else {
+    for (const label of labels) {
+      if (!declaredIssueFormLabels.has(label)) problems.push(`${form} uses undeclared issue-form label ${label}`);
+    }
+  }
+}
 validateMainRuleset(readJson(".github/rulesets/main.json"), [
   "Release impact:15368",
   "TypeScript:15368",
@@ -139,5 +190,5 @@ if (problems.length) {
   process.exit(1);
 }
 console.log(
-  "Repository security desired-state policy passed: main/tags, Actions, workflow defaults, and 3 environments.",
+  "Repository security desired-state policy passed: main/tags, Actions, workflow defaults, 3 environments, and issue-form labels.",
 );
