@@ -17,7 +17,7 @@ trap 'exit 143' TERM
 cd "$REPOSITORY_ROOT"
 
 HIGH_CONFIDENCE_SECRET_PATTERN='-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|npm_[A-Za-z0-9]{20,}|sk_(live|test)_[A-Za-z0-9]{20,}'
-ABSOLUTE_WORKSTATION_PATTERN='/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|[A-Za-z]:\\Users\\[A-Za-z0-9._-]+\\'
+ABSOLUTE_WORKSTATION_PATTERN='(^|[^[:alnum:]_./\\])(/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|[A-Za-z]:\\Users\\[A-Za-z0-9._-]+\\)'
 SENSITIVE_FILENAME_PATTERN='(^|/)\.env($|\.)|\.(pem|key|p12|pfx|jks|keystore|mobileprovision)$'
 
 TRACKED_PATHS="$AUDIT_TMP_DIR/tracked-paths.txt"
@@ -27,6 +27,21 @@ SENSITIVE_TRACKED_PATHS="$AUDIT_TMP_DIR/sensitive-tracked-paths.txt"
 HISTORICAL_SENSITIVE_PATHS="$AUDIT_TMP_DIR/historical-sensitive-paths.txt"
 CURRENT_ABSOLUTE_PATHS="$AUDIT_TMP_DIR/current-absolute-paths.txt"
 AUTHOR_DOMAINS="$AUDIT_TMP_DIR/author-domains.txt"
+
+absolute_path_pattern_self_test() {
+  for path in '/home/alice/work' '/Users/alice/work' 'C:\Users\alice\work'; do
+    if ! printf '%s\n' "$path" | grep -E "$ABSOLUTE_WORKSTATION_PATTERN" > /dev/null; then
+      printf 'Absolute workstation path pattern missed: %s\n' "$path" >&2
+      exit 1
+    fi
+  done
+  if printf '%s\n' 'frontend/src/pages/home/localization' | grep -E "$ABSOLUTE_WORKSTATION_PATTERN" > /dev/null; then
+    printf 'Absolute workstation path pattern matched a repository-relative path.\n' >&2
+    exit 1
+  fi
+}
+
+absolute_path_pattern_self_test
 
 git ls-files > "$TRACKED_PATHS"
 

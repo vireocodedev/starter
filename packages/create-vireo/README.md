@@ -12,7 +12,7 @@ corepack npm run doctor
 corepack npm run dev
 ```
 
-The interactive path asks for the project name, Java package, database, and Git initialization. PostgreSQL is the generated-app default; `--database h2` selects the zero-service embedded development database.
+The interactive path asks for the project name, Java package, database, and Git initialization. PostgreSQL is the generated-app default; `--database h2` selects the zero-service embedded development database. Release identity can be supplied non-interactively with `--display-name`, `--owner-name`, `--repository-url`, `--support-url`, and `--security-contact`. Omitted release fields are stored as explicit unresolved markers and must be resolved before release.
 
 For a frontend team with a separately owned backend:
 
@@ -59,6 +59,13 @@ project name; it is not configured through `VITE_APP_NAME`. The generated fronte
 keeps source and built PWA contract checks plus the opt-in two-production-build
 update-lifecycle fixture. Those automated checks do not replace browser-brand or
 physical-device install evidence, which remains experimental/not run.
+
+## Generated project identity
+
+Every project stores `projectName`, `displayName`, owner, repository, support, and
+security coordinates in `.vireo/project.json`. The generator renders its README,
+security policy, support policy, and issue routing from those values. It never copies
+Vireo repository, support, or security endpoints into a generated application.
 
 ## Generate a capability
 

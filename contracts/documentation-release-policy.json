@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "publicBaseUrl": "https://vireocodedev.github.io/starter",
-  "currentRelease": "npm-0.5.1_jvm-0.3.0",
+  "currentRelease": "npm-0.6.0_jvm-0.3.0",
   "releases": [
     {
-      "id": "npm-0.5.1_jvm-0.3.0",
+      "id": "npm-0.6.0_jvm-0.3.0",
       "documentationVersion": "0.3",
       "documentationLabel": "Vireo 0.3",
       "status": "current",
       "npm": [
-        { "package": "create-vireo", "version": "0.5.1" },
+        { "package": "create-vireo", "version": "0.6.0" },
         { "package": "@vireocodedev/history", "version": "0.2.2" },
         { "package": "@vireocodedev/infrastructure", "version": "0.2.2" },
         { "package": "@vireocodedev/localization", "version": "0.2.2" },
@@ -25,7 +25,10 @@
       },
       "template": {
         "repository": "https://github.com/vireocodedev/starter-template",
-        "commit": "a24f9435d3f624fb1962c3d5c4e3457b69f5be28"
+        "commit": "5b123e60bd1ce733ae70711796552a17aaa60fe3",
+        "version": "0.6.0",
+        "tag": "starter-template@0.6.0",
+        "releaseUrl": "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.6.0"
       },
       "releaseLinks": {
         "source": "https://github.com/vireocodedev/starter",
@@ -33,7 +36,8 @@
         "jvm": "https://central.sonatype.com/namespace/com.vireocode",
         "jvmTag": "https://github.com/vireocodedev/starter/releases/tag/jvm-v0.3.0",
         "compatibility": "https://github.com/vireocodedev/starter/blob/main/docs/COMPATIBILITY.md",
-        "migration": "https://github.com/vireocodedev/starter/tree/main/docs/migration"
+        "migration": "https://github.com/vireocodedev/starter/tree/main/docs/migration",
+        "template": "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.6.0"
       }
     }
   ]

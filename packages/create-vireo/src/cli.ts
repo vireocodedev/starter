@@ -6,6 +6,11 @@ type Arguments = {
   directory?: string;
   profile?: VireoProfile;
   name?: string;
+  displayName?: string;
+  ownerName?: string;
+  repositoryUrl?: string;
+  supportUrl?: string;
+  securityContact?: string;
   javaPackage?: string;
   database?: VireoDatabase;
   git?: boolean;
@@ -21,6 +26,11 @@ Usage:
 
 Options:
   --name <kebab-name>          Project name (defaults to directory name)
+  --display-name <name>        Display name (defaults to a title from --name)
+  --owner-name <name>          Application owner (stored for release validation)
+  --repository-url <https-url> Application repository URL (stored for release validation)
+  --support-url <url>          Application support URL or mailto route
+  --security-contact <url>     Private security URL or mailto route
   --profile <profile>          full-stack (default) or frontend
   --java-package <package>     Java base package (full-stack only)
   --database <postgresql|h2>   Development database (full-stack only)
@@ -51,6 +61,11 @@ function parse(values: string[]): Arguments {
     else if (value === "--git") parsed.git = true;
     else if (value === "--no-git") parsed.git = false;
     else if (value === "--name") parsed.name = valueAt(values, index++, value);
+    else if (value === "--display-name") parsed.displayName = valueAt(values, index++, value);
+    else if (value === "--owner-name") parsed.ownerName = valueAt(values, index++, value);
+    else if (value === "--repository-url") parsed.repositoryUrl = valueAt(values, index++, value);
+    else if (value === "--support-url") parsed.supportUrl = valueAt(values, index++, value);
+    else if (value === "--security-contact") parsed.securityContact = valueAt(values, index++, value);
     else if (value === "--profile") {
       const profile = valueAt(values, index++, value);
       if (profile !== "full-stack" && profile !== "frontend")
@@ -114,6 +129,11 @@ async function main() {
     directory: args.directory!,
     profile: args.profile,
     projectName: args.name,
+    displayName: args.displayName,
+    ownerName: args.ownerName,
+    repositoryUrl: args.repositoryUrl,
+    supportUrl: args.supportUrl,
+    securityContact: args.securityContact,
     javaPackage: args.javaPackage,
     database: args.database,
     packageManager: "npm",

@@ -2,9 +2,16 @@ import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { chmod, cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
 import { format, resolveConfig } from "prettier";
 import { writeExampleManifest } from "./remove-example.js";
+import {
+  classifyProjectionPath,
+  readApplicationProjectionContract,
+  validateApplicationIdentity,
+  validateApplicationProjectionContract,
+} from "./application-projection-contract.mjs";
 
 export {
   checkGeneratedEntities,
@@ -53,9 +60,12 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-export const TEMPLATE_COMMIT = "a24f9435d3f624fb1962c3d5c4e3457b69f5be28";
+const CREATE_VIREO_PACKAGE_VERSION = "0.6.0";
+const TEMPLATE_VERSION = CREATE_VIREO_PACKAGE_VERSION;
+const TEMPLATE_TAG = `starter-template@${TEMPLATE_VERSION}`;
+const INITIAL_APPLICATION_VERSION = "0.1.0";
+export const TEMPLATE_COMMIT = "5b123e60bd1ce733ae70711796552a17aaa60fe3";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
-const CREATE_VIREO_PACKAGE_VERSION = "0.5.1";
 const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
 export type VireoDatabase = "postgresql" | "h2";
@@ -65,6 +75,11 @@ export type CreateVireoOptions = {
   directory: string;
   profile?: VireoProfile;
   projectName?: string;
+  displayName?: string;
+  ownerName?: string;
+  repositoryUrl?: string;
+  supportUrl?: string;
+  securityContact?: string;
   javaPackage?: string;
   database?: VireoDatabase;
   packageManager?: VireoPackageManager;
@@ -75,6 +90,7 @@ export type CreateVireoOptions = {
 export type CreateVireoResult = {
   directory: string;
   projectName: string;
+  displayName: string;
   profile: VireoProfile;
   javaPackage?: string;
   database?: VireoDatabase;
@@ -83,6 +99,29 @@ export type CreateVireoResult = {
   templateCommit: string;
   dryRun: boolean;
 };
+
+type ApplicationIdentity = {
+  projectName: string;
+  displayName: string;
+  ownerName: string;
+  repositoryUrl: string;
+  supportUrl: string;
+  securityContact: string;
+};
+
+type ProjectionContract = {
+  defaultOptionalRuleIds?: string[];
+  rules?: Array<{ id: string; category: string }>;
+  identity?: Record<string, unknown>;
+};
+
+const applicationProjectionContract = readApplicationProjectionContract(
+  fileURLToPath(new URL("../schema/application-projection-contract.json", import.meta.url)),
+) as ProjectionContract;
+const projectionContractProblems = validateApplicationProjectionContract(applicationProjectionContract);
+if (projectionContractProblems.length > 0) {
+  throw new Error(`Bundled application projection contract is invalid: ${projectionContractProblems.join("; ")}`);
+}
 
 function assertProjectName(name: string) {
   if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u.test(name))
@@ -159,10 +198,130 @@ async function walk(directory: string): Promise<string[]> {
     await Promise.all(
       entries.map(async entry => {
         const path = join(directory, entry.name);
-        return entry.isDirectory() ? walk(path) : [path];
+        if (entry.isSymbolicLink()) throw new Error(`Template source contains an unsupported link: ${path}`);
+        if (entry.isDirectory()) return walk(path);
+        if (entry.isFile()) return [path];
+        throw new Error(`Template source contains an unsupported filesystem entry: ${path}`);
       }),
     )
   ).flat();
+}
+
+function normalizedRelative(root: string, path: string) {
+  return relative(root, path).replaceAll("\\", "/");
+}
+
+function frontendDestination(path: string) {
+  if (path.startsWith("frontend/")) return path.slice("frontend/".length);
+  if (
+    path === "LICENSE" ||
+    path === "CODE_OF_CONDUCT.md" ||
+    path === "CONTRIBUTING.md" ||
+    path === "GOVERNANCE.md" ||
+    path === "README.md" ||
+    path === "SECURITY.md" ||
+    path === "SUPPORT.md" ||
+    path === ".github/pull_request_template.md" ||
+    path.startsWith(".github/ISSUE_TEMPLATE/") ||
+    path.startsWith(".vireo/examples/") ||
+    path.startsWith(".vscode/")
+  ) {
+    return path;
+  }
+  return undefined;
+}
+
+function projectDestination(path: string, profile: VireoProfile) {
+  return profile === "full-stack" ? path : frontendDestination(path);
+}
+
+function isWorkspaceArtifact(path: string) {
+  const segments = path.split("/");
+  const filename = segments[segments.length - 1] ?? "";
+  if (
+    path.startsWith(".vscode/") &&
+    ![".vscode/extensions.json", ".vscode/launch.json", ".vscode/settings.json", ".vscode/tasks.json"].includes(path)
+  ) {
+    return true;
+  }
+  if (filename.startsWith(".env") && filename !== ".env.example") return true;
+  if (filename === ".DS_Store" || filename.endsWith(".iml")) return true;
+  if (segments.join("/") === "operations/evidence" || segments.join("/").startsWith("operations/evidence/"))
+    return true;
+  return segments.some(segment =>
+    [
+      ".git",
+      ".data",
+      ".gradle",
+      ".idea",
+      ".support-evidence",
+      ".verification-evidence",
+      ".performance-evidence",
+      "node_modules",
+      "dist",
+      "storybook-static",
+      "test-results",
+      "playwright-report",
+      ".pwa-update-fixture",
+      "build",
+      "bin",
+      "out",
+    ].includes(segment),
+  );
+}
+
+async function assertNoLocalTemplateLinks(directory: string, root = directory): Promise<void> {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name);
+    const relativePath = normalizedRelative(root, path);
+    if (isWorkspaceArtifact(relativePath)) continue;
+    if (entry.isSymbolicLink()) throw new Error(`Template source contains an unsupported link: ${path}`);
+    if (entry.isDirectory()) await assertNoLocalTemplateLinks(path, root);
+    else if (!entry.isFile()) throw new Error(`Template source contains an unsupported filesystem entry: ${path}`);
+  }
+}
+
+async function copyLocalTemplateDirectory(source: string, destination: string) {
+  await assertNoLocalTemplateLinks(source);
+  await cp(source, destination, {
+    recursive: true,
+    filter: path => path === source || !isWorkspaceArtifact(normalizedRelative(source, path)),
+  });
+}
+
+async function projectTemplate(staging: string, profile: VireoProfile, ignoreWorkspaceArtifacts: boolean) {
+  const projection = `${staging}-project`;
+  const selectedOptionalRules = new Set(applicationProjectionContract.defaultOptionalRuleIds ?? []);
+  const destinations = new Set<string>();
+  try {
+    for (const source of await walk(staging)) {
+      const path = normalizedRelative(staging, source);
+      // Local template directories may be working checkouts. Ignore only their
+      // gitignored build and environment artifacts; pinned archives remain
+      // fully classified by the projection contract.
+      if (ignoreWorkspaceArtifacts && isWorkspaceArtifact(path)) continue;
+      const classification = classifyProjectionPath(applicationProjectionContract, path, profile);
+      if (!classification) throw new Error(`Pinned Template path is unclassified for ${profile}: ${path}`);
+      if (classification.disposition === "exclude") continue;
+      if (classification.disposition === "copy-when-selected" && !selectedOptionalRules.has(classification.ruleId)) {
+        continue;
+      }
+      const destination = projectDestination(path, profile);
+      if (!destination) {
+        throw new Error(`Pinned Template path has no declared ${profile} destination: ${path}`);
+      }
+      if (destinations.has(destination)) throw new Error(`Pinned Template projects multiple files to ${destination}.`);
+      destinations.add(destination);
+      const target = join(projection, destination);
+      await mkdir(dirname(target), { recursive: true });
+      await cp(source, target, { force: true, preserveTimestamps: true });
+    }
+    await rm(staging, { recursive: true, force: true });
+    await rename(projection, staging);
+  } catch (error) {
+    await rm(projection, { recursive: true, force: true });
+    throw error;
+  }
 }
 
 async function replaceTextFiles(root: string, replacements: Array<[string, string]>) {
@@ -235,7 +394,7 @@ async function renderPwaIdentity(path: string, identity: PwaIdentity) {
   await writeFile(path, source);
 }
 
-async function renderLegacyTemplateIdentity(root: string, identity: PwaIdentity) {
+async function renderLegacyTemplateIdentity(root: string, identity: PwaIdentity, frontendDirectory: string) {
   const replaceExactlyOnce = async (path: string, baseline: string, rendered: string) => {
     const source = await readFile(path, "utf8");
     const occurrences = source.split(baseline).length - 1;
@@ -246,34 +405,34 @@ async function renderLegacyTemplateIdentity(root: string, identity: PwaIdentity)
   };
 
   await replaceExactlyOnce(
-    join(root, "frontend", "vite.config.ts"),
+    join(root, frontendDirectory, "vite.config.ts"),
     'name: "Vireo Starter App"',
     `name: ${JSON.stringify(identity.name)}`,
   );
   await replaceExactlyOnce(
-    join(root, "frontend", "vite.config.ts"),
+    join(root, frontendDirectory, "vite.config.ts"),
     'short_name: "Vireo"',
     `short_name: ${JSON.stringify(identity.shortName)}`,
   );
   for (const locale of ["app.en.ts", "app.hr.ts"]) {
     await replaceExactlyOnce(
-      join(root, "frontend", "src", "app", "ui", "localization", "resources", locale),
+      join(root, frontendDirectory, "src", "app", "ui", "localization", "resources", locale),
       'name: "Vireo Starter"',
       `name: ${JSON.stringify(identity.name)}`,
     );
   }
 }
 
-async function renderTemplateIdentity(root: string, identity: PwaIdentity) {
+async function renderTemplateIdentity(root: string, identity: PwaIdentity, frontendDirectory = "frontend") {
   try {
-    await renderPwaIdentity(join(root, "frontend", "pwa-policy.mjs"), identity);
+    await renderPwaIdentity(join(root, frontendDirectory, "pwa-policy.mjs"), identity);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     // Release-pair upgrade fixtures intentionally materialize historical
     // Templates that predate the shared PWA identity authority. Keep their
     // original, strict identity contract readable without weakening the
     // fail-closed checks for current Templates.
-    await renderLegacyTemplateIdentity(root, identity);
+    await renderLegacyTemplateIdentity(root, identity, frontendDirectory);
   }
 }
 
@@ -291,11 +450,144 @@ async function renameJavaPackage(root: string, javaPackage: string) {
   }
 }
 
+function projectIdentityPolicySource(profile: VireoProfile) {
+  if (!applicationProjectionContract.identity)
+    throw new Error("Bundled application projection contract has no identity policy.");
+  return `import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const IDENTITY_CONTRACT = ${JSON.stringify(applicationProjectionContract.identity, null, 2)};
+const EXPECTED_PROFILE = ${JSON.stringify(profile)};
+const options = new Set(process.argv.slice(2));
+const supportedOptions = new Set(["--release", "--json"]);
+const unsupportedOptions = [...options].filter(option => !supportedOptions.has(option));
+const phase = options.has("--release") ? "release" : "creation";
+const json = options.has("--json");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+function hasWhitespace(value) {
+  return /\\s/u.test(value);
+}
+
+function isHttpsUrl(value) {
+  return value.startsWith("https://") && value.length > "https://".length && !hasWhitespace(value);
+}
+
+function isMailtoUrl(value) {
+  if (!value.startsWith("mailto:")) return false;
+  const address = value.slice("mailto:".length);
+  const at = address.indexOf("@");
+  return at > 0 && at === address.lastIndexOf("@") && at < address.length - 1 && !hasWhitespace(address);
+}
+
+function matchesFormat(format, value) {
+  if (format === "kebab-case") return /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u.test(value);
+  if (format === "non-empty") return value.trim().length > 0;
+  if (format === "https-url") return isHttpsUrl(value);
+  if (format === "https-or-mailto-url") return isHttpsUrl(value) || isMailtoUrl(value);
+  return false;
+}
+
+function normalizedReleaseRouteIdentity(value) {
+  if (typeof value !== "string") return undefined;
+  if (isMailtoUrl(value)) return "mailto:" + value.slice("mailto:".length).toLowerCase();
+  if (!isHttpsUrl(value)) return undefined;
+  try {
+    const route = new URL(value);
+    if (route.protocol !== "https:") return undefined;
+    const pathname =
+      route.pathname.length > 1 && route.pathname.endsWith("/") ? route.pathname.slice(0, -1) : route.pathname;
+    return route.protocol + "//" + route.host + pathname + route.search + route.hash;
+  } catch {
+    return undefined;
+  }
+}
+
+function validateIdentity(values) {
+  const problems = [];
+  if (!values || typeof values !== "object" || Array.isArray(values)) return ["application identity must be an object"];
+  for (const field of IDENTITY_CONTRACT.fields) {
+    const value = values[field.name];
+    const required = field.requiredBy === "creation" || phase === "release";
+    if (typeof value !== "string" || value.length === 0) {
+      if (required) problems.push(field.name + " is required by " + field.requiredBy);
+      continue;
+    }
+    if (value.startsWith(IDENTITY_CONTRACT.unresolvedMarkerPrefix)) {
+      if (value !== field.unresolvedMarker) problems.push(field.name + " must use its explicit unresolved marker");
+      else if (phase === "release" || field.requiredBy === "creation") problems.push(field.name + " is unresolved");
+      continue;
+    }
+    if (!matchesFormat(field.format, value)) problems.push(field.name + " must use " + field.format + " format");
+  }
+  if (phase === "release") {
+    for (const field of ["repositoryUrl", "supportUrl", "securityContact"]) {
+      const route = String(values[field] ?? "").toLowerCase();
+      for (const inherited of IDENTITY_CONTRACT.releaseRequirements.forbiddenInheritedHosts ?? []) {
+        if (route.includes(String(inherited).toLowerCase())) {
+          problems.push(field + " must not inherit a Vireo repository, support, or security route");
+        }
+      }
+    }
+    const supportRoute = normalizedReleaseRouteIdentity(values.supportUrl);
+    const securityRoute = normalizedReleaseRouteIdentity(values.securityContact);
+    if (supportRoute !== undefined && supportRoute === securityRoute) {
+      problems.push("supportUrl and securityContact must be distinct release routes");
+    }
+  }
+  return problems;
+}
+
+function remedy(problem) {
+  if (problem.startsWith("schemaVersion")) return "Set schemaVersion to 1 in " + IDENTITY_CONTRACT.metadataPath + ".";
+  if (problem.startsWith("profile")) return "Set profile to " + EXPECTED_PROFILE + " in " + IDENTITY_CONTRACT.metadataPath + ".";
+  const field = IDENTITY_CONTRACT.fields.find(candidate => problem.startsWith(candidate.name + " "));
+  if (problem.includes("unresolved") || problem.includes("required")) {
+    return "Set " + (field?.name ?? "the missing field") + " in " + IDENTITY_CONTRACT.metadataPath + ".";
+  }
+  if (problem.includes("format")) return "Use the format declared for " + (field?.name ?? "this field") + " in the project identity policy.";
+  if (problem.includes("inherit")) return "Replace the inherited Vireo route with an application-owned route.";
+  if (problem.includes("distinct")) return "Configure separate support and private security reporting routes.";
+  return "Repair " + IDENTITY_CONTRACT.metadataPath + " and rerun this command.";
+}
+
+let problems = unsupportedOptions.map(option => "unsupported option " + option);
+try {
+  const metadata = JSON.parse(readFileSync(resolve(root, IDENTITY_CONTRACT.metadataPath), "utf8"));
+  if (metadata.schemaVersion !== 1) problems.push("schemaVersion must be 1");
+  if (metadata.profile !== EXPECTED_PROFILE) problems.push("profile must be " + EXPECTED_PROFILE);
+  problems = problems.concat(validateIdentity(metadata));
+} catch {
+  problems.push("project metadata is missing or invalid at " + IDENTITY_CONTRACT.metadataPath);
+}
+const ok = problems.length === 0;
+if (json) {
+  console.log(JSON.stringify({ phase, ok, problems }));
+} else if (ok) {
+  console.log("Project identity is valid for " + phase + ".");
+} else {
+  console.error("Project identity check failed for " + phase + ":");
+  for (const problem of problems) console.error("- " + problem + "\\n  Remedy: " + remedy(problem));
+}
+if (!ok) process.exitCode = 1;
+`;
+}
+
+async function renderProjectIdentityPolicy(staging: string, profile: VireoProfile) {
+  const path = join(staging, "scripts", "project-identity-policy.mjs");
+  await mkdir(dirname(path), { recursive: true });
+  const config = (await resolveConfig(path)) ?? {};
+  await writeFile(path, await format(projectIdentityPolicySource(profile), { ...config, filepath: path }));
+  await chmod(path, 0o755);
+}
+
 const FRONTEND_VERIFY_SCRIPT = `#!/usr/bin/env bash
 
 set -euo pipefail
 
 steps=(
+  "Project identity|node scripts/project-identity-policy.mjs"
   "Published package boundary|corepack npm run starter:boundary:check"
   "Architecture|corepack npm run architecture:check"
   "Formatting|corepack npm run format:check"
@@ -320,10 +612,11 @@ printf 'Frontend-only verification passed: %d/%d steps.\\n' "\${#steps[@]}" "\${
 const FRONTEND_DOCTOR_SCRIPT = `import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { createConnection } from "node:net";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { checkPwaSourceContract, formatPwaContractProblems } from "./pwa-contract.mjs";
 
-const root = resolve(import.meta.dirname, "..");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const results = [];
 const add = (code, status, summary, remedy) =>
   results.push({ code, status, summary, ...(remedy ? { remedy } : {}) });
@@ -448,87 +741,71 @@ if (!ok) process.exitCode = 1;
 `;
 
 async function projectFrontendTemplate(staging: string, projectName: string, productName: string) {
-  const frontendSource = join(staging, "frontend");
-  const projection = `${staging}-frontend`;
-  const excluded = new Set(["dist", "node_modules", "storybook-static", "test-results", "tests/demo", "tests/e2e"]);
-  try {
-    await cp(frontendSource, projection, {
-      recursive: true,
-      filter: source => {
-        const path = relative(frontendSource, source).replaceAll("\\", "/");
-        return ![...excluded].some(entry => path === entry || path.startsWith(`${entry}/`));
-      },
-    });
-    for (const file of ["LICENSE", "SECURITY.md", "SUPPORT.md"]) {
-      try {
-        await cp(join(staging, file), join(projection, file));
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      }
-    }
-    try {
-      await mkdir(join(projection, ".vireo", "examples"), { recursive: true });
-      await cp(join(staging, ".vireo", "examples"), join(projection, ".vireo", "examples"), { recursive: true });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-    }
+  const packagePath = join(staging, "package.json");
+  const packageJson = JSON.parse(await readFile(packagePath, "utf8")) as Record<string, unknown> & {
+    scripts: Record<string, string>;
+  };
+  packageJson.name = projectName;
+  packageJson.version = INITIAL_APPLICATION_VERSION;
+  const requiredScript = (name: string) => {
+    const script = packageJson.scripts?.[name];
+    if (typeof script !== "string" || script.trim().length === 0)
+      throw new Error(`Pinned Template frontend package.json must define ${name}.`);
+    return script;
+  };
+  packageJson.scripts = {
+    setup: "corepack npm ci",
+    doctor: "node scripts/vireo-frontend-doctor.mjs",
+    dev: packageJson.scripts.dev,
+    build: packageJson.scripts.build,
+    typecheck: packageJson.scripts.typecheck,
+    lint: packageJson.scripts.lint,
+    format: packageJson.scripts.format,
+    "format:check": packageJson.scripts["format:check"],
+    test: packageJson.scripts.test,
+    "test:storybook": packageJson.scripts["test:storybook"],
+    storybook: packageJson.scripts.storybook,
+    "build-storybook": packageJson.scripts["build-storybook"],
+    "starter:mode:published": packageJson.scripts["starter:mode:published"],
+    "starter:boundary:check": packageJson.scripts["starter:boundary:check"],
+    "architecture:check": packageJson.scripts["architecture:check"],
+    "bundle:check": packageJson.scripts["bundle:check"],
+    "pwa:check:source": requiredScript("pwa:check:source"),
+    "pwa:check:built": requiredScript("pwa:check:built"),
+    "pretest:pwa": requiredScript("pretest:pwa"),
+    "test:pwa": requiredScript("test:pwa"),
+    preview: packageJson.scripts.preview,
+    vireo: CREATE_VIREO_COMMAND,
+    "generate:check": "corepack npm run vireo -- check",
+    "identity:check": "node scripts/project-identity-policy.mjs",
+    "identity:check:release": "node scripts/project-identity-policy.mjs --release",
+    verify: "bash scripts/verify-frontend-profile.sh",
+    "verify:release": "corepack npm run identity:check:release && corepack npm run verify",
+  };
+  await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 
-    const packagePath = join(projection, "package.json");
-    const packageJson = JSON.parse(await readFile(packagePath, "utf8")) as Record<string, unknown> & {
-      scripts: Record<string, string>;
-    };
-    packageJson.name = projectName;
-    const requiredScript = (name: string) => {
-      const script = packageJson.scripts?.[name];
-      if (typeof script !== "string" || script.trim().length === 0)
-        throw new Error(`Pinned Template frontend package.json must define ${name}.`);
-      return script;
-    };
-    packageJson.scripts = {
-      setup: "corepack npm ci",
-      doctor: "node scripts/vireo-frontend-doctor.mjs",
-      dev: packageJson.scripts.dev,
-      build: packageJson.scripts.build,
-      typecheck: packageJson.scripts.typecheck,
-      lint: packageJson.scripts.lint,
-      format: packageJson.scripts.format,
-      "format:check": packageJson.scripts["format:check"],
-      test: packageJson.scripts.test,
-      "test:storybook": packageJson.scripts["test:storybook"],
-      storybook: packageJson.scripts.storybook,
-      "build-storybook": packageJson.scripts["build-storybook"],
-      "starter:mode:published": packageJson.scripts["starter:mode:published"],
-      "starter:boundary:check": packageJson.scripts["starter:boundary:check"],
-      "architecture:check": packageJson.scripts["architecture:check"],
-      "bundle:check": packageJson.scripts["bundle:check"],
-      "pwa:check:source": requiredScript("pwa:check:source"),
-      "pwa:check:built": requiredScript("pwa:check:built"),
-      "pretest:pwa": requiredScript("pretest:pwa"),
-      "test:pwa": requiredScript("test:pwa"),
-      preview: packageJson.scripts.preview,
-      vireo: CREATE_VIREO_COMMAND,
-      "generate:check": "corepack npm run vireo -- check",
-      verify: "bash scripts/verify-frontend-profile.sh",
-    };
-    await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+  const lockPath = join(staging, "package-lock.json");
+  const lock = JSON.parse(await readFile(lockPath, "utf8")) as {
+    name?: string;
+    version?: string;
+    packages?: Record<string, { name?: string; version?: string }>;
+  };
+  lock.name = projectName;
+  lock.version = INITIAL_APPLICATION_VERSION;
+  if (lock.packages?.[""]) {
+    lock.packages[""].name = projectName;
+    lock.packages[""].version = INITIAL_APPLICATION_VERSION;
+  }
+  await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
 
-    const lockPath = join(projection, "package-lock.json");
-    const lock = JSON.parse(await readFile(lockPath, "utf8")) as {
-      name?: string;
-      packages?: Record<string, { name?: string }>;
-    };
-    lock.name = projectName;
-    if (lock.packages?.[""]) lock.packages[""].name = projectName;
-    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
-
-    await writeFile(
-      join(projection, "README.md"),
-      `# ${productName}\n\nA standalone Vireo frontend. It runs without Java or a database by default through application-owned mock adapters.\n\nThe authoritative local verification host is Ubuntu 24.04 x86-64 with GNU time/coreutils. Other Linux releases, macOS, Windows/WSL2, and ARM64 may work for development but remain untested; Doctor reports this boundary.\n\n\`\`\`bash\ncorepack npm run setup\ncorepack npm run doctor\ncorepack npm run dev\n\`\`\`\n\nSign in with \`demo\` / \`demo123\`. Replace the adapters exported from \`src/app/adapters/public.ts\` when connecting the company API. See \`docs/architecture/frontend-only-adoption.md\`.\n`,
-    );
-    await writeFile(join(projection, ".env.development"), "VITE_API_MODE=mock\nVITE_API_BASE_URL=/api\n");
-    await writeFile(
-      join(projection, ".gitignore"),
-      `node_modules/
+  await writeFile(
+    join(staging, "README.md"),
+    `# ${productName}\n\nA standalone Vireo frontend. It runs without Java or a database by default through application-owned mock adapters.\n\nThe authoritative local verification host is Ubuntu 24.04 x86-64 with GNU time/coreutils. Other Linux releases, macOS, Windows/WSL2, and ARM64 may work for development but remain untested; Doctor reports this boundary.\n\n\`\`\`bash\ncorepack npm run setup\ncorepack npm run doctor\ncorepack npm run dev\n\`\`\`\n\nSign in with \`demo\` / \`demo123\`. Replace the adapters exported from \`src/app/adapters/public.ts\` when connecting the company API. See \`docs/architecture/frontend-only-adoption.md\`.\n`,
+  );
+  await writeFile(join(staging, ".env.development"), "VITE_API_MODE=mock\nVITE_API_BASE_URL=/api\n");
+  await writeFile(
+    join(staging, ".gitignore"),
+    `node_modules/
 dist/
 .pwa-update-fixture/
 playwright-report/
@@ -539,39 +816,349 @@ storybook-static/
 !.env.example
 !.env.development
 `,
-    );
-    await writeFile(join(projection, "scripts", "verify-frontend-profile.sh"), FRONTEND_VERIFY_SCRIPT);
-    await chmod(join(projection, "scripts", "verify-frontend-profile.sh"), 0o755);
-    const doctorPath = join(projection, "scripts", "vireo-frontend-doctor.mjs");
-    const doctorConfig = (await resolveConfig(doctorPath)) ?? {};
-    await writeFile(doctorPath, await format(FRONTEND_DOCTOR_SCRIPT, { ...doctorConfig, filepath: doctorPath }));
-
-    await rm(staging, { recursive: true, force: true });
-    await rename(projection, staging);
-  } catch (error) {
-    await rm(projection, { recursive: true, force: true });
-    throw error;
-  }
+  );
+  await writeFile(join(staging, "scripts", "verify-frontend-profile.sh"), FRONTEND_VERIFY_SCRIPT);
+  await chmod(join(staging, "scripts", "verify-frontend-profile.sh"), 0o755);
+  const doctorPath = join(staging, "scripts", "vireo-frontend-doctor.mjs");
+  const doctorConfig = (await resolveConfig(doctorPath)) ?? {};
+  await writeFile(doctorPath, await format(FRONTEND_DOCTOR_SCRIPT, { ...doctorConfig, filepath: doctorPath }));
 }
 
 async function pinGeneratedProjectCli(staging: string) {
   const packagePath = join(staging, "package.json");
   const packageJson = JSON.parse(await readFile(packagePath, "utf8")) as {
+    version?: string;
     scripts?: Record<string, string>;
   };
   if (!packageJson.scripts) throw new Error("The pinned Template package.json does not declare scripts.");
+  packageJson.version = INITIAL_APPLICATION_VERSION;
+  delete packageJson.scripts["release:policy"];
   packageJson.scripts.vireo = CREATE_VIREO_COMMAND;
+  packageJson.scripts["identity:check"] = "node scripts/project-identity-policy.mjs";
+  packageJson.scripts["identity:check:release"] = "node scripts/project-identity-policy.mjs --release";
+  packageJson.scripts.verify = "bash scripts/verify.sh";
+  packageJson.scripts["verify:release"] = "corepack npm run identity:check:release && corepack npm run verify";
+  packageJson.scripts["test:scripts"] =
+    "node --test scripts/database-development.test.mjs scripts/verification-host.test.mjs";
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+}
+
+async function normalizeGeneratedAppToolchainPolicy(staging: string) {
+  const path = join(staging, "scripts", "toolchain-policy.mjs");
+  const source = await readFile(path, "utf8");
+  const platformPolicyDeclaration = 'const platformPolicy = readJson("contracts/platform-support-policy.json");\n';
+  const platformAlignment = `expectEqual(
+  "platform Node exact",
+  policy.node,
+  platformPolicy.toolchains.node.exact,
+);
+expectEqual(
+  "platform Node range",
+  policy.nodeRange,
+  platformPolicy.toolchains.node.range,
+);
+expectEqual("platform npm", policy.npm, platformPolicy.toolchains.npm.exact);
+expectEqual(
+  "platform Java",
+  policy.java,
+  platformPolicy.toolchains.java.compile,
+);
+expectEqual("platform Gradle", policy.gradle, platformPolicy.toolchains.gradle);
+expectEqual(
+  "platform Spring Boot",
+  policy.springBoot,
+  platformPolicy.toolchains.springBoot,
+);
+expectEqual(
+  "platform canonical runner",
+  policy.canonicalRunner,
+  platformPolicy.canonicalHost.os,
+);
+
+`;
+  if (!source.includes(platformPolicyDeclaration) || !source.includes(platformAlignment)) {
+    throw new Error("Pinned Template toolchain policy must declare the platform-support alignment block.");
+  }
+  const rendered = source.replace(platformPolicyDeclaration, "").replace(platformAlignment, "");
+  await writeFile(path, rendered);
+
+  const frontendPackagePath = join(staging, "frontend", "package.json");
+  const frontendPackage = JSON.parse(await readFile(frontendPackagePath, "utf8")) as {
+    scripts?: Record<string, string>;
+  };
+  if (!frontendPackage.scripts?.["toolchain:check"])
+    throw new Error("Pinned Template frontend package.json must declare toolchain:check.");
+  frontendPackage.scripts["toolchain:check"] = "node ../scripts/toolchain-policy.mjs";
+  await writeFile(frontendPackagePath, `${JSON.stringify(frontendPackage, null, 2)}\n`);
+}
+
+async function normalizeGeneratedAppWorkflowPolicy(staging: string) {
+  const path = join(staging, "contracts", "github-actions-policy.json");
+  const policy = JSON.parse(await readFile(path, "utf8")) as {
+    requiredConcurrencyWorkflows?: Record<string, unknown>;
+  };
+  if (policy.requiredConcurrencyWorkflows === undefined) {
+    policy.requiredConcurrencyWorkflows = {};
+  } else if (!policy.requiredConcurrencyWorkflows || Array.isArray(policy.requiredConcurrencyWorkflows)) {
+    throw new Error("Pinned Template GitHub Actions policy must declare concurrency workflows as an object.");
+  }
+  const ciConcurrency = await readCiWorkflowConcurrency(staging);
+  if (!Object.prototype.hasOwnProperty.call(policy.requiredConcurrencyWorkflows, "ci.yml")) {
+    policy.requiredConcurrencyWorkflows["ci.yml"] = ciConcurrency;
+  } else if (!hasExactConcurrencyPolicy(policy.requiredConcurrencyWorkflows["ci.yml"], ciConcurrency)) {
+    throw new Error("Pinned Template GitHub Actions ci.yml concurrency policy must exactly match ci.yml.");
+  }
+  delete policy.requiredConcurrencyWorkflows["template-release.yml"];
+  await writeFile(path, `${JSON.stringify(policy, null, 2)}\n`);
+}
+
+async function readCiWorkflowConcurrency(staging: string) {
+  const source = await readFile(join(staging, ".github", "workflows", "ci.yml"), "utf8");
+  const concurrency = source.match(/^concurrency:\s*\n(?<body>(?:^[ \t]+[^\n]*(?:\n|$))*)/mu)?.groups?.body;
+  if (!concurrency) throw new Error("Pinned Template ci.yml must declare a concurrency block.");
+  const groups = [...concurrency.matchAll(/^\s+group:\s*(\S(?:.*\S)?)\s*$/gmu)].map(match => match[1]);
+  const cancelValues = [...concurrency.matchAll(/^\s+cancel-in-progress:\s*(true|false)\s*$/gmu)].map(
+    match => match[1],
+  );
+  if (groups.length !== 1 || cancelValues.length !== 1) {
+    throw new Error("Pinned Template ci.yml concurrency block must declare one group and cancel-in-progress value.");
+  }
+  return { group: groups[0], cancelInProgress: cancelValues[0] === "true" };
+}
+
+function hasExactConcurrencyPolicy(value: unknown, expected: { group: string; cancelInProgress: boolean }) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const policy = value as Record<string, unknown>;
+  return (
+    Object.keys(policy).length === 2 &&
+    policy.group === expected.group &&
+    policy.cancelInProgress === expected.cancelInProgress
+  );
+}
+
+const PROJECT_IDENTITY_BUDGET_STAGE = {
+  label: "Project identity",
+  baselineMs: 50,
+  warningMs: 5000,
+  failureMs: 10000,
+  baselineRssKiB: 50000,
+  warningRssKiB: 131072,
+  failureRssKiB: 262144,
+};
+
+const DEVELOPMENT_DATABASE_BUDGET_STAGE = {
+  label: "Development database modes",
+  baselineMs: 500,
+  warningMs: 5000,
+  failureMs: 10000,
+  baselineRssKiB: 80000,
+  warningRssKiB: 262144,
+  failureRssKiB: 524288,
+};
+
+async function normalizeGeneratedAppVerification(staging: string) {
+  const path = join(staging, "scripts", "verify.sh");
+  const source = await readFile(path, "utf8");
+  const templateOnlyStages = [
+    "verification-pipeline",
+    "vireo-compatibility",
+    "public-contract",
+    "flagship-demo",
+    "flagship-proof",
+  ];
+  let rendered = source
+    .split("\n")
+    .filter(line => !templateOnlyStages.some(stage => line.includes(`"${stage}|`)))
+    .join("\n");
+  if (!rendered.includes('"project-identity|')) {
+    const stepsOpening = "steps=(\n";
+    if (!rendered.includes(stepsOpening)) throw new Error("Pinned Template verifier must declare a steps array.");
+    rendered = rendered.replace(
+      stepsOpening,
+      `${stepsOpening}  "project-identity|Project identity|node scripts/project-identity-policy.mjs"\n`,
+    );
+  }
+  if (rendered !== source) await writeFile(path, rendered);
+  await chmod(path, 0o755);
+
+  const budgetPath = join(staging, "contracts", "verification-budget-policy.json");
+  try {
+    const budget = JSON.parse(await readFile(budgetPath, "utf8")) as { stages?: Record<string, unknown> };
+    if (!budget.stages || typeof budget.stages !== "object") {
+      throw new Error("Pinned Template verification budget must declare stages.");
+    }
+    const stageIds = [...rendered.matchAll(/^\s*"([a-z0-9-]+)\|/gmu)].map(match => match[1]);
+    delete budget.stages["public-contract"];
+    if (
+      stageIds.includes("development-database") &&
+      !Object.prototype.hasOwnProperty.call(budget.stages, "development-database")
+    )
+      budget.stages["development-database"] = DEVELOPMENT_DATABASE_BUDGET_STAGE;
+    if (!Object.prototype.hasOwnProperty.call(budget.stages, "project-identity")) {
+      budget.stages["project-identity"] = PROJECT_IDENTITY_BUDGET_STAGE;
+    } else if (JSON.stringify(budget.stages["project-identity"]) !== JSON.stringify(PROJECT_IDENTITY_BUDGET_STAGE)) {
+      throw new Error("Pinned Template project-identity budget stage has unexpected thresholds.");
+    }
+    await writeFile(budgetPath, `${JSON.stringify(budget, null, 2)}\n`);
+    const sortedStageIds = stageIds.sort();
+    const budgetStageIds = Object.keys(budget.stages).sort();
+    if (JSON.stringify(sortedStageIds) !== JSON.stringify(budgetStageIds)) {
+      throw new Error(
+        `Pinned Template verification stages and budget disagree: verifier=${sortedStageIds.join(",")} budget=${budgetStageIds.join(",")}`,
+      );
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  const workflowPath = join(staging, ".github", "workflows", "ci.yml");
+  try {
+    await replaceTextFile(workflowPath, [["./scripts/verify-template.sh", "./scripts/verify.sh"]]);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+}
+
+async function replaceApplicationDocumentation(path: string, replacements: Array<[string, string]>) {
+  try {
+    await replaceTextFile(path, replacements);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+}
+
+async function renderApplicationDocumentation(staging: string, profile: VireoProfile) {
+  if (profile === "full-stack") {
+    await replaceApplicationDocumentation(join(staging, "docs", "comparison.md"), [
+      ["[flagship path](flagship.md)", "framework evaluation guidance"],
+    ]);
+    await replaceApplicationDocumentation(join(staging, "docs", "deployment.md"), [
+      [
+        "the isolated [flagship demo operations contract](flagship-demo.md). It adds deterministic public seed data, a scoped reset procedure, and an external synthetic journey",
+        "an application-owned disposable deployment rehearsal with synthetic data and a scoped reset procedure",
+      ],
+    ]);
+    await replaceApplicationDocumentation(join(staging, "docs", "starter-compatibility.md"), [
+      [
+        "[Platform support evidence](platform-support-evidence.md).",
+        "Project platform-support evidence is application-owned.",
+      ],
+    ]);
+  }
+  const frontendDocs = profile === "frontend" ? join(staging, "docs") : join(staging, "frontend", "docs");
+  await replaceApplicationDocumentation(join(frontendDocs, "LOADING_STATES.md"), [
+    [
+      "The [template audit and remediation record](LOADING_STATE_AUDIT.md) records the current route and feature baseline, geometry targets, completed vertical slices, and enforcement contracts.",
+      "Maintain a project-owned loading-state audit for current routes, geometry targets, completed vertical slices, and enforcement contracts.",
+    ],
+  ]);
+}
+
+function unresolvedIdentity(field: keyof Omit<ApplicationIdentity, "projectName" | "displayName">) {
+  return `UNRESOLVED_VIREO_${field.replace(/([A-Z])/gu, "_$1").toUpperCase()}`;
+}
+
+function isUnresolvedIdentity(value: string) {
+  return value.startsWith("UNRESOLVED_VIREO_");
+}
+
+function assertNoInheritedVireoRoutes(identity: ApplicationIdentity) {
+  const forbidden = ["github.com/vireocodedev/starter", "github.com/vireocodedev/starter-template"];
+  for (const [field, value] of Object.entries({
+    repositoryUrl: identity.repositoryUrl,
+    supportUrl: identity.supportUrl,
+    securityContact: identity.securityContact,
+  })) {
+    if (!isUnresolvedIdentity(value) && forbidden.some(route => value.toLowerCase().includes(route))) {
+      throw new Error(`${field} must not inherit a Vireo repository, support, or security route.`);
+    }
+  }
+}
+
+function renderedRoute(value: string, label: string) {
+  return isUnresolvedIdentity(value) ? `Set ${label} before release.` : `[${label}](${value})`;
+}
+
+function githubIssueContactLinks(identity: ApplicationIdentity) {
+  const contacts = [
+    ["Support", identity.supportUrl, "Use the application support route."],
+    ["Security report", identity.securityContact, "Report suspected vulnerabilities privately."],
+  ].filter(([, value]) => /^https:\/\/[^\s]+$/u.test(value));
+  if (contacts.length === 0) return "contact_links: []\n";
+  return `contact_links:\n${contacts
+    .map(([name, value, about]) => `  - name: ${name}\n    url: ${JSON.stringify(value)}\n    about: ${about}`)
+    .join("\n")}\n`;
+}
+
+async function renderPublicIdentity(root: string, identity: ApplicationIdentity, profile: VireoProfile) {
+  const securityRoute = renderedRoute(identity.securityContact, "security reporting route");
+  const supportRoute = renderedRoute(identity.supportUrl, "support route");
+  const profileDescription =
+    profile === "frontend"
+      ? "A standalone frontend application generated with Vireo integration contracts."
+      : "A full-stack application generated with Vireo integration contracts.";
+  const frontendAdoptionGuidance =
+    profile === "frontend"
+      ? "\n\nThis standalone application starts with mock adapters. Replace the adapters exported from src/app/adapters/public.ts when connecting the company API.\n\nThe authoritative local verification host is Ubuntu 24.04 x86-64 with GNU time/coreutils. Other environments may work for development but remain unverified for release evidence."
+      : "";
+  await writeFile(
+    join(root, "README.md"),
+    `# ${identity.displayName}\n\n${profileDescription}${frontendAdoptionGuidance}\n\nThis repository is owned by ${isUnresolvedIdentity(identity.ownerName) ? "the application team" : identity.ownerName}. Configure its release identity in .vireo/project.json before publishing or deploying.\n\n## Run locally\n\n\`\`\`bash\ncorepack npm run setup\ncorepack npm run doctor\ncorepack npm run dev\n\`\`\`\n\n## Release readiness\n\nAfter resolving the owner, repository, support, and security routes in .vireo/project.json, run:\n\n\`\`\`bash\ncorepack npm run verify:release\n\`\`\`\n\n## Project routes\n\n- Repository: ${renderedRoute(identity.repositoryUrl, "repository route")}\n- Support: ${supportRoute}\n- Security: ${securityRoute}\n`,
+  );
+  await writeFile(
+    join(root, "SECURITY.md"),
+    `# Security policy\n\nReport suspected vulnerabilities through ${securityRoute}\n\nDo not open a public issue with vulnerability details. This project must set a private security route before release.\n`,
+  );
+  await writeFile(
+    join(root, "SUPPORT.md"),
+    `# Support\n\nFor help with this application, use ${supportRoute}\n\nApplication owners maintain support for derived projects; framework maintainers do not receive application support requests by default.\n`,
+  );
+  await writeFile(
+    join(root, "CONTRIBUTING.md"),
+    `# Contributing\n\nContributions are reviewed by the application owners. Read the project README and use the configured support route for questions.\n`,
+  );
+  await writeFile(
+    join(root, "GOVERNANCE.md"),
+    `# Governance\n\nThe application owner is responsible for project decisions, releases, and security response. Update .vireo/project.json with the resolved owner and repository before release.\n`,
+  );
+  await mkdir(join(root, ".github", "ISSUE_TEMPLATE"), { recursive: true });
+  await writeFile(
+    join(root, ".github", "ISSUE_TEMPLATE", "config.yml"),
+    `blank_issues_enabled: false\n${githubIssueContactLinks(identity)}`,
+  );
+  await writeFile(
+    join(root, ".github", "ISSUE_TEMPLATE", "bug_report.yml"),
+    `name: Bug report\ndescription: Report a reproducible application defect.\nbody:\n  - type: textarea\n    attributes:\n      label: What happened?\n    validations:\n      required: true\n`,
+  );
+  await writeFile(
+    join(root, ".github", "ISSUE_TEMPLATE", "feature_request.yml"),
+    `name: Feature request\ndescription: Propose an application improvement.\nbody:\n  - type: textarea\n    attributes:\n      label: What problem would this solve?\n    validations:\n      required: true\n`,
+  );
+  await writeFile(
+    join(root, ".github", "pull_request_template.md"),
+    `## Summary\n\nDescribe the application change and its verification.\n\n## Checklist\n\n- [ ] I updated application documentation when needed.\n- [ ] I considered support and security impact.\n`,
+  );
 }
 
 export async function createVireo(options: CreateVireoOptions): Promise<CreateVireoResult> {
   const directory = resolve(options.directory);
   const projectName = options.projectName ?? basename(directory);
   const profile = options.profile ?? "full-stack";
+  const productName = options.displayName ?? displayName(projectName);
+  const identity: ApplicationIdentity = {
+    projectName,
+    displayName: productName,
+    ownerName: options.ownerName ?? unresolvedIdentity("ownerName"),
+    repositoryUrl: options.repositoryUrl ?? unresolvedIdentity("repositoryUrl"),
+    supportUrl: options.supportUrl ?? unresolvedIdentity("supportUrl"),
+    securityContact: options.securityContact ?? unresolvedIdentity("securityContact"),
+  };
   const javaPackage = options.javaPackage ?? `com.example.${javaSuffix(projectName)}`;
   const database = options.database ?? "postgresql";
   const packageManager = options.packageManager ?? "npm";
   assertProjectName(projectName);
+  const identityProblems = validateApplicationIdentity(applicationProjectionContract, identity, "creation");
+  if (identityProblems.length > 0) throw new Error(`Invalid application identity: ${identityProblems.join("; ")}`);
+  assertNoInheritedVireoRoutes(identity);
   if (profile === "full-stack") assertJavaPackage(javaPackage);
   if (profile !== "full-stack" && profile !== "frontend")
     throw new Error("Profile must be `full-stack` or `frontend`.");
@@ -589,6 +1176,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
   const result: CreateVireoResult = {
     directory,
     projectName,
+    displayName: productName,
     profile,
     ...(profile === "full-stack" ? { javaPackage, database } : {}),
     packageManager,
@@ -602,25 +1190,40 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
   const staging = join(dirname(directory), `.${basename(directory)}.vireo-${randomBytes(6).toString("hex")}`);
   try {
     await mkdir(staging);
-    if (options.templateDirectory) await cp(resolve(options.templateDirectory), staging, { recursive: true });
-    else await downloadTemplate(staging);
+    if (options.templateDirectory) {
+      const templateDirectory = resolve(options.templateDirectory);
+      // Dirent-based inspection rejects projected links rather than following
+      // a target outside the Template; cp also skips local checkout artifacts.
+      await copyLocalTemplateDirectory(templateDirectory, staging);
+    } else await downloadTemplate(staging);
+    await projectTemplate(staging, profile, options.templateDirectory !== undefined);
     await replaceTextFiles(staging, [
       ["com.vireocode.startertemplate", javaPackage],
       ["starter_template", projectName.replaceAll("-", "_")],
       ["starter-template-frontend", `${projectName}-frontend`],
       ["starter-template", projectName],
     ]);
-    const productName = displayName(projectName);
-    await replaceTextFile(join(staging, "README.md"), [["# Vireo Starter Template", `# ${productName}`]]);
-    await renderTemplateIdentity(staging, createPwaIdentity(projectName, productName));
+    await renderTemplateIdentity(
+      staging,
+      createPwaIdentity(projectName, productName),
+      profile === "frontend" ? "." : "frontend",
+    );
     await renameJavaPackage(staging, javaPackage);
     if (profile === "frontend") await projectFrontendTemplate(staging, projectName, productName);
-    else await pinGeneratedProjectCli(staging);
+    else {
+      await pinGeneratedProjectCli(staging);
+      await normalizeGeneratedAppToolchainPolicy(staging);
+      await normalizeGeneratedAppVerification(staging);
+      await normalizeGeneratedAppWorkflowPolicy(staging);
+    }
+    await renderProjectIdentityPolicy(staging, profile);
+    await renderApplicationDocumentation(staging, profile);
+    await renderPublicIdentity(staging, identity, profile);
     await rm(join(staging, ".vireo", "template.json"), { force: true });
     await mkdir(join(staging, ".vireo"), { recursive: true });
     await writeFile(
       join(staging, ".vireo", "project.json"),
-      `${JSON.stringify({ schemaVersion: 1, profile, projectName, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, createdBy: `create-vireo@${CREATE_VIREO_PACKAGE_VERSION}` }, null, 2)}\n`,
+      `${JSON.stringify({ schemaVersion: 1, profile, ...identity, ...(profile === "full-stack" ? { javaPackage, database, databaseName: projectName.replaceAll("-", "_") } : {}), packageManager, templateCommit: TEMPLATE_COMMIT, templateVersion: TEMPLATE_VERSION, templateTag: TEMPLATE_TAG, createdBy: `create-vireo@${CREATE_VIREO_PACKAGE_VERSION}` }, null, 2)}\n`,
     );
     await writeExampleManifest(staging, TEMPLATE_COMMIT, profile);
     if (options.git !== false) {

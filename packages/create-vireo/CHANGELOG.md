@@ -1,5 +1,11 @@
 # create-vireo
 
+## 0.6.0
+
+### Minor Changes
+
+- Generate contract-driven full-stack and frontend projects from the pinned Template release, with application-owned identity validation, release readiness commands, and app-safe verification guidance.
+
 ## 0.5.1
 
 ### Patch Changes

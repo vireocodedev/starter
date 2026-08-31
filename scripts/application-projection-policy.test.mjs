@@ -32,6 +32,37 @@ test("flagship operations and historical evidence are excluded from every projec
   }
 });
 
+test("template release operations are excluded from every project profile", () => {
+  for (const profile of contract.profiles) {
+    for (const path of [
+      ".github/workflows/template-release.yml",
+      "contracts/template-release-policy.json",
+      "scripts/template-release-policy.mjs",
+      "scripts/template-release-policy.test.mjs",
+      "scripts/write-template-release-manifest.mjs",
+    ]) {
+      const classification = classifyProjectionPath(contract, path, profile);
+      assert.equal(classification?.category, "maintainer-only", `${profile}: ${path}`);
+      assert.equal(classification?.disposition, "exclude", `${profile}: ${path}`);
+    }
+  }
+});
+
+test("template maintainer policy wrappers are excluded from full-stack projects", () => {
+  for (const path of [
+    "contracts/platform-support-policy.json",
+    "scripts/platform-support-policy.mjs",
+    "scripts/public-contract-policy.mjs",
+    "scripts/verification-pipeline-policy.mjs",
+    "scripts/vireo-package-compatibility-policy.mjs",
+  ]) {
+    const classification = classifyProjectionPath(contract, path, "full-stack");
+    assert.equal(classification?.category, "maintainer-only", path);
+    assert.equal(classification?.disposition, "exclude", path);
+    assert.equal(classifyProjectionPath(contract, path, "frontend")?.disposition, "exclude", `frontend: ${path}`);
+  }
+});
+
 test("classification is profile-aware, specificity-based, and fail closed", () => {
   assert.equal(classifyProjectionPath(contract, "frontend/src/app/App.tsx", "frontend")?.category, "application-owned");
   assert.equal(
@@ -39,6 +70,14 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
     "substitution-required",
   );
   assert.equal(classifyProjectionPath(contract, "scripts/setup.mjs", "full-stack")?.category, "managed");
+  assert.equal(
+    classifyProjectionPath(contract, "docs/recipes/rehearse-demo-reset.md", "full-stack")?.category,
+    "maintainer-only",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "docs/recipes/rehearse-demo-reset.md", "frontend")?.category,
+    "maintainer-only",
+  );
   assert.equal(
     classifyProjectionPath(contract, "frontend/pwa-policy.mjs", "full-stack")?.category,
     "substitution-required",
@@ -62,7 +101,19 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
     classifyProjectionPath(contract, "tests/contract/pwa-contract.test.mjs", "frontend")?.category,
     "managed",
   );
-  assert.equal(classifyProjectionPath(contract, ".gitignore", "frontend")?.category, "managed");
+  assert.equal(classifyProjectionPath(contract, ".gitignore", "frontend")?.category, "maintainer-only");
+  assert.equal(classifyProjectionPath(contract, "frontend/scripts/verify.sh", "full-stack")?.category, "managed");
+  assert.equal(classifyProjectionPath(contract, "frontend/scripts/verify.sh", "frontend")?.category, "maintainer-only");
+  assert.equal(
+    classifyProjectionPath(contract, "scripts/project-identity-policy.mjs", "full-stack")?.category,
+    "managed",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "scripts/public-contract-policy.mjs", "full-stack")?.category,
+    "maintainer-only",
+  );
+  assert.equal(classifyProjectionPath(contract, ".vscode/settings.json", "full-stack")?.category, "optional");
+  assert.equal(classifyProjectionPath(contract, ".vscode/settings.json", "frontend")?.category, "maintainer-only");
   assert.equal(
     classifyProjectionPath(contract, "frontend/tests/pwa/production-pwa.spec.ts", "full-stack")?.category,
     "managed",
@@ -76,6 +127,7 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
     "playwright.pwa.config.ts",
     "scripts/verify-frontend-profile.sh",
     "scripts/vireo-frontend-doctor.mjs",
+    "scripts/project-identity-policy.mjs",
   ]) {
     assert.equal(classifyProjectionPath(contract, path, "frontend")?.category, "managed", path);
   }
@@ -85,6 +137,10 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
   );
   assert.equal(
     classifyProjectionPath(contract, "src/app/ui/localization/resources/app.en.ts", "frontend")?.category,
+    "maintainer-only",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/src/app/ui/localization/resources/app.en.ts", "frontend")?.category,
     "application-owned",
   );
   assert.equal(
@@ -151,6 +207,23 @@ test("release identity must be application-owned and route security separately",
       repositoryUrl: "https://github.com/vireocodedev/starter-template",
       securityContact: valid.supportUrl,
     }).join("\n"),
-    /generated application[\s\S]*must be distinct/u,
+    /must not inherit a Vireo[\s\S]*must be distinct/u,
   );
+  for (const identity of [
+    {
+      ...valid,
+      supportUrl: "https://support.acme.example/inventory",
+      securityContact: "https://support.acme.example/inventory/",
+    },
+    {
+      ...valid,
+      supportUrl: "mailto:Security@acme.example",
+      securityContact: "mailto:security@acme.example",
+    },
+  ]) {
+    assert.match(
+      validateApplicationIdentity(contract, identity).join("\n"),
+      /supportUrl and securityContact must be distinct/u,
+    );
+  }
 });

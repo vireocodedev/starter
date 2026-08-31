@@ -1,6 +1,8 @@
+import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveVerificationEvidenceSource } from "./lib/verification-evidence-source.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = JSON.parse(readFileSync(join(repositoryRoot, "contracts", "verification-budget-policy.json"), "utf8"));
@@ -19,6 +21,11 @@ const observed = Object.fromEntries(
 const problems = [];
 const warnings = [];
 const observedStages = {};
+const evidenceSource = resolveVerificationEvidenceSource({
+  env: process.env,
+  command: (command, args) => execFileSync(command, args, { cwd: repositoryRoot, encoding: "utf8" }),
+});
+problems.push(...evidenceSource.problems);
 
 function validateThresholds(id, thresholds) {
   for (const unit of ["Ms", "RssKiB"]) {
@@ -84,12 +91,7 @@ if (process.env.GITHUB_ACTIONS === "true") {
 const evidence = {
   schemaVersion: policy.schemaVersion,
   recordedAt: new Date().toISOString(),
-  source: {
-    commit: process.env.GITHUB_SHA,
-    workflow: process.env.GITHUB_WORKFLOW,
-    runId: process.env.GITHUB_RUN_ID,
-    runAttempt: process.env.GITHUB_RUN_ATTEMPT,
-  },
+  source: evidenceSource.source,
   host: {
     canonical: policy.canonicalHost,
     observed: {

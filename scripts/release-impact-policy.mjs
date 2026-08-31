@@ -138,18 +138,55 @@ function parseImpactRecord(change, artifactsById, policy, problems) {
   return { artifact: artifact.id, decision: record.decision, source: change.path };
 }
 
+const stableSemverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
+
+function parseStableSemver(value) {
+  const match = typeof value === "string" ? value.match(stableSemverPattern) : null;
+  return match?.slice(1) ?? null;
+}
+
+function compareNumericIdentifiers(left, right) {
+  if (left.length !== right.length) return left.length - right.length;
+  return left.localeCompare(right);
+}
+
+function compareStableSemver(left, right) {
+  for (let index = 0; index < left.length; index += 1) {
+    const comparison = compareNumericIdentifiers(left[index], right[index]);
+    if (comparison !== 0) return comparison;
+  }
+  return 0;
+}
+
+function changelogDeclaresVersion(changelog, version) {
+  return new RegExp(`^## ${version.replaceAll(".", "\\.")}\\r?$`, "mu").test(changelog);
+}
+
 function packageWasVersioned(artifact, changesByPath) {
   const prefix = artifact.pathPrefixes[0];
   const manifest = changesByPath.get(`${prefix}package.json`);
   const changelog = changesByPath.get(`${prefix}CHANGELOG.md`);
-  if (!manifest || !changelog || manifest.status === "D") return false;
+  if (!manifest || !changelog || manifest.status === "D" || changelog.status === "D") return false;
   try {
     const before = JSON.parse(manifest.baseContent ?? "null")?.version;
     const after = JSON.parse(manifest.headContent ?? "null")?.version;
-    return typeof before === "string" && typeof after === "string" && before !== after;
+    const beforeSemver = parseStableSemver(before);
+    const afterSemver = parseStableSemver(after);
+    return (
+      beforeSemver !== null &&
+      afterSemver !== null &&
+      compareStableSemver(afterSemver, beforeSemver) > 0 &&
+      typeof changelog.headContent === "string" &&
+      changelogDeclaresVersion(changelog.headContent, after)
+    );
   } catch {
     return false;
   }
+}
+
+function appliedPackageVersionSource(artifact) {
+  const prefix = artifact.pathPrefixes[0];
+  return `${prefix}package.json + ${prefix}CHANGELOG.md`;
 }
 
 export function validateReleaseImpact({ policy, ecosystemContract, changes }) {
@@ -228,6 +265,17 @@ export function validateReleaseImpact({ policy, ecosystemContract, changes }) {
     }
   }
 
+  for (const artifact of artifacts.filter(entry => entry.kind === "npm")) {
+    if (!packageWasVersioned(artifact, changesByPath) || decisions.has(artifact.id)) continue;
+    addDecision({
+      artifact: artifact.id,
+      decision: "release",
+      bump: "applied-version",
+      metadata: "applied-version",
+      source: appliedPackageVersionSource(artifact),
+    });
+  }
+
   for (const change of changes.filter(
     entry => entry.path.startsWith(metadataPrefix) && entry.path !== `${metadataPrefix}README.md`,
   )) {
@@ -291,7 +339,10 @@ export function readGitChanges(baseReference, headReference) {
       path = tokens[index++];
     }
     const needsContent =
-      path.startsWith(metadataPrefix) || path.startsWith(changesetPrefix) || path.endsWith("/package.json");
+      path.startsWith(metadataPrefix) ||
+      path.startsWith(changesetPrefix) ||
+      path.endsWith("/package.json") ||
+      path.endsWith("/CHANGELOG.md");
     changes.push({
       status,
       path,

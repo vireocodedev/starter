@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "release",
+  "bump": "deploy",
+  "summary": "Deploy current Template release coordinates and generated-project lifecycle guidance across the public documentation site."
+}
