@@ -31,7 +31,7 @@
       { "name": "@vireocodedev/query", "version": "0.2.2", "role": "query-contracts" },
       { "name": "@vireocodedev/shell", "version": "0.2.2", "role": "application-shell-contracts" },
       { "name": "@vireocodedev/sqlite", "version": "0.2.3", "role": "offline-persistence" },
-      { "name": "@vireocodedev/ui", "version": "0.3.0", "role": "react-design-system" }
+      { "name": "@vireocodedev/ui", "version": "0.3.1", "role": "react-design-system" }
     ],
     "maven": {
       "group": "com.vireocode",
@@ -64,7 +64,7 @@
           "@vireocodedev/query": "0.2.2",
           "@vireocodedev/shell": "0.2.2",
           "@vireocodedev/sqlite": "0.2.3",
-          "@vireocodedev/ui": "0.3.0"
+          "@vireocodedev/ui": "0.3.1"
         },
         "mavenBom": "com.vireocode:vireo-bom:0.3.0",
         "templateCommit": "5b123e60bd1ce733ae70711796552a17aaa60fe3",

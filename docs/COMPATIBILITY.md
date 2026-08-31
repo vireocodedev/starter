@@ -24,7 +24,7 @@ the package manifests:
 | `@vireocodedev/query`          |           0.2.2 |
 | `@vireocodedev/shell`          |           0.2.2 |
 | `@vireocodedev/sqlite`         |           0.2.3 |
-| `@vireocodedev/ui`             |           0.3.0 |
+| `@vireocodedev/ui`             |           0.3.1 |
 | `com.vireocode:vireo-*`        |           0.3.0 |
 
 `create-vireo` includes the frontend profile. Version 0.2.0 remains the first

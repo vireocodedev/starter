@@ -16,7 +16,7 @@
         { "package": "@vireocodedev/query", "version": "0.2.2" },
         { "package": "@vireocodedev/shell", "version": "0.2.2" },
         { "package": "@vireocodedev/sqlite", "version": "0.2.3" },
-        { "package": "@vireocodedev/ui", "version": "0.3.0" }
+        { "package": "@vireocodedev/ui", "version": "0.3.1" }
       ],
       "jvm": {
         "group": "com.vireocode",
