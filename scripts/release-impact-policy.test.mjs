@@ -10,6 +10,12 @@ const ecosystemContract = JSON.parse(
 );
 
 const sourceChange = path => ({ status: "M", path, baseContent: null, headContent: null });
+const versionedChangelog = (path, version) => ({
+  status: "M",
+  path,
+  baseContent: "# Changelog\n",
+  headContent: `# Changelog\n\n## ${version}\n`,
+});
 const changeset = (
   name,
   bump = "patch",
@@ -188,9 +194,53 @@ test("accepts a consumed Changeset only when the version PR changes version and 
       baseContent: '{"version":"0.2.2"}',
       headContent: '{"version":"0.2.3"}',
     },
-    sourceChange("packages/sqlite/CHANGELOG.md"),
+    versionedChangelog("packages/sqlite/CHANGELOG.md", "0.2.3"),
   ]);
   assert.deepEqual(complete.problems, []);
+});
+
+test("accepts an applied npm version only when manifest and changelog both change", () => {
+  const manifest = {
+    status: "M",
+    path: "packages/create-vireo/package.json",
+    baseContent: '{"version":"0.5.1"}',
+    headContent: '{"version":"0.6.0"}',
+  };
+  const changelog = versionedChangelog("packages/create-vireo/CHANGELOG.md", "0.6.0");
+  const accepted = validate([sourceChange("packages/create-vireo/src/index.ts"), manifest, changelog]);
+  assert.deepEqual(accepted.problems, []);
+  assert.deepEqual(accepted.decisions, [
+    {
+      artifact: "npm:create-vireo",
+      decision: "release",
+      bump: "applied-version",
+      metadata: "applied-version",
+      source: "packages/create-vireo/package.json + packages/create-vireo/CHANGELOG.md",
+    },
+  ]);
+
+  const manifestOnly = validate([sourceChange("packages/create-vireo/src/index.ts"), manifest]);
+  assert.ok(manifestOnly.problems.some(problem => problem.includes("npm:create-vireo is affected")));
+
+  const changelogOnly = validate([sourceChange("packages/create-vireo/src/index.ts"), changelog]);
+  assert.ok(changelogOnly.problems.some(problem => problem.includes("npm:create-vireo is affected")));
+
+  for (const [label, version, changelogHead] of [
+    ["invalid semver", "0.06.0", "## 0.06.0\n"],
+    ["downgrade", "0.5.0", "## 0.5.0\n"],
+    ["equal version", "0.5.1", "## 0.5.1\n"],
+    ["missing exact heading", "0.6.0", "## v0.6.0\n"],
+  ]) {
+    const rejected = validate([
+      sourceChange("packages/create-vireo/src/index.ts"),
+      { ...manifest, headContent: JSON.stringify({ version }) },
+      { ...changelog, headContent: changelogHead },
+    ]);
+    assert.ok(
+      rejected.problems.some(problem => problem.includes("npm:create-vireo is affected")),
+      label,
+    );
+  }
 });
 
 test("parses metadata as data and rejects executable or ambiguous Changesets syntax", () => {

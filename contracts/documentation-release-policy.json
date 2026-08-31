@@ -25,7 +25,7 @@
       },
       "template": {
         "repository": "https://github.com/vireocodedev/starter-template",
-        "commit": "7d17d129858063833522687d798f735f6b623c46",
+        "commit": "5b123e60bd1ce733ae70711796552a17aaa60fe3",
         "version": "0.6.0",
         "tag": "starter-template@0.6.0",
         "releaseUrl": "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.6.0"

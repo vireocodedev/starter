@@ -64,7 +64,7 @@ const CREATE_VIREO_PACKAGE_VERSION = "0.6.0";
 const TEMPLATE_VERSION = CREATE_VIREO_PACKAGE_VERSION;
 const TEMPLATE_TAG = `starter-template@${TEMPLATE_VERSION}`;
 const INITIAL_APPLICATION_VERSION = "0.1.0";
-export const TEMPLATE_COMMIT = "7d17d129858063833522687d798f735f6b623c46";
+export const TEMPLATE_COMMIT = "5b123e60bd1ce733ae70711796552a17aaa60fe3";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
 const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
@@ -918,6 +918,16 @@ const PROJECT_IDENTITY_BUDGET_STAGE = {
   failureRssKiB: 262144,
 };
 
+const DEVELOPMENT_DATABASE_BUDGET_STAGE = {
+  label: "Development database modes",
+  baselineMs: 500,
+  warningMs: 5000,
+  failureMs: 10000,
+  baselineRssKiB: 80000,
+  warningRssKiB: 262144,
+  failureRssKiB: 524288,
+};
+
 async function normalizeGeneratedAppVerification(staging: string) {
   const path = join(staging, "scripts", "verify.sh");
   const source = await readFile(path, "utf8");
@@ -949,34 +959,24 @@ async function normalizeGeneratedAppVerification(staging: string) {
     if (!budget.stages || typeof budget.stages !== "object") {
       throw new Error("Pinned Template verification budget must declare stages.");
     }
-    if (Object.prototype.hasOwnProperty.call(budget.stages, "public-contract")) {
-      if (Object.prototype.hasOwnProperty.call(budget.stages, "development-database")) {
-        throw new Error(
-          "Pinned Template verification budget cannot declare both public-contract and development-database.",
-        );
-      }
-      delete budget.stages["public-contract"];
-      budget.stages["development-database"] = {
-        label: "Development database modes",
-        baselineMs: 500,
-        warningMs: 5000,
-        failureMs: 10000,
-        baselineRssKiB: 80000,
-        warningRssKiB: 262144,
-        failureRssKiB: 524288,
-      };
-    }
+    const stageIds = [...rendered.matchAll(/^\s*"([a-z0-9-]+)\|/gmu)].map(match => match[1]);
+    delete budget.stages["public-contract"];
+    if (
+      stageIds.includes("development-database") &&
+      !Object.prototype.hasOwnProperty.call(budget.stages, "development-database")
+    )
+      budget.stages["development-database"] = DEVELOPMENT_DATABASE_BUDGET_STAGE;
     if (!Object.prototype.hasOwnProperty.call(budget.stages, "project-identity")) {
       budget.stages["project-identity"] = PROJECT_IDENTITY_BUDGET_STAGE;
     } else if (JSON.stringify(budget.stages["project-identity"]) !== JSON.stringify(PROJECT_IDENTITY_BUDGET_STAGE)) {
       throw new Error("Pinned Template project-identity budget stage has unexpected thresholds.");
     }
     await writeFile(budgetPath, `${JSON.stringify(budget, null, 2)}\n`);
-    const stageIds = [...rendered.matchAll(/^\s*"([a-z0-9-]+)\|/gmu)].map(match => match[1]).sort();
+    const sortedStageIds = stageIds.sort();
     const budgetStageIds = Object.keys(budget.stages).sort();
-    if (JSON.stringify(stageIds) !== JSON.stringify(budgetStageIds)) {
+    if (JSON.stringify(sortedStageIds) !== JSON.stringify(budgetStageIds)) {
       throw new Error(
-        `Pinned Template verification stages and budget disagree: verifier=${stageIds.join(",")} budget=${budgetStageIds.join(",")}`,
+        `Pinned Template verification stages and budget disagree: verifier=${sortedStageIds.join(",")} budget=${budgetStageIds.join(",")}`,
       );
     }
   } catch (error) {

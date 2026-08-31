@@ -365,6 +365,43 @@ test("never overwrites an existing target", async () => {
   }
 });
 
+test("normalizes historical public-contract budgets from retained verifier stages", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-historical-budget-test-"));
+  try {
+    const template = await fixture(root);
+    await writeFile(
+      join(template, "scripts", "verify.sh"),
+      '#!/usr/bin/env bash\nset -euo pipefail\nsteps=(\n  "public-contract|Public contract|true"\n)\n',
+    );
+    await writeFile(
+      join(template, "contracts", "verification-budget-policy.json"),
+      JSON.stringify({
+        stages: {
+          "public-contract": {
+            label: "Public contract",
+            baselineMs: 500,
+            warningMs: 5000,
+            failureMs: 10000,
+            baselineRssKiB: 80000,
+            warningRssKiB: 262144,
+            failureRssKiB: 524288,
+          },
+        },
+      }),
+    );
+
+    const target = join(root, "historical-budget-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+    const verify = await readFile(join(target, "scripts", "verify.sh"), "utf8");
+    const budget = JSON.parse(await readFile(join(target, "contracts", "verification-budget-policy.json"), "utf8"));
+    assert.match(verify, /project-identity\|Project identity/u);
+    assert.doesNotMatch(verify, /public-contract/u);
+    assert.deepEqual(Object.keys(budget.stages).sort(), ["project-identity"]);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("local template directories ignore ordinary checkout artifacts", async () => {
   const root = await mkdtemp(join(tmpdir(), "create-vireo-artifacts-test-"));
   try {

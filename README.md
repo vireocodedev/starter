@@ -15,7 +15,7 @@ adversarial admission checklist are in
 [Vireo Starter Template](https://github.com/vireocodedev/starter-template) for the
 current runnable full-stack composition.
 
-[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/7d17d129858063833522687d798f735f6b623c46/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
+[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/starter-template/5b123e60bd1ce733ae70711796552a17aaa60fe3/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
 
 This is the current Template pinned by the release contract, not a concept render. [Try the disposable live demo](https://demo.vireocode.com), follow the [guided build](https://vireocode.com/docs/getting-started/), or read [who Vireo does and does not fit](https://vireocode.com/docs/getting-started/choose-your-profile/) before installing.
 

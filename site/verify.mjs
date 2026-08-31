@@ -250,7 +250,7 @@ function validateArtifact(release, declaredPages) {
   }
   if (
     !visualLanguage.includes(
-      "https://github.com/vireocodedev/starter-template/blob/7d17d129858063833522687d798f735f6b623c46/frontend/docs/VISUAL_LANGUAGE.md",
+      "https://github.com/vireocodedev/starter-template/blob/5b123e60bd1ce733ae70711796552a17aaa60fe3/frontend/docs/VISUAL_LANGUAGE.md",
     )
   )
     problems.push("generated visual-language page must retain pinned source provenance");
@@ -259,7 +259,7 @@ function validateArtifact(release, declaredPages) {
     "capabilities.offline: false",
     "clearing site data removes application-owned offline state",
     "Pinned Starter Template offline contract",
-    "7d17d129858063833522687d798f735f6b623c46",
+    "5b123e60bd1ce733ae70711796552a17aaa60fe3",
     "b068ba6b51c4c93430b0fed167cd3427e7082277",
   ]) {
     if (!offline.includes(expected)) problems.push(`generated offline page is missing ${expected}`);
