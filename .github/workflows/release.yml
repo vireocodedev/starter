@@ -14,7 +14,9 @@ permissions: {}
 jobs:
   version:
     name: Create or update the npm release PR
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     permissions:
       contents: write
       pull-requests: write

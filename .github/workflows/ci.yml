@@ -11,11 +11,16 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release-impact:
     name: Release impact
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
@@ -38,6 +43,7 @@ jobs:
   build:
     name: TypeScript
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -74,6 +80,7 @@ jobs:
   jvm:
     name: JVM
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     permissions:
       contents: read
     defaults:
@@ -101,6 +108,7 @@ jobs:
   generated-entity:
     name: Generated full-stack fixture
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -122,6 +130,7 @@ jobs:
   generated-frontend:
     name: Generated frontend-only fixture
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -138,6 +147,7 @@ jobs:
   project-upgrade:
     name: Project upgrade 0.2.0 to 0.3.0
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

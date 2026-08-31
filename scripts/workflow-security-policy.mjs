@@ -169,6 +169,10 @@ for (const fileName of workflowFiles) {
   }
 
   for (const job of jobs) {
+    if (!lines.slice(job.start, job.end).some(line => /^ {4}timeout-minutes: \d+\s*$/.test(line))) {
+      problems.push(`${fileName}:${job.name} must declare timeout-minutes`);
+    }
+
     const permissions = parseJobPermissions(lines, job);
     if (!permissions) {
       problems.push(`${fileName}:${job.name} must declare explicit job permissions`);
@@ -192,6 +196,17 @@ for (const fileName of workflowFiles) {
     ) {
       problems.push(`${key} has write access in a pull-request-triggered workflow`);
     }
+    if (
+      /^ {2}workflow_dispatch:/m.test(source.slice(0, source.indexOf("jobs:"))) &&
+      writes.length > 0
+    ) {
+      if (!(policy.mainOnlyManualWriteJobs ?? []).includes(key)) {
+        problems.push(`${key} must be approved for main-only workflow_dispatch write access`);
+      }
+      if (!lines.slice(job.start, job.end).some(line => /github\.ref == 'refs\/heads\/main'/.test(line))) {
+        problems.push(`${key} must restrict workflow_dispatch write access to refs/heads/main`);
+      }
+    }
   }
 }
 
@@ -203,6 +218,9 @@ for (const key of Object.keys(policy.writePermissionJobs ?? {})) {
 }
 for (const key of policy.pullRequestWriteJobs ?? []) {
   if (!observedWriteJobs.has(key)) problems.push(`Pull-request write policy contains unused entry ${key}`);
+}
+for (const key of policy.mainOnlyManualWriteJobs ?? []) {
+  if (!observedWriteJobs.has(key)) problems.push(`Manual write policy contains unused entry ${key}`);
 }
 for (const image of Object.keys(policy.workflowContainerImages ?? {})) {
   if (!observedWorkflowImages.has(image)) problems.push(`Workflow image policy contains unused entry ${image}`);

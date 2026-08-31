@@ -17,7 +17,9 @@ permissions: {}
 jobs:
   verify:
     name: Verify npm release candidate
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     permissions:
       contents: read
     steps:
@@ -52,7 +54,9 @@ jobs:
   publish:
     name: Publish public npm packages
     needs: verify
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     environment: package-release
     permissions:
       contents: write

@@ -15,6 +15,7 @@ jobs:
   java-25:
     name: Java 25 compatibility
     runs-on: ubuntu-24.04
+    timeout-minutes: 50
     permissions:
       contents: read
     steps:
@@ -51,6 +52,7 @@ jobs:
   postgres:
     name: PostgreSQL ${{ matrix.postgresql }} migrations
     runs-on: ubuntu-24.04
+    timeout-minutes: 35
     permissions:
       contents: read
     strategy:
@@ -97,6 +99,7 @@ jobs:
   peer-floors:
     name: Required and optional peer floors
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
     permissions:
       contents: read
     steps:
@@ -168,6 +171,7 @@ jobs:
   clean-container:
     name: Clean Node container
     runs-on: ubuntu-24.04
+    timeout-minutes: 35
     container:
       image: node:24.18.1-bookworm-slim@sha256:a09aabc645e86e81e23dab78e0c0f2eaa233cab4277c7188232181a1a8bd5d39
     permissions:

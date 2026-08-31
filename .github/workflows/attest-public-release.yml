@@ -20,7 +20,7 @@ jobs:
   collect:
     name: Collect and classify exact public artifacts
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -62,6 +62,7 @@ jobs:
   attest:
     name: Bind ${{ matrix.id }} SBOM to its exact public subject
     needs: collect
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:

@@ -14,7 +14,9 @@ permissions: {}
 jobs:
   build:
     name: Build documentation
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     permissions:
       contents: read
     steps:
@@ -67,7 +69,9 @@ jobs:
   deploy:
     name: Deploy Storybook
     needs: build
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       pages: write
       id-token: write

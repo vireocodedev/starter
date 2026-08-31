@@ -78,5 +78,12 @@
     "storybook-pages.yml:deploy": ["id-token", "pages"]
   },
   "pullRequestWriteJobs": ["codeql.yml:analyze"],
+  "mainOnlyManualWriteJobs": [
+    "attest-public-release.yml:attest",
+    "codeql.yml:analyze",
+    "release-npm.yml:publish",
+    "release.yml:version",
+    "storybook-pages.yml:deploy"
+  ],
   "checkoutCredentialJobs": []
 }
