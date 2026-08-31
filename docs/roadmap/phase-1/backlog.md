@@ -72,9 +72,10 @@ range, not an elapsed-date commitment.
   against registry hashes; GitHub OIDC/Sigstore attestations bind the exact subjects
   to populated npm/JVM CycloneDX SBOMs and verify their signer identity. A dated
   recovery tabletop records the provider evidence boundary and backup-owner gap.
-  Checked-in 2026-08-31 desired state covers rulesets, environments, Actions, and
-  workflow-token defaults, but must be applied and independently re-exported from
-  GitHub before it can close the machine-controlled portion.
+  Authenticated 2026-08-31 evidence confirms the live main/tag rulesets, narrowed
+  Actions policy, workflow-token defaults, valid CODEOWNERS, and environment
+  branch/tag restrictions. Four UI-only environment administrator-bypass toggles
+  remain before the machine-controlled portion can close.
 - **P1-10: complete.** Both authoritative public-contract gates bind documented
   setup, verification, Storybook, and deployment commands to the hosted workflow
   steps that execute them. Clean Starter and Template verification now recurs on a
