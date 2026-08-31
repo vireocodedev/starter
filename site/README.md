@@ -20,14 +20,20 @@ generated TypeScript exports, aggregate Javadocs, and historical machine snapsho
 - `app.mjs` contains the React-rendered documentation and product UI.
 - `markdown.mjs` renders the trusted source Markdown without client execution.
 - `build.mjs` pre-renders current and version-specific routes into `site/dist`,
-  builds search/version feeds and validates internal links.
+  builds current and version-scoped search feeds, fingerprints executable assets,
+  emits the manifest/service worker, and validates internal links.
+- `content/snapshots/<friendly-version>.json` is a compact Brotli archive of the
+  rendered article records, navigation, provenance, and federated documentation/API
+  search entries for every retained line. The build emits all retained `/docs/<version>/`
+  routes from those archives; it verifies the current archive still matches source.
 - `verify.mjs` prevents content, link, maturity, canonical-host, route-count, and
   release-version drift.
 
 The generated `site.json` is the machine-readable public summary. `versions.json`
 maps friendly Vireo documentation lines to exact CLI/npm/JVM/Template snapshots,
-and `search-index.json` covers every canonical content page. The site never
-hardcodes an independent package-version table.
+and `search-index.json` covers every canonical content page. Each versioned route
+uses `/docs/<version>/search-index.json`, whose documentation links stay under that
+versioned URL. The site never hardcodes an independent package-version table.
 
 ## Documentation ownership
 
@@ -41,6 +47,28 @@ own exhaustive signatures. Neither replaces explanatory website content.
 The current alias is `/docs/`; the friendly snapshot is `/docs/0.3/`. Exact
 reference snapshots keep the independent machine release identifier used by the
 GitHub Pages portal.
+
+## Offline website and release workflow
+
+The documentation website is intentionally an offline-capable static PWA. After
+one successful load, its generated worker precaches same-origin pages, versioned
+search indexes, and local assets. It does not cache external links, the demo, or
+arbitrary network responses. A new worker waits for existing pages to close; the
+site never forces activation or reload.
+
+For a documentation release, first publish the exact framework/Template policy,
+then add the friendly version and generate `content/snapshots/<version>.json` with
+`corepack npm run site:snapshot`. For a reviewed change to the current snapshot,
+update the Markdown/manifest and regenerate that archive in the same review. Do
+not rewrite a retained historical archive to hide drift: release a new documentation
+version when the public meaning has changed. Static deployment serves HTML, manifests, workers, search metadata,
+and asset metadata with `no-cache`; content-addressed CSS/JS may be cached
+immutably.
+
+The checked-in Caddy matchers make fingerprinted CSS/JS and mutable assets
+mutually exclusive. Verify final response headers on the deployment host with the
+installed Caddy binary and an HTTPS request; local source checks cannot prove host
+configuration or intermediary-cache behavior.
 
 ## Local build
 

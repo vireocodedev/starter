@@ -29,8 +29,9 @@ function WebsiteDocument({ website, page, navigation, allPages }) {
       h("meta", { name: "twitter:card", content: "summary_large_image" }),
       h("meta", { name: "twitter:image", content: website.links.flagshipImage }),
       h("link", { rel: "canonical", href: canonical }),
-      h("link", { rel: "stylesheet", href: "/assets/site.css" }),
-      h("link", { rel: "icon", type: "image/svg+xml", href: "/assets/favicon.svg" }),
+      h("link", { rel: "manifest", href: "/manifest.webmanifest" }),
+      h("link", { rel: "stylesheet", href: website.assets?.["site.css"] ?? "/assets/site.css" }),
+      h("link", { rel: "icon", type: "image/svg+xml", href: website.assets?.["favicon.svg"] ?? "/assets/favicon.svg" }),
       h("title", null, `${page.title} · Vireo Framework`),
       h("script", {
         type: "application/ld+json",
@@ -57,8 +58,8 @@ function WebsiteDocument({ website, page, navigation, allPages }) {
         ? h(LandingPage, { website })
         : h(DocumentationPage, { website, page, navigation, allPages }),
       h(SiteFooter, { website }),
-      h(SearchDialog, null),
-      h("script", { src: "/assets/site.js", defer: true }),
+      h(SearchDialog, { searchIndexUrl: page.searchIndexUrl ?? "/search-index.json" }),
+      h("script", { src: website.assets?.["site.js"] ?? "/assets/site.js", defer: true }),
     ),
   );
 }
@@ -94,6 +95,7 @@ function SiteHeader({ website, page }) {
               className: "icon-button mobile-only",
               type: "button",
               "data-navigation-toggle": true,
+              "aria-controls": "documentation-navigation",
               "aria-label": "Open documentation navigation",
               "aria-expanded": "false",
             },
@@ -376,7 +378,23 @@ function DocumentationPage({ website, page, navigation, allPages }) {
     { id: "main", className: "docs-shell" },
     h(
       "aside",
-      { className: "docs-sidebar", "data-navigation-panel": true },
+      {
+        className: "docs-sidebar",
+        id: "documentation-navigation",
+        "data-navigation-panel": true,
+        "aria-labelledby": "documentation-navigation-title",
+        tabIndex: -1,
+      },
+      h(
+        "div",
+        { className: "docs-sidebar__mobile-actions mobile-only" },
+        h("strong", { id: "documentation-navigation-title" }, "Documentation navigation"),
+        h(
+          "button",
+          { type: "button", "data-navigation-close": true, "aria-label": "Close documentation navigation" },
+          "Close",
+        ),
+      ),
       h(
         "div",
         { className: "docs-sidebar__version" },
@@ -479,10 +497,11 @@ function DocumentationPage({ website, page, navigation, allPages }) {
         page.headings.length > 0
           ? h(
               "aside",
-              { className: "table-of-contents" },
+              { className: "table-of-contents", "aria-label": "On this page" },
               h("strong", null, "On this page"),
               h(
                 "nav",
+                { "aria-label": "On this page" },
                 null,
                 ...page.headings
                   .filter(item => item.level === 2)
@@ -543,10 +562,15 @@ function SiteFooter({ website }) {
   );
 }
 
-function SearchDialog() {
+function SearchDialog({ searchIndexUrl }) {
   return h(
     "dialog",
-    { className: "search-dialog", "data-search-dialog": true },
+    {
+      className: "search-dialog",
+      "data-search-dialog": true,
+      "data-search-index-url": searchIndexUrl,
+      "aria-label": "Search Vireo documentation",
+    },
     h(
       "form",
       { method: "dialog", className: "search-dialog__header" },
@@ -563,6 +587,13 @@ function SearchDialog() {
       ),
       h("button", { type: "submit", "aria-label": "Close search" }, "Esc"),
     ),
+    h("div", {
+      className: "visually-hidden",
+      "data-search-status": true,
+      role: "status",
+      "aria-live": "polite",
+      "aria-atomic": "true",
+    }),
     h(
       "div",
       { className: "search-results", "data-search-results": true },

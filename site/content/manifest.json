@@ -122,7 +122,8 @@
           "description": "Understand the offline shell guarantee, queue boundaries and the domain decisions Vireo deliberately does not infer.",
           "category": "Build",
           "file": "offline.md",
-          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/main/docs/offline.md"
+          "sourceUrl": "https://github.com/vireocodedev/starter-template/blob/a24f9435d3f624fb1962c3d5c4e3457b69f5be28/docs/offline.md",
+          "sourceLabel": "Pinned Starter Template offline contract (a24f943)"
         },
         {
           "path": "/docs/components/",

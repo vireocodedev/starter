@@ -12,11 +12,17 @@ vireocode.com {
 		X-Frame-Options "DENY"
 	}
 
-	@metadata path /healthz /robots.txt /search-index.json /site.json /sitemap.xml /versions.json
+	@metadata path /healthz /robots.txt /search-index.json /site.json /sitemap.xml /versions.json /manifest.webmanifest /sw.js /assets/asset-manifest.json
 	header @metadata Cache-Control "no-cache"
+	@versionedMetadata path_regexp versionedMetadata ^/docs/[^/]+/search-index\.json$
+	header @versionedMetadata Cache-Control "no-cache"
+	@html path *.html */
+	header @html Cache-Control "no-cache"
 
-	@assets path /assets/*
-	header @assets Cache-Control "public, max-age=300"
+	@immutableAssets path_regexp immutableAssets ^/assets/.+\.[a-f0-9]{12}\.(?:css|js)$
+	header @immutableAssets Cache-Control "public, max-age=31536000, immutable"
+	@mutableAssets path /assets/favicon.svg /assets/asset-manifest.json
+	header @mutableAssets Cache-Control "no-cache"
 
 	file_server
 

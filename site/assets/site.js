@@ -1,45 +1,51 @@
 const root = document.documentElement;
-const storedTheme = localStorage.getItem("vireo-docs-theme");
-if (storedTheme === "light" || storedTheme === "dark") root.dataset.theme = storedTheme;
 
-const themeToggle = document.querySelector("[data-theme-toggle]");
-const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
-
-function currentThemeIsDark() {
-  return root.dataset.theme === "dark" || (root.dataset.theme !== "light" && systemTheme.matches);
+function readStorage(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
 }
 
+function writeStorage(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    /* preferences are optional */
+  }
+}
+
+const storedTheme = readStorage("vireo-docs-theme");
+if (storedTheme === "light" || storedTheme === "dark") root.dataset.theme = storedTheme;
+const themeToggle = document.querySelector("[data-theme-toggle]");
+const systemTheme = window.matchMedia?.("(prefers-color-scheme: dark)");
+const currentThemeIsDark = () =>
+  root.dataset.theme === "dark" || (root.dataset.theme !== "light" && Boolean(systemTheme?.matches));
 function syncThemeToggle() {
   if (!themeToggle) return;
   const target = currentThemeIsDark() ? "light" : "dark";
-  const label = `Use ${target} theme`;
   themeToggle.dataset.themeTarget = target;
-  themeToggle.setAttribute("aria-label", label);
-  themeToggle.setAttribute("title", label);
+  themeToggle.setAttribute("aria-label", `Use ${target} theme`);
+  themeToggle.setAttribute("title", `Use ${target} theme`);
 }
-
 syncThemeToggle();
-systemTheme.addEventListener("change", () => {
+systemTheme?.addEventListener("change", () => {
   if (root.dataset.theme === "system") syncThemeToggle();
 });
-
 themeToggle?.addEventListener("click", () => {
-  const currentDark = currentThemeIsDark();
-  const next = currentDark ? "light" : "dark";
+  const next = currentThemeIsDark() ? "light" : "dark";
   root.dataset.theme = next;
-  localStorage.setItem("vireo-docs-theme", next);
+  writeStorage("vireo-docs-theme", next);
   syncThemeToggle();
 });
 
-for (const button of document.querySelectorAll("[data-copy-command]")) {
+for (const button of document.querySelectorAll("[data-copy-command]"))
   button.addEventListener("click", () => copy(button, button.getAttribute("data-copy-command") ?? ""));
-}
-
 for (const button of document.querySelectorAll("[data-copy-code]")) {
   const code = button.closest(".code-block")?.querySelector("code")?.textContent ?? "";
   button.addEventListener("click", () => copy(button, code));
 }
-
 async function copy(button, value) {
   const original = button.textContent;
   try {
@@ -54,28 +60,78 @@ async function copy(button, value) {
 }
 
 const navigationToggle = document.querySelector("[data-navigation-toggle]");
+const navigationClose = document.querySelector("[data-navigation-close]");
 const navigationPanel = document.querySelector("[data-navigation-panel]");
-navigationToggle?.addEventListener("click", () => {
-  const open = navigationPanel?.getAttribute("data-open") !== "true";
-  navigationPanel?.setAttribute("data-open", String(open));
+const drawerSiblings = [
+  document.querySelector(".skip-link"),
+  document.querySelector(".site-header"),
+  document.querySelector(".docs-main"),
+  document.querySelector(".site-footer"),
+  document.querySelector("[data-search-dialog]"),
+].filter(Boolean);
+const desktopNavigation = window.matchMedia?.("(min-width: 821px)");
+let lastNavigationTrigger = null;
+const navigationIsOpen = () => navigationPanel?.getAttribute("data-open") === "true";
+function setNavigationOpen(open, trigger = navigationToggle, restoreFocus = true) {
+  if (!navigationPanel || !navigationToggle) return;
+  if (open && desktopNavigation?.matches) return;
+  navigationPanel.setAttribute("data-open", String(open));
   navigationToggle.setAttribute("aria-expanded", String(open));
+  navigationToggle.setAttribute("aria-label", `${open ? "Close" : "Open"} documentation navigation`);
+  if (open) {
+    lastNavigationTrigger = trigger;
+    navigationPanel.setAttribute("role", "dialog");
+    navigationPanel.setAttribute("aria-modal", "true");
+    for (const sibling of drawerSiblings) sibling.inert = true;
+    navigationClose?.focus();
+  } else {
+    navigationPanel.removeAttribute("role");
+    navigationPanel.removeAttribute("aria-modal");
+    for (const sibling of drawerSiblings) sibling.inert = false;
+    if (restoreFocus) lastNavigationTrigger?.focus();
+  }
+}
+navigationToggle?.addEventListener("click", () => setNavigationOpen(!navigationIsOpen(), navigationToggle));
+navigationClose?.addEventListener("click", () => setNavigationOpen(false));
+desktopNavigation?.addEventListener("change", event => {
+  if (!event.matches || !navigationIsOpen()) return;
+  setNavigationOpen(false, navigationPanel, false);
+  navigationPanel?.focus();
 });
-
-document.addEventListener("click", event => {
-  if (!navigationPanel || !navigationToggle || navigationPanel.getAttribute("data-open") !== "true") return;
-  if (navigationPanel.contains(event.target) || navigationToggle.contains(event.target)) return;
-  navigationPanel.setAttribute("data-open", "false");
-  navigationToggle.setAttribute("aria-expanded", "false");
-});
+function drawerFocusables() {
+  if (!navigationPanel) return [];
+  return [
+    ...navigationPanel.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+  ].filter(element => !element.hasAttribute("hidden"));
+}
 
 const dialog = document.querySelector("[data-search-dialog]");
 const searchInput = document.querySelector("[data-search-input]");
 const resultsRoot = document.querySelector("[data-search-results]");
+const searchStatus = document.querySelector("[data-search-status]");
 let searchIndex;
-
+let searchIndexUrl;
 for (const trigger of document.querySelectorAll("[data-search-open]")) trigger.addEventListener("click", openSearch);
-
 document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && navigationIsOpen()) {
+    event.preventDefault();
+    setNavigationOpen(false);
+    return;
+  }
+  if (event.key === "Tab" && navigationIsOpen()) {
+    const focusables = drawerFocusables();
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+    return;
+  }
   const target = event.target;
   const typing =
     target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target?.isContentEditable;
@@ -84,28 +140,32 @@ document.addEventListener("keydown", event => {
     openSearch();
   }
 });
-
 async function openSearch() {
+  if (navigationIsOpen()) return;
   if (!(dialog instanceof HTMLDialogElement)) return;
   dialog.showModal();
   searchInput?.focus();
-  if (!searchIndex) {
+  const requestedUrl = dialog.dataset.searchIndexUrl ?? "/search-index.json";
+  if (!searchIndex || searchIndexUrl !== requestedUrl) {
+    searchIndexUrl = requestedUrl;
     try {
-      const response = await fetch("/search-index.json", { headers: { Accept: "application/json" } });
+      const response = await fetch(requestedUrl, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error(`Search index returned ${response.status}`);
       searchIndex = await response.json();
     } catch {
-      if (resultsRoot) resultsRoot.textContent = "Search is temporarily unavailable.";
+      if (resultsRoot)
+        resultsRoot.textContent = "Search is unavailable until this documentation version has loaded successfully.";
+      if (searchStatus) searchStatus.textContent = "Search is unavailable.";
     }
   }
 }
-
 searchInput?.addEventListener("input", event => {
   const query = event.currentTarget.value.trim().toLowerCase();
   if (!resultsRoot) return;
   resultsRoot.replaceChildren();
   if (!query) {
-    resultsRoot.append(message("Start typing to search the current Vireo documentation."));
+    resultsRoot.append(message("Start typing to search this documentation version."));
+    if (searchStatus) searchStatus.textContent = "Start typing to search.";
     return;
   }
   const terms = query.split(/\s+/u).filter(Boolean);
@@ -115,12 +175,15 @@ searchInput?.addEventListener("input", event => {
     .sort((left, right) => right.score - left.score || left.entry.label.localeCompare(right.entry.label))
     .slice(0, 12);
   if (matches.length === 0) {
-    resultsRoot.append(message(`No current documentation matched “${query}”.`));
+    resultsRoot.append(message(`No documentation matched “${query}”.`));
+    if (searchStatus) searchStatus.textContent = `No results for ${query}.`;
     return;
   }
+  const status = `${matches.length} result${matches.length === 1 ? "" : "s"} for “${query}”.`;
+  if (searchStatus) searchStatus.textContent = status;
+  resultsRoot.append(message(status));
   for (const { entry } of matches) resultsRoot.append(searchResult(entry));
 });
-
 function searchScore(entry, terms) {
   const label = entry.label.toLowerCase();
   const description = entry.description.toLowerCase();
@@ -135,7 +198,6 @@ function searchScore(entry, terms) {
     return score;
   }, 0);
 }
-
 function searchResult(entry) {
   const link = document.createElement("a");
   link.className = "search-result";
@@ -149,7 +211,6 @@ function searchResult(entry) {
   link.append(category, label, description);
   return link;
 }
-
 function message(value) {
   const paragraph = document.createElement("p");
   paragraph.textContent = value;
@@ -174,3 +235,6 @@ if (observedHeadings.length > 0 && "IntersectionObserver" in window) {
   );
   for (const heading of observedHeadings) observer.observe(heading);
 }
+
+if ("serviceWorker" in navigator)
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => undefined));

@@ -99,10 +99,10 @@ function validateArtifact(release, declaredPages) {
     ".nojekyll",
     "404.html",
     "assets/favicon.svg",
-    "assets/site.css",
-    "assets/site.js",
+    "assets/asset-manifest.json",
     "docs/index.html",
     `docs/${release.documentationVersion}/index.html`,
+    `docs/${release.documentationVersion}/search-index.json`,
     "docs/getting-started/index.html",
     "docs/concepts/architecture/index.html",
     "docs/design-system/index.html",
@@ -112,6 +112,7 @@ function validateArtifact(release, declaredPages) {
     "examples/index.html",
     "healthz",
     "index.html",
+    "manifest.webmanifest",
     "reference/index.html",
     "reference/typescript/index.html",
     "reference/java/index.html",
@@ -121,6 +122,7 @@ function validateArtifact(release, declaredPages) {
     "site.json",
     "sitemap.xml",
     "storybook/index.html",
+    "sw.js",
     "versions/index.html",
     "versions.json",
   ];
@@ -132,9 +134,15 @@ function validateArtifact(release, declaredPages) {
   const docs = readFileSync(join(outputRoot, "docs/index.html"), "utf8");
   const designSystem = readFileSync(join(outputRoot, "docs/design-system/index.html"), "utf8");
   const visualLanguage = readFileSync(join(outputRoot, "docs/design-system/visual-language/index.html"), "utf8");
+  const offline = readFileSync(join(outputRoot, "docs/offline/index.html"), "utf8");
+  const snapshot = readFileSync(join(outputRoot, "docs", release.documentationVersion, "index.html"), "utf8");
   const generated = readJson(join(outputRoot, "site.json"));
   const versions = readJson(join(outputRoot, "versions.json"));
   const search = readJson(join(outputRoot, "search-index.json"));
+  const versionedSearch = readJson(join(outputRoot, "docs", release.documentationVersion, "search-index.json"));
+  const assetManifest = readJson(join(outputRoot, "assets/asset-manifest.json"));
+  const manifest = readJson(join(outputRoot, "manifest.webmanifest"));
+  const worker = readFileSync(join(outputRoot, "sw.js"), "utf8");
   const sitemap = readFileSync(join(outputRoot, "sitemap.xml"), "utf8");
 
   if (generated.schemaVersion !== 2) problems.push("generated website schemaVersion must be 2");
@@ -155,6 +163,33 @@ function validateArtifact(release, declaredPages) {
     problems.push("generated website template pin drifted from documentation policy");
   if (versions.currentDocumentationVersion !== release.documentationVersion)
     problems.push("generated versions index has the wrong friendly version");
+  if (!/^\/assets\/site\.[a-f0-9]{12}\.css$/u.test(assetManifest["site.css"] ?? ""))
+    problems.push("generated CSS must have a content fingerprint");
+  if (!/^\/assets\/site\.[a-f0-9]{12}\.js$/u.test(assetManifest["site.js"] ?? ""))
+    problems.push("generated JavaScript must have a content fingerprint");
+  if (
+    !existsSync(join(outputRoot, (assetManifest["site.css"] ?? "").slice(1))) ||
+    !existsSync(join(outputRoot, (assetManifest["site.js"] ?? "").slice(1)))
+  )
+    problems.push("generated fingerprinted assets are missing");
+  if (manifest.start_url !== "/docs/" || manifest.scope !== "/")
+    problems.push("generated web manifest must retain the documentation PWA scope");
+  if (
+    !worker.includes('self.addEventListener("fetch"') ||
+    !worker.includes(`/${release.documentationVersion}/search-index.json`)
+  )
+    problems.push("generated service worker is missing offline route/search precache behavior");
+  if (
+    worker.includes("skipWaiting") ||
+    worker.includes("caches.match(") ||
+    !worker.includes("caches.open(CACHE)") ||
+    !worker.includes("offlineNotFound")
+  )
+    problems.push(
+      "generated service worker must use its named cache, preserve unknown-route 404s, and avoid forced activation",
+    );
+  if (!worker.includes("url.origin !== self.location.origin"))
+    problems.push("generated service worker must not cache cross-origin responses");
   if (!Array.isArray(search)) {
     problems.push("search index must be an array");
   } else {
@@ -171,6 +206,18 @@ function validateArtifact(release, declaredPages) {
       if (count !== 1) problems.push(`search index must contain canonical content URL ${canonicalUrl} exactly once`);
     }
   }
+  if (
+    !Array.isArray(versionedSearch) ||
+    !versionedSearch.some(entry => entry.url === `/docs/${release.documentationVersion}/offline/`)
+  )
+    problems.push("versioned search index must contain the versioned offline route");
+  if (
+    Array.isArray(versionedSearch) &&
+    versionedSearch.some(
+      entry => entry.url.startsWith("/docs/") && !entry.url.startsWith(`/docs/${release.documentationVersion}/`),
+    )
+  )
+    problems.push("versioned search index must not point documentation entries at the current alias");
 
   for (const expected of [
     sitePolicy.canonicalUrl,
@@ -180,8 +227,8 @@ function validateArtifact(release, declaredPages) {
     "--profile frontend",
     "/docs/getting-started/",
     "data-search-open",
-    "/assets/site.css",
-    "/assets/site.js",
+    assetManifest["site.css"],
+    assetManifest["site.js"],
   ]) {
     if (!landing.includes(expected)) problems.push(`generated landing page is missing ${expected}`);
   }
@@ -207,6 +254,21 @@ function validateArtifact(release, declaredPages) {
     )
   )
     problems.push("generated visual-language page must retain pinned source provenance");
+  for (const expected of [
+    "NetworkOnly",
+    "capabilities.offline: false",
+    "clearing site data removes application-owned offline state",
+    "Pinned Starter Template offline contract",
+    "a24f9435d3f624fb1962c3d5c4e3457b69f5be28",
+    "b068ba6b51c4c93430b0fed167cd3427e7082277",
+  ]) {
+    if (!offline.includes(expected)) problems.push(`generated offline page is missing ${expected}`);
+  }
+  if (!snapshot.includes(`data-search-index-url=\"/docs/${release.documentationVersion}/search-index.json\"`))
+    problems.push("versioned documentation must select its version-scoped search index");
+  for (const expected of ['aria-controls="documentation-navigation"', "data-navigation-close", 'aria-live="polite"']) {
+    if (!docs.includes(expected)) problems.push(`generated documentation misses accessibility semantics ${expected}`);
+  }
   for (const forbidden of [
     "undefined",
     "javascript:",

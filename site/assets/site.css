@@ -792,6 +792,23 @@ a {
   color: var(--accent);
 }
 
+.docs-sidebar__mobile-actions {
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.8rem;
+  font-size: 0.82rem;
+}
+
+.docs-sidebar__mobile-actions button {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--surface);
+  color: var(--text-strong);
+  font: inherit;
+}
+
 .navigation-group {
   margin-top: 1.35rem;
 }

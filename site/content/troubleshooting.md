@@ -37,7 +37,9 @@ Identify whether the canonical schema, contract or managed output changed. Do no
 
 ## PWA behaves like an older build
 
-Close all application tabs, allow the update lifecycle to complete and inspect the active service worker. Production service-worker behavior is intentionally different from ordinary development mode.
+First close all application tabs, reconnect, reload once, and allow the deliberate update lifecycle to complete. Then inspect the active service worker and its cache in browser developer tools; production service-worker behavior is intentionally different from ordinary development mode.
+
+If the worker itself must be unregistered, do that before considering storage removal. **Clearing site data removes application-owned offline state**, including cached data and any locally queued commands. Only do it after the application has offered any lawful export or support-safe inspection and the user has confirmed the purge. See [Offline behavior](/docs/offline/) for the recovery and update boundaries.
 
 ## Ask for help
 
