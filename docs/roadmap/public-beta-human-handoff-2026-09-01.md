@@ -11,7 +11,7 @@ engineering closure.
 | Gate | Public-beta hold? | Current state | Required qualification and evidence path |
 | --- | --- | --- | --- |
 | G-107 / P1-09 continuity | Yes | Open | A second trusted maintainer verifies recovery access and independently approves protected changes; retain the restricted recovery exercise result. |
-| npm release continuity | Yes | 0/8 trusted-publisher configurations verified after rename | An npm owner with login and 2FA must migrate each package's GitHub trusted publisher from `starter` to `vireo`; follow [NPM release migration](../../NPM_RELEASE.md#repository-rename-trusted-publisher-migration). |
+| npm release continuity | Yes | 0/8 trusted-publisher configurations verified after rename | An npm owner with login and 2FA must migrate each package's GitHub trusted publisher from `starter` to `vireo`; follow [NPM release migration](../NPM_RELEASE.md#repository-rename-trusted-publisher-migration). |
 | G-301 / P4-01 security | Yes | Open | Independent security review with no unresolved critical/high finding; use the private advisory route and retain sanitized conclusion. |
 | G-303 / P4-03 platforms | Yes | Open | Manual AT, branded browser, physical device and installed-PWA checklist results with release, hardware/software, operator, scenario and result. |
 | G-304 / P4-04 performance | Yes | Open | Representative low-end physical-device and real-user field measurements; retain method, environment and sanitized observations. |
