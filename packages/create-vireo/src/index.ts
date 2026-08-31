@@ -897,15 +897,43 @@ async function normalizeGeneratedAppWorkflowPolicy(staging: string) {
   const policy = JSON.parse(await readFile(path, "utf8")) as {
     requiredConcurrencyWorkflows?: Record<string, unknown>;
   };
-  if (
-    !policy.requiredConcurrencyWorkflows ||
-    Array.isArray(policy.requiredConcurrencyWorkflows) ||
-    !Object.prototype.hasOwnProperty.call(policy.requiredConcurrencyWorkflows, "ci.yml")
-  ) {
-    throw new Error("Pinned Template GitHub Actions policy must retain a ci.yml concurrency policy.");
+  if (policy.requiredConcurrencyWorkflows === undefined) {
+    policy.requiredConcurrencyWorkflows = {};
+  } else if (!policy.requiredConcurrencyWorkflows || Array.isArray(policy.requiredConcurrencyWorkflows)) {
+    throw new Error("Pinned Template GitHub Actions policy must declare concurrency workflows as an object.");
+  }
+  const ciConcurrency = await readCiWorkflowConcurrency(staging);
+  if (!Object.prototype.hasOwnProperty.call(policy.requiredConcurrencyWorkflows, "ci.yml")) {
+    policy.requiredConcurrencyWorkflows["ci.yml"] = ciConcurrency;
+  } else if (!hasExactConcurrencyPolicy(policy.requiredConcurrencyWorkflows["ci.yml"], ciConcurrency)) {
+    throw new Error("Pinned Template GitHub Actions ci.yml concurrency policy must exactly match ci.yml.");
   }
   delete policy.requiredConcurrencyWorkflows["template-release.yml"];
   await writeFile(path, `${JSON.stringify(policy, null, 2)}\n`);
+}
+
+async function readCiWorkflowConcurrency(staging: string) {
+  const source = await readFile(join(staging, ".github", "workflows", "ci.yml"), "utf8");
+  const concurrency = source.match(/^concurrency:\s*\n(?<body>(?:^[ \t]+[^\n]*(?:\n|$))*)/mu)?.groups?.body;
+  if (!concurrency) throw new Error("Pinned Template ci.yml must declare a concurrency block.");
+  const groups = [...concurrency.matchAll(/^\s+group:\s*(\S(?:.*\S)?)\s*$/gmu)].map(match => match[1]);
+  const cancelValues = [...concurrency.matchAll(/^\s+cancel-in-progress:\s*(true|false)\s*$/gmu)].map(
+    match => match[1],
+  );
+  if (groups.length !== 1 || cancelValues.length !== 1) {
+    throw new Error("Pinned Template ci.yml concurrency block must declare one group and cancel-in-progress value.");
+  }
+  return { group: groups[0], cancelInProgress: cancelValues[0] === "true" };
+}
+
+function hasExactConcurrencyPolicy(value: unknown, expected: { group: string; cancelInProgress: boolean }) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const policy = value as Record<string, unknown>;
+  return (
+    Object.keys(policy).length === 2 &&
+    policy.group === expected.group &&
+    policy.cancelInProgress === expected.cancelInProgress
+  );
 }
 
 const PROJECT_IDENTITY_BUDGET_STAGE = {

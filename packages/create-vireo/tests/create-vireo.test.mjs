@@ -22,10 +22,18 @@ async function fixture(root) {
     join(template, ".github/dependabot.yml"),
     "version: 2\nupdates:\n  - package-ecosystem: npm\n    directory: /frontend\n",
   );
-  await writeFile(join(template, ".github/workflows/ci.yml"), "steps:\n  - run: ./scripts/verify-template.sh silent\n");
+  await writeFile(
+    join(template, ".github/workflows/ci.yml"),
+    "concurrency:\n  group: verify-${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true\nsteps:\n  - run: ./scripts/verify-template.sh silent\n",
+  );
   await writeFile(
     join(template, "contracts/github-actions-policy.json"),
-    JSON.stringify({ requiredConcurrencyWorkflows: { "ci.yml": {}, "template-release.yml": {} } }),
+    JSON.stringify({
+      requiredConcurrencyWorkflows: {
+        "ci.yml": { group: "verify-${{ github.workflow }}-${{ github.ref }}", cancelInProgress: true },
+        "template-release.yml": {},
+      },
+    }),
   );
   await writeFile(
     join(template, "scripts/verify.sh"),
@@ -360,6 +368,74 @@ test("never overwrites an existing target", async () => {
     const target = join(root, "existing-app");
     await mkdir(target);
     await assert.rejects(createVireo({ directory: target, templateDirectory: template }), /already exists/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("derives historical ci workflow concurrency when the policy predates it", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-historical-workflow-policy-test-"));
+  try {
+    const template = await fixture(root);
+    await writeFile(join(template, "contracts", "github-actions-policy.json"), "{}\n");
+    await writeFile(
+      join(template, ".github", "workflows", "ci.yml"),
+      "name: Verify\nconcurrency:\n  group: verify-${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true\njobs: {}\n",
+    );
+
+    const target = join(root, "historical-workflow-policy-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+    const policy = JSON.parse(await readFile(join(target, "contracts", "github-actions-policy.json"), "utf8"));
+    assert.deepEqual(policy.requiredConcurrencyWorkflows, {
+      "ci.yml": {
+        group: "verify-${{ github.workflow }}-${{ github.ref }}",
+        cancelInProgress: true,
+      },
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("rejects declared ci workflow concurrency that drifts from ci.yml", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-workflow-policy-drift-test-"));
+  try {
+    const template = await fixture(root);
+    await writeFile(
+      join(template, "contracts", "github-actions-policy.json"),
+      JSON.stringify({
+        requiredConcurrencyWorkflows: {
+          "ci.yml": { group: "verify-different", cancelInProgress: true },
+        },
+      }),
+    );
+    await assert.rejects(
+      createVireo({ directory: join(root, "workflow-policy-drift-app"), git: false, templateDirectory: template }),
+      /ci\.yml concurrency policy must exactly match ci\.yml/u,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("rejects historical workflow policies without parseable ci concurrency", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-malformed-workflow-policy-test-"));
+  try {
+    const template = await fixture(root);
+    await writeFile(join(template, "contracts", "github-actions-policy.json"), "{}\n");
+    await writeFile(join(template, ".github", "workflows", "ci.yml"), "name: Verify\njobs: {}\n");
+    await assert.rejects(
+      createVireo({ directory: join(root, "missing-concurrency-app"), git: false, templateDirectory: template }),
+      /ci\.yml must declare a concurrency block/u,
+    );
+    await writeFile(
+      join(template, ".github", "workflows", "ci.yml"),
+      "name: Verify\nconcurrency:\n  group: verify-${{ github.workflow }}-${{ github.ref }}\njobs: {}\n",
+    );
+    await assert.rejects(
+      createVireo({ directory: join(root, "malformed-concurrency-app"), git: false, templateDirectory: template }),
+      /concurrency block must declare one group and cancel-in-progress value/u,
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

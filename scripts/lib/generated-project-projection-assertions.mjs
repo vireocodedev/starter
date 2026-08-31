@@ -103,6 +103,31 @@ function text(path) {
   return readFileSync(path, "utf8");
 }
 
+function readGeneratedCiConcurrency(root) {
+  const source = text(join(root, ".github", "workflows", "ci.yml"));
+  const concurrency = source.match(/^concurrency:\s*\n(?<body>(?:^[ \t]+[^\n]*(?:\n|$))*)/mu)?.groups?.body;
+  if (!concurrency) throw new Error("Generated ci.yml must declare a concurrency block.");
+  const groups = [...concurrency.matchAll(/^\s+group:\s*(\S(?:.*\S)?)\s*$/gmu)].map(match => match[1]);
+  const cancelValues = [...concurrency.matchAll(/^\s+cancel-in-progress:\s*(true|false)\s*$/gmu)].map(
+    match => match[1],
+  );
+  if (groups.length !== 1 || cancelValues.length !== 1) {
+    throw new Error("Generated ci.yml concurrency block must declare one group and cancel-in-progress value.");
+  }
+  return { group: groups[0], cancelInProgress: cancelValues[0] === "true" };
+}
+
+function hasExactGeneratedConcurrencyPolicy(value, expected) {
+  return (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.keys(value).length === 2 &&
+    value.group === expected.group &&
+    value.cancelInProgress === expected.cancelInProgress
+  );
+}
+
 export function assertGeneratedProjectIdentity(root, profile, identity) {
   const metadata = JSON.parse(text(join(root, ".vireo/project.json")));
   for (const [field, value] of Object.entries({ profile, ...identity })) {
@@ -162,6 +187,10 @@ export function assertGeneratedWorkflowPolicy(root, profile) {
   const workflows = policy.requiredConcurrencyWorkflows;
   if (!workflows || typeof workflows !== "object" || Array.isArray(workflows) || !("ci.yml" in workflows)) {
     throw new Error("Generated GitHub Actions policy must retain the ci.yml concurrency workflow.");
+  }
+  const ciConcurrency = readGeneratedCiConcurrency(root);
+  if (!hasExactGeneratedConcurrencyPolicy(workflows["ci.yml"], ciConcurrency)) {
+    throw new Error("Generated GitHub Actions ci.yml concurrency policy must exactly match ci.yml.");
   }
   if ("template-release.yml" in workflows) {
     throw new Error("Generated GitHub Actions policy must not retain template-release.yml.");

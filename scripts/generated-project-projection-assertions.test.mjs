@@ -147,6 +147,7 @@ test("generated projection assertions require application package and workflow n
     await mkdir(join(root, "frontend"), { recursive: true });
     await mkdir(join(root, "scripts"), { recursive: true });
     await mkdir(join(root, "contracts"), { recursive: true });
+    await mkdir(join(root, ".github", "workflows"), { recursive: true });
     await writeFile(join(root, ".vireo", "project.json"), JSON.stringify({ createdBy: "create-vireo@0.6.0" }));
     await writeFile(
       join(root, "package.json"),
@@ -161,15 +162,40 @@ test("generated projection assertions require application package and workflow n
     );
     await writeFile(join(root, "scripts", "toolchain-policy.mjs"), "export {};\n");
     await writeFile(
+      join(root, ".github", "workflows", "ci.yml"),
+      "concurrency:\n  group: verify-${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true\n",
+    );
+    await writeFile(
       join(root, "contracts", "github-actions-policy.json"),
-      JSON.stringify({ requiredConcurrencyWorkflows: { "ci.yml": {} } }),
+      JSON.stringify({
+        requiredConcurrencyWorkflows: {
+          "ci.yml": { group: "verify-${{ github.workflow }}-${{ github.ref }}", cancelInProgress: true },
+        },
+      }),
     );
     assert.doesNotThrow(() => assertGeneratedApplicationPackage(root, "full-stack"));
     assert.doesNotThrow(() => assertGeneratedWorkflowPolicy(root, "full-stack"));
 
+    for (const ciPolicy of [
+      {},
+      { group: "verify-${{ github.workflow }}-${{ github.ref }}" },
+      { group: "different", cancelInProgress: true },
+    ]) {
+      await writeFile(
+        join(root, "contracts", "github-actions-policy.json"),
+        JSON.stringify({ requiredConcurrencyWorkflows: { "ci.yml": ciPolicy } }),
+      );
+      assert.throws(() => assertGeneratedWorkflowPolicy(root, "full-stack"), /ci\.yml concurrency policy/u);
+    }
+
     await writeFile(
       join(root, "contracts", "github-actions-policy.json"),
-      JSON.stringify({ requiredConcurrencyWorkflows: { "ci.yml": {}, "template-release.yml": {} } }),
+      JSON.stringify({
+        requiredConcurrencyWorkflows: {
+          "ci.yml": { group: "verify-${{ github.workflow }}-${{ github.ref }}", cancelInProgress: true },
+          "template-release.yml": {},
+        },
+      }),
     );
     assert.throws(() => assertGeneratedWorkflowPolicy(root, "full-stack"), /template-release\.yml/u);
     await writeFile(
