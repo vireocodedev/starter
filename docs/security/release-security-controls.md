@@ -132,11 +132,10 @@ The live application must cover:
   registries, environments, security inbox, and signing/provenance identities.
 
 The release-PR and npm publication workflows are split. The authenticated record
-confirms the rulesets, Actions restrictions, and environment ref restrictions.
-The four environment administrator-bypass toggles remain enabled because GitHub
-offers no documented API update field for them. Only one trusted maintainer is
-currently evidenced, so the interim rules cannot honestly require an independent
-CODEOWNERS approval.
+confirms the rulesets, Actions restrictions, environment ref restrictions, and
+`can_admins_bypass: false` for all four protected environments after the UI-only
+settings were changed. Only one trusted maintainer is currently evidenced, so the
+interim rules cannot honestly require an independent CODEOWNERS approval.
 
 ## Review and release rules
 
