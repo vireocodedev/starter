@@ -117,7 +117,7 @@ test("pins Design system documentation to reviewable source contracts", () => {
   for (const page of designSystem?.pages ?? []) {
     assert.match(
       page.sourceUrl ?? "",
-      /^https:\/\/github\.com\/vireocodedev\/(?:starter|starter-template)\/blob\/[a-f0-9]{40}\//u,
+      /^https:\/\/github\.com\/vireocodedev\/(?:vireo|vireo-template)\/blob\/[a-f0-9]{40}\//u,
     );
     assert.doesNotMatch(page.sourceUrl ?? "", /\/main\//u);
     assert.equal(typeof page.sourceLabel, "string");
@@ -400,7 +400,7 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     assert.match(visualLanguage, /VISUAL_LANGUAGE\.md/u);
     assert.match(
       visualLanguage,
-      /href="https:\/\/github\.com\/vireocodedev\/starter-template\/blob\/a670d7f95f720a91705c7c156d19e605582fb4c8\/frontend\/docs\/VISUAL_LANGUAGE\.md"/u,
+      /href="https:\/\/github\.com\/vireocodedev\/vireo-template\/blob\/a670d7f95f720a91705c7c156d19e605582fb4c8\/frontend\/docs\/VISUAL_LANGUAGE\.md"/u,
     );
     assert.match(sitemap, /https:\/\/vireocode\.com\/docs\/design-system\/loading-states\//u);
     assert.match(snapshot, /Vireo 0.3 snapshot/u);
