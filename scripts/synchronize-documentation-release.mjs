@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { extname, join } from "node:path";
 import { format, resolveConfig } from "prettier";
 
 export async function synchronizeDocumentationRelease(repositoryRoot) {
@@ -8,6 +8,10 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   const documentationPath = join(contractsDirectory, "documentation-release-policy.json");
   const lifecyclePath = join(contractsDirectory, "release-lifecycle-policy.json");
   const ecosystem = readJson(ecosystemPath);
+  const oldTemplateCommit = ecosystem.current?.template?.commit;
+  if (!/^[a-f0-9]{40}$/u.test(oldTemplateCommit ?? "")) {
+    throw new Error("Ecosystem current template must pin an exact starter-template commit");
+  }
   const documentation = readJson(documentationPath);
   const lifecycle = readJson(lifecyclePath);
   const currentDocumentation = documentation.releases?.find(release => release.id === documentation.currentRelease);
@@ -15,19 +19,27 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     throw new Error(`Current documentation release ${documentation.currentRelease} is not declared`);
   }
 
-  const packageVersions = new Map(
-    readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
-      .filter(entry => entry.isDirectory())
-      .map(entry => join(repositoryRoot, "packages", entry.name, "package.json"))
-      .filter(existsSync)
-      .map(manifestPath => {
-        const manifest = readJson(manifestPath);
-        return manifest.private === true ? null : [manifest.name, manifest.version];
-      })
-      .filter(Boolean),
-  );
+  const publicWorkspacePackages = readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => ({
+      directory: entry.name,
+      manifestPath: join(repositoryRoot, "packages", entry.name, "package.json"),
+    }))
+    .filter(record => existsSync(record.manifestPath))
+    .map(({ directory, manifestPath }) => {
+      const manifest = readJson(manifestPath);
+      return manifest.private === true ? null : { directory, name: manifest.name, version: manifest.version };
+    })
+    .filter(Boolean);
+  const packageVersions = new Map(publicWorkspacePackages.map(({ name, version }) => [name, version]));
+  const packageLockPath = join(repositoryRoot, "package-lock.json");
+  const packageLock = readJson(packageLockPath);
+  updatePublicWorkspaceLockEntries(packageLock, publicWorkspacePackages);
   const createVireoVersion = packageVersions.get("create-vireo");
   if (!createVireoVersion) throw new Error("create-vireo has no public workspace manifest");
+  const templateVersion = createVireoVersion;
+  const templateTag = `starter-template@${templateVersion}`;
+  const templateReleaseUrl = `https://github.com/vireocodedev/starter-template/releases/tag/${encodeURIComponent(templateTag)}`;
 
   const gradleProperties = readFileSync(join(repositoryRoot, "jvm", "gradle.properties"), "utf8");
   const jvmVersion = gradleProperties.match(/^version=(.+)$/mu)?.[1];
@@ -61,7 +73,10 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   updateNpmEntries(ecosystem.current?.npm, packageVersions, "Ecosystem release");
   ecosystem.current.id = nextReleaseId;
   ecosystem.current.maven.version = jvmVersion;
+  ecosystem.current.template.version = templateVersion;
+  ecosystem.current.template.tag = templateTag;
   ecosystem.current.template.commit = templateCommit;
+  ecosystem.current.template.releaseUrl = templateReleaseUrl;
 
   const compatibility = ecosystem.compatibility?.sets?.find(
     candidate => candidate.id === ecosystem.compatibility?.defaultSet,
@@ -70,14 +85,21 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   compatibility.release = nextReleaseId;
   compatibility.npm = Object.fromEntries(packageVersions);
   compatibility.mavenBom = `${ecosystem.current.maven.group}:vireo-bom:${jvmVersion}`;
+  compatibility.templateVersion = templateVersion;
+  compatibility.templateTag = templateTag;
   compatibility.templateCommit = templateCommit;
+  compatibility.templateReleaseUrl = templateReleaseUrl;
   updateReleaseReferences(ecosystem.supportLines, oldReleaseId, nextReleaseId);
 
   updateNpmEntries(currentDocumentation.npm, packageVersions, "Documentation release", "package");
   currentDocumentation.id = nextReleaseId;
   currentDocumentation.jvm.version = jvmVersion;
+  currentDocumentation.template.version = templateVersion;
+  currentDocumentation.template.tag = templateTag;
   currentDocumentation.template.commit = templateCommit;
+  currentDocumentation.template.releaseUrl = templateReleaseUrl;
   currentDocumentation.releaseLinks.jvmTag = `https://github.com/vireocodedev/starter/releases/tag/jvm-v${jvmVersion}`;
+  currentDocumentation.releaseLinks.template = templateReleaseUrl;
   documentation.currentRelease = nextReleaseId;
   updateReleaseReferences(lifecycle.supportLines, oldReleaseId, nextReleaseId);
 
@@ -97,6 +119,7 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     compatibilityPath,
   );
   const portal = readFileSync(portalPath, "utf8").replaceAll(oldReleaseId, nextReleaseId);
+  const siteOutputs = replaceCurrentTemplateCommitInSite(repositoryRoot, oldTemplateCommit, templateCommit);
 
   const outputs = [
     [ecosystemPath, JSON.stringify(ecosystem)],
@@ -104,9 +127,11 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     [lifecyclePath, JSON.stringify(lifecycle)],
     [createSourcePath, createSource],
     [upgradePolicyPath, JSON.stringify(upgradePolicy)],
+    [packageLockPath, JSON.stringify(packageLock)],
     [readmePath, readme],
     [compatibilityPath, compatibilityMarkdown],
     [portalPath, portal],
+    ...siteOutputs,
   ];
   const formatted = await Promise.all(
     outputs.map(async ([path, content]) => {
@@ -119,6 +144,43 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function updatePublicWorkspaceLockEntries(packageLock, publicWorkspacePackages) {
+  if (!packageLock.packages || typeof packageLock.packages !== "object") {
+    throw new Error("Root package-lock.json must declare workspace package entries");
+  }
+  for (const { directory, name, version } of publicWorkspacePackages) {
+    const path = `packages/${directory}`;
+    const entry = packageLock.packages[path];
+    if (!entry || typeof entry !== "object") {
+      throw new Error(`Root package-lock.json is missing public workspace entry ${path} (${name})`);
+    }
+    entry.version = version;
+  }
+}
+
+function replaceCurrentTemplateCommitInSite(repositoryRoot, oldTemplateCommit, templateCommit) {
+  if (oldTemplateCommit === templateCommit) return [];
+  return collectSiteTextSources(join(repositoryRoot, "site"))
+    .map(path => [path, readFileSync(path, "utf8").replaceAll(oldTemplateCommit, templateCommit)])
+    .filter(([path, content]) => content !== readFileSync(path, "utf8"));
+}
+
+function collectSiteTextSources(directory) {
+  if (!existsSync(directory)) return [];
+  const excludedDirectories = new Set(["build", "dist", "node_modules", "static"]);
+  const textExtensions = new Set([".json", ".md", ".mjs"]);
+  const paths = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      if (!excludedDirectories.has(entry.name)) paths.push(...collectSiteTextSources(path));
+    } else if (entry.isFile() && textExtensions.has(extname(entry.name))) {
+      paths.push(path);
+    }
+  }
+  return paths;
 }
 
 function updateNpmEntries(entries, packageVersions, label, nameKey = "name") {

@@ -34,7 +34,12 @@ Run the semantic contract and corruption tests with:
 corepack npm run projection:check
 ```
 
-The root generator gate invokes this command. The next projection implementation should
-consume the same classifier while materializing the pinned Template, reject unclassified
-archive paths, render substitution-required surfaces, and persist resolved identity in
-`.vireo/project.json`.
+The root generator gate and `create-vireo` consume the same bundled classifier. Creation
+inventories every pinned Template path, rejects an unclassified or ambiguous path, excludes
+maintainer-only and historical material, and emits optional rules only when the contract
+selects them by default. The published package ships an exact copy of the contract; the
+projection policy rejects drift between that copy and this canonical file.
+
+`create-vireo` renders the public identity surfaces and persists all six identity fields in
+`.vireo/project.json`. Release coordinates default to their unresolved markers so a newly
+created application never inherits Vireo's repository, support, or security routes.

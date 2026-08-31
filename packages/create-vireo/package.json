@@ -1,6 +1,6 @@
 {
   "name": "create-vireo",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Create a production-shaped Vireo Framework React application, with an optional Spring Boot backend, from the pinned Starter Template.",
   "type": "module",
   "sideEffects": false,

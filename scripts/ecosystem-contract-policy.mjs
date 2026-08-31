@@ -6,6 +6,36 @@ import { validateReleaseSbomPolicy } from "./lib/release-sbom-evidence.mjs";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const readJson = path => JSON.parse(readFileSync(join(repositoryRoot, path), "utf8"));
 
+export function validateTemplateCoordinates(actual, expected, label = "Template") {
+  const problems = [];
+  for (const field of ["repository", "version", "tag", "commit", "releaseUrl"]) {
+    if (actual?.[field] !== expected?.[field]) {
+      problems.push(
+        `${label} ${field}: expected ${JSON.stringify(expected?.[field])}, found ${JSON.stringify(actual?.[field])}`,
+      );
+    }
+  }
+  return problems;
+}
+
+export function validatePublicWorkspaceLockEntries(packageLock, publicWorkspacePackages) {
+  const problems = [];
+  if (!packageLock?.packages || typeof packageLock.packages !== "object") {
+    return ["Root package-lock.json must declare workspace package entries"];
+  }
+  for (const { directory, name, version } of publicWorkspacePackages) {
+    const entry = packageLock.packages[`packages/${directory}`];
+    if (!entry || typeof entry !== "object") {
+      problems.push(`Root package-lock.json is missing public workspace entry packages/${directory} (${name})`);
+    } else if (entry.version !== version) {
+      problems.push(
+        `Root package-lock.json workspace entry ${name} must be ${version}; found ${String(entry.version)}`,
+      );
+    }
+  }
+  return problems;
+}
+
 export function validateEcosystemContract(contract = readJson("contracts/ecosystem-release-contract.json")) {
   const problems = [];
 
@@ -29,11 +59,14 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
     if (!existsSync(join(repositoryRoot, path))) problems.push(`policySources.${name} references missing ${path}`);
   }
 
-  const packageRecords = readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
+  const publicWorkspacePackages = readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
     .filter(entry => entry.isDirectory() && existsSync(join(repositoryRoot, "packages", entry.name, "package.json")))
-    .map(entry => readJson(`packages/${entry.name}/package.json`))
-    .filter(manifest => manifest.private !== true)
-    .map(manifest => ({ name: manifest.name, version: manifest.version }));
+    .map(entry => ({ directory: entry.name, manifest: readJson(`packages/${entry.name}/package.json`) }))
+    .filter(({ manifest }) => manifest.private !== true)
+    .map(({ directory, manifest }) => ({ directory, name: manifest.name, version: manifest.version }));
+  const packageRecords = publicWorkspacePackages.map(({ name, version }) => ({ name, version }));
+  const packageLock = readJson("package-lock.json");
+  problems.push(...validatePublicWorkspaceLockEntries(packageLock, publicWorkspacePackages));
   const declaredNpm = (contract.current?.npm ?? []).map(({ name, version }) => ({ name, version }));
   requireEqual("current npm artifacts", declaredNpm, packageRecords);
   if (new Set(declaredNpm.map(entry => entry.name)).size !== declaredNpm.length) {
@@ -54,7 +87,20 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
 
   const createSource = readFileSync(join(repositoryRoot, "packages/create-vireo/src/index.ts"), "utf8");
   const templateCommit = createSource.match(/TEMPLATE_COMMIT = "([a-f0-9]{40})"/u)?.[1];
+  const createVireoVersion = createSource.match(/CREATE_VIREO_PACKAGE_VERSION = "([^"]+)"/u)?.[1];
+  const createVireoManifest = packageRecords.find(manifest => manifest.name === "create-vireo");
+  const templateTag = createVireoVersion ? `starter-template@${createVireoVersion}` : undefined;
+  const templateReleaseUrl = templateTag
+    ? `https://github.com/vireocodedev/starter-template/releases/tag/${encodeURIComponent(templateTag)}`
+    : undefined;
   requireEqual("Template commit", contract.current?.template?.commit, templateCommit);
+  requireEqual("create-vireo source version", createVireoVersion, createVireoManifest?.version);
+  requireEqual("Template version", contract.current?.template?.version, createVireoVersion);
+  requireEqual("Template tag", contract.current?.template?.tag, templateTag);
+  requireEqual("Template release URL", contract.current?.template?.releaseUrl, templateReleaseUrl);
+  if (!/^starter-template@\d+\.\d+\.\d+$/u.test(contract.current?.template?.tag ?? "")) {
+    problems.push("Template tag must use starter-template@<semver>");
+  }
 
   const compatibilitySet = contract.compatibility?.sets?.find(
     candidate => candidate.id === contract.compatibility?.defaultSet,
@@ -72,7 +118,14 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
       compatibilitySet.mavenBom,
       `${contract.current.maven.group}:vireo-bom:${contract.current.maven.version}`,
     );
+    requireEqual("compatibility Template version", compatibilitySet.templateVersion, contract.current.template.version);
+    requireEqual("compatibility Template tag", compatibilitySet.templateTag, contract.current.template.tag);
     requireEqual("compatibility Template", compatibilitySet.templateCommit, contract.current.template.commit);
+    requireEqual(
+      "compatibility Template release URL",
+      compatibilitySet.templateReleaseUrl,
+      contract.current.template.releaseUrl,
+    );
   }
 
   const documentation = readJson(contract.policySources.documentationReleases);
@@ -84,10 +137,24 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
     declaredNpm.map(entry => ({ package: entry.name, version: entry.version })),
   );
   requireEqual("documentation Maven release", documentedCurrent?.jvm, contract.current.maven);
-  requireEqual("documentation Template", documentedCurrent?.template, {
-    repository: contract.current.template.repository,
-    commit: contract.current.template.commit,
-  });
+  problems.push(
+    ...validateTemplateCoordinates(
+      documentedCurrent?.template,
+      {
+        repository: contract.current.template.repository,
+        version: contract.current.template.version,
+        tag: contract.current.template.tag,
+        commit: contract.current.template.commit,
+        releaseUrl: contract.current.template.releaseUrl,
+      },
+      "documentation Template",
+    ),
+  );
+  requireEqual(
+    "documentation Template release URL",
+    documentedCurrent?.releaseLinks?.template,
+    contract.current.template.releaseUrl,
+  );
 
   const attestation = readJson(contract.policySources.publicArtifacts);
   problems.push(...validateReleaseSbomPolicy(attestation));

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,11 +11,22 @@ import {
 } from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
 import { assertGeneratedFixtureTemplatePinFromRepository } from "./lib/generated-fixture-template-pin.mjs";
+import { assertExactGeneratedProject } from "./lib/generated-project-projection-assertions.mjs";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 await assertGeneratedFixtureTemplatePinFromRepository({ repositoryRoot, templateCommit: TEMPLATE_COMMIT });
+const ecosystemContract = JSON.parse(
+  await readFile(join(repositoryRoot, "contracts/ecosystem-release-contract.json"), "utf8"),
+);
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-frontend-fixture-"));
 const projectRoot = join(temporaryRoot, "frontend-app");
+const identity = {
+  displayName: "Generated Frontend",
+  ownerName: "Frontend Fixture Team",
+  repositoryUrl: "https://example.test/generated-frontend",
+  supportUrl: "https://support.example.test/generated-frontend",
+  securityContact: "https://security.example.test/generated-frontend",
+};
 
 function run(command, args, cwd) {
   execFileSync(command, args, { cwd, stdio: "inherit" });
@@ -37,9 +48,17 @@ try {
     projectName: "frontend-app",
     profile: "frontend",
     git: false,
+    ...identity,
   });
   if (created.profile !== "frontend" || created.javaPackage || created.database)
     throw new Error(`Unexpected frontend project result: ${JSON.stringify(created)}`);
+  await assertExactGeneratedProject({
+    root: projectRoot,
+    profile: "frontend",
+    identity: { projectName: "frontend-app", ...identity },
+    template: ecosystemContract.current.template,
+  });
+  run("corepack", ["npm", "run", "identity:check:release"], projectRoot);
 
   const schemaPath = join(projectRoot, ".vireo/examples/purchase-order.entity.json");
   const first = await generateEntity({ projectDirectory: projectRoot, schemaPath });

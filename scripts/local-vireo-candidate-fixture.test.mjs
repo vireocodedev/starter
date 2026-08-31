@@ -238,12 +238,12 @@ test("keeps fixture commands self-preparing on Corepack and guards their templat
     readFile(join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.0.2.0.entity.json"), "utf8"),
   ]);
   const fixtureCommands = [
-    ["generate:entity:fixture", "generated-entity-fixture.mjs", entityFixture],
-    ["generate:frontend:fixture", "generated-frontend-fixture.mjs", frontendFixture],
-    ["upgrade:project:fixture", "project-upgrade-fixture.mjs", upgradeFixture],
+    ["generate:entity:fixture", "generated-entity-fixture.mjs", entityFixture, true],
+    ["generate:frontend:fixture", "generated-frontend-fixture.mjs", frontendFixture, true],
+    ["upgrade:project:fixture", "project-upgrade-fixture.mjs", upgradeFixture, false],
   ];
   const scripts = JSON.parse(packageJson).scripts;
-  for (const [command, script, fixture] of fixtureCommands) {
+  for (const [command, script, fixture, requiresExactProjection] of fixtureCommands) {
     assert.equal(scripts[command], `corepack npm run build && node scripts/${script}`);
     assert.match(workflow, new RegExp(`- run: corepack npm run ${command}`, "u"));
     assert.doesNotMatch(workflow, new RegExp(`corepack npm run build\\n\\s*- run: corepack npm run ${command}`, "u"));
@@ -253,6 +253,19 @@ test("keeps fixture commands self-preparing on Corepack and guards their templat
       fixture.indexOf("await assertGeneratedFixtureTemplatePinFromRepository") < fixture.indexOf("await createVireo"),
       `${command} must validate TEMPLATE_COMMIT before scaffolding.`,
     );
+    if (requiresExactProjection) {
+      assert.match(fixture, /assertExactGeneratedProject/u);
+      assert.ok(
+        fixture.indexOf("await assertExactGeneratedProject") > fixture.indexOf("await createVireo") &&
+          fixture.indexOf("await assertExactGeneratedProject") < fixture.indexOf("await generateEntity"),
+        `${command} must validate its exact generated projection before capability generation.`,
+      );
+      assert.ok(
+        fixture.indexOf('"identity:check:release"') > fixture.indexOf("await assertExactGeneratedProject") &&
+          fixture.indexOf('"identity:check:release"') < fixture.indexOf("await generateEntity"),
+        `${command} must prove resolved release identity before capability generation.`,
+      );
+    }
   }
   assert.ok(
     upgradeFixture.indexOf("await assertGeneratedFixtureTemplatePinFromRepository") <

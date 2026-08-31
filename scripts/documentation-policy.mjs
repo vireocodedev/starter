@@ -86,8 +86,22 @@ if (current) {
   }
   const createSource = readFileSync(join(root, "packages/create-vireo/src/index.ts"), "utf8");
   const generatedTemplateCommit = createSource.match(/TEMPLATE_COMMIT = "([a-f0-9]{40})"/u)?.[1];
+  const createVireoVersion = createSource.match(/CREATE_VIREO_PACKAGE_VERSION = "([^"]+)"/u)?.[1];
+  const templateTag = createVireoVersion ? `starter-template@${createVireoVersion}` : undefined;
+  const templateReleaseUrl = templateTag
+    ? `https://github.com/vireocodedev/starter-template/releases/tag/${encodeURIComponent(templateTag)}`
+    : undefined;
   if (current.template?.commit !== generatedTemplateCommit) {
     problems.push(`documentation template pin must match create-vireo ${generatedTemplateCommit ?? "source"}`);
+  }
+  if (current.template?.version !== createVireoVersion) {
+    problems.push(`documentation template version must match create-vireo ${createVireoVersion ?? "source"}`);
+  }
+  if (current.template?.tag !== templateTag || !/^starter-template@\d+\.\d+\.\d+$/u.test(current.template?.tag ?? "")) {
+    problems.push("documentation template tag must use the create-vireo starter-template@<semver> tag");
+  }
+  if (current.template?.releaseUrl !== templateReleaseUrl) {
+    problems.push("documentation template release URL must match the encoded template tag");
   }
   const declaredPackages = new Map(current.npm?.map(entry => [entry.package, entry.version]));
   for (const { manifest } of packageRecords) {
@@ -115,10 +129,13 @@ if (current) {
   if (JSON.stringify(actualModules) !== JSON.stringify(expectedModules)) {
     problems.push("documentation release must link all six published JVM modules exactly once");
   }
-  for (const link of ["source", "npm", "jvm", "jvmTag", "compatibility", "migration"]) {
+  for (const link of ["source", "npm", "jvm", "jvmTag", "template", "compatibility", "migration"]) {
     if (!current.releaseLinks?.[link]?.startsWith("https://")) {
       problems.push(`documentation release link ${link} must be an HTTPS URL`);
     }
+  }
+  if (current.releaseLinks?.template !== templateReleaseUrl) {
+    problems.push("documentation release link template must match the encoded template tag");
   }
 }
 

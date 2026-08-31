@@ -1,5 +1,6 @@
+import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -12,21 +13,89 @@ async function fixture(root) {
   await mkdir(join(template, ".vireo"), { recursive: true });
   await mkdir(join(template, "src/main/java/com/vireocode/startertemplate"), { recursive: true });
   await writeFile(join(template, ".vireo/template.json"), "{}\n");
+  await mkdir(join(template, ".github"), { recursive: true });
+  await mkdir(join(template, ".github", "workflows"), { recursive: true });
+  await mkdir(join(template, "contracts"), { recursive: true });
+  await mkdir(join(template, "scripts"), { recursive: true });
+  await mkdir(join(template, ".vscode"), { recursive: true });
+  await writeFile(
+    join(template, ".github/dependabot.yml"),
+    "version: 2\nupdates:\n  - package-ecosystem: npm\n    directory: /frontend\n",
+  );
+  await writeFile(join(template, ".github/workflows/ci.yml"), "steps:\n  - run: ./scripts/verify-template.sh silent\n");
+  await writeFile(
+    join(template, "contracts/github-actions-policy.json"),
+    JSON.stringify({ requiredConcurrencyWorkflows: { "ci.yml": {}, "template-release.yml": {} } }),
+  );
+  await writeFile(
+    join(template, "scripts/verify.sh"),
+    '#!/usr/bin/env bash\nset -euo pipefail\nsteps=(\n  "development-database|Development database modes|true"\n)\n',
+  );
+  await writeFile(
+    join(template, "scripts/toolchain-policy.mjs"),
+    `const policy = readJson("contracts/toolchain-policy.json");
+const platformPolicy = readJson("contracts/platform-support-policy.json");
+expectEqual(
+  "platform Node exact",
+  policy.node,
+  platformPolicy.toolchains.node.exact,
+);
+expectEqual(
+  "platform Node range",
+  policy.nodeRange,
+  platformPolicy.toolchains.node.range,
+);
+expectEqual("platform npm", policy.npm, platformPolicy.toolchains.npm.exact);
+expectEqual(
+  "platform Java",
+  policy.java,
+  platformPolicy.toolchains.java.compile,
+);
+expectEqual("platform Gradle", policy.gradle, platformPolicy.toolchains.gradle);
+expectEqual(
+  "platform Spring Boot",
+  policy.springBoot,
+  platformPolicy.toolchains.springBoot,
+);
+expectEqual(
+  "platform canonical runner",
+  policy.canonicalRunner,
+  platformPolicy.canonicalHost.os,
+);
+
+export {};
+`,
+  );
+  await writeFile(
+    join(template, ".vscode/settings.json"),
+    '{"java.import.gradle.enabled":true,"files.exclude":{"frontend/dist":true}}\n',
+  );
   await writeFile(join(template, "settings.gradle"), "rootProject.name = 'starter-template'\n");
   await writeFile(join(template, "README.md"), "# Vireo Starter Template\n");
   await writeFile(
     join(template, "package.json"),
-    JSON.stringify({ name: "starter-template", scripts: { vireo: "npx --yes --package=create-vireo@0.3.0 vireo" } }),
+    JSON.stringify({
+      name: "starter-template",
+      version: "0.6.0",
+      scripts: {
+        vireo: "npx --yes --package=create-vireo@0.3.0 vireo",
+        "release:policy": "node scripts/template-release-policy.mjs",
+      },
+    }),
   );
   await mkdir(join(template, "frontend/src/app/ui/localization/resources"), { recursive: true });
   await mkdir(join(template, "frontend/public/icons"), { recursive: true });
   await mkdir(join(template, "frontend/tests/pwa"), { recursive: true });
+  await mkdir(join(template, "frontend/tests/demo"), { recursive: true });
+  await mkdir(join(template, "frontend/tests/deployment"), { recursive: true });
+  await mkdir(join(template, "frontend/tests/e2e"), { recursive: true });
   await mkdir(join(template, "frontend/scripts"), { recursive: true });
   await mkdir(join(template, "frontend/docs/architecture"), { recursive: true });
   await writeFile(
     join(template, "frontend/package.json"),
     JSON.stringify({
       name: "starter-template-frontend",
+      version: "0.6.0",
       scripts: {
         dev: "vite",
         build: "vite build",
@@ -46,6 +115,7 @@ async function fixture(root) {
         "pwa:check:built": "node scripts/check-pwa-contract.mjs --built",
         "pretest:pwa": "node scripts/prepare-pwa-update-fixture.mjs",
         "test:pwa": "playwright test --config=playwright.pwa.config.ts",
+        "toolchain:check": "node ../scripts/toolchain-policy.mjs && node ../scripts/platform-support-policy.mjs",
         preview: "vite preview",
       },
       dependencies: { "@vireocodedev/ui": "^0.2.2" },
@@ -55,8 +125,9 @@ async function fixture(root) {
     join(template, "frontend/package-lock.json"),
     JSON.stringify({
       name: "starter-template-frontend",
+      version: "0.6.0",
       lockfileVersion: 3,
-      packages: { "": { name: "starter-template-frontend" } },
+      packages: { "": { name: "starter-template-frontend", version: "0.6.0" } },
     }),
   );
   await writeFile(join(template, "frontend/vite.config.ts"), 'import { createPwaManifest } from "./pwa-policy.mjs";\n');
@@ -80,7 +151,13 @@ async function fixture(root) {
   await writeFile(join(template, "frontend/scripts/pwa-update-fixture.mjs"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/pwa-update-fixture.d.mts"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/app-identity-html.mjs"), "export {};\n");
+  await writeFile(join(template, "frontend/scripts/verify.sh"), "#!/usr/bin/env bash\nset -euo pipefail\n");
   await writeFile(join(template, "frontend/tests/pwa/production-pwa.spec.ts"), "export {};\n");
+  await writeFile(join(template, "frontend/tests/demo/flagship-demo.spec.ts"), "export {};\n");
+  await writeFile(join(template, "frontend/tests/deployment/smoke.spec.ts"), "export {};\n");
+  await writeFile(join(template, "frontend/tests/e2e/login.spec.ts"), "export {};\n");
+  await writeFile(join(template, "frontend/playwright.demo.config.ts"), "export {};\n");
+  await writeFile(join(template, "frontend/playwright.deployment.config.ts"), "export {};\n");
   await writeFile(join(template, "frontend/public/icons/icon-192x192.png"), "fixture\n");
   await mkdir(join(template, "frontend/src/features/item"), { recursive: true });
   await writeFile(join(template, "frontend/src/features/item/public.ts"), "export type Item = { id: number };\n");
@@ -105,7 +182,7 @@ test("creates and customizes a project atomically from a local fixture", async (
     });
     assert.equal(result.templateCommit, TEMPLATE_COMMIT);
     assert.match(await readFile(join(target, "settings.gradle"), "utf8"), /sample-app/u);
-    assert.equal(await readFile(join(target, "README.md"), "utf8"), "# Sample App\n");
+    assert.match(await readFile(join(target, "README.md"), "utf8"), /^# Sample App$/mu);
     const identity = await readFile(join(target, "frontend/pwa-policy.mjs"), "utf8");
     assert.match(identity, /id: "\/sample-app"/u);
     assert.match(identity, /name: "Sample App"/u);
@@ -120,9 +197,157 @@ test("creates and customizes a project atomically from a local fixture", async (
     const metadata = JSON.parse(await readFile(join(target, ".vireo/project.json"), "utf8"));
     assert.equal(metadata.createdBy, `create-vireo@${createVireoVersion}`);
     assert.deepEqual(
+      {
+        templateCommit: metadata.templateCommit,
+        templateVersion: metadata.templateVersion,
+        templateTag: metadata.templateTag,
+      },
+      {
+        templateCommit: TEMPLATE_COMMIT,
+        templateVersion: createVireoVersion,
+        templateTag: `starter-template@${createVireoVersion}`,
+      },
+    );
+    assert.deepEqual(
       { projectName: metadata.projectName, javaPackage: metadata.javaPackage, database: metadata.database },
       { projectName: "sample-app", javaPackage: "dev.example.sample", database: "h2" },
     );
+    assert.deepEqual(
+      {
+        displayName: metadata.displayName,
+        ownerName: metadata.ownerName,
+        repositoryUrl: metadata.repositoryUrl,
+        supportUrl: metadata.supportUrl,
+        securityContact: metadata.securityContact,
+      },
+      {
+        displayName: "Sample App",
+        ownerName: "UNRESOLVED_VIREO_OWNER_NAME",
+        repositoryUrl: "UNRESOLVED_VIREO_REPOSITORY_URL",
+        supportUrl: "UNRESOLVED_VIREO_SUPPORT_URL",
+        securityContact: "UNRESOLVED_VIREO_SECURITY_CONTACT",
+      },
+    );
+    const runIdentityCheck = args =>
+      execFileSync(process.execPath, ["scripts/project-identity-policy.mjs", ...args], {
+        cwd: target,
+        encoding: "utf8",
+        stdio: "pipe",
+      });
+    const assertIdentityFailure = (args, expected) =>
+      assert.throws(
+        () => runIdentityCheck(args),
+        error => expected.test(String(error.stderr)),
+      );
+    assert.doesNotThrow(() => runIdentityCheck([]));
+    assertIdentityFailure(["--release"], /ownerName is unresolved/u);
+    const resolvedIdentity = {
+      ...metadata,
+      ownerName: "Example Application Team",
+      repositoryUrl: "https://example.test/sample-app",
+      supportUrl: "mailto:support@example.test",
+      securityContact: "https://security.example.test/sample-app",
+    };
+    await writeFile(join(target, ".vireo/project.json"), `${JSON.stringify(resolvedIdentity, null, 2)}\n`);
+    assert.doesNotThrow(() => runIdentityCheck(["--release", "--json"]));
+    await writeFile(
+      join(target, ".vireo/project.json"),
+      `${JSON.stringify({ ...resolvedIdentity, schemaVersion: 2 }, null, 2)}\n`,
+    );
+    assertIdentityFailure([], /schemaVersion must be 1/u);
+    assertIdentityFailure(["--release"], /schemaVersion must be 1/u);
+    await writeFile(
+      join(target, ".vireo/project.json"),
+      `${JSON.stringify({ ...resolvedIdentity, profile: "frontend" }, null, 2)}\n`,
+    );
+    assertIdentityFailure([], /profile must be full-stack/u);
+    assertIdentityFailure(["--release"], /profile must be full-stack/u);
+    await writeFile(
+      join(target, ".vireo/project.json"),
+      `${JSON.stringify(
+        {
+          ...resolvedIdentity,
+          supportUrl: "https://support.example.test/sample-app",
+          securityContact: "https://support.example.test/sample-app/",
+        },
+        null,
+        2,
+      )}\n`,
+    );
+    assertIdentityFailure(["--release"], /supportUrl and securityContact must be distinct/u);
+    await writeFile(
+      join(target, ".vireo/project.json"),
+      `${JSON.stringify(
+        {
+          ...resolvedIdentity,
+          supportUrl: "mailto:Security@example.test",
+          securityContact: "mailto:security@example.test",
+        },
+        null,
+        2,
+      )}\n`,
+    );
+    assertIdentityFailure(["--release"], /supportUrl and securityContact must be distinct/u);
+    await writeFile(
+      join(target, ".vireo/project.json"),
+      `${JSON.stringify({ ...resolvedIdentity, repositoryUrl: "https://github.com/vireocodedev/starter" }, null, 2)}\n`,
+    );
+    assertIdentityFailure(["--release"], /repositoryUrl must not inherit a Vireo/u);
+    await writeFile(
+      join(target, ".vireo/project.json"),
+      `${JSON.stringify({ ...resolvedIdentity, securityContact: resolvedIdentity.supportUrl }, null, 2)}\n`,
+    );
+    assertIdentityFailure(["--release"], /supportUrl and securityContact must be distinct/u);
+    const generatedPackage = JSON.parse(await readFile(join(target, "package.json"), "utf8"));
+    assert.equal(generatedPackage.scripts["identity:check"], "node scripts/project-identity-policy.mjs");
+    assert.equal(
+      generatedPackage.scripts["identity:check:release"],
+      "node scripts/project-identity-policy.mjs --release",
+    );
+    assert.equal(
+      generatedPackage.scripts["verify:release"],
+      "corepack npm run identity:check:release && corepack npm run verify",
+    );
+    assert.equal(generatedPackage.version, "0.1.0");
+    assert.equal(generatedPackage.scripts["release:policy"], undefined);
+    const generatedFrontendPackage = JSON.parse(await readFile(join(target, "frontend", "package.json"), "utf8"));
+    assert.equal(generatedFrontendPackage.scripts["toolchain:check"], "node ../scripts/toolchain-policy.mjs");
+    assert.doesNotMatch(
+      await readFile(join(target, "scripts", "toolchain-policy.mjs"), "utf8"),
+      /platform-support-policy/u,
+    );
+    const generatedWorkflowPolicy = JSON.parse(
+      await readFile(join(target, "contracts", "github-actions-policy.json"), "utf8"),
+    );
+    assert.deepEqual(Object.keys(generatedWorkflowPolicy.requiredConcurrencyWorkflows).sort(), ["ci.yml"]);
+    const fullStackIdentityPolicy = await readFile(join(target, "scripts/project-identity-policy.mjs"), "utf8");
+    assert.match(fullStackIdentityPolicy, /IDENTITY_CONTRACT/u);
+    assert.match(fullStackIdentityPolicy, /EXPECTED_PROFILE = "full-stack"/u);
+    assert.doesNotThrow(() =>
+      execFileSync(process.execPath, ["--check", "scripts/project-identity-policy.mjs"], {
+        cwd: target,
+        encoding: "utf8",
+        stdio: "pipe",
+      }),
+    );
+    assert.match(await readFile(join(target, "scripts/verify.sh"), "utf8"), /project-identity\|Project identity/u);
+    for (const path of ["README.md", "SECURITY.md", "SUPPORT.md"]) {
+      assert.doesNotMatch(await readFile(join(target, path), "utf8"), /vireocodedev\/starter(?:-template)?/u);
+    }
+    const issueConfig = await readFile(join(target, ".github/ISSUE_TEMPLATE/config.yml"), "utf8");
+    assert.match(issueConfig, /contact_links: \[\]/u);
+    assert.doesNotMatch(issueConfig, /UNRESOLVED_VIREO_|mailto:/u);
+    assert.match(await readFile(join(target, ".github/dependabot.yml"), "utf8"), /directory: \/frontend/u);
+    assert.match(await readFile(join(target, ".vscode/settings.json"), "utf8"), /java\.import\.gradle/u);
+    for (const path of [
+      "frontend/playwright.demo.config.ts",
+      "frontend/playwright.deployment.config.ts",
+      "frontend/tests/demo/flagship-demo.spec.ts",
+      "frontend/tests/deployment/smoke.spec.ts",
+      "frontend/tests/e2e/login.spec.ts",
+    ]) {
+      assert.match(await readFile(join(target, path), "utf8"), /export/u);
+    }
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -135,6 +360,49 @@ test("never overwrites an existing target", async () => {
     const target = join(root, "existing-app");
     await mkdir(target);
     await assert.rejects(createVireo({ directory: target, templateDirectory: template }), /already exists/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("local template directories ignore ordinary checkout artifacts", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-artifacts-test-"));
+  try {
+    const template = await fixture(root);
+    await mkdir(join(template, ".gradle", "cache"), { recursive: true });
+    await mkdir(join(template, "frontend", "dist"), { recursive: true });
+    await mkdir(join(template, "operations", "evidence"), { recursive: true });
+    await writeFile(join(template, ".gradle", "cache", "state.bin"), "local\n");
+    await writeFile(join(template, "frontend", "dist", "bundle.js"), "local\n");
+    await writeFile(join(template, "operations", "evidence", "run.json"), "local\n");
+    await writeFile(join(template, ".env.local"), "LOCAL_ONLY=true\n");
+    await writeFile(join(template, "frontend", "scratch.iml"), "local\n");
+
+    const target = join(root, "artifact-safe-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+    for (const path of [
+      ".gradle/cache/state.bin",
+      "frontend/dist/bundle.js",
+      "operations/evidence/run.json",
+      ".env.local",
+      "frontend/scratch.iml",
+    ]) {
+      await assert.rejects(readFile(join(target, path)), /ENOENT/u);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("local template directories reject symbolic links", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-link-test-"));
+  try {
+    const template = await fixture(root);
+    await symlink("README.md", join(template, "linked-readme.md"));
+    await assert.rejects(
+      createVireo({ directory: join(root, "linked-app"), git: false, templateDirectory: template }),
+      /unsupported link/u,
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -166,11 +434,25 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.match(await readFile(join(target, ".gitignore"), "utf8"), /^\.pwa-update-fixture\/$/mu);
     assert.match(await readFile(join(target, ".gitignore"), "utf8"), /^!\.env\.development$/mu);
     const packageJson = JSON.parse(await readFile(join(target, "package.json"), "utf8"));
+    assert.equal(packageJson.version, "0.1.0");
+    assert.equal(packageJson.scripts["release:policy"], undefined);
     for (const script of ["pwa:check:source", "pwa:check:built", "pretest:pwa", "test:pwa"]) {
       assert.equal(typeof packageJson.scripts[script], "string", `${script} is retained`);
     }
+    assert.equal(packageJson.scripts["identity:check"], "node scripts/project-identity-policy.mjs");
+    assert.equal(packageJson.scripts["identity:check:release"], "node scripts/project-identity-policy.mjs --release");
+    assert.equal(
+      packageJson.scripts["verify:release"],
+      "corepack npm run identity:check:release && corepack npm run verify",
+    );
+    const lock = JSON.parse(await readFile(join(target, "package-lock.json"), "utf8"));
+    assert.equal(lock.version, "0.1.0");
+    assert.equal(lock.packages[""].version, "0.1.0");
     const verify = await readFile(join(target, "scripts/verify-frontend-profile.sh"), "utf8");
-    assert.match(verify, /pwa:check:source[\s\S]*Application build[\s\S]*pwa:check:built/u);
+    assert.match(verify, /Project identity[\s\S]*pwa:check:source[\s\S]*Application build[\s\S]*pwa:check:built/u);
+    const frontendIdentityPolicy = await readFile(join(target, "scripts/project-identity-policy.mjs"), "utf8");
+    assert.match(frontendIdentityPolicy, /IDENTITY_CONTRACT/u);
+    assert.match(frontendIdentityPolicy, /EXPECTED_PROFILE = "frontend"/u);
     const doctor = await readFile(join(target, "scripts/vireo-frontend-doctor.mjs"), "utf8");
     assert.match(doctor, /Frontend profile/u);
     assert.match(doctor, /VIR-VERIFY-001/u);
@@ -181,6 +463,32 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.match(await readFile(join(target, "README.md"), "utf8"), /Ubuntu 24\.04 x86-64/u);
     const metadata = JSON.parse(await readFile(join(target, ".vireo/project.json"), "utf8"));
     assert.equal(metadata.profile, "frontend");
+    assert.deepEqual(
+      {
+        templateCommit: metadata.templateCommit,
+        templateVersion: metadata.templateVersion,
+        templateTag: metadata.templateTag,
+        createdBy: metadata.createdBy,
+      },
+      {
+        templateCommit: TEMPLATE_COMMIT,
+        templateVersion: createVireoVersion,
+        templateTag: `starter-template@${createVireoVersion}`,
+        createdBy: `create-vireo@${createVireoVersion}`,
+      },
+    );
+    await assert.rejects(readFile(join(target, ".github/dependabot.yml")), /ENOENT/u);
+    await assert.rejects(readFile(join(target, "scripts/verify.sh")), /ENOENT/u);
+    await assert.rejects(readFile(join(target, ".vscode/settings.json")), /ENOENT/u);
+    for (const path of [
+      "playwright.demo.config.ts",
+      "playwright.deployment.config.ts",
+      "tests/demo/flagship-demo.spec.ts",
+      "tests/deployment/smoke.spec.ts",
+      "tests/e2e/login.spec.ts",
+    ]) {
+      await assert.rejects(readFile(join(target, path)), /ENOENT/u);
+    }
     await assert.rejects(readFile(join(target, "settings.gradle")), /ENOENT/u);
     await assert.rejects(readFile(join(target, "src/main/java/App.java")), /ENOENT/u);
   } finally {
@@ -278,9 +586,10 @@ test("fails closed when neither the current nor historical identity baseline exi
 
 test("generator source uses the current PWA identity renderer and isolates historical substitutions", async () => {
   const source = await readFile(new URL("../src/index.ts", import.meta.url), "utf8");
-  assert.match(source, /renderPwaIdentity\(join\(root, "frontend", "pwa-policy\.mjs"\)/u);
+  assert.match(source, /renderPwaIdentity\(join\(root, frontendDirectory, "pwa-policy\.mjs"\)/u);
   assert.match(source, /async function renderLegacyTemplateIdentity/u);
-  assert.match(source, /await renderTemplateIdentity\(staging,/u);
+  assert.match(source, /await renderTemplateIdentity\(\s*staging,/u);
+  assert.match(source, /await projectTemplate\(staging, profile, options\.templateDirectory !== undefined\)/u);
 });
 
 test("dry run validates without writing", async () => {
@@ -290,6 +599,23 @@ test("dry run validates without writing", async () => {
     const result = await createVireo({ directory: target, dryRun: true });
     assert.equal(result.dryRun, true);
     await assert.rejects(readFile(target), /ENOENT/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("rejects an inherited Vireo public route even during creation", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-identity-test-"));
+  try {
+    await assert.rejects(
+      createVireo({
+        directory: join(root, "identity-app"),
+        git: false,
+        dryRun: true,
+        repositoryUrl: "https://github.com/vireocodedev/starter-template",
+      }),
+      /must not inherit a Vireo repository/u,
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

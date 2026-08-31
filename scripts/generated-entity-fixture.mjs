@@ -11,6 +11,7 @@ import {
 } from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
 import { assertGeneratedFixtureTemplatePinFromRepository } from "./lib/generated-fixture-template-pin.mjs";
+import { assertExactGeneratedProject } from "./lib/generated-project-projection-assertions.mjs";
 import {
   mavenCandidateConsumerCommand,
   withLocalVireoMavenCandidates,
@@ -26,6 +27,13 @@ if (typeof targetMavenVersion !== "string" || !targetMavenVersion.trim())
   throw new Error("Ecosystem release contract must declare current.maven.version for the generated JVM fixture.");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-generated-fixture-"));
 const projectRoot = join(temporaryRoot, "generated-app");
+const identity = {
+  displayName: "Generated Full Stack",
+  ownerName: "Generated Fixture Team",
+  repositoryUrl: "https://example.test/generated-full-stack",
+  supportUrl: "https://support.example.test/generated-full-stack",
+  securityContact: "https://security.example.test/generated-full-stack",
+};
 
 function run(command, args, cwd) {
   execFileSync(command, args, { cwd, stdio: "inherit" });
@@ -38,7 +46,15 @@ try {
     javaPackage: "dev.vireo.generated",
     database: "h2",
     git: false,
+    ...identity,
   });
+  await assertExactGeneratedProject({
+    root: projectRoot,
+    profile: "full-stack",
+    identity: { projectName: "generated-app", ...identity },
+    template: ecosystemContract.current.template,
+  });
+  run("corepack", ["npm", "run", "identity:check:release"], projectRoot);
   const schemaPath = join(projectRoot, ".vireo/examples/purchase-order.entity.json");
   const first = await generateEntity({ projectDirectory: projectRoot, schemaPath });
   const second = await generateEntity({ projectDirectory: projectRoot, schemaPath });

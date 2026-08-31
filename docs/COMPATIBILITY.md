@@ -17,7 +17,7 @@ the package manifests:
 
 | Artifact                       | Current version |
 | ------------------------------ | --------------: |
-| `create-vireo`                 |           0.5.1 |
+| `create-vireo`                 |           0.6.0 |
 | `@vireocodedev/history`        |           0.2.2 |
 | `@vireocodedev/infrastructure` |           0.2.2 |
 | `@vireocodedev/localization`   |           0.2.2 |
