@@ -84,20 +84,21 @@ evaluation.
 
 ### `G-305` — Maintainer-run target-environment recovery preparation
 
-- [ ] Take a guarded backup of the hosted demo database.
-- [ ] Verify the backup before accepting it as recovery input.
-- [ ] Restore representative data into a new database or isolated recovery target.
-- [ ] Verify Flyway history, application readiness, authentication, and the Item
+- [x] Take a guarded backup of the hosted demo database.
+- [x] Verify the backup before accepting it as recovery input.
+- [x] Restore representative data into a new database or isolated recovery target.
+- [x] Verify Flyway history, application readiness, authentication, and the Item
       journey after restore.
-- [ ] Measure and record recovery time and recovery point.
-- [ ] Exercise one sanitized demo incident, containment, rollback or forward-fix,
+- [x] Measure and record recovery time and recovery point.
+- [x] Exercise one sanitized demo incident, containment, rollback or forward-fix,
       and post-incident verification.
-- [ ] Retain sanitized commands, timings, logs, revision, and results.
-- [ ] Update the operations evidence without claiming that the required independent
+- [x] Retain sanitized commands, timings, logs, revision, and results.
+- [x] Update the operations evidence without claiming that the required independent
       witness row passed.
 
-This work strengthens `G-305`, but the Phase 4 gate still requires a witnessed
-target-environment rehearsal.
+The 2026-09-01 maintainer rehearsal closes this preparation. The Phase 4 gate still
+requires an independently witnessed target-environment rehearsal; same-host retained
+backup evidence does not claim independent-failure-domain durability.
 
 ### Roadmap and release-state reconciliation
 

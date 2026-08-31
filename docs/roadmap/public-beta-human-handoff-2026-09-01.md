@@ -12,9 +12,11 @@ engineering closure.
    any critical/high finding through the private advisory route.
 2. Testers perform the retained physical-device and manual assistive-technology
    scenarios in the Template platform checklist.
-3. Two trusted people witness the target-environment recovery rehearsal after the
-   maintainer records the guarded backup/restore evidence. The prepared evidence
-   location is `docs/roadmap/phase-4/evidence/target-recovery-2026-09-01.md`.
+3. Two trusted people witness the target-environment recovery rehearsal. The
+   maintainer's guarded backup/restore/incident preparation is complete and retained
+   at `docs/roadmap/phase-4/evidence/target-recovery-2026-09-01.md`; the remaining
+   witness must independently observe the scenario. The retained backup is same-host
+   evidence, not an independent failure-domain durability claim.
 4. Unfamiliar developers complete the bounded first-run, first-change, generation,
    customization, upgrade, and deployment sessions. Independent adopters then use a
    non-fixture application and submit the qualified adopter check-in.

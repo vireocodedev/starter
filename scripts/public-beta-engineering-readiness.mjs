@@ -7,7 +7,7 @@ const readiness = readJson("contracts/public-beta-engineering-readiness.json");
 const evidencePolicy = readJson("contracts/public-beta-evidence-policy.json");
 const aggregate = readJson(evidencePolicy.aggregatePath);
 const problems = [];
-const requiredMachine = ["P1-03", "P1-09-machine", "G-108", "G-308"];
+const requiredMachine = ["P1-03", "P1-09-machine", "G-108", "G-305-maintainer", "G-308"];
 const requiredHuman = [
   "independent-security-review",
   "manual-assistive-technology-and-physical-device-evidence",
@@ -21,8 +21,8 @@ if (readiness.machineClosure?.status !== "PASS") problems.push("machineClosure m
 if (readiness.humanGate?.status !== "HOLD") problems.push("humanGate must remain HOLD until external evidence is recorded");
 for (const id of requiredMachine) if (!readiness.machineClosure?.resolved?.includes(id)) problems.push(`machine closure is missing ${id}`);
 for (const id of requiredHuman) if (!readiness.humanGate?.pending?.includes(id)) problems.push(`human gate is missing ${id}`);
-if (!Array.isArray(readiness.machineClosure?.evidence) || readiness.machineClosure.evidence.length < 4)
-  problems.push("machine closure must retain four evidence paths");
+if (!Array.isArray(readiness.machineClosure?.evidence) || readiness.machineClosure.evidence.length < 5)
+  problems.push("machine closure must retain five evidence paths");
 for (const path of [...(readiness.machineClosure?.evidence ?? []), readiness.humanGate?.handoff]) {
   if (typeof path !== "string" || !path.startsWith("docs/") || !readFileExists(path)) problems.push(`missing readiness evidence path ${path}`);
 }
