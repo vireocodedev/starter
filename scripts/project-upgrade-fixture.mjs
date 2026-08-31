@@ -42,8 +42,8 @@ const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-upgrade-fixture-"));
 const sourceTemplate = join(temporaryRoot, "source-template");
 const projectRoot = join(temporaryRoot, "upgrade-app");
 
-function run(command, args, cwd) {
-  execFileSync(command, args, { cwd, stdio: "inherit" });
+function run(command, args, cwd, { env = process.env } = {}) {
+  execFileSync(command, args, { cwd, env, stdio: "inherit" });
 }
 
 async function generatedBytes(root, manifest) {
@@ -101,6 +101,7 @@ async function ejectedBytes(root, directory = root) {
 
 async function adjacentUpgradeFixture(profile) {
   const root = join(temporaryRoot, `public-0-6-${profile}`);
+  let verificationCommit;
   const createArguments = [
     "npm",
     "exec",
@@ -300,8 +301,14 @@ async function adjacentUpgradeFixture(profile) {
       ],
       root,
     );
+    verificationCommit = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: root,
+      encoding: "utf8",
+    }).trim();
   }
-  run("corepack", ["npm", "run", "verify"], root);
+  run("corepack", ["npm", "run", "verify"], root, {
+    env: verificationCommit ? { ...process.env, GITHUB_SHA: verificationCommit } : process.env,
+  });
   console.log(`Public create-vireo 0.6.0 ${profile} fixture upgraded by packed 0.7 candidate.`);
 }
 
