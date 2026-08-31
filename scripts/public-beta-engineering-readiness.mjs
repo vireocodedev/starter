@@ -9,10 +9,14 @@ const aggregate = readJson(evidencePolicy.aggregatePath);
 const problems = [];
 const requiredMachine = ["P1-03", "P1-09-machine", "G-108", "G-305-maintainer", "G-308"];
 const requiredHuman = [
+  "professional-identity-and-trademark-clearance",
+  "second-trusted-maintainer-and-independent-approval",
   "independent-security-review",
-  "manual-assistive-technology-and-physical-device-evidence",
+  "manual-at-branded-browser-physical-device-and-installed-pwa-evidence",
+  "low-end-device-and-real-user-field-performance",
   "witnessed-target-environment-recovery",
-  "unfamiliar-user-and-independent-adopter-evidence",
+  "unfamiliar-user-workflow-sessions",
+  "qualifying-independent-adopters-and-maintained-upgrade",
 ];
 
 if (readiness.schemaVersion !== 1) problems.push("readiness schemaVersion must equal 1");

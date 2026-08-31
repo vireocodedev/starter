@@ -7,6 +7,7 @@
     "resolved": ["P1-03", "P1-09-machine", "G-108", "G-305-maintainer", "G-308"],
     "evidence": [
       "docs/roadmap/phase-0/repository-topology.md",
+      "docs/roadmap/phase-1/evidence/repository-migration-2026-09-01.md",
       "docs/security/provider-controls-2026-08-31.md",
       "docs/roadmap/phase-1/evidence/verification-trend-review-2026-09-01.md",
       "docs/roadmap/phase-4/evidence/target-recovery-2026-09-01.md",
@@ -18,10 +19,14 @@
     "privacyRule": "Only sanitized aggregate evidence is public; do not record identities, credentials, private source, application data, or identifying project information.",
     "handoff": "docs/roadmap/public-beta-human-handoff-2026-09-01.md",
     "pending": [
+      "professional-identity-and-trademark-clearance",
+      "second-trusted-maintainer-and-independent-approval",
       "independent-security-review",
-      "manual-assistive-technology-and-physical-device-evidence",
+      "manual-at-branded-browser-physical-device-and-installed-pwa-evidence",
+      "low-end-device-and-real-user-field-performance",
       "witnessed-target-environment-recovery",
-      "unfamiliar-user-and-independent-adopter-evidence"
+      "unfamiliar-user-workflow-sessions",
+      "qualifying-independent-adopters-and-maintained-upgrade"
     ]
   },
   "adoptionSnapshot": {

@@ -8,18 +8,16 @@ engineering closure.
 
 ## Remaining human work
 
-1. An independent security reviewer assesses the published threat model and reports
-   any critical/high finding through the private advisory route.
-2. Testers perform the retained physical-device and manual assistive-technology
-   scenarios in the Template platform checklist.
-3. Two trusted people witness the target-environment recovery rehearsal. The
-   maintainer's guarded backup/restore/incident preparation is complete and retained
-   at `docs/roadmap/phase-4/evidence/target-recovery-2026-09-01.md`; the remaining
-   witness must independently observe the scenario. The retained backup is same-host
-   evidence, not an independent failure-domain durability claim.
-4. Unfamiliar developers complete the bounded first-run, first-change, generation,
-   customization, upgrade, and deployment sessions. Independent adopters then use a
-   non-fixture application and submit the qualified adopter check-in.
+| Gate | Current state | Required qualification and evidence path |
+| --- | --- | --- |
+| G-002 / P1-01 identity | Open accepted pre-1.0/public-beta risk | Professional trademark/identity clearance or documented fallback; retain dated professional decision in the Phase 1 record. |
+| G-107 / P1-09 continuity | Open | A second trusted maintainer verifies recovery access and independently approves protected changes; retain the restricted recovery exercise result. |
+| G-301 / P4-01 security | Open | Independent security review with no unresolved critical/high finding; use the private advisory route and retain sanitized conclusion. |
+| G-303 / P4-03 platforms | Open | Manual AT, branded browser, physical device and installed-PWA checklist results with release, hardware/software, operator, scenario and result. |
+| G-304 / P4-04 performance | Open | Representative low-end physical-device and real-user field measurements; retain method, environment and sanitized observations. |
+| G-305 / P4-05 recovery | Open | A second trusted person witnesses target restore, application acceptance and incident result. [Maintainer preparation](phase-4/evidence/target-recovery-2026-09-01.md) is complete but same-host backup is not an independent-failure-domain claim. |
+| P1-15 / P2-08 / P3-09 / P5-06 workflow | 0 sessions | Unfamiliar developers complete first run, first change, generation, customization, upgrade and deployment; retain only the privacy-safe aggregate in `phase-5/evidence/aggregate.json`. |
+| G-309 / P5-07 adoption | 0/3 teams; 0/1 upgrades | Three qualifying independent teams actively build with Vireo and one maintains a production-like deployment through an upgrade; submit only sanitized qualified check-ins. |
 
 Use the public [evaluation form](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml)
 for sanitized outcomes, the [adopter check-in](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml)

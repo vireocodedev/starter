@@ -62,13 +62,12 @@ not an assigned person.
 
 ## Immediate sequence
 
-1. Execute the remaining [Phase 1 backlog](../phase-1/backlog.md), beginning with
-   accurate external repository metadata, governance/support, compatibility, and
-   executable documentation.
+1. Follow the dated [human-only public-beta handoff](../public-beta-human-handoff-2026-09-01.md);
+   no remaining machine work is admitted through this historical sequence.
 2. Preserve G-001, G-002, G-005, and G-006 as accepted risks; do not translate AI
    comprehension or technical onboarding into claims of human demand or adoption.
-3. Keep G-008 for Phase 2, G-302 for Phase 4, and G-308/G-309 for Phase 5 rather
-   than pulling later-phase work into the public-foundation gate.
+3. Keep the documented external/manual rows open until their named evidence exists;
+   do not promote hosted automation or maintainer activity into independent adoption.
 
 The historical [2026-08-26 NO-GO](phase-0-gate-review.md) is preserved. The
 [2026-08-27 closure review](phase-0-gate-review-2026-08-27.md) supersedes its

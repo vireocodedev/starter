@@ -8,7 +8,7 @@ JVM family are supported with security updates.
 ## Reporting a vulnerability
 
 Do not open a public issue. Use GitHub's private vulnerability-reporting flow
-for `vireocodedev/starter`, including affected versions, reproduction steps,
+for `vireocodedev/vireo`, including affected versions, reproduction steps,
 impact, and any proposed mitigation.
 
 If private reporting is unavailable, do not post vulnerability details publicly.

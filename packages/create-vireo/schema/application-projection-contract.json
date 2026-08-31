@@ -78,7 +78,7 @@
       "requireApplicationOwner": true,
       "requireApplicationRepository": true,
       "requireDistinctSupportAndSecurityRoutes": true,
-      "forbiddenInheritedHosts": ["github.com/vireocodedev/vireo", "github.com/vireocodedev/vireo-template"]
+      "forbiddenInheritedHosts": ["github.com/vireocodedev/starter", "github.com/vireocodedev/starter-template", "github.com/vireocodedev/vireo", "github.com/vireocodedev/vireo-template"]
     }
   },
   "profiles": ["full-stack", "frontend"],

@@ -49,7 +49,7 @@ and completion.
 | Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open   |
 | Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Engineering complete; external/manual gate open |
 | Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Engineering substantially complete; gate HOLD   |
-| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Engineering in progress; external gate pending  |
+| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Post-beta strategic planning; human gate pending |
 
 ## Phase 0A evidence set
 
@@ -76,8 +76,8 @@ and completion.
 
 Phase 0C approved the direction and migration contract. Since that decision,
 `vireocode.com`, both public repositories, the npm scope, and the verified Maven
-namespace have been activated. Professional clearance and the remaining repository
-rename/metadata sequence stay in Phase 1.
+namespace have been activated. The repository migration is complete; professional
+clearance remains an accepted human pre-1.0/public-beta risk.
 
 ## Phase 0D evidence set
 

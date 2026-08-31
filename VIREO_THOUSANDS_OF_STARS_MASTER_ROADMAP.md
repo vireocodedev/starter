@@ -2,7 +2,7 @@
 
 > A comprehensive, implementation-grade roadmap for turning Vireo from a sophisticated internal platform and template into a trusted, desirable, sustainable open-source framework for production React + Spring Boot PWAs.
 
-**Document status:** Living master roadmap
+**Document status:** Strategic/post-beta planning archive; not an executable public-beta checklist. Current machine closure and the human-only HOLD are authoritative in [`contracts/public-beta-engineering-readiness.json`](contracts/public-beta-engineering-readiness.json) and [`docs/roadmap/public-beta-human-handoff-2026-09-01.md`](docs/roadmap/public-beta-human-handoff-2026-09-01.md).
 
 **Baseline reviewed:** 26 August 2026 archive containing `starter/` and
 `starter-template/`
