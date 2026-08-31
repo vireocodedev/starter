@@ -17,24 +17,24 @@ and GNU-time peak-RSS method defined in
 | Complete duration | 496,601 ms | 314,005–519,511 ms |
 | Complete peak RSS | 4,270,372 KiB | 4,158,624–4,557,684 KiB |
 | Tests duration | 190,278 ms | 109,495–202,055 ms |
-| Tests peak RSS | 2,138,236 KiB | median |
-| Lint peak RSS | 948,524 KiB | one 1,715,284 KiB transient |
+| Tests peak RSS | 2,138,236 KiB | 2,101,832–2,203,480 KiB |
+| Lint peak RSS | 948,524 KiB | 918,564–1,715,284 KiB |
 
 The artifacts retain `.verification-evidence/latest.json` for 90 days, including
 host identity, cache statement, schema version, stage durations, and peak RSS. All
-five completed successfully. The apparent lint RSS spike occurred once and remains
-below its failure threshold; it is retained as a transient observation rather than a
-reason to loosen memory limits.
+five runs succeeded and used clean source checkouts; each artifact result was a
+warning (four test-duration warnings and one lint-RSS warning). The lint RSS spike
+occurred once and remains below its failure threshold, so it is retained as a
+transient observation rather than a reason to loosen memory limits.
 
 ## Decision
 
 The test-and-contract-check duration moved materially above its initial 62-second
 reference across the review window. The checked-in policy therefore adopts the
 190,278 ms median and the smallest practical warning/failure values of 220,000 ms
-and 270,000 ms. Complete-gate and RSS warning/failure thresholds are unchanged:
-the records were clean and offer no evidence for a broader relaxation. Review again
-after the next five comparable canonical-host records or before changing a relevant
-gate.
+and 270,000 ms. All other warning/failure thresholds remain unchanged: successful
+warning results do not justify a broader relaxation. Review again after the next
+five comparable canonical-host records or before changing a relevant gate.
 
 This closes G-108's machine evidence. It does not change any unfamiliar-user,
 independent-review, physical-device, assistive-technology, recovery-witness, or

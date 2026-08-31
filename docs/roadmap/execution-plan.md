@@ -166,7 +166,7 @@ The [dated Phase 5 closure review](phase-5/closure-review-2026-08-28.md) records
 completed `P5-01` through `P5-05` and `P5-08`, including activated hosted-demo
 evidence under `P5-03`, and the unchanged external `P5-06`/`P5-07` gates.
 
-## Phase 6 current engineering evidence
+## Phase 6 strategic/post-beta evidence
 
 - [`P6-02` standalone Vireo website](remaining-non-human-work.md#p6-02--primary-website-and-conversion-funnel)
 - [`P6-13` frontend-only organizational adoption](remaining-non-human-work.md#p6-13--frontend-only-organizational-adoption)
@@ -174,8 +174,9 @@ evidence under `P5-03`, and the unchanged external `P5-06`/`P5-07` gates.
 - Template adapter/mock contracts and Starter unit plus clean generated-consumer
   coverage
 
-Phase 6 is not complete. These independently useful engineering slices do not
-substitute for the remaining launch, sustainability, or external-adoption gates.
+Phase 6 is strategic/post-beta planning outside public-beta promotion. These
+independently useful slices and the superseded `remaining-non-human-work.md` record
+do not create beta blockers or substitute for the dated human-only hold.
 
 ## Measurement policy
 

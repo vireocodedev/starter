@@ -27,7 +27,7 @@ through the same npm and Maven boundaries as an independent application.
 
 ```bash
 git clone https://github.com/vireocodedev/vireo-template.git
-cd starter-template
+cd vireo-template
 cp .env.example .env
 cd frontend
 corepack npm ci

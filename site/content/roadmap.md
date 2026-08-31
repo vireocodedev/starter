@@ -14,14 +14,17 @@ Vireo is a public, production-shaped `0.x` framework. The source, packages, docu
 - Version-specific Storybook, TypeScript and Java references
 - Main multi-page documentation website
 
-## Open product work
+## Public-beta holds and post-beta work
 
-- Independent human adoption evidence
-- A broader examples and recipes ecosystem
-- More polished flagship scenarios and guided failure demonstrations
-- Wider platform validation
-- Stronger long-term compatibility and support history
-- Community governance and sustainable maintainer processes
+- The remaining public-beta holds are exclusively human/external and are tracked in
+  the dated [human handoff](https://github.com/vireocodedev/vireo/blob/main/docs/roadmap/public-beta-human-handoff-2026-09-01.md).
+- A broader examples/recipes ecosystem, flagship polish, and long-term compatibility
+  history are explicit post-beta, nonblocking work.
+- Wider platform validation, governance, and sustainable maintainer processes remain
+  human/external work with their stated evidence boundaries.
+
+See the machine-readable [engineering readiness contract](https://github.com/vireocodedev/vireo/blob/main/contracts/public-beta-engineering-readiness.json)
+for the current PASS/HOLD distinction.
 
 ## Evidence before claims
 

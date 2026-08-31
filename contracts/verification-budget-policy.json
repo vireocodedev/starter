@@ -68,7 +68,7 @@
       "baselineMs": 190278,
       "warningMs": 220000,
       "failureMs": 270000,
-      "baselineRssKiB": 7298089,
+      "baselineRssKiB": 2138236,
       "warningRssKiB": 8388608,
       "failureRssKiB": 10485760
     },
