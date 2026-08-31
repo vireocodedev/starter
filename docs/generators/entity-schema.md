@@ -4,7 +4,7 @@ Build `create-vireo`, then run its application CLI from a Vireo project root:
 
 ```bash
 corepack npm run build --workspace=create-vireo
-node /path/to/starter/packages/create-vireo/dist/vireo-cli.js \
+node /path/to/vireo/packages/create-vireo/dist/vireo-cli.js \
   generate entity .vireo/examples/purchase-order.entity.json \
   --project . \
   --dry-run
