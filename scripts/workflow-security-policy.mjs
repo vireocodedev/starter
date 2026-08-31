@@ -58,6 +58,18 @@ function parseJobPermissions(lines, job) {
   return permissions;
 }
 
+function hasMainOnlyManualDispatchGuard(lines, job) {
+  return lines
+    .slice(job.start, job.end)
+    .some(
+      line =>
+        /^ {4}if:/.test(line) &&
+        /github\.ref == 'refs\/heads\/main'/.test(line) &&
+        (/github\.event_name != 'workflow_dispatch'/.test(line) ||
+          /^ {4}if: github\.ref == 'refs\/heads\/main'\s*$/.test(line)),
+    );
+}
+
 function inspectCheckoutCredentials(fileName, lines, jobs, lineNumber) {
   const job = jobForLine(jobs, lineNumber);
   if (!job) {
@@ -109,6 +121,17 @@ for (const fileName of workflowFiles) {
   }
   if (!lines.includes("permissions: {}")) {
     problems.push(`${fileName} must deny permissions at workflow level with permissions: {}`);
+  }
+  const requiredConcurrency = policy.requiredConcurrencyWorkflows?.[fileName];
+  if (requiredConcurrency) {
+    const expected = [
+      "concurrency:",
+      `  group: ${requiredConcurrency.group}`,
+      `  cancel-in-progress: ${requiredConcurrency.cancelInProgress}`,
+    ];
+    if (!expected.every(line => lines.includes(line))) {
+      problems.push(`${fileName} must declare the required cancellable concurrency group`);
+    }
   }
   if (source.includes("ubuntu-latest")) {
     problems.push(`${fileName} may not use floating ubuntu-latest runners`);
@@ -196,14 +219,11 @@ for (const fileName of workflowFiles) {
     ) {
       problems.push(`${key} has write access in a pull-request-triggered workflow`);
     }
-    if (
-      /^ {2}workflow_dispatch:/m.test(source.slice(0, source.indexOf("jobs:"))) &&
-      writes.length > 0
-    ) {
+    if (/^ {2}workflow_dispatch:/m.test(source.slice(0, source.indexOf("jobs:"))) && writes.length > 0) {
       if (!(policy.mainOnlyManualWriteJobs ?? []).includes(key)) {
         problems.push(`${key} must be approved for main-only workflow_dispatch write access`);
       }
-      if (!lines.slice(job.start, job.end).some(line => /github\.ref == 'refs\/heads\/main'/.test(line))) {
+      if (!hasMainOnlyManualDispatchGuard(lines, job)) {
         problems.push(`${key} must restrict workflow_dispatch write access to refs/heads/main`);
       }
     }

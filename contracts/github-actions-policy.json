@@ -85,5 +85,15 @@
     "release.yml:version",
     "storybook-pages.yml:deploy"
   ],
+  "requiredConcurrencyWorkflows": {
+    "ci.yml": {
+      "group": "ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}",
+      "cancelInProgress": true
+    },
+    "website.yml": {
+      "group": "website-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}",
+      "cancelInProgress": true
+    }
+  },
   "checkoutCredentialJobs": []
 }

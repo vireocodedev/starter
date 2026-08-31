@@ -8,6 +8,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: website-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   changes:
     name: Detect standalone website changes
@@ -41,7 +45,7 @@ jobs:
           fi
 
           changed_paths="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
-          if printf '%s\n' "$changed_paths" | grep --extended-regexp --quiet '^(\.github/workflows/website\.yml|package-lock\.json|package\.json|site/)'; then
+          if printf '%s\n' "$changed_paths" | grep --extended-regexp --quiet '^(\.github/workflows/website\.yml|contracts/documentation-release-policy\.json|jvm/[^/]+/api-surface\.txt|package-lock\.json|package\.json|packages/[^/]+/(api-surface\.json|package\.json)|scripts/lib/reference-symbol-anchors\.mjs|site/)'; then
             echo "should-build=true" >> "$GITHUB_OUTPUT"
           else
             echo "should-build=false" >> "$GITHUB_OUTPUT"
