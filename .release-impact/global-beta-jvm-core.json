@@ -1,1 +1,6 @@
-{"schemaVersion":1,"artifact":"jvm:vireo-core","decision":"no-release","justification":"Only SCM/POM metadata coordinates changed; immutable 0.3.0 POM URLs redirect and runtime/API bytes are unchanged."}
+{
+  "schemaVersion": 1,
+  "artifact": "jvm:vireo-core",
+  "decision": "no-release",
+  "justification": "Only SCM/POM metadata coordinates changed; immutable 0.3.0 POM URLs redirect and runtime/API bytes are unchanged."
+}

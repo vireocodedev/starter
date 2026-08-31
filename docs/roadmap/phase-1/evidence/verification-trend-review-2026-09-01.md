@@ -8,17 +8,17 @@ hosted tool caches may have been restored. Each artifact uses the schema-2 durat
 and GNU-time peak-RSS method defined in
 [`contracts/verification-budget-policy.json`](../../../../contracts/verification-budget-policy.json).
 
-| Reviewed run artifacts |
-| --- |
+| Reviewed run artifacts                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [33440023686](https://github.com/vireocodedev/vireo/actions/runs/33440023686), [33440878972](https://github.com/vireocodedev/vireo/actions/runs/33440878972), [33442126458](https://github.com/vireocodedev/vireo/actions/runs/33442126458), [33442975048](https://github.com/vireocodedev/vireo/actions/runs/33442975048), and [33447355845](https://github.com/vireocodedev/vireo/actions/runs/33447355845) |
 
-| Reviewed metric | Median | Range / observation |
-| --- | ---: | --- |
-| Complete duration | 496,601 ms | 314,005–519,511 ms |
+| Reviewed metric   |        Median | Range / observation     |
+| ----------------- | ------------: | ----------------------- |
+| Complete duration |    496,601 ms | 314,005–519,511 ms      |
 | Complete peak RSS | 4,270,372 KiB | 4,158,624–4,557,684 KiB |
-| Tests duration | 190,278 ms | 109,495–202,055 ms |
-| Tests peak RSS | 2,138,236 KiB | 2,101,832–2,203,480 KiB |
-| Lint peak RSS | 948,524 KiB | 918,564–1,715,284 KiB |
+| Tests duration    |    190,278 ms | 109,495–202,055 ms      |
+| Tests peak RSS    | 2,138,236 KiB | 2,101,832–2,203,480 KiB |
+| Lint peak RSS     |   948,524 KiB | 918,564–1,715,284 KiB   |
 
 The artifacts retain `.verification-evidence/latest.json` for 90 days, including
 host identity, cache statement, schema version, stage durations, and peak RSS. All

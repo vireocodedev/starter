@@ -1,1 +1,6 @@
-{"schemaVersion":1,"artifact":"npm:create-vireo","decision":"no-release","justification":"Public 0.7.0 remains usable through redirects and runtime/API semantics are unchanged; canonical packaged README and metadata ship in the next normal release after human npm trusted-publisher migration."}
+{
+  "schemaVersion": 1,
+  "artifact": "npm:create-vireo",
+  "decision": "no-release",
+  "justification": "Public 0.7.0 remains usable through redirects and runtime/API semantics are unchanged; canonical packaged README and metadata ship in the next normal release after human npm trusted-publisher migration."
+}

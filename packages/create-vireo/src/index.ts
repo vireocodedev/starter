@@ -1094,7 +1094,12 @@ function isUnresolvedIdentity(value: string) {
 }
 
 function assertNoInheritedVireoRoutes(identity: ApplicationIdentity) {
-  const forbidden = ["github.com/vireocodedev/starter", "github.com/vireocodedev/starter-template", "github.com/vireocodedev/vireo", "github.com/vireocodedev/vireo-template"];
+  const forbidden = [
+    "github.com/vireocodedev/starter",
+    "github.com/vireocodedev/starter-template",
+    "github.com/vireocodedev/vireo",
+    "github.com/vireocodedev/vireo-template",
+  ];
   for (const [field, value] of Object.entries({
     repositoryUrl: identity.repositoryUrl,
     supportUrl: identity.supportUrl,

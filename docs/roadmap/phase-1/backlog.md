@@ -33,24 +33,24 @@ range, not an elapsed-date commitment.
 
 ## Backlog
 
-| ID    | Outcome                                                                                 | Current state | Remaining estimate    | Confidence |
-| ----- | --------------------------------------------------------------------------------------- | ------------- | --------------------- | ---------- |
-| P1-00 | Freeze the passed Phase 0 scope and Phase 1 acceptance set                              | Complete      | 0 d                   | High       |
-| P1-01 | Activate and professionally clear the identity across canonical public surfaces         | Partial       | 1–3 d + external wait | Low        |
-| P1-02 | Productionize the accepted npm/Maven distribution and provenance architecture           | Complete      | 0 d                   | High       |
-| P1-03 | Finish repository migration and publish compatibility sequencing                        | Complete      | 0 d                   | High       |
-| P1-04 | Publish credential-free npm artifacts through the selected trusted path                 | Complete      | 0 d                   | High       |
-| P1-05 | Publish credential-free Maven artifacts/BOM through the selected trusted path           | Complete      | 0 d                   | High       |
-| P1-06 | Correct repository metadata, topics, links, and public settings                         | Complete      | 0 d                   | High       |
-| P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Complete      | 0 d                   | High       |
-| P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Complete      | 0 d                   | High       |
-| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Complete (machine) | 0 d; human continuity open | High     |
-| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Complete      | 0 d                   | High       |
-| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Complete      | 0 d                   | High       |
-| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Complete      | 0 d                   | High       |
-| P1-13 | Classify and document the supported Starter UI public surface                           | Complete      | 0 d                   | High       |
-| P1-14 | Establish verification duration/resource baselines and regression policy                | Complete      | 0 d                   | High       |
-| P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial       | 3–6 d                 | Low        |
+| ID    | Outcome                                                                                 | Current state      | Remaining estimate         | Confidence |
+| ----- | --------------------------------------------------------------------------------------- | ------------------ | -------------------------- | ---------- |
+| P1-00 | Freeze the passed Phase 0 scope and Phase 1 acceptance set                              | Complete           | 0 d                        | High       |
+| P1-01 | Activate and professionally clear the identity across canonical public surfaces         | Partial            | 1–3 d + external wait      | Low        |
+| P1-02 | Productionize the accepted npm/Maven distribution and provenance architecture           | Complete           | 0 d                        | High       |
+| P1-03 | Finish repository migration and publish compatibility sequencing                        | Complete           | 0 d                        | High       |
+| P1-04 | Publish credential-free npm artifacts through the selected trusted path                 | Complete           | 0 d                        | High       |
+| P1-05 | Publish credential-free Maven artifacts/BOM through the selected trusted path           | Complete           | 0 d                        | High       |
+| P1-06 | Correct repository metadata, topics, links, and public settings                         | Complete           | 0 d                        | High       |
+| P1-07 | Publish governance, support, ownership, issue intake, and response boundaries           | Complete           | 0 d                        | High       |
+| P1-08 | Publish artifact compatibility, semver, deprecation, release-line, and migration policy | Complete           | 0 d                        | High       |
+| P1-09 | Complete scanning, SBOM/provenance policy, and release-recovery evidence                | Complete (machine) | 0 d; human continuity open | High       |
+| P1-10 | Extend executable checks for version, link, setup, and deployment claims                | Complete           | 0 d                        | High       |
+| P1-11 | Publish the minimal docs/README evaluation funnel and API entry points                  | Complete           | 0 d                        | High       |
+| P1-12 | Encode the admitted platform matrix and required clean-room consumer lanes              | Complete           | 0 d                        | High       |
+| P1-13 | Classify and document the supported Starter UI public surface                           | Complete           | 0 d                        | High       |
+| P1-14 | Establish verification duration/resource baselines and regression policy                | Complete           | 0 d                        | High       |
+| P1-15 | Complete the credential-free public-alpha consumer and unfamiliar-user gate             | Partial            | 3–6 d                      | Low        |
 
 ## Implementation status — 2026-08-27
 
