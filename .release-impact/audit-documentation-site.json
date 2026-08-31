@@ -3,5 +3,5 @@
   "artifact": "application:documentation-site",
   "decision": "release",
   "bump": "deploy",
-  "summary": "Deploy current PWA identity, platform evidence, and offline-boundary documentation."
+  "summary": "Deploy release-pinned offline documentation, retained version snapshots, offline site caching, and accessible navigation."
 }
