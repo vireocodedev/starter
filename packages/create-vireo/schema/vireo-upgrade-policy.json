@@ -113,7 +113,7 @@
       {
         "release": "0.8.1",
         "status": "candidate",
-        "templateCommit": "TEMPLATE_COMMIT_PENDING_RELEASE",
+        "templateCommit": "50ca39292810fd57049e3cc73b68e71f9b5c746c",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.1 vireo",
         "starterJvmVersion": "0.3.1",
         "frontendDependencies": {
