@@ -76,6 +76,7 @@
     "release:smoke": "node scripts/release-pack-smoke.mjs",
     "release:validate": "node scripts/validate-npm-release.mjs",
     "release:publish-candidates": "node scripts/publish-verified-npm-candidates.mjs .release-evidence",
+    "release:report-publication": "node scripts/report-npm-publication-result.mjs .release-evidence/npm-publication-result.json",
     "release:verify-public": "node scripts/verify-npm-public-release.mjs",
     "release:evidence": "node scripts/generate-release-evidence.mjs .release-evidence",
     "license:check": "node scripts/third-party-license-policy.mjs",

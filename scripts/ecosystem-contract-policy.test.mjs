@@ -63,6 +63,17 @@ test("rejects an artifact version that drifts from its package manifest", () => 
   assert.ok(result.problems.some(problem => problem.includes("current npm artifacts")));
 });
 
+test("rejects a release provenance identity that could drift across a repository rename", () => {
+  const contract = JSON.parse(readFileSync(contractPath, "utf8"));
+  contract.npmPublicationProvenance.repositoryId = "not-stable";
+  contract.npmPublicationProvenance.workflowRef = "refs/heads/release";
+
+  const result = validateEcosystemContract(contract);
+
+  assert.ok(result.problems.some(problem => problem.includes("npm provenance repository id")));
+  assert.ok(result.problems.some(problem => problem.includes("npm provenance workflow ref")));
+});
+
 test("rejects template release coordinates that drift from create-vireo", () => {
   const contract = JSON.parse(readFileSync(contractPath, "utf8"));
   contract.current.template.version = "9.9.9";

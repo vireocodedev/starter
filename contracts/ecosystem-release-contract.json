@@ -49,6 +49,14 @@
       "releaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.0"
     }
   },
+  "npmPublicationProvenance": {
+    "auditCli": "12.0.2",
+    "repositoryId": "1304974749",
+    "canonicalRepository": "vireocodedev/vireo",
+    "repositoryAliases": ["vireocodedev/starter"],
+    "workflowPath": ".github/workflows/release-npm.yml",
+    "workflowRef": "refs/heads/main"
+  },
   "compatibility": {
     "versioning": "independent-artifact-semver",
     "defaultSet": "current-alpha",

@@ -103,14 +103,16 @@ merge.
 
 The publish job downloads the retained evidence from the verify job, requires its
 source commit and all eight tarball SHA-256 digests to match, then preflights every
-registry coordinate and annotated coordinate tag before making either mutation. It
-classifies each registry version as absent, an exact match for the reviewed tarball,
-or historical bytes. Historical bytes are recoverable only when their existing
-annotated coordinate tag supplies their provenance; that tag is never created,
-moved, or replaced. The publisher passes only absent reviewed tarballs to `npm
-publish`, strictly confirms their exact SRI integrity afterwards, and can recreate
-a missing current tag for an exact published retry. It does not rebuild package
-bytes. The production workflow is OIDC-only: it does not read
+registry coordinate, cryptographically audits every already-public package in an
+isolated token-free consumer with `npm@12.0.2 audit signatures --json
+--include-attestations`, and checks its annotated coordinate tag before making
+either mutation. Every registry `200` is historical until its audited SLSA bundle
+binds the exact PURL and registry SRI to the stable repository identity, approved
+repository alias, workflow/ref, and resolved source commit. A historical tag must
+match that provenance commit; a missing one is created only at that commit and is
+never moved. The publisher passes only absent reviewed tarballs to `npm publish`
+and strictly confirms their exact SRI integrity afterwards. It does not rebuild
+package bytes. The production workflow is OIDC-only: it does not read
 `NPM_TOKEN` or `NODE_AUTH_TOKEN`. npm obtains a short-lived identity from GitHub
 Actions and records provenance for each publication.
 
@@ -144,10 +146,10 @@ publisher received a success response.
 - If verification times out while npm is propagating a valid release, rerun
   **Verify public npm release**. Do not republish the same version.
 - If only some workspaces publish, inspect npm first. A reviewed retry preflights
-  all eight coordinates before mutation, skips only exact reviewed bytes, and may
-  publish only the absent tarballs from the unchanged retained candidate. A
-  different but valid historical SRI requires its existing annotated coordinate
-  tag and is preserved without moving or recreating that tag.
+  all eight coordinates before mutation and may publish only absent tarballs from
+  the unchanged retained candidate. Already-public versions are recovered only
+  after their audited provenance establishes the tag's source commit; an absent
+  historical tag may be recreated at that verified commit, never moved.
 - If a published artifact is defective, deprecate it with an actionable message,
   prepare corrected patch versions, and run the normal release path. Never move
   a tag or attempt to overwrite a published version.

@@ -1,11 +1,15 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const registry = "https://registry.npmjs.org";
+const provenanceContract = JSON.parse(
+  readFileSync(join(repositoryRoot, "contracts/ecosystem-release-contract.json"), "utf8"),
+).npmPublicationProvenance;
 
 function positiveInteger(value, fallback, variableName) {
   if (value == null || value === "") return fallback;
@@ -152,7 +156,12 @@ export async function inspectRegistryCandidate(candidate, fetchRegistry) {
     throw new Error(`npm registry metadata has invalid sha512 SRI integrity for ${candidate.coordinate}`);
   }
   return {
-    state: metadata.dist.integrity === candidate.integrity ? "exact" : "historical",
+    // A 200 response proves only that an immutable registry version exists. Its
+    // bytes may happen to equal this retained candidate, but only its audited
+    // provenance establishes the source commit and tag binding.
+    state: "historical",
+    integrityMatchesCandidate: metadata.dist.integrity === candidate.integrity,
+    integrity: metadata.dist.integrity,
     metadata,
   };
 }
@@ -160,7 +169,7 @@ export async function inspectRegistryCandidate(candidate, fetchRegistry) {
 async function confirmPublishedCandidate(candidate, { fetchRegistry, sleep, retryAttempts, retryDelay }) {
   for (let attempt = 1; attempt <= retryAttempts; attempt += 1) {
     const registryState = await inspectRegistryCandidate(candidate, fetchRegistry);
-    if (registryState.state === "exact") return;
+    if (registryState.state === "historical" && registryState.integrity === candidate.integrity) return;
     if (registryState.state === "historical") {
       throw new Error(`npm registry integrity does not match reviewed candidate bytes for ${candidate.coordinate}`);
     }
@@ -168,6 +177,169 @@ async function confirmPublishedCandidate(candidate, { fetchRegistry, sleep, retr
     await sleep(retryDelay);
   }
   throw new Error(`npm registry did not confirm ${candidate.coordinate} after ${retryAttempts} attempts`);
+}
+
+function anonymousNpmEnvironment(auditRoot) {
+  const environment = Object.fromEntries(
+    Object.entries(process.env).filter(
+      ([key]) =>
+        !/(?:^|_)(?:node_auth_token|npm_token|github_token)$/iu.test(key) &&
+        !(key.toLowerCase().startsWith("npm_config_") && /auth|token|userconfig/iu.test(key)),
+    ),
+  );
+  return {
+    ...environment,
+    CI: "true",
+    npm_config_always_auth: "false",
+    npm_config_cache: join(auditRoot, "npm-cache"),
+    npm_config_registry: registry,
+    npm_config_userconfig: join(auditRoot, "anonymous.npmrc"),
+  };
+}
+
+function sha512HexFromSRI(integrity) {
+  if (!isSha512Integrity(integrity)) throw new Error(`Invalid sha512 SRI integrity ${JSON.stringify(integrity)}.`);
+  return Buffer.from(integrity.slice("sha512-".length), "base64").toString("hex");
+}
+
+export function npmPurl(candidate) {
+  assertCandidateCoordinate(candidate);
+  return `pkg:npm/${encodeURIComponent(candidate.name)}@${candidate.version}`;
+}
+
+function decodeStatement(bundle, coordinate) {
+  const payload = bundle?.dsseEnvelope?.payload;
+  if (typeof payload !== "string") throw new Error(`Audited provenance bundle lacks a DSSE payload for ${coordinate}.`);
+  try {
+    return JSON.parse(Buffer.from(payload, "base64").toString("utf8"));
+  } catch (error) {
+    throw new Error(`Audited provenance bundle has invalid DSSE JSON for ${coordinate}.`, { cause: error });
+  }
+}
+
+function valuesForKey(value, matcher, values = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) valuesForKey(item, matcher, values);
+  } else if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(value)) {
+      if (matcher(key)) values.push(item);
+      valuesForKey(item, matcher, values);
+    }
+  }
+  return values;
+}
+
+function provenanceMaterials(statement) {
+  return statement?.predicate?.buildDefinition?.resolvedDependencies ?? statement?.predicate?.materials ?? [];
+}
+
+function materialCommit(material) {
+  const digest = material?.digest ?? {};
+  for (const key of ["gitCommit", "sha1", "sha256"]) {
+    if (/^[a-f0-9]{40}$/u.test(digest[key] ?? "")) return digest[key];
+  }
+  const match = /@([a-f0-9]{40})(?:$|[?#])/u.exec(material?.uri ?? "");
+  return match?.[1] ?? null;
+}
+
+function materialRepository(material) {
+  const uri = material?.uri ?? "";
+  const match = /github\.com[/:]([^/]+\/[^/@]+)(?:\.git)?(?:@|$|\/)/u.exec(uri);
+  return match?.[1]?.replace(/\.git$/u, "") ?? null;
+}
+
+function statementMatchesProvenance(statement, candidate, registryIntegrity, policy) {
+  const expectedPurl = npmPurl(candidate);
+  const expectedDigest = sha512HexFromSRI(registryIntegrity);
+  const subjectMatches = statement?.subject?.some(
+    subject => subject?.name === expectedPurl && subject?.digest?.sha512 === expectedDigest,
+  );
+  if (!subjectMatches) return false;
+
+  const repositoryIds = valuesForKey(statement?.predicate, key => /^(?:repository_id|repositoryId)$/u.test(key));
+  if (!repositoryIds.some(value => String(value) === policy.repositoryId)) return false;
+
+  const allowedRepositories = new Set([policy.canonicalRepository, ...(policy.repositoryAliases ?? [])]);
+  const materials = provenanceMaterials(statement);
+  const matchingMaterial = materials.find(material => allowedRepositories.has(materialRepository(material)));
+  if (!matchingMaterial || !/^[a-f0-9]{40}$/u.test(materialCommit(matchingMaterial) ?? "")) return false;
+
+  const workflowReferences = valuesForKey(statement?.predicate, key => /workflow(?:_ref|Ref)?$/iu.test(key));
+  return workflowReferences.some(
+    value => typeof value === "string" && value.includes(`${policy.workflowPath}@${policy.workflowRef}`),
+  );
+}
+
+export function validateAuditedProvenance(candidates, audit, policy = provenanceContract) {
+  if (!Array.isArray(audit?.verified))
+    throw new Error("npm signature audit did not expose verified Sigstore attestations.");
+  const provenances = new Map();
+  for (const candidate of candidates) {
+    const verified = audit.verified.find(
+      entry => entry?.name === candidate.name && entry?.version === candidate.version,
+    );
+    const bundles = verified?.attestations?.bundles;
+    if (!Array.isArray(bundles) || bundles.length === 0) {
+      throw new Error(`npm signature audit did not expose an attestation bundle for ${candidate.coordinate}.`);
+    }
+    const matchingBundle = bundles.find(({ bundle }) => {
+      if (!bundle) return false;
+      return statementMatchesProvenance(
+        decodeStatement(bundle, candidate.coordinate),
+        candidate,
+        candidate.registryIntegrity,
+        policy,
+      );
+    });
+    if (!matchingBundle) {
+      throw new Error(
+        `No audited SLSA provenance matches ${candidate.coordinate}, its registry SRI, and the release identity.`,
+      );
+    }
+    const statement = decodeStatement(matchingBundle.bundle, candidate.coordinate);
+    const material = provenanceMaterials(statement).find(
+      material =>
+        new Set([policy.canonicalRepository, ...(policy.repositoryAliases ?? [])]).has(materialRepository(material)) &&
+        /^[a-f0-9]{40}$/u.test(materialCommit(material) ?? ""),
+    );
+    provenances.set(candidate.coordinate, {
+      commit: materialCommit(material),
+      bundles,
+      purl: npmPurl(candidate),
+      registryIntegrity: candidate.registryIntegrity,
+    });
+  }
+  return provenances;
+}
+
+export function auditHistoricalCandidates(candidates, options = {}) {
+  if (candidates.length === 0) return new Map();
+  const run = options.run ?? execFileSync;
+  const auditRoot = mkdtempSync(join(tmpdir(), "vireo-release-provenance-"));
+  const consumerRoot = join(auditRoot, "consumer");
+  try {
+    mkdirSync(consumerRoot, { recursive: true });
+    writeFileSync(join(auditRoot, "anonymous.npmrc"), `registry=${registry}/\nalways-auth=false\n`);
+    writeFileSync(
+      join(consumerRoot, "package.json"),
+      `${JSON.stringify({ name: "vireo-release-provenance-audit", private: true, dependencies: Object.fromEntries(candidates.map(c => [c.name, c.version])) })}\n`,
+    );
+    const command = ["npm@12.0.2"];
+    run("corepack", [...command, "install", "--ignore-scripts", "--no-audit", "--no-fund", "--strict-peer-deps"], {
+      cwd: consumerRoot,
+      env: anonymousNpmEnvironment(auditRoot),
+      stdio: "inherit",
+    });
+    const output = run("corepack", [...command, "audit", "signatures", "--json", "--include-attestations"], {
+      cwd: consumerRoot,
+      env: anonymousNpmEnvironment(auditRoot),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "inherit"],
+    });
+    return validateAuditedProvenance(candidates, JSON.parse(output), options.policy);
+  } finally {
+    rmSync(auditRoot, { recursive: true, force: true });
+  }
 }
 
 function runGit(args) {
@@ -217,7 +389,7 @@ async function preflightCandidateTags(candidates, expectedCommit, options) {
 
   for (const candidate of candidates) {
     const registryState = registryStates.get(candidate.coordinate);
-    if (!registryState || !["absent", "exact", "historical"].includes(registryState.state)) {
+    if (!registryState || !["absent", "historical"].includes(registryState.state)) {
       throw new Error(`Release candidate ${candidate.coordinate} is missing a valid registry preflight state.`);
     }
     const target = await resolveTag(candidate.coordinate);
@@ -226,11 +398,14 @@ async function preflightCandidateTags(candidates, expectedCommit, options) {
     }
 
     if (registryState.state === "historical") {
-      if (target === null) {
+      const provenance = registryState.provenance;
+      if (!/^[a-f0-9]{40}$/u.test(provenance?.commit ?? ""))
+        throw new Error(`Historical npm registry candidate ${candidate.coordinate} lacks audited provenance commit.`);
+      if (target === null) missingTags.add(candidate.coordinate);
+      else if (target !== provenance.commit)
         throw new Error(
-          `Historical npm registry candidate ${candidate.coordinate} requires its existing annotated coordinate tag.`,
+          `Release tag ${candidate.coordinate} resolves to ${target}, not audited provenance commit ${provenance.commit}`,
         );
-      }
       continue;
     }
 
@@ -252,12 +427,13 @@ export async function reconcileCandidateTags(candidates, expectedCommit, options
     options.missingTags ??
     (await preflightCandidateTags(candidates, expectedCommit, {
       ...options,
-      registryStates: new Map(candidates.map(candidate => [candidate.coordinate, { state: "exact" }])),
+      registryStates: new Map(candidates.map(candidate => [candidate.coordinate, { state: "absent" }])),
     }));
 
   for (const candidate of candidates) {
     if (!missingTags.has(candidate.coordinate)) continue;
-    await createTag(candidate.coordinate, candidate.coordinate, expectedCommit);
+    const target = options.tagTargets?.get(candidate.coordinate) ?? expectedCommit;
+    await createTag(candidate.coordinate, candidate.coordinate, target);
     log(`New tag: ${candidate.coordinate}`);
   }
   return candidates.filter(candidate => missingTags.has(candidate.coordinate)).map(candidate => candidate.coordinate);
@@ -297,6 +473,18 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
     if (registryState.state === "absent") unpublished.push(candidate);
   }
 
+  const historicalCandidates = candidates
+    .filter(candidate => registryStates.get(candidate.coordinate).state === "historical")
+    .map(candidate => ({ ...candidate, registryIntegrity: registryStates.get(candidate.coordinate).integrity }));
+  const audit = options.auditHistoricalCandidates ?? auditHistoricalCandidates;
+  const provenances = await audit(historicalCandidates, {
+    expectedCommit,
+    policy: options.provenancePolicy ?? provenanceContract,
+  });
+  for (const candidate of historicalCandidates) {
+    registryStates.get(candidate.coordinate).provenance = provenances.get(candidate.coordinate);
+  }
+
   // All registry coordinates and all tag bindings must be understood before
   // either immutable system is mutated. A historical registry version is only
   // safe when its existing annotated coordinate tag supplies its provenance.
@@ -311,7 +499,28 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
     published.push(candidate.coordinate);
   }
 
-  await reconcileCandidateTags(candidates, expectedCommit, { ...options, missingTags });
+  const tagTargets = new Map(
+    candidates.map(candidate => [
+      candidate.coordinate,
+      registryStates.get(candidate.coordinate).state === "historical"
+        ? registryStates.get(candidate.coordinate).provenance.commit
+        : expectedCommit,
+    ]),
+  );
+  const createdTags = await reconcileCandidateTags(candidates, expectedCommit, { ...options, missingTags, tagTargets });
+  if (options.writeResult) {
+    options.writeResult({
+      schemaVersion: 1,
+      source: { commit: expectedCommit },
+      published,
+      recoveredTags: createdTags.filter(coordinate => registryStates.get(coordinate).state === "historical"),
+      publishedTags: createdTags.filter(coordinate => registryStates.get(coordinate).state === "absent"),
+      auditedHistorical: historicalCandidates.map(candidate => ({
+        coordinate: candidate.coordinate,
+        ...provenances.get(candidate.coordinate),
+      })),
+    });
+  }
   return published;
 }
 
@@ -324,7 +533,12 @@ async function main() {
     throw new Error("Usage: node scripts/publish-verified-npm-candidates.mjs <release-evidence-directory>");
   }
   const candidates = verifyNpmCandidates(resolve(repositoryRoot, argument), process.env.GITHUB_SHA);
-  await publishVerifiedCandidates(candidates, { expectedCommit: process.env.GITHUB_SHA });
+  const evidenceRoot = resolve(repositoryRoot, argument);
+  await publishVerifiedCandidates(candidates, {
+    expectedCommit: process.env.GITHUB_SHA,
+    writeResult: result =>
+      writeFileSync(join(evidenceRoot, "npm-publication-result.json"), `${JSON.stringify(result, null, 2)}\n`),
+  });
 }
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) await main();
