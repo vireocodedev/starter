@@ -1,8 +1,13 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { format, resolveConfig } from "prettier";
+import { createCurrentSnapshotArchive, serializeSnapshotArchive } from "../site/build.mjs";
 
-export async function synchronizeDocumentationRelease(repositoryRoot) {
+export async function synchronizeDocumentationRelease(
+  repositoryRoot,
+  { createSnapshotArchive = createCurrentSnapshotArchive, serializeSnapshot = serializeSnapshotArchive } = {},
+) {
   const contractsDirectory = join(repositoryRoot, "contracts");
   const ecosystemPath = join(contractsDirectory, "ecosystem-release-contract.json");
   const documentationPath = join(contractsDirectory, "documentation-release-policy.json");
@@ -221,6 +226,59 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     }),
   );
   for (const [path, content] of formatted) writeFileSync(path, content);
+
+  writeCurrentDocumentationSnapshot({ repositoryRoot, currentDocumentation, createSnapshotArchive, serializeSnapshot });
+  writeDocumentationSiteReleaseImpact({ repositoryRoot, currentDocumentation });
+}
+
+function writeCurrentDocumentationSnapshot({
+  repositoryRoot,
+  currentDocumentation,
+  createSnapshotArchive,
+  serializeSnapshot,
+}) {
+  const archive = createSnapshotArchive({ root: repositoryRoot });
+  if (archive.documentationVersion !== currentDocumentation.documentationVersion) {
+    throw new Error("Current documentation snapshot version does not match the synchronized documentation release");
+  }
+  const serialized = serializeSnapshot(archive);
+  const snapshotPath = join(
+    repositoryRoot,
+    "site",
+    "content",
+    "snapshots",
+    `${currentDocumentation.documentationVersion}.json`,
+  );
+  writeFileSync(snapshotPath, `${JSON.stringify(serialized, null, 2)}\n`);
+}
+
+function writeDocumentationSiteReleaseImpact({ repositoryRoot, currentDocumentation }) {
+  const coordinateDigest = createHash("sha256").update(stableJson(currentDocumentation)).digest("hex");
+  const releaseId = currentDocumentation.id;
+  const record = {
+    schemaVersion: 1,
+    artifact: "application:documentation-site",
+    decision: "release",
+    bump: "deploy",
+    summary: `Deploy the synchronized Vireo documentation snapshot for ${releaseId}.`,
+  };
+  const directory = join(repositoryRoot, ".release-impact");
+  mkdirSync(directory, { recursive: true });
+  writeFileSync(
+    join(directory, `documentation-site-${releaseId}-${coordinateDigest}.json`),
+    `${JSON.stringify(record, null, 2)}\n`,
+  );
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(entry => stableJson(entry)).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map(key => `${JSON.stringify(key)}:${stableJson(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
 }
 
 function finalizeCandidateUpgrade({ upgradePolicy, projectUpgrade, createVireoVersion, templateCommit }) {

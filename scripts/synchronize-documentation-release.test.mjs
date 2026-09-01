@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -8,7 +8,7 @@ import { synchronizeDocumentationRelease } from "./synchronize-documentation-rel
 test("synchronizes release contracts and public version documentation from source", async () => {
   const root = makeFixture();
   try {
-    await synchronizeDocumentationRelease(root);
+    await synchronizeFixtureDocumentationRelease(root);
 
     const releaseId = "npm-0.3.0_jvm-0.4.0";
     const ecosystem = readJson(join(root, "contracts", "ecosystem-release-contract.json"));
@@ -179,6 +179,34 @@ test("synchronizes release contracts and public version documentation from sourc
     assert.ok(historicalSiteSource.includes("a".repeat(40)));
     assert.match(historicalSiteSource, /pinned 0\.2\.0 Template/u);
     assert.ok(readFileSync(join(root, "site/dist/current.md"), "utf8").includes("a".repeat(40)));
+
+    const snapshotPath = join(root, "site", "content", "snapshots", "0.2.json");
+    const snapshot = readJson(snapshotPath);
+    assert.equal(snapshot.documentationVersion, "0.2");
+    assert.equal(snapshot.payload.releaseId, releaseId);
+    assert.match(snapshot.payload.currentOfflineGuide, /b{40}/u);
+
+    const impactRecords = documentationSiteImpactRecords(root);
+    assert.equal(impactRecords.length, 1);
+    assert.match(impactRecords[0], /^documentation-site-npm-0\.3\.0_jvm-0\.4\.0-[a-f0-9]{64}\.json$/u);
+    assert.deepEqual(readJson(join(root, ".release-impact", impactRecords[0])), {
+      schemaVersion: 1,
+      artifact: "application:documentation-site",
+      decision: "release",
+      bump: "deploy",
+      summary: "Deploy the synchronized Vireo documentation snapshot for npm-0.3.0_jvm-0.4.0.",
+    });
+
+    const firstSnapshot = readFileSync(snapshotPath, "utf8");
+    const firstImpact = readFileSync(join(root, ".release-impact", impactRecords[0]), "utf8");
+    await synchronizeFixtureDocumentationRelease(root);
+    assert.equal(readFileSync(snapshotPath, "utf8"), firstSnapshot, "reruns keep the current snapshot byte-stable");
+    assert.equal(
+      readFileSync(join(root, ".release-impact", impactRecords[0]), "utf8"),
+      firstImpact,
+      "reruns keep the generated deploy decision byte-stable",
+    );
+    assert.deepEqual(documentationSiteImpactRecords(root), impactRecords, "reruns do not add duplicate deploy records");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -193,7 +221,7 @@ test("fails closed when an allowlisted current site reference changes form", asy
       readFileSync(offlinePath, "utf8").replace("pinned 0.2.0 Template", "pinned Template 0.2.0"),
     );
     await assert.rejects(
-      synchronizeDocumentationRelease(root),
+      synchronizeFixtureDocumentationRelease(root),
       /site\/content\/offline\.md current Template version must contain exactly 1 current-state reference/u,
     );
   } finally {
@@ -210,7 +238,7 @@ test("fails closed when release artifacts drift from public workspaces", async (
     writeJson(ecosystemPath, ecosystem);
 
     await assert.rejects(
-      synchronizeDocumentationRelease(root),
+      synchronizeFixtureDocumentationRelease(root),
       /Ecosystem release npm artifacts do not match the public workspaces/u,
     );
   } finally {
@@ -227,8 +255,32 @@ test("fails closed when a public workspace is missing from the root package lock
     writeJson(packageLockPath, packageLock);
 
     await assert.rejects(
-      synchronizeDocumentationRelease(root),
+      synchronizeFixtureDocumentationRelease(root),
       /Root package-lock\.json is missing public workspace entry packages\/create-vireo/u,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("documentation-site deploy intent digests every public package coordinate", async () => {
+  const root = makeFixture();
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    const [firstRecord] = documentationSiteImpactRecords(root);
+
+    const sqliteManifestPath = join(root, "packages", "sqlite", "package.json");
+    const sqliteManifest = readJson(sqliteManifestPath);
+    sqliteManifest.version = "0.2.3";
+    writeJson(sqliteManifestPath, sqliteManifest);
+    await synchronizeFixtureDocumentationRelease(root);
+
+    const records = documentationSiteImpactRecords(root);
+    assert.equal(records.length, 2);
+    assert.ok(records.includes(firstRecord));
+    assert.notEqual(
+      records.find(record => record !== firstRecord),
+      firstRecord,
     );
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -248,6 +300,7 @@ function makeFixture() {
   mkdirSync(join(root, "site", "content"), { recursive: true });
   mkdirSync(join(root, "site", "content", "snapshots"), { recursive: true });
   mkdirSync(join(root, "site", "dist"), { recursive: true });
+  mkdirSync(join(root, ".release-impact"));
   writeJson(join(root, "packages", "create-vireo", "package.json"), {
     name: "create-vireo",
     version: "0.3.0",
@@ -439,4 +492,27 @@ function readJson(path) {
 
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+async function synchronizeFixtureDocumentationRelease(root) {
+  return synchronizeDocumentationRelease(root, {
+    createSnapshotArchive: ({ root: snapshotRoot }) => {
+      const documentation = readJson(join(snapshotRoot, "contracts", "documentation-release-policy.json"));
+      const release = documentation.releases.find(candidate => candidate.id === documentation.currentRelease);
+      return {
+        documentationVersion: release.documentationVersion,
+        payload: {
+          releaseId: release.id,
+          currentOfflineGuide: readFileSync(join(snapshotRoot, "site", "content", "offline.md"), "utf8"),
+        },
+      };
+    },
+    serializeSnapshot: archive => archive,
+  });
+}
+
+function documentationSiteImpactRecords(root) {
+  return readdirSync(join(root, ".release-impact"))
+    .filter(name => name.startsWith("documentation-site-") && name.endsWith(".json"))
+    .sort();
 }
