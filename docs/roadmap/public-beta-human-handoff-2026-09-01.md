@@ -36,13 +36,15 @@ framework repository. Install the Node/Corepack versions listed in the canonical
 [getting-started guide](https://vireocode.com/docs/getting-started/) first:
 
 ```sh
-npm create vireo@0.7.0 my-frontend-app -- --profile frontend
+npm create vireo@0.7.0 my-frontend-app -- --profile frontend --yes
 cd my-frontend-app
 corepack npm run setup
 corepack npm run doctor
 corepack npm run generate:check
 corepack npm run verify
 ```
+
+`--yes` accepts the generated defaults, so this handoff remains noninteractive and repeatable.
 
 The generated project is application-owned. Start with the
 [frontend-only adoption guide](../architecture/frontend-only-profile.md), make a
