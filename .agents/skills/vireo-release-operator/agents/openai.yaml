@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vireo Release Operator"
+  short_description: "Prepare coordinated Vireo framework releases"
+  default_prompt: "Use $vireo-release-operator to prepare a coordinated Vireo release."

@@ -131,6 +131,27 @@
       "prefixes": []
     },
     {
+      "id": "template-codex-guidance",
+      "category": "maintainer-only",
+      "profiles": ["full-stack", "frontend"],
+      "paths": ["AGENTS.md", "frontend/AGENTS.md", "src/AGENTS.md", "scripts/AGENTS.md"],
+      "prefixes": [".agents/skills/"]
+    },
+    {
+      "id": "application-codex-guidance",
+      "category": "application-owned",
+      "profiles": ["full-stack", "frontend"],
+      "paths": [".vireo/application/AGENTS.md"],
+      "prefixes": []
+    },
+    {
+      "id": "managed-application-codex-skills",
+      "category": "managed",
+      "profiles": ["full-stack", "frontend"],
+      "paths": [],
+      "prefixes": [".vireo/application/.agents/skills/"]
+    },
+    {
       "id": "public-application-identity",
       "category": "substitution-required",
       "profiles": ["full-stack", "frontend"],
@@ -438,6 +459,18 @@
     { "path": ".verification-evidence/latest.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "deploy/hetzner/deploy.sh", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "docs/flagship.md", "profile": "full-stack", "category": "historical" },
+    { "path": "AGENTS.md", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "AGENTS.md", "profile": "frontend", "category": "maintainer-only" },
+    {
+      "path": ".vireo/application/AGENTS.md",
+      "profile": "full-stack",
+      "category": "application-owned"
+    },
+    {
+      "path": ".vireo/application/.agents/skills/vireo-app-feature-author/SKILL.md",
+      "profile": "frontend",
+      "category": "managed"
+    },
     { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/workflows/template-release.yml", "profile": "full-stack", "category": "maintainer-only" },

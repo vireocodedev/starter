@@ -1,17 +1,22 @@
 ---
 name: starter-ui-component-author
-description: Create, migrate, or complete first-class public Vireo React components in @vireocodedev/ui using its generator and component-authoring contracts. Use for Vireo design-system component work, not application-specific compositions, internal helpers, or ordinary UI edits.
+description: Use for first-class public Vireo React components in @vireocodedev/ui; not application-specific compositions, internal helpers, or ordinary UI edits.
 ---
 
 # Starter UI Component Author
 
-Build a finished, publishable Vireo component—not merely a compiling scaffold. Work from the `@vireocodedev/starter` repository root and preserve the user's requested behavior, compatibility, and scope.
+Build a finished, publishable Vireo component—not merely a compiling scaffold. Work from the Starter repository root and preserve the user's requested behavior, compatibility, and scope.
 
 ## Canonical sources
 
 The repository documentation is authoritative. Read the guide for every file or contract the task touches; read all of them for a new or full component migration:
 
 - New scaffolds and CLI constraints: [generator.md](../../../packages/ui/docs/component-authoring/generator.md)
+- Owner boundaries and source layout: [source-structure.md](../../../packages/ui/docs/architecture/source-structure.md)
+- Approved component categories: [component-folder-categories.md](../../../packages/ui/docs/architecture/component-folder-categories.md)
+- Form anatomy and layout: [form-layout.md](../../../packages/ui/docs/component-authoring/form-layout.md)
+- Cross-component loading standard: [LOADING_STATE_STANDARD.md](../../../docs/LOADING_STATE_STANDARD.md)
+- Declared loading categories and geometry: [loading-state-contracts.json](../../../packages/ui/loading-state-contracts.json)
 - Runtime implementation and prop precedence: [component-files.md](../../../packages/ui/docs/component-authoring/component-files.md)
 - Public types, slots, owner state, and MUI augmentation: [types-files.md](../../../packages/ui/docs/component-authoring/types-files.md)
 - Canonical name and ordered slot tuple: [identity-files.md](../../../packages/ui/docs/component-authoring/identity-files.md)
@@ -29,17 +34,19 @@ Use the cited reference components from those guides when a concrete pattern is 
 Use the repository generator for a new first-class component. Do not hand-create the eight-file structure while the `react-component` template is available.
 
 1. Choose an unprefixed PascalCase input such as `StatusBadge`; the generator adds `Vireo`.
-2. Choose an existing output parent under `packages/ui/src`. Infer the Storybook category from that directory or set it explicitly when the navigation label should differ.
+2. Choose an existing public owner and an approved component category. Choose the loading category and geometry from the loading-state contract; `static` must use `none`.
 3. Inspect destinations before writing:
 
 ```bash
 npm run generate -- react-component StatusBadge \
-  --output packages/ui/src/components/data-display \
-  --set storybookCategory="Data Display" \
+  --owner core \
+  --category data-display \
+  --loading-category static \
+  --loading-geometry none \
   --dry-run
 ```
 
-4. If the plan is correct and no destination exists, rerun without `--dry-run`.
+4. If the plan is correct and no destination exists, rerun without `--dry-run`. The generator rejects `--output` and never overwrites a component.
 
 The generator deliberately refuses to overwrite an existing component. For an existing or partially migrated component, edit it in place and use the file guides as the completion checklist.
 

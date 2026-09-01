@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vireo Framework Readiness"
+  short_description: "Audit Vireo public framework readiness"
+  default_prompt: "Use $vireo-framework-readiness-auditor to audit Vireo for public readiness."

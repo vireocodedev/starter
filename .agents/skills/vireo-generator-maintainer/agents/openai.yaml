@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vireo Generator Maintainer"
+  short_description: "Maintain safe project generation and upgrades"
+  default_prompt: "Use $vireo-generator-maintainer to update create-vireo projection behavior safely."

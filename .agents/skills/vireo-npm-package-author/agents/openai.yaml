@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vireo npm Package Author"
+  short_description: "Safely evolve published Vireo npm packages"
+  default_prompt: "Use $vireo-npm-package-author to change a public Vireo npm package."

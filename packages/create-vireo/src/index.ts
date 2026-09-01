@@ -234,7 +234,14 @@ function frontendDestination(path: string) {
   return undefined;
 }
 
+function applicationGuidanceDestination(path: string) {
+  const prefix = ".vireo/application/";
+  return path.startsWith(prefix) ? path.slice(prefix.length) : undefined;
+}
+
 function projectDestination(path: string, profile: VireoProfile) {
+  const applicationGuidance = applicationGuidanceDestination(path);
+  if (applicationGuidance) return applicationGuidance;
   return profile === "full-stack" ? path : frontendDestination(path);
 }
 
