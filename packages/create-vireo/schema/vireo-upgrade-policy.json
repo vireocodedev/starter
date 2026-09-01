@@ -220,7 +220,7 @@
           {
             "id": "application-owned-template-0.8.1-review",
             "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/", "docs/", "scripts/"],
-            "requirement": "Review the upstream Template 0.8.1 source, deployment, verification, OpenAPI compatibility, Corepack command, and Storybook telemetry changes. Vireo declares no managed application-file rewrite for this patch; selectively port application-owned changes and retain local product decisions.",
+            "requirement": "Review the upstream Template 0.8.1 source, deployment, verification, OpenAPI compatibility, Corepack command, and Storybook telemetry changes. The empty baseline set adds no Template-file rewrite beyond Vireo's managed release-coordinate, provenance, and root-script metadata updates; selectively port application-owned changes and retain local product decisions.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
               "corepack npm run setup",
