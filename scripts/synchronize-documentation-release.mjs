@@ -52,6 +52,10 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   const declaredCreateVireoVersion = createSource.match(/CREATE_VIREO_PACKAGE_VERSION = "([^"]+)"/u)?.[1];
   if (!declaredCreateVireoVersion)
     throw new Error("create-vireo does not declare its generated-project package version");
+  const declaredTemplateStarterJvmBaseline = createSource.match(/TEMPLATE_STARTER_JVM_BASELINE = "([^"]+)"/u)?.[1];
+  if (!declaredTemplateStarterJvmBaseline) {
+    throw new Error("create-vireo does not declare its starter JVM baseline");
+  }
   createSource = createSource.replace(
     `CREATE_VIREO_PACKAGE_VERSION = "${declaredCreateVireoVersion}"`,
     `CREATE_VIREO_PACKAGE_VERSION = "${createVireoVersion}"`,
@@ -78,6 +82,10 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     createSource = createSource.replace(
       `TEMPLATE_COMMIT = "${templateCommit}"`,
       `TEMPLATE_COMMIT = "${candidateTemplateCommit}"`,
+    );
+    createSource = createSource.replace(
+      `TEMPLATE_STARTER_JVM_BASELINE = "${declaredTemplateStarterJvmBaseline}"`,
+      `TEMPLATE_STARTER_JVM_BASELINE = "${jvmVersion}"`,
     );
     templateCommit = candidateTemplateCommit;
   }

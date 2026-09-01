@@ -82,6 +82,10 @@ test("synchronizes release contracts and public version documentation from sourc
       readFileSync(join(root, "packages", "create-vireo", "src", "index.ts"), "utf8"),
       /CREATE_VIREO_PACKAGE_VERSION = "0\.3\.0"/u,
     );
+    assert.match(
+      readFileSync(join(root, "packages", "create-vireo", "src", "index.ts"), "utf8"),
+      /TEMPLATE_STARTER_JVM_BASELINE = "0\.4\.0"/u,
+    );
     const upgradePolicy = readJson(join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json"));
     assert.equal(
       upgradePolicy.releaseGraph.releases.find(
@@ -178,7 +182,7 @@ function makeFixture() {
   });
   writeFileSync(
     join(root, "packages", "create-vireo", "src", "index.ts"),
-    `export const TEMPLATE_COMMIT = "${"a".repeat(40)}";\nconst CREATE_VIREO_PACKAGE_VERSION = "0.2.0";\n`,
+    `export const TEMPLATE_COMMIT = "${"a".repeat(40)}";\nconst CREATE_VIREO_PACKAGE_VERSION = "0.2.0";\nconst TEMPLATE_STARTER_JVM_BASELINE = "0.3.0";\n`,
   );
   writeJson(join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json"), {
     schemaVersion: 2,

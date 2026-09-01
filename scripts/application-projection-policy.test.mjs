@@ -46,6 +46,7 @@ test("template release operations are excluded from every project profile", () =
       ".github/workflows/template-release.yml",
       ...templateProviderOnlyPaths,
       ".github/rulesets/starter-template-0.8.0.json",
+      ".github/rulesets/starter-template-0.8.1.json",
       "contracts/template-release-policy.json",
       "scripts/template-release-policy.mjs",
       "scripts/template-release-policy.test.mjs",
@@ -178,10 +179,12 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
     ]) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "managed", path);
     }
-    assert.equal(
-      classifyProjectionPath(contract, ".github/rulesets/starter-template-0.8.0.json", profile)?.category,
-      "maintainer-only",
-    );
+    for (const path of [
+      ".github/rulesets/starter-template-0.8.0.json",
+      ".github/rulesets/starter-template-0.8.1.json",
+    ]) {
+      assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only");
+    }
     for (const path of templateProviderOnlyPaths) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only", path);
     }
