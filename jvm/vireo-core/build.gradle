@@ -1,6 +1,17 @@
 description = 'Base entity, service and mapper primitives, REST error handling, and the seams the optional modules plug into.'
 
 dependencies {
+    constraints {
+        // Security floors that supersede versions currently selected through
+        // the Spring Boot/Springdoc dependency graph. Publishing them as API
+        // constraints protects both Gradle and Maven consumers of vireo-core.
+        api "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
+        api "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+        api "org.apache.tomcat.embed:tomcat-embed-el:${tomcatVersion}"
+        api "org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}"
+        api "org.webjars:swagger-ui:${swaggerUiVersion}"
+    }
+
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-validation'
     api 'org.springframework.boot:spring-boot-starter-webmvc'
