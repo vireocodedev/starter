@@ -38,8 +38,8 @@
       "sha": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
     },
     "actions/upload-pages-artifact": {
-      "version": "v4.0.0",
-      "sha": "7b1f4a764d45c48632c6b24a0339c27f5614fb0b"
+      "version": "v5.0.0",
+      "sha": "fc324d3547104276b827a68afc52ff2a11cc49c9"
     },
     "changesets/action": {
       "version": "v1.9.0",
