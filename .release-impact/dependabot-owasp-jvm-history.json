@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "jvm:vireo-history",
+  "decision": "no-release",
+  "justification": "Only the build-time OWASP dependency scanner changed; publication, runtime, API coordinates, and published bytes are unchanged."
+}
