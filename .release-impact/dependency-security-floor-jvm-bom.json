@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "jvm:vireo-bom",
+  "decision": "release",
+  "bump": "patch",
+  "summary": "Raise managed dependency floors to versions containing the current Jackson, Tomcat, and Swagger UI security fixes."
+}
