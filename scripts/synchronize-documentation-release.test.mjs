@@ -81,9 +81,11 @@ test("synchronizes release contracts and public version documentation from sourc
       readFileSync(join(root, "README.md"), "utf8"),
       /0\.1\.0→0\.2\.0 remains retained historical evidence/u,
     );
-    assert.match(readFileSync(join(root, "docs", "COMPATIBILITY.md"), "utf8"), /vireo-\*`.*0\.4\.0/u);
-    assert.match(readFileSync(join(root, "docs", "COMPATIBILITY.md"), "utf8"), /edge is 0\.2\.0→0\.3\.0/u);
-    assert.match(readFileSync(join(root, "docs", "COMPATIBILITY.md"), "utf8"), /starter-template@0\.3\.0/u);
+    const compatibilityMarkdown = readFileSync(join(root, "docs", "COMPATIBILITY.md"), "utf8");
+    assert.match(compatibilityMarkdown, /vireo-\*`.*0\.4\.0/u);
+    assert.match(compatibilityMarkdown, /edge is 0\.2\.0→0\.3\.0/u);
+    assert.match(compatibilityMarkdown, /starter-template@0\.3\.0/u);
+    assert.doesNotMatch(compatibilityMarkdown, /JVM release\.\./u);
     assert.match(
       readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8"),
       /0\.2\.0 upgraded to 0\.3\.0/u,
