@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       confirmation:
-        description: Type publish to release every unpublished manifest version
+        description: Type publish to release absent reviewed manifest versions or recover an exact prior release
         required: true
         type: string
 
@@ -64,8 +64,8 @@ jobs:
       contents: write
       id-token: write
     outputs:
-      published: ${{ steps.changesets.outputs.published }}
-      published-packages: ${{ steps.changesets.outputs.publishedPackages }}
+      published: ${{ steps.publication-result.outputs.published }}
+      published-packages: ${{ steps.publication-result.outputs.publishedPackages }}
     steps:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -92,12 +92,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+      - name: Report evidence-backed publication and tag recovery result
+        id: publication-result
+        run: corepack npm run release:report-publication
       - name: Verify the anonymous public release
         run: corepack npm run release:verify-public
       - name: Record publication or recovery summary
         env:
-          PUBLISHED: ${{ steps.changesets.outputs.published }}
-          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+          PUBLISHED: ${{ steps.publication-result.outputs.published }}
+          PUBLISHED_PACKAGES: ${{ steps.publication-result.outputs.publishedPackages }}
+          RECOVERED_TAGS: ${{ steps.publication-result.outputs.recoveredTags }}
         run: |
           {
             if [ "$PUBLISHED" = "true" ]; then
@@ -111,4 +115,6 @@ jobs:
             echo '```json'
             echo "${PUBLISHED_PACKAGES:-[]}"
             echo '```'
+            echo
+            echo "Recovered provenance tags: ${RECOVERED_TAGS:-[]}"
           } >> "$GITHUB_STEP_SUMMARY"

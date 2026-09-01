@@ -48,8 +48,16 @@ scopes:
 Checkout credentials are disabled everywhere except the isolated JVM tag job.
 Dependency lifecycle scripts are disabled during installation in the npm write
 job. Candidate verification runs in separate read-only jobs before either package
-publisher can start. Unexpected registry responses fail closed rather than being
-treated as permission to publish.
+publisher can start. Before publishing or creating a tag, the npm publisher
+preflights every candidate's exact coordinate and registry SRI. Each registry 200
+is historical until `npm@12.0.2 audit signatures --json --include-attestations`
+cryptographically verifies its registry signatures/Sigstore bundles in an isolated
+token-free consumer. The retained bundles must bind the exact PURL/SRI, stable
+repository ID, approved repository identity, workflow/ref, and resolved commit;
+the annotated tag must match that commit. A missing historical tag can be created
+only at its verified commit and is never moved. Unexpected registry responses and
+post-publish integrity mismatches fail closed rather than being treated as
+permission to publish.
 
 ### Secret detection
 

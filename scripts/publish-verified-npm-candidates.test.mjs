@@ -7,9 +7,12 @@ import test from "node:test";
 
 import {
   inspectExistingTag,
+  inspectRegistryCandidate,
+  npmPurl,
   publishVerifiedCandidates,
   reconcileCandidateTags,
   registryConfirmationSettings,
+  validateAuditedProvenance,
   verifyNpmCandidates,
 } from "./publish-verified-npm-candidates.mjs";
 
@@ -190,6 +193,10 @@ function metadataResponse(candidate, overrides = {}) {
   };
 }
 
+function alternateIntegrity(candidate) {
+  return `sha512-${createHash("sha512").update(`historical:${candidate.coordinate}`).digest("base64")}`;
+}
+
 function notFoundResponse() {
   return { ok: false, status: 404 };
 }
@@ -216,6 +223,86 @@ function tagOperations({ existingTags = new Map() } = {}) {
   };
 }
 
+function auditedProvenance(commits = new Map()) {
+  return async candidates =>
+    new Map(
+      candidates.map(candidate => [
+        candidate.coordinate,
+        { commit: commits.get(candidate.coordinate) ?? commit, bundles: [{ retained: true }] },
+      ]),
+    );
+}
+
+function auditedBundle(candidate, registryIntegrity, overrides = {}) {
+  const provenanceCommit = overrides.commit ?? commit;
+  const statement = {
+    _type: "https://in-toto.io/Statement/v1",
+    predicateType: "https://slsa.dev/provenance/v1",
+    subject: [
+      {
+        name: npmPurl(candidate),
+        digest: { sha512: Buffer.from(registryIntegrity.slice(7), "base64").toString("hex") },
+      },
+    ],
+    predicate: {
+      buildDefinition: {
+        externalParameters: {
+          workflow: {
+            repository: overrides.repository ?? "vireocodedev/vireo",
+            path: ".github/workflows/release-npm.yml",
+            ref: "refs/heads/main",
+          },
+        },
+        internalParameters: {
+          github: { repository_id: "1304974749" },
+        },
+        resolvedDependencies: [
+          {
+            uri: `git+https://github.com/vireocodedev/vireo@${provenanceCommit}`,
+            digest: { gitCommit: provenanceCommit },
+          },
+        ],
+      },
+    },
+  };
+  return {
+    verified: [
+      {
+        name: candidate.name,
+        version: candidate.version,
+        attestationBundles: [
+          { bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64") } } },
+        ],
+      },
+    ],
+  };
+}
+
+test("accepts only audited SLSA bundles that bind the exact PURL, registry SRI, repository identity, workflow, and commit", () => {
+  const candidate = { ...verifyNpmCandidates(fixture(), commit)[0], registryIntegrity: undefined };
+  candidate.registryIntegrity = candidate.integrity;
+  const provenance = validateAuditedProvenance([candidate], auditedBundle(candidate, candidate.integrity));
+  assert.equal(provenance.get(candidate.coordinate).commit, commit);
+
+  const wrongIntegrity = auditedBundle(candidate, alternateIntegrity(candidate));
+  assert.throws(() => validateAuditedProvenance([candidate], wrongIntegrity), /No audited SLSA provenance/u);
+});
+
+test("uses the npm package-url scope form with an encoded at-sign and literal slash", () => {
+  const candidate = verifyNpmCandidates(fixture(), commit).find(item => item.name === "@vireocodedev/history");
+  assert.equal(npmPurl(candidate), "pkg:npm/%40vireocodedev/history@0.2.2");
+});
+
+test("accepts the explicit historical starter repository alias in the live workflow repository URL shape", () => {
+  const candidate = { ...verifyNpmCandidates(fixture(), commit)[0], registryIntegrity: undefined };
+  candidate.registryIntegrity = candidate.integrity;
+  const provenance = validateAuditedProvenance(
+    [candidate],
+    auditedBundle(candidate, candidate.integrity, { repository: "https://github.com/vireocodedev/starter" }),
+  );
+  assert.equal(provenance.get(candidate.coordinate).commit, commit);
+});
+
 test("publishes a missing candidate, confirms its exact reviewed bytes, then creates its tag", async () => {
   const candidate = verifyNpmCandidates(fixture(), commit)[0];
   const published = [];
@@ -234,13 +321,14 @@ test("publishes a missing candidate, confirms its exact reviewed bytes, then cre
   assert.deepEqual(tags.logs, [`New tag: ${candidate.coordinate}`]);
 });
 
-test("accepts an existing coordinate only when registry metadata matches the reviewed tarball", async () => {
+test("recovers an already-public coordinate after audited provenance matches its current tag", async () => {
   const candidate = verifyNpmCandidates(fixture(), commit)[0];
   const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, commit]]) });
   const result = await publishVerifiedCandidates([candidate], {
     expectedCommit: commit,
     fetchRegistry: async () => metadataResponse(candidate),
     publish: async () => assert.fail("exact existing candidate must not publish"),
+    auditHistoricalCandidates: auditedProvenance(),
     ...tags.options,
   });
   assert.deepEqual(result, []);
@@ -248,19 +336,38 @@ test("accepts an existing coordinate only when registry metadata matches the rev
   assert.deepEqual(tags.logs, []);
 });
 
-test("fails closed before publication or tagging when registry integrity differs", async () => {
+test("classifies every registry 200 as historical, including matching reviewed SRI", async () => {
   const candidate = verifyNpmCandidates(fixture(), commit)[0];
-  const tags = tagOperations();
-  await assert.rejects(
-    publishVerifiedCandidates([candidate], {
-      expectedCommit: commit,
-      fetchRegistry: async () => metadataResponse(candidate, { dist: { integrity: "sha512-not-reviewed" } }),
-      publish: async () => assert.fail("mismatched registry candidate must not publish"),
-      ...tags.options,
-    }),
-    /does not match reviewed candidate bytes/u,
+  assert.equal((await inspectRegistryCandidate(candidate, async () => notFoundResponse())).state, "absent");
+  const sameBytes = await inspectRegistryCandidate(candidate, async () => metadataResponse(candidate));
+  assert.equal(sameBytes.state, "historical");
+  assert.equal(sameBytes.integrityMatchesCandidate, true);
+  assert.equal(
+    (
+      await inspectRegistryCandidate(candidate, async () =>
+        metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } }),
+      )
+    ).state,
+    "historical",
   );
-  assert.deepEqual(tags.created, []);
+  await assert.rejects(
+    inspectRegistryCandidate(candidate, async () => metadataResponse(candidate, { name: "wrong-package" })),
+    /unexpected coordinate/u,
+  );
+  await assert.rejects(
+    inspectRegistryCandidate(candidate, async () =>
+      metadataResponse(candidate, { dist: { integrity: "sha512-not-sri" } }),
+    ),
+    /invalid sha512 SRI/u,
+  );
+  await assert.rejects(
+    inspectRegistryCandidate({ ...candidate, coordinate: "wrong" }, async () => notFoundResponse()),
+    /valid npm coordinate/u,
+  );
+  await assert.rejects(
+    inspectRegistryCandidate({ ...candidate, integrity: "sha512-not-sri" }, async () => notFoundResponse()),
+    /valid sha512 SRI/u,
+  );
 });
 
 test("retries registry propagation after publish and waits only between unresolved checks", async () => {
@@ -309,13 +416,50 @@ test("preserves an immutable historical tag for a registry-existing candidate", 
   const tags = tagOperations({ existingTags: new Map([[candidates[1].coordinate, "b".repeat(40)]]) });
   const result = await publishVerifiedCandidates(candidates, {
     expectedCommit: commit,
-    fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+    fetchRegistry: async url => {
+      const candidate = candidateFromUrl(candidates, url);
+      return metadataResponse(
+        candidate,
+        candidate === candidates[1] ? { dist: { integrity: alternateIntegrity(candidate) } } : {},
+      );
+    },
     publish: async () => assert.fail("existing candidates must not publish"),
+    auditHistoricalCandidates: auditedProvenance(new Map([[candidates[1].coordinate, "b".repeat(40)]])),
     ...tags.options,
   });
   assert.deepEqual(result, []);
   assert.deepEqual(tags.created, [[candidates[0].coordinate, candidates[0].coordinate, commit]]);
   assert.deepEqual(tags.logs, [`New tag: ${candidates[0].coordinate}`]);
+});
+
+test("treats matching registry bytes as historical when their audited provenance points to a prior tag commit", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const provenanceCommit = "b".repeat(40);
+  const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, provenanceCommit]]) });
+  const result = await publishVerifiedCandidates([candidate], {
+    expectedCommit: commit,
+    fetchRegistry: async () => metadataResponse(candidate),
+    publish: async () => assert.fail("matching historical bytes must not republish"),
+    auditHistoricalCandidates: auditedProvenance(new Map([[candidate.coordinate, provenanceCommit]])),
+    ...tags.options,
+  });
+  assert.deepEqual(result, []);
+  assert.deepEqual(tags.created, []);
+});
+
+test("creates a missing historical tag only at its audited provenance commit", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations();
+  const provenanceCommit = "b".repeat(40);
+  const result = await publishVerifiedCandidates([candidate], {
+    expectedCommit: commit,
+    fetchRegistry: async () => metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } }),
+    publish: async () => assert.fail("historical candidates must not publish"),
+    auditHistoricalCandidates: auditedProvenance(new Map([[candidate.coordinate, provenanceCommit]])),
+    ...tags.options,
+  });
+  assert.deepEqual(result, []);
+  assert.deepEqual(tags.created, [[candidate.coordinate, candidate.coordinate, provenanceCommit]]);
 });
 
 test("fails before publication when an unpublished candidate tag belongs to another commit", async () => {
@@ -341,6 +485,7 @@ test("recovers all registry-existing candidates by creating only missing tags", 
     expectedCommit: commit,
     fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
     publish: async () => assert.fail("existing candidates must not publish"),
+    auditHistoricalCandidates: auditedProvenance(),
     ...tags.options,
   });
   assert.deepEqual(result, []);
@@ -352,6 +497,69 @@ test("recovers all registry-existing candidates by creating only missing tags", 
     tags.logs,
     candidates.map(candidate => `New tag: ${candidate.coordinate}`),
   );
+});
+
+test("returns only candidates actually published when an exact retry and an absent candidate are mixed", async () => {
+  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
+  const tags = tagOperations({ existingTags: new Map([[candidates[1].coordinate, commit]]) });
+  let firstCandidateChecks = 0;
+  const result = await publishVerifiedCandidates(candidates, {
+    expectedCommit: commit,
+    fetchRegistry: async url => {
+      const candidate = candidateFromUrl(candidates, url);
+      if (candidate === candidates[0]) {
+        return firstCandidateChecks++ === 0 ? notFoundResponse() : metadataResponse(candidate);
+      }
+      return metadataResponse(candidate);
+    },
+    publish: async candidate => assert.equal(candidate.coordinate, candidates[0].coordinate),
+    auditHistoricalCandidates: auditedProvenance(),
+    ...tags.options,
+  });
+  assert.deepEqual(result, [candidates[0].coordinate]);
+  assert.deepEqual(tags.created, [[candidates[0].coordinate, candidates[0].coordinate, commit]]);
+});
+
+test("preflights every registry and tag state before publishing any absent candidate", async () => {
+  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
+  const provenanceCommit = "b".repeat(40);
+  const tags = tagOperations({ existingTags: new Map([[candidates[1].coordinate, "c".repeat(40)]]) });
+  await assert.rejects(
+    publishVerifiedCandidates(candidates, {
+      expectedCommit: commit,
+      fetchRegistry: async url => {
+        const candidate = candidateFromUrl(candidates, url);
+        return candidate === candidates[0]
+          ? notFoundResponse()
+          : metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } });
+      },
+      publish: async () => assert.fail("preflight failure must occur before publication"),
+      auditHistoricalCandidates: auditedProvenance(new Map([[candidates[1].coordinate, provenanceCommit]])),
+      ...tags.options,
+    }),
+    /not audited provenance commit/u,
+  );
+  assert.deepEqual(tags.created, []);
+});
+
+test("fails strict post-publish confirmation when a raced registry version has historical bytes", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations();
+  let checks = 0;
+  await assert.rejects(
+    publishVerifiedCandidates([candidate], {
+      expectedCommit: commit,
+      fetchRegistry: async () =>
+        checks++ === 0
+          ? notFoundResponse()
+          : metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } }),
+      publish: async () => {},
+      sleep: async () => assert.fail("historical bytes must not be retried"),
+      ...tags.options,
+    }),
+    /does not match reviewed candidate bytes/u,
+  );
+  assert.deepEqual(tags.created, []);
 });
 
 test("keeps an exact duplicate without tags markers", async () => {
@@ -373,8 +581,15 @@ test("recovers an all-published release without moving historical tags or emitti
   });
   const result = await publishVerifiedCandidates(candidates, {
     expectedCommit: commit,
-    fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+    fetchRegistry: async url => {
+      const candidate = candidateFromUrl(candidates, url);
+      return metadataResponse(
+        candidate,
+        candidate === candidates[0] ? { dist: { integrity: alternateIntegrity(candidate) } } : {},
+      );
+    },
     publish: async () => assert.fail("all-published recovery must not republish"),
+    auditHistoricalCandidates: auditedProvenance(new Map([[candidates[0].coordinate, "b".repeat(40)]])),
     ...tags.options,
   });
   assert.deepEqual(result, []);
