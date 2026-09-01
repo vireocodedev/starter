@@ -60,9 +60,11 @@ corepack npm exec changeset
 corepack npm run verify -- silent
 ```
 
-After that pull request merges, **Maintain npm release PR** creates or refreshes
-the version pull request. Review its package versions, changelogs, lockfile, and
-the complete CI result. Merging it updates source metadata but does not publish.
+After that pull request merges, the trusted, `main`-only **Maintain npm release
+PR** workflow creates or refreshes the version pull request. Review its package
+versions, changelogs, lockfile, and the complete CI result. Its reviewed, pinned
+steps contain no approval or merge operation; merging it updates source metadata
+but does not publish.
 
 Before starting publication, the release owner can run:
 

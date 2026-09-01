@@ -107,6 +107,121 @@ function inspectCheckoutCredentials(fileName, lines, jobs, lineNumber) {
   }
 }
 
+function mapMatches(actual, expected) {
+  return (
+    actual instanceof Map &&
+    actual.size === expected.size &&
+    [...expected].every(([key, value]) => actual.get(key) === value)
+  );
+}
+
+function actionStep(source, action) {
+  const match = source.match(new RegExp(`^([ ]*)(?:- )?uses: ${action}@[^\\s]+(?:\\s+#\\s+[^\\s]+)?\\s*$`, "mu"));
+  if (!match || match.index === undefined) return null;
+  const usesIndent = match[1];
+  const stepIndent = match[0].startsWith(`${usesIndent}- `) ? usesIndent : usesIndent.slice(0, -2);
+  const beforeUses = source.slice(0, match.index);
+  const stepStart = beforeUses.lastIndexOf(`\n${stepIndent}- `) + 1;
+  const afterUses = source.slice(match.index + match[0].length);
+  const nextStep = afterUses.search(new RegExp(`^${stepIndent}- (?:name|uses|run):`, "mu"));
+  return source.slice(stepStart, nextStep < 0 ? undefined : match.index + match[0].length + nextStep);
+}
+
+function releaseRunSteps(lines, job) {
+  const commands = [];
+  let hasMultilineRun = false;
+  for (const line of lines.slice(job.start, job.end)) {
+    const match = line.match(/^(?: {6}- | {8})run:\s*(.*)$/u);
+    if (!match) continue;
+    const command = match[1];
+    if (command.length === 0 || /^(?:\||>)[+-]?$/u.test(command)) {
+      hasMultilineRun = true;
+      continue;
+    }
+    commands.push(command);
+  }
+  return { commands, hasMultilineRun };
+}
+
+/**
+ * The repository setting that permits Actions to create PRs also permits PR
+ * approval. This narrow policy keeps the sole PR-writing workflow limited to
+ * Changesets version-PR maintenance. It deliberately allowlists operations
+ * instead of attempting to enumerate every future approval, merge, publish, or
+ * deployment command.
+ */
+export function validateReleasePrWorkflow(source, actionPolicy) {
+  const problems = [];
+  const lines = source.split(/\r?\n/);
+  const jobs = parseJobs(lines);
+  const beforeJobs = source.slice(0, source.indexOf("jobs:"));
+  const versionJob = jobs.find(job => job.name === "version");
+
+  if (!/^on:\n {2}push:\n {4}branches: \[main\]\n {2}workflow_dispatch:\s*$/mu.test(beforeJobs)) {
+    problems.push("release.yml must run only for pushes to main and manual dispatch");
+  }
+  if (jobs.length !== 1 || !versionJob) {
+    problems.push("release.yml must contain only the version job");
+    return problems;
+  }
+  if (!lines.slice(versionJob.start, versionJob.end).includes("    if: github.ref == 'refs/heads/main'")) {
+    problems.push("release.yml:version must restrict every trigger to main");
+  }
+  if (
+    !mapMatches(
+      parseJobPermissions(lines, versionJob),
+      new Map([
+        ["contents", "write"],
+        ["pull-requests", "write"],
+      ]),
+    )
+  ) {
+    problems.push("release.yml:version must grant exactly contents/pull-requests write permissions");
+  }
+  if (lines.slice(versionJob.start, versionJob.end).some(line => /^ {4}environment:/u.test(line))) {
+    problems.push("release.yml:version may not target a deployment environment");
+  }
+
+  const actionReferences = [...source.matchAll(/^[ ]*(?:- )?uses: ([^\s@]+)@[^\s]+/gmu)].map(match => match[1]).sort();
+  const expectedActions = ["actions/checkout", "actions/setup-node", "changesets/action"];
+  if (JSON.stringify(actionReferences) !== JSON.stringify(expectedActions)) {
+    problems.push("release.yml may use only checkout, setup-node, and the reviewed Changesets action");
+  }
+  const changesetsAction = actionPolicy.actions?.["changesets/action"];
+  const changesetsStep = actionStep(source, "changesets/action");
+  if (
+    !changesetsAction ||
+    !changesetsStep?.includes(`uses: changesets/action@${changesetsAction.sha} # ${changesetsAction.version}`)
+  ) {
+    problems.push("release.yml must pin the reviewed Changesets action");
+  }
+  const changesetsWithBlock = changesetsStep?.match(/^ {8}with:\n((?:^ {10}[^\n]+\n?)*)/mu)?.[1] ?? "";
+  const changesetsInputs = changesetsWithBlock.match(/^ {10}([A-Za-z][A-Za-z-]*): (.+)$/gmu) ?? [];
+  const expectedInputs = [
+    "          version: corepack npm run version-packages",
+    '          commit: "chore(npm): version public packages"',
+    '          title: "chore(npm): version public packages"',
+  ];
+  if (
+    changesetsInputs.length !== expectedInputs.length ||
+    !expectedInputs.every(input => changesetsInputs.includes(input))
+  ) {
+    problems.push("release.yml must configure Changesets only to version and open the reviewed release PR");
+  }
+
+  const { commands: runCommands, hasMultilineRun } = releaseRunSteps(lines, versionJob);
+  if (hasMultilineRun) {
+    problems.push("release.yml:version may not use multiline run values");
+  }
+  if (runCommands.length !== 1 || runCommands[0] !== "corepack npm ci --ignore-scripts") {
+    problems.push(
+      "release.yml may execute only the lifecycle-script-free install; approval, merge, publication, and deployment commands are prohibited",
+    );
+  }
+
+  return problems;
+}
+
 const workflowFiles = readdirSync(workflowsRoot)
   .filter(file => /\.ya?ml$/.test(file))
   .sort();
@@ -115,6 +230,8 @@ for (const fileName of workflowFiles) {
   const source = readFileSync(join(workflowsRoot, fileName), "utf8");
   const lines = source.split(/\r?\n/);
   const jobs = parseJobs(lines);
+
+  if (fileName === "release.yml") problems.push(...validateReleasePrWorkflow(source, policy));
 
   if (source.includes("pull_request_target:")) {
     problems.push(`${fileName} may not use pull_request_target`);

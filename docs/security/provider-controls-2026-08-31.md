@@ -27,8 +27,9 @@ The desired state is:
 - an active, no-bypass Starter tag ruleset for `refs/tags/**`; Template retains
   its release-specific immutable-tag rulesets;
 - selected GitHub Actions only, with SHA pinning, GitHub-owned actions, and the
-  reviewed Gradle/Changesets pins; read-only default workflow tokens and no
-  workflow PR approval;
+  reviewed Gradle/Changesets pins; read-only default workflow tokens, with
+  pull-request write access limited to the reviewed, `main`-only Changesets
+  version-PR workflow;
 - `package-release` and `maven-central` restricted to `main`, and `github-pages`
   restricted to `main`, all without administrator bypass; and
 - `template-release` restricted to `main` dispatches and `starter-template@*`
@@ -71,3 +72,21 @@ environment reads at `2026-08-31T21:32:11Z` report
 `github-pages`, and Template's `template-release`. This closes the
 machine-controlled provider-security portion of P1-09. Independent approval and
 backup-owner recovery remain separate human gaps.
+
+## Follow-up — 2026-09-01
+
+GitHub's repository-level **Allow GitHub Actions to create and approve pull
+requests** setting was enabled so the trusted, `main`-only **Maintain npm release
+PR** workflow can create or refresh its Changesets version PR. GitHub exposes PR
+creation and approval through the same setting; enabling it does not grant write
+access by default. The repository continues to use read-only default workflow
+tokens, and only that workflow's `version` job explicitly requests
+`contents: write` and `pull-requests: write`. The combined setting and those job
+scopes could technically be used to approve or merge a PR if reviewed workflow
+code added such an API step; the trust boundary is the narrowly scoped, reviewed,
+pinned workflow rather than a separate GitHub creation-only switch.
+
+The current workflow contains no approval or merge step: it prepares a release
+PR only. Merging a version PR does not publish packages. npm and Maven
+publication remain separately manually dispatched from `main` and require their
+protected, no-bypass environments and documented human approval gates.
