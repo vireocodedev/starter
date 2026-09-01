@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:@vireocodedev/infrastructure",
+  "decision": "no-release",
+  "justification": "Only repository build and test devDependencies changed; runtime dependencies, emitted package bytes, and public behavior are unchanged."
+}
