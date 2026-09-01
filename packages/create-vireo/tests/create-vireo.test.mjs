@@ -88,6 +88,15 @@ async function fixture(root) {
     join(template, "docs/generated-capabilities.md"),
     "The [`starter-template@0.8.0` release contract](https://github.com/vireocodedev/vireo-template/blob/starter-template%400.8.0/contracts/template-release-policy.json) is immutable.\n",
   );
+  for (const directory of ["docs", "frontend/docs"]) {
+    await mkdir(join(template, directory), { recursive: true });
+    for (const filename of ["database-recovery.md", "incident-response.md", "operations.md"]) {
+      await writeFile(
+        join(template, directory, filename),
+        `The [maintainer rehearsal](hosted-demo-recovery-rehearsal-2026-09-01.md) is retained upstream.\n`,
+      );
+    }
+  }
   for (const path of [
     "docs/provider-controls-2026-08-31.md",
     "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
@@ -538,6 +547,30 @@ test("creates and customizes a project atomically from a local fixture", async (
     }
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("projects self-contained documentation when excluded evidence is linked upstream", async () => {
+  for (const profile of ["full-stack", "frontend"]) {
+    const root = await mkdtemp(join(tmpdir(), "create-vireo-documentation-test-"));
+    try {
+      const template = await fixture(root);
+      const target = join(root, `${profile}-app`);
+      await createVireo({
+        directory: target,
+        profile,
+        git: false,
+        templateDirectory: template,
+      });
+      for (const document of ["docs/database-recovery.md", "docs/incident-response.md", "docs/operations.md"]) {
+        const contents = await readFile(join(target, document), "utf8");
+        assert.doesNotMatch(contents, /hosted-demo-recovery-rehearsal-2026-09-01\.md/u, document);
+        assert.match(contents, /maintainer rehearsal/u, document);
+      }
+      await assert.rejects(readFile(join(target, "docs/hosted-demo-recovery-rehearsal-2026-09-01.md")), /ENOENT/u);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   }
 });
 

@@ -50,6 +50,7 @@ type PackageManifest = Record<string, unknown> & {
 };
 type PackageLock = Record<string, unknown> & { packages?: Record<string, { dependencies?: Record<string, unknown> }> };
 type ManagedManifest = { schemaVersion: 1; templateCommit: string; files: Array<{ path: string; sha256: string }> };
+const TEMPLATE_COMMIT_PENDING_RELEASE = "TEMPLATE_COMMIT_PENDING_RELEASE";
 
 export type VireoUpgradeOptions = {
   projectDirectory: string;
@@ -286,9 +287,13 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
     edges.add(`${edge.from}->${edge.to}`);
   }
   for (const release of graph.releases) {
+    const pendingTemplateCommit =
+      release.release === graph.candidateRelease &&
+      release.status === "candidate" &&
+      release.templateCommit === TEMPLATE_COMMIT_PENDING_RELEASE;
     if (
       !/^\d+\.\d+\.\d+$/u.test(release.release) ||
-      !/^[a-f0-9]{40}$/u.test(release.templateCommit) ||
+      (!/^[a-f0-9]{40}$/u.test(release.templateCommit) && !pendingTemplateCommit) ||
       typeof release.rootVireoScript !== "string" ||
       !release.rootVireoScript.trim() ||
       !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(release.starterJvmVersion) ||
@@ -665,6 +670,12 @@ async function upgradeProjectWithPolicy(
     target = graph.releases.find(release => release.release === options.targetRelease);
   if (!target)
     throw new VireoUpgradeError("VIR-UPG-002", `Target ${options.targetRelease} is not declared by this CLI.`);
+  if (target.status === "candidate") {
+    throw new VireoUpgradeError(
+      "VIR-UPG-008",
+      `Target ${target.release} is an unpublished candidate and cannot be previewed or applied.`,
+    );
+  }
   for (const path of [".vireo/project.json", "package.json"]) await safeFileState(projectDirectory, path);
   const metadataPath = join(projectDirectory, ".vireo/project.json"),
     rootManifestPath = join(projectDirectory, "package.json");

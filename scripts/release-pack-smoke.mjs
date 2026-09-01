@@ -15,6 +15,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { assertPackableProjectUpgrade } from "./lib/project-upgrade-publication-state.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagesRoot = join(repoRoot, "packages");
@@ -27,6 +28,7 @@ const projectUpgradeContract = JSON.parse(
   readFileSync(join(repoRoot, "contracts/project-upgrade-policy.json"), "utf8"),
 );
 const ecosystemContract = JSON.parse(readFileSync(join(repoRoot, "contracts/ecosystem-release-contract.json"), "utf8"));
+const releasePackMode = process.env.VIREO_RELEASE_PACK_MODE ?? "merge";
 const installLifecycleScripts = ["preinstall", "install", "postinstall", "prepare", "prepublish", "prepublishOnly"];
 const forbiddenPackedPath =
   /(?:^|\/)(?:\.env(?:\.|$)|\.git(?:\/|$)|\.npmrc$|__tests__(?:\/|$)|coverage(?:\/|$)|node_modules(?:\/|$)|src(?:\/|$)|storybook-static(?:\/|$)|tests?(?:\/|$))/iu;
@@ -155,15 +157,9 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
     throw new Error("create-vireo must publish its project upgrade policy.");
   }
   if (manifest.name === "create-vireo") {
-    if (projectUpgradeContract.publicationState !== "final") {
-      throw new Error(
-        "create-vireo cannot be packed for publication while the project-upgrade release is a candidate.",
-      );
-    }
     const upgradePolicy = JSON.parse(readFileSync(join(packageDirectory, "schema/vireo-upgrade-policy.json"), "utf8"));
+    assertPackableProjectUpgrade(projectUpgradeContract, upgradePolicy, releasePackMode);
     const graph = upgradePolicy.releaseGraph;
-    const targetRelease = graph?.candidateRelease ?? graph?.publicRelease;
-    const targetNode = graph?.releases?.find(release => release.release === targetRelease);
     if (
       upgradePolicy.schemaVersion !== 2 ||
       !graph?.edges?.some(
@@ -172,15 +168,6 @@ function validatePackageContents(packageDirectory, sourceDirectory, sourceManife
       !graph?.releases?.some(release => release.release === graph.publicRelease && release.status === "current")
     ) {
       throw new Error("create-vireo must pack an executable adjacent project-upgrade graph.");
-    }
-    if (
-      graph?.candidateRelease !== undefined ||
-      targetNode?.status !== "current" ||
-      !/^[a-f0-9]{40}$/u.test(targetNode?.templateCommit ?? "") ||
-      targetNode.templateCommit ===
-        graph?.releases?.find(release => release.release === graph.previousRelease)?.templateCommit
-    ) {
-      throw new Error("create-vireo publication requires a distinct immutable target Template commit.");
     }
   }
   if (readFileSync(join(packageDirectory, "LICENSE"), "utf8") !== rootLicense) {

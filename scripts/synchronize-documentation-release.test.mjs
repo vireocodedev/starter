@@ -45,7 +45,15 @@ test("synchronizes release contracts and public version documentation from sourc
 
     const documentation = readJson(join(root, "contracts", "documentation-release-policy.json"));
     assert.equal(documentation.currentRelease, releaseId);
+    assert.equal(
+      documentation.releases.length,
+      1,
+      "a patch promotion keeps the current friendly documentation line in place",
+    );
     assert.equal(documentation.releases[0].id, releaseId);
+    assert.equal(documentation.releases[0].documentationVersion, "0.2");
+    assert.equal(documentation.releases[0].documentationLabel, "Vireo 0.2");
+    assert.equal(documentation.releases[0].status, "current");
     assert.deepEqual(documentation.releases[0].npm, [
       { package: "create-vireo", version: "0.3.0" },
       { package: "@vireocodedev/sqlite", version: "0.2.2" },
@@ -89,6 +97,19 @@ test("synchronizes release contracts and public version documentation from sourc
       ).starterJvmVersion,
       "0.4.0",
     );
+    assert.equal(upgradePolicy.releaseGraph.publicRelease, "0.3.0");
+    assert.equal(upgradePolicy.releaseGraph.previousRelease, "0.2.0");
+    assert.equal(upgradePolicy.releaseGraph.candidateRelease, undefined);
+    assert.equal(upgradePolicy.releaseGraph.releases.find(release => release.release === "0.2.0").status, "historical");
+    assert.equal(upgradePolicy.releaseGraph.releases.find(release => release.release === "0.3.0").status, "current");
+    const finalizedUpgrade = readJson(join(root, "contracts", "project-upgrade-policy.json"));
+    assert.equal(finalizedUpgrade.publicationState, "final");
+    assert.equal(finalizedUpgrade.publicRelease, "0.3.0");
+    assert.equal(finalizedUpgrade.previousRelease, "0.2.0");
+    assert.equal(finalizedUpgrade.candidateRelease, undefined);
+    assert.equal(finalizedUpgrade.finalization, undefined);
+    assert.equal(finalizedUpgrade.releaseCoordinates["0.2.0"].status, "historical");
+    assert.equal(finalizedUpgrade.releaseCoordinates["0.3.0"].status, "current");
     assert.equal(
       readJson(join(root, "contracts", "project-upgrade-policy.json")).releaseCoordinates["0.3.0"].starterJvmVersion,
       "0.4.0",
@@ -157,7 +178,7 @@ function makeFixture() {
   });
   writeFileSync(
     join(root, "packages", "create-vireo", "src", "index.ts"),
-    `export const TEMPLATE_COMMIT = "${"b".repeat(40)}";\nconst CREATE_VIREO_PACKAGE_VERSION = "0.2.0";\n`,
+    `export const TEMPLATE_COMMIT = "${"a".repeat(40)}";\nconst CREATE_VIREO_PACKAGE_VERSION = "0.2.0";\n`,
   );
   writeJson(join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json"), {
     schemaVersion: 2,
@@ -166,10 +187,17 @@ function makeFixture() {
       candidateRelease: "0.3.0",
       previousRelease: "0.2.0",
       releases: [
-        { release: "0.2.0", status: "upgrade-source" },
+        {
+          release: "0.2.0",
+          status: "current",
+          templateCommit: "a".repeat(40),
+          rootVireoScript: "npx --yes --package=create-vireo@0.2.0 vireo",
+          starterJvmVersion: "0.3.0",
+        },
         {
           release: "0.3.0",
-          status: "current",
+          status: "candidate",
+          templateCommit: "b".repeat(40),
           rootVireoScript: "npx --yes --package=create-vireo@0.2.0 vireo",
           starterJvmVersion: "0.3.0",
         },
@@ -178,13 +206,25 @@ function makeFixture() {
     },
   });
   writeJson(join(root, "contracts", "project-upgrade-policy.json"), {
-    publicRelease: "0.3.0",
+    publicRelease: "0.2.0",
+    candidateRelease: "0.3.0",
+    previousRelease: "0.2.0",
+    publicationState: "candidate",
+    finalization: { targetTemplateCommit: "b".repeat(40) },
     releaseCoordinates: {
-      "0.3.0": {
+      "0.2.0": {
         createVireo: "0.2.0",
         templateVersion: "0.2.0",
         templateCommit: "a".repeat(40),
         starterJvmVersion: "0.3.0",
+        status: "current",
+      },
+      "0.3.0": {
+        createVireo: "0.3.0",
+        templateVersion: "0.3.0",
+        templateCommit: "b".repeat(40),
+        starterJvmVersion: "0.3.0",
+        status: "candidate",
       },
     },
   });
@@ -230,6 +270,9 @@ function makeFixture() {
     releases: [
       {
         id: "npm-0.2.0_jvm-0.3.0",
+        documentationVersion: "0.2",
+        documentationLabel: "Vireo 0.2",
+        status: "current",
         npm: [
           { package: "create-vireo", version: "0.2.0" },
           { package: "@vireocodedev/sqlite", version: "0.2.1" },

@@ -8,5 +8,5 @@ REPOSITORY_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 cd "$REPOSITORY_ROOT"
 
 corepack npm run release:validate
-corepack npm run verify -- silent
+VIREO_RELEASE_PACK_MODE=publication corepack npm run verify -- silent
 corepack npm run release:evidence

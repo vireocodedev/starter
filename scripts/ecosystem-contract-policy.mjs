@@ -122,11 +122,17 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
         problems.push("upgrade graph must distinguish the public current release from an unpublished candidate");
       }
       if (upgradeContract.publicationState === "candidate") {
+        const candidateTemplateCommit = targetNode?.templateCommit;
+        const finalizationTemplateCommit = upgradeContract.finalization?.targetTemplateCommit;
         if (
-          upgradeContract.finalization?.targetTemplateCommit !== "TEMPLATE_COMMIT_PENDING_RELEASE" ||
-          targetNode?.templateCommit !== "TEMPLATE_COMMIT_PENDING_RELEASE"
+          candidateTemplateCommit !== finalizationTemplateCommit ||
+          (candidateTemplateCommit !== "TEMPLATE_COMMIT_PENDING_RELEASE" &&
+            (!/^[a-f0-9]{40}$/u.test(candidateTemplateCommit ?? "") ||
+              candidateTemplateCommit === publicNode?.templateCommit))
         ) {
-          problems.push("candidate upgrade release must use the explicit Template finalization sentinel");
+          problems.push(
+            "candidate upgrade release must retain matching pending or distinct immutable Template finalization",
+          );
         }
       } else if (
         upgradeContract.publicationState !== "final" ||

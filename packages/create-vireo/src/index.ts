@@ -1109,6 +1109,46 @@ async function replaceApplicationDocumentation(path: string, replacements: Array
   }
 }
 
+/**
+ * Historical and maintainer-only evidence stays in the Template repository, not
+ * in projects created from it. Retain the surrounding operational guidance,
+ * but render a plain-language reference when that evidence was linked from a
+ * copied document. This keeps a projected project self-contained instead of
+ * leaving a relative link to an intentionally excluded file.
+ */
+async function removeExcludedDocumentationLinks(staging: string, profile: VireoProfile) {
+  const excludedDocumentation = new Set(
+    (applicationProjectionContract.rules ?? [])
+      .filter(rule => ["historical", "maintainer-only"].includes(rule.category))
+      .flatMap(rule => (rule as { paths?: unknown }).paths ?? [])
+      .filter((path): path is string => typeof path === "string" && path.startsWith("docs/") && path.endsWith(".md")),
+  );
+  const documentationRoots =
+    profile === "frontend" ? [join(staging, "docs")] : [join(staging, "docs"), join(staging, "frontend", "docs")];
+  for (const documentationRoot of documentationRoots) {
+    try {
+      for (const path of await walk(documentationRoot)) {
+        if (!path.endsWith(".md")) continue;
+        const source = await readFile(path, "utf8");
+        const documentPath = normalizedRelative(staging, path);
+        let rendered = source;
+        for (const excludedPath of excludedDocumentation) {
+          const relativeTarget = relative(dirname(documentPath), excludedPath).replaceAll("\\", "/");
+          const pattern = new RegExp(`\\[([^\\]]+)\\]\\(${escapeRegExp(relativeTarget)}\\)`, "gu");
+          rendered = rendered.replace(pattern, "$1");
+        }
+        if (rendered !== source) await writeFile(path, rendered);
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+  }
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
 async function renderApplicationDocumentation(staging: string, profile: VireoProfile, projectName: string) {
   await replaceApplicationDocumentation(join(staging, "docs", "generated-capabilities.md"), [
     [`${projectName}@${TEMPLATE_VERSION}`, TEMPLATE_TAG],
@@ -1138,6 +1178,7 @@ async function renderApplicationDocumentation(staging: string, profile: VireoPro
       "Maintain a project-owned loading-state audit for current routes, geometry targets, completed vertical slices, and enforcement contracts.",
     ],
   ]);
+  await removeExcludedDocumentationLinks(staging, profile);
 }
 
 function unresolvedIdentity(field: keyof Omit<ApplicationIdentity, "projectName" | "displayName">) {
