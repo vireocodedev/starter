@@ -93,7 +93,7 @@
     "security:secrets": "sh scripts/secret-scan.sh",
     "security:workflow": "node scripts/workflow-security-policy.mjs",
     "security:repository": "node scripts/repository-security-policy.mjs",
-    "toolchain:check": "node scripts/toolchain-policy.mjs && node scripts/platform-support-policy.mjs",
+    "toolchain:check": "node scripts/toolchain-policy.mjs && node scripts/platform-support-policy.mjs && node --test scripts/platform-support-policy.test.mjs",
     "release": "sh scripts/with-declared-npm.sh sh -c 'corepack npm run verify -- silent && corepack npm run release:publish'",
     "release:publish": "sh scripts/with-declared-npm.sh node scripts/changeset-publish-adapter.mjs"
   },
