@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { extname, join } from "node:path";
+import { join } from "node:path";
 import { format, resolveConfig } from "prettier";
 
 export async function synchronizeDocumentationRelease(repositoryRoot) {
@@ -298,19 +298,36 @@ function replaceCurrentTemplateReferencesInSite(
   templateVersion,
 ) {
   if (oldTemplateCommit === templateCommit && oldTemplateVersion === templateVersion) return [];
-  return collectSiteTextSources(join(repositoryRoot, "site"))
-    .map(path => {
-      const source = readFileSync(path, "utf8");
-      return [
-        path,
-        source
-          .replaceAll(oldTemplateCommit, templateCommit)
-          .replaceAll(`starter-template@${oldTemplateVersion}`, `starter-template@${templateVersion}`)
-          .replaceAll(`current ${oldTemplateVersion} Template`, `current ${templateVersion} Template`)
-          .replaceAll(`pinned ${oldTemplateVersion} Template`, `pinned ${templateVersion} Template`),
-      ];
-    })
-    .filter(([path, content]) => content !== readFileSync(path, "utf8"));
+  const currentReferences = [
+    { path: "content/offline.md", commits: 2, versionReference: `pinned ${oldTemplateVersion} Template` },
+    {
+      path: "content/design-system-overview.md",
+      commits: 7,
+      versionReference: `current ${oldTemplateVersion} Template`,
+    },
+    { path: "content/manifest.json", commits: 9 },
+    { path: "verify.mjs", commits: 2 },
+    { path: "build.test.mjs", commits: 2 },
+  ];
+  return currentReferences.map(reference => {
+    const path = join(repositoryRoot, "site", reference.path);
+    let content = replaceExactCount(
+      readFileSync(path, "utf8"),
+      oldTemplateCommit,
+      templateCommit,
+      reference.commits,
+      `site/${reference.path} current Template commit`,
+    );
+    if (reference.versionReference) {
+      content = replaceRequired(
+        content,
+        reference.versionReference,
+        reference.versionReference.replace(oldTemplateVersion, templateVersion),
+        `site/${reference.path} current Template version`,
+      );
+    }
+    return [path, content];
+  });
 }
 
 function synchronizeCurrentReleaseGuidance({
@@ -394,14 +411,72 @@ function synchronizeCurrentReleaseGuidance({
     `\`starter-template@${templateVersion}\` release is already published`,
     "docs/NPM_RELEASE.md current Template release prerequisite",
   );
+  const additionalGuidanceOutputs = synchronizeAdditionalCurrentGuidance({
+    repositoryRoot,
+    priorPublicUpgradeRelease,
+    publicUpgradeRelease,
+    candidateUpgradeRelease,
+  });
   return {
     readme: updatedReadme,
     compatibilityMarkdown: updatedCompatibility,
-    outputs: [
-      [createReadmePath, createReadme],
-      [npmReleasePath, npmRelease],
-    ],
+    outputs: [[createReadmePath, createReadme], [npmReleasePath, npmRelease], ...additionalGuidanceOutputs],
   };
+}
+
+function synchronizeAdditionalCurrentGuidance({
+  repositoryRoot,
+  priorPublicUpgradeRelease,
+  publicUpgradeRelease,
+  candidateUpgradeRelease,
+}) {
+  const historicalEdge = `${priorPublicUpgradeRelease}→${publicUpgradeRelease}`;
+  const currentEdge = `${publicUpgradeRelease}→${candidateUpgradeRelease}`;
+  const historicalHyphenEdge = `${priorPublicUpgradeRelease}-to-${publicUpgradeRelease}`;
+  const currentHyphenEdge = `${publicUpgradeRelease}-to-${candidateUpgradeRelease}`;
+  const frontendProfilePath = join(repositoryRoot, "docs", "architecture", "frontend-only-profile.md");
+  let frontendProfile = replaceRequired(
+    readFileSync(frontendProfilePath, "utf8"),
+    `is \`create-vireo@${publicUpgradeRelease}\`.`,
+    `is \`create-vireo@${candidateUpgradeRelease}\`.`,
+    "docs/architecture/frontend-only-profile.md current profile contract",
+  );
+  frontendProfile = replaceRequired(
+    frontendProfile,
+    `The public \`create-vireo@${publicUpgradeRelease}\` CLI unit suite`,
+    `The public \`create-vireo@${candidateUpgradeRelease}\` CLI unit suite`,
+    "docs/architecture/frontend-only-profile.md current profile evidence",
+  );
+
+  const generatedOwnershipPath = join(repositoryRoot, "docs", "architecture", "generated-code-ownership.md");
+  const generatedOwnership = replaceRequired(
+    readFileSync(generatedOwnershipPath, "utf8"),
+    `The current supported ${historicalHyphenEdge} project upgrade admits declared manifests without\nregeneration.`,
+    `The current supported ${currentHyphenEdge} project upgrade admits declared manifests without\nregeneration. The ${historicalHyphenEdge} edge remains retained historical evidence.`,
+    "docs/architecture/generated-code-ownership.md current project-upgrade edge",
+  );
+
+  const phaseBacklogPath = join(repositoryRoot, "docs", "roadmap", "phase-4", "backlog.md");
+  const phaseBacklog = replaceRequired(
+    readFileSync(phaseBacklogPath, "utf8"),
+    `The current public \`create-vireo@${publicUpgradeRelease}\` line and its supported ${historicalEdge}\nadjacent upgrade fixture are complete.`,
+    `The current public \`create-vireo@${candidateUpgradeRelease}\` line and its supported ${currentEdge}\nadjacent upgrade fixture are complete; ${historicalEdge} remains retained historical evidence.`,
+    "docs/roadmap/phase-4/backlog.md current release contract",
+  );
+
+  const readinessPath = join(repositoryRoot, "docs", "roadmap", "phase-4", "production-readiness-criteria.md");
+  const readinessCriteria = replaceRequired(
+    readFileSync(readinessPath, "utf8"),
+    `Public \`create-vireo\` ${publicUpgradeRelease} declares the current ${historicalEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance; frontend/full-stack unit fixtures exercise the six managed application-skill additions for both profiles.`,
+    `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance; its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical ${historicalEdge} edge.`,
+    "docs/roadmap/phase-4/production-readiness-criteria.md current release compatibility",
+  );
+  return [
+    [frontendProfilePath, frontendProfile],
+    [generatedOwnershipPath, generatedOwnership],
+    [phaseBacklogPath, phaseBacklog],
+    [readinessPath, readinessCriteria],
+  ];
 }
 
 function replaceCurrentTemplateBaseline(
@@ -433,9 +508,14 @@ function replaceCurrentTemplateBaseline(
 }
 
 function replaceRequired(markdown, from, to, label) {
+  return replaceExactCount(markdown, from, to, 1, label);
+}
+
+function replaceExactCount(markdown, from, to, expectedCount, label) {
   const matches = markdown.split(from).length - 1;
-  if (matches !== 1) throw new Error(`${label} must contain exactly one current-state reference`);
-  return markdown.replace(from, to);
+  if (matches !== expectedCount)
+    throw new Error(`${label} must contain exactly ${expectedCount} current-state reference(s)`);
+  return markdown.replaceAll(from, to);
 }
 
 function replacePatternOnce(markdown, pattern, replacement, label) {
@@ -446,22 +526,6 @@ function replacePatternOnce(markdown, pattern, replacement, label) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-}
-
-function collectSiteTextSources(directory) {
-  if (!existsSync(directory)) return [];
-  const excludedDirectories = new Set(["build", "dist", "node_modules", "static"]);
-  const textExtensions = new Set([".json", ".md", ".mjs"]);
-  const paths = [];
-  for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    const path = join(directory, entry.name);
-    if (entry.isDirectory()) {
-      if (!excludedDirectories.has(entry.name)) paths.push(...collectSiteTextSources(path));
-    } else if (entry.isFile() && textExtensions.has(extname(entry.name))) {
-      paths.push(path);
-    }
-  }
-  return paths;
 }
 
 function updateNpmEntries(entries, packageVersions, label, nameKey = "name") {

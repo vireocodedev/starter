@@ -97,6 +97,22 @@ test("synchronizes release contracts and public version documentation from sourc
       readFileSync(join(root, "docs", "NPM_RELEASE.md"), "utf8"),
       /starter-template@0\.3\.0` release is already published/u,
     );
+    assert.match(
+      readFileSync(join(root, "docs", "architecture", "frontend-only-profile.md"), "utf8"),
+      /create-vireo@0\.3\.0/u,
+    );
+    assert.match(
+      readFileSync(join(root, "docs", "architecture", "generated-code-ownership.md"), "utf8"),
+      /current supported 0\.2\.0-to-0\.3\.0 project upgrade/u,
+    );
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-4", "backlog.md"), "utf8"),
+      /create-vireo@0\.3\.0.*0\.2\.0→0\.3\.0/su,
+    );
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"), "utf8"),
+      /current 0\.2\.0→0\.3\.0 edge/u,
+    );
     assert.match(readFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "utf8"), new RegExp(releaseId, "u"));
     assert.match(
       readFileSync(join(root, "packages", "create-vireo", "src", "index.ts"), "utf8"),
@@ -141,17 +157,43 @@ test("synchronizes release contracts and public version documentation from sourc
     const packageLock = readJson(join(root, "package-lock.json"));
     assert.equal(packageLock.packages["packages/create-vireo"].version, "0.3.0");
     assert.equal(packageLock.packages["packages/sqlite"].version, "0.2.2");
-    for (const path of ["site/content/current.md", "site/content/manifest.json", "site/verify.mjs"]) {
+    for (const path of [
+      "site/content/offline.md",
+      "site/content/design-system-overview.md",
+      "site/content/manifest.json",
+      "site/verify.mjs",
+      "site/build.test.mjs",
+    ]) {
       const source = readFileSync(join(root, path), "utf8");
       assert.ok(source.includes("b".repeat(40)), path);
       assert.ok(!source.includes("a".repeat(40)), path);
     }
-    const templateProse = readFileSync(join(root, "site", "content", "template-prose.md"), "utf8");
-    assert.match(templateProse, /current 0\.3\.0 Template reference composition/u);
-    assert.match(templateProse, /pinned 0\.3\.0 Template offline guide/u);
-    assert.match(templateProse, /starter-template@0\.3\.0/u);
-    assert.ok(!templateProse.includes("0.2.0"));
+    assert.match(readFileSync(join(root, "site", "content", "offline.md"), "utf8"), /pinned 0\.3\.0 Template/u);
+    assert.match(
+      readFileSync(join(root, "site", "content", "design-system-overview.md"), "utf8"),
+      /current 0\.3\.0 Template/u,
+    );
+    const historicalSiteSource = readFileSync(join(root, "site", "content", "snapshots", "historical.md"), "utf8");
+    assert.ok(historicalSiteSource.includes("a".repeat(40)));
+    assert.match(historicalSiteSource, /pinned 0\.2\.0 Template/u);
     assert.ok(readFileSync(join(root, "site/dist/current.md"), "utf8").includes("a".repeat(40)));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("fails closed when an allowlisted current site reference changes form", async () => {
+  const root = makeFixture();
+  try {
+    const offlinePath = join(root, "site", "content", "offline.md");
+    writeFileSync(
+      offlinePath,
+      readFileSync(offlinePath, "utf8").replace("pinned 0.2.0 Template", "pinned Template 0.2.0"),
+    );
+    await assert.rejects(
+      synchronizeDocumentationRelease(root),
+      /site\/content\/offline\.md current Template version must contain exactly 1 current-state reference/u,
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -199,7 +241,10 @@ function makeFixture() {
   mkdirSync(join(root, "packages", "sqlite"));
   mkdirSync(join(root, "jvm"));
   mkdirSync(join(root, "docs"));
+  mkdirSync(join(root, "docs", "architecture"));
+  mkdirSync(join(root, "docs", "roadmap", "phase-4"), { recursive: true });
   mkdirSync(join(root, "site", "content"), { recursive: true });
+  mkdirSync(join(root, "site", "content", "snapshots"), { recursive: true });
   mkdirSync(join(root, "site", "dist"), { recursive: true });
   writeJson(join(root, "packages", "create-vireo", "package.json"), {
     name: "create-vireo",
@@ -341,14 +386,47 @@ function makeFixture() {
     join(root, "docs", "NPM_RELEASE.md"),
     "Publish the Template first (the `starter-template@0.2.0` release is already published), then continue.\n",
   );
-  writeFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "Current snapshot: `npm-0.2.0_jvm-0.3.0`.\n");
-  writeFileSync(join(root, "site/content/current.md"), `Current Template: ${"a".repeat(40)}\n`);
   writeFileSync(
-    join(root, "site", "content", "template-prose.md"),
-    `The current 0.2.0 Template reference composition uses the pinned 0.2.0 Template offline guide from starter-template@0.2.0 at ${"a".repeat(40)}.\n`,
+    join(root, "docs", "architecture", "frontend-only-profile.md"),
+    "The current profile is `create-vireo@0.2.0`.\nThe public `create-vireo@0.2.0` CLI unit suite covers the profile.\n",
   );
-  writeFileSync(join(root, "site/content/manifest.json"), JSON.stringify({ currentTemplate: "a".repeat(40) }));
-  writeFileSync(join(root, "site/verify.mjs"), `export const currentTemplate = "${"a".repeat(40)}";\n`);
+  writeFileSync(
+    join(root, "docs", "architecture", "generated-code-ownership.md"),
+    "The current supported 0.1.0-to-0.2.0 project upgrade admits declared manifests without\nregeneration.\n",
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "phase-4", "backlog.md"),
+    "The current public `create-vireo@0.2.0` line and its supported 0.1.0→0.2.0\nadjacent upgrade fixture are complete.\n",
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"),
+    "Public `create-vireo` 0.2.0 declares the current 0.1.0→0.2.0 edge with dry run, explicit apply, refusal, ownership and rollback guidance; frontend/full-stack unit fixtures exercise the six managed application-skill additions for both profiles.\n",
+  );
+  writeFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "Current snapshot: `npm-0.2.0_jvm-0.3.0`.\n");
+  writeFileSync(
+    join(root, "site", "content", "offline.md"),
+    `The pinned 0.2.0 Template offline guide uses ${"a".repeat(40)} and ${"a".repeat(40)}.\n`,
+  );
+  writeFileSync(
+    join(root, "site", "content", "design-system-overview.md"),
+    `The current 0.2.0 Template reference composition uses ${Array.from({ length: 7 }, () => "a".repeat(40)).join(" ")}.\n`,
+  );
+  writeFileSync(
+    join(root, "site/content/manifest.json"),
+    JSON.stringify({ currentTemplateReferences: Array.from({ length: 9 }, () => "a".repeat(40)) }),
+  );
+  writeFileSync(
+    join(root, "site/verify.mjs"),
+    `export const currentTemplate = ["${"a".repeat(40)}", "${"a".repeat(40)}"];\n`,
+  );
+  writeFileSync(
+    join(root, "site/build.test.mjs"),
+    `export const currentTemplate = ["${"a".repeat(40)}", "${"a".repeat(40)}"];\n`,
+  );
+  writeFileSync(
+    join(root, "site", "content", "snapshots", "historical.md"),
+    `The pinned 0.2.0 Template archive uses ${"a".repeat(40)}.\n`,
+  );
   writeFileSync(join(root, "site/dist/current.md"), `Archived Template: ${"a".repeat(40)}\n`);
   return root;
 }
