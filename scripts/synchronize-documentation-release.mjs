@@ -496,7 +496,7 @@ function replaceCurrentTemplateBaseline(
       escapeRegExp(publicUpgradeRelease) +
       "` normalizes generated and upgraded\\nfull-stack consumers to the coordinated `" +
       escapeRegExp(jvmVersion) +
-      "` JVM release|commit intentionally retains its\\n`starterVersion=[^`]+` baseline\\. Full-stack creation and the " +
+      "` JVM release\\.|commit intentionally retains its\\n`starterVersion=[^`]+` baseline\\. Full-stack creation and the " +
       escapeRegExp(historicalEdge) +
       " upgrade\\nnormalize that managed declaration to the current Vireo JVM release, `" +
       escapeRegExp(jvmVersion) +
