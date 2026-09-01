@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vireo JVM Module Author"
+  short_description: "Evolve Vireo JVM modules and Spring APIs"
+  default_prompt: "Use $vireo-jvm-module-author to update a public Vireo JVM module."

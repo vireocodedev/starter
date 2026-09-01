@@ -7,12 +7,49 @@ import test from "node:test";
 import { createVireo, findExampleReferences, removeExample, TEMPLATE_COMMIT } from "../dist/index.js";
 
 const createVireoVersion = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")).version;
+const applicationSkillNames = ["vireo-app-feature-author", "vireo-app-upgrader", "vireo-app-production-readiness"];
+
+async function writeApplicationSkill(template, name) {
+  const skill = join(template, ".vireo", "application", ".agents", "skills", name);
+  await mkdir(join(skill, "agents"), { recursive: true });
+  await writeFile(join(skill, "SKILL.md"), `---\nname: ${name}\ndescription: Fixture consumer skill.\n---\n`);
+  await writeFile(
+    join(skill, "agents", "openai.yaml"),
+    `interface:\n  display_name: "Fixture App Skill"\n  short_description: "Fixture consumer skill"\n  default_prompt: "Use $${name} for fixture work."\n`,
+  );
+}
+
+async function assertProjectedApplicationGuidance(target) {
+  assert.match(await readFile(join(target, "AGENTS.md"), "utf8"), /Application guidance/u);
+  const managed = JSON.parse(await readFile(join(target, ".vireo", "managed-files.json"), "utf8"));
+  const managedPaths = new Set(managed.files.map(file => file.path));
+  assert.equal(managedPaths.has("AGENTS.md"), false, "application-owned AGENTS.md is not managed");
+  for (const name of applicationSkillNames) {
+    assert.match(await readFile(join(target, ".agents", "skills", name, "SKILL.md"), "utf8"), new RegExp(name, "u"));
+    assert.equal(managedPaths.has(`.agents/skills/${name}/SKILL.md`), true, `${name} skill is managed`);
+    assert.equal(managedPaths.has(`.agents/skills/${name}/agents/openai.yaml`), true, `${name} metadata is managed`);
+  }
+  await assert.rejects(readFile(join(target, ".agents", "skills", "vireo-template-maintainer", "SKILL.md")), /ENOENT/u);
+}
 
 async function fixture(root) {
   const template = join(root, "template");
   await mkdir(join(template, ".vireo"), { recursive: true });
+  await mkdir(join(template, ".vireo", "application"), { recursive: true });
+  await mkdir(join(template, ".agents", "skills", "vireo-template-maintainer", "agents"), { recursive: true });
   await mkdir(join(template, "src/main/java/com/vireocode/startertemplate"), { recursive: true });
   await writeFile(join(template, ".vireo/template.json"), "{}\n");
+  await writeFile(join(template, "AGENTS.md"), "# Template maintainer guidance\n");
+  await writeFile(
+    join(template, ".agents", "skills", "vireo-template-maintainer", "SKILL.md"),
+    "---\nname: vireo-template-maintainer\ndescription: Fixture maintainer skill.\n---\n",
+  );
+  await writeFile(
+    join(template, ".agents", "skills", "vireo-template-maintainer", "agents", "openai.yaml"),
+    'interface:\n  display_name: "Fixture Template Maintainer"\n  short_description: "Fixture maintainer skill"\n  default_prompt: "Use $vireo-template-maintainer for fixture work."\n',
+  );
+  await writeFile(join(template, ".vireo", "application", "AGENTS.md"), "# Application guidance\n");
+  for (const name of applicationSkillNames) await writeApplicationSkill(template, name);
   await mkdir(join(template, ".github"), { recursive: true });
   await mkdir(join(template, ".github", "workflows"), { recursive: true });
   await mkdir(join(template, "contracts"), { recursive: true });
@@ -191,6 +228,7 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.equal(result.templateCommit, TEMPLATE_COMMIT);
     assert.match(await readFile(join(target, "settings.gradle"), "utf8"), /sample-app/u);
     assert.match(await readFile(join(target, "README.md"), "utf8"), /^# Sample App$/mu);
+    await assertProjectedApplicationGuidance(target);
     const identity = await readFile(join(target, "frontend/pwa-policy.mjs"), "utf8");
     assert.match(identity, /id: "\/sample-app"/u);
     assert.match(identity, /name: "Sample App"/u);
@@ -541,6 +579,7 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.match(identity, /name: "Operations Ui"/u);
     assert.match(identity, /shortName: "Operations"/u);
     assert.doesNotMatch(identity, /Vireo Starter/u);
+    await assertProjectedApplicationGuidance(target);
     const environment = await readFile(join(target, ".env.development"), "utf8");
     assert.match(environment, /VITE_API_MODE=mock/u);
     assert.doesNotMatch(environment, /VITE_APP_NAME/u);

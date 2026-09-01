@@ -143,6 +143,22 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
     classifyProjectionPath(contract, "frontend/src/app/ui/localization/resources/app.en.ts", "frontend")?.category,
     "application-owned",
   );
+  for (const profile of contract.profiles) {
+    assert.equal(classifyProjectionPath(contract, "AGENTS.md", profile)?.category, "maintainer-only");
+    assert.equal(
+      classifyProjectionPath(contract, ".vireo/application/AGENTS.md", profile)?.category,
+      "application-owned",
+    );
+    assert.equal(
+      classifyProjectionPath(contract, ".vireo/application/.agents/skills/vireo-app-feature-author/SKILL.md", profile)
+        ?.category,
+      "managed",
+    );
+    assert.equal(
+      classifyProjectionPath(contract, ".agents/skills/vireo-template-maintainer/SKILL.md", profile)?.category,
+      "maintainer-only",
+    );
+  }
   assert.equal(
     classifyProjectionPath(contract, "frontend/public/icons/icon-192x192.png", "full-stack")?.category,
     "application-owned",

@@ -1,8 +1,11 @@
 #!/bin/sh
 set -eu
 
+corepack npm run codex:check
+
 node --test \
   scripts/changeset-publish-adapter.test.mjs \
+  scripts/codex-customization-policy.test.mjs \
   scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
   scripts/local-vireo-candidate-fixture.test.mjs \

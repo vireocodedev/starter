@@ -136,6 +136,8 @@ repository setup, permissions, local verification, custom-domain guidance, and
 failure handling.
 The [documentation portal contract](docs/DOCUMENTATION_PORTAL.md) defines search,
 version-specific routes, generated API references, and release linkage.
+For repository contributors, [working with Codex](docs/CODEX.md) explains the
+project-root, skill-discovery, trust, and cross-repository workflow.
 
 The normative [loading-state and skeleton standard](docs/LOADING_STATE_STANDARD.md)
 defines loading classification, structural skeleton behavior, geometry guarantees,

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:@vireocodedev/ui",
+  "decision": "no-release",
+  "justification": "Repository-only Codex instructions changed; the packed UI runtime, declarations, exports, and consumer behavior are unchanged."
+}
