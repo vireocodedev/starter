@@ -33,10 +33,17 @@ threshold for both duration and peak RSS.
 - Lower thresholds whenever the five-run median and normal variance show sustained
   headroom.
 
-The initial complete-gate reference is 165 seconds and 6.96 GiB peak RSS. Warning
-thresholds are 270 seconds and 8 GiB; failure thresholds are 360 seconds and 10 GiB.
-Stage-specific limits remain machine-readable to avoid duplicating a table that can
-drift.
+The 2026-09-01 five-run review replaced every stage and complete-gate baseline with
+its five-run median, including a 496.601-second complete-gate median
+(314.005–519.511 seconds) and 4.07 GiB median peak RSS. The only sustained
+stage regression was the test-and-contract-check stage, so its duration baseline,
+warning, and failure thresholds are 190.278, 220, and 270 seconds respectively.
+The complete-gate and RSS warning/failure thresholds remain unchanged: all runs
+completed successfully, but four of five recorded sustained test-duration warnings
+and one recorded a transient lint-RSS warning; neither justified loosening limits.
+Stage-specific limits remain
+machine-readable to avoid duplicating a table that can drift. See
+[`docs/roadmap/phase-1/evidence/verification-trend-review-2026-09-01.md`](roadmap/phase-1/evidence/verification-trend-review-2026-09-01.md).
 
 ## Exceptions
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "evidenceClass": "signed-sbom-attestation",
-  "repository": "vireocodedev/starter",
+  "repository": "vireocodedev/vireo",
   "retentionDays": 90,
   "npm": {
     "registry": "https://registry.npmjs.org",

@@ -7,12 +7,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vireocodedev/starter.git",
+    "url": "git+https://github.com/vireocodedev/vireo.git",
     "directory": "packages/create-vireo"
   },
   "homepage": "https://vireocode.com/reference/typescript/",
   "bugs": {
-    "url": "https://github.com/vireocodedev/starter/issues"
+    "url": "https://github.com/vireocodedev/vireo/issues"
   },
   "keywords": [
     "create",

@@ -6,7 +6,7 @@ Phase 2 turns the public framework and Template into one reproducible first-run 
 | ------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `P2-00` | Scope and decisions           | D-107 and D-108 are resolved with explicit supported variants and non-goals.                                                                                                 | Done                                                                            |
 | `P2-01` | Minimal Template              | The Item capability is the only end-to-end product example; kitchen-sink/dev-tool pages are absent from the generated app.                                                   | Done                                                                            |
-| `P2-02` | Canonical create coordinate   | `npm create vireo@latest` maps to public package `create-vireo`; npm is the one Phase 2 package manager.                                                                     | Done; `create-vireo@0.2.0` is publicly and anonymously verified                 |
+| `P2-02` | Canonical create coordinate   | `npm create vireo@latest` maps to public package `create-vireo`; npm is the one Phase 2 package manager.                                                                     | Done; `create-vireo@0.7.0` is publicly and anonymously verified                 |
 | `P2-03` | Safe creation engine          | A pinned public Template commit is downloaded, validated, customized, staged, and atomically installed without overwriting targets.                                          | Done                                                                            |
 | `P2-04` | Interactive and automated CLI | Prompts plus `--yes`, naming, Java package, database, Git, dry-run, and JSON options are tested.                                                                             | Done                                                                            |
 | `P2-05` | Root workflow                 | Root `setup`, `doctor`, `dev`, and `verify` commands cover frontend, backend, and the selected database.                                                                     | Done                                                                            |
@@ -25,6 +25,5 @@ Phase 2 turns the public framework and Template into one reproducible first-run 
 
 ## Non-goals
 
-- `vireo upgrade` remains G-203 and needs a released create baseline before its compatibility design is honest.
-- Full-stack entity generation remains G-204 and Phase 3.
+- Supported project upgrade and full-stack entity generation are complete; they are not Phase 2 non-goals.
 - Removed kitchen-sink pages are not promoted to stable framework APIs. Independently valuable examples can be restored later in a separate, explicitly unsupported examples repository.

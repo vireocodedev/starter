@@ -316,7 +316,7 @@ try {
   await mkdir(sourceTemplate);
   const archivePath = join(temporaryRoot, "source-template.tar.gz");
   const response = await fetch(
-    `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${sourceTemplateCommit}`,
+    `https://codeload.github.com/vireocodedev/vireo-template/tar.gz/${sourceTemplateCommit}`,
     { headers: { "user-agent": "vireo-project-upgrade-fixture" } },
   );
   if (!response.ok) throw new Error(`Could not download source Template: HTTP ${response.status}`);

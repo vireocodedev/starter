@@ -138,7 +138,7 @@ export function assertGeneratedProjectIdentity(root, profile, identity) {
   for (const value of [identity.repositoryUrl, identity.supportUrl, identity.securityContact]) {
     if (!joined.includes(value)) throw new Error(`Generated public identity must render ${value}`);
   }
-  if (/github\.com\/vireocodedev\/(?:starter|starter-template)/iu.test(joined)) {
+  if (/github\.com\/vireocodedev\/(?:starter|starter-template|vireo|vireo-template)/iu.test(joined)) {
     throw new Error("Generated public identity inherits a Vireo repository, support, or security route.");
   }
 }

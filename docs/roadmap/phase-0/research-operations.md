@@ -6,7 +6,7 @@ Status: fieldwork-ready and deferred to public beta; zero participants recruited
 zero sessions completed
 
 The 2026-08-27 owner-approved Phase 0 AI-proxy variance did not execute or satisfy
-this human-research runbook. Retain it for the public-beta demand gate and the D-101
+this human-research runbook. Retain it for the D-110 during/after-beta checkpoint and the D-101
 and D-102 revisit after the first three independent adopters or before a 1.0
 commitment, whichever comes first.
 

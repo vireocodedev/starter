@@ -204,7 +204,7 @@ test("release identity must be application-owned and route security separately",
   assert.match(
     validateApplicationIdentity(contract, {
       ...valid,
-      repositoryUrl: "https://github.com/vireocodedev/starter-template",
+      repositoryUrl: "https://github.com/vireocodedev/vireo-template",
       securityContact: valid.supportUrl,
     }).join("\n"),
     /must not inherit a Vireo[\s\S]*must be distinct/u,

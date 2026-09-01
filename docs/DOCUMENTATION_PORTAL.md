@@ -4,7 +4,7 @@ The canonical Vireo documentation entry point is <https://vireocode.com/docs/>.
 It contains task-oriented onboarding, concepts, guides, CLI documentation,
 operations, examples, versions, roadmap, and community routes.
 
-The GitHub Pages artifact at <https://vireocodedev.github.io/starter/> remains the
+The GitHub Pages artifact at <https://vireocodedev.github.io/vireo/> remains the
 exact-release technical host for interactive Storybook, generated TypeScript exports,
 aggregate Javadocs, and immutable machine snapshots. It is not the primary learning
 experience.

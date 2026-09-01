@@ -137,12 +137,12 @@ for module in "${modules[@]}"; do
     assert_contains "$pom" "<version>$version</version>"
     assert_contains "$pom" "<name>$module</name>"
     assert_contains "$pom" "<description>"
-    assert_contains "$pom" "<url>https://github.com/vireocodedev/starter</url>"
+    assert_contains "$pom" "<url>https://github.com/vireocodedev/vireo</url>"
     assert_contains "$pom" "<name>MIT</name>"
     assert_contains "$pom" "<id>vireocodedev</id>"
     assert_contains "$pom" "<name>Vireo Code</name>"
     assert_contains "$pom" "<email>53398175+brunotot@users.noreply.github.com</email>"
-    assert_contains "$pom" "<connection>scm:git:https://github.com/vireocodedev/starter.git</connection>"
+    assert_contains "$pom" "<connection>scm:git:https://github.com/vireocodedev/vireo.git</connection>"
 
     if [[ "$module" == "vireo-bom" ]]; then
         if [[ "$mode" == "verification" ]]; then

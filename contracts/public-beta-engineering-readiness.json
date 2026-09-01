@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-01",
+  "product": "vireo-framework",
+  "machineClosure": {
+    "status": "PASS",
+    "resolved": ["P1-03", "P1-09-machine", "G-108", "G-305-maintainer", "G-308"],
+    "evidence": [
+      "docs/roadmap/phase-0/repository-topology.md",
+      "docs/roadmap/phase-1/evidence/repository-migration-2026-09-01.md",
+      "docs/security/provider-controls-2026-08-31.md",
+      "docs/roadmap/phase-1/evidence/verification-trend-review-2026-09-01.md",
+      "docs/roadmap/phase-4/evidence/target-recovery-2026-09-01.md",
+      "docs/roadmap/phase-5/evidence/hosted-demo-2026-08-28.md"
+    ]
+  },
+  "humanGate": {
+    "status": "HOLD",
+    "privacyRule": "Only sanitized aggregate evidence is public; do not record identities, credentials, private source, application data, or identifying project information.",
+    "handoff": "docs/roadmap/public-beta-human-handoff-2026-09-01.md",
+    "pending": [
+      "second-trusted-maintainer-and-independent-approval",
+      "npm-trusted-publisher-release-continuity",
+      "independent-security-review",
+      "manual-at-branded-browser-physical-device-and-installed-pwa-evidence",
+      "low-end-device-and-real-user-field-performance",
+      "witnessed-target-environment-recovery",
+      "unfamiliar-user-workflow-sessions",
+      "qualifying-independent-adopters-and-maintained-upgrade"
+    ],
+    "obligations": [
+      {
+        "id": "target-developer-persona-demand-and-controlled-competitor-validation",
+        "publicBetaHold": false,
+        "currentState": "zero-human evidence; D-110 accepted-risk timing"
+      },
+      {
+        "id": "authentic-external-contribution-and-publication-permission",
+        "publicBetaHold": false,
+        "currentState": "post-beta human-only; no authentic examples, testimonials, or case-study permission"
+      },
+      {
+        "id": "professional-identity-and-trademark-clearance",
+        "publicBetaHold": false,
+        "currentState": "accepted pre-1.0/public-beta risk; professional clearance open"
+      }
+    ]
+  },
+  "adoptionSnapshot": {
+    "workflowSessions": 0,
+    "qualifyingActiveTeams": 0,
+    "maintainedDeploymentUpgrades": 0
+  },
+  "postBetaNonblocking": ["docs/roadmap/remaining-non-human-work.md", "VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md"]
+}

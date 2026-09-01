@@ -34,4 +34,4 @@ Replace demo credentials, restrict origins, configure trusted proxies deliberate
 
 ## Report a vulnerability
 
-Use the private security-reporting route documented in the framework [security policy](https://github.com/vireocodedev/starter/security/policy). Do not disclose an unpatched vulnerability in a public issue.
+Use the private security-reporting route documented in the framework [security policy](https://github.com/vireocodedev/vireo/security/policy). Do not disclose an unpatched vulnerability in a public issue.

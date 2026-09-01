@@ -5,8 +5,8 @@ Status: **machine intake ready; zero qualifying external sessions and zero indep
 ## Evaluation paths
 
 - Use the Template's 10-minute flagship evaluation for a bounded technical review.
-- File a [**Public-beta evaluation** issue](https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml) for a sanitized task outcome, including failures and objections.
-- File an [**Independent adopter check-in**](https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml) only when the Phase 5 qualification statements are true.
+- File a [**Public-beta evaluation** issue](https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml) for a sanitized task outcome, including failures and objections.
+- File an [**Independent adopter check-in**](https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml) only when the Phase 5 qualification statements are true.
 - Use Discussions for open-ended public questions and design feedback. Use the private security-advisory path for suspected vulnerabilities.
 
 GitHub issues are public, require a GitHub account to submit, and retain their authors according to GitHub's policies. The committed roadmap aggregate never copies participant handles, names, organizations, repository links, recordings, source, application data, or free-form raw responses. Raw research material and any identity mapping belong only in an approved access-controlled system outside this repository.

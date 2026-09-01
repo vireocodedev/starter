@@ -2,7 +2,7 @@
 
 Creates either a full-stack Vireo application or a standalone Vireo frontend from
 an immutable, reviewed commit of the public
-[Vireo Starter Template](https://github.com/vireocodedev/starter-template).
+[Vireo Template](https://github.com/vireocodedev/vireo-template).
 
 ```bash
 npm create vireo@latest my-app
@@ -116,12 +116,12 @@ new capability or reconcile it manually; the command will not overwrite it.
 
 ## Upgrade a generated project
 
-Version 0.3 introduces the first supported release pair, from a project created by
-`create-vireo` 0.2.0 to 0.3.0. The command is non-writing by default:
+The current supported adjacent release pair is a project created by `create-vireo`
+0.6.0 upgraded to 0.7.0. The command is non-writing by default:
 
 ```bash
-vireo upgrade --to 0.3.0 --dry-run
-vireo upgrade --to 0.3.0 --apply --accept-application-owned
+vireo upgrade --to 0.7.0 --dry-run
+vireo upgrade --to 0.7.0 --apply --accept-application-owned
 ```
 
 The preflight refuses unknown source commits, changed Vireo dependency declarations,
@@ -129,10 +129,15 @@ lockfile drift, invalid/duplicate Flyway migration versions, and managed generat
 wire-contract drift. Apply changes only Vireo-managed metadata and the pinned CLI
 script. Template files, domain logic, deployment, data migration, and adopted/ejected
 code remain application-owned and must be reviewed against the target Template
-commit `11e1795a798d5dbaee9344b8ff207d5b0ea59657`. A managed dependency apply can
-leave a 0.2 project unable to compile: that project does not already contain the
-target Template's navigation, responsive-table, accessible-name, or surface-palette
-work. Complete the printed pending checklist before calling the upgrade complete:
+commit `a670d7f95f720a91705c7c156d19e605582fb4c8`. For the current 0.6.0→0.7.0
+edge, review the Template release notes and source-to-target diff for `frontend/src`,
+`src`, deployment descriptors, and `.github`; selectively port application-owned
+changes, refresh the appropriate lockfile, run setup, and complete full verification
+before accepting the upgrade.
+
+### Historical 0.2.0→0.3.0 checklist
+
+The following special checklist applies only to the original 0.2.0→0.3.0 edge:
 
 - navigation landmarks, localized labels, and real links;
 - responsive-table live announcements in both catalogues;

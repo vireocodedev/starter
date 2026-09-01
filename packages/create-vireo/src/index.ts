@@ -68,7 +68,7 @@ const TEMPLATE_VERSION = CREATE_VIREO_PACKAGE_VERSION;
 const TEMPLATE_TAG = `starter-template@${TEMPLATE_VERSION}`;
 const INITIAL_APPLICATION_VERSION = "0.1.0";
 export const TEMPLATE_COMMIT = "a670d7f95f720a91705c7c156d19e605582fb4c8";
-export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/starter-template/tar.gz/${TEMPLATE_COMMIT}`;
+export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/vireo-template/tar.gz/${TEMPLATE_COMMIT}`;
 const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
 export type VireoDatabase = "postgresql" | "h2";
@@ -1094,7 +1094,12 @@ function isUnresolvedIdentity(value: string) {
 }
 
 function assertNoInheritedVireoRoutes(identity: ApplicationIdentity) {
-  const forbidden = ["github.com/vireocodedev/starter", "github.com/vireocodedev/starter-template"];
+  const forbidden = [
+    "github.com/vireocodedev/starter",
+    "github.com/vireocodedev/starter-template",
+    "github.com/vireocodedev/vireo",
+    "github.com/vireocodedev/vireo-template",
+  ];
   for (const [field, value] of Object.entries({
     repositoryUrl: identity.repositoryUrl,
     supportUrl: identity.supportUrl,

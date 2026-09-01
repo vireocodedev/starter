@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const canonicalHomepage = "https://vireocode.com/reference/typescript/";
-const canonicalIssues = "https://github.com/vireocodedev/starter/issues";
-const canonicalRepository = "git+https://github.com/vireocodedev/starter.git";
+const canonicalIssues = "https://github.com/vireocodedev/vireo/issues";
+const canonicalRepository = "git+https://github.com/vireocodedev/vireo.git";
 
 export function validatePackageIdentity(manifest, directory) {
   const problems = [];

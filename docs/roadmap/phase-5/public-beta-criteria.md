@@ -2,11 +2,18 @@
 
 Status: **engineering scope substantially complete; public-beta decision HOLD**.
 
+The current machine PASS and complete human-only pending set are authoritative in
+[`contracts/public-beta-engineering-readiness.json`](../../../contracts/public-beta-engineering-readiness.json)
+and the dated [human handoff](../public-beta-human-handoff-2026-09-01.md). This
+criteria record is read with those sources: second-maintainer/independent-approval
+continuity and npm trusted-publisher release continuity are public-beta holds until
+their named human/provider evidence exists.
+
 ## Public evaluation contract
 
 | Claim surface        | Required evidence                                                                                | Current disposition                       |
 | -------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| First run            | Anonymous `npm create vireo@latest`, doctor, setup, and clean verification                       | Automated evidence exists; human row open |
+| First run            | Anonymous `npm create vireo@latest`, setup, doctor, and clean verification                       | Automated evidence exists; human row open |
 | Killer workflow      | Generate, run, customize, eject, and upgrade a realistic application-owned vertical slice        | Automated fixture exists; human row open  |
 | Flagship quality     | Responsive seeded application, accessible critical journey, explicit supported/unsupported scope | Engineering evidence complete             |
 | Hosted evaluation    | Public revision, health, journey, reset policy, monitoring history, and incident contact         | Complete; best effort, no SLA             |

@@ -11,10 +11,10 @@
   "links": {
     "documentation": "https://vireocode.com/docs/",
     "versions": "https://vireocode.com/versions/",
-    "typescriptApi": "https://vireocodedev.github.io/starter/api/typescript/",
-    "jvmApi": "https://vireocodedev.github.io/starter/api/jvm/",
+    "typescriptApi": "https://vireocodedev.github.io/vireo/api/typescript/",
+    "jvmApi": "https://vireocodedev.github.io/vireo/api/jvm/",
     "demo": "https://demo.vireocode.com",
-    "template": "https://github.com/vireocodedev/starter-template",
+    "template": "https://github.com/vireocodedev/vireo-template",
     "quickstart": "https://vireocode.com/docs/getting-started/",
     "tutorial": "https://vireocode.com/docs/guides/30-minute-vertical-slice/",
     "comparison": "https://vireocode.com/docs/getting-started/choose-your-profile/",
@@ -22,11 +22,11 @@
     "frontendProfile": "https://vireocode.com/docs/getting-started/frontend-only/",
     "security": "https://vireocode.com/docs/security/",
     "roadmap": "https://vireocode.com/roadmap/",
-    "compatibility": "https://github.com/vireocodedev/starter/blob/main/docs/COMPATIBILITY.md",
+    "compatibility": "https://github.com/vireocodedev/vireo/blob/main/docs/COMPATIBILITY.md",
     "migration": "https://vireocode.com/docs/upgrades/",
-    "discussions": "https://github.com/vireocodedev/starter/discussions",
-    "feedback": "https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml",
-    "adopterCheckIn": "https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml",
-    "contributing": "https://github.com/vireocodedev/starter/blob/main/CONTRIBUTING.md"
+    "discussions": "https://github.com/vireocodedev/vireo/discussions",
+    "feedback": "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
+    "adopterCheckIn": "https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml",
+    "contributing": "https://github.com/vireocodedev/vireo/blob/main/CONTRIBUTING.md"
   }
 }

@@ -298,7 +298,7 @@ test("creates and customizes a project atomically from a local fixture", async (
     assertIdentityFailure(["--release"], /supportUrl and securityContact must be distinct/u);
     await writeFile(
       join(target, ".vireo/project.json"),
-      `${JSON.stringify({ ...resolvedIdentity, repositoryUrl: "https://github.com/vireocodedev/starter" }, null, 2)}\n`,
+      `${JSON.stringify({ ...resolvedIdentity, repositoryUrl: "https://github.com/vireocodedev/vireo" }, null, 2)}\n`,
     );
     assertIdentityFailure(["--release"], /repositoryUrl must not inherit a Vireo/u);
     await writeFile(
@@ -725,7 +725,7 @@ test("rejects an inherited Vireo public route even during creation", async () =>
         directory: join(root, "identity-app"),
         git: false,
         dryRun: true,
-        repositoryUrl: "https://github.com/vireocodedev/starter-template",
+        repositoryUrl: "https://github.com/vireocodedev/vireo-template",
       }),
       /must not inherit a Vireo repository/u,
     );

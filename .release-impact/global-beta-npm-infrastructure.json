@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:@vireocodedev/infrastructure",
+  "decision": "no-release",
+  "justification": "Package repository and bugs metadata moved to canonical redirect targets; packed runtime bytes and public API are unchanged."
+}

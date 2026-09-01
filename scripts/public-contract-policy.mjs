@@ -83,8 +83,8 @@ requireText("README.md", [
   "docs/roadmap/phase-5/feedback-and-evidence.md",
 ]);
 requireText("docs/EVALUATION.md", [
-  "https://github.com/vireocodedev/starter/issues/new?template=public_beta_feedback.yml",
-  "https://github.com/vireocodedev/starter/issues/new?template=adopter_check_in.yml",
+  "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
+  "https://github.com/vireocodedev/vireo/issues/new?template=adopter_check_in.yml",
 ]);
 requireText("SUPPORT.md", ["SECURITY.md", "CODE_OF_CONDUCT.md"]);
 requireText("GOVERNANCE.md", [".github/CODEOWNERS", "docs/COMPATIBILITY.md"]);

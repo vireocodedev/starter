@@ -12,7 +12,7 @@ device, or a screen-reader user.
 | `P4-02` | Offline contract (`G-302`)            | Supported reads/mutations, durability, ordering, retries, conflicts, identity isolation, schema/version limits, recovery, diagnostics, and adversarial tests. | Done for the explicitly supported scope        |
 | `P4-03` | Accessibility and platforms (`G-303`) | WCAG 2.2 AA target, automated axe/browser/PWA evidence, release checklist, and honest branded-browser/device/manual-AT evidence matrix.                       | Automation done; manual/device rows open       |
 | `P4-04` | Performance budgets (`G-304`)         | Reproducible production-build and browser measurements enforce declared payload/runtime budgets; field and physical low-end evidence remain explicit.         | Lab budgets done; field/device rows open       |
-| `P4-05` | Production operations (`G-305`)       | Backup, restore, supported PostgreSQL major upgrade, rollback, observability, deployment, and incident runbooks are exercised against real PostgreSQL.        | Automation done; target witness open           |
+| `P4-05` | Production operations (`G-305`)       | Backup, restore, supported PostgreSQL major upgrade, rollback, observability, deployment, and incident runbooks are exercised against real PostgreSQL.        | Maintainer rehearsal done; target witness open |
 | `P4-06` | Release/project upgrades (`G-203`)    | Supported release-pair fixtures detect dependency, migration, wire-contract, generated-contract, and application-owned upgrade incompatibility.               | Done; 0.3.0 published and hosted fixture green |
 | `P4-07` | Closure review                        | Production-readiness criteria are evaluated, known limitations are public, closed gaps cite reproducible evidence, and external/manual gates remain open.     | Done; production-readiness gate stays open     |
 
@@ -43,4 +43,5 @@ gate is silently waived by progress in the other phase.
 See the dated [Phase 4 closure review](closure-review-2026-08-28.md). The
 maintainer-automatable implementation is complete, but the Phase 4 exit gate is not:
 independent, manual, physical-device, field, and target-environment evidence remain
-open. The first public 0.3.0 release and hosted 0.2.0→0.3.0 fixture are complete.
+open. The current public `create-vireo@0.7.0` line and its supported 0.6.0→0.7.0
+adjacent upgrade fixture are complete.

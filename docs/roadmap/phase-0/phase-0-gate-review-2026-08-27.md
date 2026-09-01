@@ -74,7 +74,7 @@ competitor counterevidence, rescues, remediation, and limitations are in the
 
 ### Accepted or deferred
 
-- G-001/G-006: zero human demand/onboarding sessions; public-beta gate under D-110.
+- G-001/G-006: zero human demand/onboarding sessions; human-only post-beta obligation under D-110 timing.
 - G-002: professional identity clearance before material brand investment or 1.0.
 - G-005: controlled neutral-fixture and human competitor replication before
   comparative claims or 1.0.

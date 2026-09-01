@@ -27,8 +27,8 @@ the package manifests:
 | `@vireocodedev/ui`             |           0.3.1 |
 | `com.vireocode:vireo-*`        |           0.3.0 |
 
-`create-vireo` includes the frontend profile. Version 0.2.0 remains the first
-supported project-upgrade source for the explicit 0.2.0→0.3.0 pair. Numeric
+`create-vireo` includes the frontend profile. The current supported project-upgrade
+edge is 0.6.0→0.7.0; 0.2.0→0.3.0 remains retained historical evidence. Numeric
 equality between npm packages or between npm and JVM versions is neither required
 nor implied. A Template commit or tag, together with its committed lockfiles and
 compatibility contract, records the exact frontend and backend combination proven

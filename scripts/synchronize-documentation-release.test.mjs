@@ -26,7 +26,7 @@ test("synchronizes release contracts and public version documentation from sourc
     assert.equal(ecosystem.current.template.commit, "b".repeat(40));
     assert.equal(
       ecosystem.current.template.releaseUrl,
-      "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.3.0",
+      "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.3.0",
     );
     assert.equal(ecosystem.compatibility.sets[0].release, releaseId);
     assert.deepEqual(ecosystem.compatibility.sets[0].npm, {
@@ -39,7 +39,7 @@ test("synchronizes release contracts and public version documentation from sourc
     assert.equal(ecosystem.compatibility.sets[0].templateCommit, "b".repeat(40));
     assert.equal(
       ecosystem.compatibility.sets[0].templateReleaseUrl,
-      "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.3.0",
+      "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.3.0",
     );
     assert.equal(ecosystem.supportLines[0].release, releaseId);
 
@@ -56,15 +56,15 @@ test("synchronizes release contracts and public version documentation from sourc
     assert.equal(documentation.releases[0].template.commit, "b".repeat(40));
     assert.equal(
       documentation.releases[0].template.releaseUrl,
-      "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.3.0",
+      "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.3.0",
     );
     assert.equal(
       documentation.releases[0].releaseLinks.jvmTag,
-      "https://github.com/vireocodedev/starter/releases/tag/jvm-v0.4.0",
+      "https://github.com/vireocodedev/vireo/releases/tag/jvm-v0.4.0",
     );
     assert.equal(
       documentation.releases[0].releaseLinks.template,
-      "https://github.com/vireocodedev/starter-template/releases/tag/starter-template%400.3.0",
+      "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.3.0",
     );
     assert.equal(readJson(join(root, "contracts", "release-lifecycle-policy.json")).supportLines[0].release, releaseId);
     assert.match(readFileSync(join(root, "README.md"), "utf8"), /create-vireo.*0\.3\.0/u);
@@ -209,7 +209,7 @@ function makeFixture() {
         ],
         jvm: { version: "0.3.0" },
         template: { commit: "a".repeat(40) },
-        releaseLinks: { jvmTag: "https://github.com/vireocodedev/starter/releases/tag/jvm-v0.3.0" },
+        releaseLinks: { jvmTag: "https://github.com/vireocodedev/vireo/releases/tag/jvm-v0.3.0" },
       },
     ],
   });

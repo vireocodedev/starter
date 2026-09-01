@@ -36,20 +36,20 @@ and completion.
 
 ## Execution sequence
 
-| Milestone | Scope                                                  | Exit evidence                                                                     | Status                                          |
-| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete                                        |
-| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete                                        |
-| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete                                        |
-| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete                                        |
-| Phase 0E  | External evidence                                      | Isolated AI proxy; human research explicitly deferred under D-110                 | Complete with variance                          |
-| Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete                                        |
-| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Engineering complete; external-human gate open  |
-| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Engineering complete; external-human gate open  |
-| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open   |
-| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Engineering complete; external/manual gate open |
-| Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Engineering substantially complete; gate HOLD   |
-| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Engineering in progress; external gate pending  |
+| Milestone | Scope                                                  | Exit evidence                                                                     | Status                                           |
+| --------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Phase 0A  | Repository baseline reconciliation                     | Scorecard, gap register, responsibility map, prerequisite inventory, measurements | Complete                                         |
+| Phase 0B  | Audience, positioning, non-goals, and scope            | Decision record plus target-developer validation plan                             | Complete                                         |
+| Phase 0C  | Identity, package coordinates, and repository topology | Approved naming and topology decisions                                            | Complete                                         |
+| Phase 0D  | Supported platform matrix                              | Published toolchain, browser, database, and OS policy                             | Complete                                         |
+| Phase 0E  | External evidence                                      | Isolated AI proxy; human research explicitly deferred under D-110                 | Complete with variance                           |
+| Phase 0F  | Phase 0 gate review                                    | Dated closure review and current Phase 1 backlog                                  | Complete                                         |
+| Phase 1   | Public foundation and trust                            | Credential-free public adoption and clean-install proof                           | Engineering complete; external-human gate open   |
+| Phase 2   | Golden-path developer experience                       | Create/doctor workflow and independently successful onboarding                    | Engineering complete; external-human gate open   |
+| Phase 3   | Killer vertical-slice workflow                         | Generated full-stack capability proven by external users                          | Engineering complete; external-user gate open    |
+| Phase 4   | Production hardening                                   | Published production-readiness criteria pass                                      | Engineering complete; external/manual gate open  |
+| Phase 5   | Flagship experience and public beta                    | Three independent active teams and one deployment                                 | Engineering substantially complete; gate HOLD    |
+| Phase 6   | Launch and sustained growth                            | Organic activation, sustainable support, and reliable upgrades                    | Post-beta strategic planning; human gate pending |
 
 ## Phase 0A evidence set
 
@@ -76,8 +76,8 @@ and completion.
 
 Phase 0C approved the direction and migration contract. Since that decision,
 `vireocode.com`, both public repositories, the npm scope, and the verified Maven
-namespace have been activated. Professional clearance and the remaining repository
-rename/metadata sequence stay in Phase 1.
+namespace have been activated. The repository migration is complete; professional
+clearance remains an accepted human pre-1.0/public-beta risk.
 
 ## Phase 0D evidence set
 
@@ -166,7 +166,7 @@ The [dated Phase 5 closure review](phase-5/closure-review-2026-08-28.md) records
 completed `P5-01` through `P5-05` and `P5-08`, including activated hosted-demo
 evidence under `P5-03`, and the unchanged external `P5-06`/`P5-07` gates.
 
-## Phase 6 current engineering evidence
+## Phase 6 strategic/post-beta evidence
 
 - [`P6-02` standalone Vireo website](remaining-non-human-work.md#p6-02--primary-website-and-conversion-funnel)
 - [`P6-13` frontend-only organizational adoption](remaining-non-human-work.md#p6-13--frontend-only-organizational-adoption)
@@ -174,8 +174,9 @@ evidence under `P5-03`, and the unchanged external `P5-06`/`P5-07` gates.
 - Template adapter/mock contracts and Starter unit plus clean generated-consumer
   coverage
 
-Phase 6 is not complete. These independently useful engineering slices do not
-substitute for the remaining launch, sustainability, or external-adoption gates.
+Phase 6 is strategic/post-beta planning outside public-beta promotion. These
+independently useful slices and the superseded `remaining-non-human-work.md` record
+do not create beta blockers or substitute for the dated human-only hold.
 
 ## Measurement policy
 

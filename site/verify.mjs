@@ -255,7 +255,7 @@ function validateArtifact(release, declaredPages) {
   }
   if (
     !visualLanguage.includes(
-      "https://github.com/vireocodedev/starter-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/VISUAL_LANGUAGE.md",
+      "https://github.com/vireocodedev/vireo-template/blob/a670d7f95f720a91705c7c156d19e605582fb4c8/frontend/docs/VISUAL_LANGUAGE.md",
     )
   )
     problems.push("generated visual-language page must retain pinned source provenance");
@@ -278,7 +278,7 @@ function validateArtifact(release, declaredPages) {
     "undefined",
     "javascript:",
     "<script>",
-    'href="https://vireocodedev.github.io/starter/docs/"',
+    'href="https://vireocodedev.github.io/vireo/docs/"',
   ]) {
     if (landing.includes(forbidden) || docs.includes(forbidden))
       problems.push(`generated website contains forbidden value ${forbidden}`);
