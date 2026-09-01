@@ -23,9 +23,9 @@
     "projectUpgrades": "contracts/project-upgrade-policy.json"
   },
   "current": {
-    "id": "npm-0.7.0_jvm-0.3.0",
+    "id": "npm-0.8.0_jvm-0.3.1",
     "npm": [
-      { "name": "create-vireo", "version": "0.7.0", "role": "project-scaffolder" },
+      { "name": "create-vireo", "version": "0.8.0", "role": "project-scaffolder" },
       { "name": "@vireocodedev/history", "version": "0.2.2", "role": "history-domain" },
       { "name": "@vireocodedev/infrastructure", "version": "0.2.2", "role": "browser-infrastructure" },
       { "name": "@vireocodedev/localization", "version": "0.2.2", "role": "localization-resources" },
@@ -36,7 +36,7 @@
     ],
     "maven": {
       "group": "com.vireocode",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "modules": ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"]
     },
     "template": {
@@ -44,9 +44,9 @@
       "commit": "a670d7f95f720a91705c7c156d19e605582fb4c8",
       "profiles": ["frontend", "full-stack"],
       "databases": ["h2", "postgresql"],
-      "version": "0.7.0",
-      "tag": "starter-template@0.7.0",
-      "releaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.7.0"
+      "version": "0.8.0",
+      "tag": "starter-template@0.8.0",
+      "releaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.0"
     }
   },
   "compatibility": {
@@ -56,9 +56,9 @@
       {
         "id": "current-alpha",
         "status": "supported",
-        "release": "npm-0.7.0_jvm-0.3.0",
+        "release": "npm-0.8.0_jvm-0.3.1",
         "npm": {
-          "create-vireo": "0.7.0",
+          "create-vireo": "0.8.0",
           "@vireocodedev/history": "0.2.2",
           "@vireocodedev/infrastructure": "0.2.2",
           "@vireocodedev/localization": "0.2.2",
@@ -67,11 +67,11 @@
           "@vireocodedev/sqlite": "0.2.3",
           "@vireocodedev/ui": "0.3.1"
         },
-        "mavenBom": "com.vireocode:vireo-bom:0.3.0",
+        "mavenBom": "com.vireocode:vireo-bom:0.3.1",
         "templateCommit": "a670d7f95f720a91705c7c156d19e605582fb4c8",
-        "templateVersion": "0.7.0",
-        "templateTag": "starter-template@0.7.0",
-        "templateReleaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.7.0"
+        "templateVersion": "0.8.0",
+        "templateTag": "starter-template@0.8.0",
+        "templateReleaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.0"
       }
     ]
   },
@@ -125,7 +125,7 @@
       "id": "0.3-alpha",
       "status": "active",
       "claim": "public-alpha",
-      "release": "npm-0.7.0_jvm-0.3.0",
+      "release": "npm-0.8.0_jvm-0.3.1",
       "eol": null,
       "compatibilityPolicy": "docs/COMPATIBILITY.md"
     }

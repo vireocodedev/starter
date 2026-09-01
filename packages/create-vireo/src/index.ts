@@ -63,7 +63,7 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-const CREATE_VIREO_PACKAGE_VERSION = "0.7.0";
+const CREATE_VIREO_PACKAGE_VERSION = "0.8.0";
 const TEMPLATE_VERSION = CREATE_VIREO_PACKAGE_VERSION;
 const TEMPLATE_TAG = `starter-template@${TEMPLATE_VERSION}`;
 const INITIAL_APPLICATION_VERSION = "0.1.0";

@@ -83,7 +83,7 @@
         "release": "0.7.0",
         "status": "current",
         "templateCommit": "a670d7f95f720a91705c7c156d19e605582fb4c8",
-        "rootVireoScript": "npx --yes --package=create-vireo@0.7.0 vireo",
+        "rootVireoScript": "npx --yes --package=create-vireo@0.8.0 vireo",
         "starterJvmVersion": "0.3.0",
         "frontendDependencies": {
           "@vireocodedev/history": "^0.2.2",

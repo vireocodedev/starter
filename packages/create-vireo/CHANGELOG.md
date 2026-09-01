@@ -1,5 +1,11 @@
 # create-vireo
 
+## 0.8.0
+
+### Minor Changes
+
+- cc6c53d: Project versioned Codex guidance and managed application skills into newly generated full-stack and frontend applications while excluding Template-maintainer instructions.
+
 ## 0.7.0
 
 ### Minor Changes
