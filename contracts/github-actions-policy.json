@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "actions": {
     "actions/checkout": {
-      "version": "v6.1.0",
-      "sha": "d23441a48e516b6c34aea4fa41551a30e30af803"
+      "version": "v7.0.1",
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1"
     },
     "actions/configure-pages": {
       "version": "v5.0.0",
