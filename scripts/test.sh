@@ -8,6 +8,7 @@ node --test \
   scripts/codex-customization-policy.test.mjs \
   scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
+  scripts/npm-release-maven-prerequisite-policy.test.mjs \
   scripts/local-vireo-candidate-fixture.test.mjs \
   scripts/generated-fixture-template-pin.test.mjs \
   scripts/local-vireo-maven-candidate-fixture.test.mjs \

@@ -116,6 +116,10 @@ export {};
     '{"java.import.gradle.enabled":true,"files.exclude":{"frontend/dist":true}}\n',
   );
   await writeFile(join(template, "settings.gradle"), "rootProject.name = 'starter-template'\n");
+  await writeFile(
+    join(template, "gradle.properties"),
+    "org.gradle.caching=true\nstarterVersion=0.3.0\norg.gradle.jvmargs=-Xmx2g\n",
+  );
   await writeFile(join(template, "README.md"), "# Vireo Starter Template\n");
   await writeFile(
     join(template, "package.json"),
@@ -236,6 +240,10 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.match(identity, /description: "Sample App is a production-oriented application\."/u);
     assert.doesNotMatch(identity, /Vireo Starter/u);
     assert.ok((await readFile(join(target, "package.json"), "utf8")).includes(`create-vireo@${createVireoVersion}`));
+    assert.equal(
+      await readFile(join(target, "gradle.properties"), "utf8"),
+      "org.gradle.caching=true\nstarterVersion=0.3.1\norg.gradle.jvmargs=-Xmx2g\n",
+    );
     assert.match(
       await readFile(join(target, "src/main/java/dev/example/sample/App.java"), "utf8"),
       /package dev\.example\.sample/u,
@@ -396,6 +404,50 @@ test("creates and customizes a project atomically from a local fixture", async (
     }
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("normalizes the immutable Template JVM baseline only for full-stack projects", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-jvm-release-"));
+  try {
+    const template = await fixture(root);
+    const fullStack = join(root, "full-stack-app");
+    const frontend = join(root, "frontend-app");
+    await createVireo({ directory: fullStack, git: false, templateDirectory: template });
+    await createVireo({ directory: frontend, profile: "frontend", git: false, templateDirectory: template });
+    assert.equal(
+      await readFile(join(template, "gradle.properties"), "utf8"),
+      "org.gradle.caching=true\nstarterVersion=0.3.0\norg.gradle.jvmargs=-Xmx2g\n",
+    );
+    assert.equal(
+      await readFile(join(fullStack, "gradle.properties"), "utf8"),
+      "org.gradle.caching=true\nstarterVersion=0.3.1\norg.gradle.jvmargs=-Xmx2g\n",
+    );
+    await assert.rejects(readFile(join(frontend, "gradle.properties")), /ENOENT/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("refuses malformed, missing, duplicate, or drifted Template starterVersion baselines", async () => {
+  const cases = [
+    "",
+    "starterVersion=not-a-version\n",
+    "starterVersion=0.2.0\n",
+    "starterVersion=0.3.0\nstarterVersion=0.3.0\n",
+  ];
+  for (const [index, gradleProperties] of cases.entries()) {
+    const root = await mkdtemp(join(tmpdir(), `create-vireo-jvm-baseline-${index}-`));
+    try {
+      const template = await fixture(root);
+      await writeFile(join(template, "gradle.properties"), gradleProperties);
+      await assert.rejects(
+        createVireo({ directory: join(root, "invalid-app"), git: false, templateDirectory: template }),
+        /exactly one starterVersion=0\.3\.0 baseline/u,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   }
 });
 

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "release",
+  "bump": "deploy",
+  "summary": "Deploy the Vireo 0.8 current snapshot with npm 0.8.0, JVM 0.3.1, Template 0.8.0, and 0.7-to-0.8 upgrade guidance."
+}

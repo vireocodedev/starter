@@ -16,6 +16,17 @@ import {
 } from "./lib/local-vireo-maven-candidate-fixture.mjs";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+const exactMavenVersionPattern = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u;
+
+async function readCurrentEcosystemMavenVersion() {
+  const ecosystemContract = JSON.parse(
+    await readFile(join(repositoryRoot, "contracts/ecosystem-release-contract.json"), "utf8"),
+  );
+  const version = ecosystemContract.current?.maven?.version;
+  if (typeof version !== "string" || !exactMavenVersionPattern.test(version))
+    throw new Error("Ecosystem release contract must declare an exact current Maven version.");
+  return version;
+}
 
 test("JVM candidate version is read and gated exactly from gradle.properties", () => {
   assert.equal(readJvmCandidateVersion("group=com.vireocode\nversion=0.3.0\n"), "0.3.0");
@@ -28,8 +39,9 @@ test("JVM candidate version is read and gated exactly from gradle.properties", (
 });
 
 test("the fixture target equals the current JVM gradle.properties version", async () => {
+  const expectedVersion = await readCurrentEcosystemMavenVersion();
   const gradleProperties = await readFile(join(repositoryRoot, "jvm", "gradle.properties"), "utf8");
-  assert.equal(assertJvmCandidateVersion({ gradleProperties, expectedVersion: "0.3.0" }), "0.3.0");
+  assert.equal(assertJvmCandidateVersion({ gradleProperties, expectedVersion }), expectedVersion);
 });
 
 test("JVM candidate commands use an audited file repository and isolated Gradle consumer flags", () => {
@@ -133,7 +145,7 @@ test("JVM candidate lifecycle cleans up after success and aggregates primary and
   );
 });
 
-test("generated backend fixtures use packed Maven candidates and retain the PurchaseOrder integration", async () => {
+test("generated and historical backend fixtures isolate Maven verification and retain the PurchaseOrder integration", async () => {
   const fixtures = await Promise.all(
     ["project-upgrade-fixture.mjs", "generated-entity-fixture.mjs"].map(async name => ({
       name,
@@ -145,15 +157,22 @@ test("generated backend fixtures use packed Maven candidates and retain the Purc
     "utf8",
   );
   const sources = [...fixtures.map(fixture => fixture.source), helper].join("\n");
-  for (const fixture of fixtures) {
-    assert.match(fixture.source, /withLocalVireoMavenCandidates\(/u, fixture.name);
-    assert.match(fixture.source, /mavenCandidateConsumerCommand\(\{/u, fixture.name);
-    assert.match(fixture.source, /expectedVersion:/u, fixture.name);
-  }
   const generatedEntityFixture = fixtures.find(fixture => fixture.name === "generated-entity-fixture.mjs").source;
+  const projectUpgradeFixture = fixtures.find(fixture => fixture.name === "project-upgrade-fixture.mjs").source;
+  assert.match(generatedEntityFixture, /withLocalVireoMavenCandidates\(/u);
+  assert.match(generatedEntityFixture, /mavenCandidateConsumerCommand\(\{/u);
+  assert.match(generatedEntityFixture, /expectedVersion: targetMavenVersion/u);
   assert.match(generatedEntityFixture, /contracts\/ecosystem-release-contract\.json/u);
   assert.match(generatedEntityFixture, /current\?\.maven\?\.version/u);
-  assert.match(generatedEntityFixture, /expectedVersion: targetMavenVersion/u);
+  assert.match(projectUpgradeFixture, /packages\/create-vireo\/schema\/vireo-upgrade-policy\.json/u);
+  assert.match(projectUpgradeFixture, /targetStarterJvmVersion = targetReleaseNode\?\.starterJvmVersion/u);
+  assert.match(projectUpgradeFixture, /"\.\/gradlew"/u);
+  assert.match(projectUpgradeFixture, /"-PuseLocalStarter=false"/u);
+  assert.match(projectUpgradeFixture, /GRADLE_USER_HOME: historicalGradleUserHome/u);
+  assert.doesNotMatch(
+    projectUpgradeFixture,
+    /withLocalVireoMavenCandidates|mavenCandidateConsumerCommand|--init-script/u,
+  );
   assert.match(helper, /PurchaseOrderApiIntegrationTest/u);
   assert.doesNotMatch(sources, /publishToMavenLocal|mavenLocal|~\/\.m2/u);
   assert.doesNotMatch(sources, /writeFile\([^\n]*gradle\.properties/u);

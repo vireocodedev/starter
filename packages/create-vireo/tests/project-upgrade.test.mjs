@@ -361,9 +361,10 @@ test("release pair refuses generated wire-contract drift", async () => {
   }
 });
 
-const adjacentSourceRelease = "0.6.0";
-const adjacentTargetRelease = "0.7.0";
-const adjacentSourceCommit = "5b123e60bd1ce733ae70711796552a17aaa60fe3";
+const adjacentSourceRelease = "0.7.0";
+const adjacentTargetRelease = "0.8.0";
+const adjacentSourceCommit = "a670d7f95f720a91705c7c156d19e605582fb4c8";
+const adjacentEdge = "0.7.0->0.8.0";
 const adjacentPolicy = JSON.parse(
   await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
 );
@@ -371,7 +372,7 @@ const adjacentSource = adjacentPolicy.releaseGraph.releases.find(release => rele
 const adjacentTarget = adjacentPolicy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease);
 
 async function adjacentFixture(profile) {
-  const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-0.6-`));
+  const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-0.7-`));
   const frontend = profile === "frontend";
   await mkdir(join(root, ".vireo"), { recursive: true });
   await mkdir(join(root, "scripts"), { recursive: true });
@@ -388,8 +389,7 @@ async function adjacentFixture(profile) {
       join(root, "package-lock.json"),
       `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies } } }, null, 2)}\n`,
     );
-    const doctor = adjacentPolicy.releaseGraph.baselines["0.6.0->0.7.0"].frontend[0];
-    await writeFile(join(root, doctor.path), doctor.sourceContent);
+    // The 0.8 edge adds managed application skills; their absence is the verified source state.
   } else {
     await writeFile(join(root, "frontend/package.json"), `${JSON.stringify({ dependencies }, null, 2)}\n`);
     await writeFile(
@@ -397,15 +397,13 @@ async function adjacentFixture(profile) {
       `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies } } }, null, 2)}\n`,
     );
     await writeFile(join(root, "gradle.properties"), `starterVersion=${adjacentSource.starterJvmVersion}\n`);
-    for (const baseline of adjacentPolicy.releaseGraph.baselines["0.6.0->0.7.0"]["full-stack"]) {
-      await mkdir(dirname(join(root, baseline.path)), { recursive: true });
-      await writeFile(join(root, baseline.path), baseline.sourceContent);
-    }
+    // The full-stack source also intentionally has no managed 0.8 skill additions.
   }
   await writeFile(join(root, "application-owned.txt"), "keep this application customization\n");
+  await writeFile(join(root, "AGENTS.md"), "application-owned guidance\n");
   await writeFile(
     join(root, ".vireo/project.json"),
-    `${JSON.stringify({ schemaVersion: 1, profile, projectName: "upgrade-fixture", ...(frontend ? {} : { javaPackage: "dev.example.upgradefixture", database: "h2" }), templateCommit: adjacentSourceCommit, createdBy: "create-vireo@0.6.0" }, null, 2)}\n`,
+    `${JSON.stringify({ schemaVersion: 1, profile, projectName: "upgrade-fixture", ...(frontend ? {} : { javaPackage: "dev.example.upgradefixture", database: "h2" }), templateCommit: adjacentSourceCommit, createdBy: "create-vireo@0.7.0" }, null, 2)}\n`,
   );
   return root;
 }
@@ -420,7 +418,7 @@ async function treeBytes(root, directory = root) {
   return result;
 }
 
-test("0.6.0 projects expose a non-writing adjacent 0.7.0 status and dry run for both profiles", async () => {
+test("0.7.0 projects expose a non-writing adjacent 0.8.0 status and dry run for both profiles", async () => {
   for (const profile of ["full-stack", "frontend"]) {
     const root = await adjacentFixture(profile);
     try {
@@ -428,17 +426,23 @@ test("0.6.0 projects expose a non-writing adjacent 0.7.0 status and dry run for 
       const status = await vireoProjectStatus(root);
       assert.equal(status.recordedRelease, adjacentSourceRelease);
       assert.equal(status.nextHop, adjacentTargetRelease);
-      assert.ok(status.managedFiles.some(file => file.state === "update"));
-      assert.match(formatVireoStatusText(status).join("\n"), /next hop: 0\.7\.0/u);
+      assert.ok(status.managedFiles.some(file => file.state === "add"));
+      assert.match(formatVireoStatusText(status).join("\n"), /next hop: 0\.8\.0/u);
       const preview = await upgradeVireoProject({ projectDirectory: root, targetRelease: adjacentTargetRelease });
       assert.equal(preview.dryRun, true);
-      assert.ok(preview.files.some(file => file.status === "update"));
+      assert.ok(preview.files.some(file => file.status === "create"));
       assert.match(
         preview.checks.find(check => check.id === "lockfile").detail,
         profile === "frontend"
           ? /corepack npm install --package-lock-only before verification/u
           : /corepack npm install --package-lock-only --prefix frontend before verification/u,
       );
+      if (profile === "full-stack") {
+        assert.ok(preview.files.some(file => file.path === "gradle.properties" && file.status === "update"));
+        assert.equal(await readFile(join(root, "gradle.properties"), "utf8"), "starterVersion=0.3.0\n");
+      } else {
+        assert.ok(preview.files.every(file => file.path !== "gradle.properties"));
+      }
       assertSameSnapshot(before, await treeBytes(root));
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -446,7 +450,7 @@ test("0.6.0 projects expose a non-writing adjacent 0.7.0 status and dry run for 
   }
 });
 
-test("0.6.0 to 0.7.0 applies managed transforms once and preserves application-owned bytes", async () => {
+test("0.7.0 to 0.8.0 adds managed skills once and preserves application-owned bytes", async () => {
   for (const profile of ["full-stack", "frontend"]) {
     const root = await adjacentFixture(profile);
     try {
@@ -456,16 +460,38 @@ test("0.6.0 to 0.7.0 applies managed transforms once and preserves application-o
         dryRun: false,
         acceptApplicationOwned: true,
       });
-      assert.ok(applied.files.some(file => file.status === "update"));
+      assert.ok(applied.files.some(file => file.status === "create"));
       assert.equal(
         await readFile(join(root, "application-owned.txt"), "utf8"),
         "keep this application customization\n",
       );
-      const baseline = adjacentPolicy.releaseGraph.baselines["0.6.0->0.7.0"][profile][0];
-      assert.equal(await readFile(join(root, baseline.path), "utf8"), baseline.targetContent);
+      assert.equal(await readFile(join(root, "AGENTS.md"), "utf8"), "application-owned guidance\n");
+      if (profile === "full-stack") {
+        assert.equal(await readFile(join(root, "gradle.properties"), "utf8"), "starterVersion=0.3.1\n");
+      } else {
+        await assert.rejects(readFile(join(root, "gradle.properties")), /ENOENT/u);
+      }
+      for (const baseline of adjacentPolicy.releaseGraph.baselines[adjacentEdge][profile]) {
+        assert.equal(await readFile(join(root, baseline.path), "utf8"), baseline.targetContent, baseline.path);
+      }
+      await assert.rejects(
+        readFile(join(root, ".vireo", "application", ".agents", "skills", "vireo-app-feature-author", "SKILL.md")),
+        /ENOENT/u,
+      );
       const metadata = JSON.parse(await readFile(join(root, ".vireo/project.json"), "utf8"));
-      assert.equal(metadata.lastUpgradedBy, "create-vireo@0.7.0");
+      assert.equal(metadata.lastUpgradedBy, "create-vireo@0.8.0");
       assert.equal(metadata.templateCommit, adjacentTarget.templateCommit);
+      const managed = JSON.parse(await readFile(join(root, ".vireo/managed-files.json"), "utf8"));
+      for (const baseline of adjacentPolicy.releaseGraph.baselines[adjacentEdge][profile]) {
+        assert.ok(
+          managed.files.some(file => file.path === baseline.path),
+          baseline.path,
+        );
+      }
+      assert.ok(
+        managed.files.every(file => !file.path.startsWith(".vireo/application/.agents/")),
+        "consumer skill additions must never be recorded under Template-only provenance paths",
+      );
       const repeated = await upgradeVireoProject({ projectDirectory: root, targetRelease: adjacentTargetRelease });
       assert.ok(repeated.files.every(file => file.status === "unchanged"));
     } finally {
@@ -474,7 +500,7 @@ test("0.6.0 to 0.7.0 applies managed transforms once and preserves application-o
   }
 });
 
-test("0.6.0 adjacent upgrades reject unknown commits, managed drift, unsafe paths, symlinks, and dry journal recovery", async () => {
+test("0.7.0 adjacent upgrades reject unknown commits, managed drift, unsafe paths, symlinks, and dry journal recovery", async () => {
   const root = await adjacentFixture("frontend");
   try {
     const metadataPath = join(root, ".vireo/project.json");
@@ -487,7 +513,9 @@ test("0.6.0 adjacent upgrades reject unknown commits, managed drift, unsafe path
     );
     metadata.templateCommit = adjacentSourceCommit;
     await writeFile(metadataPath, JSON.stringify(metadata));
-    await writeFile(join(root, "scripts/vireo-frontend-doctor.mjs"), "customized\n");
+    const driftedPath = adjacentPolicy.releaseGraph.baselines[adjacentEdge].frontend[0].path;
+    await mkdir(dirname(join(root, driftedPath)), { recursive: true });
+    await writeFile(join(root, driftedPath), "customized\n");
     await assert.rejects(
       upgradeVireoProject({ projectDirectory: root, targetRelease: adjacentTargetRelease }),
       error => error.code === "VIR-UPG-003",
@@ -516,8 +544,7 @@ test("0.6.0 adjacent upgrades reject unknown commits, managed drift, unsafe path
 
   const linked = await adjacentFixture("frontend");
   try {
-    await rm(join(linked, "scripts"), { recursive: true, force: true });
-    await symlink(resolve(linked, ".."), join(linked, "scripts"));
+    await symlink(resolve(linked, ".."), join(linked, ".agents"));
     await assert.rejects(
       upgradeVireoProject({ projectDirectory: linked, targetRelease: adjacentTargetRelease }),
       error => error.code === "VIR-UPG-003",
@@ -527,7 +554,7 @@ test("0.6.0 adjacent upgrades reject unknown commits, managed drift, unsafe path
   }
 });
 
-test("interrupted 0.6.0 upgrade journals are non-writing in preview and recover before apply", async () => {
+test("interrupted 0.7.0 upgrade journals are non-writing in preview and recover before apply", async () => {
   const root = await adjacentFixture("frontend");
   try {
     await writeFile(join(root, "README.md"), "partially-written\n");
@@ -588,7 +615,7 @@ test("synthetic adjacent add/delete transforms are visible, atomic, idempotent, 
   const addContent = "new managed baseline\n";
   const emptyContent = "";
   const deleteContent = "obsolete managed baseline\n";
-  policy.releaseGraph.baselines["0.6.0->0.7.0"].frontend.push(
+  policy.releaseGraph.baselines[adjacentEdge].frontend.push(
     { path: "managed/added.txt", operation: "add", targetSha256: sha256(addContent), targetContent: addContent },
     { path: "managed/empty.txt", operation: "add", targetSha256: sha256(emptyContent), targetContent: emptyContent },
     {

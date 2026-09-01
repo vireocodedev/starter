@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateNpmReleaseMavenPrerequisite } from "./npm-release-maven-prerequisite-policy.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workflowsRoot = join(repoRoot, ".github", "workflows");
@@ -232,6 +233,7 @@ for (const fileName of workflowFiles) {
   const jobs = parseJobs(lines);
 
   if (fileName === "release.yml") problems.push(...validateReleasePrWorkflow(source, policy));
+  if (fileName === "release-npm.yml") problems.push(...validateNpmReleaseMavenPrerequisite(source));
 
   if (source.includes("pull_request_target:")) {
     problems.push(`${fileName} may not use pull_request_target`);

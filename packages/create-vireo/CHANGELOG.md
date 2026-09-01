@@ -5,6 +5,10 @@
 ### Minor Changes
 
 - cc6c53d: Project versioned Codex guidance and managed application skills into newly generated full-stack and frontend applications while excluding Template-maintainer instructions.
+- Declare and execute the public 0.7.0-to-0.8.0 adjacent project-upgrade edge. It
+  pins Template `starter-template@0.8.0` at
+  `2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d` and adds the six managed
+  application-skill files without overwriting application-owned guidance.
 
 ## 0.7.0
 

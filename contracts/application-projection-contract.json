@@ -243,8 +243,15 @@
       "paths": [
         ".github/workflows/template-release.yml",
         ".github/environments/template-release.json",
+        ".github/environments/template-release.deployment-branch-policies.json",
+        ".github/environments/template-release.live-assertions.json",
+        ".github/rulesets/main.json",
         ".github/rulesets/starter-template-0.6.0.json",
         ".github/rulesets/starter-template-0.7.0.json",
+        ".github/rulesets/starter-template-0.8.0.json",
+        ".github/settings/actions.json",
+        ".github/settings/selected-actions.json",
+        ".github/settings/workflow-permissions.json",
         "contracts/template-release-policy.json",
         "contracts/template-release-recovery.json",
         "contracts/project-upgrade-policy.json",
@@ -263,6 +270,7 @@
       "paths": [
         "contracts/platform-support-policy.json",
         "scripts/platform-support-policy.mjs",
+        "scripts/platform-support-policy.test.mjs",
         "scripts/public-contract-policy.mjs",
         "scripts/verification-pipeline-policy.mjs",
         "scripts/vireo-package-compatibility-policy.mjs"
@@ -471,12 +479,52 @@
       "profile": "frontend",
       "category": "managed"
     },
+    {
+      "path": ".vireo/application/.agents/skills/vireo-app-feature-author/agents/openai.yaml",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": ".vireo/application/.agents/skills/vireo-app-production-readiness/SKILL.md",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": ".vireo/application/.agents/skills/vireo-app-production-readiness/agents/openai.yaml",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": ".vireo/application/.agents/skills/vireo-app-upgrader/SKILL.md",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": ".vireo/application/.agents/skills/vireo-app-upgrader/agents/openai.yaml",
+      "profile": "full-stack",
+      "category": "managed"
+    },
     { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/workflows/template-release.yml", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/environments/template-release.json", "profile": "full-stack", "category": "maintainer-only" },
+    {
+      "path": ".github/environments/template-release.deployment-branch-policies.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/environments/template-release.live-assertions.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    { "path": ".github/rulesets/main.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.6.0.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.7.0.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.8.0.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/settings/actions.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/settings/selected-actions.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/settings/workflow-permissions.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "contracts/template-release-policy.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "contracts/template-release-recovery.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "contracts/project-upgrade-policy.json", "profile": "full-stack", "category": "maintainer-only" },
@@ -485,6 +533,7 @@
     { "path": "scripts/write-template-release-manifest.mjs", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "contracts/platform-support-policy.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "scripts/platform-support-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "scripts/platform-support-policy.test.mjs", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "scripts/public-contract-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "scripts/verification-pipeline-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
     {
@@ -494,14 +543,30 @@
     },
     { "path": ".github/workflows/template-release.yml", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/environments/template-release.json", "profile": "frontend", "category": "maintainer-only" },
+    {
+      "path": ".github/environments/template-release.deployment-branch-policies.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/environments/template-release.live-assertions.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    { "path": ".github/rulesets/main.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.6.0.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.7.0.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.8.0.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/settings/actions.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/settings/selected-actions.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/settings/workflow-permissions.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": "contracts/template-release-policy.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": "contracts/template-release-recovery.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": "contracts/project-upgrade-policy.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/template-release-policy.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/template-release-policy.test.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/write-template-release-manifest.mjs", "profile": "frontend", "category": "maintainer-only" },
+    { "path": "scripts/platform-support-policy.test.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "SECURITY.md", "profile": "full-stack", "category": "substitution-required" },
     { "path": "frontend/package.json", "profile": "frontend", "category": "substitution-required" },
     { "path": "gradle/wrapper/gradle-wrapper.properties", "profile": "full-stack", "category": "managed" },

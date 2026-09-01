@@ -90,7 +90,8 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
           node.templateCommit !== coordinate.templateCommit ||
           node.status !== coordinate.status ||
           coordinate.createVireo !== release ||
-          coordinate.templateVersion !== release
+          coordinate.templateVersion !== release ||
+          node.starterJvmVersion !== coordinate.starterJvmVersion
         ) {
           problems.push(`packed upgrade policy does not match coordinate ${release}`);
         }
@@ -128,6 +129,9 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
         problems.push(
           "published upgrade release requires a final terminal current node with a distinct immutable Template commit",
         );
+      }
+      if (publicNode?.starterJvmVersion !== contract.current?.maven?.version) {
+        problems.push("current upgrade starterJvmVersion must match the ecosystem current Maven version");
       }
     }
   }

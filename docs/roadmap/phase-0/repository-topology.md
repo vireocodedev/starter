@@ -13,7 +13,7 @@ and an older private Template repository:
 | Current repository                          | Baseline role                                                               | Finding                                                                                       |
 | ------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `vireocodedev/vireo`                        | TypeScript and JVM libraries, contracts, generators, verification, and docs | Canonical framework source                                                                    |
-| `vireocodedev/vireo-template`               | Active full-stack reference/golden-path consumer                            | Canonical Template implementation at the audited 0.7.0 commit                                 |
+| `vireocodedev/vireo-template`               | Active full-stack reference/golden-path consumer                            | Canonical Template implementation at the reviewed 0.8.0 commit                                |
 | `vireocodedev/starter` / `starter-template` | Historical provider names                                                   | GitHub redirects preserve old public links; they are not canonical release/source coordinates |
 
 Creating a repository for every deliverable would increase navigation, security,

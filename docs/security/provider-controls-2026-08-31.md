@@ -53,7 +53,7 @@ GitHub user `@brunotot` applied and re-read the controls at
   Security app `57789` as appropriate.
 - Starter ruleset `21958125` actively prevents update or deletion of every tag,
   with no bypass actor. Template rulesets `21958166`, `21958135`, and `21926710`
-  protect `main`, `starter-template@0.7.0`, and `starter-template@0.6.0`.
+  protect `main`, `starter-template@0.8.0`, `starter-template@0.7.0`, and `starter-template@0.6.0`.
 - both repositories report selected Actions, SHA pinning, the exact checked-in
   external-action patterns, read-only default workflow permissions, and
   `can_approve_pull_request_reviews: false`;

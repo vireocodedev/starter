@@ -1,22 +1,17 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   checkGeneratedEntities,
-  createVireo,
   TEMPLATE_COMMIT,
   upgradeVireoProject,
   vireoProjectStatus,
 } from "../packages/create-vireo/dist/index.js";
 import { withLocalVireoCandidates } from "./lib/local-vireo-candidate-fixture.mjs";
 import { assertGeneratedFixtureTemplatePinFromRepository } from "./lib/generated-fixture-template-pin.mjs";
-import {
-  mavenCandidateConsumerCommand,
-  withLocalVireoMavenCandidates,
-} from "./lib/local-vireo-maven-candidate-fixture.mjs";
 
 const sourceRelease = "0.2.0";
 const targetRelease = "0.3.0";
@@ -29,6 +24,17 @@ const pendingActionIds = [
 ];
 const sourceTemplateCommit = "2520c99b1550246c3b0c5299b3cc6055dd10ead7";
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+const upgradePolicy = JSON.parse(
+  await readFile(join(repositoryRoot, "packages/create-vireo/schema/vireo-upgrade-policy.json"), "utf8"),
+);
+const targetReleaseNode = upgradePolicy.releaseGraph?.releases?.find(node => node?.release === targetRelease);
+const targetStarterJvmVersion = targetReleaseNode?.starterJvmVersion;
+if (
+  typeof targetStarterJvmVersion !== "string" ||
+  !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(targetStarterJvmVersion)
+) {
+  throw new Error(`Packed upgrade policy must declare an exact starterJvmVersion for ${targetRelease}.`);
+}
 const publicFrontendDoctorFixture = await readFile(
   join(repositoryRoot, "packages/create-vireo/fixtures/project-upgrades/vireo-frontend-doctor.0.6.0.mjs"),
   "utf8",
@@ -39,7 +45,6 @@ const publicGithubActionsPolicyFixture = await readFile(
 );
 await assertGeneratedFixtureTemplatePinFromRepository({ repositoryRoot, templateCommit: TEMPLATE_COMMIT });
 const temporaryRoot = await mkdtemp(join(tmpdir(), "vireo-upgrade-fixture-"));
-const sourceTemplate = join(temporaryRoot, "source-template");
 const projectRoot = join(temporaryRoot, "upgrade-app");
 
 function run(command, args, cwd, { env = process.env } = {}) {
@@ -81,6 +86,17 @@ function assertPendingActions(result) {
 
 function packedVireo(args, cwd) {
   run("node", [join(repositoryRoot, "packages/create-vireo/dist/vireo-cli.js"), ...args], cwd);
+}
+
+function readStarterVersion(gradleProperties) {
+  const versions = gradleProperties
+    .split(/\r?\n/u)
+    .map(line => /^starterVersion=([^\s#]+)$/u.exec(line)?.[1])
+    .filter(Boolean);
+  if (versions.length !== 1 || !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(versions[0])) {
+    throw new Error("Upgraded gradle.properties must declare exactly one exact starterVersion.");
+  }
+  return versions[0];
 }
 
 async function ejectedBytes(root, directory = root) {
@@ -309,44 +325,57 @@ async function adjacentUpgradeFixture(profile) {
   run("corepack", ["npm", "run", "verify"], root, {
     env: verificationCommit ? { ...process.env, GITHUB_SHA: verificationCommit } : process.env,
   });
-  console.log(`Public create-vireo 0.6.0 ${profile} fixture upgraded by packed 0.7 candidate.`);
+  console.log(
+    `Retained public create-vireo 0.6.0 ${profile} fixture upgraded through the historical 0.7.0 edge by the packed 0.8 CLI.`,
+  );
 }
 
 try {
-  await mkdir(sourceTemplate);
-  const archivePath = join(temporaryRoot, "source-template.tar.gz");
-  const response = await fetch(
-    `https://codeload.github.com/vireocodedev/vireo-template/tar.gz/${sourceTemplateCommit}`,
-    { headers: { "user-agent": "vireo-project-upgrade-fixture" } },
-  );
-  if (!response.ok) throw new Error(`Could not download source Template: HTTP ${response.status}`);
-  await writeFile(archivePath, new Uint8Array(await response.arrayBuffer()));
   run(
-    "tar",
-    ["--extract", "--gzip", "--file", archivePath, "--directory", sourceTemplate, "--strip-components=1"],
+    "corepack",
+    [
+      "npm",
+      "exec",
+      "--yes",
+      `--package=create-vireo@${sourceRelease}`,
+      "--",
+      "create-vireo",
+      projectRoot,
+      "--yes",
+      "--name",
+      "upgrade-app",
+      "--java-package",
+      "dev.vireo.upgradeapp",
+      "--database",
+      "h2",
+      "--no-git",
+    ],
     repositoryRoot,
   );
-
-  await createVireo({
-    directory: projectRoot,
-    projectName: "upgrade-app",
-    javaPackage: "dev.vireo.upgradeapp",
-    database: "h2",
-    git: false,
-    templateDirectory: sourceTemplate,
-  });
   const metadataPath = join(projectRoot, ".vireo/project.json");
   const metadata = JSON.parse(await readFile(metadataPath, "utf8"));
-  metadata.templateCommit = sourceTemplateCommit;
-  metadata.createdBy = `create-vireo@${sourceRelease}`;
-  await writeFile(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`);
+  assert.equal(
+    metadata.templateCommit,
+    sourceTemplateCommit,
+    "Published 0.2 CLI must materialize its immutable source Template.",
+  );
+  assert.equal(
+    metadata.createdBy,
+    `create-vireo@${sourceRelease}`,
+    "Published 0.2 CLI must record its source release.",
+  );
   const packagePath = join(projectRoot, "package.json");
   const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
-  packageJson.scripts.vireo = `npx --yes --package=create-vireo@${sourceRelease} vireo`;
-  await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
-  // This fixture deliberately materializes the pre-provenance 0.2 source;
-  // current creation writes managed provenance for 0.6+ projects.
-  await rm(join(projectRoot, ".vireo", "managed-files.json"), { force: true });
+  assert.equal(
+    packageJson.scripts.vireo,
+    `npx --yes --package=create-vireo@${sourceRelease} vireo`,
+    "Published 0.2 CLI must pin its historical Vireo command.",
+  );
+  await assert.rejects(
+    readFile(join(projectRoot, ".vireo", "managed-files.json")),
+    error => error.code === "ENOENT",
+    "Published 0.2 source must remain pre-managed-provenance.",
+  );
 
   const entityFixture = join(repositoryRoot, "packages/create-vireo/fixtures/purchase-order.0.2.0.entity.json");
   const entitySchema = join(projectRoot, ".vireo/purchase-order.entity.json");
@@ -388,6 +417,11 @@ try {
     acceptApplicationOwned: true,
   });
   assertPendingActions(applied);
+  assert.equal(
+    readStarterVersion(await readFile(join(projectRoot, "gradle.properties"), "utf8")),
+    targetStarterJvmVersion,
+    `Historical ${targetRelease} upgrade must set gradle.properties starterVersion from the packed upgrade policy.`,
+  );
   assertSameGeneratedBytes(beforeUpgradeGeneratedBytes, await generatedBytes(projectRoot, generatedManifest));
   const afterUpgradeChecks = await checkGeneratedEntities(projectRoot);
   if (afterUpgradeChecks.length !== 1 || !afterUpgradeChecks[0].ok)
@@ -410,16 +444,26 @@ try {
       join(projectRoot, "frontend"),
     );
   });
-  await withLocalVireoMavenCandidates(
+  const historicalGradleUserHome = join(temporaryRoot, "gradle-user-home");
+  await mkdir(historicalGradleUserHome);
+  run(
+    "./gradlew",
+    [
+      "test",
+      "--tests",
+      "*PurchaseOrderApiIntegrationTest",
+      "-PuseLocalStarter=false",
+      "--refresh-dependencies",
+      "--no-daemon",
+      "--no-build-cache",
+      "--no-configuration-cache",
+      "--console=plain",
+    ],
     projectRoot,
-    ({ initScript }) => {
-      const consumer = mavenCandidateConsumerCommand({ initScript });
-      run(consumer.command, consumer.args, projectRoot);
-    },
-    { expectedVersion: targetRelease },
+    { env: { ...process.env, GRADLE_USER_HOME: historicalGradleUserHome } },
   );
-  // Historical 0.2 -> 0.3 evidence above remains deliberately separate from
-  // the public adjacent-release acceptance below.
+  // Hosted evidence retains the historical 0.2 -> 0.3 and 0.6 -> 0.7 lanes;
+  // focused unit fixtures cover the current 0.7 -> 0.8 edge.
   await adjacentUpgradeFixture("frontend");
   await adjacentUpgradeFixture("full-stack");
   console.log(

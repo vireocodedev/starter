@@ -156,7 +156,7 @@ export function assertGeneratedProjectTemplateMetadata(root, template) {
   }
 }
 
-export function assertGeneratedApplicationPackage(root, profile) {
+export function assertGeneratedApplicationPackage(root, profile, starterJvmVersion) {
   const packageJson = JSON.parse(text(join(root, "package.json")));
   if (packageJson.version !== INITIAL_APPLICATION_VERSION) {
     throw new Error(`Generated ${profile} package version must be ${INITIAL_APPLICATION_VERSION}.`);
@@ -169,7 +169,23 @@ export function assertGeneratedApplicationPackage(root, profile) {
   if (packageJson.scripts?.vireo !== expectedVireo) {
     throw new Error(`Generated package vireo script must pin ${metadata.createdBy}.`);
   }
-  if (profile !== "full-stack") return;
+  if (profile !== "full-stack") {
+    if (existsSync(join(root, "gradle.properties")))
+      throw new Error("Frontend project must not contain gradle.properties.");
+    return;
+  }
+
+  if (typeof starterJvmVersion !== "string" || !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(starterJvmVersion)) {
+    throw new Error("Full-stack generated projection requires an exact current starter JVM version.");
+  }
+  const starterVersions = [...text(join(root, "gradle.properties")).matchAll(/^starterVersion=([^\r\n]+)\r?$/gmu)];
+  if (
+    starterVersions.length !== 1 ||
+    !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(starterVersions[0]?.[1] ?? "") ||
+    starterVersions[0]?.[1] !== starterJvmVersion
+  ) {
+    throw new Error(`Generated gradle.properties must normalize starterVersion=${starterJvmVersion}.`);
+  }
 
   const frontendPackage = JSON.parse(text(join(root, "frontend", "package.json")));
   if (frontendPackage.scripts?.["toolchain:check"] !== "node ../scripts/toolchain-policy.mjs") {
@@ -289,12 +305,12 @@ export function assertGeneratedVerificationBudgetAlignment(root) {
   }
 }
 
-export function assertExactGeneratedProject({ root, profile, identity, template }) {
+export function assertExactGeneratedProject({ root, profile, identity, template, starterJvmVersion }) {
   const files = walk(root);
   assertGeneratedProjectExclusions(files, profile);
   assertGeneratedProjectIdentity(root, profile, identity);
   assertGeneratedProjectTemplateMetadata(root, template);
-  assertGeneratedApplicationPackage(root, profile);
+  assertGeneratedApplicationPackage(root, profile, starterJvmVersion);
   assertGeneratedProjectReleaseIdentity(root, profile);
   assertGeneratedWorkflowPolicy(root, profile);
   assertGeneratedVerificationSplit(root, profile, files);

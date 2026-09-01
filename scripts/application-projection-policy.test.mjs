@@ -10,6 +10,14 @@ import {
 
 const contract = JSON.parse(readFileSync("contracts/application-projection-contract.json", "utf8"));
 const clone = value => structuredClone(value);
+const templateProviderOnlyPaths = [
+  ".github/environments/template-release.deployment-branch-policies.json",
+  ".github/environments/template-release.live-assertions.json",
+  ".github/rulesets/main.json",
+  ".github/settings/actions.json",
+  ".github/settings/selected-actions.json",
+  ".github/settings/workflow-permissions.json",
+];
 
 test("the checked-in application projection contract is semantically valid", () => {
   assert.deepEqual(validateApplicationProjectionContract(contract), []);
@@ -36,6 +44,8 @@ test("template release operations are excluded from every project profile", () =
   for (const profile of contract.profiles) {
     for (const path of [
       ".github/workflows/template-release.yml",
+      ...templateProviderOnlyPaths,
+      ".github/rulesets/starter-template-0.8.0.json",
       "contracts/template-release-policy.json",
       "scripts/template-release-policy.mjs",
       "scripts/template-release-policy.test.mjs",
@@ -60,6 +70,15 @@ test("template maintainer policy wrappers are excluded from full-stack projects"
     assert.equal(classification?.category, "maintainer-only", path);
     assert.equal(classification?.disposition, "exclude", path);
     assert.equal(classifyProjectionPath(contract, path, "frontend")?.disposition, "exclude", `frontend: ${path}`);
+  }
+});
+
+test("the Template platform-support wrapper test is excluded from both project profiles", () => {
+  const path = "scripts/platform-support-policy.test.mjs";
+  for (const profile of contract.profiles) {
+    const classification = classifyProjectionPath(contract, path, profile);
+    assert.equal(classification?.category, "maintainer-only", profile);
+    assert.equal(classification?.disposition, "exclude", profile);
   }
 });
 
@@ -149,11 +168,23 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
       classifyProjectionPath(contract, ".vireo/application/AGENTS.md", profile)?.category,
       "application-owned",
     );
+    for (const path of [
+      ".vireo/application/.agents/skills/vireo-app-feature-author/SKILL.md",
+      ".vireo/application/.agents/skills/vireo-app-feature-author/agents/openai.yaml",
+      ".vireo/application/.agents/skills/vireo-app-production-readiness/SKILL.md",
+      ".vireo/application/.agents/skills/vireo-app-production-readiness/agents/openai.yaml",
+      ".vireo/application/.agents/skills/vireo-app-upgrader/SKILL.md",
+      ".vireo/application/.agents/skills/vireo-app-upgrader/agents/openai.yaml",
+    ]) {
+      assert.equal(classifyProjectionPath(contract, path, profile)?.category, "managed", path);
+    }
     assert.equal(
-      classifyProjectionPath(contract, ".vireo/application/.agents/skills/vireo-app-feature-author/SKILL.md", profile)
-        ?.category,
-      "managed",
+      classifyProjectionPath(contract, ".github/rulesets/starter-template-0.8.0.json", profile)?.category,
+      "maintainer-only",
     );
+    for (const path of templateProviderOnlyPaths) {
+      assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only", path);
+    }
     assert.equal(
       classifyProjectionPath(contract, ".agents/skills/vireo-template-maintainer/SKILL.md", profile)?.category,
       "maintainer-only",
@@ -187,6 +218,28 @@ test("the validator rejects ambiguous and missing ownership decisions", () => {
     paths: rule.paths.filter(path => path !== ".github/workflows/flagship-demo.yml"),
   }));
   assert.match(validateApplicationProjectionContract(missing).join("\n"), /flagship-demo\.yml is unclassified/u);
+
+  const missingPlatformSupportTest = clone(contract);
+  missingPlatformSupportTest.rules = missingPlatformSupportTest.rules.map(rule => ({
+    ...rule,
+    paths: rule.paths.filter(path => path !== "scripts/platform-support-policy.test.mjs"),
+  }));
+  assert.match(
+    validateApplicationProjectionContract(missingPlatformSupportTest).join("\n"),
+    /platform-support-policy\.test\.mjs/u,
+  );
+
+  for (const path of templateProviderOnlyPaths) {
+    const missingProviderSurface = clone(contract);
+    missingProviderSurface.rules = missingProviderSurface.rules.map(rule => ({
+      ...rule,
+      paths: rule.paths.filter(candidate => candidate !== path),
+    }));
+    assert.match(
+      validateApplicationProjectionContract(missingProviderSurface).join("\n"),
+      new RegExp(`${path} is unclassified`, "u"),
+    );
+  }
 });
 
 test("creation permits explicit unresolved release routes but release validation blocks them", () => {

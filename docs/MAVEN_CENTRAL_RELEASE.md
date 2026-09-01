@@ -95,6 +95,13 @@ HTTP `204`, and waits until Central reports `PUBLISHED`. The upload remains
 6. Create the signed or protected `jvm-v<version>` tag only after this public
    consumer proof succeeds.
 
+For a coordinated npm release, this anonymous Maven proof is a protected
+prerequisite: publish the Template first, then stage/publish Maven and verify all
+six public coordinates, and only then dispatch and approve the npm
+`package-release` environment. The npm workflow reads the required Maven version
+from the ecosystem contract and repeats this check before its candidate can reach
+publication; it does not affect merging the Changesets release pull request.
+
 ## Recover an already-validated deployment
 
 If a protected publication run stopped after Central accepted a valid
