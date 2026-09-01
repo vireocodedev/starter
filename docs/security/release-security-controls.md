@@ -39,7 +39,8 @@ scopes:
 | Release verification       | `contents: read`, `packages: read`                                                     | Verify the exact candidate without writes     |
 | Release evidence           | `contents: read`, `packages: read`                                                     | Build checksums, SBOM, and dry-run artifacts  |
 | Public SBOM attestation    | `contents: read`, `id-token: write`, `attestations: write`, `artifact-metadata: write` | Sign exact registry subjects with GitHub OIDC |
-| npm release                | `contents/packages/pull-requests: write`                                               | Release PR, tags, and package publication     |
+| npm release PR maintenance | `contents: write`, `pull-requests: write`                                              | Create or refresh the Changesets release PR   |
+| npm publication            | `contents: write`, `id-token: write`                                                   | Publish human-approved candidate packages     |
 | JVM publication            | `contents: read`, `packages: write`                                                    | Query and publish Maven artifacts             |
 | JVM tag                    | `contents: write`                                                                      | Create the version marker only                |
 | Published JVM verification | `contents: read`, `packages: read`                                                     | Resolve artifacts as an external consumer     |
@@ -93,7 +94,7 @@ review examines a pull request's dependency change, Dependabot monitors known
 vulnerabilities after merge, and Gitleaks scans history for credential-like
 material. None substitutes for threat modeling or independent review.
 
-## Verified GitHub settings
+## Historical GitHub settings audit — 2026-08-27
 
 An authenticated API audit on 2026-08-27 verified these settings on both Starter
 and Template:
@@ -131,8 +132,17 @@ The live application must cover:
 - give at least two trusted maintainers recoverable access to the organization,
   registries, environments, security inbox, and signing/provenance identities.
 
-The release-PR and npm publication workflows are split. The authenticated record
-confirms the rulesets, Actions restrictions, environment ref restrictions, and
+The release-PR and npm publication workflows are split. The trusted, `main`-only
+release-PR workflow may create or refresh a Changesets PR; its reviewed, pinned
+steps contain no approval or merge operation and no publication command. GitHub
+combines PR creation and approval in one repository setting, so trust is enforced
+by that reviewed workflow scope rather than a creation-only provider capability.
+The current provider setting is recorded in the 2026-09-01 follow-up to
+[`provider-controls-2026-08-31.md`](provider-controls-2026-08-31.md), not in the
+historical 2026-08-27 audit above.
+Publication remains manually dispatched from `main` and protected by its
+environment approval gate. The authenticated record confirms the rulesets,
+Actions restrictions, environment ref restrictions, and
 `can_admins_bypass: false` for all four protected environments after the UI-only
 settings were changed. Only one trusted maintainer is currently evidenced, so the
 interim rules cannot honestly require an independent CODEOWNERS approval.
