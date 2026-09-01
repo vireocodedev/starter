@@ -20,8 +20,21 @@ dependencies {
 
     // The library's migrations have to hold up on the vendor a consumer actually
     // deploys to, not only on the in-memory database the suite defaults to.
-    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
-    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testImplementation('org.testcontainers:testcontainers-junit-jupiter') {
+        exclude group: 'com.github.docker-java', module: 'docker-java-transport-zerodep'
+    }
+    testImplementation('org.testcontainers:testcontainers-postgresql') {
+        exclude group: 'com.github.docker-java', module: 'docker-java-transport-zerodep'
+    }
+    testImplementation "com.github.docker-java:docker-java-transport-httpclient5:${dockerJavaVersion}"
+    // docker-java declares this as Maven-provided; javac needs the annotation
+    // types while compiling the compatibility bridge below.
+    testCompileOnly 'org.immutables:value:2.10.1'
+    constraints {
+        testImplementation "org.apache.httpcomponents.client5:httpclient5:${httpClient5Version}"
+        testImplementation "org.apache.httpcomponents.core5:httpcore5:${httpCore5Version}"
+        testImplementation "org.apache.httpcomponents.core5:httpcore5-h2:${httpCore5Version}"
+    }
     testRuntimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'org.flywaydb:flyway-database-postgresql'
 }

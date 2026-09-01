@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "jvm:vireo-core",
+  "decision": "release",
+  "bump": "patch",
+  "summary": "Publish safe Jackson, Tomcat, and Swagger UI dependency constraints for framework consumers."
+}
