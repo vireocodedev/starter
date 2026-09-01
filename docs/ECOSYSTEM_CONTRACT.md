@@ -12,6 +12,13 @@ corepack npm run ecosystem:check
 
 The check compares relationships rather than searching for version tokens. It rejects drift between package manifests, Gradle properties, `create-vireo`, documentation releases, attestation scope, platform policy, and hosted gate jobs. Downstream Doctor, projection, documentation, upgrade, and release tooling should consume this contract instead of introducing a new current-version map.
 
+For coordinated publication, the immutable Template release comes first, followed
+by the exact Maven release and anonymous six-coordinate Maven consumer proof. Only
+then may npm publication be dispatched and approved. The protected npm verify job
+derives this Maven prerequisite from `current.maven.version` in this contract, so a
+missing or mismatched Maven publication blocks npm publication but never blocks a
+release pull-request merge.
+
 Execute the declared gates through `corepack npm run gate:fast`, `corepack npm run
 gate:full`, or `corepack npm run gate:release`. The same manifest owns each gate's
 shell-free invocation, required tool classes, evidence subjects, hosted workflow

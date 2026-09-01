@@ -10,6 +10,15 @@ Vireo publishes independently versioned npm packages and a versioned Maven BOM. 
 
 The prerelease channel is currently `not-enabled`. Enabling it requires a reviewed lifecycle-contract change and release validation that calls `validateReleaseCoordinates` for the selected channel.
 
+## Coordinated publication order
+
+When one release line spans Template, Maven, and npm artifacts, publish the reviewed
+Template first, then stage/publish Maven and complete anonymous Maven Central
+verification, then dispatch and approve npm publication. The npm verify stage
+enforces the exact Maven prerequisite from the ecosystem contract before its
+protected environment is reachable; Changesets release pull requests remain
+mergeable without this public-artifact check.
+
 ## Supported lines
 
 Every line records when it began, when its current status became effective, its maintenance scope, compatibility policy, and withdrawal guide. Valid transitions are `active` → `deprecated` → `eol`; a deprecated line must publish both its deprecation and EOL dates at least 30 days apart.

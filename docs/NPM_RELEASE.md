@@ -78,11 +78,25 @@ corepack npm run release:smoke
 version is outside the approved `0.x` line, or there is nothing new to publish.
 `release:smoke` packs every workspace and exercises the isolated tarballs.
 
+## Protected cross-artifact release order
+
+The current npm line depends on the coordinated public Maven line. Keep this
+order protected: publish the reviewed Template release first (the
+`starter-template@0.8.0` release is already published), then stage and publish the
+matching Maven Central deployment, and run its anonymous six-coordinate consumer
+verification. Only after that proof succeeds may a maintainer dispatch and approve
+the npm publication environment. The npm verify job independently repeats that
+anonymous Maven prerequisite using the exact `current.maven.version` from the
+ecosystem contract, so it blocks publication rather than the release pull-request
+merge.
+
 ## Publish
 
 1. Open GitHub Actions → **Publish npm release** → **Run workflow**.
-2. Select `main`, enter `publish`, and start the run.
-3. Review the retained release-candidate evidence from the verify job.
+2. Confirm the matching Maven Central release has already passed anonymous public
+   verification, select `main`, enter `publish`, and start the run.
+3. Review the retained release-candidate evidence from the verify job, including
+   its Maven availability prerequisite.
 4. Approve the `package-release` environment deployment.
 5. Confirm that the publish job reports at least one published package.
 

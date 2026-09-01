@@ -42,6 +42,8 @@ jobs:
       - run: corepack npm ci
       - name: Install Storybook contract browser
         run: corepack npm exec -- playwright install --with-deps chromium
+      - name: Verify current Maven artifacts are public before npm publication
+        run: ./jvm/scripts/verify-central-consumer.sh "$(node scripts/current-ecosystem-maven-version.mjs)"
       - run: corepack npm run gate:release
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

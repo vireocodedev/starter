@@ -1,5 +1,10 @@
 # Vireo JVM changelog
 
+## 0.3.1
+
+- **vireo-bom:** Raise managed dependency floors to versions containing the current Jackson, Tomcat, and Swagger UI security fixes.
+- **vireo-core:** Publish safe Jackson, Tomcat, and Swagger UI dependency constraints for framework consumers.
+
 ## 0.3.0
 
 - **vireo-bom:** Align the coordinated JVM family after adding optional observability integration.

@@ -82,6 +82,17 @@ test("synchronizes release contracts and public version documentation from sourc
       ).rootVireoScript,
       "npx --yes --package=create-vireo@0.3.0 vireo",
     );
+    assert.equal(
+      upgradePolicy.releaseGraph.releases.find(
+        release =>
+          release.release === (upgradePolicy.releaseGraph.candidateRelease ?? upgradePolicy.releaseGraph.publicRelease),
+      ).starterJvmVersion,
+      "0.4.0",
+    );
+    assert.equal(
+      readJson(join(root, "contracts", "project-upgrade-policy.json")).releaseCoordinates["0.3.0"].starterJvmVersion,
+      "0.4.0",
+    );
     const packageLock = readJson(join(root, "package-lock.json"));
     assert.equal(packageLock.packages["packages/create-vireo"].version, "0.3.0");
     assert.equal(packageLock.packages["packages/sqlite"].version, "0.2.2");
@@ -156,9 +167,25 @@ function makeFixture() {
       previousRelease: "0.2.0",
       releases: [
         { release: "0.2.0", status: "upgrade-source" },
-        { release: "0.3.0", status: "current", rootVireoScript: "npx --yes --package=create-vireo@0.2.0 vireo" },
+        {
+          release: "0.3.0",
+          status: "current",
+          rootVireoScript: "npx --yes --package=create-vireo@0.2.0 vireo",
+          starterJvmVersion: "0.3.0",
+        },
       ],
       edges: [{ from: "0.2.0", to: "0.3.0", applicationOwnedActions: [] }],
+    },
+  });
+  writeJson(join(root, "contracts", "project-upgrade-policy.json"), {
+    publicRelease: "0.3.0",
+    releaseCoordinates: {
+      "0.3.0": {
+        createVireo: "0.2.0",
+        templateVersion: "0.2.0",
+        templateCommit: "a".repeat(40),
+        starterJvmVersion: "0.3.0",
+      },
     },
   });
   writeJson(join(root, "packages", "sqlite", "package.json"), {

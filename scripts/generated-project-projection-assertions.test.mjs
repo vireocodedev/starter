@@ -157,6 +157,10 @@ test("generated projection assertions require application package and workflow n
       }),
     );
     await writeFile(
+      join(root, "gradle.properties"),
+      "org.gradle.caching=true\nstarterVersion=0.3.1\norg.gradle.jvmargs=-Xmx2g\n",
+    );
+    await writeFile(
       join(root, "frontend", "package.json"),
       JSON.stringify({ scripts: { "toolchain:check": "node ../scripts/toolchain-policy.mjs" } }),
     );
@@ -173,7 +177,7 @@ test("generated projection assertions require application package and workflow n
         },
       }),
     );
-    assert.doesNotThrow(() => assertGeneratedApplicationPackage(root, "full-stack"));
+    assert.doesNotThrow(() => assertGeneratedApplicationPackage(root, "full-stack", "0.3.1"));
     assert.doesNotThrow(() => assertGeneratedWorkflowPolicy(root, "full-stack"));
 
     for (const ciPolicy of [
@@ -208,7 +212,7 @@ test("generated projection assertions require application package and workflow n
         },
       }),
     );
-    assert.throws(() => assertGeneratedApplicationPackage(root, "full-stack"), /package version/u);
+    assert.throws(() => assertGeneratedApplicationPackage(root, "full-stack", "0.3.1"), /package version/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

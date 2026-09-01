@@ -53,6 +53,7 @@ try {
     profile: "full-stack",
     identity: { projectName: "generated-app", ...identity },
     template: ecosystemContract.current.template,
+    starterJvmVersion: targetMavenVersion,
   });
   run("corepack", ["npm", "run", "identity:check:release"], projectRoot);
   const schemaPath = join(projectRoot, ".vireo/examples/purchase-order.entity.json");

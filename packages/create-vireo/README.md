@@ -117,11 +117,11 @@ new capability or reconcile it manually; the command will not overwrite it.
 ## Upgrade a generated project
 
 The current supported adjacent release pair is a project created by `create-vireo`
-0.6.0 upgraded to 0.7.0. The command is non-writing by default:
+0.7.0 upgraded to 0.8.0. The command is non-writing by default:
 
 ```bash
-vireo upgrade --to 0.7.0 --dry-run
-vireo upgrade --to 0.7.0 --apply --accept-application-owned
+vireo upgrade --to 0.8.0 --dry-run
+vireo upgrade --to 0.8.0 --apply --accept-application-owned
 ```
 
 The preflight refuses unknown source commits, changed Vireo dependency declarations,
@@ -129,11 +129,18 @@ lockfile drift, invalid/duplicate Flyway migration versions, and managed generat
 wire-contract drift. Apply changes only Vireo-managed metadata and the pinned CLI
 script. Template files, domain logic, deployment, data migration, and adopted/ejected
 code remain application-owned and must be reviewed against the target Template
-commit `a670d7f95f720a91705c7c156d19e605582fb4c8`. For the current 0.6.0→0.7.0
-edge, review the Template release notes and source-to-target diff for `frontend/src`,
-`src`, deployment descriptors, and `.github`; selectively port application-owned
-changes, refresh the appropriate lockfile, run setup, and complete full verification
-before accepting the upgrade.
+commit `2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d`. For the current 0.7.0→0.8.0
+edge, Vireo adds the six managed application-skill files under
+`.agents/skills/`; it never overwrites the application-owned root
+`AGENTS.md`, source, deployment descriptors, or `.github`
+review policy. Review the Template release notes and source-to-target diff, selectively
+port application-owned changes, refresh the appropriate lockfile, run setup, and
+complete full verification before accepting the upgrade.
+
+The immutable `starter-template@0.8.0` source commit intentionally retains its
+`starterVersion=0.3.0` baseline. Full-stack creation and the 0.7.0→0.8.0 upgrade
+normalize that managed declaration to the current Vireo JVM release, `0.3.1`, before
+recording managed hashes. The frontend profile remains Gradle-free.
 
 ### Historical 0.2.0→0.3.0 checklist
 

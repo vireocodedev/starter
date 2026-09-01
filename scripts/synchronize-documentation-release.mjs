@@ -59,6 +59,8 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
 
   const upgradePolicyPath = join(repositoryRoot, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json");
   const upgradePolicy = readJson(upgradePolicyPath);
+  const projectUpgradePath = join(repositoryRoot, "contracts", "project-upgrade-policy.json");
+  const projectUpgrade = readJson(projectUpgradePath);
   const currentUpgradeRelease = upgradePolicy.releaseGraph?.releases?.find(
     release =>
       release.release === (upgradePolicy.releaseGraph?.candidateRelease ?? upgradePolicy.releaseGraph?.publicRelease),
@@ -68,6 +70,18 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   }
   currentUpgradeRelease.rootVireoScript = `npx --yes --package=create-vireo@${createVireoVersion} vireo`;
   currentUpgradeRelease.templateCommit = templateCommit;
+  currentUpgradeRelease.starterJvmVersion = jvmVersion;
+  const currentReleaseCoordinate =
+    projectUpgrade.releaseCoordinates?.[
+      upgradePolicy.releaseGraph?.candidateRelease ?? upgradePolicy.releaseGraph?.publicRelease
+    ];
+  if (!currentReleaseCoordinate || typeof currentReleaseCoordinate !== "object") {
+    throw new Error("Project-upgrade policy has no current release coordinate");
+  }
+  currentReleaseCoordinate.createVireo = createVireoVersion;
+  currentReleaseCoordinate.templateVersion = templateVersion;
+  currentReleaseCoordinate.templateCommit = templateCommit;
+  currentReleaseCoordinate.starterJvmVersion = jvmVersion;
 
   const oldReleaseId = ecosystem.current?.id;
   if (!oldReleaseId || documentation.currentRelease !== oldReleaseId) {
@@ -132,6 +146,7 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     [lifecyclePath, JSON.stringify(lifecycle)],
     [createSourcePath, createSource],
     [upgradePolicyPath, JSON.stringify(upgradePolicy)],
+    [projectUpgradePath, JSON.stringify(projectUpgrade)],
     [packageLockPath, JSON.stringify(packageLock)],
     [readmePath, readme],
     [compatibilityPath, compatibilityMarkdown],

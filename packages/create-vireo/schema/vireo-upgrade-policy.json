@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "releaseGraph": {
-    "publicRelease": "0.7.0",
-    "previousRelease": "0.6.0",
+    "publicRelease": "0.8.0",
+    "previousRelease": "0.7.0",
     "releases": [
       {
         "release": "0.2.0",
@@ -81,10 +81,25 @@
       },
       {
         "release": "0.7.0",
-        "status": "current",
+        "status": "historical",
         "templateCommit": "a670d7f95f720a91705c7c156d19e605582fb4c8",
         "rootVireoScript": "npx --yes --package=create-vireo@0.7.0 vireo",
         "starterJvmVersion": "0.3.0",
+        "frontendDependencies": {
+          "@vireocodedev/history": "^0.2.2",
+          "@vireocodedev/infrastructure": "^0.2.2",
+          "@vireocodedev/localization": "^0.2.2",
+          "@vireocodedev/query": "^0.2.2",
+          "@vireocodedev/shell": "^0.2.2",
+          "@vireocodedev/ui": "^0.3.0"
+        }
+      },
+      {
+        "release": "0.8.0",
+        "status": "current",
+        "templateCommit": "2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d",
+        "rootVireoScript": "npx --yes --package=create-vireo@0.8.0 vireo",
+        "starterJvmVersion": "0.3.1",
         "frontendDependencies": {
           "@vireocodedev/history": "^0.2.2",
           "@vireocodedev/infrastructure": "^0.2.2",
@@ -165,9 +180,103 @@
             ]
           }
         ]
+      },
+      {
+        "from": "0.7.0",
+        "to": "0.8.0",
+        "applicationOwnedActions": [
+          {
+            "id": "application-owned-template-review",
+            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/"],
+            "requirement": "Review the upstream Template 0.8.0 release notes and selectively port the application-owned root AGENTS.md, source, deployment, and generated-capability changes. Vireo adds only the declared managed application skills and never rewrites application-owned source or repository review policy.",
+            "verificationCommands": [
+              "corepack npm install --package-lock-only --prefix frontend",
+              "corepack npm run setup",
+              "./scripts/verify.sh"
+            ]
+          }
+        ]
       }
     ],
     "baselines": {
+      "0.7.0->0.8.0": {
+        "full-stack": [
+          {
+            "path": ".agents/skills/vireo-app-feature-author/SKILL.md",
+            "operation": "add",
+            "targetSha256": "0e023771710524fbf69df805733e5ab96120ea5c6f05db1da7f961600be30acf",
+            "targetContent": "---\nname: vireo-app-feature-author\ndescription: Use for end-to-end Vireo consumer application features; not Vireo framework or Template source changes.\n---\n\n# Vireo App Feature Author\n\nUse this skill for an end-to-end feature in a Vireo consumer app. Do not use it to change the Vireo framework or Template source.\n\n## Discover the project before planning\n\n1. If `.vireo/project.json` exists, read it and use its `profile`, provenance, and generation information. Then inspect the relevant package manifest and available scripts.\n2. In a `full-stack` project, frontend work normally lives in `frontend/` and backend/Flyway work at the root. In a `frontend` project, frontend work is at the root. Follow the checked-in layout rather than hard-coding this convention.\n3. If metadata is absent or legacy coordinates are installed, inspect dependencies, manifests, and existing code. Do not assume a current generator, package name, or upgrade path.\n\n## Ownership and implementation\n\n- Use Vireo generation only for supported capability shapes. Review its dry-run and generated ownership before writing; generated manifests/contracts/indexes remain managed until ejected.\n- Implement product rules, authorization, tenant boundaries, accessible names, localization, validation, migrations, and deployment effects in application-owned code.\n- Add an append-only migration for persistent-schema changes. Do not rewrite a migration already used outside a disposable local database.\n- Use the project’s own focused tests and scripts. Escalate to its full verification only after feature boundaries are complete.\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-feature-author/agents/openai.yaml",
+            "operation": "add",
+            "targetSha256": "6af6da43b0444dfec9db83fae81f82ca69ef314af10a83f8bb10700a1b05b3ff",
+            "targetContent": "interface:\n  display_name: \"Vireo App Feature Author\"\n  short_description: \"Build end-to-end Vireo application features\"\n  default_prompt: \"Use $vireo-app-feature-author to implement a Vireo application feature.\"\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-production-readiness/SKILL.md",
+            "operation": "add",
+            "targetSha256": "839e3ec520dd10729b4262744e6f0abf30ef903b8c1c8e5491f7cb8aa7da1c3e",
+            "targetContent": "---\nname: vireo-app-production-readiness\ndescription: Use for production-readiness reviews of Vireo consumer apps; not a substitute for narrow feature tests.\n---\n\n# Vireo App Production Readiness\n\nUse this skill for a consumer app deployment or production-readiness review. Do not use it as a substitute for a narrow feature test.\n\n- Discover the actual profile, deployment shape, persistence, identity model, and operational owner before applying a checklist.\n- Verify repository-controlled work: production-safe configuration, dependency/security checks, migrations, tests, build artifacts, headers, health/readiness behavior, and documentation.\n- Separate human work clearly: secrets and provider configuration, TLS/ingress, domain authorization decisions, data classification/retention, monitoring ownership, backups/restore rehearsal, incident contacts, legal/privacy review, and deployment approval.\n- Never print secrets, weaken production settings for convenience, or claim an environment is ready merely because a local Compose check passes.\n- Keep a dated evidence record that identifies what was checked, what remains human-owned, and who owns the next decision.\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-production-readiness/agents/openai.yaml",
+            "operation": "add",
+            "targetSha256": "5d7f418de098172323ed000bb13f8c782ac74849d7b1e19ac67004f24e3fd94c",
+            "targetContent": "interface:\n  display_name: \"Vireo App Production Readiness\"\n  short_description: \"Assess Vireo applications for production use\"\n  default_prompt: \"Use $vireo-app-production-readiness to review this Vireo application for production readiness.\"\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-upgrader/SKILL.md",
+            "operation": "add",
+            "targetSha256": "514d19503d05f16f272721879be1bd7f75d1c05cde81461af8944808616c8b6a",
+            "targetContent": "---\nname: vireo-app-upgrader\ndescription: Use for Vireo consumer application upgrades; not framework release execution.\n---\n\n# Vireo App Upgrader\n\nUse this skill when updating a generated Vireo application, `create-vireo`, Template provenance, or Vireo package coordinates. Do not use it for a framework release itself.\n\n## Establish what is supported\n\n- Read `.vireo/project.json` if present and run the project’s status command only when its installed/declared CLI supports it.\n- For legacy projects without current metadata, inventory installed Vireo packages, Template history, generated manifests, migrations, and current verification scripts before recommending a path.\n- Do not invent a release edge. An unsupported or EOL source requires a manual migration plan, not a forced CLI upgrade.\n\n## Safe upgrade workflow\n\n- Start on a clean branch with a recoverable database backup when persistent data is involved.\n- Review a non-writing plan first. It may update declared managed files but cannot decide application-owned source, migrations, deployment, or ejected capabilities.\n- Refresh the applicable lockfile only after the managed plan is accepted, then resolve application-owned work and run the project’s documented checks.\n- Define rollback against both code and schema. Never route an older binary to a newer database unless that mixed state was explicitly designed and rehearsed.\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-upgrader/agents/openai.yaml",
+            "operation": "add",
+            "targetSha256": "6797bd078add4d7b1085e0299e4a277efebec4de9db7d0e21c122eb93dbf907d",
+            "targetContent": "interface:\n  display_name: \"Vireo App Upgrader\"\n  short_description: \"Upgrade Vireo consumer applications safely\"\n  default_prompt: \"Use $vireo-app-upgrader to plan a safe Vireo application upgrade.\"\n"
+          }
+        ],
+        "frontend": [
+          {
+            "path": ".agents/skills/vireo-app-feature-author/SKILL.md",
+            "operation": "add",
+            "targetSha256": "0e023771710524fbf69df805733e5ab96120ea5c6f05db1da7f961600be30acf",
+            "targetContent": "---\nname: vireo-app-feature-author\ndescription: Use for end-to-end Vireo consumer application features; not Vireo framework or Template source changes.\n---\n\n# Vireo App Feature Author\n\nUse this skill for an end-to-end feature in a Vireo consumer app. Do not use it to change the Vireo framework or Template source.\n\n## Discover the project before planning\n\n1. If `.vireo/project.json` exists, read it and use its `profile`, provenance, and generation information. Then inspect the relevant package manifest and available scripts.\n2. In a `full-stack` project, frontend work normally lives in `frontend/` and backend/Flyway work at the root. In a `frontend` project, frontend work is at the root. Follow the checked-in layout rather than hard-coding this convention.\n3. If metadata is absent or legacy coordinates are installed, inspect dependencies, manifests, and existing code. Do not assume a current generator, package name, or upgrade path.\n\n## Ownership and implementation\n\n- Use Vireo generation only for supported capability shapes. Review its dry-run and generated ownership before writing; generated manifests/contracts/indexes remain managed until ejected.\n- Implement product rules, authorization, tenant boundaries, accessible names, localization, validation, migrations, and deployment effects in application-owned code.\n- Add an append-only migration for persistent-schema changes. Do not rewrite a migration already used outside a disposable local database.\n- Use the project’s own focused tests and scripts. Escalate to its full verification only after feature boundaries are complete.\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-feature-author/agents/openai.yaml",
+            "operation": "add",
+            "targetSha256": "6af6da43b0444dfec9db83fae81f82ca69ef314af10a83f8bb10700a1b05b3ff",
+            "targetContent": "interface:\n  display_name: \"Vireo App Feature Author\"\n  short_description: \"Build end-to-end Vireo application features\"\n  default_prompt: \"Use $vireo-app-feature-author to implement a Vireo application feature.\"\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-production-readiness/SKILL.md",
+            "operation": "add",
+            "targetSha256": "839e3ec520dd10729b4262744e6f0abf30ef903b8c1c8e5491f7cb8aa7da1c3e",
+            "targetContent": "---\nname: vireo-app-production-readiness\ndescription: Use for production-readiness reviews of Vireo consumer apps; not a substitute for narrow feature tests.\n---\n\n# Vireo App Production Readiness\n\nUse this skill for a consumer app deployment or production-readiness review. Do not use it as a substitute for a narrow feature test.\n\n- Discover the actual profile, deployment shape, persistence, identity model, and operational owner before applying a checklist.\n- Verify repository-controlled work: production-safe configuration, dependency/security checks, migrations, tests, build artifacts, headers, health/readiness behavior, and documentation.\n- Separate human work clearly: secrets and provider configuration, TLS/ingress, domain authorization decisions, data classification/retention, monitoring ownership, backups/restore rehearsal, incident contacts, legal/privacy review, and deployment approval.\n- Never print secrets, weaken production settings for convenience, or claim an environment is ready merely because a local Compose check passes.\n- Keep a dated evidence record that identifies what was checked, what remains human-owned, and who owns the next decision.\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-production-readiness/agents/openai.yaml",
+            "operation": "add",
+            "targetSha256": "5d7f418de098172323ed000bb13f8c782ac74849d7b1e19ac67004f24e3fd94c",
+            "targetContent": "interface:\n  display_name: \"Vireo App Production Readiness\"\n  short_description: \"Assess Vireo applications for production use\"\n  default_prompt: \"Use $vireo-app-production-readiness to review this Vireo application for production readiness.\"\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-upgrader/SKILL.md",
+            "operation": "add",
+            "targetSha256": "514d19503d05f16f272721879be1bd7f75d1c05cde81461af8944808616c8b6a",
+            "targetContent": "---\nname: vireo-app-upgrader\ndescription: Use for Vireo consumer application upgrades; not framework release execution.\n---\n\n# Vireo App Upgrader\n\nUse this skill when updating a generated Vireo application, `create-vireo`, Template provenance, or Vireo package coordinates. Do not use it for a framework release itself.\n\n## Establish what is supported\n\n- Read `.vireo/project.json` if present and run the project’s status command only when its installed/declared CLI supports it.\n- For legacy projects without current metadata, inventory installed Vireo packages, Template history, generated manifests, migrations, and current verification scripts before recommending a path.\n- Do not invent a release edge. An unsupported or EOL source requires a manual migration plan, not a forced CLI upgrade.\n\n## Safe upgrade workflow\n\n- Start on a clean branch with a recoverable database backup when persistent data is involved.\n- Review a non-writing plan first. It may update declared managed files but cannot decide application-owned source, migrations, deployment, or ejected capabilities.\n- Refresh the applicable lockfile only after the managed plan is accepted, then resolve application-owned work and run the project’s documented checks.\n- Define rollback against both code and schema. Never route an older binary to a newer database unless that mixed state was explicitly designed and rehearsed.\n"
+          },
+          {
+            "path": ".agents/skills/vireo-app-upgrader/agents/openai.yaml",
+            "operation": "add",
+            "targetSha256": "6797bd078add4d7b1085e0299e4a277efebec4de9db7d0e21c122eb93dbf907d",
+            "targetContent": "interface:\n  display_name: \"Vireo App Upgrader\"\n  short_description: \"Upgrade Vireo consumer applications safely\"\n  default_prompt: \"Use $vireo-app-upgrader to plan a safe Vireo application upgrade.\"\n"
+          }
+        ]
+      },
       "0.6.0->0.7.0": {
         "full-stack": [
           {

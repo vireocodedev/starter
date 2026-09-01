@@ -1,7 +1,7 @@
 # Frontend-only project profile
 
 Status: introduced in `create-vireo@0.4.0` on 2026-08-28; current public contract
-is `create-vireo@0.7.0`.
+is `create-vireo@0.8.0`.
 
 Vireo remains a React + Spring Boot full-stack framework by default. The
 `frontend` project profile is a supported secondary adoption path for organizations
@@ -113,7 +113,7 @@ reference and CI fixture; it is not a requirement that Vireo own the repository.
 
 ## Evidence and release boundary
 
-The public `create-vireo@0.7.0` CLI unit suite covers profile validation, projection, generation, checking,
+The public `create-vireo@0.8.0` CLI unit suite covers profile validation, projection, generation, checking,
 idempotence, collisions, and ejection. The hosted `Generated frontend-only fixture`
 CI job downloads the pinned public Template, creates a clean standalone project,
 generates a capability twice, checks the contract, proves that no backend artifact

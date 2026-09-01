@@ -190,6 +190,21 @@ function assertEqual(actual: unknown, expected: unknown, surface: string, code =
       `${surface} is ${JSON.stringify(actual)}; expected ${JSON.stringify(expected)}. Resolve this managed-file customization before upgrading.`,
     );
 }
+function starterVersionDeclaration(gradle: string, surface: string) {
+  const declarations = [...gradle.matchAll(/^starterVersion=([^\r\n]+)\r?$/gmu)];
+  if (declarations.length !== 1 || !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(declarations[0]?.[1] ?? ""))
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `${surface} must declare exactly one well-formed starterVersion=<semver> value.`,
+    );
+  return declarations[0];
+}
+function replaceStarterVersion(gradle: string, expected: string, surface: string) {
+  const declaration = starterVersionDeclaration(gradle, surface);
+  return `${gradle.slice(0, declaration.index)}starterVersion=${expected}${gradle.slice(
+    declaration.index! + declaration[0].length,
+  )}`;
+}
 
 export function validateApplicationOwnedActions(actions: unknown): asserts actions is ApplicationOwnedActionPolicy[] {
   validateEdgeActions(actions);
@@ -271,6 +286,20 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
     edges.add(`${edge.from}->${edge.to}`);
   }
   for (const release of graph.releases) {
+    if (
+      !/^\d+\.\d+\.\d+$/u.test(release.release) ||
+      !/^[a-f0-9]{40}$/u.test(release.templateCommit) ||
+      typeof release.rootVireoScript !== "string" ||
+      !release.rootVireoScript.trim() ||
+      !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(release.starterJvmVersion) ||
+      !release.frontendDependencies ||
+      typeof release.frontendDependencies !== "object" ||
+      Array.isArray(release.frontendDependencies) ||
+      Object.entries(release.frontendDependencies).some(
+        ([name, version]) => !name || typeof version !== "string" || !version.trim(),
+      )
+    )
+      throw new VireoUpgradeError("VIR-UPG-001", `Upgrade graph release ${release.release} has invalid requirements.`);
     const outgoing = graph.edges.filter(edge => edge.from === release.release);
     if (outgoing.length > 1)
       throw new VireoUpgradeError("VIR-UPG-001", `Upgrade graph branches at ${release.release}.`);
@@ -284,6 +313,17 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
   }
   return policy;
 }
+/** @internal Shared validated release requirements for generated full-stack consumers. */
+export async function currentVireoReleaseRequirements(): Promise<ReleaseRequirements> {
+  const policy = await readPolicy();
+  const release = policy.releaseGraph.releases.find(node => node.release === policy.releaseGraph.publicRelease);
+  if (!release) throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph has no current public release requirements.");
+  return {
+    rootVireoScript: release.rootVireoScript,
+    starterJvmVersion: release.starterJvmVersion,
+    frontendDependencies: release.frontendDependencies,
+  };
+}
 function requirementsMatch(
   manifest: PackageManifest,
   frontend: PackageManifest,
@@ -295,7 +335,7 @@ function requirementsMatch(
   assertEqual(manifest.scripts?.vireo, expected.rootVireoScript, "package.json scripts.vireo");
   if (gradle !== undefined)
     assertEqual(
-      /^starterVersion=(.+)$/mu.exec(gradle)?.[1],
+      starterVersionDeclaration(gradle, "gradle.properties")[1],
       expected.starterJvmVersion,
       "gradle.properties starterVersion",
     );
@@ -706,10 +746,10 @@ async function upgradeProjectWithPolicy(
   targetRootManifest.scripts = { ...targetRootManifest.scripts, vireo: target.rootVireoScript };
   const targetFrontendManifest = frontendOnly ? targetRootManifest : structuredClone(frontendManifest);
   targetFrontendManifest.dependencies = { ...targetFrontendManifest.dependencies, ...target.frontendDependencies };
-  const targetGradleProperties = gradleProperties?.replace(
-    /^starterVersion=.+$/mu,
-    `starterVersion=${target.starterJvmVersion}`,
-  );
+  const targetGradleProperties =
+    gradleProperties === undefined
+      ? undefined
+      : replaceStarterVersion(gradleProperties, target.starterJvmVersion, "gradle.properties");
   const targetMetadata = structuredClone(metadata);
   targetMetadata.templateCommit = target.templateCommit;
   targetMetadata.lastUpgradedBy = `create-vireo@${target.release}`;

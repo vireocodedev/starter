@@ -13,6 +13,7 @@ import {
   validateApplicationProjectionContract,
 } from "./application-projection-contract.mjs";
 import { sha256 } from "./entity-generator.js";
+import { currentVireoReleaseRequirements } from "./project-upgrade.js";
 
 export {
   checkGeneratedEntities,
@@ -63,11 +64,12 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-const CREATE_VIREO_PACKAGE_VERSION = "0.7.0";
+const CREATE_VIREO_PACKAGE_VERSION = "0.8.0";
 const TEMPLATE_VERSION = CREATE_VIREO_PACKAGE_VERSION;
 const TEMPLATE_TAG = `starter-template@${TEMPLATE_VERSION}`;
+const TEMPLATE_STARTER_JVM_BASELINE = "0.3.0";
 const INITIAL_APPLICATION_VERSION = "0.1.0";
-export const TEMPLATE_COMMIT = "a670d7f95f720a91705c7c156d19e605582fb4c8";
+export const TEMPLATE_COMMIT = "2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/vireo-template/tar.gz/${TEMPLATE_COMMIT}`;
 const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
@@ -882,6 +884,29 @@ async function pinGeneratedProjectCli(staging: string) {
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 }
 
+async function normalizeGeneratedStarterJvmVersion(staging: string) {
+  const requirements = await currentVireoReleaseRequirements();
+  const path = join(staging, "gradle.properties");
+  const source = await readFile(path, "utf8");
+  const declarations = [...source.matchAll(/^starterVersion=([^\r\n]+)\r?$/gmu)];
+  if (
+    declarations.length !== 1 ||
+    !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u.test(declarations[0]?.[1] ?? "") ||
+    declarations[0]?.[1] !== TEMPLATE_STARTER_JVM_BASELINE
+  ) {
+    throw new Error(
+      `Pinned Template gradle.properties must declare exactly one starterVersion=${TEMPLATE_STARTER_JVM_BASELINE} baseline.`,
+    );
+  }
+  const declaration = declarations[0];
+  await writeFile(
+    path,
+    `${source.slice(0, declaration.index)}starterVersion=${requirements.starterJvmVersion}${source.slice(
+      declaration.index! + declaration[0].length,
+    )}`,
+  );
+}
+
 async function normalizeGeneratedAppToolchainPolicy(staging: string) {
   const path = join(staging, "scripts", "toolchain-policy.mjs");
   const source = await readFile(path, "utf8");
@@ -1256,6 +1281,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     if (profile === "frontend") await projectFrontendTemplate(staging, projectName, productName);
     else {
       await pinGeneratedProjectCli(staging);
+      await normalizeGeneratedStarterJvmVersion(staging);
       await normalizeGeneratedAppToolchainPolicy(staging);
       await normalizeGeneratedAppVerification(staging);
       await normalizeGeneratedAppWorkflowPolicy(staging);

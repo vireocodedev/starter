@@ -26,6 +26,7 @@ const portabilityPolicy = JSON.parse(readFileSync(join(repoRoot, "contracts/pack
 const projectUpgradeContract = JSON.parse(
   readFileSync(join(repoRoot, "contracts/project-upgrade-policy.json"), "utf8"),
 );
+const ecosystemContract = JSON.parse(readFileSync(join(repoRoot, "contracts/ecosystem-release-contract.json"), "utf8"));
 const installLifecycleScripts = ["preinstall", "install", "postinstall", "prepare", "prepublish", "prepublishOnly"];
 const forbiddenPackedPath =
   /(?:^|\/)(?:\.env(?:\.|$)|\.git(?:\/|$)|\.npmrc$|__tests__(?:\/|$)|coverage(?:\/|$)|node_modules(?:\/|$)|src(?:\/|$)|storybook-static(?:\/|$)|tests?(?:\/|$))/iu;
@@ -421,18 +422,44 @@ try {
   const packedTarget = packedPolicy.releaseGraph.releases.find(
     release => release.release === packedPolicy.releaseGraph.publicRelease,
   );
-  const frontendDoctor =
-    packedPolicy.releaseGraph.baselines?.[`${packedSource.release}->${packedTarget.release}`]?.frontend?.[0];
-  if (!frontendDoctor?.sourceContent || !frontendDoctor?.targetContent) {
-    throw new Error("Packed create-vireo must carry the content-addressed frontend Doctor adjacent baseline.");
+  const adjacentEdge = `${packedSource.release}->${packedTarget.release}`;
+  const rootTarget = projectUpgradeContract.releaseCoordinates?.[packedTarget.release];
+  if (
+    packedTarget.starterJvmVersion !== ecosystemContract.current?.maven?.version ||
+    rootTarget?.starterJvmVersion !== packedTarget.starterJvmVersion
+  ) {
+    throw new Error(
+      "Packed current upgrade JVM target must match both the ecosystem Maven release and root coordinates.",
+    );
   }
-  const upgradeFixture = join(auditRoot, "packed-0.6-upgrade-fixture");
+  const managedSkillPaths = [
+    ".agents/skills/vireo-app-feature-author/SKILL.md",
+    ".agents/skills/vireo-app-feature-author/agents/openai.yaml",
+    ".agents/skills/vireo-app-production-readiness/SKILL.md",
+    ".agents/skills/vireo-app-production-readiness/agents/openai.yaml",
+    ".agents/skills/vireo-app-upgrader/SKILL.md",
+    ".agents/skills/vireo-app-upgrader/agents/openai.yaml",
+  ];
+  const managedSkillBaselines = packedPolicy.releaseGraph.baselines?.[adjacentEdge]?.frontend;
+  if (
+    !Array.isArray(managedSkillBaselines) ||
+    managedSkillBaselines.length !== managedSkillPaths.length ||
+    managedSkillBaselines.some(
+      baseline =>
+        baseline.operation !== "add" ||
+        !managedSkillPaths.includes(baseline.path) ||
+        typeof baseline.targetContent !== "string",
+    ) ||
+    new Set(managedSkillBaselines.map(baseline => baseline.path)).size !== managedSkillPaths.length
+  ) {
+    throw new Error("Packed create-vireo must carry the six consumer-path managed skill additions.");
+  }
+  const upgradeFixture = join(auditRoot, "packed-0.7-upgrade-fixture");
   mkdirSync(join(upgradeFixture, ".vireo"), { recursive: true });
-  mkdirSync(join(upgradeFixture, "scripts"), { recursive: true });
   const upgradeDependencies = { ...packedSource.frontendDependencies, react: "^19.0.0" };
   writeFileSync(
     join(upgradeFixture, "package.json"),
-    `${JSON.stringify({ name: "packed-0.6-upgrade-fixture", scripts: { vireo: packedSource.rootVireoScript }, dependencies: upgradeDependencies }, null, 2)}\n`,
+    `${JSON.stringify({ name: "packed-0.7-upgrade-fixture", scripts: { vireo: packedSource.rootVireoScript }, dependencies: upgradeDependencies }, null, 2)}\n`,
   );
   writeFileSync(
     join(upgradeFixture, "package-lock.json"),
@@ -440,9 +467,10 @@ try {
   );
   writeFileSync(
     join(upgradeFixture, ".vireo/project.json"),
-    `${JSON.stringify({ schemaVersion: 1, profile: "frontend", projectName: "packed-0.6-upgrade-fixture", templateCommit: packedSource.templateCommit, createdBy: `create-vireo@${packedSource.release}` }, null, 2)}\n`,
+    `${JSON.stringify({ schemaVersion: 1, profile: "frontend", projectName: "packed-0.7-upgrade-fixture", templateCommit: packedSource.templateCommit, createdBy: `create-vireo@${packedSource.release}` }, null, 2)}\n`,
   );
-  writeFileSync(join(upgradeFixture, frontendDoctor.path), frontendDoctor.sourceContent);
+  const applicationAgentsPath = join(upgradeFixture, "AGENTS.md");
+  writeFileSync(applicationAgentsPath, "application-owned packed guidance\n");
   const packedStatus = JSON.parse(
     execFileSync("node", [join(createPackage, "dist/vireo-cli.js"), "status", "--json", "--project", upgradeFixture], {
       cwd: consumerRoot,
@@ -453,7 +481,7 @@ try {
     packedStatus.currentRelease !== projectUpgradeContract.publicRelease ||
     packedStatus.nextHop !== packedTarget.release
   ) {
-    throw new Error("The packed vireo status executable did not report the adjacent 0.6 upgrade graph.");
+    throw new Error("The packed vireo status executable did not report the adjacent 0.7 upgrade graph.");
   }
   const packedUpgrade = JSON.parse(
     execFileSync(
@@ -473,9 +501,53 @@ try {
   );
   if (
     !packedUpgrade.dryRun ||
-    !packedUpgrade.files.some(file => file.path === frontendDoctor.path && file.status === "update")
+    JSON.stringify(
+      packedUpgrade.files
+        .filter(file => managedSkillPaths.includes(file.path))
+        .map(file => [file.path, file.status])
+        .sort((left, right) => left[0].localeCompare(right[0])),
+    ) !==
+      JSON.stringify(
+        managedSkillPaths.map(path => [path, "create"]).sort((left, right) => left[0].localeCompare(right[0])),
+      ) ||
+    packedUpgrade.files.some(file => file.path.startsWith(".vireo/application/.agents/"))
   ) {
-    throw new Error("The packed vireo executable did not produce a non-writing adjacent Doctor upgrade plan.");
+    throw new Error("The packed vireo executable did not produce the six non-writing consumer-skill additions.");
+  }
+  const packedApply = JSON.parse(
+    execFileSync(
+      "node",
+      [
+        join(createPackage, "dist/vireo-cli.js"),
+        "upgrade",
+        "--to",
+        packedTarget.release,
+        "--apply",
+        "--accept-application-owned",
+        "--json",
+        "--project",
+        upgradeFixture,
+      ],
+      { cwd: consumerRoot, encoding: "utf8" },
+    ),
+  );
+  if (packedApply.dryRun) throw new Error("The packed vireo executable did not apply the accepted adjacent upgrade.");
+  for (const baseline of managedSkillBaselines) {
+    if (readFileSync(join(upgradeFixture, baseline.path), "utf8") !== baseline.targetContent)
+      throw new Error("The packed vireo executable wrote incorrect managed skill bytes at " + baseline.path + ".");
+  }
+  if (existsSync(join(upgradeFixture, ".vireo", "application", ".agents"))) {
+    throw new Error("The packed vireo executable wrote managed skills into the Template-only provenance directory.");
+  }
+  if (readFileSync(applicationAgentsPath, "utf8") !== "application-owned packed guidance\n") {
+    throw new Error("The packed vireo executable overwrote application-owned AGENTS.md.");
+  }
+  const packedManaged = JSON.parse(readFileSync(join(upgradeFixture, ".vireo", "managed-files.json"), "utf8"));
+  if (
+    managedSkillPaths.some(path => !packedManaged.files.some(file => file.path === path)) ||
+    packedManaged.files.some(file => file.path.startsWith(".vireo/application/.agents/"))
+  ) {
+    throw new Error("Packed managed-file provenance must record consumer skill paths only.");
   }
 
   const typecheckEntry = join(consumerRoot, "consumer.ts");

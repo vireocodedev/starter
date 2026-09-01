@@ -249,10 +249,18 @@ test("keeps fixture commands self-preparing on Corepack and guards their templat
     assert.doesNotMatch(workflow, new RegExp(`corepack npm run build\\n\\s*- run: corepack npm run ${command}`, "u"));
     assert.match(fixture, /TEMPLATE_COMMIT/u);
     assert.match(fixture, /assertGeneratedFixtureTemplatePinFromRepository/u);
+    const scaffoldMarker =
+      command === "upgrade:project:fixture" ? "`--package=create-vireo@${sourceRelease}`" : "await createVireo";
     assert.ok(
-      fixture.indexOf("await assertGeneratedFixtureTemplatePinFromRepository") < fixture.indexOf("await createVireo"),
+      fixture.indexOf("await assertGeneratedFixtureTemplatePinFromRepository") < fixture.indexOf(scaffoldMarker),
       `${command} must validate TEMPLATE_COMMIT before scaffolding.`,
     );
+    if (command === "upgrade:project:fixture") {
+      assert.match(fixture, /--name",\s+"upgrade-app"/u);
+      assert.match(fixture, /--java-package",\s+"dev\.vireo\.upgradeapp"/u);
+      assert.match(fixture, /--database",\s+"h2"/u);
+      assert.match(fixture, /--no-git"/u);
+    }
     if (requiresExactProjection) {
       assert.match(fixture, /assertExactGeneratedProject/u);
       assert.ok(
@@ -269,13 +277,35 @@ test("keeps fixture commands self-preparing on Corepack and guards their templat
   }
   assert.ok(
     upgradeFixture.indexOf("await assertGeneratedFixtureTemplatePinFromRepository") <
-      upgradeFixture.indexOf("await fetch"),
-    "Project upgrade must validate TEMPLATE_COMMIT before downloading its source scaffold.",
+      upgradeFixture.indexOf("`--package=create-vireo@${sourceRelease}`"),
+    "Project upgrade must validate TEMPLATE_COMMIT before materializing its historical source scaffold.",
   );
   assert.doesNotMatch(workflow, /npm run build --workspace=create-vireo/u);
   assert.doesNotMatch(testScript, /(?<!corepack )npm run/u);
   assert.match(verifyScript, /corepack npm --version/u);
   assert.match(upgradeFixture, /generatorVersion !== sourceRelease/u);
   assert.match(upgradeFixture, /checkGeneratedEntities\(projectRoot\)/u);
+  assert.match(upgradeFixture, /packages\/create-vireo\/schema\/vireo-upgrade-policy\.json/u);
+  assert.match(upgradeFixture, /targetReleaseNode = upgradePolicy\.releaseGraph\?\.releases\?\.find/u);
+  assert.match(upgradeFixture, /targetStarterJvmVersion = targetReleaseNode\?\.starterJvmVersion/u);
+  assert.match(upgradeFixture, /readStarterVersion\(await readFile\(join\(projectRoot, "gradle\.properties"\)/u);
+  assert.match(upgradeFixture, /"\.\/gradlew"/u);
+  assert.match(upgradeFixture, /"\*PurchaseOrderApiIntegrationTest"/u);
+  assert.match(upgradeFixture, /"-PuseLocalStarter=false"/u);
+  for (const flag of [
+    "--refresh-dependencies",
+    "--no-daemon",
+    "--no-build-cache",
+    "--no-configuration-cache",
+    "--console=plain",
+  ]) {
+    assert.match(upgradeFixture, new RegExp(`"${flag}"`, "u"));
+  }
+  assert.match(upgradeFixture, /join\(temporaryRoot, "gradle-user-home"\)/u);
+  assert.match(upgradeFixture, /GRADLE_USER_HOME: historicalGradleUserHome/u);
+  assert.doesNotMatch(upgradeFixture, /contracts\/ecosystem-release-contract\.json/u);
+  assert.doesNotMatch(upgradeFixture, /withLocalVireoMavenCandidates|mavenCandidateConsumerCommand|--init-script/u);
+  assert.match(upgradeFixture, /Hosted evidence retains the historical 0\.2 -> 0\.3 and 0\.6 -> 0\.7 lanes/u);
+  assert.match(upgradeFixture, /focused unit fixtures cover the current 0\.7 -> 0\.8 edge/u);
   assert.doesNotMatch(legacySchema, /"example"/u);
 });
