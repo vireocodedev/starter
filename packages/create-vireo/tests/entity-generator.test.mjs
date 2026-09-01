@@ -357,6 +357,31 @@ test("generated fixtures respect declared string length constraints", async () =
   assert.doesNotMatch(frontendTest, /EXAMPLE/u);
 });
 
+test("generated full-stack and frontend stories use deterministic in-memory adapters", async () => {
+  const fixtures = [
+    { ...(await projectFixture()), storyRoot: "frontend/src/generated" },
+    { ...(await frontendProjectFixture()), storyRoot: "src/generated" },
+  ];
+
+  for (const fixture of fixtures) {
+    await generateEntity({ projectDirectory: fixture.root, schemaPath: fixture.schemaPath });
+    const story = await readFile(
+      join(fixture.root, fixture.storyRoot, "api-clients/storybook/AppPageApiClients.stories.tsx"),
+      "utf8",
+    );
+    assert.match(story, /import \{ expect, waitFor, within \} from "storybook\/test"/u);
+    assert.match(story, /configureAPIClientApi\(storyApi\)/u);
+    assert.match(story, /const storyApi: APIClientApi/u);
+    assert.match(story, /content: \[storySample\]/u);
+    assert.match(story, /storySearchCalls \+= 1/u);
+    assert.match(story, /play: async \(\{ canvasElement \}\)/u);
+    assert.match(story, /expect\(storySearchCalls\)\.toBeGreaterThan\(0\)/u);
+    assert.match(story, /canvas\.findAllByText\("XX"\)/u);
+    assert.match(story, /expect\(displayed\.length\)\.toBeGreaterThan\(0\)/u);
+    assert.doesNotMatch(story, /HttpApi|postAppPagedSearch|["']\/api\//u);
+  }
+});
+
 test("generation is idempotent, detects wire drift, refuses customization, and ejects without deleting code", async () => {
   const { root, schemaPath } = await projectFixture();
   const first = await generateEntity({ projectDirectory: root, schemaPath });

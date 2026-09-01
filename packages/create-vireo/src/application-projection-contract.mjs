@@ -234,27 +234,63 @@ export function validateApplicationProjectionContract(contract) {
   return problems;
 }
 
+const CONTROL_CHARACTERS = /[\u0000-\u001F\u007F]/u;
+
+function parseHttpsUrl(value) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("https://") ||
+    /\s/u.test(value) ||
+    CONTROL_CHARACTERS.test(value) ||
+    value.includes("\\")
+  ) {
+    return undefined;
+  }
+  try {
+    const route = new URL(value);
+    const authority = value.slice("https://".length).split(/[/?#]/u, 1)[0];
+    if (
+      route.protocol !== "https:" ||
+      route.host.length === 0 ||
+      route.hostname === "." ||
+      route.hostname === ".." ||
+      authority.length === 0 ||
+      route.username.length > 0 ||
+      route.password.length > 0 ||
+      authority.includes("@")
+    ) {
+      return undefined;
+    }
+    return route;
+  } catch {
+    return undefined;
+  }
+}
+
+function isMailtoUrl(value) {
+  if (typeof value !== "string" || !value.startsWith("mailto:") || /\s/u.test(value) || CONTROL_CHARACTERS.test(value))
+    return false;
+  const address = value.slice("mailto:".length);
+  const at = address.indexOf("@");
+  return at > 0 && at === address.lastIndexOf("@") && at < address.length - 1;
+}
+
 function matchesFormat(format, value) {
   if (format === "kebab-case") return /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u.test(value);
   if (format === "non-empty") return value.trim().length > 0;
-  if (format === "https-url") return /^https:\/\/[^\s]+$/u.test(value);
-  if (format === "https-or-mailto-url") return /^(?:https:\/\/[^\s]+|mailto:[^@\s]+@[^@\s]+)$/u.test(value);
+  if (format === "https-url") return parseHttpsUrl(value) !== undefined;
+  if (format === "https-or-mailto-url") return parseHttpsUrl(value) !== undefined || isMailtoUrl(value);
   return false;
 }
 
 function normalizedReleaseRouteIdentity(value) {
   if (typeof value !== "string") return undefined;
-  if (/^mailto:[^@\s]+@[^@\s]+$/u.test(value)) return `mailto:${value.slice("mailto:".length).toLowerCase()}`;
-  if (!/^https:\/\/[^\s]+$/u.test(value)) return undefined;
-  try {
-    const route = new URL(value);
-    if (route.protocol !== "https:") return undefined;
-    const pathname =
-      route.pathname.length > 1 && route.pathname.endsWith("/") ? route.pathname.slice(0, -1) : route.pathname;
-    return `${route.protocol}//${route.host}${pathname}${route.search}${route.hash}`;
-  } catch {
-    return undefined;
-  }
+  if (isMailtoUrl(value)) return `mailto:${value.slice("mailto:".length).toLowerCase()}`;
+  const route = parseHttpsUrl(value);
+  if (!route) return undefined;
+  const pathname =
+    route.pathname.length > 1 && route.pathname.endsWith("/") ? route.pathname.slice(0, -1) : route.pathname;
+  return `${route.protocol}//${route.host}${pathname}${route.search}${route.hash}`;
 }
 
 export function validateApplicationIdentity(contract, values, phase = "release") {

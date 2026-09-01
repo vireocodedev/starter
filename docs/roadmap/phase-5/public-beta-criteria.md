@@ -6,8 +6,9 @@ The current machine PASS and complete human-only pending set are authoritative i
 [`contracts/public-beta-engineering-readiness.json`](../../../contracts/public-beta-engineering-readiness.json)
 and the dated [human handoff](../public-beta-human-handoff-2026-09-01.md). This
 criteria record is read with those sources: second-maintainer/independent-approval
-continuity and npm trusted-publisher release continuity are public-beta holds until
-their named human/provider evidence exists.
+continuity remains a public-beta hold until its named human evidence exists. npm
+repository-rename continuity is retained as completed engineering evidence in the
+[Phase 1 record](../phase-1/evidence/npm-release-continuity-2026-09-01.md).
 
 ## Public evaluation contract
 

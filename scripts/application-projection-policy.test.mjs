@@ -46,6 +46,7 @@ test("template release operations are excluded from every project profile", () =
       ".github/workflows/template-release.yml",
       ...templateProviderOnlyPaths,
       ".github/rulesets/starter-template-0.8.0.json",
+      ".github/rulesets/starter-template-0.8.1.json",
       "contracts/template-release-policy.json",
       "scripts/template-release-policy.mjs",
       "scripts/template-release-policy.test.mjs",
@@ -178,10 +179,12 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
     ]) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "managed", path);
     }
-    assert.equal(
-      classifyProjectionPath(contract, ".github/rulesets/starter-template-0.8.0.json", profile)?.category,
-      "maintainer-only",
-    );
+    for (const path of [
+      ".github/rulesets/starter-template-0.8.0.json",
+      ".github/rulesets/starter-template-0.8.1.json",
+    ]) {
+      assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only");
+    }
     for (const path of templateProviderOnlyPaths) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only", path);
     }
@@ -295,4 +298,42 @@ test("release identity must be application-owned and route security separately",
       /supportUrl and securityContact must be distinct/u,
     );
   }
+});
+
+test("release identity URLs are structurally parsed and normalized before route comparison", () => {
+  const valid = {
+    projectName: "inventory-app",
+    displayName: "Inventory App",
+    ownerName: "Acme Operations",
+    repositoryUrl: "https://github.com/acme/inventory-app",
+    supportUrl: "https://support.acme.example/inventory",
+    securityContact: "mailto:Security@acme.example",
+  };
+  assert.deepEqual(validateApplicationIdentity(contract, valid), []);
+
+  for (const repositoryUrl of [
+    "https:///missing-host",
+    "https://.",
+    "https://..",
+    "https://user@example.test/inventory",
+    "https://:password@example.test/inventory",
+    "https://@example.test/inventory",
+    "https://example.test/invalid\\path",
+    "https://example.test/invalid\u0000path",
+  ]) {
+    assert.match(
+      validateApplicationIdentity(contract, { ...valid, repositoryUrl }).join("\n"),
+      /repositoryUrl must use https-url format/u,
+      repositoryUrl,
+    );
+  }
+
+  assert.match(
+    validateApplicationIdentity(contract, {
+      ...valid,
+      supportUrl: "https://SUPPORT.acme.example:443/inventory/",
+      securityContact: "https://support.acme.example/inventory",
+    }).join("\n"),
+    /supportUrl and securityContact must be distinct/u,
+  );
 });

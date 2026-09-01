@@ -47,11 +47,15 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
 
   const createSourcePath = join(repositoryRoot, "packages", "create-vireo", "src", "index.ts");
   let createSource = readFileSync(createSourcePath, "utf8");
-  const templateCommit = createSource.match(/TEMPLATE_COMMIT = "([a-f0-9]{40})"/u)?.[1];
+  let templateCommit = createSource.match(/TEMPLATE_COMMIT = "([a-f0-9]{40})"/u)?.[1];
   if (!templateCommit) throw new Error("create-vireo does not pin an exact starter-template commit");
   const declaredCreateVireoVersion = createSource.match(/CREATE_VIREO_PACKAGE_VERSION = "([^"]+)"/u)?.[1];
   if (!declaredCreateVireoVersion)
     throw new Error("create-vireo does not declare its generated-project package version");
+  const declaredTemplateStarterJvmBaseline = createSource.match(/TEMPLATE_STARTER_JVM_BASELINE = "([^"]+)"/u)?.[1];
+  if (!declaredTemplateStarterJvmBaseline) {
+    throw new Error("create-vireo does not declare its starter JVM baseline");
+  }
   createSource = createSource.replace(
     `CREATE_VIREO_PACKAGE_VERSION = "${declaredCreateVireoVersion}"`,
     `CREATE_VIREO_PACKAGE_VERSION = "${createVireoVersion}"`,
@@ -61,6 +65,31 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   const upgradePolicy = readJson(upgradePolicyPath);
   const projectUpgradePath = join(repositoryRoot, "contracts", "project-upgrade-policy.json");
   const projectUpgrade = readJson(projectUpgradePath);
+  const candidateTemplateCommit = projectUpgrade.finalization?.targetTemplateCommit;
+  if (
+    upgradePolicy.releaseGraph?.candidateRelease !== undefined &&
+    upgradePolicy.releaseGraph.candidateRelease !== createVireoVersion
+  ) {
+    throw new Error(
+      `Candidate upgrade release ${upgradePolicy.releaseGraph.candidateRelease} cannot finalize until create-vireo is versioned to the same release`,
+    );
+  }
+  if (
+    upgradePolicy.releaseGraph?.candidateRelease === createVireoVersion &&
+    typeof candidateTemplateCommit === "string" &&
+    /^[a-f0-9]{40}$/u.test(candidateTemplateCommit)
+  ) {
+    createSource = createSource.replace(
+      `TEMPLATE_COMMIT = "${templateCommit}"`,
+      `TEMPLATE_COMMIT = "${candidateTemplateCommit}"`,
+    );
+    createSource = createSource.replace(
+      `TEMPLATE_STARTER_JVM_BASELINE = "${declaredTemplateStarterJvmBaseline}"`,
+      `TEMPLATE_STARTER_JVM_BASELINE = "${jvmVersion}"`,
+    );
+    templateCommit = candidateTemplateCommit;
+  }
+  finalizeCandidateUpgrade({ upgradePolicy, projectUpgrade, createVireoVersion, templateCommit });
   const currentUpgradeRelease = upgradePolicy.releaseGraph?.releases?.find(
     release =>
       release.release === (upgradePolicy.releaseGraph?.candidateRelease ?? upgradePolicy.releaseGraph?.publicRelease),
@@ -160,6 +189,55 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     }),
   );
   for (const [path, content] of formatted) writeFileSync(path, content);
+}
+
+function finalizeCandidateUpgrade({ upgradePolicy, projectUpgrade, createVireoVersion, templateCommit }) {
+  const graph = upgradePolicy.releaseGraph;
+  if (!graph?.candidateRelease) return;
+  const candidateRelease = graph.candidateRelease;
+  if (createVireoVersion !== candidateRelease) {
+    throw new Error(
+      `Candidate upgrade release ${candidateRelease} cannot finalize until create-vireo is versioned to the same release`,
+    );
+  }
+  const current = graph.releases?.find(release => release.release === graph.publicRelease);
+  const candidate = graph.releases?.find(release => release.release === candidateRelease);
+  const currentCoordinate = projectUpgrade.releaseCoordinates?.[graph.publicRelease];
+  const candidateCoordinate = projectUpgrade.releaseCoordinates?.[candidateRelease];
+  if (
+    !current ||
+    current.status !== "current" ||
+    !/^[a-f0-9]{40}$/u.test(current.templateCommit ?? "") ||
+    !candidate ||
+    candidate.status !== "candidate" ||
+    candidate.templateCommit !== templateCommit ||
+    !/^[a-f0-9]{40}$/u.test(templateCommit) ||
+    !graph.edges?.some(edge => edge.from === current.release && edge.to === candidate.release) ||
+    projectUpgrade.publicationState !== "candidate" ||
+    projectUpgrade.publicRelease !== current.release ||
+    projectUpgrade.candidateRelease !== candidate.release ||
+    projectUpgrade.previousRelease !== current.release ||
+    projectUpgrade.finalization?.targetTemplateCommit !== templateCommit ||
+    currentCoordinate?.status !== "current" ||
+    candidateCoordinate?.status !== "candidate" ||
+    candidateCoordinate?.templateCommit !== templateCommit
+  ) {
+    throw new Error("Candidate project-upgrade release is not ready for immutable finalization");
+  }
+
+  current.status = "historical";
+  candidate.status = "current";
+  graph.publicRelease = candidate.release;
+  graph.previousRelease = current.release;
+  delete graph.candidateRelease;
+
+  currentCoordinate.status = "historical";
+  candidateCoordinate.status = "current";
+  projectUpgrade.publicRelease = candidate.release;
+  projectUpgrade.previousRelease = current.release;
+  projectUpgrade.publicationState = "final";
+  delete projectUpgrade.candidateRelease;
+  delete projectUpgrade.finalization;
 }
 
 function readJson(path) {

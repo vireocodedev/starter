@@ -1,10 +1,17 @@
-import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { createVireo, findExampleReferences, removeExample, TEMPLATE_COMMIT } from "../dist/index.js";
+import {
+  createVireo,
+  findExampleReferences,
+  removeExample,
+  TEMPLATE_COMMIT,
+  vireoProjectStatus,
+} from "../dist/index.js";
 
 const createVireoVersion = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")).version;
 const applicationSkillNames = ["vireo-app-feature-author", "vireo-app-upgrader", "vireo-app-production-readiness"];
@@ -53,6 +60,7 @@ async function fixture(root) {
   await mkdir(join(template, ".github"), { recursive: true });
   await mkdir(join(template, ".github", "workflows"), { recursive: true });
   await mkdir(join(template, "contracts"), { recursive: true });
+  await mkdir(join(template, "docs"), { recursive: true });
   await mkdir(join(template, "scripts"), { recursive: true });
   await mkdir(join(template, ".vscode"), { recursive: true });
   await writeFile(
@@ -76,6 +84,27 @@ async function fixture(root) {
     join(template, "scripts/verify.sh"),
     '#!/usr/bin/env bash\nset -euo pipefail\nsteps=(\n  "development-database|Development database modes|true"\n)\n',
   );
+  await writeFile(
+    join(template, "docs/generated-capabilities.md"),
+    "The [`starter-template@0.8.0` release contract](https://github.com/vireocodedev/vireo-template/blob/starter-template%400.8.0/contracts/template-release-policy.json) is immutable.\n",
+  );
+  for (const directory of ["docs", "frontend/docs"]) {
+    await mkdir(join(template, directory), { recursive: true });
+    for (const filename of ["database-recovery.md", "incident-response.md", "operations.md"]) {
+      await writeFile(
+        join(template, directory, filename),
+        `The [maintainer rehearsal](hosted-demo-recovery-rehearsal-2026-09-01.md) is retained upstream.\n`,
+      );
+    }
+  }
+  for (const path of [
+    "docs/provider-controls-2026-08-31.md",
+    "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
+    "docs/verification-trend-review-2026-09-01.md",
+    "scripts/repository-security-policy.mjs",
+  ]) {
+    await writeFile(join(template, path), "maintainer-only fixture\n");
+  }
   await writeFile(
     join(template, "scripts/toolchain-policy.mjs"),
     `const policy = readJson("contracts/toolchain-policy.json");
@@ -138,7 +167,10 @@ export {};
   await mkdir(join(template, "frontend/tests/demo"), { recursive: true });
   await mkdir(join(template, "frontend/tests/deployment"), { recursive: true });
   await mkdir(join(template, "frontend/tests/e2e"), { recursive: true });
+  await mkdir(join(template, "frontend/tests/integration"), { recursive: true });
+  await mkdir(join(template, "frontend/tests/unit"), { recursive: true });
   await mkdir(join(template, "frontend/scripts"), { recursive: true });
+  await mkdir(join(template, "frontend/src/app/shell/layout"), { recursive: true });
   await mkdir(join(template, "frontend/docs/architecture"), { recursive: true });
   await writeFile(
     join(template, "frontend/package.json"),
@@ -192,8 +224,9 @@ export {};
   );
   await writeFile(
     join(template, "frontend/scripts/pwa-contract.mjs"),
-    "export const checkPwaSourceContract = () => []; export const formatPwaContractProblems = () => '';\n",
+    "// Item PWA contract\nexport const checkPwaSourceContract = () => []; export const formatPwaContractProblems = () => '';\n",
   );
+  await writeFile(join(template, "frontend/scripts/architecture-policy.test.mjs"), "// Item architecture contract\n");
   await writeFile(join(template, "frontend/scripts/check-pwa-contract.mjs"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/prepare-pwa-update-fixture.mjs"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/serve-pwa-update-fixture.mjs"), "export {};\n");
@@ -201,18 +234,113 @@ export {};
   await writeFile(join(template, "frontend/scripts/pwa-update-fixture.d.mts"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/app-identity-html.mjs"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/verify.sh"), "#!/usr/bin/env bash\nset -euo pipefail\n");
-  await writeFile(join(template, "frontend/tests/pwa/production-pwa.spec.ts"), "export {};\n");
+  await writeFile(
+    join(template, "frontend/tests/pwa/production-pwa.spec.ts"),
+    "// Item production PWA contract\nexport {};\n",
+  );
+  await writeFile(
+    join(template, "frontend/tests/deployment/item-persistence.spec.ts"),
+    "// Item deployment persistence\n",
+  );
   await writeFile(join(template, "frontend/tests/demo/flagship-demo.spec.ts"), "export {};\n");
   await writeFile(join(template, "frontend/tests/deployment/smoke.spec.ts"), "export {};\n");
   await writeFile(join(template, "frontend/tests/e2e/login.spec.ts"), "export {};\n");
   await writeFile(join(template, "frontend/playwright.demo.config.ts"), "export {};\n");
   await writeFile(join(template, "frontend/playwright.deployment.config.ts"), "export {};\n");
+  await writeFile(
+    join(template, "frontend/src/app/shell/layout/AppPageHeader.stories.tsx"),
+    'export const Default = { args: { title: "Items", description: "Manage items.", label: "Create item" } };\n',
+  );
+  await writeFile(
+    join(template, "frontend/tests/integration/app-page-header.integration.test.tsx"),
+    'const title = "Items"; const description = "Manage workspace items."; const label = "Create item";\n',
+  );
+  await writeFile(
+    join(template, "frontend/tests/integration/app-shell-layout.integration.test.tsx"),
+    `const navigationLabel = "Items";
+const VireoMobileBottomNavigation = ({
+    items,
+    onChange,
+  }: {
+    items: readonly { label: string; value: string }[];
+    onChange: (value: string) => void;
+  }) => items.map(item => item.label);
+`,
+  );
+  await writeFile(
+    join(template, "frontend/tests/integration/session-expiry.integration.test.tsx"),
+    'const route = "/items?search=active"; const label = "Items";\n',
+  );
+  await writeFile(
+    join(template, "frontend/tests/unit/app-query-error-reporting.test.ts"),
+    'const key = ["history", "ITEM", "1"]; const mutation = "save-item";\n',
+  );
+  await writeFile(
+    join(template, "frontend/tests/unit/is-app-route-active.test.ts"),
+    'const route = "/items"; const nested = "/items/42/history";\n',
+  );
+  await writeFile(join(template, "frontend/tests/unit/app-pages.test.ts"), 'const itemPage = "Items";\n');
+  await writeFile(join(template, "scripts/verify-deployment.sh"), "#!/usr/bin/env bash\n# Item deployment smoke\n");
+  await writeFile(
+    join(template, "scripts/verify-database-recovery.sh"),
+    `#!/usr/bin/env bash
+source_item_count="1"
+source_user_count="1"
+source_migration_count="1"
+target_item_count="1"
+target_user_count="1"
+target_migration_count="1"
+target_marker_count="1"
+if [[ "$source_item_count" != "$target_item_count" || "$source_user_count" != "$target_user_count" || "$source_migration_count" != "$target_migration_count" || "$target_marker_count" != 1 ]]; then
+  exit 1
+fi
+printf 'Database recovery rehearsal passed: %s items, %s users, %s migrations.\n' "$target_item_count" "$target_user_count" "$target_migration_count"
+`,
+  );
   await writeFile(join(template, "frontend/public/icons/icon-192x192.png"), "fixture\n");
   await mkdir(join(template, "frontend/src/features/item"), { recursive: true });
   await writeFile(join(template, "frontend/src/features/item/public.ts"), "export type Item = { id: number };\n");
+  await writeFile(join(template, "frontend/src/features/item/sample.bin"), Buffer.from([0, 1, 2, 3]));
   await writeFile(
     join(template, "src/main/java/com/vireocode/startertemplate/App.java"),
     "package com.vireocode.startertemplate;\n",
+  );
+  await mkdir(join(template, "src/test/java/com/vireocode/startertemplate"), { recursive: true });
+  await writeFile(
+    join(template, "src/test/java/com/vireocode/startertemplate/MainApplicationTest.java"),
+    'package com.vireocode.startertemplate; class MainApplicationTest { String sample = "Item"; }\n',
+  );
+  await writeFile(
+    join(template, "src/test/java/com/vireocode/startertemplate/SecurityContractIntegrationTest.java"),
+    'package com.vireocode.startertemplate; class SecurityContractIntegrationTest { String route = "/api/items/search"; }\n',
+  );
+  await writeFile(
+    join(template, "src/test/java/com/vireocode/startertemplate/OpenApiCompatibilityIntegrationTest.java"),
+    'package com.vireocode.startertemplate; class OpenApiCompatibilityIntegrationTest { String schema = "ItemDTO"; }\n',
+  );
+  await mkdir(join(template, "src/test/resources/contracts"), { recursive: true });
+  await writeFile(
+    join(template, "src/test/resources/contracts/openapi-compatibility.json"),
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        operations: {
+          "GET /api/auth/me": { responses: ["200"] },
+          "GET /api/history": { responses: ["200"] },
+          "POST /api/items/search": { responses: ["200"] },
+        },
+        schemaNames: ["ApiError", "HistoryActor", "HistoryRecord", "ItemDTO", "JsonNode", "PageItemDTO"],
+        schemas: { ApiError: { required: [], properties: [] }, ItemDTO: { required: [], properties: [] } },
+        securitySchemes: {},
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  await mkdir(join(template, "src/main/resources/db/migration"), { recursive: true });
+  await writeFile(
+    join(template, "src/main/resources/db/migration/V3__enforce_item_value_constraints.sql"),
+    "ALTER TABLE item ADD CONSTRAINT ck_item_name_not_blank CHECK (name <> '');\n",
   );
   return template;
 }
@@ -232,6 +360,21 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.equal(result.templateCommit, TEMPLATE_COMMIT);
     assert.match(await readFile(join(target, "settings.gradle"), "utf8"), /sample-app/u);
     assert.match(await readFile(join(target, "README.md"), "utf8"), /^# Sample App$/mu);
+    const generatedCapabilities = await readFile(join(target, "docs", "generated-capabilities.md"), "utf8");
+    assert.match(generatedCapabilities, /starter-template@0\.8\.0/u);
+    assert.match(
+      generatedCapabilities,
+      /https:\/\/github\.com\/vireocodedev\/vireo-template\/blob\/starter-template%400\.8\.0\/contracts\/template-release-policy\.json/u,
+    );
+    assert.doesNotMatch(generatedCapabilities, /sample-app(?:@|%40)0\.8\.0/u);
+    for (const path of [
+      "docs/provider-controls-2026-08-31.md",
+      "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
+      "docs/verification-trend-review-2026-09-01.md",
+      "scripts/repository-security-policy.mjs",
+    ]) {
+      await assert.rejects(readFile(join(target, path)), /ENOENT/u);
+    }
     await assertProjectedApplicationGuidance(target);
     const identity = await readFile(join(target, "frontend/pwa-policy.mjs"), "utf8");
     assert.match(identity, /id: "\/sample-app"/u);
@@ -404,6 +547,30 @@ test("creates and customizes a project atomically from a local fixture", async (
     }
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("projects self-contained documentation when excluded evidence is linked upstream", async () => {
+  for (const profile of ["full-stack", "frontend"]) {
+    const root = await mkdtemp(join(tmpdir(), "create-vireo-documentation-test-"));
+    try {
+      const template = await fixture(root);
+      const target = join(root, `${profile}-app`);
+      await createVireo({
+        directory: target,
+        profile,
+        git: false,
+        templateDirectory: template,
+      });
+      for (const document of ["docs/database-recovery.md", "docs/incident-response.md", "docs/operations.md"]) {
+        const contents = await readFile(join(target, document), "utf8");
+        assert.doesNotMatch(contents, /hosted-demo-recovery-rehearsal-2026-09-01\.md/u, document);
+        assert.match(contents, /maintainer rehearsal/u, document);
+      }
+      await assert.rejects(readFile(join(target, "docs/hosted-demo-recovery-rehearsal-2026-09-01.md")), /ENOENT/u);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   }
 });
 
@@ -794,6 +961,103 @@ test("generator source uses the current PWA identity renderer and isolates histo
   assert.match(source, /async function renderLegacyTemplateIdentity/u);
   assert.match(source, /await renderTemplateIdentity\(\s*staging,/u);
   assert.match(source, /await projectTemplate\(staging, profile, options\.templateDirectory !== undefined\)/u);
+  assert.match(
+    source,
+    /const staging = await mkdtemp\(join\(dirname\(directory\), `\.\$\{basename\(directory\)\}\.vireo-`\)\)/u,
+  );
+  assert.doesNotMatch(source, /randomBytes/u);
+});
+
+test("a failed creation removes only its mkdtemp-owned staging directory", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-staging-test-"));
+  try {
+    const template = await fixture(root);
+    const target = join(root, "sample-app");
+    const unrelatedSibling = join(root, ".sample-app.vireo-unrelated");
+    await mkdir(unrelatedSibling);
+    await writeFile(join(unrelatedSibling, "sentinel.txt"), "preserve me\n");
+    await writeFile(join(template, "frontend/pwa-policy.mjs"), "export const APP_IDENTITY = Object.freeze({});\n");
+
+    await assert.rejects(
+      createVireo({ directory: target, git: false, templateDirectory: template }),
+      /Pinned Template PWA identity/u,
+    );
+    assert.equal(await readFile(join(unrelatedSibling, "sentinel.txt"), "utf8"), "preserve me\n");
+    assert.deepEqual((await readdir(root)).filter(name => name.startsWith(".sample-app.vireo-")).sort(), [
+      ".sample-app.vireo-unrelated",
+    ]);
+    await assert.rejects(readFile(target), /ENOENT/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("the generated release identity policy rejects malformed HTTPS routes and retains mailto support", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-generated-identity-test-"));
+  try {
+    const template = await fixture(root);
+    const target = join(root, "sample-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+    const metadataPath = join(target, ".vireo/project.json");
+    const metadata = JSON.parse(await readFile(metadataPath, "utf8"));
+    const resolvedIdentity = {
+      ...metadata,
+      ownerName: "Example Application Team",
+      repositoryUrl: "https://example.test/sample-app",
+      supportUrl: "mailto:Security@example.test",
+      securityContact: "mailto:security@example.test",
+    };
+    const runReleasePolicy = () =>
+      execFileSync(process.execPath, ["scripts/project-identity-policy.mjs", "--release"], {
+        cwd: target,
+        encoding: "utf8",
+        stdio: "pipe",
+      });
+    const assertReleaseFailure = expected =>
+      assert.throws(
+        () => runReleasePolicy(),
+        error => expected.test(String(error.stderr)),
+      );
+    await writeFile(metadataPath, `${JSON.stringify(resolvedIdentity, null, 2)}\n`);
+    assertReleaseFailure(/supportUrl and securityContact must be distinct/u);
+
+    for (const repositoryUrl of [
+      "https:///missing-host",
+      "https://.",
+      "https://..",
+      "https://user@example.test/sample-app",
+      "https://example.test/invalid\\path",
+      "https://example.test/invalid\u0000path",
+    ]) {
+      await writeFile(
+        metadataPath,
+        `${JSON.stringify({ ...resolvedIdentity, repositoryUrl, securityContact: "mailto:security-team@example.test" }, null, 2)}\n`,
+      );
+      assertReleaseFailure(/repositoryUrl must use https-url format/u);
+    }
+
+    await writeFile(
+      metadataPath,
+      `${JSON.stringify({ ...resolvedIdentity, securityContact: "mailto:security-team@example.test" }, null, 2)}\n`,
+    );
+    assert.doesNotThrow(() => runReleasePolicy());
+
+    await writeFile(
+      metadataPath,
+      `${JSON.stringify(
+        {
+          ...resolvedIdentity,
+          supportUrl: "https://SUPPORT.example.test:443/sample-app/",
+          securityContact: "https://support.example.test/sample-app",
+        },
+        null,
+        2,
+      )}\n`,
+    );
+    assertReleaseFailure(/supportUrl and securityContact must be distinct/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test("dry run validates without writing", async () => {
@@ -832,12 +1096,92 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
     const target = join(root, "sample-app");
     await createVireo({ directory: target, git: false, templateDirectory: template });
     const samplePath = join(target, "frontend/src/features/item/public.ts");
+    const managedManifestPath = join(target, ".vireo/managed-files.json");
+    const managedBefore = JSON.parse(await readFile(managedManifestPath, "utf8"));
+    for (const invalidManifest of [
+      { ...managedBefore, templateCommit: "0".repeat(40) },
+      { ...managedBefore, files: [] },
+    ]) {
+      await writeFile(managedManifestPath, `${JSON.stringify(invalidManifest, null, 2)}\n`);
+      await assert.rejects(removeExample(target, true), /Managed-file provenance is invalid/u);
+    }
+    await writeFile(managedManifestPath, `${JSON.stringify(managedBefore, null, 2)}\n`);
+    const customizedManagedPath = "frontend/scripts/pwa-contract.mjs";
+    const originalManagedHash = managedBefore.files.find(file => file.path === customizedManagedPath)?.sha256;
+    assert.match(originalManagedHash, /^[a-f0-9]{64}$/u);
+    await writeFile(
+      join(target, customizedManagedPath),
+      `${await readFile(join(target, customizedManagedPath), "utf8")}\n// consumer customization\n`,
+    );
+    const retainedMaintainerEvidence = new Map(
+      [
+        "docs/provider-controls-2026-08-31.md",
+        "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
+        "docs/verification-trend-review-2026-09-01.md",
+        "scripts/repository-security-policy.mjs",
+      ].map(path => [path, "Item maintainer-only evidence\n"]),
+    );
+    const ownership = JSON.parse(await readFile(join(target, ".vireo/example-manifest.json"), "utf8"));
+    assert.equal(
+      ownership.files["frontend/src/features/item/sample.bin"],
+      createHash("sha256")
+        .update(Buffer.from([0, 1, 2, 3]))
+        .digest("hex"),
+    );
+    for (const [path, content] of retainedMaintainerEvidence) {
+      await writeFile(join(target, path), content);
+      ownership.files[path] = createHash("sha256").update(content).digest("hex");
+    }
+    await writeFile(join(target, ".vireo/example-manifest.json"), `${JSON.stringify(ownership, null, 2)}\n`);
+    const protectedInfrastructure = new Map(
+      await Promise.all(
+        [
+          "frontend/scripts/architecture-policy.test.mjs",
+          "frontend/scripts/pwa-contract.mjs",
+          "frontend/tests/pwa/production-pwa.spec.ts",
+        ].map(async path => [path, await readFile(join(target, path), "utf8")]),
+      ),
+    );
 
     const preview = await removeExample(target);
     assert.equal(preview.dryRun, true);
     assert.equal(preview.state, "present");
     assert.match(await readFile(samplePath, "utf8"), /Item/u);
-
+    for (const path of protectedInfrastructure.keys()) {
+      assert.equal(
+        preview.files.some(file => file.path === path && file.status === "delete"),
+        false,
+        path,
+      );
+    }
+    for (const path of retainedMaintainerEvidence.keys()) {
+      assert.equal(
+        preview.files.some(file => file.path === path && file.status === "delete"),
+        false,
+        path,
+      );
+    }
+    const metadata = JSON.parse(await readFile(join(target, ".vireo/project.json"), "utf8"));
+    const javaTestRoot = `src/test/java/${metadata.javaPackage.replaceAll(".", "/")}`;
+    const genericCoverage = [
+      "frontend/src/app/shell/layout/AppPageHeader.stories.tsx",
+      "frontend/tests/integration/app-page-header.integration.test.tsx",
+      "frontend/tests/integration/app-shell-layout.integration.test.tsx",
+      "frontend/tests/integration/session-expiry.integration.test.tsx",
+      "frontend/tests/unit/app-query-error-reporting.test.ts",
+      "frontend/tests/unit/is-app-route-active.test.ts",
+      "frontend/tests/unit/app-pages.test.ts",
+      "frontend/tests/deployment/item-persistence.spec.ts",
+      "scripts/verify-deployment.sh",
+      "scripts/verify-database-recovery.sh",
+      `${javaTestRoot}/MainApplicationTest.java`,
+      `${javaTestRoot}/SecurityContractIntegrationTest.java`,
+      `${javaTestRoot}/OpenApiCompatibilityIntegrationTest.java`,
+      "src/test/resources/contracts/openapi-compatibility.json",
+    ];
+    for (const path of genericCoverage) {
+      assert.equal(preview.files.find(file => file.path === path)?.status, "update", path);
+    }
     await writeFile(samplePath, "export type Item = { id: number; customized: true };\n");
     await assert.rejects(removeExample(target, true), /customized example file/u);
     await writeFile(samplePath, "export type Item = { id: number };\n");
@@ -847,11 +1191,158 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
     await assert.rejects(removeExample(target, true), /unowned example references/u);
     await rm(unowned);
 
+    const binarySentinel = join(target, "frontend/src/features/item/consumer-sentinel.bin");
+    const binarySentinelContents = Buffer.from([0, 255, 1, 254]);
+    await writeFile(binarySentinel, binarySentinelContents);
+    await assert.rejects(removeExample(target, true), /unowned example references/u);
+    assert.deepEqual(await readFile(binarySentinel), binarySentinelContents);
+    await assert.rejects(readFile(join(target, ".vireo/remove-example.json")), /ENOENT/u);
+    await rm(binarySentinel);
+
+    const javaBinarySentinel = join(
+      target,
+      "src/main/java",
+      metadata.javaPackage.replaceAll(".", "/"),
+      "app/item/consumer-sentinel.bin",
+    );
+    await mkdir(join(target, "src/main/java", metadata.javaPackage.replaceAll(".", "/"), "app/item"), {
+      recursive: true,
+    });
+    await writeFile(javaBinarySentinel, binarySentinelContents);
+    await assert.rejects(removeExample(target, true), /unowned example references/u);
+    assert.deepEqual(await readFile(javaBinarySentinel), binarySentinelContents);
+    await rm(javaBinarySentinel);
+
+    const outsideLinkSentinel = join(root, "outside-item-symlink-sentinel.txt");
+    const outsideLinkContents = "consumer-owned sentinel\n";
+    const linkedSentinel = join(target, "frontend/src/features/item/consumer-sentinel-link.txt");
+    await writeFile(outsideLinkSentinel, outsideLinkContents);
+    await symlink(outsideLinkSentinel, linkedSentinel, "file");
+    await assert.rejects(removeExample(target, true), /unowned example references/u);
+    assert.equal(await readFile(outsideLinkSentinel, "utf8"), outsideLinkContents);
+    await assert.rejects(readFile(join(target, ".vireo/remove-example.json")), /ENOENT/u);
+    await rm(linkedSentinel);
+
     const applied = await removeExample(target, true);
-    assert.equal(applied.state, "present");
+    assert.equal(applied.state, "removed");
     assert.deepEqual(await findExampleReferences(target), []);
     await assert.rejects(readFile(samplePath), /ENOENT/u);
+    await assert.rejects(
+      readFile(join(target, "src/main/resources/db/migration/V3__enforce_item_value_constraints.sql")),
+      /ENOENT/u,
+    );
+    for (const [path, contents] of protectedInfrastructure) {
+      assert.equal(await readFile(join(target, path), "utf8"), contents, path);
+    }
+    for (const [path, contents] of retainedMaintainerEvidence) {
+      assert.equal(await readFile(join(target, path), "utf8"), contents, path);
+    }
+    for (const path of genericCoverage) {
+      assert.doesNotMatch(
+        await readFile(join(target, path), "utf8"),
+        /features\/item|pages\/items|\/items\b|\bItems?(?:[A-Z]\w*)?\b|\bITEMS?\b|app[/.]item|create_item/u,
+        path,
+      );
+    }
+    const shellCoverage = await readFile(
+      join(target, "frontend/tests/integration/app-shell-layout.integration.test.tsx"),
+      "utf8",
+    );
+    assert.match(shellCoverage, /\bitems: readonly/u);
+    assert.match(shellCoverage, /\bitems\.map/u);
+    assert.doesNotMatch(shellCoverage, /\brecords: readonly|\brecords\.map/u);
+    const openApiCoverage = JSON.parse(
+      await readFile(join(target, "src/test/resources/contracts/openapi-compatibility.json"), "utf8"),
+    );
+    assert.equal(openApiCoverage.operations["GET /api/history"], undefined);
+    assert.equal(openApiCoverage.operations["POST /api/items/search"], undefined);
+    assert.deepEqual(openApiCoverage.schemaNames, ["ApiError"]);
+    const deploymentSmoke = await readFile(join(target, "scripts/verify-deployment.sh"), "utf8");
+    assert.match(deploymentSmoke, /POSTGRES_RUNTIME_USER:-sample_app_runtime/u);
+    assert.match(deploymentSmoke, /POSTGRES_DB:-sample_app/u);
+    assert.doesNotMatch(
+      deploymentSmoke,
+      /starter_template|persisted CRUD|has_table_privilege\('\$runtime_user', 'item'/u,
+    );
+    assert.match(
+      await readFile(join(target, "frontend/tests/deployment/item-persistence.spec.ts"), "utf8"),
+      /authenticates and preserves a session/u,
+    );
+    const recoverySmoke = await readFile(join(target, "scripts/verify-database-recovery.sh"), "utf8");
+    assert.match(recoverySmoke, /"\$target_user_count" "\$target_migration_count"/u);
+    assert.doesNotMatch(recoverySmoke, /^\+\s/mu);
+    const managed = JSON.parse(await readFile(join(target, ".vireo/managed-files.json"), "utf8"));
+    const managedByPath = new Map(managed.files.map(file => [file.path, file.sha256]));
+    for (const path of [
+      ...[...protectedInfrastructure.keys()].filter(path => path !== customizedManagedPath),
+      "scripts/verify.sh",
+      "scripts/verify-deployment.sh",
+      "frontend/tests/deployment/item-persistence.spec.ts",
+    ]) {
+      const content = await readFile(join(target, path));
+      assert.equal(managedByPath.get(path), createHash("sha256").update(content).digest("hex"), path);
+    }
+    const customizedContents = await readFile(join(target, customizedManagedPath));
+    assert.equal(managedByPath.get(customizedManagedPath), originalManagedHash);
+    assert.notEqual(createHash("sha256").update(customizedContents).digest("hex"), originalManagedHash);
+    const status = await vireoProjectStatus(target);
+    assert.equal(status.managedFiles.find(file => file.path === customizedManagedPath)?.state, "customized");
     assert.equal((await removeExample(target)).state, "removed");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("remove-example refuses symbolic-link targets before applying a sample removal", async () => {
+  const root = await mkdtemp(join(tmpdir(), "remove-vireo-symlink-test-"));
+  try {
+    const template = await fixture(root);
+    const target = join(root, "sample-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+    const sampleDirectory = join(target, "frontend/src/features/item");
+    const sampleFile = join(sampleDirectory, "public.ts");
+    const outsideDirectory = join(root, "outside-item");
+    const outsideSentinel = join(outsideDirectory, "public.ts");
+    const original = await readFile(sampleFile);
+    await mkdir(outsideDirectory);
+    await writeFile(outsideSentinel, original);
+    await rm(sampleFile);
+    await symlink(outsideSentinel, sampleFile, "file");
+
+    await assert.rejects(removeExample(target, true), /symbolic link/u);
+    assert.deepEqual(await readFile(outsideSentinel), original);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("remove-example retains framework contract infrastructure in standalone frontend projects", async () => {
+  const root = await mkdtemp(join(tmpdir(), "remove-vireo-frontend-example-test-"));
+  try {
+    const template = await fixture(root);
+    const target = join(root, "sample-frontend");
+    await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
+    const protectedInfrastructure = new Map(
+      await Promise.all(
+        ["scripts/architecture-policy.test.mjs", "scripts/pwa-contract.mjs", "tests/pwa/production-pwa.spec.ts"].map(
+          async path => [path, await readFile(join(target, path), "utf8")],
+        ),
+      ),
+    );
+
+    const preview = await removeExample(target);
+    for (const path of protectedInfrastructure.keys()) {
+      assert.equal(
+        preview.files.some(file => file.path === path && file.status === "delete"),
+        false,
+        `${path} is retained for the standalone frontend profile`,
+      );
+    }
+
+    await removeExample(target, true);
+    for (const [path, contents] of protectedInfrastructure) {
+      assert.equal(await readFile(join(target, path), "utf8"), contents, path);
+    }
   } finally {
     await rm(root, { recursive: true, force: true });
   }

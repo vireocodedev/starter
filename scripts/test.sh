@@ -19,6 +19,8 @@ node --test \
   scripts/release-impact-policy.test.mjs \
   scripts/release-impact-version.test.mjs \
   scripts/release-lifecycle-policy.test.mjs \
+  scripts/project-upgrade-publication-state.test.mjs \
+  scripts/packed-project-upgrade-baselines.test.mjs \
   scripts/lib/verification-evidence-source.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
   scripts/third-party-license-policy.test.mjs \

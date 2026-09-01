@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { randomBytes } from "node:crypto";
-import { chmod, cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
@@ -481,42 +480,62 @@ const phase = options.has("--release") ? "release" : "creation";
 const json = options.has("--json");
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-function hasWhitespace(value) {
-  return /\\s/u.test(value);
-}
+const CONTROL_CHARACTERS = /[\\u0000-\\u001F\\u007F]/u;
 
-function isHttpsUrl(value) {
-  return value.startsWith("https://") && value.length > "https://".length && !hasWhitespace(value);
+function parseHttpsUrl(value) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("https://") ||
+    /\\s/u.test(value) ||
+    CONTROL_CHARACTERS.test(value) ||
+    value.includes("\\\\")
+  ) {
+    return undefined;
+  }
+  try {
+    const route = new URL(value);
+    const authority = value.slice("https://".length).split(/[/?#]/u, 1)[0];
+    if (
+      route.protocol !== "https:" ||
+      route.host.length === 0 ||
+      route.hostname === "." ||
+      route.hostname === ".." ||
+      authority.length === 0 ||
+      route.username.length > 0 ||
+      route.password.length > 0 ||
+      authority.includes("@")
+    ) {
+      return undefined;
+    }
+    return route;
+  } catch {
+    return undefined;
+  }
 }
 
 function isMailtoUrl(value) {
-  if (!value.startsWith("mailto:")) return false;
+  if (typeof value !== "string" || !value.startsWith("mailto:") || /\\s/u.test(value) || CONTROL_CHARACTERS.test(value))
+    return false;
   const address = value.slice("mailto:".length);
   const at = address.indexOf("@");
-  return at > 0 && at === address.lastIndexOf("@") && at < address.length - 1 && !hasWhitespace(address);
+  return at > 0 && at === address.lastIndexOf("@") && at < address.length - 1;
 }
 
 function matchesFormat(format, value) {
   if (format === "kebab-case") return /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u.test(value);
   if (format === "non-empty") return value.trim().length > 0;
-  if (format === "https-url") return isHttpsUrl(value);
-  if (format === "https-or-mailto-url") return isHttpsUrl(value) || isMailtoUrl(value);
+  if (format === "https-url") return parseHttpsUrl(value) !== undefined;
+  if (format === "https-or-mailto-url") return parseHttpsUrl(value) !== undefined || isMailtoUrl(value);
   return false;
 }
 
 function normalizedReleaseRouteIdentity(value) {
   if (typeof value !== "string") return undefined;
   if (isMailtoUrl(value)) return "mailto:" + value.slice("mailto:".length).toLowerCase();
-  if (!isHttpsUrl(value)) return undefined;
-  try {
-    const route = new URL(value);
-    if (route.protocol !== "https:") return undefined;
-    const pathname =
-      route.pathname.length > 1 && route.pathname.endsWith("/") ? route.pathname.slice(0, -1) : route.pathname;
-    return route.protocol + "//" + route.host + pathname + route.search + route.hash;
-  } catch {
-    return undefined;
-  }
+  const route = parseHttpsUrl(value);
+  if (!route) return undefined;
+  const pathname = route.pathname.length > 1 && route.pathname.endsWith("/") ? route.pathname.slice(0, -1) : route.pathname;
+  return route.protocol + "//" + route.host + pathname + route.search + route.hash;
 }
 
 function validateIdentity(values) {
@@ -1090,7 +1109,51 @@ async function replaceApplicationDocumentation(path: string, replacements: Array
   }
 }
 
-async function renderApplicationDocumentation(staging: string, profile: VireoProfile) {
+/**
+ * Historical and maintainer-only evidence stays in the Template repository, not
+ * in projects created from it. Retain the surrounding operational guidance,
+ * but render a plain-language reference when that evidence was linked from a
+ * copied document. This keeps a projected project self-contained instead of
+ * leaving a relative link to an intentionally excluded file.
+ */
+async function removeExcludedDocumentationLinks(staging: string, profile: VireoProfile) {
+  const excludedDocumentation = new Set(
+    (applicationProjectionContract.rules ?? [])
+      .filter(rule => ["historical", "maintainer-only"].includes(rule.category))
+      .flatMap(rule => (rule as { paths?: unknown }).paths ?? [])
+      .filter((path): path is string => typeof path === "string" && path.startsWith("docs/") && path.endsWith(".md")),
+  );
+  const documentationRoots =
+    profile === "frontend" ? [join(staging, "docs")] : [join(staging, "docs"), join(staging, "frontend", "docs")];
+  for (const documentationRoot of documentationRoots) {
+    try {
+      for (const path of await walk(documentationRoot)) {
+        if (!path.endsWith(".md")) continue;
+        const source = await readFile(path, "utf8");
+        const documentPath = normalizedRelative(staging, path);
+        let rendered = source;
+        for (const excludedPath of excludedDocumentation) {
+          const relativeTarget = relative(dirname(documentPath), excludedPath).replaceAll("\\", "/");
+          const pattern = new RegExp(`\\[([^\\]]+)\\]\\(${escapeRegExp(relativeTarget)}\\)`, "gu");
+          rendered = rendered.replace(pattern, "$1");
+        }
+        if (rendered !== source) await writeFile(path, rendered);
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+  }
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+async function renderApplicationDocumentation(staging: string, profile: VireoProfile, projectName: string) {
+  await replaceApplicationDocumentation(join(staging, "docs", "generated-capabilities.md"), [
+    [`${projectName}@${TEMPLATE_VERSION}`, TEMPLATE_TAG],
+    [`${projectName}%40${TEMPLATE_VERSION}`, `starter-template%40${TEMPLATE_VERSION}`],
+  ]);
   if (profile === "full-stack") {
     await replaceApplicationDocumentation(join(staging, "docs", "comparison.md"), [
       ["[flagship path](flagship.md)", "framework evaluation guidance"],
@@ -1115,6 +1178,7 @@ async function renderApplicationDocumentation(staging: string, profile: VireoPro
       "Maintain a project-owned loading-state audit for current routes, geometry targets, completed vertical slices, and enforcement contracts.",
     ],
   ]);
+  await removeExcludedDocumentationLinks(staging, profile);
 }
 
 function unresolvedIdentity(field: keyof Omit<ApplicationIdentity, "projectName" | "displayName">) {
@@ -1256,9 +1320,8 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
   if (options.dryRun) return result;
 
   await mkdir(dirname(directory), { recursive: true });
-  const staging = join(dirname(directory), `.${basename(directory)}.vireo-${randomBytes(6).toString("hex")}`);
+  const staging = await mkdtemp(join(dirname(directory), `.${basename(directory)}.vireo-`));
   try {
-    await mkdir(staging);
     if (options.templateDirectory) {
       const templateDirectory = resolve(options.templateDirectory);
       // Dirent-based inspection rejects projected links rather than following
@@ -1287,7 +1350,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
       await normalizeGeneratedAppWorkflowPolicy(staging);
     }
     await renderProjectIdentityPolicy(staging, profile);
-    await renderApplicationDocumentation(staging, profile);
+    await renderApplicationDocumentation(staging, profile, projectName);
     await renderPublicIdentity(staging, identity, profile);
     await rm(join(staging, ".vireo", "template.json"), { force: true });
     await mkdir(join(staging, ".vireo"), { recursive: true });

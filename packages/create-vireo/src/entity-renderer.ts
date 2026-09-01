@@ -822,8 +822,43 @@ export const ${names.fileStem}Capability = {
 }
 
 function renderStory(schema: VireoEntitySchema, names: EntityNames, digest: string) {
+  const storySample = Object.fromEntries([
+    ["id", 1],
+    ...schema.fields.map(field => [field.name, sampleValue(field, true)]),
+  ]);
+  const displayedField = schema.fields.find(field => field.ui?.list !== false);
+  const displayedSample = displayedField
+    ? String(storySample[displayedField.name] ?? "—")
+    : schema.localization.en.plural;
   return `${generatedHeader("//", digest, "generated-once")}import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, waitFor, within } from "storybook/test";
+import { configure${names.className}Api, type ${names.className}Api } from "../api/${names.fileStem}.api";
+import type { ${names.className} } from "../models/${names.className}";
 import { ${names.pageClass} } from "../pages/${names.pageClass}";
+
+const storySample = ${JSON.stringify(storySample, null, 2)} satisfies ${names.className};
+let storySearchCalls = 0;
+
+const storyApi: ${names.className}Api = {
+  search: async pageable => {
+    storySearchCalls += 1;
+    return {
+      content: [storySample],
+      number: pageable.page,
+      size: pageable.rowsPerPage,
+      totalElements: 1,
+      totalPages: 1,
+    };
+  },
+  create: async value => ({ ...value, id: storySample.id }),
+  update: async (id, value) => ({ ...value, id }),
+  delete: async () => undefined,
+};
+
+// Generated stories are executable without an application backend. Configure the
+// feature's adapter slot before its page mounts so Storybook cannot fall through
+// to the production HTTP client or Vite's API proxy.
+configure${names.className}Api(storyApi);
 
 const meta = {
   title: "Generated/${schema.localization.en.plural}",
@@ -834,7 +869,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(() => expect(storySearchCalls).toBeGreaterThan(0));
+    const displayed = await canvas.findAllByText(${JSON.stringify(displayedSample)});
+    await expect(displayed.length).toBeGreaterThan(0);
+  },
+};
 `;
 }
 

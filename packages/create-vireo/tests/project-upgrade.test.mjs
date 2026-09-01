@@ -500,6 +500,46 @@ test("0.7.0 to 0.8.0 adds managed skills once and preserves application-owned by
   }
 });
 
+test("unpublished 0.8.1 candidates reject preview and apply while their finalized target remains supported", async () => {
+  const root = await adjacentFixture("frontend");
+  try {
+    await upgradeVireoProject({
+      projectDirectory: root,
+      targetRelease: adjacentTargetRelease,
+      dryRun: false,
+      acceptApplicationOwned: true,
+    });
+    const beforeCandidate = await treeBytes(root);
+    for (const options of [
+      { projectDirectory: root, targetRelease: "0.8.1", dryRun: true },
+      { projectDirectory: root, targetRelease: "0.8.1", dryRun: false, acceptApplicationOwned: true },
+    ]) {
+      await assert.rejects(upgradeVireoProject(options), error => error.code === "VIR-UPG-008");
+      assertSameSnapshot(beforeCandidate, await treeBytes(root));
+    }
+
+    const finalizedPolicy = structuredClone(adjacentPolicy);
+    delete finalizedPolicy.releaseGraph.candidateRelease;
+    finalizedPolicy.releaseGraph.publicRelease = "0.8.1";
+    finalizedPolicy.releaseGraph.previousRelease = "0.8.0";
+    finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.0").status = "historical";
+    finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.1").status = "current";
+    const applied = await upgradeVireoProjectForTest(
+      { projectDirectory: root, targetRelease: "0.8.1", dryRun: false, acceptApplicationOwned: true },
+      finalizedPolicy,
+    );
+    assert.equal(applied.dryRun, false);
+    const metadata = JSON.parse(await readFile(join(root, ".vireo/project.json"), "utf8"));
+    assert.equal(metadata.lastUpgradedBy, "create-vireo@0.8.1");
+    assert.equal(
+      metadata.templateCommit,
+      finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.1").templateCommit,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("0.7.0 adjacent upgrades reject unknown commits, managed drift, unsafe paths, symlinks, and dry journal recovery", async () => {
   const root = await adjacentFixture("frontend");
   try {
