@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const repository = basename(repositoryRoot);
+const repository = "starter";
 const policy = JSON.parse(readFileSync(join(repositoryRoot, "contracts/platform-support-policy.json"), "utf8"));
-const documentationPath = repository === "starter" ? "docs/PLATFORM_SUPPORT.md" : "docs/platform-support-evidence.md";
+const documentationPath = "docs/PLATFORM_SUPPORT.md";
 const documentation = readFileSync(join(repositoryRoot, documentationPath), "utf8");
 const allowedStatuses = new Set(["supported", "compatible", "experimental", "untested", "unsupported"]);
 const allowedRequirements = new Set(["required", "advisory", "manual", "none"]);
