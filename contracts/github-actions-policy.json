@@ -14,8 +14,8 @@
       "sha": "1e69f48acb82d1966a394da916b4c1698aa569d6"
     },
     "actions/deploy-pages": {
-      "version": "v4.0.5",
-      "sha": "d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e"
+      "version": "v5.0.0",
+      "sha": "cd2ce8fcbc39b97be8ca5fce6e763baed58fa128"
     },
     "actions/dependency-review-action": {
       "version": "v5.0.0",
