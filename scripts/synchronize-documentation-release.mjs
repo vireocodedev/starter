@@ -9,8 +9,12 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   const lifecyclePath = join(contractsDirectory, "release-lifecycle-policy.json");
   const ecosystem = readJson(ecosystemPath);
   const oldTemplateCommit = ecosystem.current?.template?.commit;
+  const oldTemplateVersion = ecosystem.current?.template?.version;
   if (!/^[a-f0-9]{40}$/u.test(oldTemplateCommit ?? "")) {
     throw new Error("Ecosystem current template must pin an exact starter-template commit");
+  }
+  if (!/^\d+\.\d+\.\d+$/u.test(oldTemplateVersion ?? "")) {
+    throw new Error("Ecosystem current template must declare a semantic version");
   }
   const documentation = readJson(documentationPath);
   const lifecycle = readJson(lifecyclePath);
@@ -65,6 +69,11 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
   const upgradePolicy = readJson(upgradePolicyPath);
   const projectUpgradePath = join(repositoryRoot, "contracts", "project-upgrade-policy.json");
   const projectUpgrade = readJson(projectUpgradePath);
+  const publicUpgradeRelease = upgradePolicy.releaseGraph?.publicRelease;
+  const candidateUpgradeRelease = upgradePolicy.releaseGraph?.candidateRelease;
+  const priorPublicUpgradeRelease = upgradePolicy.releaseGraph?.edges?.find(
+    edge => edge.to === publicUpgradeRelease,
+  )?.from;
   const candidateTemplateCommit = projectUpgrade.finalization?.targetTemplateCommit;
   if (
     upgradePolicy.releaseGraph?.candidateRelease !== undefined &&
@@ -167,7 +176,29 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     compatibilityPath,
   );
   const portal = readFileSync(portalPath, "utf8").replaceAll(oldReleaseId, nextReleaseId);
-  const siteOutputs = replaceCurrentTemplateCommitInSite(repositoryRoot, oldTemplateCommit, templateCommit);
+  const siteOutputs = replaceCurrentTemplateReferencesInSite(
+    repositoryRoot,
+    oldTemplateCommit,
+    templateCommit,
+    oldTemplateVersion,
+    templateVersion,
+  );
+  const currentReleaseGuidance =
+    candidateUpgradeRelease === createVireoVersion
+      ? synchronizeCurrentReleaseGuidance({
+          repositoryRoot,
+          readme,
+          compatibilityMarkdown,
+          oldTemplateCommit,
+          templateCommit,
+          oldTemplateVersion,
+          templateVersion,
+          priorPublicUpgradeRelease,
+          publicUpgradeRelease,
+          candidateUpgradeRelease,
+          jvmVersion,
+        })
+      : undefined;
 
   const outputs = [
     [ecosystemPath, JSON.stringify(ecosystem)],
@@ -177,9 +208,10 @@ export async function synchronizeDocumentationRelease(repositoryRoot) {
     [upgradePolicyPath, JSON.stringify(upgradePolicy)],
     [projectUpgradePath, JSON.stringify(projectUpgrade)],
     [packageLockPath, JSON.stringify(packageLock)],
-    [readmePath, readme],
-    [compatibilityPath, compatibilityMarkdown],
+    [readmePath, currentReleaseGuidance?.readme ?? readme],
+    [compatibilityPath, currentReleaseGuidance?.compatibilityMarkdown ?? compatibilityMarkdown],
     [portalPath, portal],
+    ...(currentReleaseGuidance?.outputs ?? []),
     ...siteOutputs,
   ];
   const formatted = await Promise.all(
@@ -258,11 +290,162 @@ function updatePublicWorkspaceLockEntries(packageLock, publicWorkspacePackages) 
   }
 }
 
-function replaceCurrentTemplateCommitInSite(repositoryRoot, oldTemplateCommit, templateCommit) {
-  if (oldTemplateCommit === templateCommit) return [];
+function replaceCurrentTemplateReferencesInSite(
+  repositoryRoot,
+  oldTemplateCommit,
+  templateCommit,
+  oldTemplateVersion,
+  templateVersion,
+) {
+  if (oldTemplateCommit === templateCommit && oldTemplateVersion === templateVersion) return [];
   return collectSiteTextSources(join(repositoryRoot, "site"))
-    .map(path => [path, readFileSync(path, "utf8").replaceAll(oldTemplateCommit, templateCommit)])
+    .map(path => {
+      const source = readFileSync(path, "utf8");
+      return [
+        path,
+        source
+          .replaceAll(oldTemplateCommit, templateCommit)
+          .replaceAll(`starter-template@${oldTemplateVersion}`, `starter-template@${templateVersion}`)
+          .replaceAll(`current ${oldTemplateVersion} Template`, `current ${templateVersion} Template`)
+          .replaceAll(`pinned ${oldTemplateVersion} Template`, `pinned ${templateVersion} Template`),
+      ];
+    })
     .filter(([path, content]) => content !== readFileSync(path, "utf8"));
+}
+
+function synchronizeCurrentReleaseGuidance({
+  repositoryRoot,
+  readme,
+  compatibilityMarkdown,
+  oldTemplateCommit,
+  templateCommit,
+  oldTemplateVersion,
+  templateVersion,
+  priorPublicUpgradeRelease,
+  publicUpgradeRelease,
+  candidateUpgradeRelease,
+  jvmVersion,
+}) {
+  if (!priorPublicUpgradeRelease || !publicUpgradeRelease || !candidateUpgradeRelease) {
+    throw new Error("Candidate finalization must retain the prior public project-upgrade edge");
+  }
+  const historicalEdge = `${priorPublicUpgradeRelease}→${publicUpgradeRelease}`;
+  const currentEdge = `${publicUpgradeRelease}→${candidateUpgradeRelease}`;
+  const updatedReadme = replaceRequired(
+    readme.replaceAll(oldTemplateCommit, templateCommit),
+    `in \`create-vireo@${publicUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${historicalEdge} release\npair;`,
+    `in \`create-vireo@${candidateUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${currentEdge} release\npair; ${historicalEdge} remains retained historical evidence;`,
+    "README.md current project-upgrade guidance",
+  );
+  let updatedCompatibility = replaceRequired(
+    compatibilityMarkdown,
+    `edge is ${historicalEdge};`,
+    `edge is ${currentEdge}; ${historicalEdge} remains retained historical evidence;`,
+    "docs/COMPATIBILITY.md current project-upgrade edge",
+  );
+  updatedCompatibility = replaceCurrentTemplateBaseline(
+    updatedCompatibility,
+    oldTemplateVersion,
+    templateVersion,
+    publicUpgradeRelease,
+    candidateUpgradeRelease,
+    historicalEdge,
+    jvmVersion,
+    "docs/COMPATIBILITY.md current Template baseline",
+  );
+
+  const createReadmePath = join(repositoryRoot, "packages", "create-vireo", "README.md");
+  let createReadme = readFileSync(createReadmePath, "utf8").replaceAll(oldTemplateCommit, templateCommit);
+  createReadme = replaceRequired(
+    createReadme,
+    `The current supported adjacent release pair is a project created by \`create-vireo\`\n${priorPublicUpgradeRelease} upgraded to ${publicUpgradeRelease}.`,
+    `The current supported adjacent release pair is a project created by \`create-vireo\`\n${publicUpgradeRelease} upgraded to ${candidateUpgradeRelease}. The ${historicalEdge} edge remains historical evidence.`,
+    "packages/create-vireo/README.md current project-upgrade pair",
+  );
+  for (const mode of ["--dry-run", "--apply --accept-application-owned"]) {
+    createReadme = replaceRequired(
+      createReadme,
+      `vireo upgrade --to ${publicUpgradeRelease} ${mode}`,
+      `vireo upgrade --to ${candidateUpgradeRelease} ${mode}`,
+      `packages/create-vireo/README.md current ${mode} command`,
+    );
+  }
+  createReadme = replaceRequired(
+    createReadme,
+    `For the current ${historicalEdge}\nedge, Vireo adds the six managed application-skill files under\n\`.agents/skills/\`; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\`\nreview policy.`,
+    `For the current ${currentEdge}\nedge, Vireo updates only managed release-coordinate, provenance, and pinned CLI metadata while retaining the six managed application-skill files introduced by the historical ${historicalEdge} edge; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\` review policy.`,
+    "packages/create-vireo/README.md current managed edge description",
+  );
+  createReadme = replaceCurrentTemplateBaseline(
+    createReadme,
+    oldTemplateVersion,
+    templateVersion,
+    publicUpgradeRelease,
+    candidateUpgradeRelease,
+    historicalEdge,
+    jvmVersion,
+    "packages/create-vireo/README.md current Template baseline",
+  );
+
+  const npmReleasePath = join(repositoryRoot, "docs", "NPM_RELEASE.md");
+  const npmRelease = replaceRequired(
+    readFileSync(npmReleasePath, "utf8"),
+    `\`starter-template@${oldTemplateVersion}\` release is already published`,
+    `\`starter-template@${templateVersion}\` release is already published`,
+    "docs/NPM_RELEASE.md current Template release prerequisite",
+  );
+  return {
+    readme: updatedReadme,
+    compatibilityMarkdown: updatedCompatibility,
+    outputs: [
+      [createReadmePath, createReadme],
+      [npmReleasePath, npmRelease],
+    ],
+  };
+}
+
+function replaceCurrentTemplateBaseline(
+  markdown,
+  oldTemplateVersion,
+  templateVersion,
+  publicUpgradeRelease,
+  candidateUpgradeRelease,
+  historicalEdge,
+  jvmVersion,
+  label,
+) {
+  const pattern = new RegExp(
+    "The immutable `starter-template@" +
+      escapeRegExp(oldTemplateVersion) +
+      "` source (?:baseline retains\\n`starterVersion=[^`]+`; `create-vireo@" +
+      escapeRegExp(publicUpgradeRelease) +
+      "` normalizes generated and upgraded\\nfull-stack consumers to the coordinated `" +
+      escapeRegExp(jvmVersion) +
+      "` JVM release|commit intentionally retains its\\n`starterVersion=[^`]+` baseline\\. Full-stack creation and the " +
+      escapeRegExp(historicalEdge) +
+      " upgrade\\nnormalize that managed declaration to the current Vireo JVM release, `" +
+      escapeRegExp(jvmVersion) +
+      "`, before\\nrecording managed hashes\\.)",
+    "u",
+  );
+  const replacement = `The immutable \`starter-template@${templateVersion}\` source baseline uses\n\`starterVersion=${jvmVersion}\`; \`create-vireo@${candidateUpgradeRelease}\` generates and upgrades\nfull-stack consumers with the coordinated \`${jvmVersion}\` JVM release.`;
+  return replacePatternOnce(markdown, pattern, replacement, label);
+}
+
+function replaceRequired(markdown, from, to, label) {
+  const matches = markdown.split(from).length - 1;
+  if (matches !== 1) throw new Error(`${label} must contain exactly one current-state reference`);
+  return markdown.replace(from, to);
+}
+
+function replacePatternOnce(markdown, pattern, replacement, label) {
+  const matches = [...markdown.matchAll(new RegExp(pattern.source, `${pattern.flags}g`))];
+  if (matches.length !== 1) throw new Error(`${label} must contain exactly one current-state reference`);
+  return markdown.replace(pattern, replacement);
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 function collectSiteTextSources(directory) {
