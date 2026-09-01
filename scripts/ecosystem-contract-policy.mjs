@@ -61,6 +61,8 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
   requireEqual("npm provenance repository aliases", npmProvenance?.repositoryAliases, ["vireocodedev/starter"]);
   requireEqual("npm provenance workflow path", npmProvenance?.workflowPath, ".github/workflows/release-npm.yml");
   requireEqual("npm provenance workflow ref", npmProvenance?.workflowRef, "refs/heads/main");
+  requireEqual("npm provenance statement type", npmProvenance?.statementType, "https://in-toto.io/Statement/v1");
+  requireEqual("npm provenance predicate type", npmProvenance?.predicateType, "https://slsa.dev/provenance/v1");
 
   for (const [name, path] of Object.entries(contract.policySources ?? {})) {
     if (!existsSync(join(repositoryRoot, path))) problems.push(`policySources.${name} references missing ${path}`);

@@ -65,7 +65,7 @@ jobs:
       id-token: write
     outputs:
       published: ${{ steps.publication-result.outputs.published }}
-      published-packages: ${{ steps.publication-result.outputs.published }}
+      published-packages: ${{ steps.publication-result.outputs.publishedPackages }}
     steps:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -99,12 +99,12 @@ jobs:
         run: corepack npm run release:verify-public
       - name: Record publication or recovery summary
         env:
-          PUBLISHED: ${{ steps.publication-result.outputs.outcome }}
-          PUBLISHED_PACKAGES: ${{ steps.publication-result.outputs.published }}
+          PUBLISHED: ${{ steps.publication-result.outputs.published }}
+          PUBLISHED_PACKAGES: ${{ steps.publication-result.outputs.publishedPackages }}
           RECOVERED_TAGS: ${{ steps.publication-result.outputs.recoveredTags }}
         run: |
           {
-            if [ "$PUBLISHED" = "published" ]; then
+            if [ "$PUBLISHED" = "true" ]; then
               echo "## Published npm packages"
             else
               echo "## Recovered npm release"

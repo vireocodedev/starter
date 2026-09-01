@@ -204,7 +204,10 @@ function sha512HexFromSRI(integrity) {
 
 export function npmPurl(candidate) {
   assertCandidateCoordinate(candidate);
-  return `pkg:npm/${encodeURIComponent(candidate.name)}@${candidate.version}`;
+  const packageName = candidate.name.startsWith("@")
+    ? `%40${candidate.name.slice(1)}`
+    : encodeURIComponent(candidate.name);
+  return `pkg:npm/${packageName}@${candidate.version}`;
 }
 
 function decodeStatement(bundle, coordinate) {
@@ -215,18 +218,6 @@ function decodeStatement(bundle, coordinate) {
   } catch (error) {
     throw new Error(`Audited provenance bundle has invalid DSSE JSON for ${coordinate}.`, { cause: error });
   }
-}
-
-function valuesForKey(value, matcher, values = []) {
-  if (Array.isArray(value)) {
-    for (const item of value) valuesForKey(item, matcher, values);
-  } else if (value && typeof value === "object") {
-    for (const [key, item] of Object.entries(value)) {
-      if (matcher(key)) values.push(item);
-      valuesForKey(item, matcher, values);
-    }
-  }
-  return values;
 }
 
 function provenanceMaterials(statement) {
@@ -243,12 +234,16 @@ function materialCommit(material) {
 }
 
 function materialRepository(material) {
-  const uri = material?.uri ?? "";
-  const match = /github\.com[/:]([^/]+\/[^/@]+)(?:\.git)?(?:@|$|\/)/u.exec(uri);
+  return repositoryIdentity(material?.uri);
+}
+
+function repositoryIdentity(value) {
+  const match = /github\.com[/:]([^/]+\/[^/@]+)(?:\.git)?(?:@|$|\/)/u.exec(value ?? "");
   return match?.[1]?.replace(/\.git$/u, "") ?? null;
 }
 
 function statementMatchesProvenance(statement, candidate, registryIntegrity, policy) {
+  if (statement?._type !== policy.statementType || statement?.predicateType !== policy.predicateType) return false;
   const expectedPurl = npmPurl(candidate);
   const expectedDigest = sha512HexFromSRI(registryIntegrity);
   const subjectMatches = statement?.subject?.some(
@@ -256,18 +251,23 @@ function statementMatchesProvenance(statement, candidate, registryIntegrity, pol
   );
   if (!subjectMatches) return false;
 
-  const repositoryIds = valuesForKey(statement?.predicate, key => /^(?:repository_id|repositoryId)$/u.test(key));
-  if (!repositoryIds.some(value => String(value) === policy.repositoryId)) return false;
-
   const allowedRepositories = new Set([policy.canonicalRepository, ...(policy.repositoryAliases ?? [])]);
+  const buildDefinition = statement?.predicate?.buildDefinition;
+  const workflow = buildDefinition?.externalParameters?.workflow;
+  if (
+    !workflow ||
+    !allowedRepositories.has(repositoryIdentity(workflow.repository) ?? workflow.repository) ||
+    workflow.path !== policy.workflowPath ||
+    workflow.ref !== policy.workflowRef
+  ) {
+    return false;
+  }
+  if (String(buildDefinition?.internalParameters?.github?.repository_id) !== policy.repositoryId) return false;
   const materials = provenanceMaterials(statement);
   const matchingMaterial = materials.find(material => allowedRepositories.has(materialRepository(material)));
   if (!matchingMaterial || !/^[a-f0-9]{40}$/u.test(materialCommit(matchingMaterial) ?? "")) return false;
 
-  const workflowReferences = valuesForKey(statement?.predicate, key => /workflow(?:_ref|Ref)?$/iu.test(key));
-  return workflowReferences.some(
-    value => typeof value === "string" && value.includes(`${policy.workflowPath}@${policy.workflowRef}`),
-  );
+  return true;
 }
 
 export function validateAuditedProvenance(candidates, audit, policy = provenanceContract) {
@@ -278,7 +278,7 @@ export function validateAuditedProvenance(candidates, audit, policy = provenance
     const verified = audit.verified.find(
       entry => entry?.name === candidate.name && entry?.version === candidate.version,
     );
-    const bundles = verified?.attestations?.bundles;
+    const bundles = verified?.attestationBundles;
     if (!Array.isArray(bundles) || bundles.length === 0) {
       throw new Error(`npm signature audit did not expose an attestation bundle for ${candidate.coordinate}.`);
     }
@@ -512,6 +512,11 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
     options.writeResult({
       schemaVersion: 1,
       source: { commit: expectedCommit },
+      candidates: candidates.map(candidate => ({
+        coordinate: candidate.coordinate,
+        integrity: candidate.integrity,
+        purl: npmPurl(candidate),
+      })),
       published,
       recoveredTags: createdTags.filter(coordinate => registryStates.get(coordinate).state === "historical"),
       publishedTags: createdTags.filter(coordinate => registryStates.get(coordinate).state === "absent"),

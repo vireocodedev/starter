@@ -55,7 +55,9 @@
     "canonicalRepository": "vireocodedev/vireo",
     "repositoryAliases": ["vireocodedev/starter"],
     "workflowPath": ".github/workflows/release-npm.yml",
-    "workflowRef": "refs/heads/main"
+    "workflowRef": "refs/heads/main",
+    "statementType": "https://in-toto.io/Statement/v1",
+    "predicateType": "https://slsa.dev/provenance/v1"
   },
   "compatibility": {
     "versioning": "independent-artifact-semver",

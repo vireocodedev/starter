@@ -237,6 +237,7 @@ function auditedBundle(candidate, registryIntegrity, overrides = {}) {
   const provenanceCommit = overrides.commit ?? commit;
   const statement = {
     _type: "https://in-toto.io/Statement/v1",
+    predicateType: "https://slsa.dev/provenance/v1",
     subject: [
       {
         name: npmPurl(candidate),
@@ -246,8 +247,14 @@ function auditedBundle(candidate, registryIntegrity, overrides = {}) {
     predicate: {
       buildDefinition: {
         externalParameters: {
-          repository_id: "1304974749",
-          workflow_ref: ".github/workflows/release-npm.yml@refs/heads/main",
+          workflow: {
+            repository: overrides.repository ?? "vireocodedev/vireo",
+            path: ".github/workflows/release-npm.yml",
+            ref: "refs/heads/main",
+          },
+        },
+        internalParameters: {
+          github: { repository_id: "1304974749" },
         },
         resolvedDependencies: [
           {
@@ -263,11 +270,9 @@ function auditedBundle(candidate, registryIntegrity, overrides = {}) {
       {
         name: candidate.name,
         version: candidate.version,
-        attestations: {
-          bundles: [
-            { bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64") } } },
-          ],
-        },
+        attestationBundles: [
+          { bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64") } } },
+        ],
       },
     ],
   };
@@ -281,6 +286,21 @@ test("accepts only audited SLSA bundles that bind the exact PURL, registry SRI, 
 
   const wrongIntegrity = auditedBundle(candidate, alternateIntegrity(candidate));
   assert.throws(() => validateAuditedProvenance([candidate], wrongIntegrity), /No audited SLSA provenance/u);
+});
+
+test("uses the npm package-url scope form with an encoded at-sign and literal slash", () => {
+  const candidate = verifyNpmCandidates(fixture(), commit).find(item => item.name === "@vireocodedev/history");
+  assert.equal(npmPurl(candidate), "pkg:npm/%40vireocodedev/history@0.2.2");
+});
+
+test("accepts the explicit historical starter repository alias in the live workflow repository URL shape", () => {
+  const candidate = { ...verifyNpmCandidates(fixture(), commit)[0], registryIntegrity: undefined };
+  candidate.registryIntegrity = candidate.integrity;
+  const provenance = validateAuditedProvenance(
+    [candidate],
+    auditedBundle(candidate, candidate.integrity, { repository: "https://github.com/vireocodedev/starter" }),
+  );
+  assert.equal(provenance.get(candidate.coordinate).commit, commit);
 });
 
 test("publishes a missing candidate, confirms its exact reviewed bytes, then creates its tag", async () => {
