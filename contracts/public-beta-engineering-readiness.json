@@ -4,10 +4,11 @@
   "product": "vireo-framework",
   "machineClosure": {
     "status": "PASS",
-    "resolved": ["P1-03", "P1-09-machine", "G-108", "G-305-maintainer", "G-308"],
+    "resolved": ["P1-03", "P1-09-machine", "P1-09-npm-release-continuity", "G-108", "G-305-maintainer", "G-308"],
     "evidence": [
       "docs/roadmap/phase-0/repository-topology.md",
       "docs/roadmap/phase-1/evidence/repository-migration-2026-09-01.md",
+      "docs/roadmap/phase-1/evidence/npm-release-continuity-2026-09-01.md",
       "docs/security/provider-controls-2026-08-31.md",
       "docs/roadmap/phase-1/evidence/verification-trend-review-2026-09-01.md",
       "docs/roadmap/phase-4/evidence/target-recovery-2026-09-01.md",
@@ -20,7 +21,6 @@
     "handoff": "docs/roadmap/public-beta-human-handoff-2026-09-01.md",
     "pending": [
       "second-trusted-maintainer-and-independent-approval",
-      "npm-trusted-publisher-release-continuity",
       "independent-security-review",
       "manual-at-branded-browser-physical-device-and-installed-pwa-evidence",
       "low-end-device-and-real-user-field-performance",

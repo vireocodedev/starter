@@ -110,7 +110,9 @@
         "scripts/reset-flagship-demo.sh",
         "scripts/verify-template.sh",
         "scripts/write-support-evidence.mjs",
+        "docs/provider-controls-2026-08-31.md",
         "docs/recipes/rehearse-demo-reset.md",
+        "scripts/repository-security-policy.mjs",
         ".vireo/template.json"
       ],
       "prefixes": [".performance-evidence/", ".verification-evidence/", "deploy/hetzner/"]
@@ -123,8 +125,10 @@
         "docs/assets/flagship-overview.png",
         "docs/flagship-demo.md",
         "docs/flagship.md",
+        "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
         "docs/platform-support-evidence.md",
         "docs/tutorials/evaluate-flagship.md",
+        "docs/verification-trend-review-2026-09-01.md",
         "docs/verification-performance.md",
         "frontend/docs/LOADING_STATE_AUDIT.md"
       ],
@@ -467,6 +471,14 @@
     { "path": ".verification-evidence/latest.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "deploy/hetzner/deploy.sh", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "docs/flagship.md", "profile": "full-stack", "category": "historical" },
+    { "path": "docs/provider-controls-2026-08-31.md", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "docs/provider-controls-2026-08-31.md", "profile": "frontend", "category": "maintainer-only" },
+    { "path": "docs/hosted-demo-recovery-rehearsal-2026-09-01.md", "profile": "full-stack", "category": "historical" },
+    { "path": "docs/hosted-demo-recovery-rehearsal-2026-09-01.md", "profile": "frontend", "category": "historical" },
+    { "path": "docs/verification-trend-review-2026-09-01.md", "profile": "full-stack", "category": "historical" },
+    { "path": "docs/verification-trend-review-2026-09-01.md", "profile": "frontend", "category": "historical" },
+    { "path": "scripts/repository-security-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": "scripts/repository-security-policy.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "AGENTS.md", "profile": "full-stack", "category": "maintainer-only" },
     { "path": "AGENTS.md", "profile": "frontend", "category": "maintainer-only" },
     {

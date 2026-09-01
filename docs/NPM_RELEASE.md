@@ -159,11 +159,15 @@ publisher received a success response.
 
 ## Repository-rename trusted-publisher migration
 
-Current public packages remain consumable through GitHub redirects, but future npm
-OIDC publishing is not proven until an npm owner with login and 2FA completes this
-for each of `create-vireo`, `@vireocodedev/history`, `@vireocodedev/infrastructure`,
+The 2026-09-01 repository rename completed this procedure for each of
+`create-vireo`, `@vireocodedev/history`, `@vireocodedev/infrastructure`,
 `@vireocodedev/localization`, `@vireocodedev/query`, `@vireocodedev/shell`,
-`@vireocodedev/sqlite`, and `@vireocodedev/ui`:
+`@vireocodedev/sqlite`, and `@vireocodedev/ui`. The retained [continuity evidence](roadmap/phase-1/evidence/npm-release-continuity-2026-09-01.md)
+includes the successful post-rename `create-vireo@0.8.0` publication, anonymous
+verification, and SBOM attestation.
+
+Repeat this procedure when a public npm package changes repository identity or a
+new public package is introduced:
 
 1. Run `npm trust list <package> --json` and retain the sanitized result.
 2. In npm package settings, revoke the old GitHub trusted publisher for repository

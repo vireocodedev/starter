@@ -17,10 +17,18 @@ boundary with their intended return paths intact. A signed-in GitHub user needs 
 repository membership to use the forms, but GitHub does require an account to view
 and submit them.
 
-The latest hosted **Public-beta evidence** workflow was successful: run
-[`33429747974`](https://github.com/vireocodedev/starter/actions/runs/33429747974),
+The pre-rename **Public-beta evidence** workflow is retained as historical
+aggregate-contract evidence: [run 33429747974](https://github.com/vireocodedev/starter/actions/runs/33429747974),
 completed 2026-08-31T19:17:46Z. A green workflow validates the aggregate contract;
 it is not an external result.
+
+Post-rename npm release continuity is separately complete: all eight packages use
+the canonical `vireocodedev/vireo` trusted publisher, `create-vireo@0.8.0` was
+published, anonymous verification succeeded, and all npm/Maven SBOM attestations
+were verified. The exact release evidence is retained in the
+[Phase 1 continuity record](../../phase-1/evidence/npm-release-continuity-2026-09-01.md).
+It confirms public artifact availability but does not change any external-session
+or adoption outcome.
 
 ## Source and live-label state
 

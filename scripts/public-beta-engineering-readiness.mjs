@@ -7,10 +7,16 @@ const readiness = readJson("contracts/public-beta-engineering-readiness.json");
 const evidencePolicy = readJson("contracts/public-beta-evidence-policy.json");
 const aggregate = readJson(evidencePolicy.aggregatePath);
 const problems = [];
-const requiredMachine = ["P1-03", "P1-09-machine", "G-108", "G-305-maintainer", "G-308"];
+const requiredMachine = [
+  "P1-03",
+  "P1-09-machine",
+  "P1-09-npm-release-continuity",
+  "G-108",
+  "G-305-maintainer",
+  "G-308",
+];
 const requiredHuman = [
   "second-trusted-maintainer-and-independent-approval",
-  "npm-trusted-publisher-release-continuity",
   "independent-security-review",
   "manual-at-branded-browser-physical-device-and-installed-pwa-evidence",
   "low-end-device-and-real-user-field-performance",

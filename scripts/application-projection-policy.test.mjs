@@ -296,3 +296,41 @@ test("release identity must be application-owned and route security separately",
     );
   }
 });
+
+test("release identity URLs are structurally parsed and normalized before route comparison", () => {
+  const valid = {
+    projectName: "inventory-app",
+    displayName: "Inventory App",
+    ownerName: "Acme Operations",
+    repositoryUrl: "https://github.com/acme/inventory-app",
+    supportUrl: "https://support.acme.example/inventory",
+    securityContact: "mailto:Security@acme.example",
+  };
+  assert.deepEqual(validateApplicationIdentity(contract, valid), []);
+
+  for (const repositoryUrl of [
+    "https:///missing-host",
+    "https://.",
+    "https://..",
+    "https://user@example.test/inventory",
+    "https://:password@example.test/inventory",
+    "https://@example.test/inventory",
+    "https://example.test/invalid\\path",
+    "https://example.test/invalid\u0000path",
+  ]) {
+    assert.match(
+      validateApplicationIdentity(contract, { ...valid, repositoryUrl }).join("\n"),
+      /repositoryUrl must use https-url format/u,
+      repositoryUrl,
+    );
+  }
+
+  assert.match(
+    validateApplicationIdentity(contract, {
+      ...valid,
+      supportUrl: "https://SUPPORT.acme.example:443/inventory/",
+      securityContact: "https://support.acme.example/inventory",
+    }).join("\n"),
+    /supportUrl and securityContact must be distinct/u,
+  );
+});

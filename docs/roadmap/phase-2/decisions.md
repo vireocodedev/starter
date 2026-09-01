@@ -18,4 +18,6 @@ npm create vireo@latest my-app
 
 It resolves to the unscoped public package `create-vireo`. The package pins a full public Template commit rather than a moving branch. It performs no telemetry. Existing targets are never overwritten, and failed staging is removed before the command exits.
 
-The package coordinate is technically implemented but cannot be described as anonymously consumable until its one-time first npm publication is complete and its trusted publisher is configured.
+The one-time first npm publication and all eight repository-rename trusted-publisher
+configurations were completed on 2026-09-01. Anonymous public verification and SBOM
+attestation are retained in the [npm release continuity record](../phase-1/evidence/npm-release-continuity-2026-09-01.md).

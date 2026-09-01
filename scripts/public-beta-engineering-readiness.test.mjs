@@ -9,6 +9,11 @@ const aggregate = JSON.parse(readFileSync(resolve(root, "docs/roadmap/phase-5/ev
 
 assert.equal(readiness.machineClosure.status, "PASS");
 assert.equal(readiness.humanGate.status, "HOLD");
+assert.ok(readiness.machineClosure.resolved.includes("P1-09-npm-release-continuity"));
+assert.ok(
+  readiness.machineClosure.evidence.includes("docs/roadmap/phase-1/evidence/npm-release-continuity-2026-09-01.md"),
+);
+assert.equal(readiness.humanGate.pending.includes("npm-trusted-publisher-release-continuity"), false);
 assert.deepEqual(readiness.adoptionSnapshot, {
   workflowSessions: aggregate.workflowSessions.total,
   qualifyingActiveTeams: aggregate.adoption.qualifyingActiveTeams,
