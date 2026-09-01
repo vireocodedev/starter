@@ -7,6 +7,7 @@ import test from "node:test";
 
 import {
   inspectExistingTag,
+  inspectRegistryCandidate,
   publishVerifiedCandidates,
   reconcileCandidateTags,
   registryConfirmationSettings,
@@ -190,6 +191,10 @@ function metadataResponse(candidate, overrides = {}) {
   };
 }
 
+function alternateIntegrity(candidate) {
+  return `sha512-${createHash("sha512").update(`historical:${candidate.coordinate}`).digest("base64")}`;
+}
+
 function notFoundResponse() {
   return { ok: false, status: 404 };
 }
@@ -248,19 +253,30 @@ test("accepts an existing coordinate only when registry metadata matches the rev
   assert.deepEqual(tags.logs, []);
 });
 
-test("fails closed before publication or tagging when registry integrity differs", async () => {
+test("classifies registry candidates as absent, exact, or historical only with matching coordinates and valid SRI", async () => {
   const candidate = verifyNpmCandidates(fixture(), commit)[0];
-  const tags = tagOperations();
-  await assert.rejects(
-    publishVerifiedCandidates([candidate], {
-      expectedCommit: commit,
-      fetchRegistry: async () => metadataResponse(candidate, { dist: { integrity: "sha512-not-reviewed" } }),
-      publish: async () => assert.fail("mismatched registry candidate must not publish"),
-      ...tags.options,
-    }),
-    /does not match reviewed candidate bytes/u,
+  assert.equal((await inspectRegistryCandidate(candidate, async () => notFoundResponse())).state, "absent");
+  assert.equal((await inspectRegistryCandidate(candidate, async () => metadataResponse(candidate))).state, "exact");
+  assert.equal(
+    (await inspectRegistryCandidate(candidate, async () => metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } }))).state,
+    "historical",
   );
-  assert.deepEqual(tags.created, []);
+  await assert.rejects(
+    inspectRegistryCandidate(candidate, async () => metadataResponse(candidate, { name: "wrong-package" })),
+    /unexpected coordinate/u,
+  );
+  await assert.rejects(
+    inspectRegistryCandidate(candidate, async () => metadataResponse(candidate, { dist: { integrity: "sha512-not-sri" } })),
+    /invalid sha512 SRI/u,
+  );
+  await assert.rejects(
+    inspectRegistryCandidate({ ...candidate, coordinate: "wrong" }, async () => notFoundResponse()),
+    /valid npm coordinate/u,
+  );
+  await assert.rejects(
+    inspectRegistryCandidate({ ...candidate, integrity: "sha512-not-sri" }, async () => notFoundResponse()),
+    /valid sha512 SRI/u,
+  );
 });
 
 test("retries registry propagation after publish and waits only between unresolved checks", async () => {
@@ -309,13 +325,34 @@ test("preserves an immutable historical tag for a registry-existing candidate", 
   const tags = tagOperations({ existingTags: new Map([[candidates[1].coordinate, "b".repeat(40)]]) });
   const result = await publishVerifiedCandidates(candidates, {
     expectedCommit: commit,
-    fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+    fetchRegistry: async url => {
+      const candidate = candidateFromUrl(candidates, url);
+      return metadataResponse(
+        candidate,
+        candidate === candidates[1] ? { dist: { integrity: alternateIntegrity(candidate) } } : {},
+      );
+    },
     publish: async () => assert.fail("existing candidates must not publish"),
     ...tags.options,
   });
   assert.deepEqual(result, []);
   assert.deepEqual(tags.created, [[candidates[0].coordinate, candidates[0].coordinate, commit]]);
   assert.deepEqual(tags.logs, [`New tag: ${candidates[0].coordinate}`]);
+});
+
+test("fails closed before every mutation when a historical registry candidate has no annotated coordinate tag", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations();
+  await assert.rejects(
+    publishVerifiedCandidates([candidate], {
+      expectedCommit: commit,
+      fetchRegistry: async () => metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } }),
+      publish: async () => assert.fail("historical candidates must not publish"),
+      ...tags.options,
+    }),
+    /requires its existing annotated coordinate tag/u,
+  );
+  assert.deepEqual(tags.created, []);
 });
 
 test("fails before publication when an unpublished candidate tag belongs to another commit", async () => {
@@ -354,6 +391,66 @@ test("recovers all registry-existing candidates by creating only missing tags", 
   );
 });
 
+test("returns only candidates actually published when an exact retry and an absent candidate are mixed", async () => {
+  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
+  const tags = tagOperations({ existingTags: new Map([[candidates[1].coordinate, commit]]) });
+  let firstCandidateChecks = 0;
+  const result = await publishVerifiedCandidates(candidates, {
+    expectedCommit: commit,
+    fetchRegistry: async url => {
+      const candidate = candidateFromUrl(candidates, url);
+      if (candidate === candidates[0]) {
+        return firstCandidateChecks++ === 0 ? notFoundResponse() : metadataResponse(candidate);
+      }
+      return metadataResponse(candidate);
+    },
+    publish: async candidate => assert.equal(candidate.coordinate, candidates[0].coordinate),
+    ...tags.options,
+  });
+  assert.deepEqual(result, [candidates[0].coordinate]);
+  assert.deepEqual(tags.created, [[candidates[0].coordinate, candidates[0].coordinate, commit]]);
+});
+
+test("preflights every registry and tag state before publishing any absent candidate", async () => {
+  const candidates = verifyNpmCandidates(fixture(), commit).slice(0, 2);
+  const tags = tagOperations();
+  await assert.rejects(
+    publishVerifiedCandidates(candidates, {
+      expectedCommit: commit,
+      fetchRegistry: async url => {
+        const candidate = candidateFromUrl(candidates, url);
+        return candidate === candidates[0]
+          ? notFoundResponse()
+          : metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } });
+      },
+      publish: async () => assert.fail("preflight failure must occur before publication"),
+      ...tags.options,
+    }),
+    /requires its existing annotated coordinate tag/u,
+  );
+  assert.deepEqual(tags.created, []);
+});
+
+test("fails strict post-publish confirmation when a raced registry version has historical bytes", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit)[0];
+  const tags = tagOperations();
+  let checks = 0;
+  await assert.rejects(
+    publishVerifiedCandidates([candidate], {
+      expectedCommit: commit,
+      fetchRegistry: async () =>
+        checks++ === 0
+          ? notFoundResponse()
+          : metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } }),
+      publish: async () => {},
+      sleep: async () => assert.fail("historical bytes must not be retried"),
+      ...tags.options,
+    }),
+    /does not match reviewed candidate bytes/u,
+  );
+  assert.deepEqual(tags.created, []);
+});
+
 test("keeps an exact duplicate without tags markers", async () => {
   const candidate = verifyNpmCandidates(fixture(), commit)[0];
   const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, commit]]) });
@@ -373,7 +470,13 @@ test("recovers an all-published release without moving historical tags or emitti
   });
   const result = await publishVerifiedCandidates(candidates, {
     expectedCommit: commit,
-    fetchRegistry: async url => metadataResponse(candidateFromUrl(candidates, url)),
+    fetchRegistry: async url => {
+      const candidate = candidateFromUrl(candidates, url);
+      return metadataResponse(
+        candidate,
+        candidate === candidates[0] ? { dist: { integrity: alternateIntegrity(candidate) } } : {},
+      );
+    },
     publish: async () => assert.fail("all-published recovery must not republish"),
     ...tags.options,
   });

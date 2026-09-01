@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       confirmation:
-        description: Type publish to release every unpublished manifest version
+        description: Type publish to release absent reviewed manifest versions or recover an exact prior release
         required: true
         type: string
 

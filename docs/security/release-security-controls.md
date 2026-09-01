@@ -48,8 +48,13 @@ scopes:
 Checkout credentials are disabled everywhere except the isolated JVM tag job.
 Dependency lifecycle scripts are disabled during installation in the npm write
 job. Candidate verification runs in separate read-only jobs before either package
-publisher can start. Unexpected registry responses fail closed rather than being
-treated as permission to publish.
+publisher can start. Before publishing or creating a tag, the npm publisher
+preflights every candidate's exact coordinate, valid SHA-512 SRI state, and
+annotated coordinate-tag binding. It distinguishes absent, exact, and historical
+registry versions; historical bytes are accepted only with their existing valid
+annotated coordinate tag, which recovery never creates or moves. Unexpected
+registry responses and post-publish integrity mismatches fail closed rather than
+being treated as permission to publish.
 
 ### Secret detection
 

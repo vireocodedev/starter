@@ -98,12 +98,19 @@ merge.
 3. Review the retained release-candidate evidence from the verify job, including
    its Maven availability prerequisite.
 4. Approve the `package-release` environment deployment.
-5. Confirm that the publish job reports at least one published package.
+5. Confirm that the publish job reports the packages it published, or an explicit
+   successful recovery when every reviewed coordinate was already public.
 
 The publish job downloads the retained evidence from the verify job, requires its
-source commit and all eight tarball SHA-256 digests to match, rechecks registry
-immutability, and passes those exact tarballs to `npm publish`. It does not rebuild
-package bytes. The production workflow is OIDC-only: it does not read
+source commit and all eight tarball SHA-256 digests to match, then preflights every
+registry coordinate and annotated coordinate tag before making either mutation. It
+classifies each registry version as absent, an exact match for the reviewed tarball,
+or historical bytes. Historical bytes are recoverable only when their existing
+annotated coordinate tag supplies their provenance; that tag is never created,
+moved, or replaced. The publisher passes only absent reviewed tarballs to `npm
+publish`, strictly confirms their exact SRI integrity afterwards, and can recreate
+a missing current tag for an exact published retry. It does not rebuild package
+bytes. The production workflow is OIDC-only: it does not read
 `NPM_TOKEN` or `NODE_AUTH_TOKEN`. npm obtains a short-lived identity from GitHub
 Actions and records provenance for each publication.
 
@@ -136,9 +143,11 @@ publisher received a success response.
 
 - If verification times out while npm is propagating a valid release, rerun
   **Verify public npm release**. Do not republish the same version.
-- If only some workspaces publish, inspect npm first. The publisher skips
-  already-immutable coordinates, so a reviewed retry may publish only the missing
-  tarballs from the unchanged retained candidate.
+- If only some workspaces publish, inspect npm first. A reviewed retry preflights
+  all eight coordinates before mutation, skips only exact reviewed bytes, and may
+  publish only the absent tarballs from the unchanged retained candidate. A
+  different but valid historical SRI requires its existing annotated coordinate
+  tag and is preserved without moving or recreating that tag.
 - If a published artifact is defective, deprecate it with an actionable message,
   prepare corrected patch versions, and run the normal release path. Never move
   a tag or attempt to overwrite a published version.
