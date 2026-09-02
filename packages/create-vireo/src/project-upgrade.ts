@@ -820,11 +820,6 @@ async function upgradeProjectWithPolicy(
     }
   }
   const managedBaselines = edgeBaselines(policy, source.release, edge?.to, metadata.profile);
-  const receiptManagedSurfaces = [
-    ...managedSurfaces,
-    ...(frontendOnly ? Object.keys(target.managedRootScripts ?? {}).map(name => `package.json#scripts.${name}`) : []),
-    ...managedBaselines.map(baseline => baseline.path),
-  ];
   const baselineFiles = await Promise.all(
     managedBaselines.map(async baseline => ({ baseline, state: await baselineState(projectDirectory, baseline) })),
   );
@@ -887,6 +882,14 @@ async function upgradeProjectWithPolicy(
       ? graph.edges.find(candidate => candidate.from === previousUpgrade.from && candidate.to === target.release)
       : undefined);
   const recordSource = recordedEdge ? graph.releases.find(release => release.release === recordedEdge.from)! : source;
+  const receiptBaselines = recordedEdge
+    ? edgeBaselines(policy, recordSource.release, target.release, metadata.profile)
+    : managedBaselines;
+  const receiptManagedSurfaces = [
+    ...managedSurfaces,
+    ...(frontendOnly ? Object.keys(target.managedRootScripts ?? {}).map(name => `package.json#scripts.${name}`) : []),
+    ...receiptBaselines.map(baseline => baseline.path),
+  ];
   const actions = profileActions(recordedEdge?.applicationOwnedActions ?? [], metadata.profile),
     recordPath = join(projectDirectory, ".vireo", `upgrade-${recordSource.release}-to-${target.release}.json`);
   const recordContents = await format(

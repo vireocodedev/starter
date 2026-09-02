@@ -823,8 +823,20 @@ test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves a
     const managed = JSON.parse(await readFile(join(root, ".vireo/managed-files.json"), "utf8"));
     for (const file of managed.files)
       assert.equal(sha256(await readFile(join(root, file.path))), file.sha256, `managed digest ${file.path}`);
+    const receiptPath = join(root, ".vireo", "upgrade-0.8.1-to-0.8.2.json");
+    const receiptBeforeRepeat = await readFile(receiptPath, "utf8");
+    assert.deepEqual(JSON.parse(receiptBeforeRepeat).managedSurfaces, [
+      "package.json#scripts.vireo",
+      "frontend/package.json#dependencies",
+      "gradle.properties#starterVersion",
+      ".vireo/project.json#templateCommit,templateVersion,templateTag,lastUpgradedBy,lastUpgrade",
+      ".vireo/managed-files.json",
+      "package.json#scripts.doctor:json",
+      "scripts/vireo-frontend-doctor.mjs",
+    ]);
     const repeated = await upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy);
     assert.ok(repeated.files.every(file => file.status === "unchanged"));
+    assert.equal(await readFile(receiptPath, "utf8"), receiptBeforeRepeat);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -911,8 +923,20 @@ test("finalized 0.8.1 full-stack Doctor migration updates realistic managed prov
     const managed = JSON.parse(await readFile(join(root, ".vireo/managed-files.json"), "utf8"));
     for (const file of managed.files)
       assert.equal(sha256(await readFile(join(root, file.path))), file.sha256, `managed digest ${file.path}`);
+    const receiptPath = join(root, ".vireo", "upgrade-0.8.1-to-0.8.2.json");
+    const receiptBeforeRepeat = await readFile(receiptPath, "utf8");
+    assert.deepEqual(JSON.parse(receiptBeforeRepeat).managedSurfaces, [
+      "package.json#scripts.vireo",
+      "frontend/package.json#dependencies",
+      "gradle.properties#starterVersion",
+      ".vireo/project.json#templateCommit,templateVersion,templateTag,lastUpgradedBy,lastUpgrade",
+      ".vireo/managed-files.json",
+      "scripts/vireo-doctor.mjs",
+      "scripts/vireo-doctor.test.mjs",
+    ]);
     const repeated = await upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, policy);
     assert.ok(repeated.files.every(file => file.status === "unchanged"));
+    assert.equal(await readFile(receiptPath, "utf8"), receiptBeforeRepeat);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
