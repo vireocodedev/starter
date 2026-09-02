@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:create-vireo",
+  "decision": "no-release",
+  "justification": "Only test-fixture release identity and regression coverage changed; fixtures are excluded from the published package and create-vireo runtime, exports, declarations, and packed bytes are unchanged."
+}

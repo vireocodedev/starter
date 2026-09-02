@@ -370,6 +370,30 @@ const adjacentPolicy = JSON.parse(
 );
 const adjacentSource = adjacentPolicy.releaseGraph.releases.find(release => release.release === adjacentSourceRelease);
 const adjacentTarget = adjacentPolicy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease);
+const candidateTargetRelease = syntheticCandidateTargetRelease(adjacentPolicy);
+
+function syntheticCandidateTargetRelease(policy) {
+  const targetRelease = policy.releaseGraph.candidateRelease ?? policy.releaseGraph.publicRelease;
+  if (
+    typeof targetRelease !== "string" ||
+    targetRelease === adjacentTargetRelease ||
+    !policy.releaseGraph.releases.some(release => release.release === targetRelease)
+  ) {
+    throw new Error("Adjacent upgrade fixture requires a distinct declared synthetic candidate target.");
+  }
+  return targetRelease;
+}
+
+function candidatePolicyForTest(sourcePolicy) {
+  const candidateRelease = syntheticCandidateTargetRelease(sourcePolicy);
+  const policy = structuredClone(sourcePolicy);
+  policy.releaseGraph.publicRelease = adjacentTargetRelease;
+  policy.releaseGraph.previousRelease = adjacentTargetRelease;
+  policy.releaseGraph.candidateRelease = candidateRelease;
+  policy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease).status = "current";
+  policy.releaseGraph.releases.find(release => release.release === candidateRelease).status = "candidate";
+  return policy;
+}
 
 async function adjacentFixture(profile) {
   const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-0.7-`));
@@ -500,7 +524,7 @@ test("0.7.0 to 0.8.0 adds managed skills once and preserves application-owned by
   }
 });
 
-test("unpublished 0.8.1 candidates reject preview and apply while their finalized target remains supported", async () => {
+test("synthetic candidate policies reject preview and apply while explicit finalized policies support their target", async () => {
   const root = await adjacentFixture("frontend");
   try {
     await upgradeVireoProject({
@@ -510,30 +534,35 @@ test("unpublished 0.8.1 candidates reject preview and apply while their finalize
       acceptApplicationOwned: true,
     });
     const beforeCandidate = await treeBytes(root);
+    const finalizedArtifactPolicy = structuredClone(adjacentPolicy);
+    delete finalizedArtifactPolicy.releaseGraph.candidateRelease;
+    finalizedArtifactPolicy.releaseGraph.publicRelease = candidateTargetRelease;
+    finalizedArtifactPolicy.releaseGraph.previousRelease = adjacentTargetRelease;
+    finalizedArtifactPolicy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease).status =
+      "historical";
+    finalizedArtifactPolicy.releaseGraph.releases.find(release => release.release === candidateTargetRelease).status =
+      "current";
+    assert.equal(syntheticCandidateTargetRelease(finalizedArtifactPolicy), candidateTargetRelease);
+    const candidatePolicy = candidatePolicyForTest(finalizedArtifactPolicy);
     for (const options of [
-      { projectDirectory: root, targetRelease: "0.8.1", dryRun: true },
-      { projectDirectory: root, targetRelease: "0.8.1", dryRun: false, acceptApplicationOwned: true },
+      { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: true },
+      { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: false, acceptApplicationOwned: true },
     ]) {
-      await assert.rejects(upgradeVireoProject(options), error => error.code === "VIR-UPG-008");
+      await assert.rejects(upgradeVireoProjectForTest(options, candidatePolicy), error => error.code === "VIR-UPG-008");
       assertSameSnapshot(beforeCandidate, await treeBytes(root));
     }
 
-    const finalizedPolicy = structuredClone(adjacentPolicy);
-    delete finalizedPolicy.releaseGraph.candidateRelease;
-    finalizedPolicy.releaseGraph.publicRelease = "0.8.1";
-    finalizedPolicy.releaseGraph.previousRelease = "0.8.0";
-    finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.0").status = "historical";
-    finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.1").status = "current";
     const applied = await upgradeVireoProjectForTest(
-      { projectDirectory: root, targetRelease: "0.8.1", dryRun: false, acceptApplicationOwned: true },
-      finalizedPolicy,
+      { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: false, acceptApplicationOwned: true },
+      finalizedArtifactPolicy,
     );
     assert.equal(applied.dryRun, false);
     const metadata = JSON.parse(await readFile(join(root, ".vireo/project.json"), "utf8"));
-    assert.equal(metadata.lastUpgradedBy, "create-vireo@0.8.1");
+    assert.equal(metadata.lastUpgradedBy, `create-vireo@${candidateTargetRelease}`);
     assert.equal(
       metadata.templateCommit,
-      finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.1").templateCommit,
+      finalizedArtifactPolicy.releaseGraph.releases.find(release => release.release === candidateTargetRelease)
+        .templateCommit,
     );
   } finally {
     await rm(root, { recursive: true, force: true });
