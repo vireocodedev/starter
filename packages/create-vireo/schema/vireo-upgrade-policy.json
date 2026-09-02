@@ -2,6 +2,7 @@
   "schemaVersion": 2,
   "releaseGraph": {
     "publicRelease": "0.8.1",
+    "candidateRelease": "0.8.2",
     "previousRelease": "0.8.0",
     "releases": [
       {
@@ -123,6 +124,24 @@
           "@vireocodedev/shell": "^0.2.2",
           "@vireocodedev/ui": "^0.3.0"
         }
+      },
+      {
+        "release": "0.8.2",
+        "status": "candidate",
+        "templateCommit": "421ae56cdd6d1fa6863cc6f29503b15294e4aa99",
+        "rootVireoScript": "npx --yes --package=create-vireo@0.8.2 vireo",
+        "starterJvmVersion": "0.3.1",
+        "managedRootScripts": {
+          "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json"
+        },
+        "frontendDependencies": {
+          "@vireocodedev/history": "^0.2.2",
+          "@vireocodedev/infrastructure": "^0.2.2",
+          "@vireocodedev/localization": "^0.2.2",
+          "@vireocodedev/query": "^0.2.2",
+          "@vireocodedev/shell": "^0.2.2",
+          "@vireocodedev/ui": "^0.3.0"
+        }
       }
     ],
     "edges": [
@@ -228,6 +247,23 @@
             ]
           }
         ]
+      },
+      {
+        "from": "0.8.1",
+        "to": "0.8.2",
+        "applicationOwnedActions": [
+          {
+            "id": "application-owned-template-0.8.2-review",
+            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/", "docs/", "scripts/"],
+            "requirement": "Review the upstream Template 0.8.2 Doctor JSON release and selectively port application-owned changes. Vireo updates only the declared managed Doctor/provenance surfaces; retain local product decisions.",
+            "verificationCommands": [
+              "corepack npm install --package-lock-only --prefix frontend",
+              "corepack npm run setup",
+              "corepack npm run generate:check",
+              "./scripts/verify.sh"
+            ]
+          }
+        ]
       }
     ],
     "baselines": {
@@ -310,6 +346,50 @@
         ]
       },
       "0.8.0->0.8.1": { "full-stack": [], "frontend": [] },
+      "0.8.1->0.8.2": {
+        "full-stack": [
+          {
+            "path": "scripts/vireo-doctor.mjs",
+            "operation": "update",
+            "sourceSha256": "cca6da07184a351c6d30ceeed9818575ea34b95bd50531e3aefb1257f330b631",
+            "targetSha256": "6af1ecbeeea3c39afff09c798cfd484c241f99dddf5e9d1dbbdae09b67126f19",
+            "transforms": [
+              {
+                "from": "function result(code, status, summary, remedy) {\n  return { code, status, summary, ...(remedy ? { remedy } : {}) };\n}\n\n",
+                "to": "function result(code, status, summary, remedy) {\n  return { code, status, summary, ...(remedy ? { remedy } : {}) };\n}\n\nexport function resolveDoctorProfile(metadata) {\n  return typeof metadata?.profile === \"string\" && metadata.profile.trim() !== \"\"\n    ? metadata.profile\n    : \"unknown\";\n}\n\n"
+              },
+              {
+                "from": "    project: metadata.projectName ?? \"unknown\",\n",
+                "to": "    project: metadata.projectName ?? \"unknown\",\n    profile: resolveDoctorProfile(metadata),\n"
+              }
+            ]
+          },
+          {
+            "path": "scripts/vireo-doctor.test.mjs",
+            "operation": "add",
+            "targetSha256": "4982c5169416da35ade390f262689785083e848d92d8f454244c1c8bb1cd712c",
+            "targetContent": "import assert from \"node:assert/strict\";\nimport { spawnSync } from \"node:child_process\";\nimport { dirname, resolve } from \"node:path\";\nimport test from \"node:test\";\nimport { fileURLToPath } from \"node:url\";\nimport { resolveDoctorProfile } from \"./vireo-doctor.mjs\";\n\nconst root = resolve(dirname(fileURLToPath(import.meta.url)), \"..\");\n\ntest(\"Doctor emits a parseable, schema-complete JSON report even when checks fail\", () => {\n  const completed = spawnSync(process.execPath, [\"scripts/vireo-doctor.mjs\", \"--json\"], {\n    cwd: root,\n    encoding: \"utf8\",\n    env: {\n      ...process.env,\n      npm_config_user_agent: \"npm/0.0.0 node/v24.0.0 linux x64 workspaces/false\",\n    },\n  });\n\n  assert.notEqual(completed.status, 0, \"the forced unsupported npm must fail\");\n  assert.equal(completed.stderr, \"\");\n  assert.doesNotMatch(completed.stdout, /^\\s*(?:Vireo doctor|✓|!|✗)/mu);\n\n  const report = JSON.parse(completed.stdout);\n  assert.equal(report.schemaVersion, 1);\n  assert.equal(report.project, \"starter-template\");\n  assert.equal(report.profile, \"full-stack\");\n  assert.equal(report.database, \"h2\");\n  assert.equal(report.databaseMode, \"h2\");\n  assert.ok(Array.isArray(report.results));\n  assert.ok(report.results.length > 0);\n  assert.equal(report.ok, false);\n});\n\ntest(\"Doctor uses an explicit string profile and falls back safely\", () => {\n  assert.equal(resolveDoctorProfile({ profile: \"frontend\" }), \"frontend\");\n  for (const profile of [undefined, null, \"\", 0, {}])\n    assert.equal(resolveDoctorProfile({ profile }), \"unknown\");\n});\n"
+          }
+        ],
+        "frontend": [
+          {
+            "path": "scripts/vireo-frontend-doctor.mjs",
+            "operation": "update",
+            "sourceSha256": "6379ac4bdd43117d5056fa1613c9ecf0bf03bb86692a132b534425938aa15ce6",
+            "targetSha256": "284948c155911808bfa6bba4a8227f95818da8223ee6057a852b5bbbc538f6f2",
+            "transforms": [
+              {
+                "from": "const root = resolve(dirname(fileURLToPath(import.meta.url)), \"..\");\n",
+                "to": "const root = resolve(dirname(fileURLToPath(import.meta.url)), \"..\");\nconst jsonMode = process.argv.slice(2).includes(\"--json\");\n"
+              },
+              {
+                "from": "for (const result of results)\n  console.log(\n    `${result.status === \"pass\" ? \"✓\" : result.status === \"warn\" ? \"!\" : \"✗\"} ${result.code} ${result.summary}`,\n  );\nconst ok = results.every(result => result.status !== \"fail\");\nconst warnings = results.some(result => result.status === \"warn\");\nconsole.log(\n  ok\n    ? warnings\n      ? \"Frontend profile is ready for development with unverified platform warnings.\"\n      : \"Frontend profile is ready.\"\n    : \"Resolve the failed checks and rerun the doctor.\",\n);\n",
+                "to": "const ok = results.every(result => result.status !== \"fail\");\nconst warnings = results.some(result => result.status === \"warn\");\nconst report = {\n  schemaVersion: 1,\n  ok,\n  project: metadata?.projectName ?? \"unknown\",\n  profile: \"frontend\",\n  databaseMode: \"frontend\",\n  results,\n};\nif (jsonMode) console.log(JSON.stringify(report, null, 2));\nelse {\n  for (const result of results)\n    console.log(\n      `${result.status === \"pass\" ? \"✓\" : result.status === \"warn\" ? \"!\" : \"✗\"} ${result.code} ${result.summary}`,\n    );\n  console.log(\n    ok\n      ? warnings\n        ? \"Frontend profile is ready for development with unverified platform warnings.\"\n        : \"Frontend profile is ready.\"\n      : \"Resolve the failed checks and rerun the doctor.\",\n  );\n}\n"
+              }
+            ]
+          }
+        ]
+      },
       "0.6.0->0.7.0": {
         "full-stack": [
           {

@@ -57,7 +57,9 @@ test("deterministic plan gives a fake executor every required recipe and refusal
   );
   assert.ok(
     operations
-      .find(operation => operation.arguments.some(argument => String(argument).endsWith("collect-public-release-evidence.mjs")))
+      .find(operation =>
+        operation.arguments.some(argument => String(argument).endsWith("collect-public-release-evidence.mjs")),
+      )
       .arguments.includes("--output-relative-paths"),
   );
   assert.equal(
@@ -74,13 +76,28 @@ test("deterministic plan gives a fake executor every required recipe and refusal
       ).length,
     2,
   );
+  const upgrades = plan
+    .find(scenario => scenario.id === "adjacent-public-upgrades")
+    .operations.filter(operation => operation.kind === "assert-upgraded-consumer");
+  assert.equal(upgrades.length, 2);
+  assert.ok(upgrades.every(operation => operation.source.createVireoVersion === "0.8.1"));
+  assert.ok(upgrades.every(operation => operation.target.createVireoVersion === "0.8.2"));
+  assert.ok(
+    !plan
+      .find(scenario => scenario.id === "adjacent-public-upgrades")
+      .operations.some(operation => operation.kind === "assert-project-identity"),
+  );
   const adversity = plan.find(scenario => scenario.id === "cli-adversity").operations.map(operation => operation.id);
   assert.ok(adversity.includes("retry-project-setup"));
   assert.ok(adversity.includes("retry-project-verify"));
-  const lifecycle = plan.find(scenario => scenario.id === "capability-lifecycle").operations.map(operation => operation.id);
+  const lifecycle = plan
+    .find(scenario => scenario.id === "capability-lifecycle")
+    .operations.map(operation => operation.id);
   assert.ok(lifecycle.includes("capability-customized-snapshot"));
   assert.ok(lifecycle.includes("capability-refusal-preserves-customization"));
-  const removal = plan.find(scenario => scenario.id === "sample-removal-and-ejection").operations.map(operation => operation.id);
+  const removal = plan
+    .find(scenario => scenario.id === "sample-removal-and-ejection")
+    .operations.map(operation => operation.id);
   assert.ok(removal.includes("sample-removal-first-apply-snapshot"));
   assert.ok(removal.includes("sample-removal-repeat-preserves-tree"));
 });
@@ -107,7 +124,11 @@ test("JSON command assertions accept only bounded exact ready reports", () => {
   assert.throws(() => parseBoundedJsonOutput("{"), /complete JSON/u);
   assert.throws(() => parseBoundedJsonOutput("x".repeat(9), { maximumBytes: 8 }), /exceeds/u);
   assert.throws(
-    () => validateCreateDryRunJson({ ...dryRun, database: "h2" }, { directory: dryRunDirectory, profile: "frontend", release }),
+    () =>
+      validateCreateDryRunJson(
+        { ...dryRun, database: "h2" },
+        { directory: dryRunDirectory, profile: "frontend", release },
+      ),
     /full-stack-only/u,
   );
   const doctor = {
@@ -120,12 +141,20 @@ test("JSON command assertions accept only bounded exact ready reports", () => {
     results: [{ code: "VIR-ENV-001", status: "pass", summary: "Node 24" }],
   };
   assert.equal(
-    validateDoctorJson(doctor, { project: "frontend", profile: "frontend", database: undefined, databaseMode: "frontend" })
-      .type,
+    validateDoctorJson(doctor, {
+      project: "frontend",
+      profile: "frontend",
+      database: undefined,
+      databaseMode: "frontend",
+    }).type,
     "doctor",
   );
   assert.throws(
-    () => validateDoctorJson({ ...doctor, ok: false }, { project: "frontend", profile: "frontend", database: undefined, databaseMode: "frontend" }),
+    () =>
+      validateDoctorJson(
+        { ...doctor, ok: false },
+        { project: "frontend", profile: "frontend", database: undefined, databaseMode: "frontend" },
+      ),
     /expected ready/u,
   );
   assert.equal(validateReleaseIdentityJson({ phase: "release", ok: true, problems: [] }).type, "release-identity");

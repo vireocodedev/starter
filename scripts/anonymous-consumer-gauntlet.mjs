@@ -226,7 +226,12 @@ export function validateDoctorJson(value, { project, profile, database, database
 
 export function validateReleaseIdentityJson(value) {
   const report = exactObject(value, "release identity report");
-  if (report.phase !== "release" || report.ok !== true || !Array.isArray(report.problems) || report.problems.length !== 0)
+  if (
+    report.phase !== "release" ||
+    report.ok !== true ||
+    !Array.isArray(report.problems) ||
+    report.problems.length !== 0
+  )
     throw new Error("release identity JSON is not an exact ready release identity.");
   return { type: "release-identity" };
 }
@@ -334,9 +339,12 @@ function execute(command, options) {
       if (exitCode === command.expectedExit && !timedOut && !signal && assertionPassed) resolvePromise(result);
       else
         reject(
-          Object.assign(new Error(jsonProblem ?? `${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`), {
-            result,
-          }),
+          Object.assign(
+            new Error(jsonProblem ?? `${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`),
+            {
+              result,
+            },
+          ),
         );
     }
   });
@@ -456,12 +464,26 @@ async function executeOperation(operation, { environment, runRoot }) {
       throw new Error(`${operation.id} is missing managed-file provenance.`);
   } else if (operation.kind === "assert-upgraded-consumer") {
     const project = JSON.parse(readFileSync(join(operation.path, ".vireo", "project.json"), "utf8"));
+    const expectedLastUpgrade = {
+      schemaVersion: 2,
+      from: operation.source.createVireoVersion,
+      to: operation.target.createVireoVersion,
+      sourceTemplateCommit: operation.source.template.commit,
+      targetTemplateCommit: operation.target.template.commit,
+      sourceTemplateVersion: operation.source.template.version,
+      targetTemplateVersion: operation.target.template.version,
+      sourceTemplateTag: operation.source.template.tag,
+      targetTemplateTag: operation.target.template.tag,
+      lockfileRefresh: "required",
+    };
     if (
-      project.createdBy !== `create-vireo@${operation.release.createVireoVersion}` ||
-      project.templateCommit !== operation.release.template.commit ||
-      project.templateVersion !== operation.release.template.version ||
-      project.templateTag !== operation.release.template.tag ||
-      project.profile !== operation.profile
+      project.createdBy !== `create-vireo@${operation.source.createVireoVersion}` ||
+      project.lastUpgradedBy !== `create-vireo@${operation.target.createVireoVersion}` ||
+      project.templateCommit !== operation.target.template.commit ||
+      project.templateVersion !== operation.target.template.version ||
+      project.templateTag !== operation.target.template.tag ||
+      project.profile !== operation.profile ||
+      JSON.stringify(project.lastUpgrade) !== JSON.stringify(expectedLastUpgrade)
     )
       throw new Error("Upgraded consumer target identity drifted.");
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
@@ -725,10 +747,15 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
               databaseMode: "frontend",
             }),
         }),
-        command("frontend-release-identity", "corepack", ["npm", "run", "--silent", "identity:check:release", "--", "--json"], {
-          cwd: frontend,
-          jsonValidator: validateReleaseIdentityJson,
-        }),
+        command(
+          "frontend-release-identity",
+          "corepack",
+          ["npm", "run", "--silent", "identity:check:release", "--", "--json"],
+          {
+            cwd: frontend,
+            jsonValidator: validateReleaseIdentityJson,
+          },
+        ),
         command("frontend-verify", "corepack", ["npm", "run", "verify"], { cwd: frontend, timeoutMs: 30 * 60_000 }),
         command("frontend-production-build", "corepack", ["npm", "run", "build"], { cwd: frontend }),
       ];
@@ -754,10 +781,15 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
               databaseMode: "h2",
             }),
         }),
-        command("h2-release-identity", "corepack", ["npm", "run", "--silent", "identity:check:release", "--", "--json"], {
-          cwd: h2,
-          jsonValidator: validateReleaseIdentityJson,
-        }),
+        command(
+          "h2-release-identity",
+          "corepack",
+          ["npm", "run", "--silent", "identity:check:release", "--", "--json"],
+          {
+            cwd: h2,
+            jsonValidator: validateReleaseIdentityJson,
+          },
+        ),
         command("h2-verify", "corepack", ["npm", "run", "verify"], { cwd: h2, timeoutMs: 45 * 60_000 }),
         command("h2-frontend-production-build", "corepack", ["npm", "run", "build", "--prefix", "frontend"], {
           cwd: h2,
@@ -794,7 +826,11 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         command("capability-setup", "corepack", ["npm", "run", "setup"], { cwd: capability }),
         vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
         { kind: "record-generated-digest", id: "capability-first-digest", path: capability },
-        { ...vireo(capability, "check", "--json"), id: "capability-check-json", jsonValidator: value => validateJsonValue(value, "capability-check") },
+        {
+          ...vireo(capability, "check", "--json"),
+          id: "capability-check-json",
+          jsonValidator: value => validateJsonValue(value, "capability-check"),
+        },
         vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
         { kind: "assert-generated-digest", id: "capability-idempotent-digest", path: capability },
         { kind: "mutate-generated", id: "customize-generated-output", path: capability },
@@ -863,7 +899,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       ];
     }
     case "adjacent-public-upgrades": {
-      const target = upgradePolicy.publicRelease;
+      const target = upgradePolicy.candidateRelease ?? upgradePolicy.publicRelease;
       const edges = (upgradePolicy.requiredEdges ?? []).filter(
         edge => edge.from === upgradePolicy.maintenance?.priorCurrentUpgradeSource && edge.to === target,
       );
@@ -871,9 +907,9 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       const targetCoordinate = upgradePolicy.releaseCoordinates?.[target];
       if (
         edges.length !== 1 ||
-        upgradePolicy.publicRelease !== release.createVireoVersion ||
+        ![upgradePolicy.publicRelease, upgradePolicy.candidateRelease].includes(release.createVireoVersion) ||
         !["historical", "current"].includes(source?.status) ||
-        targetCoordinate?.status !== "current"
+        !["current", "candidate"].includes(targetCoordinate?.status)
       ) {
         throw new Error(
           "Project-upgrade policy must expose an adjacent public edge for the current public create-vireo release.",
@@ -969,18 +1005,26 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
             },
             { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
             {
-              kind: "assert-project-identity",
-              id: `upgrade-${edge.from}-${edge.to}-${profile}-exact-target`,
-              path: directory,
-              release,
-              profile,
-              database: profile === "full-stack" ? "h2" : undefined,
-            },
-            {
               kind: "assert-upgraded-consumer",
               id: `upgrade-${edge.from}-${edge.to}-${profile}-lock-and-jvm`,
               path: directory,
               release,
+              source: {
+                createVireoVersion: source.createVireo,
+                template: {
+                  version: source.templateVersion,
+                  tag: `starter-template@${source.templateVersion}`,
+                  commit: source.templateCommit,
+                },
+              },
+              target: {
+                createVireoVersion: targetCoordinate.createVireo,
+                template: {
+                  version: targetCoordinate.templateVersion,
+                  tag: `starter-template@${targetCoordinate.templateVersion}`,
+                  commit: targetCoordinate.templateCommit,
+                },
+              },
               profile,
               registry: "https://registry.npmjs.org",
             },

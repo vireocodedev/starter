@@ -678,6 +678,72 @@ test("current and legacy ejection evidence is reported and preserved across the 
   }
 });
 
+test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves application bytes, and is idempotent", async () => {
+  const sourceRelease = "0.8.1";
+  const targetRelease = "0.8.2";
+  const edge = `${sourceRelease}->${targetRelease}`;
+  const source = adjacentPolicy.releaseGraph.releases.find(release => release.release === sourceRelease);
+  const target = adjacentPolicy.releaseGraph.releases.find(release => release.release === targetRelease);
+  const sourceDoctor = adjacentPolicy.releaseGraph.baselines["0.6.0->0.7.0"].frontend[0].targetContent;
+  const targetDoctor = adjacentPolicy.releaseGraph.baselines[edge].frontend[0];
+  const root = await mkdtemp(join(tmpdir(), "vireo-081-frontend-"));
+  try {
+    await mkdir(join(root, ".vireo"), { recursive: true });
+    await mkdir(join(root, "scripts"), { recursive: true });
+    const dependencies = { ...source.frontendDependencies, react: "^19.0.0" };
+    await writeFile(
+      join(root, "package.json"),
+      `${JSON.stringify({ name: "doctor-upgrade", scripts: { vireo: source.rootVireoScript, doctor: "node scripts/vireo-frontend-doctor.mjs" }, dependencies }, null, 2)}\n`,
+    );
+    await writeFile(
+      join(root, "package-lock.json"),
+      `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies } } }, null, 2)}\n`,
+    );
+    await writeFile(join(root, "scripts/vireo-frontend-doctor.mjs"), sourceDoctor);
+    await writeFile(join(root, "application-owned.txt"), "retain this product decision\n");
+    await writeFile(
+      join(root, ".vireo/project.json"),
+      `${JSON.stringify({ schemaVersion: 1, profile: "frontend", projectName: "doctor-upgrade", templateCommit: source.templateCommit, templateVersion: source.release, templateTag: `starter-template@${source.release}`, createdBy: `create-vireo@${source.release}` }, null, 2)}\n`,
+    );
+    const originalApplicationBytes = await readFile(join(root, "application-owned.txt"));
+    const preview = await upgradeVireoProject({ projectDirectory: root, targetRelease });
+    assert.ok(
+      preview.files.some(file => file.path === "scripts/vireo-frontend-doctor.mjs" && file.status === "update"),
+    );
+    await writeFile(join(root, "scripts/vireo-frontend-doctor.mjs"), "customized\n");
+    await assert.rejects(
+      upgradeVireoProject({ projectDirectory: root, targetRelease }),
+      error => error.code === "VIR-UPG-003",
+    );
+    await writeFile(join(root, "scripts/vireo-frontend-doctor.mjs"), sourceDoctor);
+    await upgradeVireoProject({ projectDirectory: root, targetRelease, dryRun: false, acceptApplicationOwned: true });
+    assert.equal(await readFile(join(root, "application-owned.txt"), "utf8"), originalApplicationBytes.toString());
+    assert.equal(sha256(await readFile(join(root, "scripts/vireo-frontend-doctor.mjs"))), targetDoctor.targetSha256);
+    const metadata = JSON.parse(await readFile(join(root, ".vireo/project.json"), "utf8"));
+    assert.equal(metadata.createdBy, "create-vireo@0.8.1");
+    assert.equal(metadata.lastUpgradedBy, "create-vireo@0.8.2");
+    assert.equal(metadata.templateCommit, target.templateCommit);
+    assert.equal(metadata.templateVersion, "0.8.2");
+    assert.equal(metadata.templateTag, "starter-template@0.8.2");
+    assert.deepEqual(metadata.lastUpgrade, {
+      schemaVersion: 2,
+      from: "0.8.1",
+      to: "0.8.2",
+      sourceTemplateCommit: source.templateCommit,
+      targetTemplateCommit: target.templateCommit,
+      sourceTemplateVersion: "0.8.1",
+      targetTemplateVersion: "0.8.2",
+      sourceTemplateTag: "starter-template@0.8.1",
+      targetTemplateTag: "starter-template@0.8.2",
+      lockfileRefresh: "required",
+    });
+    const repeated = await upgradeVireoProject({ projectDirectory: root, targetRelease });
+    assert.ok(repeated.files.every(file => file.status === "unchanged"));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("synthetic adjacent add/delete transforms are visible, atomic, idempotent, and journal-recoverable", async () => {
   const root = await adjacentFixture("frontend");
   const policy = structuredClone(adjacentPolicy);
