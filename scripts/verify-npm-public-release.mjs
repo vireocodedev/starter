@@ -177,17 +177,21 @@ function verifyIntegrity(bytes, integrity, coordinate) {
   )
     throw new Error(`${coordinate} tarball does not match valid npm SHA-512 registry integrity.`);
 }
-async function resolvePeeledReleaseTag(version, repository) {
-  const name = `create-vireo@${version}`;
+export function releaseTagName({ name, version }) {
+  return `${name}@${version}`;
+}
+export async function resolvePeeledReleaseTag(expected, repository) {
+  const name = releaseTagName(expected);
   const ref = await (
     await fetchRequired(`${githubApi}/repos/${repository}/git/ref/tags/${encodeURIComponent(name)}`)
   ).json();
+  if (ref?.ref !== `refs/tags/${name}`) throw new Error(`${name} returned a mismatched GitHub tag reference.`);
   let object = ref.object;
   for (let depth = 0; depth < 4 && object?.type === "tag"; depth += 1)
     object = (await (await fetchRequired(`${githubApi}/repos/${repository}/git/tags/${object.sha}`)).json()).object;
   if (object?.type !== "commit" || !/^[0-9a-f]{40}$/u.test(object.sha ?? ""))
     throw new Error(`${name} does not peel to a commit.`);
-  return { name, ref: ref.ref, object: ref.object?.sha ?? null, commit: object.sha };
+  return { repository, name, ref: ref.ref, object: ref.object?.sha ?? null, commit: object.sha };
 }
 function inventory(packageDirectory) {
   const files = [];
@@ -312,11 +316,13 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
     manifest: JSON.parse(readFileSync(join(packageRoot, directory, "package.json"), "utf8")),
   }));
   const release = assertExactContract({ contract, manifests: packages, expectedReleaseId });
-  const createVersion = release.npm.find(entry => entry.name === "create-vireo")?.version;
-  const releaseTag = await resolvePeeledReleaseTag(
-    createVersion,
-    contract.npmPublicationProvenance.canonicalRepository,
-  );
+  const releaseTags = new Map();
+  for (const expected of release.npm)
+    releaseTags.set(
+      expected.name,
+      await resolvePeeledReleaseTag(expected, contract.npmPublicationProvenance.canonicalRepository),
+    );
+  const releaseTag = releaseTags.get("create-vireo");
   const metadata = new Map();
   for (const entry of packages) metadata.set(entry.name, await packageMetadata(entry.manifest, attempts, intervalMs));
   const auditRoot = mkdtempSync(join(tmpdir(), "vireo-public-npm-"));
@@ -399,6 +405,8 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
     const lockfile = JSON.parse(readFileSync(join(consumerRoot, "package-lock.json"), "utf8"));
     const records = [];
     for (const expected of release.npm) {
+      const coordinateReleaseTag = releaseTags.get(expected.name);
+      if (!coordinateReleaseTag) throw new Error(`${expected.name}@${expected.version} has no resolved release tag.`);
       const entry = metadata.get(expected.name),
         bytes = Buffer.from(
           await (await fetchRequired(entry.metadata.dist.tarball, "application/octet-stream")).arrayBuffer(),
@@ -414,7 +422,7 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
         auditRecord: audited.auditRecord,
         expected,
         integrity: entry.metadata.dist.integrity,
-        releaseTagCommit: releaseTag.commit,
+        releaseTagCommit: coordinateReleaseTag.commit,
         policy: contract.npmPublicationProvenance,
       });
       const installed = join(consumerModules, ...expected.name.split("/")),
@@ -441,9 +449,15 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
         ...inspectPackedPackage({ tarball, expected, metadata: entry.metadata, auditRoot }),
         ...audited.evidence,
         provenance,
+        releaseTag: coordinateReleaseTag,
         installed: { resolved: lock.resolved, integrity: lock.integrity, exports: specifiers(installedManifest) },
       };
-      const problems = validateExactNpmRecord({ record, expected, releaseTagCommit: releaseTag.commit });
+      const problems = validateExactNpmRecord({
+        record,
+        expected,
+        releaseTagCommit: coordinateReleaseTag.commit,
+        policy: contract.npmPublicationProvenance,
+      });
       if (problems.length > 0)
         throw new Error(`${entry.coordinate} exact public verification failed:\n- ${problems.join("\n- ")}`);
       records.push(record);
@@ -503,6 +517,7 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
         template: release.template,
       },
       releaseTag,
+      releaseTags: Object.fromEntries(records.map(record => [record.name, record.releaseTag])),
       registry,
       anonymousInstall: true,
       strictPeerDependencies: true,

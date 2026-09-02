@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertExactContract, exactAuditSignatureRecord, parseCommandLine } from "./verify-npm-public-release.mjs";
+import {
+  assertExactContract,
+  exactAuditSignatureRecord,
+  parseCommandLine,
+  releaseTagName,
+} from "./verify-npm-public-release.mjs";
 
 const publicManifests = [
   ["create-vireo", "create-vireo"],
@@ -36,6 +41,11 @@ test("npm public verifier accepts an explicit contract and expected release id",
     assertExactContract({ contract, manifests: publicManifests, expectedReleaseId: "npm-1.2.3_jvm-4.5.6" }).id,
     "npm-1.2.3_jvm-4.5.6",
   );
+});
+
+test("npm public verifier names release tags from each exact package coordinate", () => {
+  assert.equal(releaseTagName({ name: "create-vireo", version: "1.2.3" }), "create-vireo@1.2.3");
+  assert.equal(releaseTagName({ name: "@vireocodedev/ui", version: "4.5.6" }), "@vireocodedev/ui@4.5.6");
 });
 
 test("npm public verifier rejects a local public manifest that drifts from its contract", () => {
