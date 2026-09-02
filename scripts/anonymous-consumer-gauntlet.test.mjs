@@ -13,6 +13,8 @@ const release = publicReleaseIdentity(readJson(join(root, "contracts", "ecosyste
 test("gauntlet policy covers every required scenario with exact public identity", () => {
   assert.deepEqual(validatePolicy(policy, release), []);
   assert.equal(policy.scenarios.length, policy.requiredScenarios.length);
+  assert.ok(policy.scenarios.every(scenario => Array.isArray(scenario.recipe) && scenario.recipe.length > 0));
+  assert.equal(new Set(policy.scenarios.map(scenario => JSON.stringify(scenario.recipe))).size, policy.scenarios.length);
 });
 
 test("gauntlet policy wiring remains public and scheduled", () => {
@@ -21,4 +23,6 @@ test("gauntlet policy wiring remains public and scheduled", () => {
   assert.match(workflow, /consumer:gauntlet/u);
   assert.match(workflow, /permissions: \{\}/u);
   assert.match(workflow, /upload-artifact/u);
+  assert.match(workflow, /playwright install --with-deps chromium/u);
+  assert.match(workflow, /docker version/u);
 });

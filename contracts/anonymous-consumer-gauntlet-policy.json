@@ -32,19 +32,19 @@
     "maven-consumer-surface"
   ],
   "scenarios": [
-    { "id": "public-artifacts", "summary": "Registry metadata, provenance, SBOM, license and immutable release coordinates." },
-    { "id": "cli-adversity", "summary": "CLI help, JSON/dry-run, invalid identity, malformed URL, occupied target, failed download and retry cleanup." },
-    { "id": "frontend-creation", "summary": "Anonymous frontend-only creation, setup, doctor and complete verification." },
-    { "id": "full-stack-h2-creation", "summary": "Anonymous full-stack H2 creation, setup, doctor and complete verification." },
-    { "id": "postgresql-production", "summary": "PostgreSQL creation and supported production-like hosted deployment verification." },
-    { "id": "release-identity-and-doctor", "summary": "Generated release identity, provenance markers and Doctor output." },
-    { "id": "capability-lifecycle", "summary": "Capability generation/checking, idempotence and customized-file refusal." },
-    { "id": "sample-removal-and-ejection", "summary": "Sample removal, ejection and managed-file provenance preservation." },
-    { "id": "storybook-and-production-builds", "summary": "Storybook interaction/static output plus production frontend and JVM builds." },
-    { "id": "browser-and-pwa", "summary": "Browser smoke and PWA install/update lifecycle where the hosted runner supports Chromium." },
-    { "id": "container-and-network-boundaries", "summary": "Container context, security headers, API proxying and database-role separation." },
-    { "id": "adjacent-public-upgrades", "summary": "Every supported adjacent public upgrade for frontend and full-stack profiles." },
-    { "id": "npm-consumer-surface", "summary": "Public imports/exports, exact npm package contents, licenses, SBOM and provenance." },
-    { "id": "maven-consumer-surface", "summary": "Maven Central BOM/module consumption without Maven Local." }
+    { "id": "public-artifacts", "recipe": ["registry-metadata", "npm-public-verifier", "public-evidence-collector"], "summary": "Registry metadata, provenance, SBOM, license and immutable release coordinates." },
+    { "id": "cli-adversity", "recipe": ["help", "json-dry-run", "invalid-identities", "occupied-target", "download-failure-cleanup-retry"], "summary": "CLI help, JSON/dry-run, invalid identity, malformed URL, occupied target, failed download and retry cleanup." },
+    { "id": "frontend-creation", "recipe": ["create", "setup", "doctor-json", "identity-release", "verify", "production-build"], "summary": "Anonymous frontend-only creation, setup, doctor and complete verification." },
+    { "id": "full-stack-h2-creation", "recipe": ["create", "setup", "doctor-json", "identity-release", "verify", "frontend-production-build", "boot-jar"], "summary": "Anonymous full-stack H2 creation, setup, doctor and complete verification." },
+    { "id": "postgresql-production", "recipe": ["create", "setup", "verify-deployment-compose-contract"], "summary": "PostgreSQL creation and supported production-like hosted deployment verification." },
+    { "id": "release-identity-and-doctor", "recipe": ["doctor-json", "identity-release-json", "project-provenance"], "summary": "Generated release identity, provenance markers and Doctor output." },
+    { "id": "capability-lifecycle", "recipe": ["generate", "check", "idempotent-regenerate", "customization-refusal"], "summary": "Capability generation/checking, idempotence and customized-file refusal." },
+    { "id": "sample-removal-and-ejection", "recipe": ["status", "dry-run", "apply", "idempotence", "eject", "managed-provenance"], "summary": "Sample removal, ejection and managed-file provenance preservation." },
+    { "id": "storybook-and-production-builds", "recipe": ["storybook-interaction", "storybook-static", "frontend-production", "jvm-boot-jar"], "summary": "Storybook interaction/static output plus production frontend and JVM builds." },
+    { "id": "browser-and-pwa", "recipe": ["browser-smoke", "two-build-pwa-lifecycle"], "summary": "Browser smoke and PWA install/update lifecycle where the hosted runner supports Chromium." },
+    { "id": "container-and-network-boundaries", "recipe": ["deployment-contract", "headers", "api-proxy", "persistent-crud", "private-db", "role-separation"], "summary": "Container context, security headers, API proxying and database-role separation." },
+    { "id": "adjacent-public-upgrades", "recipe": ["supported-edge-matrix", "dry-run", "apply", "refusal", "idempotence", "provenance", "capability", "verify"], "summary": "Every supported adjacent public upgrade for frontend and full-stack profiles." },
+    { "id": "npm-consumer-surface", "recipe": ["pack", "imports-exports", "licenses", "sbom", "provenance-attestation"], "summary": "Public imports/exports, exact npm package contents, licenses, SBOM and provenance." },
+    { "id": "maven-consumer-surface", "recipe": ["central-bom-modules", "pom-jar-license-checksums", "public-signatures"], "summary": "Maven Central BOM/module consumption without Maven Local." }
   ]
 }

@@ -36,21 +36,38 @@ function isExactVersion(value) {
 }
 
 export function anonymousEnvironment({ root, environment = process.env, registry }) {
-  const safe = Object.fromEntries(Object.entries(environment).filter(([key]) => !credentialKey.test(key)));
+  const pathEntries = String(environment.PATH ?? "")
+    .split(":")
+    .filter(entry => entry && !/(?:node_modules\/\.bin|vireocode|starter)/iu.test(entry));
+  if (pathEntries.length === 0) throw new Error("Anonymous consumer environment requires a controlled executable PATH.");
+  const home = join(root, "home");
   const npmUserConfig = join(root, "npmrc");
   const npmCache = join(root, "npm-cache");
   const gradleUserHome = join(root, "gradle-user-home");
-  mkdirSync(npmCache, { recursive: true });
+  const mavenRepository = join(root, "maven-repository");
+  const corepackHome = join(root, "corepack");
+  const dockerConfig = join(root, "docker-config");
+  const playwrightBrowsers = join(root, "playwright-browsers");
+  for (const directory of [home, npmCache, gradleUserHome, mavenRepository, corepackHome, dockerConfig, playwrightBrowsers])
+    mkdirSync(directory, { recursive: true });
   mkdirSync(gradleUserHome, { recursive: true });
   writeFileSync(npmUserConfig, `registry=${registry}\nalways-auth=false\n`);
   return {
-    ...safe,
+    PATH: pathEntries.join(":"),
     CI: "true",
+    HOME: home,
+    XDG_CONFIG_HOME: join(root, "xdg-config"),
+    XDG_CACHE_HOME: join(root, "xdg-cache"),
+    XDG_DATA_HOME: join(root, "xdg-data"),
+    COREPACK_HOME: corepackHome,
     npm_config_cache: npmCache,
+    npm_config_prefix: join(root, "npm-prefix"),
     npm_config_registry: registry,
     npm_config_userconfig: npmUserConfig,
     GRADLE_USER_HOME: gradleUserHome,
-    MAVEN_OPTS: "-Dmaven.repo.local=.anonymous-maven-repository",
+    MAVEN_OPTS: `-Dmaven.repo.local=${mavenRepository}`,
+    DOCKER_CONFIG: dockerConfig,
+    PLAYWRIGHT_BROWSERS_PATH: playwrightBrowsers,
   };
 }
 
@@ -88,10 +105,22 @@ export function assertAnonymousVireoLock({ consumerRoot, release, registry }) {
   }
 }
 
+export function assertExactPublicNpmConsumer({ consumerRoot, release, registry }) {
+  assertAnonymousInstallation({ consumerRoot, packageNames: release.npm.map(entry => entry.name), registry });
+  const lock = readJson(join(consumerRoot, "package-lock.json"));
+  for (const { name, version } of release.npm) {
+    const entry = lock.packages?.[`node_modules/${name}`];
+    if (entry?.version !== version) throw new Error(`${name} must resolve exactly to ${version}.`);
+  }
+}
+
 export function assertNoMavenLocal(command, environment) {
   const rendered = [command.executable, ...(command.arguments ?? [])].join(" ");
   if (/mavenLocal|\.m2\/repository|useLocalStarter=true/iu.test(rendered)) {
     throw new Error("Anonymous consumer commands may not use Maven Local or local Vireo candidates.");
+  }
+  if (!environment.HOME || !environment.XDG_CONFIG_HOME || !environment.COREPACK_HOME || !environment.DOCKER_CONFIG) {
+    throw new Error("Anonymous consumer environment is incomplete.");
   }
   if (environment.GRADLE_USER_HOME?.includes(".gradle") || environment.MAVEN_OPTS?.includes(".m2/repository")) {
     throw new Error("Anonymous consumer environment may not inherit Gradle or Maven Local homes.");

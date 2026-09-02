@@ -7,6 +7,7 @@ import {
   anonymousEnvironment,
   assertAnonymousInstallation,
   assertAnonymousVireoLock,
+  assertExactPublicNpmConsumer,
   assertNoMavenLocal,
   publicReleaseIdentity,
 } from "./anonymous-consumer-environment.mjs";
@@ -20,7 +21,10 @@ test("anonymous environment removes credentials and isolates package-manager sta
   });
   assert.equal(environment.NPM_TOKEN, undefined);
   assert.equal(environment.API_KEY, undefined);
-  assert.equal(environment.SAFE, "yes");
+  assert.equal(environment.SAFE, undefined);
+  assert.match(environment.HOME, /home$/u);
+  assert.match(environment.COREPACK_HOME, /corepack$/u);
+  assert.match(environment.MAVEN_OPTS, /maven-repository/u);
   assert.match(environment.npm_config_cache, /npm-cache$/u);
   assert.match(readFileSync(environment.npm_config_userconfig, "utf8"), /always-auth=false/u);
 });
@@ -64,4 +68,12 @@ test("anonymous lockfile accepts only exact public Vireo coordinates", () => {
   const release = { npm: [{ name: "@vireocodedev/ui", version: "1.2.3" }] };
   assert.doesNotThrow(() => assertAnonymousVireoLock({ consumerRoot: root, release, registry: "https://registry.npmjs.org" }));
   assert.throws(() => assertAnonymousVireoLock({ consumerRoot: root, release: { npm: [] }, registry: "https://registry.npmjs.org" }));
+});
+
+test("exact public npm consumer requires every declared Vireo package", () => {
+  const root = mkdtempSync(join(tmpdir(), "anonymous-exact-public-"));
+  mkdirSync(join(root, "node_modules", "@vireocodedev", "ui"), { recursive: true });
+  writeFileSync(join(root, "node_modules", "@vireocodedev", "ui", "package.json"), JSON.stringify({ name: "@vireocodedev/ui", version: "1.2.3" }));
+  writeFileSync(join(root, "package-lock.json"), JSON.stringify({ packages: { "node_modules/@vireocodedev/ui": { version: "1.2.3", resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui-1.2.3.tgz", integrity: "sha512-public" } } }));
+  assert.throws(() => assertExactPublicNpmConsumer({ consumerRoot: root, release: { npm: [{ name: "@vireocodedev/ui", version: "1.2.3" }, { name: "create-vireo", version: "1.2.3" }] }, registry: "https://registry.npmjs.org" }));
 });
