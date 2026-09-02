@@ -679,7 +679,7 @@ function readRemovalReceiptJson(path, label) {
   try {
     return exactObject(JSON.parse(readFileSync(path, "utf8")), label);
   } catch (error) {
-    if (error instanceof SyntaxError) throw new Error(`${label} must contain valid JSON.`);
+    if (error instanceof SyntaxError) throw new Error(`${label} must contain valid JSON.`, { cause: error });
     throw error;
   }
 }
