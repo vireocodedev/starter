@@ -583,7 +583,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       "--support-url",
       "https://example.invalid/support",
       "--security-contact",
-      "security@example.invalid",
+      "mailto:security@example.invalid",
       ...extra,
     ],
   });
