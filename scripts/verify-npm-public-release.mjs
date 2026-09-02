@@ -39,7 +39,14 @@ const expectedPackages = new Map([
 export function exactNpmReleaseCoordinates(release) {
   if (!Array.isArray(release?.npm)) throw new Error("Exact npm release coordinates require a release contract.");
   const coordinates = release.npm.map(({ name, version }) => `${name}@${version}`);
-  if (coordinates.some(coordinate => !/^(@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*@[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/iu.test(coordinate)))
+  if (
+    coordinates.some(
+      coordinate =>
+        !/^(@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*@[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/iu.test(
+          coordinate,
+        ),
+    )
+  )
     throw new Error("Exact npm release coordinates require valid package names and versions.");
   return coordinates;
 }

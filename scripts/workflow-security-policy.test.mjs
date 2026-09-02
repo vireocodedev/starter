@@ -37,7 +37,10 @@ function indentedSubsection(lines, key, indent) {
 
 function standaloneWebsiteArtifactRetainsHiddenFiles(workflow) {
   const uploadStep = namedWorkflowStep(workflow, "Upload standalone artifact");
-  if (!uploadStep || !uploadStep.some(line => /^ {8}uses: actions\/upload-artifact@[a-f0-9]{40}(?:\s+#.*)?$/u.test(line)))
+  if (
+    !uploadStep ||
+    !uploadStep.some(line => /^ {8}uses: actions\/upload-artifact@[a-f0-9]{40}(?:\s+#.*)?$/u.test(line))
+  )
     return false;
   const withBlock = indentedSubsection(uploadStep, "with", 8);
   return (
@@ -58,22 +61,28 @@ test("recognizes an explicit empty inline job permissions map", () => {
 test("standalone website artifacts retain generated hidden files", () => {
   assert.equal(standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow), true);
   assert.equal(
-    standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("include-hidden-files: true", "include-hidden-files: false")),
-    false,
-  );
-  assert.equal(standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("          include-hidden-files: true\n", "")), false);
-  assert.equal(
     standaloneWebsiteArtifactRetainsHiddenFiles(
-      websiteWorkflow
-        .replace(
-          "        with:\n          name: vireo-website-${{ github.sha }}\n          path: site/dist\n          include-hidden-files: true",
-          "        env:\n          include-hidden-files: true\n        with:\n          name: vireo-website-${{ github.sha }}\n          path: site/dist",
-        ),
+      websiteWorkflow.replace("include-hidden-files: true", "include-hidden-files: false"),
     ),
     false,
   );
   assert.equal(
-    standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("          path: site/dist", "          path: site/build")),
+    standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("          include-hidden-files: true\n", "")),
+    false,
+  );
+  assert.equal(
+    standaloneWebsiteArtifactRetainsHiddenFiles(
+      websiteWorkflow.replace(
+        "        with:\n          name: vireo-website-${{ github.sha }}\n          path: site/dist\n          include-hidden-files: true",
+        "        env:\n          include-hidden-files: true\n        with:\n          name: vireo-website-${{ github.sha }}\n          path: site/dist",
+      ),
+    ),
+    false,
+  );
+  assert.equal(
+    standaloneWebsiteArtifactRetainsHiddenFiles(
+      websiteWorkflow.replace("          path: site/dist", "          path: site/build"),
+    ),
     false,
   );
   assert.equal(
