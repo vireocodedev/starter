@@ -45,4 +45,8 @@ test("gauntlet policy wiring remains public and scheduled", () => {
   assert.match(workflow, /upload-artifact/u);
   assert.match(workflow, /playwright install --with-deps chromium/u);
   assert.match(workflow, /docker version/u);
+  assert.match(workflow, /workflow_run\.head_sha/u);
+  assert.match(workflow, /--release-id/u);
+  assert.match(workflow, /--source-commit/u);
+  assert.match(workflow, /head_repository\.full_name == github\.repository/u);
 });
