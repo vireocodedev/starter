@@ -364,7 +364,7 @@ and is not included in the completable scope above.
 - [x] Add unit coverage and a clean generated frontend consumer job in hosted CI.
 - [x] Publish architecture, team ownership, OpenAPI-wrapper, capability-limitation,
       command, public API, and website guidance.
-- [x] Historical milestone: publish `create-vireo@0.4.0` with npm provenance and pin generated projects; the current release-prepared frontend profile is `create-vireo@0.8.6`.
+- [x] Historical milestone: publish `create-vireo@0.4.0` with npm provenance and pin generated projects; the current release-prepared frontend profile is `create-vireo@0.8.7`.
 
 Engineering is complete in the adapter-enabled Template commit and the Starter
 frontend-profile implementation. The clean consumer creates a standalone project

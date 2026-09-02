@@ -32,12 +32,12 @@ data, identities, or vulnerability details. Security findings go through the pri
 
 ## Colleague frontend-only start
 
-For a new frontend app, use the release-prepared 0.8.6 generator rather than cloning either
+For a new frontend app, use the release-prepared 0.8.7 generator rather than cloning either
 framework repository. Install the Node/Corepack versions listed in the canonical
 [getting-started guide](https://vireocode.com/docs/getting-started/) first:
 
 ```sh
-npm create vireo@0.8.6 my-frontend-app -- --profile frontend --yes
+npm create vireo@0.8.7 my-frontend-app -- --profile frontend --yes
 cd my-frontend-app
 corepack npm run setup
 corepack npm run doctor
