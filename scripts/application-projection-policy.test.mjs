@@ -49,6 +49,7 @@ test("template release operations are excluded from every project profile", () =
       ".github/rulesets/starter-template-0.8.1.json",
       ".github/rulesets/starter-template-0.8.2.json",
       ".github/rulesets/starter-template-0.8.3.json",
+      ".github/rulesets/starter-template-0.8.4.json",
       "scripts/vireo-package-compatibility.test.mjs",
       "contracts/template-release-policy.json",
       "scripts/template-release-policy.mjs",
@@ -114,6 +115,28 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
   assert.equal(
     classifyProjectionPath(contract, "frontend/scripts/app-identity-html.d.mts", "full-stack")?.category,
     "managed",
+  );
+  for (const path of [
+    "frontend/scripts/lighthouse-audit-support.mjs",
+    "frontend/scripts/lighthouse-audit-support.test.mjs",
+    "frontend/scripts/lighthouse-budget.mjs",
+    "frontend/scripts/lighthouse-policy.mjs",
+    "frontend/scripts/lighthouse-policy.test.mjs",
+  ]) {
+    for (const profile of contract.profiles)
+      assert.equal(classifyProjectionPath(contract, path, profile)?.category, "managed", `${profile}: ${path}`);
+  }
+  assert.equal(
+    classifyProjectionPath(contract, "docs/verification-performance.md", "full-stack")?.category,
+    "historical",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/tests/demo/flagship-demo.spec.ts", "full-stack")?.category,
+    "optional",
+  );
+  assert.equal(
+    classifyProjectionPath(contract, "frontend/tests/e2e/overview.spec.ts", "frontend")?.category,
+    "maintainer-only",
   );
   assert.equal(classifyProjectionPath(contract, "scripts/app-identity-html.d.mts", "frontend")?.category, "managed");
   assert.equal(

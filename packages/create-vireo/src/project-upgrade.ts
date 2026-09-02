@@ -11,6 +11,7 @@ type ReleaseRequirements = {
   starterJvmVersion: string;
   frontendDependencies: DependencyMap;
   managedRootScripts?: DependencyMap;
+  managedFrontendScripts?: Partial<Record<"full-stack" | "frontend", DependencyMap>>;
 };
 type ApplicationOwnedActionPolicy = {
   id: string;
@@ -23,7 +24,12 @@ type ReleaseNode = ReleaseRequirements & {
   templateCommit: string;
   status: "historical" | "current" | "candidate";
 };
-type UpgradeEdge = { from: string; to: string; applicationOwnedActions: ApplicationOwnedActionPolicy[] };
+type UpgradeEdge = {
+  from: string;
+  to: string;
+  lockfileRefresh?: "required" | "not-required";
+  applicationOwnedActions: ApplicationOwnedActionPolicy[];
+};
 type UpgradePolicy = {
   schemaVersion: 2;
   releaseGraph: {
@@ -120,7 +126,9 @@ export function formatVireoUpgradeText(result: VireoUpgradeResult) {
     ]),
     result.dryRun
       ? "No files were written; application-owned actions remain pending."
-      : "Managed migration applied; refresh the lockfile before verification.",
+      : result.checks.find(check => check.id === "lockfile")?.status === "manual"
+        ? "Managed migration applied; refresh the lockfile before verification."
+        : "Managed migration applied; no lockfile refresh is required.",
   ];
 }
 export function formatVireoStatusText(result: VireoProjectStatus) {
@@ -306,6 +314,8 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
       edges.has(`${edge.from}->${edge.to}`)
     )
       throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph edges must be unique edges between declared releases.");
+    if (edge.lockfileRefresh !== undefined && !["required", "not-required"].includes(edge.lockfileRefresh))
+      throw new VireoUpgradeError("VIR-UPG-001", "Upgrade edge lockfile refresh policy is invalid.");
     validateEdgeActions(edge.applicationOwnedActions);
     edges.add(`${edge.from}->${edge.to}`);
   }
@@ -331,6 +341,17 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
           Array.isArray(release.managedRootScripts) ||
           Object.entries(release.managedRootScripts).some(
             ([name, value]) => !name || typeof value !== "string" || !value.trim(),
+          ))) ||
+      (release.managedFrontendScripts !== undefined &&
+        (typeof release.managedFrontendScripts !== "object" ||
+          Array.isArray(release.managedFrontendScripts) ||
+          Object.entries(release.managedFrontendScripts).some(
+            ([profile, scripts]) =>
+              !["full-stack", "frontend"].includes(profile) ||
+              !scripts ||
+              typeof scripts !== "object" ||
+              Array.isArray(scripts) ||
+              Object.entries(scripts).some(([name, value]) => !name || typeof value !== "string" || !value.trim()),
           )))
     )
       throw new VireoUpgradeError("VIR-UPG-001", `Upgrade graph release ${release.release} has invalid requirements.`);
@@ -357,6 +378,7 @@ export async function currentVireoReleaseRequirements(): Promise<ReleaseRequirem
     starterJvmVersion: release.starterJvmVersion,
     frontendDependencies: release.frontendDependencies,
     managedRootScripts: release.managedRootScripts,
+    managedFrontendScripts: release.managedFrontendScripts,
   };
 }
 function requirementsMatch(
@@ -369,9 +391,13 @@ function requirementsMatch(
   frontendOnly: boolean,
 ) {
   assertEqual(manifest.scripts?.vireo, expected.rootVireoScript, "package.json scripts.vireo");
-  if (frontendOnly)
-    for (const [name, value] of Object.entries(expected.managedRootScripts ?? {}))
-      assertEqual(manifest.scripts?.[name], value, `package.json scripts.${name}`);
+  const scriptManifest = frontendOnly ? manifest : frontend;
+  for (const [name, value] of Object.entries(managedScriptsForProfile(expected, frontendOnly)))
+    assertEqual(
+      scriptManifest.scripts?.[name],
+      value,
+      `${frontendOnly ? "package.json" : "frontend/package.json"} scripts.${name}`,
+    );
   if (gradle !== undefined)
     assertEqual(
       starterVersionDeclaration(gradle, "gradle.properties")[1],
@@ -388,6 +414,16 @@ function requirementsMatch(
         "VIR-UPG-004",
       );
   }
+}
+function managedScriptsForProfile(release: ReleaseRequirements, frontendOnly: boolean): DependencyMap {
+  const profile = frontendOnly ? "frontend" : "full-stack";
+  const legacy = frontendOnly ? (release.managedRootScripts ?? {}) : {};
+  const profileScripts = release.managedFrontendScripts?.[profile] ?? {};
+  for (const [name, value] of Object.entries(profileScripts)) {
+    if (legacy[name] !== undefined && legacy[name] !== value)
+      throw new VireoUpgradeError("VIR-UPG-001", `Managed script ${name} has conflicting profile requirements.`);
+  }
+  return { ...legacy, ...profileScripts };
 }
 async function migrationVersions(projectDirectory: string) {
   const directory = join(projectDirectory, "src/main/resources/db/migration");
@@ -649,9 +685,14 @@ function profileActions(actions: ApplicationOwnedActionPolicy[], profile: unknow
       : "corepack npm install --package-lock-only --prefix frontend";
   return actions.map(action => ({
     ...action,
-    verificationCommands: action.verificationCommands.map(command =>
-      command.startsWith("corepack npm install --package-lock-only") ? lockRefresh : command,
-    ),
+    verificationCommands: action.verificationCommands.map(command => {
+      if (command.startsWith("corepack npm install --package-lock-only")) return lockRefresh;
+      if (command === "corepack npm run performance:policy:test" || command === "corepack npm run performance:audit")
+        return profile === "frontend"
+          ? command
+          : `corepack npm --prefix frontend run ${command.slice("corepack npm run ".length)}`;
+      return command;
+    }),
     status: "pending" as const,
   }));
 }
@@ -860,9 +901,13 @@ async function upgradeProjectWithPolicy(
   if (generatedProblems.length)
     throw new VireoUpgradeError("VIR-UPG-006", `Generated/wire-contract drift: ${generatedProblems.join("; ")}`);
   const targetRootManifest = structuredClone(rootManifest);
-  for (const [name, value] of Object.entries(frontendOnly ? (target.managedRootScripts ?? {}) : {})) {
-    const current = targetRootManifest.scripts?.[name];
-    if (current !== undefined && current !== value)
+  const targetFrontendManifest = frontendOnly ? targetRootManifest : structuredClone(frontendManifest);
+  const targetScriptManifest = frontendOnly ? targetRootManifest : targetFrontendManifest;
+  const sourceManagedScripts = managedScriptsForProfile(source, frontendOnly);
+  const targetManagedScripts = managedScriptsForProfile(target, frontendOnly);
+  for (const [name, value] of Object.entries(targetManagedScripts)) {
+    const current = targetScriptManifest.scripts?.[name];
+    if (current !== undefined && current !== value && current !== sourceManagedScripts[name])
       throw new VireoUpgradeError(
         "VIR-UPG-003",
         `Managed package.json scripts.${name} differs from the declared target; resolve the customization before upgrading.`,
@@ -871,9 +916,11 @@ async function upgradeProjectWithPolicy(
   targetRootManifest.scripts = {
     ...targetRootManifest.scripts,
     vireo: target.rootVireoScript,
-    ...(frontendOnly ? target.managedRootScripts : {}),
   };
-  const targetFrontendManifest = frontendOnly ? targetRootManifest : structuredClone(frontendManifest);
+  targetScriptManifest.scripts = {
+    ...targetScriptManifest.scripts,
+    ...targetManagedScripts,
+  };
   targetFrontendManifest.dependencies = { ...targetFrontendManifest.dependencies, ...target.frontendDependencies };
   const targetGradleProperties =
     gradleProperties === undefined
@@ -895,7 +942,7 @@ async function upgradeProjectWithPolicy(
       targetTemplateVersion: target.release,
       sourceTemplateTag: `starter-template@${source.release}`,
       targetTemplateTag: `starter-template@${target.release}`,
-      lockfileRefresh: "required",
+      lockfileRefresh: edge.lockfileRefresh ?? "required",
     };
   const previousUpgrade =
     metadata.lastUpgrade && typeof metadata.lastUpgrade === "object"
@@ -912,7 +959,9 @@ async function upgradeProjectWithPolicy(
     : managedBaselines;
   const receiptManagedSurfaces = [
     ...managedSurfaces,
-    ...(frontendOnly ? Object.keys(target.managedRootScripts ?? {}).map(name => `package.json#scripts.${name}`) : []),
+    ...Object.keys(targetManagedScripts).map(
+      name => `${frontendOnly ? "package.json" : "frontend/package.json"}#scripts.${name}`,
+    ),
     ...receiptBaselines.map(baseline => baseline.path),
   ];
   const actions = profileActions(recordedEdge?.applicationOwnedActions ?? [], metadata.profile),
@@ -925,7 +974,7 @@ async function upgradeProjectWithPolicy(
       sourceTemplateCommit: recordSource.templateCommit,
       targetTemplateCommit: target.templateCommit,
       managedSurfaces: receiptManagedSurfaces,
-      lockfileRefresh: "required",
+      lockfileRefresh: recordedEdge?.lockfileRefresh ?? "required",
       applicationOwnedActions: actions,
     }),
     { ...(await resolveConfig(recordPath)), filepath: recordPath },
@@ -1013,6 +1062,7 @@ async function upgradeProjectWithPolicy(
   const lockCommand = frontendOnly
     ? "corepack npm install --package-lock-only"
     : "corepack npm install --package-lock-only --prefix frontend";
+  const lockfileRefresh = edge?.lockfileRefresh ?? "required";
   const checks: VireoUpgradeCheck[] = [
     { id: "source", status: "pass", detail: `${source.release} -> ${target.release} is a declared adjacent edge.` },
     {
@@ -1020,11 +1070,17 @@ async function upgradeProjectWithPolicy(
       status: "pass",
       detail: "Vireo npm declarations and JVM BOM version match the release edge.",
     },
-    {
-      id: "lockfile",
-      status: "manual",
-      detail: `No resolved dependency versions were edited. Run ${lockCommand} before verification.`,
-    },
+    lockfileRefresh === "required"
+      ? {
+          id: "lockfile" as const,
+          status: "manual" as const,
+          detail: `No resolved dependency versions were edited. Run ${lockCommand} before verification.`,
+        }
+      : {
+          id: "lockfile" as const,
+          status: "pass" as const,
+          detail: "This edge changes no dependency declarations; the existing application lockfile is preserved.",
+        },
     {
       id: "migrations",
       status: "pass",

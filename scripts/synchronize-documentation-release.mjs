@@ -95,6 +95,10 @@ export async function synchronizeDocumentationRelease(
     edge => edge.to === priorPublicUpgradeRelease,
   )?.from;
   const candidateTemplateCommit = projectUpgrade.finalization?.targetTemplateCommit;
+  const candidateUpgradeEdge = upgradePolicy.releaseGraph?.edges?.find(
+    edge => edge.from === publicUpgradeRelease && edge.to === candidateUpgradeRelease,
+  );
+  const candidateLockfileRefresh = candidateUpgradeEdge?.lockfileRefresh ?? "required";
   if (
     upgradePolicy.releaseGraph?.candidateRelease !== undefined &&
     upgradePolicy.releaseGraph.candidateRelease !== createVireoVersion
@@ -216,6 +220,7 @@ export async function synchronizeDocumentationRelease(
           priorPublicUpgradeRelease,
           publicUpgradeRelease,
           candidateUpgradeRelease,
+          candidateLockfileRefresh,
           jvmVersion,
         })
       : undefined;
@@ -457,6 +462,7 @@ function synchronizeCurrentReleaseGuidance({
   priorPublicUpgradeRelease,
   publicUpgradeRelease,
   candidateUpgradeRelease,
+  candidateLockfileRefresh,
   jvmVersion,
 }) {
   if (!priorPublicUpgradeRelease || !publicUpgradeRelease || !candidateUpgradeRelease) {
@@ -512,7 +518,7 @@ function synchronizeCurrentReleaseGuidance({
   createReadme = replacePatternOnce(
     createReadme,
     /For the current \d+\.\d+\.\d+→\d+\.\d+\.\d+\nedge, Vireo [\s\S]*?\.github`\s*review policy\./u,
-    `For the current ${currentEdge}\nedge, Vireo applies only the declared managed edge surfaces, including dependency declarations and release identity/provenance where the edge declares them. The lockfile remains application-owned and must be refreshed manually; Vireo never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\` review policy.`,
+    `For the current ${currentEdge}\nedge, Vireo applies only the declared managed edge surfaces, including dependency declarations and release identity/provenance where the edge declares them. ${candidateLockfileRefresh === "required" ? "The lockfile remains application-owned and must be refreshed manually." : "This edge changes no dependency declarations, so Vireo preserves the application-owned lockfile without a refresh."} Vireo never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\` review policy.`,
     "packages/create-vireo/README.md current managed edge description",
   );
   createReadme = replaceCurrentTemplateBaseline(

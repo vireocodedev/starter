@@ -266,7 +266,8 @@
         "scripts/template-release-policy.test.mjs",
         "scripts/write-template-release-manifest.mjs",
         "scripts/template-release-recovery-policy.mjs",
-        "scripts/template-release-recovery-policy.test.mjs"
+        "scripts/template-release-recovery-policy.test.mjs",
+        ".github/rulesets/starter-template-0.8.4.json"
       ],
       "prefixes": []
     },
@@ -466,25 +467,85 @@
       "id": "full-stack-selected-demo-and-e2e",
       "category": "optional",
       "profiles": ["full-stack"],
-      "paths": ["frontend/playwright.demo.config.ts"],
+      "paths": [
+        "frontend/playwright.demo.config.ts",
+        "frontend/tests/demo/flagship-demo.spec.ts",
+        "frontend/tests/e2e/overview.spec.ts"
+      ],
       "prefixes": ["frontend/tests/demo/", "frontend/tests/e2e/"]
     }
   ],
   "requiredClassifications": [
-    { "path": ".github/workflows/flagship-demo.yml", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".verification-evidence/latest.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "deploy/hetzner/deploy.sh", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "docs/flagship.md", "profile": "full-stack", "category": "historical" },
-    { "path": "docs/provider-controls-2026-08-31.md", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "docs/provider-controls-2026-08-31.md", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "docs/hosted-demo-recovery-rehearsal-2026-09-01.md", "profile": "full-stack", "category": "historical" },
-    { "path": "docs/hosted-demo-recovery-rehearsal-2026-09-01.md", "profile": "frontend", "category": "historical" },
-    { "path": "docs/verification-trend-review-2026-09-01.md", "profile": "full-stack", "category": "historical" },
-    { "path": "docs/verification-trend-review-2026-09-01.md", "profile": "frontend", "category": "historical" },
-    { "path": "scripts/repository-security-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/repository-security-policy.mjs", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "AGENTS.md", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "AGENTS.md", "profile": "frontend", "category": "maintainer-only" },
+    {
+      "path": ".github/workflows/flagship-demo.yml",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".verification-evidence/latest.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "deploy/hetzner/deploy.sh",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "docs/flagship.md",
+      "profile": "full-stack",
+      "category": "historical"
+    },
+    {
+      "path": "docs/provider-controls-2026-08-31.md",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "docs/provider-controls-2026-08-31.md",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
+      "profile": "full-stack",
+      "category": "historical"
+    },
+    {
+      "path": "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
+      "profile": "frontend",
+      "category": "historical"
+    },
+    {
+      "path": "docs/verification-trend-review-2026-09-01.md",
+      "profile": "full-stack",
+      "category": "historical"
+    },
+    {
+      "path": "docs/verification-trend-review-2026-09-01.md",
+      "profile": "frontend",
+      "category": "historical"
+    },
+    {
+      "path": "scripts/repository-security-policy.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/repository-security-policy.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "AGENTS.md",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "AGENTS.md",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
     {
       "path": ".vireo/application/AGENTS.md",
       "profile": "full-stack",
@@ -520,10 +581,26 @@
       "profile": "full-stack",
       "category": "managed"
     },
-    { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "docs/recipes/rehearse-demo-reset.md", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/workflows/template-release.yml", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/environments/template-release.json", "profile": "full-stack", "category": "maintainer-only" },
+    {
+      "path": "docs/recipes/rehearse-demo-reset.md",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "docs/recipes/rehearse-demo-reset.md",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/workflows/template-release.yml",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/environments/template-release.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
     {
       "path": ".github/environments/template-release.deployment-branch-policies.json",
       "profile": "full-stack",
@@ -534,27 +611,111 @@
       "profile": "full-stack",
       "category": "maintainer-only"
     },
-    { "path": ".github/rulesets/main.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.6.0.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.7.0.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.0.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.1.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.2.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.3.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/settings/actions.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/settings/selected-actions.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": ".github/settings/workflow-permissions.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "contracts/template-release-policy.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "contracts/template-release-recovery.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "contracts/project-upgrade-policy.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/template-release-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/template-release-policy.test.mjs", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/write-template-release-manifest.mjs", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "contracts/platform-support-policy.json", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/platform-support-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/platform-support-policy.test.mjs", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/public-contract-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
-    { "path": "scripts/verification-pipeline-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
+    {
+      "path": ".github/rulesets/main.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.6.0.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.7.0.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.0.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.1.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.2.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.3.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/settings/actions.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/settings/selected-actions.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/settings/workflow-permissions.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "contracts/template-release-policy.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "contracts/template-release-recovery.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "contracts/project-upgrade-policy.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-policy.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-policy.test.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/write-template-release-manifest.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "contracts/platform-support-policy.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/platform-support-policy.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/platform-support-policy.test.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/public-contract-policy.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/verification-pipeline-policy.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
     {
       "path": "scripts/vireo-package-compatibility-policy.mjs",
       "profile": "full-stack",
@@ -565,8 +726,16 @@
       "profile": "full-stack",
       "category": "maintainer-only"
     },
-    { "path": ".github/workflows/template-release.yml", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/environments/template-release.json", "profile": "frontend", "category": "maintainer-only" },
+    {
+      "path": ".github/workflows/template-release.yml",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/environments/template-release.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
     {
       "path": ".github/environments/template-release.deployment-branch-policies.json",
       "profile": "frontend",
@@ -577,63 +746,386 @@
       "profile": "frontend",
       "category": "maintainer-only"
     },
-    { "path": ".github/rulesets/main.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.6.0.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.7.0.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.0.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.1.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.2.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/rulesets/starter-template-0.8.3.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/settings/actions.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/settings/selected-actions.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".github/settings/workflow-permissions.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "contracts/template-release-policy.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "contracts/template-release-recovery.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "contracts/project-upgrade-policy.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "scripts/template-release-policy.mjs", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "scripts/template-release-policy.test.mjs", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "scripts/write-template-release-manifest.mjs", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "scripts/vireo-package-compatibility.test.mjs", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "scripts/platform-support-policy.test.mjs", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "SECURITY.md", "profile": "full-stack", "category": "substitution-required" },
-    { "path": "frontend/package.json", "profile": "frontend", "category": "substitution-required" },
-    { "path": "gradle/wrapper/gradle-wrapper.properties", "profile": "full-stack", "category": "managed" },
-    { "path": "frontend/scripts/verify.sh", "profile": "full-stack", "category": "managed" },
-    { "path": "frontend/scripts/verify.sh", "profile": "frontend", "category": "maintainer-only" },
-    { "path": ".vscode/settings.json", "profile": "full-stack", "category": "optional" },
-    { "path": ".vscode/settings.json", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "frontend/pwa-policy.mjs", "profile": "full-stack", "category": "substitution-required" },
-    { "path": "frontend/pwa-policy.mjs", "profile": "frontend", "category": "substitution-required" },
-    { "path": "pwa-policy.mjs", "profile": "frontend", "category": "substitution-required" },
-    { "path": "frontend/pwa-policy.d.mts", "profile": "frontend", "category": "managed" },
-    { "path": "frontend/pwa-policy.d.mts", "profile": "full-stack", "category": "managed" },
-    { "path": "pwa-policy.d.mts", "profile": "frontend", "category": "managed" },
-    { "path": "frontend/scripts/app-identity-html.mjs", "profile": "full-stack", "category": "managed" },
-    { "path": "scripts/app-identity-html.mjs", "profile": "frontend", "category": "managed" },
-    { "path": "frontend/scripts/prepare-pwa-update-fixture.mjs", "profile": "full-stack", "category": "managed" },
-    { "path": "scripts/prepare-pwa-update-fixture.mjs", "profile": "frontend", "category": "managed" },
-    { "path": "frontend/scripts/pwa-update-fixture.mjs", "profile": "full-stack", "category": "managed" },
-    { "path": "scripts/pwa-update-fixture.mjs", "profile": "frontend", "category": "managed" },
-    { "path": "frontend/scripts/app-identity-html.d.mts", "profile": "full-stack", "category": "managed" },
-    { "path": "scripts/app-identity-html.d.mts", "profile": "frontend", "category": "managed" },
-    { "path": "index.html", "profile": "frontend", "category": "managed" },
-    { "path": "nginx.conf", "profile": "frontend", "category": "managed" },
-    { "path": "playwright.pwa.config.ts", "profile": "frontend", "category": "managed" },
-    { "path": "scripts/verify-frontend-profile.sh", "profile": "frontend", "category": "managed" },
-    { "path": "scripts/vireo-frontend-doctor.mjs", "profile": "frontend", "category": "managed" },
-    { "path": "scripts/project-identity-policy.mjs", "profile": "full-stack", "category": "managed" },
-    { "path": "scripts/project-identity-policy.mjs", "profile": "frontend", "category": "managed" },
-    { "path": "frontend/tests/contract/pwa-contract.test.mjs", "profile": "full-stack", "category": "managed" },
-    { "path": "frontend/tests/contract/pwa-contract.test.mjs", "profile": "frontend", "category": "managed" },
-    { "path": "tests/contract/pwa-contract.test.mjs", "profile": "frontend", "category": "managed" },
-    { "path": ".gitignore", "profile": "frontend", "category": "maintainer-only" },
-    { "path": "frontend/tests/pwa/production-pwa.spec.ts", "profile": "full-stack", "category": "managed" },
-    { "path": "tests/pwa/production-pwa.spec.ts", "profile": "frontend", "category": "managed" },
-    { "path": "frontend/public/icons/icon-192x192.png", "profile": "full-stack", "category": "application-owned" },
-    { "path": "public/icons/icon-192x192.png", "profile": "frontend", "category": "application-owned" },
-    { "path": "frontend/src/app/App.tsx", "profile": "full-stack", "category": "application-owned" },
-    { "path": "src/main/resources/application.properties", "profile": "full-stack", "category": "application-owned" },
-    { "path": ".vireo/examples/purchase-order.entity.json", "profile": "frontend", "category": "optional" }
+    {
+      "path": ".github/rulesets/main.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.6.0.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.7.0.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.0.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.1.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.2.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.3.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/settings/actions.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/settings/selected-actions.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/settings/workflow-permissions.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "contracts/template-release-policy.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "contracts/template-release-recovery.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "contracts/project-upgrade-policy.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-policy.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-policy.test.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/write-template-release-manifest.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/vireo-package-compatibility.test.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/platform-support-policy.test.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "SECURITY.md",
+      "profile": "full-stack",
+      "category": "substitution-required"
+    },
+    {
+      "path": "frontend/package.json",
+      "profile": "frontend",
+      "category": "substitution-required"
+    },
+    {
+      "path": "gradle/wrapper/gradle-wrapper.properties",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/verify.sh",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/verify.sh",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".vscode/settings.json",
+      "profile": "full-stack",
+      "category": "optional"
+    },
+    {
+      "path": ".vscode/settings.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "frontend/pwa-policy.mjs",
+      "profile": "full-stack",
+      "category": "substitution-required"
+    },
+    {
+      "path": "frontend/pwa-policy.mjs",
+      "profile": "frontend",
+      "category": "substitution-required"
+    },
+    {
+      "path": "pwa-policy.mjs",
+      "profile": "frontend",
+      "category": "substitution-required"
+    },
+    {
+      "path": "frontend/pwa-policy.d.mts",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/pwa-policy.d.mts",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "pwa-policy.d.mts",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/app-identity-html.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/app-identity-html.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/prepare-pwa-update-fixture.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/prepare-pwa-update-fixture.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/pwa-update-fixture.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/pwa-update-fixture.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/app-identity-html.d.mts",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/app-identity-html.d.mts",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "index.html",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "nginx.conf",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "playwright.pwa.config.ts",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/verify-frontend-profile.sh",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/vireo-frontend-doctor.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/project-identity-policy.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "scripts/project-identity-policy.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/tests/contract/pwa-contract.test.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/tests/contract/pwa-contract.test.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "tests/contract/pwa-contract.test.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": ".gitignore",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "frontend/tests/pwa/production-pwa.spec.ts",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "tests/pwa/production-pwa.spec.ts",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/public/icons/icon-192x192.png",
+      "profile": "full-stack",
+      "category": "application-owned"
+    },
+    {
+      "path": "public/icons/icon-192x192.png",
+      "profile": "frontend",
+      "category": "application-owned"
+    },
+    {
+      "path": "frontend/src/app/App.tsx",
+      "profile": "full-stack",
+      "category": "application-owned"
+    },
+    {
+      "path": "src/main/resources/application.properties",
+      "profile": "full-stack",
+      "category": "application-owned"
+    },
+    {
+      "path": ".vireo/examples/purchase-order.entity.json",
+      "profile": "frontend",
+      "category": "optional"
+    },
+    {
+      "path": "docs/verification-performance.md",
+      "profile": "full-stack",
+      "category": "historical"
+    },
+    {
+      "path": "frontend/package.json",
+      "profile": "full-stack",
+      "category": "substitution-required"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.4.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-audit-support.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-audit-support.test.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-budget.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-policy.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-policy.test.mjs",
+      "profile": "full-stack",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/tests/demo/flagship-demo.spec.ts",
+      "profile": "full-stack",
+      "category": "optional"
+    },
+    {
+      "path": "frontend/tests/e2e/overview.spec.ts",
+      "profile": "full-stack",
+      "category": "optional"
+    },
+    {
+      "path": "docs/verification-performance.md",
+      "profile": "frontend",
+      "category": "historical"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.4.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-audit-support.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-audit-support.test.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-budget.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-policy.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/scripts/lighthouse-policy.test.mjs",
+      "profile": "frontend",
+      "category": "managed"
+    },
+    {
+      "path": "frontend/tests/demo/flagship-demo.spec.ts",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "frontend/tests/e2e/overview.spec.ts",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    }
   ],
   "projectionAssertions": {
     "excludedCategories": ["maintainer-only", "historical"],

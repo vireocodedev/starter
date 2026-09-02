@@ -844,6 +844,8 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
     "starter:boundary:check": packageJson.scripts["starter:boundary:check"],
     "architecture:check": packageJson.scripts["architecture:check"],
     "bundle:check": packageJson.scripts["bundle:check"],
+    "performance:policy:test": requiredScript("performance:policy:test"),
+    "performance:audit": requiredScript("performance:audit"),
     "pwa:check:source": requiredScript("pwa:check:source"),
     "pwa:check:built": requiredScript("pwa:check:built"),
     "pretest:pwa": requiredScript("pretest:pwa"),
@@ -857,6 +859,20 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
     "verify:release": "corepack npm run identity:check:release && corepack npm run verify",
   };
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+
+  const lighthouseBudgetPath = join(staging, "scripts", "lighthouse-budget.mjs");
+  const lighthouseBudget = await readFile(lighthouseBudgetPath, "utf8").catch(error => {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT")
+      throw new Error("Pinned Template Lighthouse budget is missing.");
+    throw error;
+  });
+  const templateEvidenceDirectory = 'path.resolve(frontendRoot, "../.performance-evidence")';
+  if (lighthouseBudget.split(templateEvidenceDirectory).length !== 2)
+    throw new Error("Pinned Template Lighthouse budget must declare exactly one frontend evidence directory.");
+  await writeFile(
+    lighthouseBudgetPath,
+    lighthouseBudget.replace(templateEvidenceDirectory, 'path.resolve(frontendRoot, ".performance-evidence")'),
+  );
 
   const lockPath = join(staging, "package-lock.json");
   const lock = JSON.parse(await readFile(lockPath, "utf8")) as {
@@ -885,6 +901,7 @@ dist/
 playwright-report/
 test-results/
 storybook-static/
+.performance-evidence/
 .env
 .env.*
 !.env.example
