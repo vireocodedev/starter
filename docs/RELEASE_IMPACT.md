@@ -79,10 +79,11 @@ exemptions remain as the reviewable audit trail.
 `corepack npm run version-packages` synchronizes the current documentation release
 after Changesets updates public package versions. It also regenerates the current
 friendly `site/content/snapshots/<version>.json` archive and writes a deterministic
-`application:documentation-site` deploy record under `.release-impact/`. The record
-name includes the exact current documentation coordinate and a digest of the full
-release object, so a non-`create-vireo` package change cannot reuse an earlier
-documentation deployment decision.
+`application:documentation-site` deploy record at
+`.release-impact/documentation-site-current-release.json`. Its summary includes the
+exact current documentation coordinate and a digest of the full release object, so a
+non-`create-vireo` package change updates the reviewed deployment decision without
+creating duplicate records.
 
 Review both generated artifacts in the version pull request. The synchronizer only
 updates the current friendly snapshot; retained historical archives and `site/dist`

@@ -41,6 +41,9 @@ export async function synchronizeDocumentationRelease(
     })
     .filter(Boolean);
   const packageVersions = new Map(publicWorkspacePackages.map(({ name, version }) => [name, version]));
+  for (const { name, version } of publicWorkspacePackages) {
+    if (!isStableSemver(version)) throw new Error(`Public workspace ${name} must declare a stable semantic version`);
+  }
   const packageLockPath = join(repositoryRoot, "package-lock.json");
   const packageLock = readJson(packageLockPath);
   updatePublicWorkspaceLockEntries(packageLock, publicWorkspacePackages);
@@ -53,6 +56,11 @@ export async function synchronizeDocumentationRelease(
   const gradleProperties = readFileSync(join(repositoryRoot, "jvm", "gradle.properties"), "utf8");
   const jvmVersion = gradleProperties.match(/^version=(.+)$/mu)?.[1];
   if (!jvmVersion) throw new Error("jvm/gradle.properties has no version");
+  const nextReleaseId = validateSynchronizedReleaseCoordinate({
+    createVireoVersion,
+    currentDocumentation,
+    jvmVersion,
+  });
 
   const createSourcePath = join(repositoryRoot, "packages", "create-vireo", "src", "index.ts");
   let createSource = readFileSync(createSourcePath, "utf8");
@@ -130,8 +138,6 @@ export async function synchronizeDocumentationRelease(
   if (!oldReleaseId || documentation.currentRelease !== oldReleaseId) {
     throw new Error("Ecosystem and documentation current release IDs do not match");
   }
-  const nextReleaseId = `npm-${createVireoVersion}_jvm-${jvmVersion}`;
-
   updateNpmEntries(ecosystem.current?.npm, packageVersions, "Ecosystem release");
   ecosystem.current.id = nextReleaseId;
   ecosystem.current.maven.version = jvmVersion;
@@ -260,13 +266,46 @@ function writeDocumentationSiteReleaseImpact({ repositoryRoot, currentDocumentat
     artifact: "application:documentation-site",
     decision: "release",
     bump: "deploy",
-    summary: `Deploy the synchronized Vireo documentation snapshot for ${releaseId}.`,
+    summary: `Deploy the synchronized Vireo documentation snapshot for ${releaseId} (${coordinateDigest}).`,
   };
   const directory = join(repositoryRoot, ".release-impact");
   mkdirSync(directory, { recursive: true });
-  writeFileSync(
-    join(directory, `documentation-site-${releaseId}-${coordinateDigest}.json`),
-    `${JSON.stringify(record, null, 2)}\n`,
+  writeFileSync(join(directory, "documentation-site-current-release.json"), `${JSON.stringify(record, null, 2)}\n`);
+}
+
+function validateSynchronizedReleaseCoordinate({ createVireoVersion, currentDocumentation, jvmVersion }) {
+  if (!isStableSemver(createVireoVersion)) {
+    throw new Error("create-vireo must declare a stable semantic version before documentation synchronization");
+  }
+  if (!isStableSemver(jvmVersion)) {
+    throw new Error(
+      "jvm/gradle.properties must declare a stable semantic version before documentation synchronization",
+    );
+  }
+  if (!isFriendlyDocumentationVersion(currentDocumentation.documentationVersion)) {
+    throw new Error("Current documentation release must declare a friendly 0.x documentationVersion");
+  }
+  if (!isDocumentationReleaseId(currentDocumentation.id)) {
+    throw new Error("Current documentation release must declare a safe npm-<version>_jvm-<version> ID");
+  }
+  const releaseId = `npm-${createVireoVersion}_jvm-${jvmVersion}`;
+  if (!isDocumentationReleaseId(releaseId)) {
+    throw new Error("Synchronized documentation release ID is not safe");
+  }
+  return releaseId;
+}
+
+function isStableSemver(value) {
+  return /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u.test(value ?? "");
+}
+
+function isFriendlyDocumentationVersion(value) {
+  return /^0\.\d+$/u.test(value ?? "");
+}
+
+function isDocumentationReleaseId(value) {
+  return /^npm-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)_jvm-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u.test(
+    value ?? "",
   );
 }
 
