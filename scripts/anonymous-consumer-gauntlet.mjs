@@ -251,6 +251,18 @@ async function executeOperation(operation, { environment, runRoot }) {
     ) throw new Error(`${operation.id} found incoherent generated release identity/provenance.`);
     if (!existsSync(join(operation.path, ".vireo", "managed-files.json")))
       throw new Error(`${operation.id} is missing managed-file provenance.`);
+  } else if (operation.kind === "assert-upgraded-consumer") {
+    const project = JSON.parse(readFileSync(join(operation.path, ".vireo", "project.json"), "utf8"));
+    if (project.createdBy !== `create-vireo@${operation.release.createVireoVersion}` || project.templateCommit !== operation.release.template.commit || project.templateVersion !== operation.release.template.version || project.templateTag !== operation.release.template.tag || project.profile !== operation.profile)
+      throw new Error("Upgraded consumer target identity drifted.");
+    const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
+    for (const file of managed.files ?? []) if (!existsSync(join(operation.path, file.path))) throw new Error(`Managed upgraded file is missing: ${file.path}`);
+    const packageRoot = operation.profile === "full-stack" ? join(operation.path, "frontend") : operation.path;
+    assertAnonymousVireoLock({ consumerRoot: packageRoot, release: operation.release, registry: operation.registry });
+    if (operation.profile === "full-stack") {
+      const properties = readFileSync(join(operation.path, "gradle.properties"), "utf8");
+      if (!properties.includes(`starterVersion=${operation.release.maven.version}`)) throw new Error("Upgraded JVM starter version drifted.");
+    }
   } else if (operation.kind === "assert-public-evidence") {
     const problems = validateAnonymousPublicEvidence({ manifest: JSON.parse(readFileSync(operation.path, "utf8")), release: operation.release });
     if (problems.length > 0) throw new Error(problems.join("\n"));
@@ -424,6 +436,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--apply", "--accept-application-owned", "--project", directory] },
           { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
           { kind: "assert-project-identity", id: `upgrade-${edge.from}-${edge.to}-${profile}-exact-target`, path: directory, release, profile, database: profile === "full-stack" ? "h2" : undefined },
+          { kind: "assert-upgraded-consumer", id: `upgrade-${edge.from}-${edge.to}-${profile}-lock-and-jvm`, path: directory, release, profile, registry: "https://registry.npmjs.org" },
           { kind: "record-project-tree", id: `upgrade-${edge.from}-${edge.to}-${profile}-post-apply-snapshot`, path: directory },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--apply", "--project", directory], expectedExit: 1 },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory] },
@@ -431,6 +444,8 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "status", "--json", "--project", directory] },
           { kind: "assert-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-provenance`, path: join(directory, ".vireo", "project.json") },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "check", "--project", directory] },
+          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "generate", "entity", ".vireo/examples/purchase-order.entity.json", "--project", directory] },
+          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "check", "--json", "--project", directory] },
           { executable: "corepack", arguments: ["npm", "run", "verify"], cwd: directory, timeoutMs: 45 * 60_000 },
         ];
       }));
