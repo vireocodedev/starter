@@ -126,11 +126,11 @@ vireo upgrade --to 0.8.3 --apply --accept-application-owned
 
 The preflight refuses unknown source commits, changed Vireo dependency declarations,
 lockfile drift, invalid/duplicate Flyway migration versions, and managed generated or
-wire-contract drift. Apply changes only Vireo-managed metadata and the pinned CLI
-script. Template files, domain logic, deployment, data migration, and adopted/ejected
+wire-contract drift. Apply changes only the managed surfaces explicitly declared by
+the selected edge. Template files, domain logic, deployment, data migration, and adopted/ejected
 code remain application-owned and must be reviewed against the target Template
 commit `12485e7e7e9323a802d79c793d230557cad4c7fb`. For the current 0.8.2→0.8.3
-edge, Vireo updates only the declared managed Doctor, release-coordinate, and provenance surfaces; it never overwrites the application-owned root
+edge, Vireo applies only the declared managed edge surfaces, including dependency declarations and release identity/provenance where the edge declares them. The lockfile remains application-owned and must be refreshed manually; Vireo never overwrites the application-owned root
 `AGENTS.md`, source, deployment descriptors, or `.github` review policy. Review the Template release notes and source-to-target diff, selectively
 port application-owned changes, refresh the appropriate lockfile, run setup, and
 complete full verification before accepting the upgrade.
