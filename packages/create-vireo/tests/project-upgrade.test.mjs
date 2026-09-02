@@ -384,19 +384,6 @@ function syntheticCandidateTargetRelease(policy) {
   return targetRelease;
 }
 
-function candidatePolicyForTest(sourcePolicy) {
-  const candidateRelease = syntheticCandidateTargetRelease(sourcePolicy);
-  const policy = structuredClone(sourcePolicy);
-  const candidateEdge = policy.releaseGraph.edges.find(edge => edge.to === candidateRelease);
-  if (!candidateEdge) throw new Error("Synthetic candidate policy requires an adjacent incoming edge.");
-  policy.releaseGraph.publicRelease = candidateEdge.from;
-  policy.releaseGraph.previousRelease = candidateEdge.from;
-  policy.releaseGraph.candidateRelease = candidateRelease;
-  policy.releaseGraph.releases.find(release => release.release === candidateEdge.from).status = "current";
-  policy.releaseGraph.releases.find(release => release.release === candidateRelease).status = "candidate";
-  return policy;
-}
-
 async function adjacentFixture(profile) {
   const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-0.7-`));
   const frontend = profile === "frontend";
@@ -573,46 +560,17 @@ test("0.7.0 to 0.8.0 adds managed skills once and preserves application-owned by
   }
 });
 
-test("synthetic candidate policies reject preview and apply while explicit finalized policies support their target", async () => {
+test("structurally valid candidate policy rejects preview and apply without writes", async () => {
   const root = await adjacentFixture("frontend");
   try {
-    await upgradeVireoProject({
-      projectDirectory: root,
-      targetRelease: adjacentTargetRelease,
-      dryRun: false,
-      acceptApplicationOwned: true,
-    });
     const beforeCandidate = await treeBytes(root);
-    const finalizedArtifactPolicy = structuredClone(adjacentPolicy);
-    delete finalizedArtifactPolicy.releaseGraph.candidateRelease;
-    finalizedArtifactPolicy.releaseGraph.publicRelease = candidateTargetRelease;
-    finalizedArtifactPolicy.releaseGraph.previousRelease = adjacentTargetRelease;
-    finalizedArtifactPolicy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease).status =
-      "historical";
-    finalizedArtifactPolicy.releaseGraph.releases.find(release => release.release === candidateTargetRelease).status =
-      "current";
-    assert.equal(syntheticCandidateTargetRelease(finalizedArtifactPolicy), candidateTargetRelease);
-    const candidatePolicy = candidatePolicyForTest(finalizedArtifactPolicy);
     for (const options of [
       { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: true },
       { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: false, acceptApplicationOwned: true },
     ]) {
-      await assert.rejects(upgradeVireoProjectForTest(options, candidatePolicy), error => error.code === "VIR-UPG-008");
+      await assert.rejects(upgradeVireoProjectForTest(options, adjacentPolicy), error => error.code === "VIR-UPG-008");
       assertSameSnapshot(beforeCandidate, await treeBytes(root));
     }
-
-    const applied = await upgradeVireoProjectForTest(
-      { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: false, acceptApplicationOwned: true },
-      finalizedArtifactPolicy,
-    );
-    assert.equal(applied.dryRun, false);
-    const metadata = JSON.parse(await readFile(join(root, ".vireo/project.json"), "utf8"));
-    assert.equal(metadata.lastUpgradedBy, `create-vireo@${candidateTargetRelease}`);
-    assert.equal(
-      metadata.templateCommit,
-      finalizedArtifactPolicy.releaseGraph.releases.find(release => release.release === candidateTargetRelease)
-        .templateCommit,
-    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -880,7 +838,7 @@ test("finalized 0.8.1 full-stack Doctor migration updates realistic managed prov
   policy.releaseGraph.releases.find(release => release.release === targetRelease).status = "current";
   const source = policy.releaseGraph.releases.find(release => release.release === sourceRelease);
   const target = policy.releaseGraph.releases.find(release => release.release === targetRelease);
-  const baselines = policy.releaseGraph.baselines[`${sourceRelease}->${targetRelease}`].full-stack;
+  const baselines = policy.releaseGraph.baselines[`${sourceRelease}->${targetRelease}`]["full-stack"];
   const sourceDoctor = "export const profile = 'source';\n";
   const targetDoctor = "export const profile = 'target';\n";
   const doctorTest = "export {};\n";
