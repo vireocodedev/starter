@@ -1131,20 +1131,32 @@ test("projection compatibility composes every immutable Storybook baseline from 
   try {
     const template = await fixture(root);
     const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
-    const sourceBaseline = policy.releaseGraph.baselines["0.8.3->0.8.4"]["full-stack"].find(
-      file => file.path === "frontend/vitest.storybook.config.ts",
-    );
-    const targetBaseline = policy.releaseGraph.baselines["0.8.4->0.8.6"]["full-stack"].find(
-      file => file.path === "frontend/vitest.storybook.config.ts",
-    );
-    await writeFile(join(template, "frontend/vitest.storybook.config.ts"), sourceBaseline.sourceContent);
+    for (const profile of ["full-stack", "frontend"]) {
+      const templatePath = "frontend/vitest.storybook.config.ts";
+      const projectedPath = profile === "frontend" ? "vitest.storybook.config.ts" : templatePath;
+      const sourceBaseline = policy.releaseGraph.baselines["0.8.3->0.8.4"][profile].find(
+        file => file.path === projectedPath,
+      );
+      const targetBaseline = policy.releaseGraph.baselines["0.8.4->0.8.6"][profile].find(
+        file => file.path === projectedPath,
+      );
+      await writeFile(join(template, templatePath), sourceBaseline.sourceContent);
 
-    const target = join(root, "composed-app");
-    await createVireo({ directory: target, git: false, templateDirectory: template });
+      const target = join(root, `composed-${profile}`);
+      await createVireo({ directory: target, profile, git: false, templateDirectory: template });
 
-    let expected = targetBaseline.sourceContent;
-    for (const transform of targetBaseline.transforms) expected = expected.replace(transform.from, transform.to);
-    assert.equal(await readFile(join(target, "frontend/vitest.storybook.config.ts"), "utf8"), expected);
+      let expected = targetBaseline.sourceContent;
+      for (const transform of targetBaseline.transforms) expected = expected.replace(transform.from, transform.to);
+      assert.equal(await readFile(join(target, projectedPath), "utf8"), expected);
+
+      await writeFile(join(template, templatePath), "// application-owned customization\n");
+      const customizedTarget = join(root, `customized-${profile}`);
+      await assert.rejects(
+        createVireo({ directory: customizedTarget, profile, git: false, templateDirectory: template }),
+        /Pinned Template compatibility baseline is customized/u,
+      );
+      await assert.rejects(readFile(join(customizedTarget, "package.json")), /ENOENT/u);
+    }
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -327,6 +327,20 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
     validateEdgeActions(edge.applicationOwnedActions);
     edges.add(`${edge.from}->${edge.to}`);
   }
+  const outgoing = new Map<string, string[]>();
+  for (const edge of graph.edges) outgoing.set(edge.from, [...(outgoing.get(edge.from) ?? []), edge.to]);
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (release: string): void => {
+    if (visiting.has(release))
+      throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph must not contain a release cycle.");
+    if (visited.has(release)) return;
+    visiting.add(release);
+    for (const target of outgoing.get(release) ?? []) visit(target);
+    visiting.delete(release);
+    visited.add(release);
+  };
+  for (const release of releases.keys()) visit(release);
   for (const release of graph.releases) {
     const pendingTemplateCommit =
       release.release === graph.candidateRelease &&
@@ -465,8 +479,12 @@ export async function currentProjectionCompatibilityRequirements(profile: "full-
     );
   return files.map(baseline => {
     const compatibleContents = new Set<string>();
+    const visitedReleases = new Set<string>();
     let release = target.release;
     while (true) {
+      if (visitedReleases.has(release))
+        throw new VireoUpgradeError("VIR-UPG-001", "Managed projection history contains a release cycle.");
+      visitedReleases.add(release);
       const incoming = graph.edges.filter(edge => edge.to === release);
       if (incoming.length === 0) break;
       if (incoming.length !== 1)

@@ -1040,6 +1040,25 @@ test("structurally valid candidate policy rejects preview and apply without writ
   }
 });
 
+test("upgrade policies reject release cycles instead of traversing them", async () => {
+  const root = await adjacentFixture("frontend");
+  try {
+    const cyclic = structuredClone(adjacentPolicy);
+    cyclic.releaseGraph.edges.push({
+      from: adjacentTargetRelease,
+      to: adjacentSourceRelease,
+      lockfileRefresh: "not-required",
+      applicationOwnedActions: [],
+    });
+    await assert.rejects(
+      upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: adjacentTargetRelease }, cyclic),
+      error => error.code === "VIR-UPG-001" && /release cycle/u.test(error.message),
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("0.7.0 adjacent upgrades reject unknown commits, managed drift, unsafe paths, symlinks, and dry journal recovery", async () => {
   const root = await adjacentFixture("frontend");
   try {
