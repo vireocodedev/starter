@@ -48,6 +48,12 @@ test("exact npm record rejects repository workflow commit digest license and inv
     },
   };
   assert.deepEqual(validateExactNpmRecord({ record, expected: record, releaseTagCommit: "b".repeat(40) }), []);
+  record.licenseContentVerified = "true";
+  assert.match(
+    validateExactNpmRecord({ record, expected: record, releaseTagCommit: "b".repeat(40) }).join("\n"),
+    /license content evidence/u,
+  );
+  record.licenseContentVerified = true;
   record.provenance.workflow = "wrong.yml";
   assert.match(
     validateExactNpmRecord({

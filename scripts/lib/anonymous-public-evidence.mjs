@@ -35,7 +35,7 @@ export function validateExactNpmRecord({ record, expected, releaseTagCommit }) {
     problems.push("package repository is not canonical");
   if (!record?.license || record.license !== "MIT" || record.licenseFile !== "LICENSE")
     problems.push("package license metadata/file mismatch");
-  if (!record?.licenseContentVerified || !/^[0-9a-f]{64}$/u.test(record?.licenseSha256 ?? ""))
+  if (record?.licenseContentVerified !== true || !/^[0-9a-f]{64}$/u.test(record?.licenseSha256 ?? ""))
     problems.push("packed package MIT license content evidence is incomplete");
   if (!record?.inventorySafe || !record?.exportsSafe || !record?.binSafe)
     problems.push("package inventory or public targets are unsafe");

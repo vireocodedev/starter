@@ -67,6 +67,12 @@ test("JAR license evidence requires canonical content verification and a byte di
     licenseSha256: "a".repeat(64),
   };
   assert.deepEqual(validatePublicMavenRecord({ record, group: "com.vireocode", version: "0.3.1" }), []);
+  record.licenseContentVerified = "true";
+  assert.match(
+    validatePublicMavenRecord({ record, group: "com.vireocode", version: "0.3.1" }).join("\n"),
+    /incomplete/u,
+  );
+  record.licenseContentVerified = true;
   record.licenseSha256 = "MIT";
   assert.match(
     validatePublicMavenRecord({ record, group: "com.vireocode", version: "0.3.1" }).join("\n"),

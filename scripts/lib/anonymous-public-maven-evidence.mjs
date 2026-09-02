@@ -6,7 +6,7 @@ export function validatePublicMavenRecord({ record, group, version }) {
     record.extension === "pom"
       ? record.pomMitLicense
       : record.extension === "jar"
-        ? record.licenseContentVerified && /^[0-9a-f]{64}$/u.test(record.licenseSha256 ?? "")
+        ? record.licenseContentVerified === true && /^[0-9a-f]{64}$/u.test(record.licenseSha256 ?? "")
         : true;
   const coordinatesValid = record.extension === "pom" ? record.pomCoordinateVerified : true;
   if (!licenseValid || !coordinatesValid || !record.checksumVerified || !record.signatureVerified)
