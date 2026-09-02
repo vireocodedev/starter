@@ -43,14 +43,20 @@ export function projectedBaselineSourceBytes(templateBytes, file) {
 export function assertStorybookBaselineContinuity(releaseGraph, edge) {
   const [sourceRelease, targetRelease] = edge.split("->");
   if (!sourceRelease || !targetRelease) throw new Error(`Baseline edge is invalid: ${edge}`);
+  const activeBaselines = releaseGraph?.baselines?.[edge];
+  const activeStorybookBaselines = new Map(
+    ["full-stack", "frontend"]
+      .map(profile => [profile, findProjectedStorybookBaseline(activeBaselines?.[profile], profile)])
+      .filter(([, baseline]) => baseline !== undefined),
+  );
+  if (activeStorybookBaselines.size === 0) return;
   const predecessorEdges = releaseGraph?.edges?.filter(candidate => candidate.to === sourceRelease) ?? [];
   if (predecessorEdges.length !== 1) {
     throw new Error(`${edge} must have exactly one predecessor edge for Storybook provenance.`);
   }
   const predecessorEdge = `${predecessorEdges[0].from}->${sourceRelease}`;
-  for (const profile of ["full-stack", "frontend"]) {
+  for (const [profile, current] of activeStorybookBaselines) {
     const predecessor = findManagedStorybookBaseline(releaseGraph?.baselines?.[predecessorEdge]?.[profile], profile);
-    const current = findManagedStorybookBaseline(releaseGraph?.baselines?.[edge]?.[profile], profile);
     if (
       typeof predecessor.targetSha256 !== "string" ||
       typeof predecessor.targetContent !== "string" ||
@@ -66,6 +72,19 @@ export function assertStorybookBaselineContinuity(releaseGraph, edge) {
       throw new Error(`${edge}:${profile} Storybook source must match ${predecessorEdge} target provenance.`);
     }
   }
+}
+
+function findProjectedStorybookBaseline(files, profile) {
+  const matches = (files ?? []).filter(
+    file =>
+      file?.operation === "update" &&
+      file.path?.endsWith("vitest.storybook.config.ts") &&
+      Array.isArray(file.sourceProjectionTransforms),
+  );
+  if (matches.length > 1) {
+    throw new Error(`${profile} must declare at most one projected Storybook configuration baseline.`);
+  }
+  return matches[0];
 }
 
 function findManagedStorybookBaseline(files, profile) {

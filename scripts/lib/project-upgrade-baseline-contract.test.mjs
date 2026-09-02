@@ -81,6 +81,33 @@ test("0.8.4 to 0.8.5 Storybook baselines retain predecessor target provenance", 
   );
 });
 
+test("Storybook provenance continuity ignores empty, unrelated, and first-add edges", () => {
+  const edge = "0.8.5->0.8.6";
+  const graphWith = files => ({
+    edges: [{ from: "0.8.5", to: "0.8.6" }],
+    baselines: {
+      [edge]: {
+        "full-stack": structuredClone(files),
+        frontend: structuredClone(files),
+      },
+    },
+  });
+
+  assert.doesNotThrow(() => assertStorybookBaselineContinuity(graphWith([]), edge));
+  assert.doesNotThrow(() =>
+    assertStorybookBaselineContinuity(
+      graphWith([{ operation: "update", path: "scripts/lighthouse-policy.mjs" }]),
+      edge,
+    ),
+  );
+  assert.doesNotThrow(() =>
+    assertStorybookBaselineContinuity(
+      graphWith([{ operation: "add", path: "vitest.storybook.config.ts" }]),
+      edge,
+    ),
+  );
+});
+
 test("frontend Lighthouse baselines require the project-local evidence transform", () => {
   const baseline = {
     path: "scripts/lighthouse-budget.mjs",
