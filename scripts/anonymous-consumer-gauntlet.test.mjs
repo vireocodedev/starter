@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -211,6 +211,31 @@ test("preflight failures have a stable machine-actionable finding", () => {
   });
 });
 
+test("malformed release input writes preflight evidence before any scenario can run", t => {
+  const evidenceDirectory = mkdtempSync(join(tmpdir(), "vireo-malformed-release-preflight-"));
+  t.after(() => rmSync(evidenceDirectory, { recursive: true, force: true }));
+  const result = spawnSync(
+    process.execPath,
+    ["scripts/anonymous-consumer-gauntlet.mjs", "--evidence-dir", evidenceDirectory],
+    {
+      cwd: root,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        VIREO_GAUNTLET_RELEASE_ID: "npm-0.8.2_jvm-0.3.1-extra",
+        VIREO_GAUNTLET_SOURCE_COMMIT: "a".repeat(40),
+      },
+    },
+  );
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /requested release id is not an exact npm-x\.y\.z_jvm-x\.y\.z release id/u);
+  const evidence = JSON.parse(readFileSync(join(evidenceDirectory, "evidence.json"), "utf8"));
+  assert.equal(evidence.status, "failed");
+  assert.deepEqual(evidence.findings, [preflightFailureFinding()]);
+  assert.deepEqual(evidence.scenarios, []);
+  assert.equal(evidence.releaseTagCommit, undefined);
+});
+
 test("fake executor preserves planned, expected-refusal, timeout, and failure evidence", async () => {
   const plan = [
     {
@@ -298,15 +323,15 @@ test("gauntlet policy wiring remains public and scheduled", () => {
   assert.match(workflow, /playwright install --with-deps chromium/u);
   assert.match(workflow, /docker version/u);
   assert.match(workflow, /workflow_run\.head_sha/u);
-  assert.match(workflow, /--release-id/u);
-  assert.match(workflow, /--source-commit/u);
+  assert.match(workflow, /VIREO_GAUNTLET_RELEASE_ID: \$\{\{ inputs\.release_id \}\}/u);
+  assert.match(workflow, /VIREO_GAUNTLET_SOURCE_COMMIT: \$\{\{ needs\.trusted-source\.outputs\.source_commit \}\}/u);
   assert.match(workflow, /git rev-parse HEAD/u);
   assert.match(workflow, /source_commit must be an exact 40-hex/u);
   assert.match(workflow, /workflow_dispatch is restricted to refs\/heads\/main/u);
   assert.match(workflow, /merge-base --is-ancestor "\$candidate" origin\/main/u);
   assert.match(workflow, /Revalidate trusted main ancestry before verifier execution/u);
-  assert.match(workflow, /workflow_dispatch release_id must be an exact npm-x\.y\.z_jvm-x\.y\.z release id/u);
   assert.match(workflow, /--evidence-dir "\$RUNNER_TEMP\/anonymous-consumer-evidence"/u);
+  assert.doesNotMatch(workflow, /REQUESTED_RELEASE_ID|release_id=|--release-id|--source-commit/u);
   assert.match(workflow, /path: \$\{\{ runner\.temp \}\}\/anonymous-consumer-evidence/u);
   assert.doesNotMatch(workflow.match(/^\s*run:[\s\S]*?(?=^\s*-\s|^\s*\w)/gmu)?.join("\n") ?? "", /inputs\./u);
   assert.match(workflow, /head_repository\.full_name == github\.repository/u);

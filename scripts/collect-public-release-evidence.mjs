@@ -319,7 +319,7 @@ const manifest = {
   subjects: [...npmSubjects, ...mavenSubjects],
 };
 const sbomProblems = validateReleaseSbomManifest(manifest, policy, {
-  root: manifestEvidenceRoot({ repositoryRoot, outputRoot, outputRelativePaths }),
+  root: outputRoot,
 });
 if (sbomProblems.length > 0) {
   throw new Error(
