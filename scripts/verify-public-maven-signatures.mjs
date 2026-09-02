@@ -45,7 +45,7 @@ try {
     encoding: "utf8",
   });
   if (!listed.includes(`fpr:::::::::${fingerprint}:`))
-    throw new Error("Public keyserver returned an unexpected Vireo signer.");
+    throw new Error("Checked-in Vireo public key does not match the pinned signer fingerprint.");
   const verified = [];
   for (const module of maven.modules)
     for (const artifactSpec of module.artifacts ?? []) {

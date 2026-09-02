@@ -8,7 +8,9 @@ then consumes registry/Central artifacts rather than this checkout.
 It creates a fresh temporary consumer for every run. npm uses a blank user config
 and cache; credential-shaped environment variables are removed; Gradle receives a
 fresh user home; Maven Local and workspace/file/link dependencies are refused. The
-workflow has no secrets and publishes only sanitized, atomic JSON evidence.
+consumer job is token-free and publishes only sanitized, atomic JSON evidence. A
+separate least-privilege `attestations: read` job consumes that evidence to verify
+the signed SBOMs; its GitHub token is never exposed to the consumer process.
 
 The policy requires sequential evidence for public artifacts; CLI help/dry-run and
 failure cleanup; frontend and H2 applications; PostgreSQL production-like creation;
@@ -19,10 +21,10 @@ boundaries; supported adjacent upgrades; and npm/Maven package surfaces.
 Automation records command-level hashes, timing, expected exits, structured
 findings and external warnings. It verifies public registry/Central artifacts,
 licenses, SBOM/provenance material, package surfaces and generated-project
-contracts. Detached Maven signatures are verified only after a published signer key
-is retrieved; a keyserver outage is recorded as external evidence rather than
-claimed as a signature pass. Physical-device PWA branding/install evidence and real
-adopter/product decisions remain human-only work.
+contracts. Detached Maven signatures use the checked-in pinned public key and
+hard-fail on any import, fingerprint, checksum, or signature mismatch. Physical-device
+PWA branding/install evidence and real adopter/product decisions remain human-only
+work.
 
 Run the structural offline check with `corepack npm run consumer:gauntlet:check`.
 The actual gauntlet is intentionally hosted because it uses public registries,

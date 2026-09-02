@@ -10,8 +10,13 @@ import {
   buildExecutionPlan,
   executePlanForTest,
   installedVireoPackageNames,
+  parseBoundedJsonOutput,
+  preflightFailureFinding,
+  validateCreateDryRunJson,
+  validateDoctorJson,
   validateManagedProvenance,
   validatePolicy,
+  validateReleaseIdentityJson,
 } from "./anonymous-consumer-gauntlet.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -69,6 +74,72 @@ test("deterministic plan gives a fake executor every required recipe and refusal
       ).length,
     2,
   );
+  const adversity = plan.find(scenario => scenario.id === "cli-adversity").operations.map(operation => operation.id);
+  assert.ok(adversity.includes("retry-project-setup"));
+  assert.ok(adversity.includes("retry-project-verify"));
+  const lifecycle = plan.find(scenario => scenario.id === "capability-lifecycle").operations.map(operation => operation.id);
+  assert.ok(lifecycle.includes("capability-customized-snapshot"));
+  assert.ok(lifecycle.includes("capability-refusal-preserves-customization"));
+  const removal = plan.find(scenario => scenario.id === "sample-removal-and-ejection").operations.map(operation => operation.id);
+  assert.ok(removal.includes("sample-removal-first-apply-snapshot"));
+  assert.ok(removal.includes("sample-removal-repeat-preserves-tree"));
+});
+
+test("JSON command assertions accept only bounded exact ready reports", () => {
+  const dryRunDirectory = "/tmp/anonymous/dry-run";
+  const dryRun = {
+    directory: dryRunDirectory,
+    projectName: "dry-run",
+    profile: "frontend",
+    packageManager: "npm",
+    templateCommit: release.template.commit,
+    dryRun: true,
+  };
+  assert.equal(
+    validateCreateDryRunJson(parseBoundedJsonOutput(JSON.stringify(dryRun)), {
+      directory: dryRunDirectory,
+      profile: "frontend",
+      release,
+    }).type,
+    "create-vireo-dry-run",
+  );
+  assert.throws(() => parseBoundedJsonOutput("notice\n{}"), /complete JSON/u);
+  assert.throws(() => parseBoundedJsonOutput("{"), /complete JSON/u);
+  assert.throws(() => parseBoundedJsonOutput("x".repeat(9), { maximumBytes: 8 }), /exceeds/u);
+  assert.throws(
+    () => validateCreateDryRunJson({ ...dryRun, database: "h2" }, { directory: dryRunDirectory, profile: "frontend", release }),
+    /full-stack-only/u,
+  );
+  const doctor = {
+    schemaVersion: 1,
+    ok: true,
+    project: "frontend",
+    profile: "frontend",
+    database: undefined,
+    databaseMode: "frontend",
+    results: [{ code: "VIR-ENV-001", status: "pass", summary: "Node 24" }],
+  };
+  assert.equal(
+    validateDoctorJson(doctor, { project: "frontend", profile: "frontend", database: undefined, databaseMode: "frontend" })
+      .type,
+    "doctor",
+  );
+  assert.throws(
+    () => validateDoctorJson({ ...doctor, ok: false }, { project: "frontend", profile: "frontend", database: undefined, databaseMode: "frontend" }),
+    /expected ready/u,
+  );
+  assert.equal(validateReleaseIdentityJson({ phase: "release", ok: true, problems: [] }).type, "release-identity");
+  assert.throws(() => validateReleaseIdentityJson({ phase: "creation", ok: true, problems: [] }), /exact ready/u);
+});
+
+test("preflight failures have a stable machine-actionable finding", () => {
+  assert.deepEqual(preflightFailureFinding(), {
+    id: "VIR-GAUNTLET-PREFLIGHT",
+    owner: "framework",
+    severity: "error",
+    remediation: "Repair the exact public release identity or its provider-backed publication evidence.",
+    evidenceReferences: ["preflight"],
+  });
 });
 
 test("fake executor preserves planned, expected-refusal, timeout, and failure evidence", async () => {

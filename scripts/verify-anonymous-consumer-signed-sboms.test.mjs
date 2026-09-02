@@ -29,6 +29,10 @@ const policy = {
     ],
   },
 };
+const gauntletPolicy = {
+  scenarios: [{ id: "public-artifacts", recipe: ["fixture public release evidence"] }],
+  requiredScenarios: ["public-artifacts"],
+};
 
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), "anonymous-signed-sbom-"));
@@ -80,6 +84,25 @@ function fixture(t) {
       release,
       releaseTagCommit: "c".repeat(40),
       verifierSourceCommit: "e".repeat(40),
+      requestedReleaseId: release.id,
+      workflow: { run: "fixture" },
+      findings: [],
+      externalWarnings: [],
+      scenarios: [
+        {
+          id: "public-artifacts",
+          recipe: gauntletPolicy.scenarios[0].recipe,
+          status: "passed",
+          commands: [
+            {
+              id: "fixture",
+              status: "passed",
+              stdout: { bytes: 0, sha256: "a".repeat(64) },
+              stderr: { bytes: 0, sha256: "b".repeat(64) },
+            },
+          ],
+        },
+      ],
     }),
   );
   const manifest = {
@@ -135,7 +158,7 @@ function verifiedOutput(subject) {
 
 test("plans and verifies every exact npm and Maven subject against the release tag", t => {
   const { root, hash } = fixture(t);
-  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash });
+  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
   assert.equal(plan.subjects.length, 2);
   assert.equal(plan.releaseTagCommit, "c".repeat(40));
   const calls = [];
@@ -170,7 +193,7 @@ test("rejects missing, extra, cross-coordinate, and digest-drifted subjects", t 
   manifest.sboms[0].subjects = [manifest.subjects[1].path];
   writeFileSync(manifestPath, JSON.stringify(manifest));
   assert.throws(
-    () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash }),
+    () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash }),
     /crosses artifact boundary/u,
   );
   manifest.sboms[0].subjects = [manifest.subjects[0].path];
@@ -182,7 +205,7 @@ test("rejects missing, extra, cross-coordinate, and digest-drifted subjects", t 
   });
   writeFileSync(manifestPath, JSON.stringify(manifest));
   assert.throws(
-    () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash }),
+    () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash }),
     /missing or extra|no SBOM mapping/u,
   );
 });
@@ -191,10 +214,13 @@ test("rejects source drift and malformed or falsely bound verifier output", t =>
   const { root, manifest, hash, manifestPath } = fixture(t);
   manifest.source.commit = "d".repeat(40);
   writeFileSync(manifestPath, JSON.stringify(manifest));
-  assert.throws(() => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash }), /source commit/u);
+  assert.throws(
+    () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash }),
+    /source commit/u,
+  );
   manifest.source.commit = "e".repeat(40);
   writeFileSync(manifestPath, JSON.stringify(manifest));
-  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash });
+  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
   const input = {
     subject: plan.subjects[0],
     repository: policy.repository,
@@ -216,6 +242,18 @@ test("rejects source drift and malformed or falsely bound verifier output", t =>
   assert.throws(
     () => verifiedAttestationRecord({ ...input, output: JSON.stringify(falseOutput) }),
     /does not describe/u,
+  );
+});
+
+test("does not trust a passed top-level gauntlet status without complete final evidence", t => {
+  const { root, hash } = fixture(t);
+  const evidencePath = join(root, "evidence.json");
+  const evidence = JSON.parse(readFileSync(evidencePath, "utf8"));
+  evidence.scenarios[0].commands[0].status = "planned";
+  writeFileSync(evidencePath, JSON.stringify(evidence));
+  assert.throws(
+    () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash }),
+    /final evidence.*not passed/u,
   );
 });
 

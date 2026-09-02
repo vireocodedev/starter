@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { publicReleaseIdentity, readJson } from "./lib/anonymous-consumer-environment.mjs";
 import { writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
+import { validateFinalAnonymousEvidence } from "./lib/anonymous-consumer-final-evidence.mjs";
 import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -50,13 +51,22 @@ function sameRelease(left, right) {
  * subject verification plan. The caller intentionally invokes `gh` once per
  * subject: Maven modules can bind several subject files to one SBOM.
  */
-export function signedSbomVerificationPlan({ evidenceRoot, release, policy, readJsonFile = readJson, hash = sha256 }) {
+export function signedSbomVerificationPlan({
+  evidenceRoot,
+  release,
+  policy,
+  gauntletPolicy,
+  readJsonFile = readJson,
+  hash = sha256,
+}) {
   const evidence = readJsonFile(join(evidenceRoot, "evidence.json"));
   const manifest = readJsonFile(join(evidenceRoot, "public-release-evidence", "public-release-manifest.json"));
   const problems = validateReleaseSbomManifest(manifest, policy, {
     root: join(evidenceRoot, "public-release-evidence"),
   });
-  if (evidence?.status !== "passed") problems.push("anonymous consumer evidence is not passed");
+  if (!gauntletPolicy) problems.push("anonymous consumer gauntlet policy is required for final evidence validation");
+  const finalEvidenceProblems = validateFinalAnonymousEvidence(evidence, release, gauntletPolicy);
+  problems.push(...finalEvidenceProblems.map(problem => `anonymous consumer final evidence: ${problem}`));
   if (!sameRelease(evidence?.release, release))
     problems.push("anonymous consumer evidence does not match the exact release contract");
   if (!/^[0-9a-f]{40}$/u.test(evidence?.releaseTagCommit ?? ""))
@@ -292,6 +302,7 @@ function main() {
   const output = resolve(repositoryRoot, argumentValue(arguments_, "--output"));
   const release = publicReleaseIdentity(readJson(join(repositoryRoot, "contracts", "ecosystem-release-contract.json")));
   const policy = readJson(join(repositoryRoot, "contracts", "public-release-attestation-policy.json"));
+  const gauntletPolicy = readJson(join(repositoryRoot, "contracts", "anonymous-consumer-gauntlet-policy.json"));
   const run = {
     repository: process.env.GITHUB_REPOSITORY ?? "local",
     id: process.env.GITHUB_RUN_ID ?? "local",
@@ -309,7 +320,7 @@ function main() {
     subjects: [],
   };
   try {
-    const plan = signedSbomVerificationPlan({ evidenceRoot, release, policy });
+    const plan = signedSbomVerificationPlan({ evidenceRoot, release, policy, gauntletPolicy });
     summary.releaseTagCommit = plan.releaseTagCommit;
     verifySignedSbomPlan({
       plan,

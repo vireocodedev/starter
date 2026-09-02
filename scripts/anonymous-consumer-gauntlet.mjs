@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   anonymousEnvironment,
@@ -164,6 +164,96 @@ export async function executePlanForTest(plan, executor, { dryRun = false } = {}
   return evidence;
 }
 
+const maximumJsonOutputBytes = 128 * 1024;
+
+/** Parses only one bounded JSON value. Callers retain a summary, never this raw output. */
+export function parseBoundedJsonOutput(output, { maximumBytes = maximumJsonOutputBytes } = {}) {
+  const bytes = Buffer.isBuffer(output) ? output : Buffer.from(String(output), "utf8");
+  if (bytes.length > maximumBytes) throw new Error("JSON command output exceeds the anonymous evidence limit.");
+  if (bytes.length === 0) throw new Error("JSON command output is empty.");
+  try {
+    return JSON.parse(bytes.toString("utf8"));
+  } catch {
+    throw new Error("JSON command output must contain one complete JSON value.");
+  }
+}
+
+function exactObject(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label} must be a JSON object.`);
+  return value;
+}
+
+export function validateCreateDryRunJson(value, { directory, profile, release }) {
+  const report = exactObject(value, "create-vireo dry-run report");
+  if (
+    report.directory !== directory ||
+    report.projectName !== basename(directory) ||
+    report.profile !== profile ||
+    report.packageManager !== "npm" ||
+    report.templateCommit !== release.template.commit ||
+    report.dryRun !== true
+  )
+    throw new Error("create-vireo dry-run JSON does not bind the exact public frontend identity.");
+  if (profile === "frontend" && ["javaPackage", "database", "databaseName"].some(field => field in report))
+    throw new Error("frontend create-vireo dry-run JSON contains full-stack-only fields.");
+  return { type: "create-vireo-dry-run", profile, project: report.projectName };
+}
+
+export function validateDoctorJson(value, { project, profile, database, databaseMode }) {
+  const report = exactObject(value, "Doctor report");
+  if (
+    report.schemaVersion !== 1 ||
+    report.ok !== true ||
+    report.project !== project ||
+    report.profile !== profile ||
+    report.database !== database ||
+    report.databaseMode !== databaseMode ||
+    !Array.isArray(report.results) ||
+    report.results.length === 0 ||
+    !report.results.every(
+      entry =>
+        entry &&
+        typeof entry === "object" &&
+        /^VIR-[A-Z]+-\d{3}$/u.test(entry.code ?? "") &&
+        ["pass", "warn"].includes(entry.status) &&
+        typeof entry.summary === "string" &&
+        entry.summary.length > 0,
+    )
+  )
+    throw new Error("Doctor JSON does not describe the expected ready generated project.");
+  return { type: "doctor", profile, project };
+}
+
+export function validateReleaseIdentityJson(value) {
+  const report = exactObject(value, "release identity report");
+  if (report.phase !== "release" || report.ok !== true || !Array.isArray(report.problems) || report.problems.length !== 0)
+    throw new Error("release identity JSON is not an exact ready release identity.");
+  return { type: "release-identity" };
+}
+
+export function validateRegistryMetadataJson(value, { name, version }) {
+  const metadata = exactObject(value, "npm registry metadata");
+  if (metadata.name !== name || metadata.version !== version)
+    throw new Error("npm registry JSON does not match the exact public package coordinate.");
+  return { type: "registry-metadata", coordinate: `${name}@${version}` };
+}
+
+export function validateJsonValue(value, type) {
+  if (value === null || (typeof value !== "object" && !Array.isArray(value)))
+    throw new Error(`${type} JSON must be an object or array.`);
+  return { type };
+}
+
+export function preflightFailureFinding() {
+  return {
+    id: "VIR-GAUNTLET-PREFLIGHT",
+    owner: "framework",
+    severity: "error",
+    remediation: "Repair the exact public release identity or its provider-backed publication evidence.",
+    evidenceReferences: ["preflight"],
+  };
+}
+
 function execute(command, options) {
   return new Promise((resolvePromise, reject) => {
     const startedAt = new Date().toISOString();
@@ -173,6 +263,9 @@ function execute(command, options) {
     let stdoutBytes = 0;
     let stderrBytes = 0;
     let excerpt = "";
+    const jsonChunks = [];
+    let jsonBytes = 0;
+    let jsonTooLarge = false;
     let finished = false;
     const child = spawn(command.executable, command.arguments, {
       ...options,
@@ -195,6 +288,11 @@ function execute(command, options) {
     child.stdout.on("data", chunk => {
       stdout.update(chunk);
       stdoutBytes += chunk.length;
+      if (command.jsonValidator) {
+        jsonBytes += chunk.length;
+        if (jsonBytes <= maximumJsonOutputBytes) jsonChunks.push(chunk);
+        else jsonTooLarge = true;
+      }
       if (excerpt.length < 4096) excerpt += chunk.toString("utf8", 0, Math.min(chunk.length, 4096 - excerpt.length));
     });
     child.stderr.on("data", chunk => {
@@ -221,11 +319,22 @@ function execute(command, options) {
         stdout: { bytes: stdoutBytes, sha256: stdout.digest("hex") },
         stderr: { bytes: stderrBytes, sha256: stderr.digest("hex") },
       };
-      const assertionPassed = !command.assertOutput || command.assertOutput.test(excerpt);
+      let jsonAssertion;
+      let jsonProblem;
+      if (command.jsonValidator) {
+        try {
+          if (jsonTooLarge) throw new Error("JSON command output exceeds the anonymous evidence limit.");
+          jsonAssertion = command.jsonValidator(parseBoundedJsonOutput(Buffer.concat(jsonChunks)));
+        } catch (error) {
+          jsonProblem = error instanceof Error ? error.message : String(error);
+        }
+      }
+      if (jsonAssertion) result.assertions = { json: jsonAssertion };
+      const assertionPassed = (!command.assertOutput || command.assertOutput.test(excerpt)) && !jsonProblem;
       if (exitCode === command.expectedExit && !timedOut && !signal && assertionPassed) resolvePromise(result);
       else
         reject(
-          Object.assign(new Error(`${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`), {
+          Object.assign(new Error(jsonProblem ?? `${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`), {
             result,
           }),
         );
@@ -462,10 +571,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       return [
         ...release.npm.map(({ name, version }) =>
           command(`registry-${name}`, "corepack", ["npm", "view", `${name}@${version}`, "--json"], {
-            assertOutput: new RegExp(
-              `"name"\\s*:\\s*"${name.replace("@", "@")}"[\\s\\S]*"version"\\s*:\\s*"${version}"`,
-              "u",
-            ),
+            jsonValidator: value => validateRegistryMetadataJson(value, { name, version }),
           }),
         ),
         command(
@@ -533,7 +639,14 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
             "--yes",
             "--no-git",
           ],
-          { assertOutput: /"dryRun"\s*:\s*true/u },
+          {
+            jsonValidator: value =>
+              validateCreateDryRunJson(value, {
+                directory: join(consumerRoot, "dry-run"),
+                profile: "frontend",
+                release,
+              }),
+          },
         ),
         {
           ...create(join(consumerRoot, "invalid-name"), "frontend", ["--name", "Invalid_Name"]),
@@ -587,6 +700,8 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         { kind: "assert-absent", id: "failed-download-cleanup", path: failed },
         { ...create(failed, "frontend"), id: "template-download-retry", expectedExit: 0 },
         { kind: "assert-file", id: "retry-project-provenance", path: join(failed, ".vireo", "project.json") },
+        command("retry-project-setup", "corepack", ["npm", "run", "setup"], { cwd: failed }),
+        command("retry-project-verify", "corepack", ["npm", "run", "verify"], { cwd: failed, timeoutMs: 30 * 60_000 }),
       ];
     }
     case "frontend-creation":
@@ -600,9 +715,19 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           profile: "frontend",
         },
         command("frontend-setup", "corepack", ["npm", "run", "setup"], { cwd: frontend }),
-        command("frontend-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: frontend }),
-        command("frontend-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], {
+        command("frontend-doctor-json", "corepack", ["npm", "run", "--silent", "doctor", "--", "--json"], {
           cwd: frontend,
+          jsonValidator: value =>
+            validateDoctorJson(value, {
+              project: "frontend",
+              profile: "frontend",
+              database: undefined,
+              databaseMode: "frontend",
+            }),
+        }),
+        command("frontend-release-identity", "corepack", ["npm", "run", "--silent", "identity:check:release", "--", "--json"], {
+          cwd: frontend,
+          jsonValidator: validateReleaseIdentityJson,
         }),
         command("frontend-verify", "corepack", ["npm", "run", "verify"], { cwd: frontend, timeoutMs: 30 * 60_000 }),
         command("frontend-production-build", "corepack", ["npm", "run", "build"], { cwd: frontend }),
@@ -619,9 +744,19 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           database: "h2",
         },
         command("h2-setup", "corepack", ["npm", "run", "setup"], { cwd: h2 }),
-        command("h2-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: h2 }),
-        command("h2-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], {
+        command("h2-doctor-json", "corepack", ["npm", "run", "--silent", "doctor", "--", "--json"], {
           cwd: h2,
+          jsonValidator: value =>
+            validateDoctorJson(value, {
+              project: "full-stack-h2",
+              profile: "full-stack",
+              database: "h2",
+              databaseMode: "h2",
+            }),
+        }),
+        command("h2-release-identity", "corepack", ["npm", "run", "--silent", "identity:check:release", "--", "--json"], {
+          cwd: h2,
+          jsonValidator: validateReleaseIdentityJson,
         }),
         command("h2-verify", "corepack", ["npm", "run", "verify"], { cwd: h2, timeoutMs: 45 * 60_000 }),
         command("h2-frontend-production-build", "corepack", ["npm", "run", "build", "--prefix", "frontend"], {
@@ -634,12 +769,21 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       ];
     case "release-identity-and-doctor":
       return [
-        command("frontend-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: frontend }),
+        command("frontend-doctor-json", "corepack", ["npm", "run", "--silent", "doctor", "--", "--json"], {
+          cwd: frontend,
+          jsonValidator: value =>
+            validateDoctorJson(value, {
+              project: "frontend",
+              profile: "frontend",
+              database: undefined,
+              databaseMode: "frontend",
+            }),
+        }),
         command(
           "frontend-identity-release-json",
           "corepack",
-          ["npm", "run", "identity:check:release", "--", "--json"],
-          { cwd: frontend },
+          ["npm", "run", "--silent", "identity:check:release", "--", "--json"],
+          { cwd: frontend, jsonValidator: validateReleaseIdentityJson },
         ),
         { kind: "assert-file", id: "frontend-project-provenance", path: join(frontend, ".vireo", "project.json") },
         { kind: "assert-file", id: "full-stack-project-provenance", path: join(h2, ".vireo", "project.json") },
@@ -650,16 +794,18 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         command("capability-setup", "corepack", ["npm", "run", "setup"], { cwd: capability }),
         vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
         { kind: "record-generated-digest", id: "capability-first-digest", path: capability },
-        vireo(capability, "check", "--json"),
+        { ...vireo(capability, "check", "--json"), id: "capability-check-json", jsonValidator: value => validateJsonValue(value, "capability-check") },
         vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
         { kind: "assert-generated-digest", id: "capability-idempotent-digest", path: capability },
         { kind: "mutate-generated", id: "customize-generated-output", path: capability },
+        { kind: "record-project-tree", id: "capability-customized-snapshot", path: capability },
         {
           ...vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
           id: "customization-refusal",
           expectedExit: 1,
           assertOutput: /VIR-GEN-004|customized/u,
         },
+        { kind: "assert-project-tree", id: "capability-refusal-preserves-customization", path: capability },
       ];
     case "sample-removal-and-ejection":
       return [
@@ -669,8 +815,10 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         vireo(removal, "remove-example", "--dry-run"),
         vireo(removal, "remove-example", "--apply"),
         { kind: "assert-removal-receipt", id: "sample-removal-receipt", path: removal },
+        { kind: "record-project-tree", id: "sample-removal-first-apply-snapshot", path: removal },
         vireo(removal, "remove-example", "--status"),
         vireo(removal, "remove-example", "--apply"),
+        { kind: "assert-project-tree", id: "sample-removal-repeat-preserves-tree", path: removal },
         command("removal-verify", "corepack", ["npm", "run", "verify"], { cwd: removal, timeoutMs: 45 * 60_000 }),
         create(ejection, "full-stack", ["--java-package", "com.example.ejection", "--database", "h2"]),
         command("ejection-setup", "corepack", ["npm", "run", "setup"], { cwd: ejection }),
@@ -882,6 +1030,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
               path: directory,
             },
             {
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-status-json`,
               executable: "corepack",
               arguments: [
                 "npm",
@@ -895,6 +1044,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
                 "--project",
                 directory,
               ],
+              jsonValidator: value => validateJsonValue(value, "upgrade-status"),
             },
             {
               kind: "assert-file",
@@ -932,6 +1082,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
               ],
             },
             {
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-capability-check-json`,
               executable: "corepack",
               arguments: [
                 "npm",
@@ -945,6 +1096,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
                 "--project",
                 directory,
               ],
+              jsonValidator: value => validateJsonValue(value, "capability-check"),
             },
             { executable: "corepack", arguments: ["npm", "run", "verify"], cwd: directory, timeoutMs: 45 * 60_000 },
           ];
@@ -956,7 +1108,11 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         { kind: "exact-public-npm-consumer", id: "exact-public-npm-install", path: join(consumerRoot, "public-npm") },
         ...release.npm.map(({ name, version }) =>
           command(`npm-pack-${name}`, "corepack", ["npm", "pack", `${name}@${version}`, "--json"], {
-            assertOutput: /"filename"/u,
+            jsonValidator: value => {
+              if (!Array.isArray(value) || !value.some(entry => typeof entry?.filename === "string"))
+                throw new Error("npm pack JSON has no packed filename.");
+              return { type: "npm-pack", coordinate: `${name}@${version}` };
+            },
           }),
         ),
         {
@@ -1038,16 +1194,17 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
 export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dryRun } = {}) {
   const policy = readJson(policyPath);
   const release = publicReleaseIdentity(readJson(join(root, policy.releaseSource)));
-  const preflightProblems = validateReleasePreflightIdentity({
-    release,
-    requestedReleaseId:
-      releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID,
-    requestedSourceCommit:
-      sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
-    verifierSourceCommit:
-      sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
-  });
-  if (preflightProblems.length > 0) throw new Error(preflightProblems.join("\n"));
+  const requestedReleaseId =
+    releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID;
+  const verifierSourceCommit =
+    sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT;
+  const preflightIdentityProblems = () =>
+    validateReleasePreflightIdentity({
+      release,
+      requestedReleaseId,
+      requestedSourceCommit: verifierSourceCommit,
+      verifierSourceCommit,
+    });
   const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
   const problems = validatePolicy(policy, release);
   if (problems.length > 0)
@@ -1055,6 +1212,8 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
       `Anonymous consumer gauntlet policy failed:\n${problems.map(problem => `- ${problem}`).join("\n")}`,
     );
   if (check) {
+    const preflightProblems = preflightIdentityProblems();
+    if (preflightProblems.length > 0) throw new Error(preflightProblems.join("\n"));
     buildExecutionPlan({
       policy,
       release,
@@ -1095,11 +1254,8 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
         evidenceReferences: [],
       },
     ],
-    verifierSourceCommit:
-      sourceCommitArgument >= 0
-        ? process.argv[sourceCommitArgument + 1]
-        : (process.env.VIREO_GAUNTLET_SOURCE_COMMIT ?? "local-dry-run"),
-    requestedReleaseId: release.id,
+    verifierSourceCommit: verifierSourceCommit ?? "local-dry-run",
+    requestedReleaseId: requestedReleaseId ?? release.id,
     workflow: {
       repository: process.env.GITHUB_REPOSITORY ?? "local",
       run: process.env.GITHUB_RUN_ID ?? "local",
@@ -1108,13 +1264,22 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     },
     scenarios: [],
   };
-  if (!dry) {
-    const preflight = await verifyPublicReleasePreflight({ release });
-    evidence.releaseTagCommit = preflight.releaseTagCommit;
-    evidence.externalWarnings.push(...preflight.warnings);
-  }
   const checkpoint = () => writeEvidenceAtomically(join(evidenceDirectory, "evidence.json"), evidence);
   try {
+    try {
+      const preflightProblems = preflightIdentityProblems();
+      if (preflightProblems.length > 0) throw new Error(preflightProblems.join("\n"));
+      if (!dry) {
+        const preflight = await verifyPublicReleasePreflight({ release });
+        evidence.releaseTagCommit = preflight.releaseTagCommit;
+        evidence.externalWarnings.push(...preflight.warnings);
+      }
+    } catch (error) {
+      evidence.status = "failed";
+      evidence.findings.push(preflightFailureFinding());
+      checkpoint();
+      throw error;
+    }
     mkdirSync(join(runRoot, "consumer"), { recursive: true });
     for (const scenario of policy.scenarios) {
       const result = { id: scenario.id, recipe: scenario.recipe, status: dry ? "planned" : "running", commands: [] };
