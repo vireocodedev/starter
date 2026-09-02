@@ -52,7 +52,7 @@ if (existsSync(outputRoot)) throw new Error(`Public release evidence already exi
 const policy = JSON.parse(
   readFileSync(join(repositoryRoot, "contracts", "public-release-attestation-policy.json"), "utf8"),
 );
-if (policy.schemaVersion !== 2) throw new Error(`Unsupported attestation policy schema ${policy.schemaVersion}`);
+if (policy.schemaVersion !== 3) throw new Error(`Unsupported attestation policy schema ${policy.schemaVersion}`);
 
 const attempts = positiveInteger(process.env.VIREO_PUBLIC_EVIDENCE_ATTEMPTS, 20);
 const intervalMs = positiveInteger(process.env.VIREO_PUBLIC_EVIDENCE_INTERVAL_MS, 15_000);
@@ -299,7 +299,9 @@ for (const mapping of sboms)
   );
 
 const manifest = {
-  schemaVersion: policy.schemaVersion,
+  // Release evidence is a separately versioned, persisted public-artifact format.
+  // Do not couple it to the attester-policy schema.
+  schemaVersion: 2,
   evidenceClass: "public-registry-subjects-awaiting-signed-sbom-attestation",
   recordedAt: new Date().toISOString(),
   source: {

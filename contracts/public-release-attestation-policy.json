@@ -1,7 +1,18 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "evidenceClass": "signed-sbom-attestation",
   "repository": "vireocodedev/vireo",
+  "trust": {
+    "repositoryId": "1304974749",
+    "workflowIdentity": "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main",
+    "workflowRef": "refs/heads/main",
+    "workflowName": "Attest public release SBOMs",
+    "oidcIssuer": "https://token.actions.githubusercontent.com",
+    "allowedTriggers": ["workflow_dispatch", "workflow_run"],
+    "runnerEnvironment": "github-hosted",
+    "sourceRepositoryVisibility": "public",
+    "minimumTrustedWorkflowCommit": "5a9a9d12bf6a16b55c406427c035af6305fab4db"
+  },
   "retentionDays": 90,
   "npm": {
     "registry": "https://registry.npmjs.org",

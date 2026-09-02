@@ -75,6 +75,13 @@ test("deterministic plan gives a fake executor every required recipe and refusal
       .find(scenario => scenario.id === "cli-adversity")
       .operations.some(operation => operation.id === "template-download-retry"),
   );
+  const dryRun = plan
+    .find(scenario => scenario.id === "cli-adversity")
+    .operations.find(operation => operation.id === "cli-json-dry-run");
+  assert.equal(dryRun.arguments.filter(argument => argument === "--profile").length, 1);
+  assert.equal(dryRun.arguments[dryRun.arguments.indexOf("--profile") + 1], "frontend");
+  assert.ok(dryRun.arguments.includes(`--package=create-vireo@${release.createVireoVersion}`));
+  for (const flag of ["--dry-run", "--json", "--yes", "--no-git"]) assert.ok(dryRun.arguments.includes(flag));
   const operations = plan.flatMap(scenario => scenario.operations);
   const registryOperations = plan
     .find(scenario => scenario.id === "public-artifacts")
@@ -179,6 +186,14 @@ test("JSON command assertions accept only bounded exact ready reports", () => {
         { directory: dryRunDirectory, profile: "frontend", release },
       ),
     /full-stack-only/u,
+  );
+  assert.throws(
+    () =>
+      validateCreateDryRunJson(
+        { ...dryRun, profile: "full-stack", javaPackage: "com.example.dryrun", database: "h2" },
+        { directory: dryRunDirectory, profile: "frontend", release },
+      ),
+    /exact public frontend identity/u,
   );
   const doctor = {
     schemaVersion: 1,
