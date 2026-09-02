@@ -31,6 +31,19 @@ const observedDigests = new Map();
 const managedOriginals = new Map();
 const projectTrees = new Map();
 
+export function validateManagedProvenance({ root, manifest }) {
+  const problems = [];
+  if (manifest?.schemaVersion !== 1 || !/^[0-9a-f]{40}$/u.test(manifest.templateCommit ?? "")) problems.push("invalid managed manifest identity");
+  const paths = new Set();
+  for (const file of manifest?.files ?? []) {
+    if (typeof file?.path !== "string" || file.path.startsWith("/") || file.path.split("/").includes("..") || paths.has(file.path)) problems.push("unsafe or duplicate managed path");
+    paths.add(file?.path);
+    if (!/^[0-9a-f]{64}$/u.test(file?.sha256 ?? "")) problems.push(`invalid managed digest ${file?.path}`);
+    else if (existsSync(join(root, file.path)) && createHash("sha256").update(readFileSync(join(root, file.path))).digest("hex") !== file.sha256) problems.push(`managed digest drift ${file.path}`);
+  }
+  return problems;
+}
+
 export function validatePolicy(policy, release) {
   const problems = [];
   if (policy.schemaVersion !== 1 || policy.contractId !== "vireo-anonymous-consumer-zero-to-production") {
@@ -256,9 +269,13 @@ async function executeOperation(operation, { environment, runRoot }) {
     if (project.createdBy !== `create-vireo@${operation.release.createVireoVersion}` || project.templateCommit !== operation.release.template.commit || project.templateVersion !== operation.release.template.version || project.templateTag !== operation.release.template.tag || project.profile !== operation.profile)
       throw new Error("Upgraded consumer target identity drifted.");
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
+    const managedProblems = validateManagedProvenance({ root: operation.path, manifest: managed });
+    if (managedProblems.length > 0) throw new Error(managedProblems.join("\n"));
     for (const file of managed.files ?? []) if (!existsSync(join(operation.path, file.path))) throw new Error(`Managed upgraded file is missing: ${file.path}`);
+    if ((operation.profile === "full-stack" && project.database !== "h2") || (operation.profile === "frontend" && project.database !== undefined)) throw new Error("Upgraded project profile/database drifted.");
     const packageRoot = operation.profile === "full-stack" ? join(operation.path, "frontend") : operation.path;
     assertAnonymousVireoLock({ consumerRoot: packageRoot, release: operation.release, registry: operation.registry });
+    assertAnonymousInstallation({ consumerRoot: packageRoot, packageNames: operation.release.npm.map(entry => entry.name), registry: operation.registry });
     if (operation.profile === "full-stack") {
       const properties = readFileSync(join(operation.path, "gradle.properties"), "utf8");
       if (!properties.includes(`starterVersion=${operation.release.maven.version}`)) throw new Error("Upgraded JVM starter version drifted.");

@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { publicReleaseIdentity, readJson } from "./lib/anonymous-consumer-environment.mjs";
-import { buildExecutionPlan, executePlanForTest, validatePolicy } from "./anonymous-consumer-gauntlet.mjs";
+import { buildExecutionPlan, executePlanForTest, validateManagedProvenance, validatePolicy } from "./anonymous-consumer-gauntlet.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = readJson(join(root, "contracts", "anonymous-consumer-gauntlet-policy.json"));
@@ -40,6 +42,13 @@ test("fake executor preserves planned, expected-refusal, timeout, and failure ev
   const failed = await executePlanForTest(plan, async operation => operation.id === "pass" ? { exitCode: 0, timedOut: true, signal: "SIGTERM" } : { exitCode: 1 });
   assert.equal(failed.status, "failed");
   assert.equal(failed.scenarios[0].commands[0].status, "failed");
+});
+
+test("managed provenance rejects traversal and digest drift", () => {
+  const directory = mkdtempSync(join(tmpdir(), "vireo-managed-"));
+  writeFileSync(join(directory, "file.txt"), "actual");
+  const manifest = { schemaVersion: 1, templateCommit: "a".repeat(40), files: [{ path: "../escape", sha256: "b".repeat(64) }, { path: "file.txt", sha256: "b".repeat(64) }] };
+  assert.match(validateManagedProvenance({ root: directory, manifest }).join("\n"), /unsafe|drift/u);
 });
 
 test("gauntlet policy wiring remains public and scheduled", () => {
