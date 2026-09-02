@@ -1064,34 +1064,54 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
   }
 });
 
-test("frontend performance projection fails closed for missing or reshaped Template evidence", async () => {
-  for (const [name, mutate] of [
-    ["missing", async template => rm(join(template, "frontend/scripts/lighthouse-budget.mjs"))],
-    [
-      "reshaped",
-      async template =>
-        writeFile(
-          join(template, "frontend/scripts/lighthouse-budget.mjs"),
-          'const a = path.resolve(frontendRoot, "../.performance-evidence");\nconst b = path.resolve(frontendRoot, "../.performance-evidence");\n',
-        ),
-    ],
-  ]) {
-    const root = await mkdtemp(join(tmpdir(), `create-vireo-frontend-performance-${name}-`));
-    try {
-      const template = await fixture(root);
-      await mutate(template);
-      await assert.rejects(
-        createVireo({
-          directory: join(root, "operations-ui"),
-          profile: "frontend",
-          git: false,
-          templateDirectory: template,
-        }),
-        /Pinned Template Lighthouse budget/u,
-      );
-    } finally {
-      await rm(root, { recursive: true, force: true });
+test("frontend performance projection materializes immutable candidate bytes when an adjacent Template omits them", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-frontend-performance-baseline-"));
+  try {
+    const template = await fixture(root);
+    const templatePackagePath = join(template, "frontend/package.json");
+    const templatePackage = JSON.parse(await readFile(templatePackagePath, "utf8"));
+    delete templatePackage.scripts["performance:policy:test"];
+    delete templatePackage.scripts["performance:audit"];
+    await writeFile(templatePackagePath, `${JSON.stringify(templatePackage, null, 2)}\n`);
+    for (const path of [
+      "lighthouse-audit-support.mjs",
+      "lighthouse-audit-support.test.mjs",
+      "lighthouse-budget.mjs",
+      "lighthouse-policy.mjs",
+      "lighthouse-policy.test.mjs",
+    ]) {
+      await rm(join(template, "frontend/scripts", path));
     }
+    const target = join(root, "operations-ui");
+    await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
+    const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
+    for (const baseline of policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend) {
+      assert.equal(await readFile(join(target, baseline.path), "utf8"), baseline.targetContent, baseline.path);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("frontend performance projection refuses incompatible Template commands", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-frontend-performance-command-"));
+  try {
+    const template = await fixture(root);
+    const path = join(template, "frontend/package.json");
+    const manifest = JSON.parse(await readFile(path, "utf8"));
+    manifest.scripts["performance:policy:test"] = "node unexpected.mjs";
+    await writeFile(path, `${JSON.stringify(manifest, null, 2)}\n`);
+    await assert.rejects(
+      createVireo({
+        directory: join(root, "operations-ui"),
+        profile: "frontend",
+        git: false,
+        templateDirectory: template,
+      }),
+      /incompatible performance:policy:test command/u,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });
 

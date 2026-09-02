@@ -12,7 +12,7 @@ import {
   validateApplicationProjectionContract,
 } from "./application-projection-contract.mjs";
 import { sha256 } from "./entity-generator.js";
-import { currentVireoReleaseRequirements } from "./project-upgrade.js";
+import { currentFrontendProjectionRequirements, currentVireoReleaseRequirements } from "./project-upgrade.js";
 
 export {
   checkGeneratedEntities,
@@ -826,6 +826,12 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       throw new Error(`Pinned Template frontend package.json must define ${name}.`);
     return script;
   };
+  const performance = await currentFrontendProjectionRequirements();
+  for (const [name, expected] of Object.entries(performance.scripts)) {
+    const templateValue = packageJson.scripts?.[name];
+    if (templateValue !== undefined && templateValue !== expected)
+      throw new Error(`Pinned Template frontend package.json defines an incompatible ${name} command.`);
+  }
   packageJson.scripts = {
     setup: "corepack npm ci",
     doctor: "node scripts/vireo-frontend-doctor.mjs",
@@ -844,8 +850,8 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
     "starter:boundary:check": packageJson.scripts["starter:boundary:check"],
     "architecture:check": packageJson.scripts["architecture:check"],
     "bundle:check": packageJson.scripts["bundle:check"],
-    "performance:policy:test": requiredScript("performance:policy:test"),
-    "performance:audit": requiredScript("performance:audit"),
+    "performance:policy:test": performance.scripts["performance:policy:test"],
+    "performance:audit": performance.scripts["performance:audit"],
     "pwa:check:source": requiredScript("pwa:check:source"),
     "pwa:check:built": requiredScript("pwa:check:built"),
     "pretest:pwa": requiredScript("pretest:pwa"),
@@ -860,19 +866,13 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
   };
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 
-  const lighthouseBudgetPath = join(staging, "scripts", "lighthouse-budget.mjs");
-  const lighthouseBudget = await readFile(lighthouseBudgetPath, "utf8").catch(error => {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT")
-      throw new Error("Pinned Template Lighthouse budget is missing.");
-    throw error;
-  });
-  const templateEvidenceDirectory = 'path.resolve(frontendRoot, "../.performance-evidence")';
-  if (lighthouseBudget.split(templateEvidenceDirectory).length !== 2)
-    throw new Error("Pinned Template Lighthouse budget must declare exactly one frontend evidence directory.");
-  await writeFile(
-    lighthouseBudgetPath,
-    lighthouseBudget.replace(templateEvidenceDirectory, 'path.resolve(frontendRoot, ".performance-evidence")'),
-  );
+  for (const file of performance.files) {
+    if (typeof file.contents !== "string")
+      throw new Error(`Active frontend performance baseline has no target bytes: ${file.path}`);
+    const path = join(staging, file.path);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, file.contents);
+  }
 
   const lockPath = join(staging, "package-lock.json");
   const lock = JSON.parse(await readFile(lockPath, "utf8")) as {
@@ -912,6 +912,7 @@ storybook-static/
   await chmod(join(staging, "scripts", "verify-frontend-profile.sh"), 0o755);
   const doctorPath = join(staging, "scripts", "vireo-frontend-doctor.mjs");
   await writeFile(doctorPath, await renderFrontendDoctorScript(doctorPath));
+  return performance.files.map(file => file.path);
 }
 
 async function pinGeneratedProjectCli(staging: string) {
@@ -1371,8 +1372,9 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
       profile === "frontend" ? "." : "frontend",
     );
     await renameJavaPackage(staging, javaPackage);
-    if (profile === "frontend") await projectFrontendTemplate(staging, projectName, productName);
-    else {
+    const frontendPerformancePaths =
+      profile === "frontend" ? await projectFrontendTemplate(staging, projectName, productName) : [];
+    if (profile !== "frontend") {
       await pinGeneratedProjectCli(staging);
       await normalizeGeneratedStarterJvmVersion(staging);
       await normalizeGeneratedAppToolchainPolicy(staging);
@@ -1391,6 +1393,7 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     const managedPaths = [
       ...new Set([
         ...projectedManagedPaths,
+        ...frontendPerformancePaths,
         ...(profile === "full-stack"
           ? ["package.json", "frontend/package.json", "gradle.properties"]
           : ["package.json"]),

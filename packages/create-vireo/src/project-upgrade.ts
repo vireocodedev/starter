@@ -381,6 +381,28 @@ export async function currentVireoReleaseRequirements(): Promise<ReleaseRequirem
     managedFrontendScripts: release.managedFrontendScripts,
   };
 }
+/** @internal Managed frontend projection bytes for the active public/candidate release. */
+export async function currentFrontendProjectionRequirements() {
+  const policy = await readPolicy();
+  const graph = policy.releaseGraph;
+  const targetRelease = graph.candidateRelease ?? graph.publicRelease;
+  const target = graph.releases.find(release => release.release === targetRelease);
+  const source = graph.releases.find(release => release.release === graph.previousRelease);
+  if (!source || !target)
+    throw new VireoUpgradeError("VIR-UPG-001", "Frontend projection requirements have no adjacent release nodes.");
+  const baselines = edgeBaselines(policy, source.release, target.release, "frontend").filter(baseline =>
+    baseline.path.startsWith("scripts/lighthouse-"),
+  );
+  if (targetRelease === "0.8.4" && baselines.length !== 5)
+    throw new VireoUpgradeError(
+      "VIR-UPG-001",
+      "Frontend performance projection must declare five immutable managed baselines.",
+    );
+  return {
+    scripts: managedScriptsForProfile(target, true),
+    files: baselines.map(baseline => ({ path: baseline.path, contents: resolveBaselineTargetContent(baseline) })),
+  };
+}
 function requirementsMatch(
   manifest: PackageManifest,
   frontend: PackageManifest,
