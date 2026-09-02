@@ -244,7 +244,9 @@ export function validateReleaseIdentityJson(value) {
 }
 
 export function validateRegistryMetadataJson(value, { name, version }) {
-  const metadata = exactObject(value, "npm registry metadata");
+  if (Array.isArray(value) && value.length !== 1)
+    throw new Error("npm registry metadata must contain exactly one object.");
+  const metadata = exactObject(Array.isArray(value) ? value[0] : value, "npm registry metadata");
   if (metadata.name !== name || metadata.version !== version)
     throw new Error("npm registry JSON does not match the exact public package coordinate.");
   return { type: "registry-metadata", coordinate: `${name}@${version}` };
@@ -608,7 +610,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     case "public-artifacts":
       return [
         ...release.npm.map(({ name, version }) =>
-          command(`registry-${name}`, "corepack", ["npm", "view", `${name}@${version}`, "--json"], {
+          command(`registry-${name}`, "corepack", ["npm", "view", `${name}@${version}`, "name", "version", "--json"], {
             jsonValidator: value => validateRegistryMetadataJson(value, { name, version }),
           }),
         ),

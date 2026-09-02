@@ -17,6 +17,7 @@ import {
   validateManagedProvenance,
   validatePolicy,
   validateReleaseIdentityJson,
+  validateRegistryMetadataJson,
 } from "./anonymous-consumer-gauntlet.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -75,6 +76,14 @@ test("deterministic plan gives a fake executor every required recipe and refusal
       .operations.some(operation => operation.id === "template-download-retry"),
   );
   const operations = plan.flatMap(scenario => scenario.operations);
+  const registryOperations = plan
+    .find(scenario => scenario.id === "public-artifacts")
+    .operations.filter(operation => operation.id.startsWith("registry-"));
+  assert.equal(registryOperations.length, release.npm.length);
+  assert.deepEqual(
+    registryOperations.map(operation => operation.arguments),
+    release.npm.map(({ name, version }) => ["npm", "view", `${name}@${version}`, "name", "version", "--json"]),
+  );
   assert.equal(operations.filter(operation => operation.id === "postgresql-production-compose").length, 1);
   assert.equal(
     operations.filter(operation =>
@@ -199,6 +208,28 @@ test("JSON command assertions accept only bounded exact ready reports", () => {
   );
   assert.equal(validateReleaseIdentityJson({ phase: "release", ok: true, problems: [] }).type, "release-identity");
   assert.throws(() => validateReleaseIdentityJson({ phase: "creation", ok: true, problems: [] }), /exact ready/u);
+});
+
+test("npm registry metadata accepts only an exact direct object or singleton result", () => {
+  const expected = { name: "@vireocodedev/ui", version: "0.3.1" };
+  assert.deepEqual(validateRegistryMetadataJson(expected, expected), {
+    type: "registry-metadata",
+    coordinate: "@vireocodedev/ui@0.3.1",
+  });
+  assert.deepEqual(validateRegistryMetadataJson([expected], expected), {
+    type: "registry-metadata",
+    coordinate: "@vireocodedev/ui@0.3.1",
+  });
+  for (const malformed of [[], [expected, expected], [[expected]], [null], null, "metadata", 0, false]) {
+    assert.throws(() => validateRegistryMetadataJson(malformed, expected));
+  }
+  assert.throws(() => validateRegistryMetadataJson({ name: expected.name }, expected), /exact public/u);
+  assert.throws(() => validateRegistryMetadataJson({ version: expected.version }, expected), /exact public/u);
+  assert.throws(() => validateRegistryMetadataJson({ ...expected, version: "0.3.2" }, expected), /exact public/u);
+  assert.throws(
+    () => validateRegistryMetadataJson([{ ...expected, name: "@vireocodedev/query" }], expected),
+    /exact public/u,
+  );
 });
 
 test("preflight failures have a stable machine-actionable finding", () => {
