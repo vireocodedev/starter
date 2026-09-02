@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -9,7 +10,7 @@ const modules = ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(version ?? "")) throw new Error("Expected exact Maven version.");
 const root = mkdtempSync(join(tmpdir(), "vireo-public-signatures-"));
 try {
-  execFileSync("gpg", ["--homedir", root, "--keyserver", "hkps://keyserver.ubuntu.com", "--recv-keys", fingerprint], { stdio: "ignore" });
+  execFileSync("gpg", ["--homedir", root, "--import", join(import.meta.dirname, "..", "contracts", "vireo-release-signing-key.asc")], { stdio: "ignore" });
   const listed = execFileSync("gpg", ["--homedir", root, "--with-colons", "--fingerprint", fingerprint], { encoding: "utf8" });
   if (!listed.includes(`fpr:::::::::${fingerprint}:`)) throw new Error("Public keyserver returned an unexpected Vireo signer.");
   const verified = [];
@@ -20,10 +21,13 @@ try {
     const signature = `${artifact}.asc`;
     const response = await fetch(url); if (!response.ok) throw new Error(`Missing public Maven subject ${subject}.`);
     writeFileSync(artifact, Buffer.from(await response.arrayBuffer()));
+    const checksum = await fetch(`${url}.sha256`); if (!checksum.ok) throw new Error(`Missing checksum ${subject}.sha256.`);
+    const expected = (await checksum.text()).trim().split(/\s+/u)[0];
+    if (createHash("sha256").update(readFileSync(artifact)).digest("hex") !== expected) throw new Error(`Checksum mismatch for ${subject}.`);
     const asc = await fetch(`${url}.asc`); if (!asc.ok) throw new Error(`Missing detached signature ${subject}.asc.`);
     writeFileSync(signature, Buffer.from(await asc.arrayBuffer()));
     execFileSync("gpg", ["--homedir", root, "--batch", "--verify", signature, artifact], { stdio: "ignore" });
-    verified.push(subject);
+    verified.push({ subject, sha256: expected });
   }
-  writeFileSync(output, `${JSON.stringify({ version, fingerprint, keyserver: "hkps://keyserver.ubuntu.com", verified }, null, 2)}\n`);
+  writeFileSync(output, `${JSON.stringify({ version, fingerprint, keyAsset: "contracts/vireo-release-signing-key.asc", verified }, null, 2)}\n`);
 } finally { rmSync(root, { recursive: true, force: true }); }
