@@ -647,14 +647,14 @@ test("0.8.4 to 0.8.5 transactionally records the pristine Overview sample before
         await assert.rejects(readFile(join(root, "frontend/tests/e2e/overview.spec.ts")), /ENOENT/u);
         assert.equal(await readFile(join(root, "frontend/tests/e2e/login.spec.ts"), "utf8"), "export {};\n");
       }
+      const receiptAfterRemoval = await readFile(upgradeReceiptPath, "utf8");
+      assert.equal(receiptAfterRemoval, receiptBeforeRepeat, "sample removal does not rewrite prior upgrade evidence");
       const repeated = await upgradeVireoProjectForTest(
         { projectDirectory: root, targetRelease: "0.8.5" },
         finalizedPolicy,
       );
-      assert.equal(
-        repeated.files.some(file => file.path === ".vireo/example-manifest.json"),
-        false,
-      );
+      assert.ok(repeated.files.every(file => file.status === "unchanged"));
+      assert.equal(await readFile(upgradeReceiptPath, "utf8"), receiptAfterRemoval);
     } finally {
       await rm(root, { recursive: true, force: true });
     }

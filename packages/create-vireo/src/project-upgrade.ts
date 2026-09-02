@@ -664,6 +664,49 @@ function validateRemovalReceipt(value: unknown, templateCommit: string): asserts
     );
   }
 }
+function validateExistingUpgradeReceipt(
+  contents: string,
+  source: ReleaseNode,
+  target: ReleaseNode,
+  expectedManagedSurfaces: string[],
+  lockfileRefresh: "required" | "not-required",
+  actions: VireoUpgradeManualAction[],
+) {
+  let receipt: Record<string, unknown>;
+  try {
+    receipt = JSON.parse(contents) as Record<string, unknown>;
+  } catch (error) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `Existing upgrade receipt is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  const actualSurfaces = receipt.managedSurfaces;
+  if (
+    receipt.schemaVersion !== 2 ||
+    receipt.from !== source.release ||
+    receipt.to !== target.release ||
+    receipt.sourceTemplateCommit !== source.templateCommit ||
+    receipt.targetTemplateCommit !== target.templateCommit ||
+    receipt.lockfileRefresh !== lockfileRefresh ||
+    !Array.isArray(actualSurfaces) ||
+    actualSurfaces.some(surface => typeof surface !== "string") ||
+    JSON.stringify(receipt.applicationOwnedActions) !== JSON.stringify(actions)
+  ) {
+    throw new VireoUpgradeError("VIR-UPG-003", "Existing upgrade receipt is invalid for this managed release edge.");
+  }
+  const isExampleSurface = (surface: string) =>
+    surface === ".vireo/example-manifest.json" || surface === ".vireo/remove-example.json";
+  const comparable = (surfaces: string[]) =>
+    surfaces.map(surface =>
+      isOverviewManifestMigration(source, target) && isExampleSurface(surface) ? "<example-state>" : surface,
+    );
+  if (JSON.stringify(comparable(actualSurfaces)) !== JSON.stringify(comparable(expectedManagedSurfaces)))
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Existing upgrade receipt has incompatible managed surfaces for this release edge.",
+    );
+}
 function isOverviewManifestMigration(source: ReleaseNode, target: ReleaseNode) {
   return source.release === "0.8.4" && target.release === "0.8.5";
 }
@@ -1173,7 +1216,7 @@ async function upgradeProjectWithPolicy(
   ];
   const actions = profileActions(recordedEdge?.applicationOwnedActions ?? [], metadata.profile),
     recordPath = join(projectDirectory, ".vireo", `upgrade-${recordSource.release}-to-${target.release}.json`);
-  const recordContents = await format(
+  const renderedRecordContents = await format(
     JSON.stringify({
       schemaVersion: 2,
       from: recordSource.release,
@@ -1186,6 +1229,19 @@ async function upgradeProjectWithPolicy(
     }),
     { ...(await resolveConfig(recordPath)), filepath: recordPath },
   );
+  const existingRecordContents = await optionalText(recordPath);
+  let recordContents = renderedRecordContents;
+  if (alreadyTarget && existingRecordContents !== undefined) {
+    validateExistingUpgradeReceipt(
+      existingRecordContents,
+      recordSource,
+      target,
+      receiptManagedSurfaces,
+      recordedEdge?.lockfileRefresh ?? "required",
+      actions,
+    );
+    recordContents = existingRecordContents;
+  }
   const sourceManaged =
     existingManaged ?? (await managedManifest(projectDirectory, source.templateCommit, frontendOnly));
   const baselineByPath = new Map(baselineFiles.map(file => [file.baseline.path, file.baseline]));
