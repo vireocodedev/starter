@@ -104,6 +104,26 @@ test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", 
   );
 });
 
+test("0.8.6 to 0.8.7 retains byte-identical Storybook optimizer provenance for both profiles", () => {
+  const policy = JSON.parse(
+    readFileSync(new URL("../../packages/create-vireo/schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+  );
+  const edge = "0.8.6->0.8.7";
+  assert.doesNotThrow(() => assertStorybookBaselineContinuity(policy.releaseGraph, edge));
+
+  for (const profile of ["full-stack", "frontend"]) {
+    const previous = policy.releaseGraph.baselines["0.8.4->0.8.6"][profile].find(file =>
+      file.path.endsWith("vitest.storybook.config.ts"),
+    );
+    const current = policy.releaseGraph.baselines[edge][profile].find(file =>
+      file.path.endsWith("vitest.storybook.config.ts"),
+    );
+    assert.equal(current.sourceSha256, previous.targetSha256, `${profile} starts at the exact prior projected bytes`);
+    assert.equal(current.sourceContent, current.targetContent, `${profile} preserves the optimizer bytes exactly`);
+    assert.equal(current.sourceSha256, current.targetSha256, `${profile} preserves the optimizer digest exactly`);
+  }
+});
+
 test("Storybook provenance continuity ignores empty, unrelated, and first-add edges", () => {
   const edge = "0.9.0->0.9.1";
   const graphWith = files => ({

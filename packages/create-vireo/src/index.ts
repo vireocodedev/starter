@@ -833,8 +833,8 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
   const performance = await currentFrontendProjectionRequirements();
   for (const [name, expected] of Object.entries(performance.scripts)) {
     const templateValue = packageJson.scripts?.[name];
-    const sourceValue = performance.sourceScripts[name];
-    if (templateValue !== undefined && templateValue !== expected && templateValue !== sourceValue)
+    const templateSourceValue = performance.templateSourceScripts[name];
+    if (templateValue !== undefined && templateValue !== expected && templateValue !== templateSourceValue)
       throw new Error(`Pinned Template frontend package.json defines an incompatible ${name} command.`);
   }
   packageJson.scripts = {
@@ -926,8 +926,8 @@ async function applyFullStackPerformanceProjection(staging: string) {
   if (!packageJson.scripts) throw new Error("Pinned Template frontend/package.json does not declare scripts.");
   for (const [name, expected] of Object.entries(performance.scripts)) {
     const templateValue = packageJson.scripts[name];
-    const sourceValue = performance.sourceScripts[name];
-    if (templateValue !== undefined && templateValue !== expected && templateValue !== sourceValue)
+    const templateSourceValue = performance.templateSourceScripts[name];
+    if (templateValue !== undefined && templateValue !== expected && templateValue !== templateSourceValue)
       throw new Error(`Pinned Template frontend/package.json defines an incompatible ${name} command.`);
     packageJson.scripts[name] = expected;
   }

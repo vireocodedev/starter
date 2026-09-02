@@ -21,6 +21,7 @@ node --test \
   scripts/release-lifecycle-policy.test.mjs \
   scripts/project-upgrade-publication-state.test.mjs \
   scripts/packed-project-upgrade-baselines.test.mjs \
+  scripts/packed-adjacent-frontend-source-manifest.test.mjs \
   scripts/lib/project-upgrade-baseline-contract.test.mjs \
   scripts/lib/verification-evidence-source.test.mjs \
   scripts/lib/anonymous-public-evidence.test.mjs \

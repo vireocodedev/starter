@@ -1126,6 +1126,22 @@ test("frontend performance projection materializes immutable candidate bytes whe
   }
 });
 
+test("creation normalizes the Template-only 0.8.7 architecture command for both profiles", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-template-source-architecture-"));
+  try {
+    const template = await fixture(root);
+    for (const profile of ["full-stack", "frontend"]) {
+      const target = join(root, profile);
+      await createVireo({ directory: target, profile, git: false, templateDirectory: template });
+      const manifestPath = join(target, profile === "frontend" ? "package.json" : "frontend/package.json");
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+      assert.equal(manifest.scripts["architecture:check"], immutable086ArchitectureCheck);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("projection compatibility composes every immutable Storybook baseline from the pinned public Template", async () => {
   const root = await mkdtemp(join(tmpdir(), "create-vireo-storybook-baseline-chain-"));
   try {
