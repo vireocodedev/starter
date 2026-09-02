@@ -244,9 +244,7 @@ export {};
         "starter:boundary:check": "node scripts/boundary.mjs",
         "architecture:check": "node scripts/architecture.mjs",
         "bundle:check": "node scripts/bundle.mjs",
-        "performance:policy:test":
-          "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
-        "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
+        "performance:audit": "node scripts/lighthouse-budget.mjs",
         "pwa:check:source": "node scripts/check-pwa-contract.mjs --source --require-nginx",
         "pwa:check:built": "node scripts/check-pwa-contract.mjs --built",
         "pretest:pwa": "node scripts/prepare-pwa-update-fixture.mjs",
@@ -267,6 +265,13 @@ export {};
     }),
   );
   await writeFile(join(template, "frontend/vite.config.ts"), 'import { createPwaManifest } from "./pwa-policy.mjs";\n');
+  const candidatePolicy = JSON.parse(
+    await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+  );
+  const storybookBaseline = candidatePolicy.releaseGraph.baselines["0.8.3->0.8.4"]["full-stack"].find(
+    file => file.path === "frontend/vitest.storybook.config.ts",
+  );
+  await writeFile(join(template, "frontend/vitest.storybook.config.ts"), storybookBaseline.sourceContent);
   await writeFile(
     join(template, "frontend/pwa-policy.mjs"),
     `export const APP_IDENTITY = Object.freeze({
@@ -453,6 +458,10 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.equal(
       frontendPackage.scripts["performance:audit"],
       "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
+    );
+    assert.match(
+      await readFile(join(target, "frontend/vitest.storybook.config.ts"), "utf8"),
+      /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
     );
     for (const path of [
       "frontend/scripts/lighthouse-audit-support.mjs",
@@ -923,6 +932,10 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.match(
       await readFile(join(target, "scripts/lighthouse-budget.mjs"), "utf8"),
       /path\.resolve\(frontendRoot, "\.performance-evidence"\)/u,
+    );
+    assert.match(
+      await readFile(join(target, "vitest.storybook.config.ts"), "utf8"),
+      /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
     );
     for (const path of [
       "scripts/lighthouse-audit-support.mjs",

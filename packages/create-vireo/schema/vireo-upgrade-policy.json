@@ -192,6 +192,14 @@
           "@vireocodedev/query": "^0.2.2",
           "@vireocodedev/shell": "^0.2.2",
           "@vireocodedev/ui": "^0.3.1"
+        },
+        "projectionSourceFrontendScripts": {
+          "full-stack": {
+            "performance:audit": "node scripts/lighthouse-budget.mjs"
+          },
+          "frontend": {
+            "performance:audit": "node scripts/lighthouse-budget.mjs"
+          }
         }
       }
     ],
@@ -208,7 +216,9 @@
               "frontend/src/app/ui/localization/resources/app.hr.ts"
             ],
             "requirement": "Update AppShellLayout for the 0.3 navigation contract, add localized navigation.PRIMARY values in en and hr, pass the translated value as the navigationLabel prop, and replace placeholder destinations with real href values while preserving client-side navigation behavior.",
-            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+            "verificationCommands": [
+              "cd frontend && corepack npm run typecheck"
+            ]
           },
           {
             "id": "responsive-table-live-announcements",
@@ -218,13 +228,20 @@
               "frontend/src/pages/**/localization/resources/*.hr.ts"
             ],
             "requirement": "Update every AppPageItems use for the 0.3 responsive-table contract and add localized loadingNextPage and loadedNextPage messages in en and hr that announce page-load state without relying on visual table changes.",
-            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+            "verificationCommands": [
+              "cd frontend && corepack npm run typecheck"
+            ]
           },
           {
             "id": "accessible-name-contracts",
-            "paths": ["frontend/src/**/*.tsx", "frontend/src/**/*.ts"],
+            "paths": [
+              "frontend/src/**/*.tsx",
+              "frontend/src/**/*.ts"
+            ],
             "requirement": "Resolve compiler-reported overlay and frame call sites with localized aria-label values or aria-labelledby connections to visible localized text; library default names are not sufficient for dialogs, drawers, frames, and overlays.",
-            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+            "verificationCommands": [
+              "cd frontend && corepack npm run typecheck"
+            ]
           },
           {
             "id": "surface-palette-ownership",
@@ -235,11 +252,18 @@
               "frontend/src/app/ui/theme/config/theme.components.ts"
             ],
             "requirement": "Remove conflicting application Palette.surface definitions, use the 0.3 appSurface pattern for canvas and overlay surfaces, and review default, elevated, and overlay states in both colour schemes for contrast, separators, focus rings, and scrims.",
-            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
+            "verificationCommands": [
+              "cd frontend && corepack npm run typecheck"
+            ]
           },
           {
             "id": "full-frontend-verification",
-            "paths": ["frontend/package.json", "frontend/package-lock.json", "scripts/setup.mjs", "scripts/verify.sh"],
+            "paths": [
+              "frontend/package.json",
+              "frontend/package-lock.json",
+              "scripts/setup.mjs",
+              "scripts/verify.sh"
+            ],
             "requirement": "Refresh the frontend lockfile after the dependency updates, run frontend typecheck and the complete application verification suite, and resolve the pending contract errors before treating the upgrade as complete.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -256,7 +280,12 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-review",
-            "paths": ["frontend/src/", "src/", "deploy/", ".github/"],
+            "paths": [
+              "frontend/src/",
+              "src/",
+              "deploy/",
+              ".github/"
+            ],
             "requirement": "Review the upstream Template release notes and selectively port application-owned, deployment, and generated-capability changes. Vireo updates only the explicitly listed managed transforms and never rewrites application-owned code.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -272,7 +301,13 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-review",
-            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/"],
+            "paths": [
+              "AGENTS.md",
+              "frontend/src/",
+              "src/",
+              "deploy/",
+              ".github/"
+            ],
             "requirement": "Review the upstream Template 0.8.0 release notes and selectively port the application-owned root AGENTS.md, source, deployment, and generated-capability changes. Vireo adds only the declared managed application skills and never rewrites application-owned source or repository review policy.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -288,7 +323,15 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-0.8.1-review",
-            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/", "docs/", "scripts/"],
+            "paths": [
+              "AGENTS.md",
+              "frontend/src/",
+              "src/",
+              "deploy/",
+              ".github/",
+              "docs/",
+              "scripts/"
+            ],
             "requirement": "Review the upstream Template 0.8.1 source, deployment, verification, OpenAPI compatibility, Corepack command, and Storybook telemetry changes. The empty baseline set adds no Template-file rewrite beyond Vireo's managed release-coordinate, provenance, and root-script metadata updates; selectively port application-owned changes and retain local product decisions.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -305,7 +348,15 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-0.8.2-review",
-            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/", "docs/", "scripts/"],
+            "paths": [
+              "AGENTS.md",
+              "frontend/src/",
+              "src/",
+              "deploy/",
+              ".github/",
+              "docs/",
+              "scripts/"
+            ],
             "requirement": "Review the upstream Template 0.8.2 Doctor JSON release and selectively port application-owned changes. Vireo updates only the declared managed Doctor/provenance surfaces; retain local product decisions.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -352,7 +403,12 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-0.8.4-performance-review",
-            "paths": [".gitignore", "frontend/tests/demo/", "frontend/tests/e2e/", "docs/"],
+            "paths": [
+              ".gitignore",
+              "frontend/tests/demo/",
+              "frontend/tests/e2e/",
+              "docs/"
+            ],
             "requirement": "Review the upstream Template 0.8.4 hosted-demo assertions and optional browser evidence. Vireo applies the declared managed Lighthouse policy and compatibility-contract updates; retain product-owned test selection, CI, lockfiles, and repository policy.",
             "verificationCommands": [
               "corepack npm run performance:policy:test",
@@ -595,6 +651,26 @@
             "operation": "add",
             "targetSha256": "4afca6dc98b8ce8ebab37077eb73ae12ba2e7fc981c60e2a69adc55c451b7a26",
             "targetContent": "import assert from \"node:assert/strict\";\nimport test from \"node:test\";\n\nimport { aggregateLighthouseSamples, evaluateLighthouseSamples, lighthouseBudgets } from \"./lighthouse-policy.mjs\";\n\nconst atBudget = {\n  performance: 0.75,\n  accessibility: 1,\n  bestPractices: 0.9,\n  firstContentfulPaintMs: 4_000,\n  largestContentfulPaintMs: 5_000,\n  totalBlockingTimeMs: 500,\n  cumulativeLayoutShift: 0.1,\n};\n\ntest(\"Lighthouse policy accepts metrics exactly at every budget\", () => {\n  const result = evaluateLighthouseSamples([atBudget, atBudget, atBudget]);\n\n  assert.deepEqual(result.aggregate, atBudget);\n  assert.deepEqual(result.failures, []);\n});\n\ntest(\"Lighthouse policy tolerates one composite-score outlier when the median passes\", () => {\n  const result = evaluateLighthouseSamples([\n    { ...atBudget, performance: 0.5 },\n    { ...atBudget, performance: 0.8 },\n    { ...atBudget, performance: 0.8 },\n  ]);\n\n  assert.equal(result.aggregate.performance, 0.8);\n  assert.deepEqual(result.failures, []);\n});\n\ntest(\"Lighthouse policy fails when two regressed composite samples lower the median\", () => {\n  const result = evaluateLighthouseSamples([\n    { ...atBudget, performance: 0.7 },\n    { ...atBudget, performance: 0.7 },\n    { ...atBudget, performance: 0.9 },\n  ]);\n\n  assert.equal(result.aggregate.performance, 0.7);\n  assert.match(result.failures.join(\"\\n\"), /performance aggregate was 0.7/);\n});\n\ntest(\"Lighthouse policy rejects an accessibility regression in any sample\", () => {\n  const result = evaluateLighthouseSamples([{ ...atBudget, accessibility: 0.99 }, atBudget, atBudget]);\n\n  assert.match(result.failures.join(\"\\n\"), /accessibility sample 1 was 0.99/);\n});\n\ntest(\"Lighthouse policy rejects a best-practices regression in any sample\", () => {\n  const result = evaluateLighthouseSamples([{ ...atBudget, bestPractices: 0.89 }, atBudget, atBudget]);\n\n  assert.match(result.failures.join(\"\\n\"), /bestPractices sample 1 was 0.89/);\n});\n\ntest(\"Lighthouse policy rejects a timing hard-cap violation in any sample\", () => {\n  const result = evaluateLighthouseSamples([{ ...atBudget, largestContentfulPaintMs: 5_001 }, atBudget, atBudget]);\n\n  assert.match(result.failures.join(\"\\n\"), /largestContentfulPaintMs sample 1 was 5001; hard maximum is 5000/);\n});\n\ntest(\"Lighthouse policy records the configured aggregation modes\", () => {\n  const aggregate = aggregateLighthouseSamples([\n    { ...atBudget, performance: 0.75, accessibility: 1, bestPractices: 0.9 },\n    { ...atBudget, performance: 0.8, accessibility: 0.95, bestPractices: 0.95 },\n    { ...atBudget, performance: 0.9, accessibility: 1, bestPractices: 1 },\n  ]);\n\n  assert.equal(lighthouseBudgets.performance.aggregate, \"median\");\n  assert.equal(aggregate.performance, 0.8);\n  assert.equal(aggregate.accessibility, 0.95);\n  assert.equal(aggregate.bestPractices, 0.9);\n});\n"
+          },
+          {
+            "path": "frontend/vitest.storybook.config.ts",
+            "operation": "update",
+            "sourceSha256": "1e467bd10170318bfe587e2de234de312136db4068306f7888df6e5978708e7f",
+            "sourceContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
+            "targetSha256": "934db0401b803d3cca38f4278d2fbf1967bc649fb9c0daeb3380b3723cde9a74",
+            "targetContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
+            "transforms": [
+              {
+                "from": "  defineConfig({\n    test:",
+                "to": "  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test:"
+              }
+            ],
+            "projectionTransforms": [
+              {
+                "from": "  defineConfig({\n    test:",
+                "to": "  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test:"
+              }
+            ]
           }
         ],
         "frontend": [
@@ -635,6 +711,26 @@
             "operation": "add",
             "targetSha256": "4afca6dc98b8ce8ebab37077eb73ae12ba2e7fc981c60e2a69adc55c451b7a26",
             "targetContent": "import assert from \"node:assert/strict\";\nimport test from \"node:test\";\n\nimport { aggregateLighthouseSamples, evaluateLighthouseSamples, lighthouseBudgets } from \"./lighthouse-policy.mjs\";\n\nconst atBudget = {\n  performance: 0.75,\n  accessibility: 1,\n  bestPractices: 0.9,\n  firstContentfulPaintMs: 4_000,\n  largestContentfulPaintMs: 5_000,\n  totalBlockingTimeMs: 500,\n  cumulativeLayoutShift: 0.1,\n};\n\ntest(\"Lighthouse policy accepts metrics exactly at every budget\", () => {\n  const result = evaluateLighthouseSamples([atBudget, atBudget, atBudget]);\n\n  assert.deepEqual(result.aggregate, atBudget);\n  assert.deepEqual(result.failures, []);\n});\n\ntest(\"Lighthouse policy tolerates one composite-score outlier when the median passes\", () => {\n  const result = evaluateLighthouseSamples([\n    { ...atBudget, performance: 0.5 },\n    { ...atBudget, performance: 0.8 },\n    { ...atBudget, performance: 0.8 },\n  ]);\n\n  assert.equal(result.aggregate.performance, 0.8);\n  assert.deepEqual(result.failures, []);\n});\n\ntest(\"Lighthouse policy fails when two regressed composite samples lower the median\", () => {\n  const result = evaluateLighthouseSamples([\n    { ...atBudget, performance: 0.7 },\n    { ...atBudget, performance: 0.7 },\n    { ...atBudget, performance: 0.9 },\n  ]);\n\n  assert.equal(result.aggregate.performance, 0.7);\n  assert.match(result.failures.join(\"\\n\"), /performance aggregate was 0.7/);\n});\n\ntest(\"Lighthouse policy rejects an accessibility regression in any sample\", () => {\n  const result = evaluateLighthouseSamples([{ ...atBudget, accessibility: 0.99 }, atBudget, atBudget]);\n\n  assert.match(result.failures.join(\"\\n\"), /accessibility sample 1 was 0.99/);\n});\n\ntest(\"Lighthouse policy rejects a best-practices regression in any sample\", () => {\n  const result = evaluateLighthouseSamples([{ ...atBudget, bestPractices: 0.89 }, atBudget, atBudget]);\n\n  assert.match(result.failures.join(\"\\n\"), /bestPractices sample 1 was 0.89/);\n});\n\ntest(\"Lighthouse policy rejects a timing hard-cap violation in any sample\", () => {\n  const result = evaluateLighthouseSamples([{ ...atBudget, largestContentfulPaintMs: 5_001 }, atBudget, atBudget]);\n\n  assert.match(result.failures.join(\"\\n\"), /largestContentfulPaintMs sample 1 was 5001; hard maximum is 5000/);\n});\n\ntest(\"Lighthouse policy records the configured aggregation modes\", () => {\n  const aggregate = aggregateLighthouseSamples([\n    { ...atBudget, performance: 0.75, accessibility: 1, bestPractices: 0.9 },\n    { ...atBudget, performance: 0.8, accessibility: 0.95, bestPractices: 0.95 },\n    { ...atBudget, performance: 0.9, accessibility: 1, bestPractices: 1 },\n  ]);\n\n  assert.equal(lighthouseBudgets.performance.aggregate, \"median\");\n  assert.equal(aggregate.performance, 0.8);\n  assert.equal(aggregate.accessibility, 0.95);\n  assert.equal(aggregate.bestPractices, 0.9);\n});\n"
+          },
+          {
+            "path": "vitest.storybook.config.ts",
+            "operation": "update",
+            "sourceSha256": "1e467bd10170318bfe587e2de234de312136db4068306f7888df6e5978708e7f",
+            "sourceContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
+            "targetSha256": "934db0401b803d3cca38f4278d2fbf1967bc649fb9c0daeb3380b3723cde9a74",
+            "targetContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
+            "transforms": [
+              {
+                "from": "  defineConfig({\n    test:",
+                "to": "  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test:"
+              }
+            ],
+            "projectionTransforms": [
+              {
+                "from": "  defineConfig({\n    test:",
+                "to": "  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test:"
+              }
+            ]
           }
         ]
       }

@@ -15,6 +15,26 @@ test("frontend managed scripts map to their Template source paths", () => {
     templatePathForBaseline("full-stack", "frontend/scripts/lighthouse-budget.mjs"),
     "frontend/scripts/lighthouse-budget.mjs",
   );
+  assert.equal(
+    templatePathForBaseline("frontend", "vitest.storybook.config.ts"),
+    "frontend/vitest.storybook.config.ts",
+  );
+});
+
+test("managed Storybook optimizer baseline is an exact projection transform", () => {
+  const baseline = {
+    path: "vitest.storybook.config.ts",
+    projectionTransforms: [
+      {
+        from: "  defineConfig({\n    test:",
+        to: '  defineConfig({\n    optimizeDeps: { include: ["@testing-library/dom"] },\n    test:',
+      },
+    ],
+  };
+  assert.equal(
+    projectedBaselineBytes("frontend", "  defineConfig({\n    test:", baseline),
+    '  defineConfig({\n    optimizeDeps: { include: ["@testing-library/dom"] },\n    test:',
+  );
 });
 
 test("frontend Lighthouse baselines require the project-local evidence transform", () => {

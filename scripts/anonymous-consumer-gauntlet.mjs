@@ -14,7 +14,7 @@ import {
   publicReleaseIdentity,
   readJson,
 } from "./lib/anonymous-consumer-environment.mjs";
-import { writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
+import { sanitizeCommandTail, writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
 import { validateAnonymousPublicEvidence } from "./lib/anonymous-public-evidence.mjs";
 import { validateFinalAnonymousEvidence } from "./lib/anonymous-consumer-final-evidence.mjs";
 import {
@@ -795,7 +795,7 @@ export function finalizationFailureFinding() {
   };
 }
 
-function execute(command, options) {
+export function execute(command, options) {
   return new Promise((resolvePromise, reject) => {
     const startedAt = new Date().toISOString();
     const started = performance.now();
@@ -803,6 +803,8 @@ function execute(command, options) {
     const stderr = createHash("sha256");
     let stdoutBytes = 0;
     let stderrBytes = 0;
+    let stdoutTail = Buffer.alloc(0);
+    let stderrTail = Buffer.alloc(0);
     let excerpt = "";
     const jsonChunks = [];
     let jsonBytes = 0;
@@ -829,6 +831,7 @@ function execute(command, options) {
     child.stdout.on("data", chunk => {
       stdout.update(chunk);
       stdoutBytes += chunk.length;
+      stdoutTail = Buffer.concat([stdoutTail, chunk]).subarray(-4_096);
       if (command.jsonValidator) {
         jsonBytes += chunk.length;
         if (jsonBytes <= maximumJsonOutputBytes) jsonChunks.push(chunk);
@@ -839,6 +842,7 @@ function execute(command, options) {
     child.stderr.on("data", chunk => {
       stderr.update(chunk);
       stderrBytes += chunk.length;
+      stderrTail = Buffer.concat([stderrTail, chunk]).subarray(-4_096);
       if (excerpt.length < 4096) excerpt += chunk.toString("utf8", 0, Math.min(chunk.length, 4096 - excerpt.length));
     });
     child.on("error", () => finish(1));
@@ -873,7 +877,9 @@ function execute(command, options) {
       if (jsonAssertion) result.assertions = { json: jsonAssertion };
       const assertionPassed = (!command.assertOutput || command.assertOutput.test(excerpt)) && !jsonProblem;
       if (exitCode === command.expectedExit && !timedOut && !signal && assertionPassed) resolvePromise(result);
-      else
+      else {
+        result.stdout.tail = sanitizeCommandTail(stdoutTail);
+        result.stderr.tail = sanitizeCommandTail(stderrTail);
         reject(
           Object.assign(
             new Error(jsonProblem ?? `${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`),
@@ -882,6 +888,7 @@ function execute(command, options) {
             },
           ),
         );
+      }
     }
   });
 }

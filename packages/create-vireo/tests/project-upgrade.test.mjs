@@ -1013,6 +1013,10 @@ test("0.8.3 to 0.8.4 manages Lighthouse policy for both profiles without lockfil
       assert.equal(preview.checks.find(check => check.id === "lockfile")?.status, "pass");
       assert.match(preview.checks.find(check => check.id === "lockfile")?.detail, /lockfile is preserved/u);
       assert.ok(preview.files.some(file => file.path.endsWith("lighthouse-policy.mjs") && file.status === "create"));
+      assert.ok(
+        preview.files.some(file => file.path.endsWith("vitest.storybook.config.ts") && file.status === "update"),
+        "Storybook optimizer compatibility baseline is managed",
+      );
       assert.equal(
         preview.manualActions[0].verificationCommands[0],
         frontendOnly
@@ -1036,6 +1040,15 @@ test("0.8.3 to 0.8.4 manages Lighthouse policy for both profiles without lockfil
       if (manifest.scripts["performance:policy:test"] === undefined) delete manifest.scripts["performance:policy:test"];
       await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
+      const storybookBaseline = baselines.find(file => file.path.endsWith("vitest.storybook.config.ts"));
+      assert.ok(storybookBaseline?.sourceContent, `${profile} has an exact Storybook source baseline`);
+      await writeFile(join(root, storybookBaseline.path), `${storybookBaseline.sourceContent}// customized\n`);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy),
+        error => error.code === "VIR-UPG-003",
+      );
+      await writeFile(join(root, storybookBaseline.path), storybookBaseline.sourceContent);
+
       await upgradeVireoProjectForTest(
         { projectDirectory: root, targetRelease, dryRun: false, acceptApplicationOwned: true },
         finalizedPolicy,
@@ -1048,6 +1061,10 @@ test("0.8.3 to 0.8.4 manages Lighthouse policy for both profiles without lockfil
         target.managedFrontendScripts[profile]["performance:policy:test"],
       );
       assert.equal(upgraded.scripts["performance:audit"], target.managedFrontendScripts[profile]["performance:audit"]);
+      assert.match(
+        await readFile(join(root, storybookBaseline.path), "utf8"),
+        /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
+      );
       for (const baseline of baselines) {
         const contents = await readFile(join(root, baseline.path), "utf8");
         assert.equal(sha256(contents), baseline.targetSha256, `${profile} baseline ${baseline.path}`);

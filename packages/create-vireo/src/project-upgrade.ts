@@ -12,6 +12,8 @@ type ReleaseRequirements = {
   frontendDependencies: DependencyMap;
   managedRootScripts?: DependencyMap;
   managedFrontendScripts?: Partial<Record<"full-stack" | "frontend", DependencyMap>>;
+  /** Exact legacy Template scripts that the staged projection may replace. */
+  projectionSourceFrontendScripts?: Partial<Record<"full-stack" | "frontend", DependencyMap>>;
 };
 type ApplicationOwnedActionPolicy = {
   id: string;
@@ -49,6 +51,7 @@ type EdgeBaseline = {
   targetSha256?: string;
   targetContent?: string;
   transforms?: Array<{ from: string; to: string }>;
+  projectionTransforms?: Array<{ from: string; to: string }>;
 };
 type ProjectMetadata = Record<string, unknown> & {
   templateCommit?: unknown;
@@ -352,6 +355,17 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
               typeof scripts !== "object" ||
               Array.isArray(scripts) ||
               Object.entries(scripts).some(([name, value]) => !name || typeof value !== "string" || !value.trim()),
+          ))) ||
+      (release.projectionSourceFrontendScripts !== undefined &&
+        (typeof release.projectionSourceFrontendScripts !== "object" ||
+          Array.isArray(release.projectionSourceFrontendScripts) ||
+          Object.entries(release.projectionSourceFrontendScripts).some(
+            ([profile, scripts]) =>
+              !["full-stack", "frontend"].includes(profile) ||
+              !scripts ||
+              typeof scripts !== "object" ||
+              Array.isArray(scripts) ||
+              Object.entries(scripts).some(([name, value]) => !name || typeof value !== "string" || !value.trim()),
           )))
     )
       throw new VireoUpgradeError("VIR-UPG-001", `Upgrade graph release ${release.release} has invalid requirements.`);
@@ -382,7 +396,7 @@ export async function currentVireoReleaseRequirements(): Promise<ReleaseRequirem
   };
 }
 /** @internal Managed frontend projection bytes for the active public/candidate release. */
-export async function currentFrontendProjectionRequirements() {
+export async function currentFrontendProjectionRequirements(profile: "full-stack" | "frontend" = "frontend") {
   const policy = await readPolicy();
   const graph = policy.releaseGraph;
   const targetRelease = graph.candidateRelease ?? graph.publicRelease;
@@ -390,8 +404,9 @@ export async function currentFrontendProjectionRequirements() {
   const source = graph.releases.find(release => release.release === graph.previousRelease);
   if (!source || !target)
     throw new VireoUpgradeError("VIR-UPG-001", "Frontend projection requirements have no adjacent release nodes.");
-  const baselines = edgeBaselines(policy, source.release, target.release, "frontend").filter(baseline =>
-    baseline.path.startsWith("scripts/lighthouse-"),
+  const baselinePrefix = profile === "frontend" ? "scripts/lighthouse-" : "frontend/scripts/lighthouse-";
+  const baselines = edgeBaselines(policy, source.release, target.release, profile).filter(baseline =>
+    baseline.path.startsWith(baselinePrefix),
   );
   if (targetRelease === "0.8.4" && baselines.length !== 5)
     throw new VireoUpgradeError(
@@ -399,9 +414,34 @@ export async function currentFrontendProjectionRequirements() {
       "Frontend performance projection must declare five immutable managed baselines.",
     );
   return {
-    scripts: managedScriptsForProfile(target, true),
+    scripts: managedScriptsForProfile(target, profile === "frontend"),
+    sourceScripts: target.projectionSourceFrontendScripts?.[profile] ?? {},
     files: baselines.map(baseline => ({ path: baseline.path, contents: resolveBaselineTargetContent(baseline) })),
   };
+}
+
+/** @internal Immutable managed compatibility bytes that bridge the public Template to the staged release. */
+export async function currentProjectionCompatibilityRequirements(profile: "full-stack" | "frontend") {
+  const policy = await readPolicy();
+  const graph = policy.releaseGraph;
+  const targetRelease = graph.candidateRelease ?? graph.publicRelease;
+  const source = graph.releases.find(release => release.release === graph.previousRelease);
+  const target = graph.releases.find(release => release.release === targetRelease);
+  if (!source || !target)
+    throw new VireoUpgradeError("VIR-UPG-001", "Projection compatibility requirements have no adjacent release nodes.");
+  const files = edgeBaselines(policy, source.release, target.release, profile).filter(
+    baseline => baseline.path.endsWith("vitest.storybook.config.ts"),
+  );
+  if (targetRelease === "0.8.4" && files.length !== 1)
+    throw new VireoUpgradeError(
+      "VIR-UPG-001",
+      `Projection compatibility for ${profile} must declare one immutable Storybook optimizer baseline.`,
+    );
+  return files.map(baseline => ({
+    path: baseline.path,
+    source: baseline.sourceContent,
+    contents: resolveBaselineTargetContent(baseline),
+  }));
 }
 function requirementsMatch(
   manifest: PackageManifest,

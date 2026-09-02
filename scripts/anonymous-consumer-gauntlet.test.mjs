@@ -11,6 +11,7 @@ import {
   buildExecutionPlan,
   cleanupAnonymousConsumerRunRoot,
   deploymentContractProblems,
+  execute,
   executePlanForTest,
   finalizationFailureFinding,
   finishAnonymousConsumerRun,
@@ -1015,6 +1016,40 @@ test("fake executor preserves planned, expected-refusal, timeout, and failure ev
   );
   assert.equal(failed.status, "failed");
   assert.equal(failed.scenarios[0].commands[0].status, "failed");
+});
+
+test("unexpected command failures retain only bounded, sanitized stream tails", async () => {
+  let failure;
+  try {
+    await execute(
+      {
+        id: "unsafe-output",
+        executable: process.execPath,
+        arguments: [
+          "-e",
+          `console.log("${"x".repeat(5_000)} /tmp/vireo-anonymous-consumer-private?token=leak"); console.error("https://bruno:password@example.invalid/?api_key=leak Bearer leak"); process.exit(1);`,
+        ],
+        expectedExit: 0,
+      },
+      { cwd: root, env: process.env },
+    );
+  } catch (error) {
+    failure = error;
+  }
+  assert.ok(failure instanceof Error);
+  const result = failure.result;
+  assert.ok(Buffer.byteLength(result.stdout.tail) <= 4_096);
+  assert.ok(Buffer.byteLength(result.stderr.tail) <= 4_096);
+  assert.equal(result.stdout.tail.includes("leak"), false);
+  assert.equal(result.stderr.tail.includes("password"), false);
+  assert.equal(result.stderr.tail.includes("bruno"), false);
+
+  const passed = await execute(
+    { id: "success", executable: process.execPath, arguments: ["-e", 'console.log("ok")'], expectedExit: 0 },
+    { cwd: root, env: process.env },
+  );
+  assert.equal("tail" in passed.stdout, false);
+  assert.equal("tail" in passed.stderr, false);
 });
 
 test("managed provenance rejects traversal and digest drift", () => {
