@@ -23,6 +23,8 @@ const checkOnly = args.has("--check");
 const dryRun = args.has("--dry-run");
 const evidenceArgument = process.argv.indexOf("--evidence-dir");
 const evidenceDirectory = evidenceArgument >= 0 ? resolve(process.argv[evidenceArgument + 1]) : join(root, ".anonymous-consumer-evidence");
+const observedDigests = new Map();
+const managedOriginals = new Map();
 
 export function validatePolicy(policy, release) {
   const problems = [];
@@ -190,6 +192,29 @@ async function executeOperation(operation, { environment, runRoot }) {
     const target = join(operation.path, manifest.files?.[0]?.path ?? "");
     if (!manifest.files?.[0]?.path || !existsSync(target)) throw new Error("Generated capability has no mutable managed output.");
     writeFileSync(target, `${readFileSync(target, "utf8")}\n// anonymous-consumer customization\n`);
+  } else if (operation.kind === "record-generated-digest" || operation.kind === "assert-generated-digest") {
+    const manifest = JSON.parse(readFileSync(join(operation.path, ".vireo", "generated", "purchase-orders.json"), "utf8"));
+    const digest = createHash("sha256").update(manifest.files.map(file => readFileSync(join(operation.path, file.path))).join("")) .digest("hex");
+    if (operation.kind === "record-generated-digest") observedDigests.set(operation.path, digest);
+    else if (observedDigests.get(operation.path) !== digest) throw new Error("Generated capability rerun changed managed bytes.");
+  } else if (operation.kind === "assert-removal-receipt") {
+    const receipt = join(operation.path, ".vireo", "remove-example.json");
+    if (!existsSync(receipt)) throw new Error("Sample removal did not write its receipt.");
+    const text = JSON.stringify(JSON.parse(readFileSync(receipt, "utf8")));
+    if (/Item|item/i.test(text) === false) throw new Error("Sample removal receipt is not attributable to the Template sample.");
+  } else if (operation.kind === "mutate-managed-file" || operation.kind === "restore-managed-file") {
+    const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
+    const relativePath = managed.files?.[0]?.path;
+    const target = join(operation.path, relativePath ?? "");
+    if (!relativePath || !existsSync(target)) throw new Error("Project has no mutable managed file.");
+    if (operation.kind === "mutate-managed-file") {
+      managedOriginals.set(operation.path, { target, contents: readFileSync(target, "utf8") });
+      writeFileSync(target, `${readFileSync(target, "utf8")}\n// anonymous upgrade drift\n`);
+    } else {
+      const original = managedOriginals.get(operation.path);
+      if (!original) throw new Error("Managed-file restoration has no recorded original.");
+      writeFileSync(original.target, original.contents);
+    }
   } else if (operation.kind === "assert-deployment-contract") {
     const script = readFileSync(join(operation.path, "scripts", "verify-deployment.sh"), "utf8");
     for (const assertion of ["security", "header", "proxy", "/api", "postgres", "migration"]) {
@@ -251,6 +276,9 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
   });
   const frontend = join(consumerRoot, "frontend");
   const h2 = join(consumerRoot, "full-stack-h2");
+  const capability = join(consumerRoot, "capability-h2");
+  const removal = join(consumerRoot, "sample-removal-h2");
+  const ejection = join(consumerRoot, "ejection-h2");
   switch (scenario.id) {
     case "public-artifacts":
       return [
@@ -310,19 +338,30 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       { kind: "assert-file", id: "full-stack-project-provenance", path: join(h2, ".vireo", "project.json") },
     ];
     case "capability-lifecycle": return [
-      vireo(h2, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
-      vireo(h2, "check", "--json"),
-      vireo(h2, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
-      { kind: "mutate-generated", id: "customize-generated-output", path: h2 },
-      { ...vireo(h2, "generate", "entity", ".vireo/examples/purchase-order.entity.json"), id: "customization-refusal", expectedExit: 1 },
+      create(capability, "full-stack", ["--java-package", "com.example.capability", "--database", "h2"]),
+      command("capability-setup", "corepack", ["npm", "run", "setup"], { cwd: capability }),
+      vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
+      { kind: "record-generated-digest", id: "capability-first-digest", path: capability },
+      vireo(capability, "check", "--json"),
+      vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
+      { kind: "assert-generated-digest", id: "capability-idempotent-digest", path: capability },
+      { kind: "mutate-generated", id: "customize-generated-output", path: capability },
+      { ...vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"), id: "customization-refusal", expectedExit: 1, assertOutput: /VIR-GEN-004|customized/u },
     ];
     case "sample-removal-and-ejection": return [
-      vireo(h2, "remove-example", "--status"), vireo(h2, "remove-example", "--dry-run"), vireo(h2, "remove-example", "--apply"),
-      vireo(h2, "remove-example", "--status"), vireo(h2, "remove-example", "--apply"), vireo(h2, "eject", "purchase-orders"),
-      { kind: "assert-absent", id: "ejected-management-removed", path: join(h2, ".vireo", "generated", "purchase-orders.json") },
-      { kind: "assert-file", id: "ejected-capability-provenance", path: join(h2, ".vireo", "ejected-capabilities.json") },
-      { kind: "assert-ejected-marker", id: "ejected-application-code-retained", path: h2 },
-      { kind: "assert-file", id: "managed-provenance-retained", path: join(h2, ".vireo", "managed-files.json") },
+      create(removal, "full-stack", ["--java-package", "com.example.removal", "--database", "h2"]),
+      command("removal-setup", "corepack", ["npm", "run", "setup"], { cwd: removal }),
+      vireo(removal, "remove-example", "--status"), vireo(removal, "remove-example", "--dry-run"), vireo(removal, "remove-example", "--apply"),
+      { kind: "assert-removal-receipt", id: "sample-removal-receipt", path: removal },
+      vireo(removal, "remove-example", "--status"), vireo(removal, "remove-example", "--apply"), command("removal-verify", "corepack", ["npm", "run", "verify"], { cwd: removal, timeoutMs: 45 * 60_000 }),
+      create(ejection, "full-stack", ["--java-package", "com.example.ejection", "--database", "h2"]),
+      command("ejection-setup", "corepack", ["npm", "run", "setup"], { cwd: ejection }),
+      vireo(ejection, "generate", "entity", ".vireo/examples/purchase-order.entity.json"), vireo(ejection, "eject", "purchase-orders"),
+      { kind: "assert-absent", id: "ejected-management-removed", path: join(ejection, ".vireo", "generated", "purchase-orders.json") },
+      { kind: "assert-file", id: "ejected-capability-provenance", path: join(ejection, ".vireo", "ejected-capabilities.json") },
+      { kind: "assert-ejected-marker", id: "ejected-application-code-retained", path: ejection },
+      { kind: "assert-file", id: "managed-provenance-retained", path: join(ejection, ".vireo", "managed-files.json") },
+      command("ejection-verify", "corepack", ["npm", "run", "verify"], { cwd: ejection, timeoutMs: 45 * 60_000 }),
     ];
     case "postgresql-production": {
       const postgresql = join(consumerRoot, "full-stack-postgresql");
@@ -340,7 +379,13 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         .map(([version]) => version);
       const targets = supportedTargets.length > 0 ? supportedTargets : [upgradePolicy.publicRelease];
       const edges = targets.flatMap(target => (upgradePolicy.requiredEdges ?? []).filter(edge => edge.to === target));
-      if (edges.length === 0 || !targets.includes(release.createVireoVersion)) {
+      if (
+        edges.length === 0 ||
+        upgradePolicy.publicRelease !== release.createVireoVersion ||
+        !targets.includes(release.createVireoVersion) ||
+        ![...edges.map(edge => edge.from), upgradePolicy.publicRelease].includes(upgradePolicy.maintenance?.priorCurrentUpgradeSource) ||
+        edges.some(edge => upgradePolicy.releaseCoordinates?.[edge.to]?.status === "candidate")
+      ) {
         throw new Error("Project-upgrade policy must expose an adjacent public edge for the current public create-vireo release.");
       }
       return edges.flatMap(edge => ["frontend", "full-stack"].flatMap(profile => {
@@ -356,6 +401,9 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         return [
           creation,
           { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
+          { kind: "mutate-managed-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-managed-refusal-mutation`, path: directory },
+          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory], expectedExit: 1, assertOutput: /managed|drift|customized/i },
+          { kind: "restore-managed-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-restore-managed-file`, path: directory },
           {
             executable: "corepack",
             arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory],
