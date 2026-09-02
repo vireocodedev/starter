@@ -15,7 +15,7 @@ import {
 } from "./lib/anonymous-consumer-environment.mjs";
 import { writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
 import { validateAnonymousPublicEvidence } from "./lib/anonymous-public-evidence.mjs";
-import { validateReleasePreflightIdentity } from "./lib/anonymous-consumer-release-preflight.mjs";
+import { validateReleasePreflightIdentity, verifyPublicReleasePreflight } from "./lib/anonymous-consumer-release-preflight.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policyPath = join(root, "contracts", "anonymous-consumer-gauntlet-policy.json");
@@ -458,6 +458,7 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     release,
     requestedReleaseId: releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID,
     requestedSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
+    verifierSourceCommit: process.env.GITHUB_SHA ?? process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
   });
   if (preflightProblems.length > 0) throw new Error(preflightProblems.join("\n"));
   const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
@@ -465,6 +466,7 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
   if (problems.length > 0)
     throw new Error(`Anonymous consumer gauntlet policy failed:\n${problems.map(problem => `- ${problem}`).join("\n")}`);
   if (check) {
+    buildExecutionPlan({ policy, release, upgradePolicy: readJson(join(root, "contracts", "project-upgrade-policy.json")), consumerRoot: "/tmp/vireo-anonymous-plan" });
     console.log(`Anonymous consumer gauntlet policy passed for ${release.id}: ${policy.scenarios.length} sequential scenarios.`);
     return;
   }
@@ -489,6 +491,7 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     ],
     scenarios: [],
   };
+  if (!dry) evidence.externalWarnings.push(...(await verifyPublicReleasePreflight({ release })).warnings);
   const checkpoint = () => writeEvidenceAtomically(join(evidenceDirectory, "evidence.json"), evidence);
   try {
     mkdirSync(join(runRoot, "consumer"), { recursive: true });
