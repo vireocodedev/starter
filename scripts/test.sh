@@ -25,6 +25,7 @@ node --test \
   scripts/lib/anonymous-public-evidence.test.mjs \
   scripts/lib/anonymous-public-maven-evidence.test.mjs \
   scripts/lib/mit-license-evidence.test.mjs \
+  scripts/lib/public-release-evidence-paths.test.mjs \
   scripts/lib/anonymous-consumer-final-evidence.test.mjs \
   scripts/lib/anonymous-consumer-release-preflight.test.mjs \
   scripts/anonymous-consumer-gauntlet.test.mjs \
