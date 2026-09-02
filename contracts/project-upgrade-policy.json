@@ -2,11 +2,9 @@
   "schemaVersion": 1,
   "contractId": "vireo-project-upgrade-graph",
   "packedPolicy": "packages/create-vireo/schema/vireo-upgrade-policy.json",
-  "publicRelease": "0.8.4",
+  "publicRelease": "0.8.6",
   "previousRelease": "0.8.4",
-  "candidateRelease": "0.8.6",
-  "publicationState": "candidate",
-  "finalization": { "targetTemplateCommit": "cef67cc74af3d28028fba424e1d5c6a92faa6fc9" },
+  "publicationState": "final",
   "releaseCoordinates": {
     "0.6.0": {
       "createVireo": "0.6.0",
@@ -55,14 +53,14 @@
       "templateVersion": "0.8.4",
       "templateCommit": "09cd526d32907bedfe5bb6ab45a2d4d221b0d47b",
       "starterJvmVersion": "0.3.1",
-      "status": "current"
+      "status": "historical"
     },
     "0.8.6": {
       "createVireo": "0.8.6",
       "templateVersion": "0.8.6",
       "templateCommit": "cef67cc74af3d28028fba424e1d5c6a92faa6fc9",
       "starterJvmVersion": "0.3.1",
-      "status": "candidate"
+      "status": "current"
     }
   },
   "historicalReleases": ["0.2.0", "0.3.0", "0.4.0", "0.5.0"],

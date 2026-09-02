@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "createVireoVersion": "0.8.4",
+  "createVireoVersion": "0.8.6",
   "templateStarterJvmBaseline": "0.3.1",
   "generatedStarterJvmVersion": "0.3.1"
 }
