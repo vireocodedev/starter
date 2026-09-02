@@ -1206,11 +1206,16 @@ async function upgradeProjectWithPolicy(
   for (const [name, value] of Object.entries(targetManagedScripts)) {
     const current = targetScriptManifest.scripts?.[name];
     const sourceValue = sourceManagedScripts[name] ?? targetProjectionSourceScripts[name];
-    if (current !== value && current !== sourceValue)
-      throw new VireoUpgradeError(
-        "VIR-UPG-003",
-        `Managed package.json scripts.${name} differs from the declared source or target; resolve the customization before upgrading.`,
-      );
+    if (current === value || (sourceValue !== undefined && current === sourceValue)) continue;
+    // A script with no declared source is an addition on this edge. Preserve the
+    // historical omission, but reject any consumer-owned value rather than
+    // silently replacing it. A declared projection source is required and
+    // therefore cannot be absent.
+    if (sourceValue === undefined && current === undefined) continue;
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `Managed package.json scripts.${name} differs from the declared source or target; resolve the customization before upgrading.`,
+    );
   }
   targetRootManifest.scripts = {
     ...targetRootManifest.scripts,

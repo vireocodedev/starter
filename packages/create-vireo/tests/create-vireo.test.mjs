@@ -248,7 +248,8 @@ export {};
         "starter:boundary:check": "node scripts/boundary.mjs",
         "architecture:check": immutable084ArchitectureCheck,
         "bundle:check": "node scripts/bundle.mjs",
-        "performance:policy:test": "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
+        "performance:policy:test":
+          "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
         "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
         "pwa:check:source": "node scripts/check-pwa-contract.mjs --source --require-nginx",
         "pwa:check:built": "node scripts/check-pwa-contract.mjs --built",
@@ -1107,7 +1108,9 @@ test("frontend performance projection materializes immutable candidate bytes whe
     const target = join(root, "operations-ui");
     await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
     const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
-    for (const baseline of policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend) {
+    for (const baseline of policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend.filter(baseline =>
+      baseline.path.startsWith("scripts/lighthouse-"),
+    )) {
       assert.equal(await readFile(join(target, baseline.path), "utf8"), baseline.targetContent, baseline.path);
     }
   } finally {

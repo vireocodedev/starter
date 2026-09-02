@@ -496,15 +496,18 @@ async function overview086Fixture(profile, source) {
   await mkdir(join(root, ".vireo"), { recursive: true });
   const samplePath = frontendOnly ? "src/features/item/public.ts" : "frontend/src/features/item/public.ts";
   const compatibilityBaselines = adjacentPolicy.releaseGraph.baselines["0.8.4->0.8.6"][profile];
-  const storybookBaseline = compatibilityBaselines.find(
-    file => file.path.endsWith("vitest.storybook.config.ts"),
+  const predecessorStorybookBaseline = adjacentPolicy.releaseGraph.baselines["0.8.3->0.8.4"][profile].find(file =>
+    file.path.endsWith("vitest.storybook.config.ts"),
   );
-  if (!storybookBaseline?.sourceContent) {
+  const storybookBaseline = compatibilityBaselines.find(file => file.path.endsWith("vitest.storybook.config.ts"));
+  if (!storybookBaseline?.sourceContent || !predecessorStorybookBaseline?.targetContent) {
     throw new Error(`${profile} requires an exact 0.8.4 Storybook baseline.`);
   }
+  assert.equal(storybookBaseline.sourceSha256, predecessorStorybookBaseline.targetSha256);
+  assert.equal(storybookBaseline.sourceContent, predecessorStorybookBaseline.targetContent);
   await mkdir(join(root, dirname(samplePath)), { recursive: true });
   await writeFile(join(root, samplePath), "export type Item = { id: number };\n");
-  await writeFile(join(root, storybookBaseline.path), storybookBaseline.sourceContent);
+  await writeFile(join(root, storybookBaseline.path), predecessorStorybookBaseline.targetContent);
   for (const baseline of compatibilityBaselines.filter(file => file.operation === "update")) {
     if (baseline.path === storybookBaseline.path) continue;
     await mkdir(join(root, dirname(baseline.path)), { recursive: true });
@@ -611,8 +614,8 @@ test("0.8.4 to 0.8.6 transactionally records the pristine Overview sample before
         "update",
         `${profile} plans the manifest migration`,
       );
-      const storybookBaseline = candidatePolicy.releaseGraph.baselines["0.8.4->0.8.6"][profile].find(
-        file => file.path.endsWith("vitest.storybook.config.ts"),
+      const storybookBaseline = candidatePolicy.releaseGraph.baselines["0.8.4->0.8.6"][profile].find(file =>
+        file.path.endsWith("vitest.storybook.config.ts"),
       );
       assert.equal(preview.files.find(file => file.path === storybookBaseline.path)?.status, "update");
       assertSameSnapshot(beforeCandidate, await treeBytes(root));
@@ -678,29 +681,34 @@ test("0.8.4 to 0.8.6 transactionally records the pristine Overview sample before
   }
 });
 
-test("0.8.4 to 0.8.6 refuses customized immutable architecture-check source scripts for both profiles", async () => {
+test("0.8.4 to 0.8.6 refuses missing or customized immutable architecture-check source scripts for both profiles", async () => {
   const { finalizedPolicy, source } = synthetic086Policies();
   for (const profile of ["full-stack", "frontend"]) {
-    const root = await overview086Fixture(profile, source);
-    try {
-      const manifestPath = join(root, profile === "frontend" ? "package.json" : "frontend/package.json");
-      const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-      assert.equal(manifest.scripts["architecture:check"], immutable084ArchitectureCheck);
-      manifest.scripts["architecture:check"] = "node consumer-architecture.mjs";
-      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-      const managedPath = join(root, ".vireo/managed-files.json");
-      const managed = JSON.parse(await readFile(managedPath, "utf8"));
-      const managedPackagePath = profile === "frontend" ? "package.json" : "frontend/package.json";
-      managed.files.find(file => file.path === managedPackagePath).sha256 = sha256(await readFile(manifestPath));
-      await writeFile(managedPath, `${JSON.stringify(managed, null, 2)}\n`);
-      const before = await treeBytes(root);
-      await assert.rejects(
-        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.6" }, finalizedPolicy),
-        error => error.code === "VIR-UPG-003" && /scripts\.architecture:check differs from the declared source or target/u.test(error.message),
-      );
-      assertSameSnapshot(before, await treeBytes(root));
-    } finally {
-      await rm(root, { recursive: true, force: true });
+    for (const scenario of ["missing", "customized"]) {
+      const root = await overview086Fixture(profile, source);
+      try {
+        const manifestPath = join(root, profile === "frontend" ? "package.json" : "frontend/package.json");
+        const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+        assert.equal(manifest.scripts["architecture:check"], immutable084ArchitectureCheck);
+        if (scenario === "missing") delete manifest.scripts["architecture:check"];
+        else manifest.scripts["architecture:check"] = "node consumer-architecture.mjs";
+        await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+        const managedPath = join(root, ".vireo/managed-files.json");
+        const managed = JSON.parse(await readFile(managedPath, "utf8"));
+        const managedPackagePath = profile === "frontend" ? "package.json" : "frontend/package.json";
+        managed.files.find(file => file.path === managedPackagePath).sha256 = sha256(await readFile(manifestPath));
+        await writeFile(managedPath, `${JSON.stringify(managed, null, 2)}\n`);
+        const before = await treeBytes(root);
+        await assert.rejects(
+          upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.6" }, finalizedPolicy),
+          error =>
+            error.code === "VIR-UPG-003" &&
+            /scripts\.architecture:check differs from the declared source or target/u.test(error.message),
+        );
+        assertSameSnapshot(before, await treeBytes(root));
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
     }
   }
 });
@@ -826,21 +834,14 @@ test("0.8.4 to 0.8.6 transactionally migrates a completed removal receipt withou
     assert.ok(repeated.files.every(file => file.status === "unchanged"));
     assert.equal(await readFile(join(root, ".vireo/upgrade-0.8.4-to-0.8.6.json"), "utf8"), receiptBeforeRepeat);
 
-    const journalChanges = await Promise.all(
-      [
-        "package.json",
-        ".vireo/project.json",
-        ".vireo/managed-files.json",
-        ".vireo/remove-example.json",
-        ".vireo/upgrade-0.8.4-to-0.8.6.json",
-      ].map(async path => ({
-        path,
-        previousBase64:
-          path === ".vireo/upgrade-0.8.4-to-0.8.6.json"
-            ? null
-            : Buffer.from(beforePreview.get(path) ?? "").toString("base64"),
-      })),
-    );
+    const journalChanges = preview.files
+      .filter(file => file.status !== "unchanged")
+      .map(file => ({
+        path: file.path,
+        previousBase64: beforePreview.has(file.path)
+          ? Buffer.from(beforePreview.get(file.path)).toString("base64")
+          : null,
+      }));
     await writeFile(
       join(root, ".vireo/upgrade-journal.json"),
       `${JSON.stringify({ schemaVersion: 1, changes: journalChanges })}\n`,
@@ -1357,12 +1358,15 @@ test("0.8.3 to 0.8.4 manages Lighthouse policy for both profiles without lockfil
         await mkdir(join(root, "contracts"), { recursive: true });
       } else await mkdir(join(root, "scripts"), { recursive: true });
       const dependencies = { ...source.frontendDependencies, react: "^19.0.0" };
-      const frontendScripts = frontendOnly
-        ? {
-            vireo: source.rootVireoScript,
-            "doctor:json": source.managedRootScripts["doctor:json"],
-          }
-        : source.managedFrontendScripts["full-stack"];
+      const frontendScripts = {
+        ...(frontendOnly
+          ? {
+              vireo: source.rootVireoScript,
+              "doctor:json": source.managedRootScripts["doctor:json"],
+            }
+          : source.managedFrontendScripts["full-stack"]),
+        ...(target.projectionSourceFrontendScripts?.[profile] ?? {}),
+      };
       await writeFile(
         join(root, "package.json"),
         `${JSON.stringify(
