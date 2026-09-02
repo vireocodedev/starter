@@ -1108,9 +1108,17 @@ test("frontend performance projection materializes immutable candidate bytes whe
     const target = join(root, "operations-ui");
     await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
     const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
-    for (const baseline of policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend.filter(baseline =>
+    const lighthouseBaselines = policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend.filter(baseline =>
       baseline.path.startsWith("scripts/lighthouse-"),
-    )) {
+    );
+    assert.deepEqual(lighthouseBaselines.map(baseline => baseline.path).sort(), [
+      "scripts/lighthouse-audit-support.mjs",
+      "scripts/lighthouse-audit-support.test.mjs",
+      "scripts/lighthouse-budget.mjs",
+      "scripts/lighthouse-policy.mjs",
+      "scripts/lighthouse-policy.test.mjs",
+    ]);
+    for (const baseline of lighthouseBaselines) {
       assert.equal(await readFile(join(target, baseline.path), "utf8"), baseline.targetContent, baseline.path);
     }
   } finally {
