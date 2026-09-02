@@ -853,7 +853,7 @@ async function upgradeProjectWithPolicy(
     if (current !== undefined && current !== value)
       throw new VireoUpgradeError(
         "VIR-UPG-003",
-        `Managed package.json script ${name} differs from the declared target; resolve the customization before upgrading.`,
+        `Managed package.json scripts.${name} differs from the declared target; resolve the customization before upgrading.`,
       );
   }
   targetRootManifest.scripts = {

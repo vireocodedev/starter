@@ -387,10 +387,12 @@ function syntheticCandidateTargetRelease(policy) {
 function candidatePolicyForTest(sourcePolicy) {
   const candidateRelease = syntheticCandidateTargetRelease(sourcePolicy);
   const policy = structuredClone(sourcePolicy);
-  policy.releaseGraph.publicRelease = adjacentTargetRelease;
-  policy.releaseGraph.previousRelease = adjacentTargetRelease;
+  const candidateEdge = policy.releaseGraph.edges.find(edge => edge.to === candidateRelease);
+  if (!candidateEdge) throw new Error("Synthetic candidate policy requires an adjacent incoming edge.");
+  policy.releaseGraph.publicRelease = candidateEdge.from;
+  policy.releaseGraph.previousRelease = candidateEdge.from;
   policy.releaseGraph.candidateRelease = candidateRelease;
-  policy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease).status = "current";
+  policy.releaseGraph.releases.find(release => release.release === candidateEdge.from).status = "current";
   policy.releaseGraph.releases.find(release => release.release === candidateRelease).status = "candidate";
   return policy;
 }
@@ -813,7 +815,7 @@ test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves a
     await writeFile(managedPath, `${JSON.stringify(sourceManaged, null, 2)}\n`);
     await assert.rejects(
       upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy),
-      error => error.code === "VIR-UPG-003" && /scripts\.doctor:json/u.test(error.message),
+      error => error.code === "VIR-UPG-003" && /package\.json scripts\.doctor:json/u.test(error.message),
     );
     delete manifest.scripts["doctor:json"];
     await writeFile(join(root, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
