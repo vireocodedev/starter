@@ -139,7 +139,7 @@ test("synchronizes release contracts and public version documentation from sourc
     );
     assert.match(
       readFileSync(join(root, "docs", "roadmap", "phase-0", "gap-register.md"), "utf8"),
-      /create-vireo` 0\.3\.0 declares the current 0\.2\.0→0\.3\.0.*0\.1\.0→0\.2\.0 edge remains retained historical evidence/u,
+      /create-vireo` 0\.3\.0 declares the current 0\.2\.0→0\.3\.0.*Earlier supported pairs remain retained historical evidence/u,
     );
     assert.match(
       readFileSync(join(root, "docs", "roadmap", "phase-0", "repository-topology.md"), "utf8"),
@@ -271,6 +271,72 @@ test("synchronizes release contracts and public version documentation from sourc
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("synchronizes two consecutive releases with stable gap-register guidance", async () => {
+  const root = makeFixture();
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    stageNextCandidateRelease(root);
+    await synchronizeFixtureDocumentationRelease(root);
+
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-0", "gap-register.md"), "utf8"),
+      /create-vireo` 0\.4\.0 declares the current 0\.3\.0→0\.4\.0.*Earlier supported pairs remain retained historical evidence/u,
+    );
+    assert.equal(
+      readFileSync(join(root, "docs", "roadmap", "phase-5", "evidence", "hosted-demo-2026-08-28.md"), "utf8"),
+      `Historical hosted-demo evidence: create-vireo@0.2.0 ${"a".repeat(40)}.\n`,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function stageNextCandidateRelease(root) {
+  const createPackagePath = join(root, "packages", "create-vireo", "package.json");
+  const createPackage = readJson(createPackagePath);
+  createPackage.version = "0.4.0";
+  writeJson(createPackagePath, createPackage);
+
+  const sourcePath = join(root, "packages", "create-vireo", "src", "index.ts");
+  const source = readFileSync(sourcePath, "utf8")
+    .replace(`TEMPLATE_COMMIT = "${"b".repeat(40)}"`, `TEMPLATE_COMMIT = "${"c".repeat(40)}"`)
+    .replace('CREATE_VIREO_PACKAGE_VERSION = "0.3.0"', 'CREATE_VIREO_PACKAGE_VERSION = "0.4.0"');
+  writeFileSync(sourcePath, source);
+
+  const upgradePolicyPath = join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json");
+  const upgradePolicy = readJson(upgradePolicyPath);
+  upgradePolicy.releaseGraph.candidateRelease = "0.4.0";
+  upgradePolicy.releaseGraph.releases.push({
+    release: "0.4.0",
+    status: "candidate",
+    templateCommit: "c".repeat(40),
+    rootVireoScript: "npx --yes --package=create-vireo@0.3.0 vireo",
+    starterJvmVersion: "0.4.0",
+  });
+  upgradePolicy.releaseGraph.edges.push({
+    from: "0.3.0",
+    to: "0.4.0",
+    lockfileRefresh: "not-required",
+    applicationOwnedActions: [],
+  });
+  writeJson(upgradePolicyPath, upgradePolicy);
+
+  const projectUpgradePath = join(root, "contracts", "project-upgrade-policy.json");
+  const projectUpgrade = readJson(projectUpgradePath);
+  projectUpgrade.previousRelease = "0.3.0";
+  projectUpgrade.candidateRelease = "0.4.0";
+  projectUpgrade.publicationState = "candidate";
+  projectUpgrade.finalization = { targetTemplateCommit: "c".repeat(40) };
+  projectUpgrade.releaseCoordinates["0.4.0"] = {
+    createVireo: "0.4.0",
+    templateVersion: "0.4.0",
+    templateCommit: "c".repeat(40),
+    starterJvmVersion: "0.4.0",
+    status: "candidate",
+  };
+  writeJson(projectUpgradePath, projectUpgrade);
+}
 
 test("fails closed when an allowlisted current site reference changes form", async () => {
   const root = makeFixture();

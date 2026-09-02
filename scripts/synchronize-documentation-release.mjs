@@ -667,7 +667,7 @@ function synchronizeAdditionalCurrentGuidance({
   const gapRegister = replaceRequired(
     readFileSync(gapRegisterPath, "utf8"),
     `Public \`create-vireo\` ${publicUpgradeRelease} declares the current ${historicalEdge} dry-run/apply/refusal/ownership edge; frontend/full-stack fixtures exercise the transactional managed additions and sample-removal provenance while preserving application-owned source. Earlier supported pairs remain retained historical evidence`,
-    `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} dry-run/apply/refusal/ownership edge; frontend/full-stack fixtures exercise the transactional managed additions and sample-removal provenance while preserving application-owned source. The ${historicalEdge} edge remains retained historical evidence`,
+    `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} dry-run/apply/refusal/ownership edge; frontend/full-stack fixtures exercise the transactional managed additions and sample-removal provenance while preserving application-owned source. Earlier supported pairs remain retained historical evidence`,
     "docs/roadmap/phase-0/gap-register.md current adjacent release edge",
   );
 
