@@ -674,6 +674,8 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
             "--",
             "create-vireo",
             join(consumerRoot, "dry-run"),
+            "--profile",
+            "frontend",
             "--dry-run",
             "--json",
             "--yes",

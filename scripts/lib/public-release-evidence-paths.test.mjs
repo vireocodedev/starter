@@ -12,6 +12,27 @@ import {
 } from "./public-release-evidence-paths.mjs";
 import { validateReleaseSbomManifest } from "./release-sbom-evidence.mjs";
 
+function attestationPolicy() {
+  return {
+    schemaVersion: 3,
+    repository: "vireocodedev/vireo",
+    trust: {
+      repositoryId: "1304974749",
+      workflowIdentity:
+        "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main",
+      workflowRef: "refs/heads/main",
+      workflowName: "Attest public release SBOMs",
+      oidcIssuer: "https://token.actions.githubusercontent.com",
+      allowedTriggers: ["workflow_dispatch", "workflow_run"],
+      runnerEnvironment: "github-hosted",
+      sourceRepositoryVisibility: "public",
+      minimumTrustedWorkflowCommit: "a".repeat(40),
+    },
+    npm: { expectedSubjectCount: 1, packages: [{ name: "example", directory: "example", sbomId: "npm-example" }] },
+    maven: { group: "com.example", expectedSubjectCount: 0, modules: [] },
+  };
+}
+
 test("collector defaults to repository-relative paths for release attestation", () => {
   const repositoryRoot = "/workspace/vireo";
   const outputRoot = join(repositoryRoot, ".public-release-evidence");
@@ -38,11 +59,7 @@ test("default collector validates SBOMs and mappings from its output root", t =>
   mkdirSync(join(outputRoot, "sbom"), { recursive: true });
   mkdirSync(join(outputRoot, "mappings"), { recursive: true });
   writeFileSync(join(outputRoot, "subjects", "npm", "example-1.2.3.tgz"), "exact public bytes");
-  const policy = {
-    schemaVersion: 2,
-    npm: { expectedSubjectCount: 1, packages: [{ name: "example", directory: "example", sbomId: "npm-example" }] },
-    maven: { group: "com.example", expectedSubjectCount: 0, modules: [] },
-  };
+  const policy = attestationPolicy();
   const manifest = {
     schemaVersion: 2,
     versions: { npm: { example: "1.2.3" }, maven: { group: "com.example", version: "1.2.3" } },
@@ -100,11 +117,7 @@ test("nested collector output records paths relative to its evidence root and va
     outputRelativePaths: true,
   });
 
-  const policy = {
-    schemaVersion: 2,
-    npm: { expectedSubjectCount: 1, packages: [{ name: "example", directory: "example", sbomId: "npm-example" }] },
-    maven: { group: "com.example", expectedSubjectCount: 0, modules: [] },
-  };
+  const policy = attestationPolicy();
   const manifest = {
     schemaVersion: 2,
     versions: { npm: { example: "1.2.3" }, maven: { group: "com.example", version: "1.2.3" } },

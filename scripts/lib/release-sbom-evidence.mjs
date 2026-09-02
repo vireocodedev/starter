@@ -17,7 +17,35 @@ function normalizedSubjectPath(path) {
 
 export function validateReleaseSbomPolicy(policy) {
   const problems = [];
-  if (policy?.schemaVersion !== 2) problems.push(`Unsupported attestation policy schema ${policy?.schemaVersion}`);
+  if (policy?.schemaVersion !== 3) problems.push(`Unsupported attestation policy schema ${policy?.schemaVersion}`);
+  const trust = policy?.trust;
+  if (!/^\d+$/u.test(trust?.repositoryId ?? "")) problems.push("attestation trust must declare an exact repository id");
+  if (
+    trust?.workflowIdentity !==
+    `https://github.com/${policy?.repository}/.github/workflows/attest-public-release.yml@${trust?.workflowRef}`
+  ) {
+    problems.push("attestation trust must declare the canonical workflow identity");
+  }
+  if (trust?.workflowRef !== "refs/heads/main")
+    problems.push("attestation trust must bind the canonical main workflow ref");
+  if (trust?.workflowName !== "Attest public release SBOMs")
+    problems.push("attestation trust must bind the canonical attester workflow name");
+  if (trust?.oidcIssuer !== "https://token.actions.githubusercontent.com")
+    problems.push("attestation trust must bind the GitHub Actions OIDC issuer");
+  if (
+    !Array.isArray(trust?.allowedTriggers) ||
+    trust.allowedTriggers.length === 0 ||
+    new Set(trust.allowedTriggers).size !== trust.allowedTriggers.length ||
+    trust.allowedTriggers.some(trigger => !["workflow_dispatch", "workflow_run"].includes(trigger))
+  ) {
+    problems.push("attestation trust must declare unique supported workflow triggers");
+  }
+  if (!/^[0-9a-f]{40}$/u.test(trust?.minimumTrustedWorkflowCommit ?? ""))
+    problems.push("attestation trust must declare an exact minimum trusted workflow commit");
+  if (trust?.runnerEnvironment !== "github-hosted")
+    problems.push("attestation trust must bind the GitHub-hosted runner environment");
+  if (trust?.sourceRepositoryVisibility !== "public")
+    problems.push("attestation trust must bind public repository visibility at signing");
 
   const npmPackages = policy?.npm?.packages ?? [];
   const mavenModules = policy?.maven?.modules ?? [];

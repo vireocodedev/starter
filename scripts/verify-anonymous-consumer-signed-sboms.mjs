@@ -11,8 +11,7 @@ import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const predicateType = "https://cyclonedx.org/bom";
-const sourceRef = "refs/heads/main";
-const oidcIssuer = "https://token.actions.githubusercontent.com";
+const commitPattern = /^[0-9a-f]{40}$/u;
 
 function argumentValue(arguments_, name) {
   const index = arguments_.indexOf(name);
@@ -44,6 +43,21 @@ function sameRelease(left, right) {
     JSON.stringify(left?.npm) === JSON.stringify(right.npm) &&
     JSON.stringify(left?.maven) === JSON.stringify(right.maven)
   );
+}
+
+function trustedAttestationPolicy(policy) {
+  return {
+    repository: policy.repository,
+    repositoryId: policy.trust.repositoryId,
+    workflowIdentity: policy.trust.workflowIdentity,
+    workflowRef: policy.trust.workflowRef,
+    workflowName: policy.trust.workflowName,
+    oidcIssuer: policy.trust.oidcIssuer,
+    allowedTriggers: policy.trust.allowedTriggers,
+    runnerEnvironment: policy.trust.runnerEnvironment,
+    sourceRepositoryVisibility: policy.trust.sourceRepositoryVisibility,
+    minimumTrustedWorkflowCommit: policy.trust.minimumTrustedWorkflowCommit,
+  };
 }
 
 /**
@@ -130,6 +144,8 @@ export function signedSbomVerificationPlan({
   return {
     releaseId: release.id,
     releaseTagCommit: evidence.releaseTagCommit,
+    verifierSourceCommit: evidence.verifierSourceCommit,
+    trust: trustedAttestationPolicy(policy),
     subjects: subjects.toSorted((left, right) => left.path.localeCompare(right.path)),
   };
 }
@@ -140,6 +156,63 @@ function actualRun(uri, repository) {
   );
   if (!match) throw new Error("verified certificate has no canonical GitHub Actions run invocation URI");
   return { id: match[1], attempt: match[2], url: uri };
+}
+
+function attesterSourceCommit(certificate) {
+  const fields = ["githubWorkflowSHA", "buildSignerDigest", "sourceRepositoryDigest", "buildConfigDigest"];
+  const values = fields.map(field => certificate?.[field]);
+  if (values.some(value => !commitPattern.test(value ?? "")))
+    throw new Error("verified certificate has a malformed attester source commit.");
+  if (new Set(values).size !== 1)
+    throw new Error("verified certificate attester source commit fields are not self-consistent.");
+  return values[0];
+}
+
+function defaultIsAncestor(ancestor, descendant) {
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", ancestor, descendant], {
+      cwd: repositoryRoot,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch (error) {
+    if (error && typeof error === "object" && "status" in error && error.status === 1) return false;
+    throw error;
+  }
+}
+
+function cachedIsAncestor({ ancestor, descendant, isAncestor, cache }) {
+  const key = `${ancestor}:${descendant}`;
+  if (!cache.has(key)) cache.set(key, Boolean(isAncestor(ancestor, descendant)));
+  return cache.get(key);
+}
+
+function assertTrustedCertificate({ certificate, trust, attesterCommit }) {
+  const expectedCertificate = {
+    subjectAlternativeName: trust.workflowIdentity,
+    githubWorkflowRepository: trust.repository,
+    githubWorkflowRef: trust.workflowRef,
+    githubWorkflowName: trust.workflowName,
+    buildSignerURI: trust.workflowIdentity,
+    sourceRepositoryURI: `https://github.com/${trust.repository}`,
+    sourceRepositoryRef: trust.workflowRef,
+    buildConfigURI: trust.workflowIdentity,
+    sourceRepositoryIdentifier: trust.repositoryId,
+    runnerEnvironment: trust.runnerEnvironment,
+    sourceRepositoryVisibilityAtSigning: trust.sourceRepositoryVisibility,
+  };
+  for (const [field, expected] of Object.entries(expectedCertificate)) {
+    if (certificate?.[field] !== expected)
+      throw new Error(`verified certificate ${field} does not match the canonical attester identity.`);
+  }
+  if (certificate?.issuer !== trust.oidcIssuer) throw new Error("verified certificate has an unexpected OIDC issuer.");
+  for (const field of ["githubWorkflowTrigger", "buildTrigger"]) {
+    if (!trust.allowedTriggers.includes(certificate?.[field]))
+      throw new Error(`verified certificate ${field} is not an allowed attester trigger.`);
+  }
+  if (certificate.githubWorkflowTrigger !== certificate.buildTrigger)
+    throw new Error("verified certificate trigger fields are not self-consistent.");
+  return attesterCommit;
 }
 
 function expectedSbomComponent(subject) {
@@ -170,7 +243,13 @@ function validateSignedCycloneDx({ predicate, subject }) {
 }
 
 /** Parses and enforces the machine-readable result returned by `gh`, not merely its exit status. */
-export function verifiedAttestationRecord({ output, subject, repository, releaseTagCommit, certIdentity }) {
+export function verifiedAttestationRecord({
+  output,
+  subject,
+  plan,
+  isAncestor = defaultIsAncestor,
+  ancestryCache = new Map(),
+}) {
   let entries;
   try {
     entries = JSON.parse(output);
@@ -181,36 +260,47 @@ export function verifiedAttestationRecord({ output, subject, repository, release
     throw new Error("gh attestation verify returned no verified attestations.");
 
   const actual = [];
+  let ignoredFutureAttestationCount = 0;
   for (const entry of entries) {
     if (!entry?.attestation?.bundle) throw new Error("gh attestation verify returned no attestation bundle.");
     const result = entry?.verificationResult;
     const certificate = result?.signature?.certificate;
+    const attesterCommit = attesterSourceCommit(certificate);
+    if (
+      attesterCommit !== plan.verifierSourceCommit &&
+      cachedIsAncestor({
+        ancestor: plan.verifierSourceCommit,
+        descendant: attesterCommit,
+        isAncestor,
+        cache: ancestryCache,
+      })
+    ) {
+      ignoredFutureAttestationCount += 1;
+      continue;
+    }
+    if (
+      !cachedIsAncestor({
+        ancestor: plan.trust.minimumTrustedWorkflowCommit,
+        descendant: attesterCommit,
+        isAncestor,
+        cache: ancestryCache,
+      }) ||
+      !cachedIsAncestor({
+        ancestor: attesterCommit,
+        descendant: plan.verifierSourceCommit,
+        isAncestor,
+        cache: ancestryCache,
+      })
+    ) {
+      throw new Error("verified certificate attester source commit is outside the trusted workflow ancestry window.");
+    }
     const matchingSubject = result?.statement?.subject?.find(candidate => candidate?.digest?.sha256 === subject.sha256);
     if (!matchingSubject)
       throw new Error(`verified attestation does not bind ${subject.path} to its exact SHA-256 digest.`);
     if (result?.statement?.predicateType !== predicateType)
       throw new Error(`verified attestation for ${subject.path} has an unexpected predicate.`);
     const sbom = validateSignedCycloneDx({ predicate: result.statement.predicate, subject });
-    const expectedCertificate = {
-      subjectAlternativeName: certIdentity,
-      githubWorkflowRepository: repository,
-      githubWorkflowRef: sourceRef,
-      githubWorkflowSHA: releaseTagCommit,
-      buildSignerURI: certIdentity,
-      buildSignerDigest: releaseTagCommit,
-      sourceRepositoryURI: `https://github.com/${repository}`,
-      sourceRepositoryDigest: releaseTagCommit,
-      sourceRepositoryRef: sourceRef,
-      buildConfigURI: certIdentity,
-      buildConfigDigest: releaseTagCommit,
-    };
-    for (const [field, expected] of Object.entries(expectedCertificate)) {
-      if (certificate?.[field] !== expected)
-        throw new Error(`verified certificate ${field} does not match the canonical release identity.`);
-    }
-    if (certificate?.issuer !== oidcIssuer) {
-      throw new Error("verified certificate has an unexpected OIDC issuer.");
-    }
+    assertTrustedCertificate({ certificate, trust: plan.trust, attesterCommit });
     const timestamps = result?.verifiedTimestamps;
     if (!Array.isArray(timestamps) || timestamps.length === 0)
       throw new Error("verified attestation has no verified timestamp.");
@@ -218,10 +308,13 @@ export function verifiedAttestationRecord({ output, subject, repository, release
       statement: { subjectSha256: matchingSubject.digest.sha256, predicateType: result.statement.predicateType },
       sbom,
       certificate: {
+        attesterSourceCommit: attesterCommit,
         subjectAlternativeName: certificate.subjectAlternativeName,
         githubWorkflowRepository: certificate.githubWorkflowRepository,
         githubWorkflowRef: certificate.githubWorkflowRef,
         githubWorkflowSHA: certificate.githubWorkflowSHA,
+        githubWorkflowName: certificate.githubWorkflowName,
+        githubWorkflowTrigger: certificate.githubWorkflowTrigger,
         buildSignerURI: certificate.buildSignerURI,
         buildSignerDigest: certificate.buildSignerDigest,
         sourceRepositoryURI: certificate.sourceRepositoryURI,
@@ -229,22 +322,39 @@ export function verifiedAttestationRecord({ output, subject, repository, release
         sourceRepositoryRef: certificate.sourceRepositoryRef,
         buildConfigURI: certificate.buildConfigURI,
         buildConfigDigest: certificate.buildConfigDigest,
-        run: actualRun(certificate.runInvocationURI, repository),
+        buildTrigger: certificate.buildTrigger,
+        sourceRepositoryIdentifier: certificate.sourceRepositoryIdentifier,
+        run: actualRun(certificate.runInvocationURI, plan.trust.repository),
       },
       verifiedTimestampCount: timestamps.length,
     });
   }
-  return actual;
+  if (actual.length === 0)
+    throw new Error(
+      `gh attestation verify returned no eligible attestations within the trusted workflow window for ${subject.path}.`,
+    );
+  return { attestations: actual, ignoredFutureAttestationCount };
 }
 
-export function verifySignedSbomPlan({ plan, repository, execute = execFileSync, run, onVerified = () => {} }) {
-  const certIdentity = `https://github.com/${repository}/.github/workflows/attest-public-release.yml@refs/heads/main`;
+export function verifySignedSbomPlan({
+  plan,
+  repository,
+  execute = execFileSync,
+  isAncestor = defaultIsAncestor,
+  run,
+  onVerified = () => {},
+}) {
+  if (repository !== plan.trust.repository)
+    throw new Error("signed SBOM verifier repository does not match its trust policy.");
+  const ancestryCache = new Map();
   const verification = {
     repository,
     predicateType,
-    certIdentity,
-    sourceRef,
-    sourceDigest: plan.releaseTagCommit,
+    certIdentity: plan.trust.workflowIdentity,
+    sourceRef: plan.trust.workflowRef,
+    releaseTagCommit: plan.releaseTagCommit,
+    verifierSourceCommit: plan.verifierSourceCommit,
+    minimumTrustedWorkflowCommit: plan.trust.minimumTrustedWorkflowCommit,
     run,
   };
   const verifiedSubjects = [];
@@ -260,13 +370,11 @@ export function verifySignedSbomPlan({ plan, repository, execute = execFileSync,
         "--predicate-type",
         predicateType,
         "--cert-identity",
-        certIdentity,
+        plan.trust.workflowIdentity,
         "--cert-oidc-issuer",
-        oidcIssuer,
+        plan.trust.oidcIssuer,
         "--source-ref",
-        sourceRef,
-        "--source-digest",
-        plan.releaseTagCommit,
+        plan.trust.workflowRef,
         "--format",
         "json",
       ],
@@ -276,12 +384,12 @@ export function verifySignedSbomPlan({ plan, repository, execute = execFileSync,
         env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" },
       },
     );
-    const attestations = verifiedAttestationRecord({
+    const record = verifiedAttestationRecord({
       output: executeResult,
       subject,
-      repository,
-      releaseTagCommit: plan.releaseTagCommit,
-      certIdentity,
+      plan,
+      isAncestor,
+      ancestryCache,
     });
     verifiedSubjects.push({
       path: subject.path,
@@ -289,7 +397,7 @@ export function verifySignedSbomPlan({ plan, repository, execute = execFileSync,
       coordinate: subject.coordinate,
       ecosystem: subject.ecosystem,
       sbomId: subject.sbomId,
-      verification: { ...verification, attestations },
+      verification: { ...verification, ...record },
     });
     onVerified(verifiedSubjects.at(-1));
   }
@@ -313,7 +421,7 @@ function main() {
         : "local",
   };
   const summary = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     evidenceClass: "anonymous-consumer-signed-sbom-verification",
     status: "running",
     releaseId: release.id,
@@ -322,6 +430,8 @@ function main() {
   try {
     const plan = signedSbomVerificationPlan({ evidenceRoot, release, policy, gauntletPolicy });
     summary.releaseTagCommit = plan.releaseTagCommit;
+    summary.verifierSourceCommit = plan.verifierSourceCommit;
+    summary.minimumTrustedWorkflowCommit = plan.trust.minimumTrustedWorkflowCommit;
     verifySignedSbomPlan({
       plan,
       repository: policy.repository,

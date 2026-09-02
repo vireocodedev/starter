@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -10,6 +11,13 @@ import {
   verifySignedSbomPlan,
 } from "./verify-anonymous-consumer-signed-sboms.mjs";
 
+const commits = {
+  floor: "a".repeat(40),
+  releaseTag: "c".repeat(40),
+  attester: "d".repeat(40),
+  verifier: "e".repeat(40),
+  future: "f".repeat(40),
+};
 const release = {
   id: "npm-1.2.3_jvm-4.5.6",
   createVireoVersion: "1.2.3",
@@ -18,8 +26,20 @@ const release = {
   maven: { group: "com.example", version: "4.5.6", modules: ["example-core"] },
 };
 const policy = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   repository: "vireocodedev/vireo",
+  trust: {
+    repositoryId: "1304974749",
+    workflowIdentity:
+      "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main",
+    workflowRef: "refs/heads/main",
+    workflowName: "Attest public release SBOMs",
+    oidcIssuer: "https://token.actions.githubusercontent.com",
+    allowedTriggers: ["workflow_dispatch", "workflow_run"],
+    runnerEnvironment: "github-hosted",
+    sourceRepositoryVisibility: "public",
+    minimumTrustedWorkflowCommit: commits.floor,
+  },
   npm: { expectedSubjectCount: 1, packages: [{ name: "example", directory: "example", sbomId: "npm-example" }] },
   maven: {
     group: "com.example",
@@ -82,8 +102,8 @@ function fixture(t) {
     JSON.stringify({
       status: "passed",
       release,
-      releaseTagCommit: "c".repeat(40),
-      verifierSourceCommit: "e".repeat(40),
+      releaseTagCommit: commits.releaseTag,
+      verifierSourceCommit: commits.verifier,
       requestedReleaseId: release.id,
       workflow: { run: "fixture" },
       findings: [],
@@ -107,7 +127,7 @@ function fixture(t) {
   );
   const manifest = {
     schemaVersion: 2,
-    source: { repository: "https://github.com/vireocodedev/vireo", commit: "e".repeat(40), clean: true },
+    source: { repository: "https://github.com/vireocodedev/vireo", commit: commits.verifier, clean: true },
     versions: { npm: { example: "1.2.3" }, maven: { group: "com.example", version: "4.5.6" } },
     subjects,
     sboms,
@@ -117,55 +137,74 @@ function fixture(t) {
   return { root, manifest, hash, manifestPath: join(publicRoot, "public-release-manifest.json") };
 }
 
-function verifiedOutput(subject) {
-  const commit = "c".repeat(40);
-  const identity = "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main";
+function trustedAncestry(ancestor, descendant) {
+  return ancestor[0] <= descendant[0];
+}
+
+function verifiedEntry(
+  subject,
+  { attesterCommit = commits.attester, trigger = "workflow_dispatch", buildTrigger = trigger } = {},
+) {
   const component =
     subject.ecosystem === "maven"
       ? { group: "com.example", name: "example-core", version: "4.5.6" }
       : { name: "example", version: "1.2.3" };
-  return JSON.stringify([
-    {
-      attestation: { bundle: { mediaType: "application/vnd.dev.sigstore.bundle.v0.3+json" } },
-      verificationResult: {
-        statement: {
-          predicateType: "https://cyclonedx.org/bom",
-          subject: [{ name: subject.path, digest: { sha256: subject.sha256 } }],
-          predicate: { bomFormat: "CycloneDX", specVersion: "1.6", metadata: { component } },
-        },
-        signature: {
-          certificate: {
-            subjectAlternativeName: identity,
-            issuer: "https://token.actions.githubusercontent.com",
-            githubWorkflowRepository: "vireocodedev/vireo",
-            githubWorkflowRef: "refs/heads/main",
-            githubWorkflowSHA: commit,
-            buildSignerURI: identity,
-            buildSignerDigest: commit,
-            sourceRepositoryURI: "https://github.com/vireocodedev/vireo",
-            sourceRepositoryDigest: commit,
-            sourceRepositoryRef: "refs/heads/main",
-            buildConfigURI: identity,
-            buildConfigDigest: commit,
-            runInvocationURI: "https://github.com/vireocodedev/vireo/actions/runs/123456/attempts/1",
-          },
-        },
-        verifiedTimestamps: [{ type: "Tlog", timestamp: "2026-01-01T00:00:00Z" }],
+  return {
+    attestation: { bundle: { mediaType: "application/vnd.dev.sigstore.bundle.v0.3+json" } },
+    verificationResult: {
+      statement: {
+        predicateType: "https://cyclonedx.org/bom",
+        subject: [{ name: subject.path, digest: { sha256: subject.sha256 } }],
+        predicate: { bomFormat: "CycloneDX", specVersion: "1.6", metadata: { component } },
       },
+      signature: {
+        certificate: {
+          subjectAlternativeName: policy.trust.workflowIdentity,
+          issuer: policy.trust.oidcIssuer,
+          githubWorkflowRepository: policy.repository,
+          githubWorkflowRef: policy.trust.workflowRef,
+          githubWorkflowName: policy.trust.workflowName,
+          githubWorkflowTrigger: trigger,
+          githubWorkflowSHA: attesterCommit,
+          buildSignerURI: policy.trust.workflowIdentity,
+          buildSignerDigest: attesterCommit,
+          runnerEnvironment: policy.trust.runnerEnvironment,
+          sourceRepositoryURI: `https://github.com/${policy.repository}`,
+          sourceRepositoryDigest: attesterCommit,
+          sourceRepositoryRef: policy.trust.workflowRef,
+          sourceRepositoryIdentifier: policy.trust.repositoryId,
+          sourceRepositoryVisibilityAtSigning: policy.trust.sourceRepositoryVisibility,
+          buildConfigURI: policy.trust.workflowIdentity,
+          buildConfigDigest: attesterCommit,
+          buildTrigger,
+          runInvocationURI: "https://github.com/vireocodedev/vireo/actions/runs/123456/attempts/1",
+        },
+      },
+      verifiedTimestamps: [{ type: "Tlog", timestamp: "2026-01-01T00:00:00Z" }],
     },
-  ]);
+  };
 }
 
-test("plans and verifies every exact npm and Maven subject against the release tag", t => {
+function verifiedOutput(subject, options) {
+  return JSON.stringify([verifiedEntry(subject, options)]);
+}
+
+test("plans and verifies every exact npm and Maven subject against a distinct trusted attester commit", t => {
   const { root, hash } = fixture(t);
   const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
   assert.equal(plan.subjects.length, 2);
-  assert.equal(plan.releaseTagCommit, "c".repeat(40));
+  assert.equal(plan.releaseTagCommit, commits.releaseTag);
+  assert.equal(plan.verifierSourceCommit, commits.verifier);
   const calls = [];
+  let ancestryCalls = 0;
   const records = verifySignedSbomPlan({
     plan,
     repository: policy.repository,
     run: { id: "123" },
+    isAncestor: (ancestor, descendant) => {
+      ancestryCalls += 1;
+      return trustedAncestry(ancestor, descendant);
+    },
     execute: (command, arguments_) => {
       calls.push([command, arguments_]);
       return verifiedOutput(plan.subjects.find(subject => subject.absolutePath === arguments_[2]));
@@ -179,16 +218,102 @@ test("plans and verifies every exact npm and Maven subject against the release t
   assert.ok(
     calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--predicate-type", "https://cyclonedx.org/bom")),
   );
-  assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--source-digest", "c".repeat(40))));
+  assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--source-ref", "refs/heads/main")));
+  assert.ok(calls.every(([, arguments_]) => !arguments_.includes("--source-digest")));
   assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--format", "json")));
-  assert.equal(
-    records[0].verification.certIdentity,
-    "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main",
-  );
+  assert.equal(records[0].verification.releaseTagCommit, commits.releaseTag);
+  assert.equal(records[0].verification.verifierSourceCommit, commits.verifier);
+  assert.equal(records[0].verification.attestations[0].certificate.attesterSourceCommit, commits.attester);
   assert.equal(records[0].verification.attestations[0].certificate.run.id, "123456");
+  assert.equal(ancestryCalls, 3, "shared attester ancestry must be cached across subjects");
 });
 
-test("rejects missing, extra, cross-coordinate, and digest-drifted subjects", t => {
+test("accepts and records multiple eligible attestations while ignoring only future attestations", t => {
+  const { root, hash } = fixture(t);
+  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
+  const output = JSON.stringify([
+    verifiedEntry(plan.subjects[0], { attesterCommit: commits.attester, trigger: "workflow_dispatch" }),
+    verifiedEntry(plan.subjects[0], { attesterCommit: commits.verifier, trigger: "workflow_run" }),
+    verifiedEntry(plan.subjects[0], { attesterCommit: commits.future, trigger: "workflow_run" }),
+  ]);
+  const record = verifiedAttestationRecord({ output, subject: plan.subjects[0], plan, isAncestor: trustedAncestry });
+  assert.equal(record.attestations.length, 2);
+  assert.equal(record.ignoredFutureAttestationCount, 1);
+  assert.deepEqual(
+    record.attestations.map(attestation => attestation.certificate.attesterSourceCommit),
+    [commits.attester, commits.verifier],
+  );
+  assert.throws(
+    () =>
+      verifiedAttestationRecord({
+        output: verifiedOutput(plan.subjects[0], { attesterCommit: commits.future }),
+        subject: plan.subjects[0],
+        plan,
+        isAncestor: trustedAncestry,
+      }),
+    /no eligible attestations/u,
+  );
+});
+
+test("rejects malformed trusted-window certificates, lower-bound drift, and incorrect identity claims", t => {
+  const { root, hash } = fixture(t);
+  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
+  const input = { subject: plan.subjects[0], plan, isAncestor: trustedAncestry };
+  assert.throws(() => verifiedAttestationRecord({ ...input, output: "not-json" }), /malformed JSON/u);
+  const inconsistent = verifiedEntry(plan.subjects[0]);
+  inconsistent.verificationResult.signature.certificate.sourceRepositoryDigest = commits.verifier;
+  assert.throws(
+    () => verifiedAttestationRecord({ ...input, output: JSON.stringify([inconsistent]) }),
+    /self-consistent/u,
+  );
+  const malformed = verifiedEntry(plan.subjects[0]);
+  malformed.verificationResult.signature.certificate.githubWorkflowSHA = "not-a-commit";
+  assert.throws(
+    () => verifiedAttestationRecord({ ...input, output: JSON.stringify([malformed]) }),
+    /malformed attester source commit/u,
+  );
+  assert.throws(
+    () =>
+      verifiedAttestationRecord({
+        ...input,
+        output: verifiedOutput(plan.subjects[0], { attesterCommit: "9".repeat(40) }),
+      }),
+    /outside the trusted workflow ancestry window/u,
+  );
+  const wrongRepositoryId = verifiedEntry(plan.subjects[0]);
+  wrongRepositoryId.verificationResult.signature.certificate.sourceRepositoryIdentifier = "999";
+  assert.throws(
+    () => verifiedAttestationRecord({ ...input, output: JSON.stringify([wrongRepositoryId]) }),
+    /sourceRepositoryIdentifier/u,
+  );
+  const wrongTrigger = verifiedEntry(plan.subjects[0], { trigger: "push" });
+  assert.throws(
+    () => verifiedAttestationRecord({ ...input, output: JSON.stringify([wrongTrigger]) }),
+    /allowed attester trigger/u,
+  );
+  const mixedAllowedTriggers = verifiedEntry(plan.subjects[0], {
+    trigger: "workflow_dispatch",
+    buildTrigger: "workflow_run",
+  });
+  assert.throws(
+    () => verifiedAttestationRecord({ ...input, output: JSON.stringify([mixedAllowedTriggers]) }),
+    /trigger fields are not self-consistent/u,
+  );
+  const wrongSubjectDigest = verifiedEntry(plan.subjects[0]);
+  wrongSubjectDigest.verificationResult.statement.subject[0].digest.sha256 = "d".repeat(64);
+  assert.throws(
+    () => verifiedAttestationRecord({ ...input, output: JSON.stringify([wrongSubjectDigest]) }),
+    /exact SHA-256/u,
+  );
+  const wrongComponent = verifiedEntry(plan.subjects[0]);
+  wrongComponent.verificationResult.statement.predicate.metadata.component.name = "wrong-package";
+  assert.throws(
+    () => verifiedAttestationRecord({ ...input, output: JSON.stringify([wrongComponent]) }),
+    /does not describe/u,
+  );
+});
+
+test("rejects missing, extra, cross-coordinate, digest-drifted, and source-drifted evidence", t => {
   const { root, manifest, hash, manifestPath } = fixture(t);
   manifest.sboms[0].subjects = [manifest.subjects[1].path];
   writeFileSync(manifestPath, JSON.stringify(manifest));
@@ -200,7 +325,7 @@ test("rejects missing, extra, cross-coordinate, and digest-drifted subjects", t 
   manifest.subjects.push({
     ecosystem: "npm",
     coordinate: "example@1.2.3",
-    path: "subjects/npm/extra.tgz",
+    path: "subjects/npm/unmapped.tgz",
     sha256: "d".repeat(64),
   });
   writeFileSync(manifestPath, JSON.stringify(manifest));
@@ -208,40 +333,33 @@ test("rejects missing, extra, cross-coordinate, and digest-drifted subjects", t 
     () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash }),
     /missing or extra|no SBOM mapping/u,
   );
-});
-
-test("rejects source drift and malformed or falsely bound verifier output", t => {
-  const { root, manifest, hash, manifestPath } = fixture(t);
-  manifest.source.commit = "d".repeat(40);
+  manifest.subjects.pop();
+  manifest.source.commit = commits.attester;
   writeFileSync(manifestPath, JSON.stringify(manifest));
   assert.throws(
     () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash }),
     /source commit/u,
   );
-  manifest.source.commit = "e".repeat(40);
+});
+
+test("rejects actual on-disk exact-subject digest drift", t => {
+  const { root, manifest, manifestPath } = fixture(t);
+  const evidenceRoot = join(root, "public-release-evidence");
+  const diskHash = path => createHash("sha256").update(readFileSync(path)).digest("hex");
+  for (const subject of manifest.subjects) subject.sha256 = diskHash(join(evidenceRoot, subject.path));
+  for (const mapping of manifest.sboms) {
+    writeFileSync(
+      join(evidenceRoot, mapping.checksums),
+      `${mapping.subjects
+        .map(path => `${manifest.subjects.find(subject => subject.path === path).sha256}  ${path}`)
+        .join("\n")}\n`,
+    );
+  }
   writeFileSync(manifestPath, JSON.stringify(manifest));
-  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
-  const input = {
-    subject: plan.subjects[0],
-    repository: policy.repository,
-    releaseTagCommit: plan.releaseTagCommit,
-    certIdentity: "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main",
-  };
-  assert.throws(() => verifiedAttestationRecord({ ...input, output: "not-json" }), /malformed JSON/u);
-  const falseOutput = JSON.parse(verifiedOutput(plan.subjects[0]));
-  falseOutput[0].verificationResult.signature.certificate.sourceRepositoryDigest = "d".repeat(40);
+  writeFileSync(join(evidenceRoot, manifest.subjects[0].path), "drifted exact public bytes");
   assert.throws(
-    () => verifiedAttestationRecord({ ...input, output: JSON.stringify(falseOutput) }),
-    /sourceRepositoryDigest/u,
-  );
-  falseOutput[0].verificationResult.signature.certificate.sourceRepositoryDigest = "c".repeat(40);
-  falseOutput[0].verificationResult.statement.subject[0].digest.sha256 = "d".repeat(64);
-  assert.throws(() => verifiedAttestationRecord({ ...input, output: JSON.stringify(falseOutput) }), /exact SHA-256/u);
-  falseOutput[0].verificationResult.statement.subject[0].digest.sha256 = plan.subjects[0].sha256;
-  falseOutput[0].verificationResult.statement.predicate.metadata.component.name = "wrong-package";
-  assert.throws(
-    () => verifiedAttestationRecord({ ...input, output: JSON.stringify(falseOutput) }),
-    /does not describe/u,
+    () => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash: diskHash }),
+    /exact public subject digest drifted/u,
   );
 });
 
@@ -257,7 +375,7 @@ test("does not trust a passed top-level gauntlet status without complete final e
   );
 });
 
-test("workflow isolates signed-SBOM verification after the token-free gauntlet", () => {
+test("workflow isolates signed-SBOM verification after the token-free gauntlet with complete history", () => {
   const workflow = readFileSync(
     new URL("../.github/workflows/anonymous-consumer-gauntlet.yml", import.meta.url),
     "utf8",
@@ -270,15 +388,17 @@ test("workflow isolates signed-SBOM verification after the token-free gauntlet",
   assert.match(job, /needs\.trusted-source\.result == 'success'/u);
   assert.match(job, /github\.event_name != 'pull_request'/u);
   assert.match(job, /attestations: read\n {6}contents: read/u);
+  assert.match(job, /fetch-depth: 0/u);
   assert.match(job, /actions\/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8\.0\.1/u);
   assert.match(job, /name: anonymous-consumer-gauntlet-evidence/u);
-  assert.match(job, /path: \$\{\{ runner\.temp \}\}\/anonymous-consumer-evidence/u);
   assert.match(job, /GH_TOKEN: \$\{\{ github\.token \}\}/u);
   const verifier = readFileSync(new URL("./verify-anonymous-consumer-signed-sboms.mjs", import.meta.url), "utf8");
   assert.match(verifier, /"--format",\s+"json"/u);
+  assert.doesNotMatch(verifier, /"--source-digest"/u);
+  assert.match(verifier, /merge-base", "--is-ancestor"/u);
+  assert.match(verifier, /cwd: repositoryRoot/u);
   assert.match(job, /anonymous-consumer-signed-sbom-evidence/u);
   assert.match(job, /Revalidate trusted main ancestry before verifier execution/u);
-  assert.match(job, /merge-base --is-ancestor "\$TRUSTED_SOURCE_COMMIT" origin\/main/u);
   assert.match(workflow, /workflow_run:/u);
   assert.match(workflow, /workflow_dispatch:/u);
   assert.match(workflow, /schedule:/u);

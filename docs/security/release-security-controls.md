@@ -203,6 +203,18 @@ verifies every subject against the CycloneDX predicate, exact workflow certifica
 identity, and `main` source ref, and retains subjects, manifests, checksums, SBOMs,
 and signed bundles for 90 days.
 
+The anonymous consumer verifier keeps the release-tag commit, its own checked-out
+verifier commit, and the SBOM-attester commit distinct. It does not pass the
+release tag as `gh attestation verify --source-digest`: that would incorrectly
+reject a valid attestation emitted after publication. Instead it derives the
+attester commit from the verified certificate, requires all certificate SHA claims
+to be identical, pins repository ID, workflow identity/name/ref, issuer, trigger,
+runner environment, and public visibility, then proves Git ancestry from the
+checked-in trusted workflow floor through the verifier source. It records every
+eligible attestation, ignores only certificate-verified candidates newer than the
+verifier, and fails closed for malformed or identity-invalid candidates in the
+trusted window.
+
 Hosted run
 [`33083933339`](https://github.com/vireocodedev/starter/actions/runs/33083933339)
 verified the earlier aggregate path for npm attestation
