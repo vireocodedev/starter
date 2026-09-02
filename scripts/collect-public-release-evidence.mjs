@@ -19,6 +19,7 @@ import {
   manifestEvidencePath,
   manifestEvidenceRoot,
   parsePublicEvidenceCollectorArguments,
+  preservesRepositoryCleanliness,
 } from "./lib/public-release-evidence-paths.mjs";
 import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
 
@@ -33,6 +34,19 @@ try {
 
 const { outputArgument, outputRelativePaths } = collectorArguments;
 const outputRoot = resolve(repositoryRoot, outputArgument);
+const outputIsGitignored = (() => {
+  try {
+    execFileSync("git", ["check-ignore", "--quiet", `${outputRoot}/`], { cwd: repositoryRoot, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+if (
+  process.env.GITHUB_ACTIONS === "true" &&
+  !preservesRepositoryCleanliness({ repositoryRoot, outputRoot, outputIsGitignored })
+)
+  throw new Error("Hosted public release evidence must be outside the checkout or a proven gitignored path.");
 if (existsSync(outputRoot)) throw new Error(`Public release evidence already exists: ${outputRoot}`);
 
 const policy = JSON.parse(

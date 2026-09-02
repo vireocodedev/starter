@@ -9,6 +9,7 @@ import {
   createVireo,
   findExampleReferences,
   removeExample,
+  renderFrontendDoctorScript,
   TEMPLATE_COMMIT,
   vireoProjectStatus,
 } from "../dist/index.js";
@@ -41,6 +42,22 @@ test("test fixture release identity tracks the private create-vireo version and 
     createVireoSource.match(/TEMPLATE_STARTER_JVM_BASELINE = "([^"]+)"/u)?.[1],
   );
   assert.match(fixtureReleaseIdentity.generatedStarterJvmVersion, /^\d+\.\d+\.\d+$/u);
+});
+
+test("fresh frontend Doctor projection matches the frozen 0.8.2 upgrade byte contract", async () => {
+  const path = join(tmpdir(), "vireo-frontend-doctor-projection.mjs");
+  const rendered = await renderFrontendDoctorScript(path);
+  const target = JSON.parse(
+    await readFile(new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.2.fixture.json", import.meta.url), "utf8"),
+  );
+  const upgradePolicy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
+  const baseline = upgradePolicy.releaseGraph.baselines["0.8.1->0.8.2"].frontend.find(
+    file => file.path === "scripts/vireo-frontend-doctor.mjs",
+  );
+  const digest = createHash("sha256").update(rendered).digest("hex");
+  assert.equal(digest, target.sha256);
+  assert.equal(Buffer.byteLength(rendered), target.bytes);
+  assert.equal(digest, baseline.targetSha256);
 });
 
 async function writeApplicationSkill(template, name) {

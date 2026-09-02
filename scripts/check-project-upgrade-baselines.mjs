@@ -22,7 +22,24 @@ const managedAdditions = [
 const frontendEvidence = new Map([
   [
     "scripts/vireo-frontend-doctor.mjs",
-    join(repositoryRoot, "packages", "create-vireo", "fixtures", "project-upgrades", "vireo-frontend-doctor.0.7.0.mjs"),
+    {
+      source: join(
+        repositoryRoot,
+        "packages",
+        "create-vireo",
+        "fixtures",
+        "project-upgrades",
+        "vireo-frontend-doctor.0.8.1.mjs",
+      ),
+      target: join(
+        repositoryRoot,
+        "packages",
+        "create-vireo",
+        "fixtures",
+        "project-upgrades",
+        "vireo-frontend-doctor.0.8.2.fixture.json",
+      ),
+    },
   ],
 ]);
 const sha256 = value => createHash("sha256").update(value).digest("hex");
@@ -82,40 +99,71 @@ for (const profile of ["full-stack", "frontend"]) {
   const files = activeBaselines[profile];
   if (!Array.isArray(files)) throw new Error(`${edge}:${profile} baseline list is missing.`);
   for (const file of files) {
-    if (!/^[a-f0-9]{64}$/u.test(file.targetSha256 ?? ""))
-      throw new Error(`${edge}:${profile}:${file.path} has no exact target hash.`);
     if (profile === "frontend") {
-      const fixturePath = frontendEvidence.get(file.path);
-      if (!fixturePath) throw new Error(`${edge}:frontend:${file.path} has no frozen Vireo-owned byte evidence.`);
-      const sourceBytes = readFileSync(fixturePath, "utf8");
+      const fixture = frontendEvidence.get(file.path);
+      if (!fixture) throw new Error(`${edge}:frontend:${file.path} has no frozen Vireo-owned byte evidence.`);
+      const sourceBytes = readFileSync(fixture.source, "utf8");
+      const targetFixture = JSON.parse(readFileSync(fixture.target, "utf8"));
+      if (
+        targetFixture.schemaVersion !== 1 ||
+        targetFixture.release !== targetRelease ||
+        targetFixture.path !== file.path ||
+        !/^[a-f0-9]{64}$/u.test(targetFixture.sha256 ?? "") ||
+        !Number.isSafeInteger(targetFixture.bytes) ||
+        targetFixture.bytes < 1
+      )
+        throw new Error(`${edge}:frontend:${file.path} has invalid frozen target byte evidence.`);
       if (sha256(sourceBytes) !== file.sourceSha256)
         throw new Error(`${edge}:frontend:${file.path} source hash differs from its frozen Vireo fixture.`);
       if (file.operation !== "update" || !file.transforms)
         throw new Error(`${edge}:frontend:${file.path} must be an exact transformed update.`);
       const targetBytes = applyTransforms(sourceBytes, file);
-      if (sha256(targetBytes) !== file.targetSha256)
+      if (Buffer.byteLength(targetBytes) !== targetFixture.bytes)
+        throw new Error(`${edge}:frontend:${file.path} target length differs from frozen Vireo byte evidence.`);
+      if (sha256(targetBytes) !== targetFixture.sha256 || targetFixture.sha256 !== file.targetSha256)
         throw new Error(`${edge}:frontend:${file.path} target hash differs from frozen Vireo byte evidence.`);
       checked += 1;
       continue;
     }
-    if (!sourceObjectExists(target.templateCommit, file.path))
-      throw new Error(`${edge}:${profile}:${file.path} is absent from the immutable target Template.`);
-    const targetBytes = gitObject(target.templateCommit, file.path);
-    if (sha256(targetBytes) !== file.targetSha256)
-      throw new Error(`${edge}:${profile}:${file.path} target hash differs from immutable Template bytes.`);
     if (file.operation === "add") {
+      if (!/^[a-f0-9]{64}$/u.test(file.targetSha256 ?? ""))
+        throw new Error(`${edge}:${profile}:${file.path} add has no exact target hash.`);
+      if (!sourceObjectExists(target.templateCommit, file.path))
+        throw new Error(`${edge}:${profile}:${file.path} add is absent from the immutable target Template.`);
+      const targetBytes = gitObject(target.templateCommit, file.path);
+      if (sha256(targetBytes) !== file.targetSha256)
+        throw new Error(`${edge}:${profile}:${file.path} add hash differs from immutable Template bytes.`);
       if (sourceObjectExists(source.templateCommit, file.path))
         throw new Error(`${edge}:${profile}:${file.path} unexpectedly exists in the source Template.`);
       if (file.targetContent !== targetBytes)
         throw new Error(`${edge}:${profile}:${file.path} stored target bytes differ from the immutable Template.`);
     } else if (file.operation === "update") {
+      if (!/^[a-f0-9]{64}$/u.test(file.sourceSha256 ?? "") || !/^[a-f0-9]{64}$/u.test(file.targetSha256 ?? ""))
+        throw new Error(`${edge}:${profile}:${file.path} update has no exact source/target hash.`);
+      if (!sourceObjectExists(source.templateCommit, file.path) || !sourceObjectExists(target.templateCommit, file.path))
+        throw new Error(`${edge}:${profile}:${file.path} update is absent from an immutable Template endpoint.`);
       const sourceBytes = gitObject(source.templateCommit, file.path);
+      const targetBytes = gitObject(target.templateCommit, file.path);
       if (sha256(sourceBytes) !== file.sourceSha256)
         throw new Error(`${edge}:${profile}:${file.path} source hash differs from immutable Template bytes.`);
+      if (sha256(targetBytes) !== file.targetSha256)
+        throw new Error(`${edge}:${profile}:${file.path} target hash differs from immutable Template bytes.`);
       if (file.targetContent !== undefined && file.targetContent !== targetBytes)
         throw new Error(`${edge}:${profile}:${file.path} stored target bytes differ from the immutable Template.`);
       if (file.transforms && applyTransforms(sourceBytes, file) !== targetBytes)
         throw new Error(`${edge}:${profile}:${file.path} transforms do not reproduce immutable Template bytes.`);
+    } else if (file.operation === "delete") {
+      if (!/^[a-f0-9]{64}$/u.test(file.sourceSha256 ?? "") || typeof file.sourceContent !== "string")
+        throw new Error(`${edge}:${profile}:${file.path} delete has no exact source bytes.`);
+      if (!sourceObjectExists(source.templateCommit, file.path))
+        throw new Error(`${edge}:${profile}:${file.path} delete is absent from the immutable source Template.`);
+      if (sourceObjectExists(target.templateCommit, file.path))
+        throw new Error(`${edge}:${profile}:${file.path} delete remains in the immutable target Template.`);
+      const sourceBytes = gitObject(source.templateCommit, file.path);
+      if (sha256(sourceBytes) !== file.sourceSha256 || file.sourceContent !== sourceBytes)
+        throw new Error(`${edge}:${profile}:${file.path} delete source differs from immutable Template bytes.`);
+    } else {
+      throw new Error(`${edge}:${profile}:${file.path} has an unsupported operation.`);
     }
     checked += 1;
   }
@@ -132,6 +180,16 @@ for (const profile of ["full-stack", "frontend"]) {
     throw new Error(`${historicalEdge}:${profile} must add only the declared managed application skills.`);
   if (new Set(files.map(file => file.path)).size !== managedAdditions.length)
     throw new Error(`${historicalEdge}:${profile} must declare each managed application skill once.`);
+  for (const file of files) {
+    const templatePath = `.vireo/application/${file.path}`;
+    if (sourceObjectExists("a670d7f95f720a91705c7c156d19e605582fb4c8", templatePath))
+      throw new Error(`${historicalEdge}:${profile}:${file.path} unexpectedly exists in the immutable source Template.`);
+    if (!sourceObjectExists("2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d", templatePath))
+      throw new Error(`${historicalEdge}:${profile}:${file.path} is absent from the immutable target Template.`);
+    const targetBytes = gitObject("2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d", templatePath);
+    if (sha256(targetBytes) !== file.targetSha256 || targetBytes !== file.targetContent)
+      throw new Error(`${historicalEdge}:${profile}:${file.path} differs from immutable target Template bytes.`);
+  }
   const profileFingerprint = JSON.stringify(files);
   if (expectedProfile === undefined) expectedProfile = profileFingerprint;
   else if (profileFingerprint !== expectedProfile)

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -8,6 +9,7 @@ import {
   manifestEvidenceRoot,
   outputRelativePathsOption,
   parsePublicEvidenceCollectorArguments,
+  preservesRepositoryCleanliness,
 } from "./public-release-evidence-paths.mjs";
 import { validateReleaseSbomManifest } from "./release-sbom-evidence.mjs";
 
@@ -73,8 +75,42 @@ test("nested collector output records paths relative to its evidence root and va
   );
   writeFileSync(join(outputRoot, "mappings", "npm-example.sha256"), `${"a".repeat(64)}  ${subjectPath}\n`);
   assert.deepEqual(validateReleaseSbomManifest(manifest, policy, { root: outputRoot }), []);
+  assert.equal(
+    preservesRepositoryCleanliness({ repositoryRoot, outputRoot }),
+    true,
+    "hosted evidence outside the checkout cannot make source.clean false before manifest capture",
+  );
+  assert.equal(
+    preservesRepositoryCleanliness({
+      repositoryRoot,
+      outputRoot: join(repositoryRoot, ".public-release-evidence"),
+      outputIsGitignored: true,
+    }),
+    true,
+    "the established gitignored attest-public-release output keeps source.clean true",
+  );
+  assert.equal(
+    preservesRepositoryCleanliness({ repositoryRoot, outputRoot: join(repositoryRoot, "unsafe-evidence") }),
+    false,
+    "an unignored checkout output can make source.clean false",
+  );
 });
 
 test("collector rejects ambiguous path modes", () => {
   assert.throws(() => parsePublicEvidenceCollectorArguments(["output", "--unknown"]), /Usage:/u);
+});
+
+test("a nonexistent established collector directory is proven gitignored before it is created", t => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), "vireo-public-evidence-ignore-"));
+  t.after(() => rmSync(repositoryRoot, { recursive: true, force: true }));
+  execFileSync("git", ["init", "--quiet"], { cwd: repositoryRoot });
+  writeFileSync(join(repositoryRoot, ".gitignore"), ".public-release-evidence/\n");
+  const outputRoot = join(repositoryRoot, ".public-release-evidence");
+  const ignored =
+    execFileSync("git", ["check-ignore", "--quiet", `${outputRoot}/`], {
+      cwd: repositoryRoot,
+      stdio: "ignore",
+    }) === undefined;
+  assert.equal(ignored, true);
+  assert.equal(preservesRepositoryCleanliness({ repositoryRoot, outputRoot, outputIsGitignored: ignored }), true);
 });

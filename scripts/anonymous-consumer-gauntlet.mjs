@@ -35,10 +35,12 @@ const observedDigests = new Map();
 const managedOriginals = new Map();
 const projectTrees = new Map();
 
-export function validateManagedProvenance({ root, manifest }) {
+export function validateManagedProvenance({ root, manifest, templateCommit }) {
   const problems = [];
   if (manifest?.schemaVersion !== 1 || !/^[0-9a-f]{40}$/u.test(manifest.templateCommit ?? ""))
     problems.push("invalid managed manifest identity");
+  if (templateCommit !== undefined && manifest?.templateCommit !== templateCommit)
+    problems.push("managed manifest Template commit does not match project metadata");
   const paths = new Set();
   for (const file of manifest?.files ?? []) {
     if (
@@ -487,7 +489,13 @@ async function executeOperation(operation, { environment, runRoot }) {
     )
       throw new Error("Upgraded consumer target identity drifted.");
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
-    const managedProblems = validateManagedProvenance({ root: operation.path, manifest: managed });
+    if (managed.templateCommit !== project.templateCommit || managed.templateCommit !== operation.target.template.commit)
+      throw new Error("Upgraded managed-file provenance does not bind the exact target Template commit.");
+    const managedProblems = validateManagedProvenance({
+      root: operation.path,
+      manifest: managed,
+      templateCommit: project.templateCommit,
+    });
     if (managedProblems.length > 0) throw new Error(managedProblems.join("\n"));
     for (const file of managed.files ?? [])
       if (!existsSync(join(operation.path, file.path)))
@@ -899,17 +907,19 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       ];
     }
     case "adjacent-public-upgrades": {
-      const target = upgradePolicy.candidateRelease ?? upgradePolicy.publicRelease;
-      const edges = (upgradePolicy.requiredEdges ?? []).filter(
-        edge => edge.from === upgradePolicy.maintenance?.priorCurrentUpgradeSource && edge.to === target,
-      );
-      const source = upgradePolicy.releaseCoordinates?.[upgradePolicy.maintenance?.priorCurrentUpgradeSource];
+      const target = release.createVireoVersion;
+      const edges = (upgradePolicy.requiredEdges ?? []).filter(edge => edge.to === target);
+      const [edge] = edges;
+      const source = upgradePolicy.releaseCoordinates?.[edge?.from];
       const targetCoordinate = upgradePolicy.releaseCoordinates?.[target];
       if (
         edges.length !== 1 ||
-        ![upgradePolicy.publicRelease, upgradePolicy.candidateRelease].includes(release.createVireoVersion) ||
+        target !== upgradePolicy.publicRelease ||
+        targetCoordinate?.createVireo !== release.createVireoVersion ||
+        targetCoordinate?.templateVersion !== release.template.version ||
+        targetCoordinate?.templateCommit !== release.template.commit ||
         !["historical", "current"].includes(source?.status) ||
-        !["current", "candidate"].includes(targetCoordinate?.status)
+        targetCoordinate?.status !== "current"
       ) {
         throw new Error(
           "Project-upgrade policy must expose an adjacent public edge for the current public create-vireo release.",
@@ -1027,6 +1037,19 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
               },
               profile,
               registry: "https://registry.npmjs.org",
+            },
+            {
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-doctor-json`,
+              executable: "corepack",
+              arguments: ["npm", "run", "--silent", "doctor:json"],
+              cwd: directory,
+              jsonValidator: value =>
+                validateDoctorJson(value, {
+                  project: basename(directory),
+                  profile,
+                  database: profile === "full-stack" ? "h2" : undefined,
+                  databaseMode: profile === "full-stack" ? "h2" : "frontend",
+                }),
             },
             {
               kind: "record-project-tree",

@@ -146,7 +146,7 @@ const managedSurfaces = [
   "package.json#scripts.vireo",
   "frontend/package.json#dependencies",
   "gradle.properties#starterVersion",
-  ".vireo/project.json#templateCommit,lastUpgradedBy,lastUpgrade",
+  ".vireo/project.json#templateCommit,templateVersion,templateTag,lastUpgradedBy,lastUpgrade",
   ".vireo/managed-files.json",
 ] as const;
 async function readJson<T>(path: string): Promise<T> {
@@ -554,16 +554,20 @@ function edgeBaselines(policy: UpgradePolicy, from: string | null, to: string | 
     const transformedTarget = resolveBaselineTargetContent(file);
     if (transformedTarget !== undefined && sha256(transformedTarget) !== file.targetSha256)
       throw new VireoUpgradeError("VIR-UPG-001", `Target content hash differs for ${file.path}`);
-    if (
-      ((file.operation === "add" || file.operation === "update") &&
-        transformedTarget === undefined &&
-        !file.transforms) ||
-      !file.targetSha256
-    )
-      throw new VireoUpgradeError(
-        "VIR-UPG-001",
-        `Managed ${file.operation} baseline requires target content for ${file.path}`,
-      );
+    if (file.operation === "add") {
+      if (file.sourceSha256 !== undefined || file.sourceContent !== undefined)
+        throw new VireoUpgradeError("VIR-UPG-001", `Managed add baseline must not declare source bytes: ${file.path}`);
+      if (!file.targetSha256 || transformedTarget === undefined)
+        throw new VireoUpgradeError("VIR-UPG-001", `Managed add baseline requires target bytes: ${file.path}`);
+    } else if (file.operation === "update") {
+      if (!file.sourceSha256 || (!file.targetSha256 || (transformedTarget === undefined && !file.transforms)))
+        throw new VireoUpgradeError("VIR-UPG-001", `Managed update baseline requires source and target bytes: ${file.path}`);
+    } else {
+      if (!file.sourceSha256 || file.sourceContent === undefined)
+        throw new VireoUpgradeError("VIR-UPG-001", `Managed delete baseline requires source bytes: ${file.path}`);
+      if (file.targetSha256 !== undefined || file.targetContent !== undefined || file.transforms !== undefined)
+        throw new VireoUpgradeError("VIR-UPG-001", `Managed delete baseline must not declare target bytes: ${file.path}`);
+    }
   }
   return files;
 }
@@ -605,6 +609,11 @@ async function baselineWriteContents(projectDirectory: string, baseline: EdgeBas
   if (target === undefined)
     throw new VireoUpgradeError("VIR-UPG-001", `Managed baseline has no resolved target content: ${baseline.path}`);
   return target;
+}
+function baselineTargetHash(baseline: EdgeBaseline | undefined) {
+  if (!baseline?.targetSha256)
+    throw new VireoUpgradeError("VIR-UPG-001", `Managed baseline has no target hash: ${baseline?.path ?? "unknown"}`);
+  return baseline.targetSha256;
 }
 function profileActions(actions: ApplicationOwnedActionPolicy[], profile: unknown): VireoUpgradeManualAction[] {
   const lockRefresh =
@@ -782,6 +791,10 @@ async function upgradeProjectWithPolicy(
       `No adjacent upgrade edge ${recordedRelease} -> ${target.release} is declared.`,
     );
   assertEqual(metadata.templateCommit, source.templateCommit, "source Template commit", "VIR-UPG-002");
+  if (metadata.templateVersion !== undefined)
+    assertEqual(metadata.templateVersion, source.release, "source Template version", "VIR-UPG-002");
+  if (metadata.templateTag !== undefined)
+    assertEqual(metadata.templateTag, `starter-template@${source.release}`, "source Template tag", "VIR-UPG-002");
   requirementsMatch(
     rootManifest,
     frontendManifest,
@@ -795,6 +808,7 @@ async function upgradeProjectWithPolicy(
   const existingManaged = await optionalJson<ManagedManifest>(join(projectDirectory, ".vireo/managed-files.json"));
   validateManagedManifest(existingManaged);
   if (existingManaged) {
+    assertEqual(existingManaged.templateCommit, source.templateCommit, "managed source Template commit", "VIR-UPG-002");
     for (const file of existingManaged.files) {
       const path = join(projectDirectory, file.path);
       if (!(await safeFileState(projectDirectory, file.path)) || sha256(await readFile(path)) !== file.sha256) {
@@ -806,6 +820,11 @@ async function upgradeProjectWithPolicy(
     }
   }
   const managedBaselines = edgeBaselines(policy, source.release, edge?.to, metadata.profile);
+  const receiptManagedSurfaces = [
+    ...managedSurfaces,
+    ...(frontendOnly ? Object.keys(target.managedRootScripts ?? {}).map(name => `package.json#scripts.${name}`) : []),
+    ...managedBaselines.map(baseline => baseline.path),
+  ];
   const baselineFiles = await Promise.all(
     managedBaselines.map(async baseline => ({ baseline, state: await baselineState(projectDirectory, baseline) })),
   );
@@ -821,6 +840,14 @@ async function upgradeProjectWithPolicy(
   if (generatedProblems.length)
     throw new VireoUpgradeError("VIR-UPG-006", `Generated/wire-contract drift: ${generatedProblems.join("; ")}`);
   const targetRootManifest = structuredClone(rootManifest);
+  for (const [name, value] of Object.entries(frontendOnly ? target.managedRootScripts ?? {} : {})) {
+    const current = targetRootManifest.scripts?.[name];
+    if (current !== undefined && current !== value)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        `Managed package.json script ${name} differs from the declared target; resolve the customization before upgrading.`,
+      );
+  }
   targetRootManifest.scripts = {
     ...targetRootManifest.scripts,
     vireo: target.rootVireoScript,
@@ -844,9 +871,9 @@ async function upgradeProjectWithPolicy(
       to: target.release,
       sourceTemplateCommit: source.templateCommit,
       targetTemplateCommit: target.templateCommit,
-      sourceTemplateVersion: metadata.templateVersion ?? source.release,
+      sourceTemplateVersion: source.release,
       targetTemplateVersion: target.release,
-      sourceTemplateTag: metadata.templateTag ?? `starter-template@${source.release}`,
+      sourceTemplateTag: `starter-template@${source.release}`,
       targetTemplateTag: `starter-template@${target.release}`,
       lockfileRefresh: "required",
     };
@@ -869,7 +896,7 @@ async function upgradeProjectWithPolicy(
       to: target.release,
       sourceTemplateCommit: recordSource.templateCommit,
       targetTemplateCommit: target.templateCommit,
-      managedSurfaces,
+      managedSurfaces: receiptManagedSurfaces,
       lockfileRefresh: "required",
       applicationOwnedActions: actions,
     }),
@@ -877,6 +904,7 @@ async function upgradeProjectWithPolicy(
   );
   const sourceManaged =
     existingManaged ?? (await managedManifest(projectDirectory, source.templateCommit, frontendOnly));
+  const baselineByPath = new Map(baselineFiles.map(file => [file.baseline.path, file.baseline]));
   const targetManagedFiles = [
     ...sourceManaged.files
       .filter(
@@ -888,7 +916,9 @@ async function upgradeProjectWithPolicy(
       .map(file => ({
         ...file,
         sha256:
-          file.path === "package.json"
+          baselineByPath.get(file.path)?.operation === "update"
+            ? baselineTargetHash(baselineByPath.get(file.path))
+            : file.path === "package.json"
             ? sha256(`${JSON.stringify(frontendOnly ? targetFrontendManifest : targetRootManifest, null, 2)}\n`)
             : file.path === "frontend/package.json"
               ? sha256(`${JSON.stringify(targetFrontendManifest, null, 2)}\n`)
@@ -902,7 +932,7 @@ async function upgradeProjectWithPolicy(
           !sourceManaged.files.some(sourceFile => sourceFile.path === file.baseline.path) &&
           file.baseline.operation !== "delete",
       )
-      .map(file => ({ path: file.baseline.path, sha256: file.baseline.targetSha256! })),
+      .map(file => ({ path: file.baseline.path, sha256: baselineTargetHash(file.baseline) })),
   ].sort((left, right) => left.path.localeCompare(right.path));
   const managedContents = `${JSON.stringify({ schemaVersion: 1, templateCommit: target.templateCommit, files: targetManagedFiles }, null, 2)}\n`;
   const candidates = [

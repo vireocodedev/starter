@@ -19,3 +19,9 @@ export function manifestEvidencePath({ repositoryRoot, outputRoot, path, outputR
 export function manifestEvidenceRoot({ repositoryRoot, outputRoot, outputRelativePaths }) {
   return outputRelativePaths ? outputRoot : repositoryRoot;
 }
+
+/** Hosted collectors must not create evidence under the checkout before recording git cleanliness. */
+export function preservesRepositoryCleanliness({ repositoryRoot, outputRoot, outputIsGitignored = false }) {
+  const path = relative(repositoryRoot, outputRoot);
+  return outputIsGitignored || path === ".." || path.startsWith("../") || path.startsWith("..\\");
+}

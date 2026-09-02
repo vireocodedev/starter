@@ -270,10 +270,13 @@ test("workflow isolates signed-SBOM verification after the token-free gauntlet",
   assert.match(job, /attestations: read\n {6}contents: read/u);
   assert.match(job, /actions\/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8\.0\.1/u);
   assert.match(job, /name: anonymous-consumer-gauntlet-evidence/u);
+  assert.match(job, /path: \$\{\{ runner\.temp \}\}\/anonymous-consumer-evidence/u);
   assert.match(job, /GH_TOKEN: \$\{\{ github\.token \}\}/u);
   const verifier = readFileSync(new URL("./verify-anonymous-consumer-signed-sboms.mjs", import.meta.url), "utf8");
   assert.match(verifier, /"--format",\s+"json"/u);
   assert.match(job, /anonymous-consumer-signed-sbom-evidence/u);
+  assert.match(job, /Revalidate trusted main ancestry before verifier execution/u);
+  assert.match(job, /merge-base --is-ancestor "\$TRUSTED_SOURCE_COMMIT" origin\/main/u);
   assert.match(workflow, /workflow_run:/u);
   assert.match(workflow, /workflow_dispatch:/u);
   assert.match(workflow, /schedule:/u);

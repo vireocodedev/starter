@@ -33,14 +33,25 @@ test("gauntlet policy covers every required scenario with exact public identity"
   );
 });
 
-test("candidate adjacent upgrades advance from the immediate public release", () => {
+test("public gauntlets derive the unique adjacent edge ending at the exact published release", () => {
   const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
-  assert.equal(upgradePolicy.publicRelease, "0.8.1");
-  assert.equal(upgradePolicy.previousRelease, "0.8.1");
-  assert.equal(upgradePolicy.candidateRelease, "0.8.2");
-  assert.ok(
-    upgradePolicy.requiredEdges.some(edge => edge.from === "0.8.1" && edge.to === "0.8.2"),
-    "candidate must retain the immediate public-to-candidate edge",
+  const matching = upgradePolicy.requiredEdges.filter(edge => edge.to === release.createVireoVersion);
+  assert.equal(matching.length, 1);
+  const plan = buildExecutionPlan({ policy, release, upgradePolicy, consumerRoot: "/tmp/vireo-anonymous-plan" });
+  const upgrades = plan
+    .find(scenario => scenario.id === "adjacent-public-upgrades")
+    .operations.filter(operation => operation.kind === "assert-upgraded-consumer");
+  assert.ok(upgrades.every(operation => operation.source.createVireoVersion === matching[0].from));
+  assert.ok(upgrades.every(operation => operation.target.createVireoVersion === release.createVireoVersion));
+  const candidatePolicy = structuredClone(upgradePolicy);
+  candidatePolicy.candidateRelease = "unpublished-candidate";
+  const candidatePlan = buildExecutionPlan({ policy, release, upgradePolicy: candidatePolicy, consumerRoot: "/tmp/vireo-anonymous-plan" });
+  assert.deepEqual(
+    candidatePlan
+      .find(scenario => scenario.id === "adjacent-public-upgrades")
+      .operations.filter(operation => operation.kind === "assert-upgraded-consumer")
+      .map(operation => [operation.source.createVireoVersion, operation.target.createVireoVersion]),
+    upgrades.map(operation => [operation.source.createVireoVersion, operation.target.createVireoVersion]),
   );
 });
 
@@ -91,8 +102,21 @@ test("deterministic plan gives a fake executor every required recipe and refusal
     .find(scenario => scenario.id === "adjacent-public-upgrades")
     .operations.filter(operation => operation.kind === "assert-upgraded-consumer");
   assert.equal(upgrades.length, 2);
-  assert.ok(upgrades.every(operation => operation.source.createVireoVersion === "0.8.1"));
-  assert.ok(upgrades.every(operation => operation.target.createVireoVersion === "0.8.2"));
+  const upgradeEdge = readJson(join(root, "contracts", "project-upgrade-policy.json")).requiredEdges.find(
+    edge => edge.to === release.createVireoVersion,
+  );
+  assert.ok(upgrades.every(operation => operation.source.createVireoVersion === upgradeEdge.from));
+  assert.ok(upgrades.every(operation => operation.target.createVireoVersion === release.createVireoVersion));
+  assert.equal(
+    upgrades.filter(operation => operation.target.createVireoVersion === release.createVireoVersion).length,
+    upgrades.length,
+  );
+  assert.equal(
+    plan
+      .find(scenario => scenario.id === "adjacent-public-upgrades")
+      .operations.filter(operation => operation.id.endsWith("-doctor-json")).length,
+    2,
+  );
   assert.ok(
     !plan
       .find(scenario => scenario.id === "adjacent-public-upgrades")
@@ -226,6 +250,10 @@ test("managed provenance rejects traversal and digest drift", () => {
     ],
   };
   assert.match(validateManagedProvenance({ root: directory, manifest }).join("\n"), /unsafe|drift/u);
+  assert.match(
+    validateManagedProvenance({ root: directory, manifest: { ...manifest, templateCommit: "a".repeat(40), files: [] }, templateCommit: "b".repeat(40) }).join("\n"),
+    /does not match/u,
+  );
 });
 
 test("upgraded consumers validate only their installed exact Vireo subset", () => {
@@ -257,5 +285,12 @@ test("gauntlet policy wiring remains public and scheduled", () => {
   assert.match(workflow, /--source-commit/u);
   assert.match(workflow, /git rev-parse HEAD/u);
   assert.match(workflow, /source_commit must be an exact 40-hex/u);
+  assert.match(workflow, /workflow_dispatch is restricted to refs\/heads\/main/u);
+  assert.match(workflow, /merge-base --is-ancestor "\$candidate" origin\/main/u);
+  assert.match(workflow, /Revalidate trusted main ancestry before verifier execution/u);
+  assert.match(workflow, /workflow_dispatch release_id must be an exact npm-x\.y\.z_jvm-x\.y\.z release id/u);
+  assert.match(workflow, /--evidence-dir "\$RUNNER_TEMP\/anonymous-consumer-evidence"/u);
+  assert.match(workflow, /path: \$\{\{ runner\.temp \}\}\/anonymous-consumer-evidence/u);
+  assert.doesNotMatch(workflow.match(/^\s*run:[\s\S]*?(?=^\s*-\s|^\s*\w)/gmu)?.join("\n") ?? "", /inputs\./u);
   assert.match(workflow, /head_repository\.full_name == github\.repository/u);
 });
