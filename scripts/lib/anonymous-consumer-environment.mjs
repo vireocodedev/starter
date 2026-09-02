@@ -14,13 +14,17 @@ export function publicReleaseIdentity(contract) {
   if (!createVireo || !isExactVersion(createVireo.version)) {
     throw new Error("Ecosystem contract must declare an exact public create-vireo version.");
   }
-  if (!isExactVersion(current.maven.version)) throw new Error("Ecosystem contract must declare an exact public Maven version.");
+  if (!isExactVersion(current.maven.version))
+    throw new Error("Ecosystem contract must declare an exact public Maven version.");
   if (current.id !== `npm-${createVireo.version}_jvm-${current.maven.version}`)
     throw new Error("Ecosystem contract release id must exactly match the public npm and Maven coordinates.");
   if (!isExactVersion(current.template?.version) || current.template.version !== createVireo.version) {
     throw new Error("Ecosystem contract Template version must match the public create-vireo version.");
   }
-  if (!/^[0-9a-f]{40}$/u.test(current.template?.commit ?? "") || current.template.tag !== `starter-template@${current.template.version}`) {
+  if (
+    !/^[0-9a-f]{40}$/u.test(current.template?.commit ?? "") ||
+    current.template.tag !== `starter-template@${current.template.version}`
+  ) {
     throw new Error("Ecosystem contract Template commit/tag is not immutable and coherent.");
   }
   for (const entry of current.npm) {
@@ -45,7 +49,8 @@ export function anonymousEnvironment({ root, environment = process.env, registry
   const pathEntries = String(environment.PATH ?? "")
     .split(":")
     .filter(entry => entry && !/(?:node_modules\/\.bin|vireocode|starter)/iu.test(entry));
-  if (pathEntries.length === 0) throw new Error("Anonymous consumer environment requires a controlled executable PATH.");
+  if (pathEntries.length === 0)
+    throw new Error("Anonymous consumer environment requires a controlled executable PATH.");
   const home = join(root, "home");
   const npmUserConfig = join(root, "npmrc");
   const npmCache = join(root, "npm-cache");
@@ -57,7 +62,15 @@ export function anonymousEnvironment({ root, environment = process.env, registry
   if (!/^(?:\/|[A-Za-z]:[\\/])/u.test(playwrightBrowsers) || !/vireo-anonymous-playwright/u.test(playwrightBrowsers)) {
     throw new Error("Anonymous consumer Playwright browser cache must be an explicit dedicated absolute path.");
   }
-  for (const directory of [home, npmCache, gradleUserHome, mavenRepository, corepackHome, dockerConfig, playwrightBrowsers])
+  for (const directory of [
+    home,
+    npmCache,
+    gradleUserHome,
+    mavenRepository,
+    corepackHome,
+    dockerConfig,
+    playwrightBrowsers,
+  ])
     mkdirSync(directory, { recursive: true });
   mkdirSync(gradleUserHome, { recursive: true });
   writeFileSync(npmUserConfig, `registry=${registry}\nalways-auth=false\n`);
@@ -101,7 +114,9 @@ export function assertAnonymousInstallation({ consumerRoot, packageNames, regist
 export function assertAnonymousVireoLock({ consumerRoot, release, registry }) {
   const lock = readJson(join(consumerRoot, "package-lock.json"));
   const expectedVersions = new Map(release.npm.map(entry => [entry.name, entry.version]));
-  const entries = Object.entries(lock.packages ?? {}).filter(([path]) => path.startsWith("node_modules/@vireocodedev/"));
+  const entries = Object.entries(lock.packages ?? {}).filter(([path]) =>
+    path.startsWith("node_modules/@vireocodedev/"),
+  );
   if (entries.length === 0) throw new Error("Anonymous consumer lockfile contains no Vireo public packages.");
   for (const [path, entry] of entries) {
     const name = path.slice("node_modules/".length);
@@ -138,6 +153,7 @@ export function assertNoMavenLocal(command, environment) {
 
 export function relativeEvidencePath(root, path) {
   const result = relative(resolve(root), resolve(path));
-  if (!result || result.startsWith("..") || result.includes("..")) throw new Error("Evidence path escapes its isolated root.");
+  if (!result || result.startsWith("..") || result.includes(".."))
+    throw new Error("Evidence path escapes its isolated root.");
   return result;
 }

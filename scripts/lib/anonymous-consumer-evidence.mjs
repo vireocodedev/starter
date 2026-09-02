@@ -7,7 +7,10 @@ export function sanitizeEvidence(value) {
   if (Array.isArray(value)) return value.map(sanitizeEvidence);
   if (value && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, sensitiveKey.test(key) ? "[redacted]" : sanitizeEvidence(entry)]),
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        sensitiveKey.test(key) ? "[redacted]" : sanitizeEvidence(entry),
+      ]),
     );
   }
   return typeof value === "string" ? value.replace(/(bearer\s+)[^\s]+/giu, "$1[redacted]") : value;

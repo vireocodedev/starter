@@ -30,7 +30,11 @@ test("anonymous environment removes credentials and isolates package-manager sta
 });
 
 test("public release identity requires exact public coordinates", () => {
-  assert.throws(() => publicReleaseIdentity({ current: { id: "bad", npm: [{ name: "create-vireo", version: "latest" }], maven: { version: "0.1" } } }));
+  assert.throws(() =>
+    publicReleaseIdentity({
+      current: { id: "bad", npm: [{ name: "create-vireo", version: "latest" }], maven: { version: "0.1" } },
+    }),
+  );
   const identity = publicReleaseIdentity({
     current: {
       id: "npm-1.2.3_jvm-4.5.6",
@@ -40,16 +44,39 @@ test("public release identity requires exact public coordinates", () => {
     },
   });
   assert.equal(identity.createVireoVersion, "1.2.3");
-  assert.throws(() => publicReleaseIdentity({ current: { id: "wrong", npm: [{ name: "create-vireo", version: "1.2.3" }], maven: { group: "com.example", version: "4.5.6", modules: [] }, template: { version: "1.2.3", commit: "a".repeat(40), tag: "starter-template@1.2.3" } } }));
+  assert.throws(() =>
+    publicReleaseIdentity({
+      current: {
+        id: "wrong",
+        npm: [{ name: "create-vireo", version: "1.2.3" }],
+        maven: { group: "com.example", version: "4.5.6", modules: [] },
+        template: { version: "1.2.3", commit: "a".repeat(40), tag: "starter-template@1.2.3" },
+      },
+    }),
+  );
 });
 
 test("anonymous installation refuses links and non-registry lock entries", () => {
   const root = mkdtempSync(join(tmpdir(), "anonymous-installation-"));
   mkdirSync(join(root, "node_modules"), { recursive: true });
-  writeFileSync(join(root, "package-lock.json"), JSON.stringify({ packages: { "node_modules/create-vireo": { resolved: "file:../local" } } }));
+  writeFileSync(
+    join(root, "package-lock.json"),
+    JSON.stringify({ packages: { "node_modules/create-vireo": { resolved: "file:../local" } } }),
+  );
   symlinkSync(root, join(root, "node_modules", "create-vireo"));
-  assert.throws(() => assertAnonymousInstallation({ consumerRoot: root, packageNames: ["create-vireo"], registry: "https://registry.npmjs.org" }));
-  assert.throws(() => assertNoMavenLocal({ executable: "./gradlew", arguments: ["publishToMavenLocal"] }, { GRADLE_USER_HOME: "/tmp/gradle" }));
+  assert.throws(() =>
+    assertAnonymousInstallation({
+      consumerRoot: root,
+      packageNames: ["create-vireo"],
+      registry: "https://registry.npmjs.org",
+    }),
+  );
+  assert.throws(() =>
+    assertNoMavenLocal(
+      { executable: "./gradlew", arguments: ["publishToMavenLocal"] },
+      { GRADLE_USER_HOME: "/tmp/gradle" },
+    ),
+  );
 });
 
 test("anonymous lockfile accepts only exact public Vireo coordinates", () => {
@@ -67,14 +94,43 @@ test("anonymous lockfile accepts only exact public Vireo coordinates", () => {
     }),
   );
   const release = { npm: [{ name: "@vireocodedev/ui", version: "1.2.3" }] };
-  assert.doesNotThrow(() => assertAnonymousVireoLock({ consumerRoot: root, release, registry: "https://registry.npmjs.org" }));
-  assert.throws(() => assertAnonymousVireoLock({ consumerRoot: root, release: { npm: [] }, registry: "https://registry.npmjs.org" }));
+  assert.doesNotThrow(() =>
+    assertAnonymousVireoLock({ consumerRoot: root, release, registry: "https://registry.npmjs.org" }),
+  );
+  assert.throws(() =>
+    assertAnonymousVireoLock({ consumerRoot: root, release: { npm: [] }, registry: "https://registry.npmjs.org" }),
+  );
 });
 
 test("exact public npm consumer requires every declared Vireo package", () => {
   const root = mkdtempSync(join(tmpdir(), "anonymous-exact-public-"));
   mkdirSync(join(root, "node_modules", "@vireocodedev", "ui"), { recursive: true });
-  writeFileSync(join(root, "node_modules", "@vireocodedev", "ui", "package.json"), JSON.stringify({ name: "@vireocodedev/ui", version: "1.2.3" }));
-  writeFileSync(join(root, "package-lock.json"), JSON.stringify({ packages: { "node_modules/@vireocodedev/ui": { version: "1.2.3", resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui-1.2.3.tgz", integrity: "sha512-public" } } }));
-  assert.throws(() => assertExactPublicNpmConsumer({ consumerRoot: root, release: { npm: [{ name: "@vireocodedev/ui", version: "1.2.3" }, { name: "create-vireo", version: "1.2.3" }] }, registry: "https://registry.npmjs.org" }));
+  writeFileSync(
+    join(root, "node_modules", "@vireocodedev", "ui", "package.json"),
+    JSON.stringify({ name: "@vireocodedev/ui", version: "1.2.3" }),
+  );
+  writeFileSync(
+    join(root, "package-lock.json"),
+    JSON.stringify({
+      packages: {
+        "node_modules/@vireocodedev/ui": {
+          version: "1.2.3",
+          resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui-1.2.3.tgz",
+          integrity: "sha512-public",
+        },
+      },
+    }),
+  );
+  assert.throws(() =>
+    assertExactPublicNpmConsumer({
+      consumerRoot: root,
+      release: {
+        npm: [
+          { name: "@vireocodedev/ui", version: "1.2.3" },
+          { name: "create-vireo", version: "1.2.3" },
+        ],
+      },
+      registry: "https://registry.npmjs.org",
+    }),
+  );
 });

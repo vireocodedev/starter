@@ -16,7 +16,10 @@ import {
 import { writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
 import { validateAnonymousPublicEvidence } from "./lib/anonymous-public-evidence.mjs";
 import { validateFinalAnonymousEvidence } from "./lib/anonymous-consumer-final-evidence.mjs";
-import { validateReleasePreflightIdentity, verifyPublicReleasePreflight } from "./lib/anonymous-consumer-release-preflight.mjs";
+import {
+  validateReleasePreflightIdentity,
+  verifyPublicReleasePreflight,
+} from "./lib/anonymous-consumer-release-preflight.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policyPath = join(root, "contracts", "anonymous-consumer-gauntlet-policy.json");
@@ -24,7 +27,8 @@ const args = new Set(process.argv.slice(2));
 const checkOnly = args.has("--check");
 const dryRun = args.has("--dry-run");
 const evidenceArgument = process.argv.indexOf("--evidence-dir");
-const evidenceDirectory = evidenceArgument >= 0 ? resolve(process.argv[evidenceArgument + 1]) : join(root, ".anonymous-consumer-evidence");
+const evidenceDirectory =
+  evidenceArgument >= 0 ? resolve(process.argv[evidenceArgument + 1]) : join(root, ".anonymous-consumer-evidence");
 const releaseIdArgument = process.argv.indexOf("--release-id");
 const sourceCommitArgument = process.argv.indexOf("--source-commit");
 const observedDigests = new Map();
@@ -33,13 +37,26 @@ const projectTrees = new Map();
 
 export function validateManagedProvenance({ root, manifest }) {
   const problems = [];
-  if (manifest?.schemaVersion !== 1 || !/^[0-9a-f]{40}$/u.test(manifest.templateCommit ?? "")) problems.push("invalid managed manifest identity");
+  if (manifest?.schemaVersion !== 1 || !/^[0-9a-f]{40}$/u.test(manifest.templateCommit ?? ""))
+    problems.push("invalid managed manifest identity");
   const paths = new Set();
   for (const file of manifest?.files ?? []) {
-    if (typeof file?.path !== "string" || file.path.startsWith("/") || file.path.split("/").includes("..") || paths.has(file.path)) problems.push("unsafe or duplicate managed path");
+    if (
+      typeof file?.path !== "string" ||
+      file.path.startsWith("/") ||
+      file.path.split("/").includes("..") ||
+      paths.has(file.path)
+    )
+      problems.push("unsafe or duplicate managed path");
     paths.add(file?.path);
     if (!/^[0-9a-f]{64}$/u.test(file?.sha256 ?? "")) problems.push(`invalid managed digest ${file?.path}`);
-    else if (existsSync(join(root, file.path)) && createHash("sha256").update(readFileSync(join(root, file.path))).digest("hex") !== file.sha256) problems.push(`managed digest drift ${file.path}`);
+    else if (
+      existsSync(join(root, file.path)) &&
+      createHash("sha256")
+        .update(readFileSync(join(root, file.path)))
+        .digest("hex") !== file.sha256
+    )
+      problems.push(`managed digest drift ${file.path}`);
   }
   return problems;
 }
@@ -51,7 +68,11 @@ export function installedVireoPackageNames({ lock, release }) {
     .map(([path, entry]) => ({ name: path.slice("node_modules/".length), entry }));
   if (names.length === 0) throw new Error("Generated consumer has no installed Vireo package coordinates.");
   for (const { name, entry } of names) {
-    if (expected.get(name) !== entry.version || !entry.resolved?.startsWith("https://registry.npmjs.org/") || !entry.integrity)
+    if (
+      expected.get(name) !== entry.version ||
+      !entry.resolved?.startsWith("https://registry.npmjs.org/") ||
+      !entry.integrity
+    )
       throw new Error(`Installed Vireo coordinate is not an exact public release package: ${name}.`);
   }
   return names.map(item => item.name);
@@ -69,7 +90,11 @@ export function validatePolicy(policy, release) {
   if (new Set(scenarioIds).size !== scenarioIds.length) problems.push("anonymous consumer scenario ids must be unique");
   const recipes = new Set();
   for (const scenario of policy.scenarios ?? []) {
-    if (!Array.isArray(scenario.recipe) || scenario.recipe.length === 0 || new Set(scenario.recipe).size !== scenario.recipe.length)
+    if (
+      !Array.isArray(scenario.recipe) ||
+      scenario.recipe.length === 0 ||
+      new Set(scenario.recipe).size !== scenario.recipe.length
+    )
       problems.push(`${scenario.id} must declare a distinct non-empty executable recipe`);
     const signature = JSON.stringify(scenario.recipe);
     if (recipes.has(signature)) problems.push(`${scenario.id} duplicates another scenario recipe`);
@@ -78,15 +103,23 @@ export function validatePolicy(policy, release) {
   for (const required of policy.requiredScenarios ?? []) {
     if (!scenarioIds.includes(required)) problems.push(`missing required anonymous consumer scenario ${required}`);
   }
-  if (!policy.isolation?.scrubbedEnvironment || !policy.isolation?.isolatedNpmCache || !policy.isolation?.isolatedGradleUserHome) {
+  if (
+    !policy.isolation?.scrubbedEnvironment ||
+    !policy.isolation?.isolatedNpmCache ||
+    !policy.isolation?.isolatedGradleUserHome
+  ) {
     problems.push("anonymous consumer policy must require scrubbed isolated environments");
   }
   if (!policy.isolation?.forbidMavenLocal || !policy.isolation?.forbidWorkspacePackages) {
     problems.push("anonymous consumer policy must forbid Maven Local and workspace packages");
   }
-  if (JSON.stringify(policy.evidence?.requiredSections) !== JSON.stringify(["findings", "externalWarnings", "remainingHumanOnly"]))
+  if (
+    JSON.stringify(policy.evidence?.requiredSections) !==
+    JSON.stringify(["findings", "externalWarnings", "remainingHumanOnly"])
+  )
     problems.push("anonymous consumer evidence must distinguish findings, external warnings, and human-only work");
-  if (!release?.createVireoVersion || !release.template.commit) problems.push("current ecosystem release is incomplete");
+  if (!release?.createVireoVersion || !release.template.commit)
+    problems.push("current ecosystem release is incomplete");
   return problems;
 }
 
@@ -141,17 +174,24 @@ function execute(command, options) {
     let stderrBytes = 0;
     let excerpt = "";
     let finished = false;
-    const child = spawn(command.executable, command.arguments, { ...options, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(command.executable, command.arguments, {
+      ...options,
+      detached: process.platform !== "win32",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     let timedOut = false;
     const stop = signal => {
       if (process.platform !== "win32" && child.pid) process.kill(-child.pid, signal);
       else child.kill(signal);
     };
-    const timeout = setTimeout(() => {
-      timedOut = true;
-      stop("SIGTERM");
-      setTimeout(() => stop("SIGKILL"), 5_000).unref();
-    }, command.timeoutMs ?? 20 * 60_000);
+    const timeout = setTimeout(
+      () => {
+        timedOut = true;
+        stop("SIGTERM");
+        setTimeout(() => stop("SIGKILL"), 5_000).unref();
+      },
+      command.timeoutMs ?? 20 * 60_000,
+    );
     child.stdout.on("data", chunk => {
       stdout.update(chunk);
       stdoutBytes += chunk.length;
@@ -183,7 +223,12 @@ function execute(command, options) {
       };
       const assertionPassed = !command.assertOutput || command.assertOutput.test(excerpt);
       if (exitCode === command.expectedExit && !timedOut && !signal && assertionPassed) resolvePromise(result);
-      else reject(Object.assign(new Error(`${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`), { result }));
+      else
+        reject(
+          Object.assign(new Error(`${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`), {
+            result,
+          }),
+        );
     }
   });
 }
@@ -206,7 +251,12 @@ async function executeOperation(operation, { environment, runRoot }) {
       `${JSON.stringify({ name: "anonymous-public-vireo-consumer", private: true, dependencies: Object.fromEntries(release.npm.map(entry => [entry.name, entry.version])) }, null, 2)}\n`,
     );
     const result = await execute(
-      command("exact-public-npm-install", "corepack", ["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", "--strict-peer-deps"], { cwd: operation.path, cwdClass: "anonymous-npm" }),
+      command(
+        "exact-public-npm-install",
+        "corepack",
+        ["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund", "--strict-peer-deps"],
+        { cwd: operation.path, cwdClass: "anonymous-npm" },
+      ),
       { cwd: operation.path, env: environment },
     );
     assertExactPublicNpmConsumer({ consumerRoot: operation.path, release, registry: environment.npm_config_registry });
@@ -220,20 +270,29 @@ async function executeOperation(operation, { environment, runRoot }) {
   } else if (operation.kind === "assert-absent") {
     if (existsSync(operation.path)) throw new Error(`${operation.id} expected cleanup to remove the target.`);
   } else if (operation.kind === "mutate-generated") {
-    const manifest = JSON.parse(readFileSync(join(operation.path, ".vireo", "generated", "purchase-orders.json"), "utf8"));
+    const manifest = JSON.parse(
+      readFileSync(join(operation.path, ".vireo", "generated", "purchase-orders.json"), "utf8"),
+    );
     const target = join(operation.path, manifest.files?.[0]?.path ?? "");
-    if (!manifest.files?.[0]?.path || !existsSync(target)) throw new Error("Generated capability has no mutable managed output.");
+    if (!manifest.files?.[0]?.path || !existsSync(target))
+      throw new Error("Generated capability has no mutable managed output.");
     writeFileSync(target, `${readFileSync(target, "utf8")}\n// anonymous-consumer customization\n`);
   } else if (operation.kind === "record-generated-digest" || operation.kind === "assert-generated-digest") {
-    const manifest = JSON.parse(readFileSync(join(operation.path, ".vireo", "generated", "purchase-orders.json"), "utf8"));
-    const digest = createHash("sha256").update(manifest.files.map(file => readFileSync(join(operation.path, file.path))).join("")) .digest("hex");
+    const manifest = JSON.parse(
+      readFileSync(join(operation.path, ".vireo", "generated", "purchase-orders.json"), "utf8"),
+    );
+    const digest = createHash("sha256")
+      .update(manifest.files.map(file => readFileSync(join(operation.path, file.path))).join(""))
+      .digest("hex");
     if (operation.kind === "record-generated-digest") observedDigests.set(operation.path, digest);
-    else if (observedDigests.get(operation.path) !== digest) throw new Error("Generated capability rerun changed managed bytes.");
+    else if (observedDigests.get(operation.path) !== digest)
+      throw new Error("Generated capability rerun changed managed bytes.");
   } else if (operation.kind === "assert-removal-receipt") {
     const receipt = join(operation.path, ".vireo", "remove-example.json");
     if (!existsSync(receipt)) throw new Error("Sample removal did not write its receipt.");
     const text = JSON.stringify(JSON.parse(readFileSync(receipt, "utf8")));
-    if (/Item|item/i.test(text) === false) throw new Error("Sample removal receipt is not attributable to the Template sample.");
+    if (/Item|item/i.test(text) === false)
+      throw new Error("Sample removal receipt is not attributable to the Template sample.");
   } else if (operation.kind === "mutate-managed-file" || operation.kind === "restore-managed-file") {
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
     const relativePath = managed.files?.[0]?.path;
@@ -248,12 +307,19 @@ async function executeOperation(operation, { environment, runRoot }) {
       writeFileSync(original.target, original.contents);
     }
   } else if (operation.kind === "record-project-tree" || operation.kind === "assert-project-tree") {
-    const collect = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
-      if (["node_modules", ".git"].includes(entry.name)) return [];
-      const path = join(directory, entry.name);
-      return entry.isDirectory() ? collect(path) : entry.isFile() ? [[path, createHash("sha256").update(readFileSync(path)).digest("hex")]] : [];
-    });
-    const digest = createHash("sha256").update(JSON.stringify(collect(operation.path).sort(([left], [right]) => left.localeCompare(right)))).digest("hex");
+    const collect = directory =>
+      readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+        if (["node_modules", ".git"].includes(entry.name)) return [];
+        const path = join(directory, entry.name);
+        return entry.isDirectory()
+          ? collect(path)
+          : entry.isFile()
+            ? [[path, createHash("sha256").update(readFileSync(path)).digest("hex")]]
+            : [];
+      });
+    const digest = createHash("sha256")
+      .update(JSON.stringify(collect(operation.path).sort(([left], [right]) => left.localeCompare(right))))
+      .digest("hex");
     if (operation.kind === "record-project-tree") projectTrees.set(operation.path, digest);
     else if (projectTrees.get(operation.path) !== digest) throw new Error("No-op upgrade changed project bytes.");
   } else if (operation.kind === "assert-deployment-contract") {
@@ -264,7 +330,8 @@ async function executeOperation(operation, { environment, runRoot }) {
     }
   } else if (operation.kind === "assert-script") {
     const scripts = JSON.parse(readFileSync(join(operation.path, "package.json"), "utf8")).scripts ?? {};
-    if (typeof scripts[operation.script] !== "string") throw new Error(`${operation.id} requires generated script ${operation.script}.`);
+    if (typeof scripts[operation.script] !== "string")
+      throw new Error(`${operation.id} requires generated script ${operation.script}.`);
   } else if (operation.kind === "assert-project-identity") {
     const project = JSON.parse(readFileSync(join(operation.path, ".vireo", "project.json"), "utf8"));
     if (
@@ -274,34 +341,59 @@ async function executeOperation(operation, { environment, runRoot }) {
       project.templateTag !== operation.release.template.tag ||
       project.profile !== operation.profile ||
       (operation.database !== undefined && project.database !== operation.database)
-    ) throw new Error(`${operation.id} found incoherent generated release identity/provenance.`);
+    )
+      throw new Error(`${operation.id} found incoherent generated release identity/provenance.`);
     if (!existsSync(join(operation.path, ".vireo", "managed-files.json")))
       throw new Error(`${operation.id} is missing managed-file provenance.`);
   } else if (operation.kind === "assert-upgraded-consumer") {
     const project = JSON.parse(readFileSync(join(operation.path, ".vireo", "project.json"), "utf8"));
-    if (project.createdBy !== `create-vireo@${operation.release.createVireoVersion}` || project.templateCommit !== operation.release.template.commit || project.templateVersion !== operation.release.template.version || project.templateTag !== operation.release.template.tag || project.profile !== operation.profile)
+    if (
+      project.createdBy !== `create-vireo@${operation.release.createVireoVersion}` ||
+      project.templateCommit !== operation.release.template.commit ||
+      project.templateVersion !== operation.release.template.version ||
+      project.templateTag !== operation.release.template.tag ||
+      project.profile !== operation.profile
+    )
       throw new Error("Upgraded consumer target identity drifted.");
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
     const managedProblems = validateManagedProvenance({ root: operation.path, manifest: managed });
     if (managedProblems.length > 0) throw new Error(managedProblems.join("\n"));
-    for (const file of managed.files ?? []) if (!existsSync(join(operation.path, file.path))) throw new Error(`Managed upgraded file is missing: ${file.path}`);
-    if ((operation.profile === "full-stack" && project.database !== "h2") || (operation.profile === "frontend" && project.database !== undefined)) throw new Error("Upgraded project profile/database drifted.");
+    for (const file of managed.files ?? [])
+      if (!existsSync(join(operation.path, file.path)))
+        throw new Error(`Managed upgraded file is missing: ${file.path}`);
+    if (
+      (operation.profile === "full-stack" && project.database !== "h2") ||
+      (operation.profile === "frontend" && project.database !== undefined)
+    )
+      throw new Error("Upgraded project profile/database drifted.");
     const packageRoot = operation.profile === "full-stack" ? join(operation.path, "frontend") : operation.path;
-    const installedNames = installedVireoPackageNames({ lock: JSON.parse(readFileSync(join(packageRoot, "package-lock.json"), "utf8")), release: operation.release });
+    const installedNames = installedVireoPackageNames({
+      lock: JSON.parse(readFileSync(join(packageRoot, "package-lock.json"), "utf8")),
+      release: operation.release,
+    });
     assertAnonymousVireoLock({ consumerRoot: packageRoot, release: operation.release, registry: operation.registry });
-    assertAnonymousInstallation({ consumerRoot: packageRoot, packageNames: installedNames, registry: operation.registry });
+    assertAnonymousInstallation({
+      consumerRoot: packageRoot,
+      packageNames: installedNames,
+      registry: operation.registry,
+    });
     if (operation.profile === "full-stack") {
       const properties = readFileSync(join(operation.path, "gradle.properties"), "utf8");
-      if (!properties.includes(`starterVersion=${operation.release.maven.version}`)) throw new Error("Upgraded JVM starter version drifted.");
+      if (!properties.includes(`starterVersion=${operation.release.maven.version}`))
+        throw new Error("Upgraded JVM starter version drifted.");
     }
   } else if (operation.kind === "assert-public-evidence") {
-    const problems = validateAnonymousPublicEvidence({ manifest: JSON.parse(readFileSync(operation.path, "utf8")), release: operation.release });
+    const problems = validateAnonymousPublicEvidence({
+      manifest: JSON.parse(readFileSync(operation.path, "utf8")),
+      release: operation.release,
+    });
     if (problems.length > 0) throw new Error(problems.join("\n"));
   } else if (operation.kind === "assert-ejected-marker") {
-    const visit = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
-      const path = join(directory, entry.name);
-      return entry.isDirectory() && entry.name !== "node_modules" ? visit(path) : entry.isFile() ? [path] : [];
-    });
+    const visit = directory =>
+      readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+        const path = join(directory, entry.name);
+        return entry.isDirectory() && entry.name !== "node_modules" ? visit(path) : entry.isFile() ? [path] : [];
+      });
     if (!visit(operation.path).some(path => readFileSync(path, "utf8").includes("@vireo-ejected")))
       throw new Error("Ejection did not retain application code with an ejected marker.");
   } else throw new Error(`Unsupported anonymous gauntlet operation ${operation.kind}.`);
@@ -322,15 +414,43 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
   const create = (directory, profile, extra = []) => ({
     executable: "corepack",
     arguments: [
-      "npm", "exec", "--yes", `--package=create-vireo@${release.createVireoVersion}`, "--", "create-vireo", directory,
-      "--yes", "--no-git", "--profile", profile, "--display-name", "Anonymous Gauntlet", "--owner-name", "Vireo CI",
-      "--repository-url", "https://example.invalid/anonymous-consumer", "--support-url", "https://example.invalid/support",
-      "--security-contact", "security@example.invalid", ...extra,
+      "npm",
+      "exec",
+      "--yes",
+      `--package=create-vireo@${release.createVireoVersion}`,
+      "--",
+      "create-vireo",
+      directory,
+      "--yes",
+      "--no-git",
+      "--profile",
+      profile,
+      "--display-name",
+      "Anonymous Gauntlet",
+      "--owner-name",
+      "Vireo CI",
+      "--repository-url",
+      "https://example.invalid/anonymous-consumer",
+      "--support-url",
+      "https://example.invalid/support",
+      "--security-contact",
+      "security@example.invalid",
+      ...extra,
     ],
   });
   const vireo = (directory, ...arguments_) => ({
     executable: "corepack",
-    arguments: ["npm", "exec", "--yes", `--package=create-vireo@${release.createVireoVersion}`, "--", "vireo", ...arguments_, "--project", directory],
+    arguments: [
+      "npm",
+      "exec",
+      "--yes",
+      `--package=create-vireo@${release.createVireoVersion}`,
+      "--",
+      "vireo",
+      ...arguments_,
+      "--project",
+      directory,
+    ],
   });
   const frontend = join(consumerRoot, "frontend");
   const h2 = join(consumerRoot, "full-stack-h2");
@@ -341,99 +461,263 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     case "public-artifacts":
       return [
         ...release.npm.map(({ name, version }) =>
-        command(`registry-${name}`, "corepack", ["npm", "view", `${name}@${version}`, "--json"], {
-          assertOutput: new RegExp(`"name"\\s*:\\s*"${name.replace("@", "@")}"[\\s\\S]*"version"\\s*:\\s*"${version}"`, "u"),
-        }),
-      ),
-        command("exact-public-npm-verifier", "node", [join(root, "scripts", "verify-npm-public-release.mjs"), join(evidenceDirectory, "exact-npm-public.json"), "--contract", "contracts/ecosystem-release-contract.json", "--expected-release-id", release.id], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
-        command("public-evidence-collector", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "public-release-evidence")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
-        { kind: "assert-public-evidence", id: "exact-public-evidence-contract", path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"), release },
+          command(`registry-${name}`, "corepack", ["npm", "view", `${name}@${version}`, "--json"], {
+            assertOutput: new RegExp(
+              `"name"\\s*:\\s*"${name.replace("@", "@")}"[\\s\\S]*"version"\\s*:\\s*"${version}"`,
+              "u",
+            ),
+          }),
+        ),
+        command(
+          "exact-public-npm-verifier",
+          "node",
+          [
+            join(root, "scripts", "verify-npm-public-release.mjs"),
+            join(evidenceDirectory, "exact-npm-public.json"),
+            "--contract",
+            "contracts/ecosystem-release-contract.json",
+            "--expected-release-id",
+            release.id,
+          ],
+          { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 },
+        ),
+        command(
+          "public-evidence-collector",
+          "node",
+          [
+            join(root, "scripts", "collect-public-release-evidence.mjs"),
+            join(evidenceDirectory, "public-release-evidence"),
+          ],
+          { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 },
+        ),
+        {
+          kind: "assert-public-evidence",
+          id: "exact-public-evidence-contract",
+          path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"),
+          release,
+        },
       ];
     case "cli-adversity": {
       const occupied = join(consumerRoot, "occupied-target");
       const failed = join(consumerRoot, "failed-download");
       const fetchBlocker = join(consumerRoot, "block-template-download.cjs");
       return [
-        command("cli-help", "corepack", ["npm", "exec", "--yes", `--package=create-vireo@${release.createVireoVersion}`, "--", "create-vireo", "--help"], { assertOutput: /Create a Vireo application/u }),
-        command("cli-json-dry-run", "corepack", ["npm", "exec", "--yes", `--package=create-vireo@${release.createVireoVersion}`, "--", "create-vireo", join(consumerRoot, "dry-run"), "--dry-run", "--json", "--yes", "--no-git"], { assertOutput: /"dryRun"\s*:\s*true/u }),
-        { ...create(join(consumerRoot, "invalid-name"), "frontend", ["--name", "Invalid_Name"]), id: "invalid-project-name", expectedExit: 1, assertOutput: /projectName|kebab/u },
-        { ...create(join(consumerRoot, "invalid-java"), "full-stack", ["--java-package", "not-a-java-package"]), id: "invalid-java-package", expectedExit: 1, assertOutput: /javaPackage|Java package/u },
-        { ...create(join(consumerRoot, "invalid-repository"), "frontend", ["--repository-url", "ftp://example.invalid"]), id: "invalid-repository-url", expectedExit: 1, assertOutput: /repositoryUrl|repository URL/u },
-        { ...create(join(consumerRoot, "invalid-support"), "frontend", ["--support-url", "javascript:alert(1)"]), id: "invalid-support-url", expectedExit: 1, assertOutput: /supportUrl|support URL/u },
+        command(
+          "cli-help",
+          "corepack",
+          [
+            "npm",
+            "exec",
+            "--yes",
+            `--package=create-vireo@${release.createVireoVersion}`,
+            "--",
+            "create-vireo",
+            "--help",
+          ],
+          { assertOutput: /Create a Vireo application/u },
+        ),
+        command(
+          "cli-json-dry-run",
+          "corepack",
+          [
+            "npm",
+            "exec",
+            "--yes",
+            `--package=create-vireo@${release.createVireoVersion}`,
+            "--",
+            "create-vireo",
+            join(consumerRoot, "dry-run"),
+            "--dry-run",
+            "--json",
+            "--yes",
+            "--no-git",
+          ],
+          { assertOutput: /"dryRun"\s*:\s*true/u },
+        ),
+        {
+          ...create(join(consumerRoot, "invalid-name"), "frontend", ["--name", "Invalid_Name"]),
+          id: "invalid-project-name",
+          expectedExit: 1,
+          assertOutput: /projectName|kebab/u,
+        },
+        {
+          ...create(join(consumerRoot, "invalid-java"), "full-stack", ["--java-package", "not-a-java-package"]),
+          id: "invalid-java-package",
+          expectedExit: 1,
+          assertOutput: /javaPackage|Java package/u,
+        },
+        {
+          ...create(join(consumerRoot, "invalid-repository"), "frontend", [
+            "--repository-url",
+            "ftp://example.invalid",
+          ]),
+          id: "invalid-repository-url",
+          expectedExit: 1,
+          assertOutput: /repositoryUrl|repository URL/u,
+        },
+        {
+          ...create(join(consumerRoot, "invalid-support"), "frontend", ["--support-url", "javascript:alert(1)"]),
+          id: "invalid-support-url",
+          expectedExit: 1,
+          assertOutput: /supportUrl|support URL/u,
+        },
         { kind: "write", id: "occupied-sentinel", path: occupied, contents: "do not overwrite\n" },
-        { ...create(occupied, "frontend"), id: "occupied-target-refusal", expectedExit: 1, assertOutput: /already exists|target/u },
+        {
+          ...create(occupied, "frontend"),
+          id: "occupied-target-refusal",
+          expectedExit: 1,
+          assertOutput: /already exists|target/u,
+        },
         { kind: "assert-file", id: "occupied-sentinel-retained", path: occupied, contents: "do not overwrite\n" },
-        { kind: "write", id: "template-download-blocker", path: fetchBlocker, contents: "globalThis.fetch = async () => { throw new Error('intentional anonymous gauntlet download failure'); };\n" },
-        { ...create(failed, "frontend"), id: "template-download-failure", expectedExit: 1, env: { NODE_OPTIONS: `--require=${fetchBlocker}` }, assertOutput: /download failure|template/i },
+        {
+          kind: "write",
+          id: "template-download-blocker",
+          path: fetchBlocker,
+          contents:
+            "globalThis.fetch = async () => { throw new Error('intentional anonymous gauntlet download failure'); };\n",
+        },
+        {
+          ...create(failed, "frontend"),
+          id: "template-download-failure",
+          expectedExit: 1,
+          env: { NODE_OPTIONS: `--require=${fetchBlocker}` },
+          assertOutput: /download failure|template/i,
+        },
         { kind: "assert-absent", id: "failed-download-cleanup", path: failed },
         { ...create(failed, "frontend"), id: "template-download-retry", expectedExit: 0 },
         { kind: "assert-file", id: "retry-project-provenance", path: join(failed, ".vireo", "project.json") },
       ];
     }
-    case "frontend-creation": return [
-      create(frontend, "frontend"),
-      { kind: "assert-project-identity", id: "frontend-exact-provenance", path: frontend, release, profile: "frontend" },
-      command("frontend-setup", "corepack", ["npm", "run", "setup"], { cwd: frontend }),
-      command("frontend-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: frontend }),
-      command("frontend-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], { cwd: frontend }),
-      command("frontend-verify", "corepack", ["npm", "run", "verify"], { cwd: frontend, timeoutMs: 30 * 60_000 }),
-      command("frontend-production-build", "corepack", ["npm", "run", "build"], { cwd: frontend }),
-    ];
-    case "full-stack-h2-creation": return [
-      create(h2, "full-stack", ["--java-package", "com.example.gauntlet", "--database", "h2"]),
-      { kind: "assert-project-identity", id: "h2-exact-provenance", path: h2, release, profile: "full-stack", database: "h2" },
-      command("h2-setup", "corepack", ["npm", "run", "setup"], { cwd: h2 }),
-      command("h2-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: h2 }),
-      command("h2-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], { cwd: h2 }),
-      command("h2-verify", "corepack", ["npm", "run", "verify"], { cwd: h2, timeoutMs: 45 * 60_000 }),
-      command("h2-frontend-production-build", "corepack", ["npm", "run", "build", "--prefix", "frontend"], { cwd: h2 }),
-      command("h2-boot-jar", "./gradlew", ["bootJar", "--no-daemon", "--no-build-cache"], { cwd: h2, timeoutMs: 30 * 60_000 }),
-    ];
-    case "release-identity-and-doctor": return [
-      command("frontend-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: frontend }),
-      command("frontend-identity-release-json", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], { cwd: frontend }),
-      { kind: "assert-file", id: "frontend-project-provenance", path: join(frontend, ".vireo", "project.json") },
-      { kind: "assert-file", id: "full-stack-project-provenance", path: join(h2, ".vireo", "project.json") },
-    ];
-    case "capability-lifecycle": return [
-      create(capability, "full-stack", ["--java-package", "com.example.capability", "--database", "h2"]),
-      command("capability-setup", "corepack", ["npm", "run", "setup"], { cwd: capability }),
-      vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
-      { kind: "record-generated-digest", id: "capability-first-digest", path: capability },
-      vireo(capability, "check", "--json"),
-      vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
-      { kind: "assert-generated-digest", id: "capability-idempotent-digest", path: capability },
-      { kind: "mutate-generated", id: "customize-generated-output", path: capability },
-      { ...vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"), id: "customization-refusal", expectedExit: 1, assertOutput: /VIR-GEN-004|customized/u },
-    ];
-    case "sample-removal-and-ejection": return [
-      create(removal, "full-stack", ["--java-package", "com.example.removal", "--database", "h2"]),
-      command("removal-setup", "corepack", ["npm", "run", "setup"], { cwd: removal }),
-      vireo(removal, "remove-example", "--status"), vireo(removal, "remove-example", "--dry-run"), vireo(removal, "remove-example", "--apply"),
-      { kind: "assert-removal-receipt", id: "sample-removal-receipt", path: removal },
-      vireo(removal, "remove-example", "--status"), vireo(removal, "remove-example", "--apply"), command("removal-verify", "corepack", ["npm", "run", "verify"], { cwd: removal, timeoutMs: 45 * 60_000 }),
-      create(ejection, "full-stack", ["--java-package", "com.example.ejection", "--database", "h2"]),
-      command("ejection-setup", "corepack", ["npm", "run", "setup"], { cwd: ejection }),
-      vireo(ejection, "generate", "entity", ".vireo/examples/purchase-order.entity.json"), vireo(ejection, "eject", "purchase-orders"),
-      { kind: "assert-absent", id: "ejected-management-removed", path: join(ejection, ".vireo", "generated", "purchase-orders.json") },
-      { kind: "assert-file", id: "ejected-capability-provenance", path: join(ejection, ".vireo", "ejected-capabilities.json") },
-      { kind: "assert-ejected-marker", id: "ejected-application-code-retained", path: ejection },
-      { kind: "assert-file", id: "managed-provenance-retained", path: join(ejection, ".vireo", "managed-files.json") },
-      command("ejection-verify", "corepack", ["npm", "run", "verify"], { cwd: ejection, timeoutMs: 45 * 60_000 }),
-    ];
+    case "frontend-creation":
+      return [
+        create(frontend, "frontend"),
+        {
+          kind: "assert-project-identity",
+          id: "frontend-exact-provenance",
+          path: frontend,
+          release,
+          profile: "frontend",
+        },
+        command("frontend-setup", "corepack", ["npm", "run", "setup"], { cwd: frontend }),
+        command("frontend-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: frontend }),
+        command("frontend-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], {
+          cwd: frontend,
+        }),
+        command("frontend-verify", "corepack", ["npm", "run", "verify"], { cwd: frontend, timeoutMs: 30 * 60_000 }),
+        command("frontend-production-build", "corepack", ["npm", "run", "build"], { cwd: frontend }),
+      ];
+    case "full-stack-h2-creation":
+      return [
+        create(h2, "full-stack", ["--java-package", "com.example.gauntlet", "--database", "h2"]),
+        {
+          kind: "assert-project-identity",
+          id: "h2-exact-provenance",
+          path: h2,
+          release,
+          profile: "full-stack",
+          database: "h2",
+        },
+        command("h2-setup", "corepack", ["npm", "run", "setup"], { cwd: h2 }),
+        command("h2-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: h2 }),
+        command("h2-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], {
+          cwd: h2,
+        }),
+        command("h2-verify", "corepack", ["npm", "run", "verify"], { cwd: h2, timeoutMs: 45 * 60_000 }),
+        command("h2-frontend-production-build", "corepack", ["npm", "run", "build", "--prefix", "frontend"], {
+          cwd: h2,
+        }),
+        command("h2-boot-jar", "./gradlew", ["bootJar", "--no-daemon", "--no-build-cache"], {
+          cwd: h2,
+          timeoutMs: 30 * 60_000,
+        }),
+      ];
+    case "release-identity-and-doctor":
+      return [
+        command("frontend-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: frontend }),
+        command(
+          "frontend-identity-release-json",
+          "corepack",
+          ["npm", "run", "identity:check:release", "--", "--json"],
+          { cwd: frontend },
+        ),
+        { kind: "assert-file", id: "frontend-project-provenance", path: join(frontend, ".vireo", "project.json") },
+        { kind: "assert-file", id: "full-stack-project-provenance", path: join(h2, ".vireo", "project.json") },
+      ];
+    case "capability-lifecycle":
+      return [
+        create(capability, "full-stack", ["--java-package", "com.example.capability", "--database", "h2"]),
+        command("capability-setup", "corepack", ["npm", "run", "setup"], { cwd: capability }),
+        vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
+        { kind: "record-generated-digest", id: "capability-first-digest", path: capability },
+        vireo(capability, "check", "--json"),
+        vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
+        { kind: "assert-generated-digest", id: "capability-idempotent-digest", path: capability },
+        { kind: "mutate-generated", id: "customize-generated-output", path: capability },
+        {
+          ...vireo(capability, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
+          id: "customization-refusal",
+          expectedExit: 1,
+          assertOutput: /VIR-GEN-004|customized/u,
+        },
+      ];
+    case "sample-removal-and-ejection":
+      return [
+        create(removal, "full-stack", ["--java-package", "com.example.removal", "--database", "h2"]),
+        command("removal-setup", "corepack", ["npm", "run", "setup"], { cwd: removal }),
+        vireo(removal, "remove-example", "--status"),
+        vireo(removal, "remove-example", "--dry-run"),
+        vireo(removal, "remove-example", "--apply"),
+        { kind: "assert-removal-receipt", id: "sample-removal-receipt", path: removal },
+        vireo(removal, "remove-example", "--status"),
+        vireo(removal, "remove-example", "--apply"),
+        command("removal-verify", "corepack", ["npm", "run", "verify"], { cwd: removal, timeoutMs: 45 * 60_000 }),
+        create(ejection, "full-stack", ["--java-package", "com.example.ejection", "--database", "h2"]),
+        command("ejection-setup", "corepack", ["npm", "run", "setup"], { cwd: ejection }),
+        vireo(ejection, "generate", "entity", ".vireo/examples/purchase-order.entity.json"),
+        vireo(ejection, "eject", "purchase-orders"),
+        {
+          kind: "assert-absent",
+          id: "ejected-management-removed",
+          path: join(ejection, ".vireo", "generated", "purchase-orders.json"),
+        },
+        {
+          kind: "assert-file",
+          id: "ejected-capability-provenance",
+          path: join(ejection, ".vireo", "ejected-capabilities.json"),
+        },
+        { kind: "assert-ejected-marker", id: "ejected-application-code-retained", path: ejection },
+        {
+          kind: "assert-file",
+          id: "managed-provenance-retained",
+          path: join(ejection, ".vireo", "managed-files.json"),
+        },
+        command("ejection-verify", "corepack", ["npm", "run", "verify"], { cwd: ejection, timeoutMs: 45 * 60_000 }),
+      ];
     case "postgresql-production": {
       const postgresql = join(consumerRoot, "full-stack-postgresql");
       return [
         create(postgresql, "full-stack", ["--java-package", "com.example.postgresql", "--database", "postgresql"]),
-        { kind: "assert-project-identity", id: "postgresql-exact-provenance", path: postgresql, release, profile: "full-stack", database: "postgresql" },
+        {
+          kind: "assert-project-identity",
+          id: "postgresql-exact-provenance",
+          path: postgresql,
+          release,
+          profile: "full-stack",
+          database: "postgresql",
+        },
         command("postgresql-setup", "corepack", ["npm", "run", "setup"], { cwd: postgresql }),
-        command("postgresql-production-compose", "sh", ["scripts/verify-deployment.sh"], { cwd: postgresql, timeoutMs: 45 * 60_000 }),
+        command("postgresql-production-compose", "sh", ["scripts/verify-deployment.sh"], {
+          cwd: postgresql,
+          timeoutMs: 45 * 60_000,
+        }),
         { kind: "assert-deployment-contract", id: "postgresql-deployment-boundaries", path: postgresql },
       ];
     }
     case "adjacent-public-upgrades": {
       const target = upgradePolicy.publicRelease;
-      const edges = (upgradePolicy.requiredEdges ?? []).filter(edge => edge.from === upgradePolicy.maintenance?.priorCurrentUpgradeSource && edge.to === target);
+      const edges = (upgradePolicy.requiredEdges ?? []).filter(
+        edge => edge.from === upgradePolicy.maintenance?.priorCurrentUpgradeSource && edge.to === target,
+      );
       const source = upgradePolicy.releaseCoordinates?.[upgradePolicy.maintenance?.priorCurrentUpgradeSource];
       const targetCoordinate = upgradePolicy.releaseCoordinates?.[target];
       if (
@@ -442,71 +726,311 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         !["historical", "current"].includes(source?.status) ||
         targetCoordinate?.status !== "current"
       ) {
-        throw new Error("Project-upgrade policy must expose an adjacent public edge for the current public create-vireo release.");
+        throw new Error(
+          "Project-upgrade policy must expose an adjacent public edge for the current public create-vireo release.",
+        );
       }
-      return edges.flatMap(edge => ["frontend", "full-stack"].flatMap(profile => {
-        const directory = join(consumerRoot, `upgrade-${edge.from}-to-${edge.to}-${profile}`);
-        const creation = {
-          executable: "corepack",
-          arguments: [
-            "npm", "exec", "--yes", `--package=create-vireo@${edge.from}`, "--", "create-vireo", directory,
-            "--yes", "--no-git", "--profile", profile,
-          ],
-        };
-        if (profile === "full-stack") creation.arguments.push("--java-package", "com.example.upgrade", "--database", "h2");
-        return [
-          creation,
-          { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
-          { kind: "mutate-managed-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-managed-refusal-mutation`, path: directory },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory], expectedExit: 1, assertOutput: /managed|drift|customized/i },
-          { kind: "restore-managed-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-restore-managed-file`, path: directory },
-          {
+      return edges.flatMap(edge =>
+        ["frontend", "full-stack"].flatMap(profile => {
+          const directory = join(consumerRoot, `upgrade-${edge.from}-to-${edge.to}-${profile}`);
+          const creation = {
             executable: "corepack",
-            arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory],
-          },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--apply", "--accept-application-owned", "--project", directory] },
-          { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
-          { kind: "assert-project-identity", id: `upgrade-${edge.from}-${edge.to}-${profile}-exact-target`, path: directory, release, profile, database: profile === "full-stack" ? "h2" : undefined },
-          { kind: "assert-upgraded-consumer", id: `upgrade-${edge.from}-${edge.to}-${profile}-lock-and-jvm`, path: directory, release, profile, registry: "https://registry.npmjs.org" },
-          { kind: "record-project-tree", id: `upgrade-${edge.from}-${edge.to}-${profile}-post-apply-snapshot`, path: directory },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--apply", "--project", directory], expectedExit: 1 },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory] },
-          { kind: "assert-project-tree", id: `upgrade-${edge.from}-${edge.to}-${profile}-no-op-snapshot`, path: directory },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "status", "--json", "--project", directory] },
-          { kind: "assert-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-provenance`, path: join(directory, ".vireo", "project.json") },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "check", "--project", directory] },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "generate", "entity", ".vireo/examples/purchase-order.entity.json", "--project", directory] },
-          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "check", "--json", "--project", directory] },
-          { executable: "corepack", arguments: ["npm", "run", "verify"], cwd: directory, timeoutMs: 45 * 60_000 },
-        ];
-      }));
+            arguments: [
+              "npm",
+              "exec",
+              "--yes",
+              `--package=create-vireo@${edge.from}`,
+              "--",
+              "create-vireo",
+              directory,
+              "--yes",
+              "--no-git",
+              "--profile",
+              profile,
+            ],
+          };
+          if (profile === "full-stack")
+            creation.arguments.push("--java-package", "com.example.upgrade", "--database", "h2");
+          return [
+            creation,
+            { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
+            {
+              kind: "mutate-managed-file",
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-managed-refusal-mutation`,
+              path: directory,
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "upgrade",
+                "--to",
+                edge.to,
+                "--dry-run",
+                "--project",
+                directory,
+              ],
+              expectedExit: 1,
+              assertOutput: /managed|drift|customized/i,
+            },
+            {
+              kind: "restore-managed-file",
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-restore-managed-file`,
+              path: directory,
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "upgrade",
+                "--to",
+                edge.to,
+                "--dry-run",
+                "--project",
+                directory,
+              ],
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "upgrade",
+                "--to",
+                edge.to,
+                "--apply",
+                "--accept-application-owned",
+                "--project",
+                directory,
+              ],
+            },
+            { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
+            {
+              kind: "assert-project-identity",
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-exact-target`,
+              path: directory,
+              release,
+              profile,
+              database: profile === "full-stack" ? "h2" : undefined,
+            },
+            {
+              kind: "assert-upgraded-consumer",
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-lock-and-jvm`,
+              path: directory,
+              release,
+              profile,
+              registry: "https://registry.npmjs.org",
+            },
+            {
+              kind: "record-project-tree",
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-post-apply-snapshot`,
+              path: directory,
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "upgrade",
+                "--to",
+                edge.to,
+                "--apply",
+                "--project",
+                directory,
+              ],
+              expectedExit: 1,
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "upgrade",
+                "--to",
+                edge.to,
+                "--dry-run",
+                "--project",
+                directory,
+              ],
+            },
+            {
+              kind: "assert-project-tree",
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-no-op-snapshot`,
+              path: directory,
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "status",
+                "--json",
+                "--project",
+                directory,
+              ],
+            },
+            {
+              kind: "assert-file",
+              id: `upgrade-${edge.from}-${edge.to}-${profile}-provenance`,
+              path: join(directory, ".vireo", "project.json"),
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "check",
+                "--project",
+                directory,
+              ],
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "generate",
+                "entity",
+                ".vireo/examples/purchase-order.entity.json",
+                "--project",
+                directory,
+              ],
+            },
+            {
+              executable: "corepack",
+              arguments: [
+                "npm",
+                "exec",
+                "--yes",
+                `--package=create-vireo@${edge.to}`,
+                "--",
+                "vireo",
+                "check",
+                "--json",
+                "--project",
+                directory,
+              ],
+            },
+            { executable: "corepack", arguments: ["npm", "run", "verify"], cwd: directory, timeoutMs: 45 * 60_000 },
+          ];
+        }),
+      );
     }
-    case "npm-consumer-surface": return [
-      { kind: "exact-public-npm-consumer", id: "exact-public-npm-install", path: join(consumerRoot, "public-npm") },
-      ...release.npm.map(({ name, version }) => command(`npm-pack-${name}`, "corepack", ["npm", "pack", `${name}@${version}`, "--json"], { assertOutput: /"filename"/u })),
-      { kind: "assert-public-evidence", id: "npm-public-evidence-reuse", path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"), release },
-    ];
-    case "maven-consumer-surface": return [
-      command("maven-central-consumer", "sh", [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
-      command("maven-detached-signatures", "node", [join(root, "scripts", "verify-public-maven-signatures.mjs"), release.maven.version, join(evidenceDirectory, "maven-signatures.json")], { cwdClass: "framework-verifier", timeoutMs: 30 * 60_000 }),
-      { kind: "assert-public-evidence", id: "maven-public-evidence-contract", path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"), release },
-    ];
-    case "storybook-and-production-builds": return [
-      command("storybook-interaction", "corepack", ["npm", "run", "test:storybook"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
-      command("storybook-static", "corepack", ["npm", "run", "build-storybook"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
-      command("full-stack-frontend-production", "corepack", ["npm", "run", "build", "--prefix", "frontend"], { cwd: h2 }),
-      command("full-stack-boot-jar", "./gradlew", ["bootJar", "--no-daemon", "--no-build-cache"], { cwd: h2, timeoutMs: 30 * 60_000 }),
-    ];
-    case "browser-and-pwa": return [
-      { kind: "assert-script", id: "h2-browser-smoke-script", path: join(h2, "frontend"), script: "test:e2e" },
-      command("browser-smoke", "corepack", ["npm", "run", "test:e2e"], { cwd: join(h2, "frontend"), timeoutMs: 20 * 60_000 }),
-      { kind: "assert-script", id: "frontend-pwa-lifecycle-script", path: frontend, script: "test:pwa" },
-      command("pwa-two-build-lifecycle", "corepack", ["npm", "run", "test:pwa"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
-    ];
-    case "container-and-network-boundaries": return [
-      { kind: "assert-deployment-contract", id: "container-security-proxy-database-contract", path: join(consumerRoot, "full-stack-postgresql") },
-    ];
-    default: throw new Error(`No implementation recipe for ${scenario.id}.`);
+    case "npm-consumer-surface":
+      return [
+        { kind: "exact-public-npm-consumer", id: "exact-public-npm-install", path: join(consumerRoot, "public-npm") },
+        ...release.npm.map(({ name, version }) =>
+          command(`npm-pack-${name}`, "corepack", ["npm", "pack", `${name}@${version}`, "--json"], {
+            assertOutput: /"filename"/u,
+          }),
+        ),
+        {
+          kind: "assert-public-evidence",
+          id: "npm-public-evidence-reuse",
+          path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"),
+          release,
+        },
+      ];
+    case "maven-consumer-surface":
+      return [
+        command(
+          "maven-central-consumer",
+          "sh",
+          [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version],
+          { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 },
+        ),
+        command(
+          "maven-detached-signatures",
+          "node",
+          [
+            join(root, "scripts", "verify-public-maven-signatures.mjs"),
+            release.maven.version,
+            join(evidenceDirectory, "maven-signatures.json"),
+          ],
+          { cwdClass: "framework-verifier", timeoutMs: 30 * 60_000 },
+        ),
+        {
+          kind: "assert-public-evidence",
+          id: "maven-public-evidence-contract",
+          path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"),
+          release,
+        },
+      ];
+    case "storybook-and-production-builds":
+      return [
+        command("storybook-interaction", "corepack", ["npm", "run", "test:storybook"], {
+          cwd: frontend,
+          timeoutMs: 20 * 60_000,
+        }),
+        command("storybook-static", "corepack", ["npm", "run", "build-storybook"], {
+          cwd: frontend,
+          timeoutMs: 20 * 60_000,
+        }),
+        command("full-stack-frontend-production", "corepack", ["npm", "run", "build", "--prefix", "frontend"], {
+          cwd: h2,
+        }),
+        command("full-stack-boot-jar", "./gradlew", ["bootJar", "--no-daemon", "--no-build-cache"], {
+          cwd: h2,
+          timeoutMs: 30 * 60_000,
+        }),
+      ];
+    case "browser-and-pwa":
+      return [
+        { kind: "assert-script", id: "h2-browser-smoke-script", path: join(h2, "frontend"), script: "test:e2e" },
+        command("browser-smoke", "corepack", ["npm", "run", "test:e2e"], {
+          cwd: join(h2, "frontend"),
+          timeoutMs: 20 * 60_000,
+        }),
+        { kind: "assert-script", id: "frontend-pwa-lifecycle-script", path: frontend, script: "test:pwa" },
+        command("pwa-two-build-lifecycle", "corepack", ["npm", "run", "test:pwa"], {
+          cwd: frontend,
+          timeoutMs: 20 * 60_000,
+        }),
+      ];
+    case "container-and-network-boundaries":
+      return [
+        {
+          kind: "assert-deployment-contract",
+          id: "container-security-proxy-database-contract",
+          path: join(consumerRoot, "full-stack-postgresql"),
+        },
+      ];
+    default:
+      throw new Error(`No implementation recipe for ${scenario.id}.`);
   }
 }
 
@@ -515,18 +1039,30 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
   const release = publicReleaseIdentity(readJson(join(root, policy.releaseSource)));
   const preflightProblems = validateReleasePreflightIdentity({
     release,
-    requestedReleaseId: releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID,
-    requestedSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
-    verifierSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
+    requestedReleaseId:
+      releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID,
+    requestedSourceCommit:
+      sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
+    verifierSourceCommit:
+      sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
   });
   if (preflightProblems.length > 0) throw new Error(preflightProblems.join("\n"));
   const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
   const problems = validatePolicy(policy, release);
   if (problems.length > 0)
-    throw new Error(`Anonymous consumer gauntlet policy failed:\n${problems.map(problem => `- ${problem}`).join("\n")}`);
+    throw new Error(
+      `Anonymous consumer gauntlet policy failed:\n${problems.map(problem => `- ${problem}`).join("\n")}`,
+    );
   if (check) {
-    buildExecutionPlan({ policy, release, upgradePolicy: readJson(join(root, "contracts", "project-upgrade-policy.json")), consumerRoot: "/tmp/vireo-anonymous-plan" });
-    console.log(`Anonymous consumer gauntlet policy passed for ${release.id}: ${policy.scenarios.length} sequential scenarios.`);
+    buildExecutionPlan({
+      policy,
+      release,
+      upgradePolicy: readJson(join(root, "contracts", "project-upgrade-policy.json")),
+      consumerRoot: "/tmp/vireo-anonymous-plan",
+    });
+    console.log(
+      `Anonymous consumer gauntlet policy passed for ${release.id}: ${policy.scenarios.length} sequential scenarios.`,
+    );
     return;
   }
 
@@ -545,12 +1081,30 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     findings: [],
     externalWarnings: [],
     remainingHumanOnly: [
-      { category: "physical-device", owner: "consumer", reason: "Brand and physical-device PWA installation evidence remains a product decision.", evidenceReferences: [] },
-      { category: "adoption", owner: "product", reason: "Public-beta adoption evidence requires real consumer teams and cannot be manufactured by CI.", evidenceReferences: [] },
+      {
+        category: "physical-device",
+        owner: "consumer",
+        reason: "Brand and physical-device PWA installation evidence remains a product decision.",
+        evidenceReferences: [],
+      },
+      {
+        category: "adoption",
+        owner: "product",
+        reason: "Public-beta adoption evidence requires real consumer teams and cannot be manufactured by CI.",
+        evidenceReferences: [],
+      },
     ],
-    verifierSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT ?? "local-dry-run",
+    verifierSourceCommit:
+      sourceCommitArgument >= 0
+        ? process.argv[sourceCommitArgument + 1]
+        : (process.env.VIREO_GAUNTLET_SOURCE_COMMIT ?? "local-dry-run"),
     requestedReleaseId: release.id,
-    workflow: { repository: process.env.GITHUB_REPOSITORY ?? "local", run: process.env.GITHUB_RUN_ID ?? "local", attempt: process.env.GITHUB_RUN_ATTEMPT ?? "1", event: process.env.GITHUB_EVENT_NAME ?? "local" },
+    workflow: {
+      repository: process.env.GITHUB_REPOSITORY ?? "local",
+      run: process.env.GITHUB_RUN_ID ?? "local",
+      attempt: process.env.GITHUB_RUN_ATTEMPT ?? "1",
+      event: process.env.GITHUB_EVENT_NAME ?? "local",
+    },
     scenarios: [],
   };
   if (!dry) {
@@ -599,7 +1153,10 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
             try {
               Object.assign(record, await executeOperation(command, { environment, runRoot }), { status: "passed" });
             } catch (error) {
-              Object.assign(record, error?.result ?? {}, { status: "failed", error: error instanceof Error ? error.message : String(error) });
+              Object.assign(record, error?.result ?? {}, {
+                status: "failed",
+                error: error instanceof Error ? error.message : String(error),
+              });
               checkpoint();
               throw error;
             }
@@ -613,13 +1170,23 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
             scenario.id === "frontend-creation" ? "frontend" : "full-stack-h2",
             ...(scenario.id === "frontend-creation" ? [] : ["frontend"]),
           );
-          assertAnonymousInstallation({ consumerRoot: projectRoot, packageNames: ["@vireocodedev/ui"], registry: policy.registry });
+          assertAnonymousInstallation({
+            consumerRoot: projectRoot,
+            packageNames: ["@vireocodedev/ui"],
+            registry: policy.registry,
+          });
           assertAnonymousVireoLock({ consumerRoot: projectRoot, release, registry: policy.registry });
         }
       } catch (error) {
         result.status = "failed";
         result.error = error instanceof Error ? error.message : String(error);
-        evidence.findings.push({ id: "VIR-GAUNTLET-OPERATION", owner: "framework", severity: "error", remediation: "Inspect the indexed operation evidence and repair the failing public contract.", evidenceReferences: [`${scenario.id}/${result.commands.at(-1)?.id ?? "setup"}`] });
+        evidence.findings.push({
+          id: "VIR-GAUNTLET-OPERATION",
+          owner: "framework",
+          severity: "error",
+          remediation: "Inspect the indexed operation evidence and repair the failing public contract.",
+          evidenceReferences: [`${scenario.id}/${result.commands.at(-1)?.id ?? "setup"}`],
+        });
         evidence.status = "failed";
         checkpoint();
         throw error;
@@ -634,7 +1201,13 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
   if (!dry) {
     const finalProblems = validateFinalAnonymousEvidence({ ...evidence, status: "passed" }, release, policy);
     if (finalProblems.length > 0) {
-      evidence.findings.push({ id: "VIR-GAUNTLET-FINAL-EVIDENCE", owner: "framework", severity: "error", remediation: "Repair the final evidence contract before release qualification.", evidenceReferences: ["evidence.json"] });
+      evidence.findings.push({
+        id: "VIR-GAUNTLET-FINAL-EVIDENCE",
+        owner: "framework",
+        severity: "error",
+        remediation: "Repair the final evidence contract before release qualification.",
+        evidenceReferences: ["evidence.json"],
+      });
       evidence.status = "failed";
       checkpoint();
       throw new Error(finalProblems.join("\n"));

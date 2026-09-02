@@ -28,8 +28,10 @@ function sha256(path) {
 function safeEvidencePath(root, candidate) {
   if (typeof candidate !== "string" || candidate.length === 0) throw new Error("Evidence subject path is missing.");
   const path = resolve(root, candidate);
-  if (path !== root && !path.startsWith(`${root}/`)) throw new Error(`Evidence subject path escapes its artifact: ${candidate}`);
-  if (normalize(relative(root, path)).startsWith("..")) throw new Error(`Evidence subject path escapes its artifact: ${candidate}`);
+  if (path !== root && !path.startsWith(`${root}/`))
+    throw new Error(`Evidence subject path escapes its artifact: ${candidate}`);
+  if (normalize(relative(root, path)).startsWith(".."))
+    throw new Error(`Evidence subject path escapes its artifact: ${candidate}`);
   return path;
 }
 
@@ -55,11 +57,16 @@ export function signedSbomVerificationPlan({ evidenceRoot, release, policy, read
     root: join(evidenceRoot, "public-release-evidence"),
   });
   if (evidence?.status !== "passed") problems.push("anonymous consumer evidence is not passed");
-  if (!sameRelease(evidence?.release, release)) problems.push("anonymous consumer evidence does not match the exact release contract");
-  if (!/^[0-9a-f]{40}$/u.test(evidence?.releaseTagCommit ?? "")) problems.push("anonymous consumer evidence has no exact release tag commit");
-  if (!/^[0-9a-f]{40}$/u.test(evidence?.verifierSourceCommit ?? "")) problems.push("anonymous consumer evidence has no exact verifier source commit");
-  if (manifest?.source?.repository !== `https://github.com/${policy.repository}`) problems.push("public evidence has an unexpected source repository");
-  if (manifest?.source?.commit !== evidence?.verifierSourceCommit) problems.push("public evidence source commit does not match the verifier source commit");
+  if (!sameRelease(evidence?.release, release))
+    problems.push("anonymous consumer evidence does not match the exact release contract");
+  if (!/^[0-9a-f]{40}$/u.test(evidence?.releaseTagCommit ?? ""))
+    problems.push("anonymous consumer evidence has no exact release tag commit");
+  if (!/^[0-9a-f]{40}$/u.test(evidence?.verifierSourceCommit ?? ""))
+    problems.push("anonymous consumer evidence has no exact verifier source commit");
+  if (manifest?.source?.repository !== `https://github.com/${policy.repository}`)
+    problems.push("public evidence has an unexpected source repository");
+  if (manifest?.source?.commit !== evidence?.verifierSourceCommit)
+    problems.push("public evidence source commit does not match the verifier source commit");
   if (manifest?.source?.clean !== true) problems.push("public evidence source checkout is not clean");
 
   const mappingForSubject = new Map();
@@ -99,13 +106,16 @@ export function signedSbomVerificationPlan({ evidenceRoot, release, policy, read
       sbomId: mapping.id,
     });
   }
-  if (subjects.length !== (policy.npm.expectedSubjectCount + policy.maven.expectedSubjectCount)) {
+  if (subjects.length !== policy.npm.expectedSubjectCount + policy.maven.expectedSubjectCount) {
     problems.push("signed SBOM verification plan has a missing or extra exact subject");
   }
   if (new Set(subjects.map(subject => subject.path)).size !== subjects.length) {
     problems.push("signed SBOM verification plan contains duplicate subjects");
   }
-  if (problems.length > 0) throw new Error(`Anonymous signed SBOM evidence is invalid:\n${problems.map(problem => `- ${problem}`).join("\n")}`);
+  if (problems.length > 0)
+    throw new Error(
+      `Anonymous signed SBOM evidence is invalid:\n${problems.map(problem => `- ${problem}`).join("\n")}`,
+    );
 
   return {
     releaseId: release.id,
@@ -115,7 +125,9 @@ export function signedSbomVerificationPlan({ evidenceRoot, release, policy, read
 }
 
 function actualRun(uri, repository) {
-  const match = new RegExp(`^https://github\\.com/${repository}/actions/runs/(\\d+)/attempts/(\\d+)$`, "u").exec(uri ?? "");
+  const match = new RegExp(`^https://github\\.com/${repository}/actions/runs/(\\d+)/attempts/(\\d+)$`, "u").exec(
+    uri ?? "",
+  );
   if (!match) throw new Error("verified certificate has no canonical GitHub Actions run invocation URI");
   return { id: match[1], attempt: match[2], url: uri };
 }
@@ -137,7 +149,11 @@ function validateSignedCycloneDx({ predicate, subject }) {
   if (predicate?.bomFormat !== "CycloneDX" || !/^\d+\.\d+(?:\.\d+)?$/u.test(predicate?.specVersion ?? "")) {
     throw new Error(`verified attestation for ${subject.path} does not contain a valid CycloneDX SBOM.`);
   }
-  if (component?.name !== expected.name || component?.version !== expected.version || (expected.group && component?.group !== expected.group)) {
+  if (
+    component?.name !== expected.name ||
+    component?.version !== expected.version ||
+    (expected.group && component?.group !== expected.group)
+  ) {
     throw new Error(`verified CycloneDX SBOM does not describe ${subject.coordinate}.`);
   }
   return { bomFormat: predicate.bomFormat, specVersion: predicate.specVersion, component: expected };
@@ -151,7 +167,8 @@ export function verifiedAttestationRecord({ output, subject, repository, release
   } catch (error) {
     throw new Error("gh attestation verify returned malformed JSON.", { cause: error });
   }
-  if (!Array.isArray(entries) || entries.length === 0) throw new Error("gh attestation verify returned no verified attestations.");
+  if (!Array.isArray(entries) || entries.length === 0)
+    throw new Error("gh attestation verify returned no verified attestations.");
 
   const actual = [];
   for (const entry of entries) {
@@ -159,8 +176,10 @@ export function verifiedAttestationRecord({ output, subject, repository, release
     const result = entry?.verificationResult;
     const certificate = result?.signature?.certificate;
     const matchingSubject = result?.statement?.subject?.find(candidate => candidate?.digest?.sha256 === subject.sha256);
-    if (!matchingSubject) throw new Error(`verified attestation does not bind ${subject.path} to its exact SHA-256 digest.`);
-    if (result?.statement?.predicateType !== predicateType) throw new Error(`verified attestation for ${subject.path} has an unexpected predicate.`);
+    if (!matchingSubject)
+      throw new Error(`verified attestation does not bind ${subject.path} to its exact SHA-256 digest.`);
+    if (result?.statement?.predicateType !== predicateType)
+      throw new Error(`verified attestation for ${subject.path} has an unexpected predicate.`);
     const sbom = validateSignedCycloneDx({ predicate: result.statement.predicate, subject });
     const expectedCertificate = {
       subjectAlternativeName: certIdentity,
@@ -176,13 +195,15 @@ export function verifiedAttestationRecord({ output, subject, repository, release
       buildConfigDigest: releaseTagCommit,
     };
     for (const [field, expected] of Object.entries(expectedCertificate)) {
-      if (certificate?.[field] !== expected) throw new Error(`verified certificate ${field} does not match the canonical release identity.`);
+      if (certificate?.[field] !== expected)
+        throw new Error(`verified certificate ${field} does not match the canonical release identity.`);
     }
     if (certificate?.issuer !== oidcIssuer) {
       throw new Error("verified certificate has an unexpected OIDC issuer.");
     }
     const timestamps = result?.verifiedTimestamps;
-    if (!Array.isArray(timestamps) || timestamps.length === 0) throw new Error("verified attestation has no verified timestamp.");
+    if (!Array.isArray(timestamps) || timestamps.length === 0)
+      throw new Error("verified attestation has no verified timestamp.");
     actual.push({
       statement: { subjectSha256: matchingSubject.digest.sha256, predicateType: result.statement.predicateType },
       sbom,
@@ -239,7 +260,11 @@ export function verifySignedSbomPlan({ plan, repository, execute = execFileSync,
         "--format",
         "json",
       ],
-      { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" } },
+      {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" },
+      },
     );
     const attestations = verifiedAttestationRecord({
       output: executeResult,
@@ -271,9 +296,10 @@ function main() {
     repository: process.env.GITHUB_REPOSITORY ?? "local",
     id: process.env.GITHUB_RUN_ID ?? "local",
     attempt: process.env.GITHUB_RUN_ATTEMPT ?? "1",
-    url: process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
-      ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
-      : "local",
+    url:
+      process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
+        ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+        : "local",
   };
   const summary = {
     schemaVersion: 1,
