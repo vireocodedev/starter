@@ -91,5 +91,6 @@ jobs:
         with:
           name: vireo-website-${{ github.sha }}
           path: site/dist
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 30

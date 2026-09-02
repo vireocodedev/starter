@@ -36,6 +36,21 @@ const expectedPackages = new Map([
   ["ui", "@vireocodedev/ui"],
 ]);
 
+export function exactNpmReleaseCoordinates(release) {
+  if (!Array.isArray(release?.npm)) throw new Error("Exact npm release coordinates require a release contract.");
+  const coordinates = release.npm.map(({ name, version }) => `${name}@${version}`);
+  if (
+    coordinates.some(
+      coordinate =>
+        !/^(@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*@[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/iu.test(
+          coordinate,
+        ),
+    )
+  )
+    throw new Error("Exact npm release coordinates require valid package names and versions.");
+  return coordinates;
+}
+
 export function parseCommandLine(arguments_ = process.argv.slice(2)) {
   const options = {
     output: "npm-public-verification.json",
@@ -380,11 +395,13 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
       {
         attempts,
         intervalMs,
+        allowlistedNotargetCoordinates: exactNpmReleaseCoordinates(release),
         onRetry: (_error, attempt) => {
           rmSync(consumerModules, { recursive: true, force: true });
           rmSync(join(consumerRoot, "package-lock.json"), { force: true });
+          rmSync(environment.npm_config_cache, { recursive: true, force: true });
           console.log(
-            `Anonymous install encountered a registry 404 (attempt ${attempt}/${attempts}); waiting ${intervalMs} ms.`,
+            `Anonymous install encountered a registry propagation delay (404 or exact release ETARGET, attempt ${attempt}/${attempts}); waiting ${intervalMs} ms.`,
           );
         },
       },
