@@ -172,15 +172,17 @@ test("plans and verifies every exact npm and Maven subject against the release t
     },
   });
   assert.equal(calls.length, 2);
+  const hasExactOptionValue = (arguments_, option, value) => {
+    const indexes = arguments_.flatMap((argument, index) => (argument === option ? [index] : []));
+    return indexes.length === 1 && arguments_[indexes[0] + 1] === value;
+  };
   assert.ok(
-    calls.every(
-      ([, arguments_]) => arguments_.includes("--predicate-type") && arguments_.includes("https://cyclonedx.org/bom"),
-    ),
+    calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--predicate-type", "https://cyclonedx.org/bom")),
   );
   assert.ok(
-    calls.every(([, arguments_]) => arguments_.includes("--source-digest") && arguments_.includes("c".repeat(40))),
+    calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--source-digest", "c".repeat(40))),
   );
-  assert.ok(calls.every(([, arguments_]) => arguments_.includes("--format") && arguments_.includes("json")));
+  assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--format", "json")));
   assert.equal(
     records[0].verification.certIdentity,
     "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main",
