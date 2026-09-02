@@ -651,6 +651,7 @@ import { fileURLToPath } from "node:url";
 import { checkPwaSourceContract, formatPwaContractProblems } from "./pwa-contract.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const jsonMode = process.argv.slice(2).includes("--json");
 const results = [];
 const add = (code, status, summary, remedy) =>
   results.push({ code, status, summary, ...(remedy ? { remedy } : {}) });
@@ -775,19 +776,30 @@ add(
   "Stop the process using port 3000.",
 );
 
-for (const result of results)
-  console.log(
-    \`\${result.status === "pass" ? "✓" : result.status === "warn" ? "!" : "✗"} \${result.code} \${result.summary}\`,
-  );
 const ok = results.every(result => result.status !== "fail");
 const warnings = results.some(result => result.status === "warn");
-console.log(
-  ok
-    ? warnings
-      ? "Frontend profile is ready for development with unverified platform warnings."
-      : "Frontend profile is ready."
-    : "Resolve the failed checks and rerun the doctor.",
-);
+const report = {
+  schemaVersion: 1,
+  ok,
+  project: metadata?.projectName ?? "unknown",
+  profile: "frontend",
+  databaseMode: "frontend",
+  results,
+};
+if (jsonMode) console.log(JSON.stringify(report, null, 2));
+else {
+  for (const result of results)
+    console.log(
+      \`\${result.status === "pass" ? "✓" : result.status === "warn" ? "!" : "✗"} \${result.code} \${result.summary}\`,
+    );
+  console.log(
+    ok
+      ? warnings
+        ? "Frontend profile is ready for development with unverified platform warnings."
+        : "Frontend profile is ready."
+      : "Resolve the failed checks and rerun the doctor.",
+  );
+}
 if (!ok) process.exitCode = 1;
 `;
 
@@ -817,6 +829,7 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
   packageJson.scripts = {
     setup: "corepack npm ci",
     doctor: "node scripts/vireo-frontend-doctor.mjs",
+    "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json",
     dev: packageJson.scripts.dev,
     build: packageJson.scripts.build,
     typecheck: packageJson.scripts.typecheck,
