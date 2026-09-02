@@ -35,6 +35,19 @@ test("requires the protected gauntlet plan to report on every pull request", () 
     validateAlwaysReportedPullRequestWorkflow(pathFiltered, "anonymous-consumer-gauntlet.yml").join("\n"),
     /must run for every pull request without paths or paths-ignore filters/u,
   );
+  const missingPlan = anonymousGauntletWorkflow.replace("  plan:\n", "  disabled-plan:\n");
+  assert.match(
+    validateAlwaysReportedPullRequestWorkflow(missingPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
+    /plan must exist and report unconditionally for every pull request/u,
+  );
+  const conditionalPlan = anonymousGauntletWorkflow.replace(
+    "    if: github.event_name == 'pull_request'",
+    "    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'",
+  );
+  assert.match(
+    validateAlwaysReportedPullRequestWorkflow(conditionalPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
+    /plan must exist and report unconditionally for every pull request/u,
+  );
 });
 
 test("rejects release-PR workflow operations outside reviewed version maintenance", () => {

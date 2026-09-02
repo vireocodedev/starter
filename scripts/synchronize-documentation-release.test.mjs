@@ -395,6 +395,21 @@ test("rejects an undeclared retained backlog edge", async () => {
   }
 });
 
+test("rejects missing retained backlog evidence when the release graph has a predecessor edge", async () => {
+  const root = makeFixture();
+  try {
+    const path = join(root, "docs", "roadmap", "phase-4", "backlog.md");
+    writeFileSync(path, readFileSync(path, "utf8").replace("; 0.0.0→0.1.0 remains retained historical evidence", ""));
+
+    await assert.rejects(
+      synchronizeFixtureDocumentationRelease(root),
+      /docs\/roadmap\/phase-4\/backlog\.md current release contract must contain exactly one current-state reference/u,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function makeFixture() {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   mkdirSync(join(root, "contracts"));

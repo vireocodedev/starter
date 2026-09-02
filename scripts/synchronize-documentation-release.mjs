@@ -553,7 +553,7 @@ function synchronizeAdditionalCurrentGuidance({
   const historicalHyphenEdge = `${priorPublicUpgradeRelease}-to-${publicUpgradeRelease}`;
   const currentHyphenEdge = `${publicUpgradeRelease}-to-${candidateUpgradeRelease}`;
   const retainedBacklogSuffix = priorHistoricalUpgradeRelease
-    ? `(?:; ${escapeRegExp(`${priorHistoricalUpgradeRelease}→${priorPublicUpgradeRelease}`)} remains retained historical evidence)?`
+    ? `; ${escapeRegExp(`${priorHistoricalUpgradeRelease}→${priorPublicUpgradeRelease}`)} remains retained historical evidence`
     : "";
   const frontendProfilePath = join(repositoryRoot, "docs", "architecture", "frontend-only-profile.md");
   let frontendProfile = replaceRequired(

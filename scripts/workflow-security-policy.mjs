@@ -227,11 +227,17 @@ export function validateReleasePrWorkflow(source, actionPolicy) {
 }
 
 export function validateAlwaysReportedPullRequestWorkflow(source, fileName) {
+  const problems = [];
   const beforePermissions = source.slice(0, source.indexOf("permissions:"));
   if (!/^on:\n {2}pull_request:\s*\n {2}[A-Za-z_-]+:/mu.test(beforePermissions)) {
-    return [`${fileName} must run for every pull request without paths or paths-ignore filters`];
+    problems.push(`${fileName} must run for every pull request without paths or paths-ignore filters`);
   }
-  return [];
+  const lines = source.split(/\r?\n/u);
+  const plan = parseJobs(lines).find(job => job.name === "plan");
+  if (!plan || !lines.slice(plan.start, plan.end).includes("    if: github.event_name == 'pull_request'")) {
+    problems.push(`${fileName}:plan must exist and report unconditionally for every pull request`);
+  }
+  return problems;
 }
 
 const workflowFiles = readdirSync(workflowsRoot)
