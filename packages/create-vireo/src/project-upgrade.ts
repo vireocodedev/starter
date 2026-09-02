@@ -429,8 +429,8 @@ export async function currentProjectionCompatibilityRequirements(profile: "full-
   const target = graph.releases.find(release => release.release === targetRelease);
   if (!source || !target)
     throw new VireoUpgradeError("VIR-UPG-001", "Projection compatibility requirements have no adjacent release nodes.");
-  const files = edgeBaselines(policy, source.release, target.release, profile).filter(
-    baseline => baseline.path.endsWith("vitest.storybook.config.ts"),
+  const files = edgeBaselines(policy, source.release, target.release, profile).filter(baseline =>
+    baseline.path.endsWith("vitest.storybook.config.ts"),
   );
   if (targetRelease === "0.8.4" && files.length !== 1)
     throw new VireoUpgradeError(

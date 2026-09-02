@@ -1420,7 +1420,8 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     await renameJavaPackage(staging, javaPackage);
     const frontendPerformancePaths =
       profile === "frontend" ? await projectFrontendTemplate(staging, projectName, productName) : [];
-    const fullStackPerformancePaths = profile === "full-stack" ? await applyFullStackPerformanceProjection(staging) : [];
+    const fullStackPerformancePaths =
+      profile === "full-stack" ? await applyFullStackPerformanceProjection(staging) : [];
     if (profile !== "frontend") {
       await pinGeneratedProjectCli(staging);
       await normalizeGeneratedStarterJvmVersion(staging);

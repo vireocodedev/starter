@@ -216,9 +216,7 @@
               "frontend/src/app/ui/localization/resources/app.hr.ts"
             ],
             "requirement": "Update AppShellLayout for the 0.3 navigation contract, add localized navigation.PRIMARY values in en and hr, pass the translated value as the navigationLabel prop, and replace placeholder destinations with real href values while preserving client-side navigation behavior.",
-            "verificationCommands": [
-              "cd frontend && corepack npm run typecheck"
-            ]
+            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
           },
           {
             "id": "responsive-table-live-announcements",
@@ -228,20 +226,13 @@
               "frontend/src/pages/**/localization/resources/*.hr.ts"
             ],
             "requirement": "Update every AppPageItems use for the 0.3 responsive-table contract and add localized loadingNextPage and loadedNextPage messages in en and hr that announce page-load state without relying on visual table changes.",
-            "verificationCommands": [
-              "cd frontend && corepack npm run typecheck"
-            ]
+            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
           },
           {
             "id": "accessible-name-contracts",
-            "paths": [
-              "frontend/src/**/*.tsx",
-              "frontend/src/**/*.ts"
-            ],
+            "paths": ["frontend/src/**/*.tsx", "frontend/src/**/*.ts"],
             "requirement": "Resolve compiler-reported overlay and frame call sites with localized aria-label values or aria-labelledby connections to visible localized text; library default names are not sufficient for dialogs, drawers, frames, and overlays.",
-            "verificationCommands": [
-              "cd frontend && corepack npm run typecheck"
-            ]
+            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
           },
           {
             "id": "surface-palette-ownership",
@@ -252,18 +243,11 @@
               "frontend/src/app/ui/theme/config/theme.components.ts"
             ],
             "requirement": "Remove conflicting application Palette.surface definitions, use the 0.3 appSurface pattern for canvas and overlay surfaces, and review default, elevated, and overlay states in both colour schemes for contrast, separators, focus rings, and scrims.",
-            "verificationCommands": [
-              "cd frontend && corepack npm run typecheck"
-            ]
+            "verificationCommands": ["cd frontend && corepack npm run typecheck"]
           },
           {
             "id": "full-frontend-verification",
-            "paths": [
-              "frontend/package.json",
-              "frontend/package-lock.json",
-              "scripts/setup.mjs",
-              "scripts/verify.sh"
-            ],
+            "paths": ["frontend/package.json", "frontend/package-lock.json", "scripts/setup.mjs", "scripts/verify.sh"],
             "requirement": "Refresh the frontend lockfile after the dependency updates, run frontend typecheck and the complete application verification suite, and resolve the pending contract errors before treating the upgrade as complete.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -280,12 +264,7 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-review",
-            "paths": [
-              "frontend/src/",
-              "src/",
-              "deploy/",
-              ".github/"
-            ],
+            "paths": ["frontend/src/", "src/", "deploy/", ".github/"],
             "requirement": "Review the upstream Template release notes and selectively port application-owned, deployment, and generated-capability changes. Vireo updates only the explicitly listed managed transforms and never rewrites application-owned code.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -301,13 +280,7 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-review",
-            "paths": [
-              "AGENTS.md",
-              "frontend/src/",
-              "src/",
-              "deploy/",
-              ".github/"
-            ],
+            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/"],
             "requirement": "Review the upstream Template 0.8.0 release notes and selectively port the application-owned root AGENTS.md, source, deployment, and generated-capability changes. Vireo adds only the declared managed application skills and never rewrites application-owned source or repository review policy.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -323,15 +296,7 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-0.8.1-review",
-            "paths": [
-              "AGENTS.md",
-              "frontend/src/",
-              "src/",
-              "deploy/",
-              ".github/",
-              "docs/",
-              "scripts/"
-            ],
+            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/", "docs/", "scripts/"],
             "requirement": "Review the upstream Template 0.8.1 source, deployment, verification, OpenAPI compatibility, Corepack command, and Storybook telemetry changes. The empty baseline set adds no Template-file rewrite beyond Vireo's managed release-coordinate, provenance, and root-script metadata updates; selectively port application-owned changes and retain local product decisions.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -348,15 +313,7 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-0.8.2-review",
-            "paths": [
-              "AGENTS.md",
-              "frontend/src/",
-              "src/",
-              "deploy/",
-              ".github/",
-              "docs/",
-              "scripts/"
-            ],
+            "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/", "docs/", "scripts/"],
             "requirement": "Review the upstream Template 0.8.2 Doctor JSON release and selectively port application-owned changes. Vireo updates only the declared managed Doctor/provenance surfaces; retain local product decisions.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
@@ -403,12 +360,7 @@
         "applicationOwnedActions": [
           {
             "id": "application-owned-template-0.8.4-performance-review",
-            "paths": [
-              ".gitignore",
-              "frontend/tests/demo/",
-              "frontend/tests/e2e/",
-              "docs/"
-            ],
+            "paths": [".gitignore", "frontend/tests/demo/", "frontend/tests/e2e/", "docs/"],
             "requirement": "Review the upstream Template 0.8.4 hosted-demo assertions and optional browser evidence. Vireo applies the declared managed Lighthouse policy and compatibility-contract updates; retain product-owned test selection, CI, lockfiles, and repository policy.",
             "verificationCommands": [
               "corepack npm run performance:policy:test",
