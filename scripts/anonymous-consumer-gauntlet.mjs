@@ -1010,7 +1010,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           database: "postgresql",
         },
         command("postgresql-setup", "corepack", ["npm", "run", "setup"], { cwd: postgresql }),
-        command("postgresql-production-compose", "sh", ["scripts/verify-deployment.sh"], {
+        command("postgresql-production-compose", "bash", ["scripts/verify-deployment.sh"], {
           cwd: postgresql,
           timeoutMs: 45 * 60_000,
         }),
