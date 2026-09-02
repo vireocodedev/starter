@@ -346,6 +346,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     ];
     case "maven-consumer-surface": return [
       command("maven-central-consumer", "sh", [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+      command("maven-detached-signatures", "node", [join(root, "scripts", "verify-public-maven-signatures.mjs"), release.maven.version, join(evidenceDirectory, "maven-signatures.json")], { cwdClass: "framework-verifier", timeoutMs: 30 * 60_000 }),
       command("maven-public-evidence", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "maven-public-evidence")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
     ];
     case "storybook-and-production-builds": return [

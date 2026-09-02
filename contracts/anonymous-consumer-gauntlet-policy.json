@@ -8,6 +8,11 @@
     "artifactName": "anonymous-consumer-gauntlet-evidence",
     "retentionDays": 90
   },
+  "mavenSignature": {
+    "fingerprint": "C8C362C561046CD11C0F0DE01174796DD298F009",
+    "keyserver": "hkps://keyserver.ubuntu.com",
+    "informationalUnavailableKeyserver": "keys.openpgp.org"
+  },
   "isolation": {
     "scrubbedEnvironment": true,
     "isolatedNpmCache": true,
