@@ -51,6 +51,7 @@ type EdgeBaseline = {
   targetSha256?: string;
   targetContent?: string;
   transforms?: Array<{ from: string; to: string }>;
+  sourceProjectionTransforms?: Array<{ from: string; to: string }>;
   projectionTransforms?: Array<{ from: string; to: string }>;
 };
 type ProjectMetadata = Record<string, unknown> & {
@@ -65,7 +66,11 @@ type PackageManifest = Record<string, unknown> & {
 };
 type PackageLock = Record<string, unknown> & { packages?: Record<string, { dependencies?: Record<string, unknown> }> };
 type ManagedManifest = { schemaVersion: 1; templateCommit: string; files: Array<{ path: string; sha256: string }> };
+type ExampleManifest = { schemaVersion: 1; templateCommit: string; files: Record<string, string> };
+type RemovalReceipt = { schemaVersion: 1; templateCommit: string; removed: true };
 const TEMPLATE_COMMIT_PENDING_RELEASE = "TEMPLATE_COMMIT_PENDING_RELEASE";
+const FULL_STACK_OVERVIEW_SPEC = "frontend/tests/e2e/overview.spec.ts";
+const PRISTINE_084_OVERVIEW_SPEC_SHA256 = "aea0494de1223a26a132f64d4cad8e3f753348c5aa7f41519edf16798af4d3e3";
 
 export type VireoUpgradeOptions = {
   projectDirectory: string;
@@ -322,6 +327,20 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
     validateEdgeActions(edge.applicationOwnedActions);
     edges.add(`${edge.from}->${edge.to}`);
   }
+  const outgoing = new Map<string, string[]>();
+  for (const edge of graph.edges) outgoing.set(edge.from, [...(outgoing.get(edge.from) ?? []), edge.to]);
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (release: string): void => {
+    if (visiting.has(release))
+      throw new VireoUpgradeError("VIR-UPG-001", "Upgrade graph must not contain a release cycle.");
+    if (visited.has(release)) return;
+    visiting.add(release);
+    for (const target of outgoing.get(release) ?? []) visit(target);
+    visiting.delete(release);
+    visited.add(release);
+  };
+  for (const release of releases.keys()) visit(release);
   for (const release of graph.releases) {
     const pendingTemplateCommit =
       release.release === graph.candidateRelease &&
@@ -401,23 +420,44 @@ export async function currentFrontendProjectionRequirements(profile: "full-stack
   const graph = policy.releaseGraph;
   const targetRelease = graph.candidateRelease ?? graph.publicRelease;
   const target = graph.releases.find(release => release.release === targetRelease);
-  const source = graph.releases.find(release => release.release === graph.previousRelease);
-  if (!source || !target)
+  if (!target)
     throw new VireoUpgradeError("VIR-UPG-001", "Frontend projection requirements have no adjacent release nodes.");
   const baselinePrefix = profile === "frontend" ? "scripts/lighthouse-" : "frontend/scripts/lighthouse-";
-  const baselines = edgeBaselines(policy, source.release, target.release, profile).filter(baseline =>
-    baseline.path.startsWith(baselinePrefix),
-  );
-  if (targetRelease === "0.8.4" && baselines.length !== 5)
-    throw new VireoUpgradeError(
-      "VIR-UPG-001",
-      "Frontend performance projection must declare five immutable managed baselines.",
-    );
+  const baselines = activeManagedProjectionBaselines(policy, target.release, profile, baselinePrefix);
   return {
     scripts: managedScriptsForProfile(target, profile === "frontend"),
     sourceScripts: target.projectionSourceFrontendScripts?.[profile] ?? {},
     files: baselines.map(baseline => ({ path: baseline.path, contents: resolveBaselineTargetContent(baseline) })),
   };
+}
+
+/**
+ * A staged edge may leave existing managed projection bytes unchanged. Walk the
+ * declared linear history backwards so creation still uses their latest exact
+ * baseline instead of silently dropping a managed surface at the next release.
+ */
+function activeManagedProjectionBaselines(
+  policy: UpgradePolicy,
+  targetRelease: string,
+  profile: "full-stack" | "frontend",
+  prefix: string,
+) {
+  const baselines = new Map<string, EdgeBaseline>();
+  const visited = new Set<string>();
+  let release = targetRelease;
+  while (!visited.has(release)) {
+    visited.add(release);
+    const incoming = policy.releaseGraph.edges.filter(edge => edge.to === release);
+    if (incoming.length === 0) break;
+    if (incoming.length !== 1)
+      throw new VireoUpgradeError("VIR-UPG-001", "Managed projection history must have one incoming edge per release.");
+    const [edge] = incoming;
+    for (const baseline of edgeBaselines(policy, edge.from, edge.to, profile)) {
+      if (baseline.path.startsWith(prefix) && !baselines.has(baseline.path)) baselines.set(baseline.path, baseline);
+    }
+    release = edge.from;
+  }
+  return [...baselines.values()].sort((left, right) => left.path.localeCompare(right.path));
 }
 
 /** @internal Immutable managed compatibility bytes that bridge the public Template to the staged release. */
@@ -432,16 +472,41 @@ export async function currentProjectionCompatibilityRequirements(profile: "full-
   const files = edgeBaselines(policy, source.release, target.release, profile).filter(baseline =>
     baseline.path.endsWith("vitest.storybook.config.ts"),
   );
-  if (targetRelease === "0.8.4" && files.length !== 1)
+  if (files.length !== 1)
     throw new VireoUpgradeError(
       "VIR-UPG-001",
-      `Projection compatibility for ${profile} must declare one immutable Storybook optimizer baseline.`,
+      `Active projection compatibility for ${profile} must declare one immutable Storybook optimizer baseline.`,
     );
-  return files.map(baseline => ({
-    path: baseline.path,
-    source: baseline.sourceContent,
-    contents: resolveBaselineTargetContent(baseline),
-  }));
+  return files.map(baseline => {
+    const compatibleContents = new Set<string>();
+    const visitedReleases = new Set<string>();
+    let release = target.release;
+    while (true) {
+      if (visitedReleases.has(release))
+        throw new VireoUpgradeError("VIR-UPG-001", "Managed projection history contains a release cycle.");
+      visitedReleases.add(release);
+      const incoming = graph.edges.filter(edge => edge.to === release);
+      if (incoming.length === 0) break;
+      if (incoming.length !== 1)
+        throw new VireoUpgradeError(
+          "VIR-UPG-001",
+          "Managed projection history must have one incoming edge per release.",
+        );
+      const [edge] = incoming;
+      const historical = edgeBaselines(policy, edge.from, edge.to, profile).find(file => file.path === baseline.path);
+      if (historical) {
+        if (historical.sourceContent !== undefined) compatibleContents.add(historical.sourceContent);
+        const historicalTarget = resolveBaselineTargetContent(historical);
+        if (historicalTarget !== undefined) compatibleContents.add(historicalTarget);
+      }
+      release = edge.from;
+    }
+    return {
+      path: baseline.path,
+      compatibleContents: [...compatibleContents],
+      contents: resolveBaselineTargetContent(baseline),
+    };
+  });
 }
 function requirementsMatch(
   manifest: PackageManifest,
@@ -624,6 +689,204 @@ function validateManagedManifest(value: ManagedManifest | undefined): asserts va
       throw new VireoUpgradeError("VIR-UPG-001", "Managed-file provenance contains duplicate paths or invalid hashes.");
     paths.add(file.path);
   }
+}
+function validateExampleManifest(value: unknown, templateCommit: string): asserts value is ExampleManifest {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    (value as Partial<ExampleManifest>).schemaVersion !== 1 ||
+    (value as Partial<ExampleManifest>).templateCommit !== templateCommit ||
+    !(value as Partial<ExampleManifest>).files ||
+    typeof (value as Partial<ExampleManifest>).files !== "object" ||
+    Array.isArray((value as Partial<ExampleManifest>).files)
+  ) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Example ownership provenance must be a schema version 1 manifest for the source Template commit.",
+    );
+  }
+  for (const [path, digest] of Object.entries((value as ExampleManifest).files)) {
+    assertBaselinePath(path);
+    if (!/^[a-f0-9]{64}$/u.test(digest))
+      throw new VireoUpgradeError("VIR-UPG-003", "Example ownership provenance has an invalid file digest.");
+  }
+}
+function validateRemovalReceipt(value: unknown, templateCommit: string): asserts value is RemovalReceipt {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    (value as Partial<RemovalReceipt>).schemaVersion !== 1 ||
+    (value as Partial<RemovalReceipt>).templateCommit !== templateCommit ||
+    (value as Partial<RemovalReceipt>).removed !== true
+  ) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Removal receipt must be a completed schema version 1 receipt for the source Template commit.",
+    );
+  }
+}
+function validateExistingUpgradeReceipt(
+  contents: string,
+  source: ReleaseNode,
+  target: ReleaseNode,
+  expectedManagedSurfaces: string[],
+  lockfileRefresh: "required" | "not-required",
+  actions: VireoUpgradeManualAction[],
+) {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(contents);
+  } catch (error) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `Existing upgrade receipt is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    throw new VireoUpgradeError("VIR-UPG-003", "Existing upgrade receipt must be a JSON object.");
+  const receipt = parsed as Record<string, unknown>;
+  const expectedKeys = [
+    "schemaVersion",
+    "from",
+    "to",
+    "sourceTemplateCommit",
+    "targetTemplateCommit",
+    "managedSurfaces",
+    "lockfileRefresh",
+    "applicationOwnedActions",
+  ].sort();
+  const actualKeys = Object.keys(receipt).sort();
+  if (actualKeys.length !== expectedKeys.length || actualKeys.some((key, index) => key !== expectedKeys[index]))
+    throw new VireoUpgradeError("VIR-UPG-003", "Existing upgrade receipt has an unsupported top-level field.");
+  const actualSurfaces = receipt.managedSurfaces;
+  if (
+    receipt.schemaVersion !== 2 ||
+    receipt.from !== source.release ||
+    receipt.to !== target.release ||
+    receipt.sourceTemplateCommit !== source.templateCommit ||
+    receipt.targetTemplateCommit !== target.templateCommit ||
+    receipt.lockfileRefresh !== lockfileRefresh ||
+    !Array.isArray(actualSurfaces) ||
+    actualSurfaces.some(surface => typeof surface !== "string") ||
+    !Array.isArray(receipt.applicationOwnedActions) ||
+    JSON.stringify(receipt.applicationOwnedActions) !== JSON.stringify(actions)
+  ) {
+    throw new VireoUpgradeError("VIR-UPG-003", "Existing upgrade receipt is invalid for this managed release edge.");
+  }
+  const isExampleSurface = (surface: string) =>
+    surface === ".vireo/example-manifest.json" || surface === ".vireo/remove-example.json";
+  const comparable = (surfaces: string[]) =>
+    surfaces.map(surface =>
+      isOverviewManifestMigration(source, target) && isExampleSurface(surface) ? "<example-state>" : surface,
+    );
+  if (JSON.stringify(comparable(actualSurfaces)) !== JSON.stringify(comparable(expectedManagedSurfaces)))
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Existing upgrade receipt has incompatible managed surfaces for this release edge.",
+    );
+}
+function isOverviewManifestMigration(source: ReleaseNode, target: ReleaseNode) {
+  return source.release === "0.8.4" && target.release === "0.8.6";
+}
+async function migrateExampleManifest(
+  projectDirectory: string,
+  source: ReleaseNode,
+  target: ReleaseNode,
+  frontendOnly: boolean,
+) {
+  if (!isOverviewManifestMigration(source, target)) return undefined;
+  const manifestPath = ".vireo/example-manifest.json";
+  const receiptPath = ".vireo/remove-example.json";
+  await safeFileState(projectDirectory, manifestPath);
+  const previous = await optionalText(join(projectDirectory, manifestPath));
+  const hasReceipt = await safeFileState(projectDirectory, receiptPath);
+  if (previous === undefined) {
+    if (!hasReceipt)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "Example ownership provenance is missing and no completed removal receipt was found.",
+      );
+    let receipt: unknown;
+    try {
+      receipt = JSON.parse(await readFile(join(projectDirectory, receiptPath), "utf8"));
+    } catch (error) {
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        `Removal receipt is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    validateRemovalReceipt(receipt, source.templateCommit);
+    // A completed removal deliberately replaces the example manifest. Do not
+    // recreate ownership after removal, regardless of which profile was removed.
+    const targetReceipt = structuredClone(receipt);
+    targetReceipt.templateCommit = target.templateCommit;
+    return {
+      path: join(projectDirectory, receiptPath),
+      contents: `${JSON.stringify(targetReceipt, null, 2)}\n`,
+      previous: await readFile(join(projectDirectory, receiptPath), "utf8"),
+    };
+  }
+  if (hasReceipt)
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Example ownership manifest conflicts with a completed removal receipt.",
+    );
+  let sourceManifest: unknown;
+  try {
+    sourceManifest = JSON.parse(previous);
+  } catch (error) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `Example ownership provenance is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  validateExampleManifest(sourceManifest, source.templateCommit);
+  const targetManifest = structuredClone(sourceManifest);
+  if (frontendOnly) {
+    if (FULL_STACK_OVERVIEW_SPEC in targetManifest.files)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "Frontend-only example provenance must not claim the full-stack Overview sample.",
+      );
+  } else {
+    if (!(await safeFileState(projectDirectory, FULL_STACK_OVERVIEW_SPEC)))
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "The full-stack Overview sample is missing; restore or adapt it before upgrading.",
+      );
+    const overview = await readFile(join(projectDirectory, FULL_STACK_OVERVIEW_SPEC));
+    if (sha256(overview) !== PRISTINE_084_OVERVIEW_SPEC_SHA256)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "The full-stack Overview sample differs from the immutable 0.8.4 baseline; restore or adapt it before upgrading.",
+      );
+    const declaredDigest = targetManifest.files[FULL_STACK_OVERVIEW_SPEC];
+    if (declaredDigest !== undefined && declaredDigest !== PRISTINE_084_OVERVIEW_SPEC_SHA256)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "Example ownership provenance has a customized full-stack Overview sample digest.",
+      );
+    targetManifest.files[FULL_STACK_OVERVIEW_SPEC] = PRISTINE_084_OVERVIEW_SPEC_SHA256;
+  }
+  targetManifest.templateCommit = target.templateCommit;
+  return {
+    path: join(projectDirectory, manifestPath),
+    contents: `${JSON.stringify(targetManifest, null, 2)}\n`,
+    previous,
+  };
+}
+async function recordedExampleProvenancePath(projectDirectory: string, source: ReleaseNode, target: ReleaseNode) {
+  if (!isOverviewManifestMigration(source, target)) return undefined;
+  const manifestPath = ".vireo/example-manifest.json";
+  const receiptPath = ".vireo/remove-example.json";
+  const hasManifest = await safeFileState(projectDirectory, manifestPath);
+  const hasReceipt = await safeFileState(projectDirectory, receiptPath);
+  if (hasManifest === hasReceipt)
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Example ownership provenance must contain exactly one of the manifest or completed removal receipt.",
+    );
+  return hasManifest ? manifestPath : receiptPath;
 }
 async function safeFileState(root: string, path: string) {
   assertBaselinePath(path);
@@ -918,6 +1181,15 @@ async function upgradeProjectWithPolicy(
       "VIR-UPG-002",
       `No adjacent upgrade edge ${recordedRelease} -> ${target.release} is declared.`,
     );
+  if (
+    !alreadyTarget &&
+    isOverviewManifestMigration(source, target) &&
+    (await safeFileState(projectDirectory, ".vireo/upgrade-0.8.4-to-0.8.6.json"))
+  )
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "A target-edge upgrade receipt already exists; resolve the conflicting provenance before upgrading.",
+    );
   assertEqual(metadata.templateCommit, source.templateCommit, "source Template commit", "VIR-UPG-002");
   if (metadata.templateVersion !== undefined)
     assertEqual(metadata.templateVersion, source.release, "source Template version", "VIR-UPG-002");
@@ -947,6 +1219,7 @@ async function upgradeProjectWithPolicy(
       }
     }
   }
+  const exampleStateChange = await migrateExampleManifest(projectDirectory, source, target, frontendOnly);
   const managedBaselines = edgeBaselines(policy, source.release, edge?.to, metadata.profile);
   const baselineFiles = await Promise.all(
     managedBaselines.map(async baseline => ({ baseline, state: await baselineState(projectDirectory, baseline) })),
@@ -967,13 +1240,21 @@ async function upgradeProjectWithPolicy(
   const targetScriptManifest = frontendOnly ? targetRootManifest : targetFrontendManifest;
   const sourceManagedScripts = managedScriptsForProfile(source, frontendOnly);
   const targetManagedScripts = managedScriptsForProfile(target, frontendOnly);
+  const targetProjectionSourceScripts =
+    target.projectionSourceFrontendScripts?.[frontendOnly ? "frontend" : "full-stack"] ?? {};
   for (const [name, value] of Object.entries(targetManagedScripts)) {
     const current = targetScriptManifest.scripts?.[name];
-    if (current !== undefined && current !== value && current !== sourceManagedScripts[name])
-      throw new VireoUpgradeError(
-        "VIR-UPG-003",
-        `Managed package.json scripts.${name} differs from the declared target; resolve the customization before upgrading.`,
-      );
+    const sourceValue = sourceManagedScripts[name] ?? targetProjectionSourceScripts[name];
+    if (current === value || (sourceValue !== undefined && current === sourceValue)) continue;
+    // A script with no declared source is an addition on this edge. Preserve the
+    // historical omission, but reject any consumer-owned value rather than
+    // silently replacing it. A declared projection source is required and
+    // therefore cannot be absent.
+    if (sourceValue === undefined && current === undefined) continue;
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `Managed package.json scripts.${name} differs from the declared source or target; resolve the customization before upgrading.`,
+    );
   }
   targetRootManifest.scripts = {
     ...targetRootManifest.scripts,
@@ -1016,11 +1297,13 @@ async function upgradeProjectWithPolicy(
       ? graph.edges.find(candidate => candidate.from === previousUpgrade.from && candidate.to === target.release)
       : undefined);
   const recordSource = recordedEdge ? graph.releases.find(release => release.release === recordedEdge.from)! : source;
+  const recordedExampleProvenance = await recordedExampleProvenancePath(projectDirectory, recordSource, target);
   const receiptBaselines = recordedEdge
     ? edgeBaselines(policy, recordSource.release, target.release, metadata.profile)
     : managedBaselines;
   const receiptManagedSurfaces = [
     ...managedSurfaces,
+    ...(recordedExampleProvenance ? [recordedExampleProvenance] : []),
     ...Object.keys(targetManagedScripts).map(
       name => `${frontendOnly ? "package.json" : "frontend/package.json"}#scripts.${name}`,
     ),
@@ -1028,7 +1311,7 @@ async function upgradeProjectWithPolicy(
   ];
   const actions = profileActions(recordedEdge?.applicationOwnedActions ?? [], metadata.profile),
     recordPath = join(projectDirectory, ".vireo", `upgrade-${recordSource.release}-to-${target.release}.json`);
-  const recordContents = await format(
+  const renderedRecordContents = await format(
     JSON.stringify({
       schemaVersion: 2,
       from: recordSource.release,
@@ -1041,6 +1324,19 @@ async function upgradeProjectWithPolicy(
     }),
     { ...(await resolveConfig(recordPath)), filepath: recordPath },
   );
+  const existingRecordContents = await optionalText(recordPath);
+  let recordContents = renderedRecordContents;
+  if (alreadyTarget && existingRecordContents !== undefined) {
+    validateExistingUpgradeReceipt(
+      existingRecordContents,
+      recordSource,
+      target,
+      receiptManagedSurfaces,
+      recordedEdge?.lockfileRefresh ?? "required",
+      actions,
+    );
+    recordContents = existingRecordContents;
+  }
   const sourceManaged =
     existingManaged ?? (await managedManifest(projectDirectory, source.templateCommit, frontendOnly));
   const baselineByPath = new Map(baselineFiles.map(file => [file.baseline.path, file.baseline]));
@@ -1099,6 +1395,7 @@ async function upgradeProjectWithPolicy(
           previous: undefined,
         })),
     )),
+    ...(exampleStateChange ? [exampleStateChange] : []),
     { path: metadataPath, contents: `${JSON.stringify(targetMetadata, null, 2)}\n`, previous: metadataText },
     {
       path: join(projectDirectory, ".vireo/managed-files.json"),

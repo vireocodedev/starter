@@ -627,6 +627,7 @@ export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoo
       ...(operation.source ? { source: operation.source } : {}),
       ...(operation.target ? { target: operation.target } : {}),
       ...(operation.profile ? { profile: operation.profile } : {}),
+      ...(operation.lockfileRefresh ? { lockfileRefresh: operation.lockfileRefresh } : {}),
     })),
   }));
 }
@@ -704,6 +705,26 @@ export function validateRemovalReceipt({ projectRoot, expectedTemplateCommit } =
     throw new Error("Sample removal project metadata does not match the exact public Template commit.");
   if (existsSync(join(projectRoot, ".vireo", "example-manifest.json")))
     throw new Error("Sample removal left its example ownership manifest behind.");
+}
+
+/** The declared adjacent edge, not an implicit default, defines recorded lockfile policy. */
+export function hasExpectedUpgradeLastUpgrade(lastUpgrade, operation) {
+  const lockfileRefresh = operation.lockfileRefresh;
+  if (!["required", "not-required"].includes(lockfileRefresh))
+    throw new Error("Upgraded-consumer assertion requires a declared lockfile refresh policy.");
+  const expectedLastUpgrade = {
+    schemaVersion: 2,
+    from: operation.source.createVireoVersion,
+    to: operation.target.createVireoVersion,
+    sourceTemplateCommit: operation.source.template.commit,
+    targetTemplateCommit: operation.target.template.commit,
+    sourceTemplateVersion: operation.source.template.version,
+    targetTemplateVersion: operation.target.template.version,
+    sourceTemplateTag: operation.source.template.tag,
+    targetTemplateTag: operation.target.template.tag,
+    lockfileRefresh,
+  };
+  return JSON.stringify(lastUpgrade) === JSON.stringify(expectedLastUpgrade);
 }
 
 export function validateCreateDryRunJson(value, { directory, profile, release }) {
@@ -1003,18 +1024,6 @@ async function executeOperation(operation, { environment, runRoot }) {
       throw new Error(`${operation.id} is missing managed-file provenance.`);
   } else if (operation.kind === "assert-upgraded-consumer") {
     const project = JSON.parse(readFileSync(join(operation.path, ".vireo", "project.json"), "utf8"));
-    const expectedLastUpgrade = {
-      schemaVersion: 2,
-      from: operation.source.createVireoVersion,
-      to: operation.target.createVireoVersion,
-      sourceTemplateCommit: operation.source.template.commit,
-      targetTemplateCommit: operation.target.template.commit,
-      sourceTemplateVersion: operation.source.template.version,
-      targetTemplateVersion: operation.target.template.version,
-      sourceTemplateTag: operation.source.template.tag,
-      targetTemplateTag: operation.target.template.tag,
-      lockfileRefresh: "required",
-    };
     if (
       project.createdBy !== `create-vireo@${operation.source.createVireoVersion}` ||
       project.lastUpgradedBy !== `create-vireo@${operation.target.createVireoVersion}` ||
@@ -1022,7 +1031,7 @@ async function executeOperation(operation, { environment, runRoot }) {
       project.templateVersion !== operation.target.template.version ||
       project.templateTag !== operation.target.template.tag ||
       project.profile !== operation.profile ||
-      JSON.stringify(project.lastUpgrade) !== JSON.stringify(expectedLastUpgrade)
+      !hasExpectedUpgradeLastUpgrade(project.lastUpgrade, operation)
     )
       throw new Error("Upgraded consumer target identity drifted.");
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
@@ -1452,6 +1461,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       const target = release.createVireoVersion;
       const edges = (upgradePolicy.requiredEdges ?? []).filter(edge => edge.to === target);
       const [edge] = edges;
+      const lockfileRefresh = edge?.lockfileRefresh ?? "required";
       const source = upgradePolicy.releaseCoordinates?.[edge?.from];
       const targetCoordinate = upgradePolicy.releaseCoordinates?.[target];
       if (
@@ -1461,7 +1471,8 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         targetCoordinate?.templateVersion !== release.template.version ||
         targetCoordinate?.templateCommit !== release.template.commit ||
         !["historical", "current"].includes(source?.status) ||
-        targetCoordinate?.status !== "current"
+        targetCoordinate?.status !== "current" ||
+        !["required", "not-required"].includes(lockfileRefresh)
       ) {
         throw new Error(
           "Project-upgrade policy must expose an adjacent public edge for the current public create-vireo release.",
@@ -1578,6 +1589,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
                 },
               },
               profile,
+              lockfileRefresh,
               registry: "https://registry.npmjs.org",
             },
             {

@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   applyExactBaselineTransforms,
+  assertStorybookBaselineContinuity,
   projectedBaselineBytes,
+  projectedBaselineSourceBytes,
   templatePathForBaseline,
 } from "./project-upgrade-baseline-contract.mjs";
 
@@ -34,6 +37,94 @@ test("managed Storybook optimizer baseline is an exact projection transform", ()
   assert.equal(
     projectedBaselineBytes("frontend", "  defineConfig({\n    test:", baseline),
     '  defineConfig({\n    optimizeDeps: { include: ["@testing-library/dom"] },\n    test:',
+  );
+});
+
+test("managed upgrade baselines can bind a prior generated projection source", () => {
+  const source = "defineConfig({\n  test:";
+  const baseline = {
+    path: "vitest.storybook.config.ts",
+    sourceProjectionTransforms: [
+      { from: "defineConfig({\n  test:", to: "defineConfig({\n  optimizeDeps: {}\n  test:" },
+    ],
+  };
+  assert.equal(projectedBaselineSourceBytes(source, baseline), "defineConfig({\n  optimizeDeps: {}\n  test:");
+});
+
+test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", () => {
+  const policy = JSON.parse(
+    readFileSync(new URL("../../packages/create-vireo/schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+  );
+  const edge = "0.8.4->0.8.6";
+  assert.doesNotThrow(() => assertStorybookBaselineContinuity(policy.releaseGraph, edge));
+
+  for (const profile of ["full-stack", "frontend"]) {
+    const predecessor = policy.releaseGraph.baselines["0.8.3->0.8.4"][profile].find(file =>
+      file.path.endsWith("vitest.storybook.config.ts"),
+    );
+    const current = policy.releaseGraph.baselines[edge][profile].find(file =>
+      file.path.endsWith("vitest.storybook.config.ts"),
+    );
+    assert.equal(current.sourceSha256, predecessor.targetSha256);
+    assert.equal(current.sourceContent, predecessor.targetContent);
+  }
+
+  const corrupted = structuredClone(policy.releaseGraph);
+  corrupted.baselines[edge].frontend.find(file => file.path.endsWith("vitest.storybook.config.ts")).sourceSha256 =
+    "0".repeat(64);
+  assert.throws(
+    () => assertStorybookBaselineContinuity(corrupted, edge),
+    /0\.8\.4->0\.8\.6:frontend Storybook source must match 0\.8\.3->0\.8\.4 target provenance/u,
+  );
+
+  const predecessorMissingForFrontendOnly = structuredClone(policy.releaseGraph);
+  predecessorMissingForFrontendOnly.baselines["0.8.3->0.8.4"].frontend = predecessorMissingForFrontendOnly.baselines[
+    "0.8.3->0.8.4"
+  ].frontend.filter(file => !file.path.endsWith("vitest.storybook.config.ts"));
+  assert.throws(
+    () => assertStorybookBaselineContinuity(predecessorMissingForFrontendOnly, edge),
+    /0\.8\.4->0\.8\.6:frontend Storybook update has no 0\.8\.3->0\.8\.4 target provenance/u,
+  );
+
+  const frontendBaseline = policy.releaseGraph.baselines[edge].frontend.find(file =>
+    file.path.endsWith("vitest.storybook.config.ts"),
+  );
+  const [sourceTransform] = frontendBaseline.sourceProjectionTransforms;
+  const immutable084TemplateSource = frontendBaseline.sourceContent.replace(sourceTransform.to, sourceTransform.from);
+  assert.equal(
+    projectedBaselineSourceBytes(immutable084TemplateSource, frontendBaseline),
+    frontendBaseline.sourceContent,
+  );
+  const transformDeletedForFrontendOnly = structuredClone(frontendBaseline);
+  delete transformDeletedForFrontendOnly.sourceProjectionTransforms;
+  assert.throws(
+    () => projectedBaselineSourceBytes(immutable084TemplateSource, transformDeletedForFrontendOnly),
+    /projected source bytes differ from declared source content/u,
+    "removing source projection provenance for one profile fails closed",
+  );
+});
+
+test("Storybook provenance continuity ignores empty, unrelated, and first-add edges", () => {
+  const edge = "0.9.0->0.9.1";
+  const graphWith = files => ({
+    edges: [{ from: "0.9.0", to: "0.9.1" }],
+    baselines: {
+      [edge]: {
+        "full-stack": structuredClone(files),
+        frontend: structuredClone(files),
+      },
+    },
+  });
+
+  assert.doesNotThrow(() => assertStorybookBaselineContinuity(graphWith([]), edge));
+  assert.doesNotThrow(() =>
+    assertStorybookBaselineContinuity(
+      graphWith([{ operation: "update", path: "scripts/lighthouse-policy.mjs" }]),
+      edge,
+    ),
+  );
+  assert.doesNotThrow(() =>
+    assertStorybookBaselineContinuity(graphWith([{ operation: "add", path: "vitest.storybook.config.ts" }]), edge),
   );
 });
 

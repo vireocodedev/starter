@@ -470,12 +470,29 @@ function synchronizeCurrentReleaseGuidance({
   }
   const historicalEdge = `${priorPublicUpgradeRelease}→${publicUpgradeRelease}`;
   const currentEdge = `${publicUpgradeRelease}→${candidateUpgradeRelease}`;
-  const updatedReadme = replaceRequired(
-    readme.replaceAll(oldTemplateCommit, templateCommit),
-    `in \`create-vireo@${publicUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${historicalEdge} release\npair;`,
-    `in \`create-vireo@${candidateUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${currentEdge} release\npair; ${historicalEdge} remains retained historical evidence;`,
-    "README.md current project-upgrade guidance",
-  );
+  const legacyReadmeGuidance = `in \`create-vireo@${publicUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${historicalEdge} release\npair;`;
+  const stableReadmeGuidance =
+    "in the published release. Its version-aware project upgrade supports the declared\nadjacent public release edge; earlier edges remain retained historical evidence.";
+  let updatedReadme = readme.replaceAll(oldTemplateCommit, templateCommit);
+  if (updatedReadme.includes(stableReadmeGuidance)) {
+    if (updatedReadme.includes(legacyReadmeGuidance)) {
+      throw new Error("README.md cannot mix stable and legacy current project-upgrade guidance");
+    }
+    updatedReadme = replaceExactCount(
+      updatedReadme,
+      stableReadmeGuidance,
+      stableReadmeGuidance,
+      1,
+      "README.md stable project-upgrade guidance",
+    );
+  } else {
+    updatedReadme = replaceRequired(
+      updatedReadme,
+      legacyReadmeGuidance,
+      `in \`create-vireo@${candidateUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${currentEdge} release\npair; ${historicalEdge} remains retained historical evidence;`,
+      "README.md current project-upgrade guidance",
+    );
+  }
   let updatedCompatibility = replaceRequired(
     compatibilityMarkdown,
     `edge is ${historicalEdge};`,

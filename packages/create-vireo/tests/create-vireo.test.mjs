@@ -25,6 +25,10 @@ const fixtureTemplateTag = `starter-template@${fixtureReleaseIdentity.createVire
 const fixtureTemplateReleaseContractUrl =
   `https://github.com/vireocodedev/vireo-template/blob/${encodeURIComponent(fixtureTemplateTag)}` +
   "/contracts/template-release-policy.json";
+const immutable084ArchitectureCheck =
+  "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs";
+const immutable086ArchitectureCheck =
+  "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs";
 
 function gradleProperties(starterVersion) {
   return `org.gradle.caching=true\nstarterVersion=${starterVersion}\norg.gradle.jvmargs=-Xmx2g\n`;
@@ -242,9 +246,11 @@ export {};
         "build-storybook": "storybook build",
         "starter:mode:published": "node scripts/mode.mjs",
         "starter:boundary:check": "node scripts/boundary.mjs",
-        "architecture:check": "node scripts/architecture.mjs",
+        "architecture:check": immutable084ArchitectureCheck,
         "bundle:check": "node scripts/bundle.mjs",
-        "performance:audit": "node scripts/lighthouse-budget.mjs",
+        "performance:policy:test":
+          "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
+        "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
         "pwa:check:source": "node scripts/check-pwa-contract.mjs --source --require-nginx",
         "pwa:check:built": "node scripts/check-pwa-contract.mjs --built",
         "pretest:pwa": "node scripts/prepare-pwa-update-fixture.mjs",
@@ -268,7 +274,9 @@ export {};
   const candidatePolicy = JSON.parse(
     await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
   );
-  const storybookBaseline = candidatePolicy.releaseGraph.baselines["0.8.3->0.8.4"]["full-stack"].find(
+  const activeTarget = candidatePolicy.releaseGraph.candidateRelease ?? candidatePolicy.releaseGraph.publicRelease;
+  const activeEdge = `${candidatePolicy.releaseGraph.previousRelease}->${activeTarget}`;
+  const storybookBaseline = candidatePolicy.releaseGraph.baselines[activeEdge]["full-stack"].find(
     file => file.path === "frontend/vitest.storybook.config.ts",
   );
   await writeFile(join(template, "frontend/vitest.storybook.config.ts"), storybookBaseline.sourceContent);
@@ -459,9 +467,10 @@ test("creates and customizes a project atomically from a local fixture", async (
       frontendPackage.scripts["performance:audit"],
       "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
     );
+    assert.equal(frontendPackage.scripts["architecture:check"], immutable086ArchitectureCheck);
     assert.match(
       await readFile(join(target, "frontend/vitest.storybook.config.ts"), "utf8"),
-      /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
+      /include: \["@testing-library\/dom"\]/u,
     );
     for (const path of [
       "frontend/scripts/lighthouse-audit-support.mjs",
@@ -929,13 +938,14 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
       packageJson.scripts["performance:audit"],
       "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
     );
+    assert.equal(packageJson.scripts["architecture:check"], immutable086ArchitectureCheck);
     assert.match(
       await readFile(join(target, "scripts/lighthouse-budget.mjs"), "utf8"),
       /path\.resolve\(frontendRoot, "\.performance-evidence"\)/u,
     );
     assert.match(
       await readFile(join(target, "vitest.storybook.config.ts"), "utf8"),
-      /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
+      /include: \["@testing-library\/dom"\]/u,
     );
     for (const path of [
       "scripts/lighthouse-audit-support.mjs",
@@ -1098,8 +1108,54 @@ test("frontend performance projection materializes immutable candidate bytes whe
     const target = join(root, "operations-ui");
     await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
     const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
-    for (const baseline of policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend) {
+    const lighthouseBaselines = policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend.filter(baseline =>
+      baseline.path.startsWith("scripts/lighthouse-"),
+    );
+    assert.deepEqual(lighthouseBaselines.map(baseline => baseline.path).sort(), [
+      "scripts/lighthouse-audit-support.mjs",
+      "scripts/lighthouse-audit-support.test.mjs",
+      "scripts/lighthouse-budget.mjs",
+      "scripts/lighthouse-policy.mjs",
+      "scripts/lighthouse-policy.test.mjs",
+    ]);
+    for (const baseline of lighthouseBaselines) {
       assert.equal(await readFile(join(target, baseline.path), "utf8"), baseline.targetContent, baseline.path);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("projection compatibility composes every immutable Storybook baseline from the pinned public Template", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-storybook-baseline-chain-"));
+  try {
+    const template = await fixture(root);
+    const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
+    for (const profile of ["full-stack", "frontend"]) {
+      const templatePath = "frontend/vitest.storybook.config.ts";
+      const projectedPath = profile === "frontend" ? "vitest.storybook.config.ts" : templatePath;
+      const sourceBaseline = policy.releaseGraph.baselines["0.8.3->0.8.4"][profile].find(
+        file => file.path === projectedPath,
+      );
+      const targetBaseline = policy.releaseGraph.baselines["0.8.4->0.8.6"][profile].find(
+        file => file.path === projectedPath,
+      );
+      await writeFile(join(template, templatePath), sourceBaseline.sourceContent);
+
+      const target = join(root, `composed-${profile}`);
+      await createVireo({ directory: target, profile, git: false, templateDirectory: template });
+
+      let expected = targetBaseline.sourceContent;
+      for (const transform of targetBaseline.transforms) expected = expected.replace(transform.from, transform.to);
+      assert.equal(await readFile(join(target, projectedPath), "utf8"), expected);
+
+      await writeFile(join(template, templatePath), "// application-owned customization\n");
+      const customizedTarget = join(root, `customized-${profile}`);
+      await assert.rejects(
+        createVireo({ directory: customizedTarget, profile, git: false, templateDirectory: template }),
+        /Pinned Template compatibility baseline is customized/u,
+      );
+      await assert.rejects(readFile(join(customizedTarget, "package.json")), /ENOENT/u);
     }
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -1383,6 +1439,13 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
       ].map(path => [path, "Item maintainer-only evidence\n"]),
     );
     const ownership = JSON.parse(await readFile(join(target, ".vireo/example-manifest.json"), "utf8"));
+    const overviewPath = "frontend/tests/e2e/overview.spec.ts";
+    const overviewContents = await readFile(join(target, overviewPath));
+    assert.equal(
+      ownership.files[overviewPath],
+      createHash("sha256").update(overviewContents).digest("hex"),
+      "fresh full-stack generation records the Overview sample as example-owned",
+    );
     assert.equal(
       ownership.files["frontend/src/features/item/sample.bin"],
       createHash("sha256")
@@ -1408,6 +1471,7 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
     assert.equal(preview.dryRun, true);
     assert.equal(preview.state, "present");
     assert.match(await readFile(samplePath, "utf8"), /Item/u);
+    assert.equal(preview.files.find(file => file.path === overviewPath)?.status, "delete");
     for (const path of protectedInfrastructure.keys()) {
       assert.equal(
         preview.files.some(file => file.path === path && file.status === "delete"),
@@ -1446,6 +1510,16 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
     await writeFile(samplePath, "export type Item = { id: number; customized: true };\n");
     await assert.rejects(removeExample(target, true), /customized example file/u);
     await writeFile(samplePath, "export type Item = { id: number };\n");
+
+    await writeFile(join(target, overviewPath), `${overviewContents}\n// consumer customization\n`);
+    await assert.rejects(removeExample(target, true), /customized example file/u);
+    await writeFile(join(target, overviewPath), overviewContents);
+
+    const staleOwnership = structuredClone(ownership);
+    delete staleOwnership.files[overviewPath];
+    await writeFile(join(target, ".vireo/example-manifest.json"), `${JSON.stringify(staleOwnership, null, 2)}\n`);
+    await assert.rejects(removeExample(target, true), /unowned example references/u);
+    await writeFile(join(target, ".vireo/example-manifest.json"), `${JSON.stringify(ownership, null, 2)}\n`);
 
     const unowned = join(target, "custom-item-note.md");
     await writeFile(unowned, "The Item integration is customized here.\n");
@@ -1486,8 +1560,16 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
 
     const applied = await removeExample(target, true);
     assert.equal(applied.state, "removed");
-    assert.deepEqual(await findExampleReferences(target), []);
+    const residualReferences = await findExampleReferences(target);
+    assert.deepEqual(residualReferences, []);
+    assert.equal(
+      residualReferences.includes("frontend/src/pages/home/AppPageHomeView.tsx"),
+      false,
+      "the rewritten product-neutral home page is not retained as a sample reference",
+    );
     await assert.rejects(readFile(samplePath), /ENOENT/u);
+    await assert.rejects(readFile(join(target, overviewPath)), /ENOENT/u);
+    assert.match(await readFile(join(target, "frontend/tests/e2e/login.spec.ts"), "utf8"), /export/u);
     await assert.rejects(
       readFile(join(target, "src/main/resources/db/migration/V3__enforce_item_value_constraints.sql")),
       /ENOENT/u,
@@ -1583,6 +1665,9 @@ test("remove-example retains framework contract infrastructure in standalone fro
     const template = await fixture(root);
     const target = join(root, "sample-frontend");
     await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
+    const ownership = JSON.parse(await readFile(join(target, ".vireo/example-manifest.json"), "utf8"));
+    assert.equal(ownership.files["tests/e2e/overview.spec.ts"], undefined);
+    await assert.rejects(readFile(join(target, "tests/e2e/overview.spec.ts")), /ENOENT/u);
     const protectedInfrastructure = new Map(
       await Promise.all(
         ["scripts/architecture-policy.test.mjs", "scripts/pwa-contract.mjs", "tests/pwa/production-pwa.spec.ts"].map(

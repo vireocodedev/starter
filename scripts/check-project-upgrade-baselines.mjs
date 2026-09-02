@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 import { classifyProjectionPath, readApplicationProjectionContract } from "./lib/application-projection-contract.mjs";
 import {
   applyExactBaselineTransforms,
+  assertStorybookBaselineContinuity,
   projectedBaselineBytes,
+  projectedBaselineSourceBytes,
   templatePathForBaseline,
 } from "./lib/project-upgrade-baseline-contract.mjs";
 
@@ -91,6 +93,7 @@ if (checkedOutTemplateCommit !== target.templateCommit)
 
 const activeBaselines = graph.baselines?.[edge];
 if (!activeBaselines) throw new Error(`The active ${edge} baseline set is missing.`);
+assertStorybookBaselineContinuity(graph, edge);
 const projectionContract = readApplicationProjectionContract(
   join(repositoryRoot, "contracts", "application-projection-contract.json"),
 );
@@ -171,7 +174,7 @@ for (const profile of ["full-stack", "frontend"]) {
         !sourceObjectExists(target.templateCommit, templatePath)
       )
         throw new Error(`${edge}:${profile}:${file.path} update is absent from an immutable Template endpoint.`);
-      const sourceBytes = gitObject(source.templateCommit, templatePath);
+      const sourceBytes = projectedBaselineSourceBytes(gitObject(source.templateCommit, templatePath), file);
       const targetBytes = projectedBaselineBytes(profile, gitObject(target.templateCommit, templatePath), file);
       if (sha256(sourceBytes) !== file.sourceSha256)
         throw new Error(`${edge}:${profile}:${file.path} source hash differs from immutable Template bytes.`);

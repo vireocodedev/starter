@@ -134,6 +134,16 @@ edge, Vireo applies only the declared managed edge surfaces, including dependenc
 port application-owned changes, refresh the appropriate lockfile, run setup, and
 complete full verification before accepting the upgrade.
 
+### Managed Storybook compatibility
+
+For the 0.8.4→target transaction, frontend projects manage
+`package.json#scripts.architecture:check`, `vitest.storybook.config.ts`, and
+`scripts/storybook-config-policy.test.mjs`; full-stack projects manage
+`frontend/package.json#scripts.architecture:check`, `frontend/vitest.storybook.config.ts`,
+and `frontend/scripts/storybook-config-policy.test.mjs`. Vireo refuses a customized
+script value or customized bytes for any of these surfaces. Only unrelated application
+test configuration and tests remain application-owned and are never rewritten.
+
 The immutable `starter-template@0.8.4` source baseline uses
 `starterVersion=0.3.1`; `create-vireo@0.8.4` generates and upgrades
 full-stack consumers with the coordinated `0.3.1` JVM release. The frontend profile remains Gradle-free.

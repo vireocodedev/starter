@@ -138,12 +138,18 @@ function isRewrittenGenericCoveragePath(path: string, profile: ProjectMetadata["
   return REWRITTEN_GENERIC_COVERAGE.has(sourceTemplatePath(profile, path));
 }
 
+function isExplicitExampleOwnedPath(path: string, profile: ProjectMetadata["profile"]) {
+  const normalized = profile === "frontend" ? `frontend/${path}` : path;
+  return profile === "full-stack" && normalized === "frontend/tests/e2e/overview.spec.ts";
+}
+
 function isStructurallyOwnedSamplePath(path: string, profile: ProjectMetadata["profile"]) {
   const normalized = profile === "frontend" ? `frontend/${path}` : path;
   const migrationName = normalized.startsWith("src/main/resources/db/migration/")
     ? normalized.slice(normalized.lastIndexOf("/") + 1)
     : "";
   return (
+    isExplicitExampleOwnedPath(path, profile) ||
     normalized === "frontend/src/features/item" ||
     normalized.startsWith("frontend/src/features/item/") ||
     normalized === "frontend/src/pages/items" ||
@@ -683,7 +689,12 @@ export async function findExampleReferences(projectDirectory: string, profile?: 
     }
     const content = value.toString("utf8");
     if (isRewrittenGenericCoveragePath(path, effectiveProfile) && !SAMPLE_REFERENCE.test(content)) continue;
-    if (!value.includes(0) && (SAMPLE_REFERENCE.test(content) || /(^|\/)item(?:s)?(?:\.|\/|$)/i.test(path)))
+    if (
+      !value.includes(0) &&
+      (isExplicitExampleOwnedPath(path, effectiveProfile) ||
+        SAMPLE_REFERENCE.test(content) ||
+        /(^|\/)item(?:s)?(?:\.|\/|$)/i.test(path))
+    )
       references.push(path);
   }
   return references;

@@ -15,6 +15,7 @@ import {
   executePlanForTest,
   finalizationFailureFinding,
   finishAnonymousConsumerRun,
+  hasExpectedUpgradeLastUpgrade,
   installedVireoPackageNames,
   parseBoundedJsonOutput,
   preflightFailureFinding,
@@ -269,6 +270,46 @@ test("public gauntlets derive the unique adjacent edge ending at the exact publi
     .operations.filter(operation => operation.kind === "assert-upgraded-consumer");
   assert.ok(upgrades.every(operation => operation.source.createVireoVersion === matching[0].from));
   assert.ok(upgrades.every(operation => operation.target.createVireoVersion === release.createVireoVersion));
+  assert.ok(upgrades.every(operation => operation.lockfileRefresh === (matching[0].lockfileRefresh ?? "required")));
+  assert.deepEqual(
+    Object.fromEntries(upgrades.map(operation => [operation.profile, operation.lockfileRefresh])),
+    { frontend: "not-required", "full-stack": "not-required" },
+    "both public upgrade profiles retain the exact declared edge lockfile policy",
+  );
+  const [upgrade] = upgrades;
+  const expectedLastUpgrade = {
+    schemaVersion: 2,
+    from: upgrade.source.createVireoVersion,
+    to: upgrade.target.createVireoVersion,
+    sourceTemplateCommit: upgrade.source.template.commit,
+    targetTemplateCommit: upgrade.target.template.commit,
+    sourceTemplateVersion: upgrade.source.template.version,
+    targetTemplateVersion: upgrade.target.template.version,
+    sourceTemplateTag: upgrade.source.template.tag,
+    targetTemplateTag: upgrade.target.template.tag,
+    lockfileRefresh: "not-required",
+  };
+  assert.equal(hasExpectedUpgradeLastUpgrade(expectedLastUpgrade, upgrade), true);
+  assert.equal(
+    hasExpectedUpgradeLastUpgrade({ ...expectedLastUpgrade, lockfileRefresh: "required" }, upgrade),
+    false,
+    "a receipt with a mismatched declared lockfile policy must fail",
+  );
+  const requiredPolicy = structuredClone(upgradePolicy);
+  delete requiredPolicy.requiredEdges.find(edge => edge.to === release.createVireoVersion).lockfileRefresh;
+  const requiredUpgrade = buildExecutionPlan({
+    policy,
+    release,
+    upgradePolicy: requiredPolicy,
+    consumerRoot: "/tmp/vireo-anonymous-plan",
+  })
+    .find(scenario => scenario.id === "adjacent-public-upgrades")
+    .operations.find(operation => operation.kind === "assert-upgraded-consumer");
+  assert.equal(requiredUpgrade.lockfileRefresh, "required");
+  assert.equal(
+    hasExpectedUpgradeLastUpgrade({ ...expectedLastUpgrade, lockfileRefresh: "required" }, requiredUpgrade),
+    true,
+  );
   const candidatePolicy = structuredClone(upgradePolicy);
   candidatePolicy.candidateRelease = "unpublished-candidate";
   const candidatePlan = buildExecutionPlan({
@@ -281,8 +322,16 @@ test("public gauntlets derive the unique adjacent edge ending at the exact publi
     candidatePlan
       .find(scenario => scenario.id === "adjacent-public-upgrades")
       .operations.filter(operation => operation.kind === "assert-upgraded-consumer")
-      .map(operation => [operation.source.createVireoVersion, operation.target.createVireoVersion]),
-    upgrades.map(operation => [operation.source.createVireoVersion, operation.target.createVireoVersion]),
+      .map(operation => [
+        operation.source.createVireoVersion,
+        operation.target.createVireoVersion,
+        operation.lockfileRefresh,
+      ]),
+    upgrades.map(operation => [
+      operation.source.createVireoVersion,
+      operation.target.createVireoVersion,
+      operation.lockfileRefresh,
+    ]),
   );
 });
 
