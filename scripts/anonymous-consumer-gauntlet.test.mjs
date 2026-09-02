@@ -125,7 +125,10 @@ test("deterministic plan gives a fake executor every required recipe and refusal
     registryOperations.map(operation => operation.arguments),
     release.npm.map(({ name, version }) => ["npm", "view", `${name}@${version}`, "name", "version", "--json"]),
   );
-  assert.equal(operations.filter(operation => operation.id === "postgresql-production-compose").length, 1);
+  const postgresqlProductionCompose = operations.filter(operation => operation.id === "postgresql-production-compose");
+  assert.equal(postgresqlProductionCompose.length, 1);
+  assert.equal(postgresqlProductionCompose[0].executable, "bash");
+  assert.deepEqual(postgresqlProductionCompose[0].arguments, ["scripts/verify-deployment.sh"]);
   assert.equal(
     operations.filter(operation =>
       operation.arguments.some(argument => String(argument).endsWith("collect-public-release-evidence.mjs")),
