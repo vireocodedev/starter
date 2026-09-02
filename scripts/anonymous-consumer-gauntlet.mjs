@@ -15,6 +15,7 @@ import {
 } from "./lib/anonymous-consumer-environment.mjs";
 import { writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
 import { validateAnonymousPublicEvidence } from "./lib/anonymous-public-evidence.mjs";
+import { validateFinalAnonymousEvidence } from "./lib/anonymous-consumer-final-evidence.mjs";
 import { validateReleasePreflightIdentity, verifyPublicReleasePreflight } from "./lib/anonymous-consumer-release-preflight.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -489,6 +490,9 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
       { category: "physical-device", owner: "consumer", reason: "Brand and physical-device PWA installation evidence remains a product decision.", evidenceReferences: [] },
       { category: "adoption", owner: "product", reason: "Public-beta adoption evidence requires real consumer teams and cannot be manufactured by CI.", evidenceReferences: [] },
     ],
+    verifierSourceCommit: process.env.GITHUB_SHA ?? process.env.VIREO_GAUNTLET_SOURCE_COMMIT ?? "local-dry-run",
+    requestedReleaseId: release.id,
+    workflow: { repository: process.env.GITHUB_REPOSITORY ?? "local", run: process.env.GITHUB_RUN_ID ?? "local", attempt: process.env.GITHUB_RUN_ATTEMPT ?? "1", event: process.env.GITHUB_EVENT_NAME ?? "local" },
     scenarios: [],
   };
   if (!dry) evidence.externalWarnings.push(...(await verifyPublicReleasePreflight({ release })).warnings);
@@ -564,6 +568,10 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     if (evidence.status === "running") evidence.status = dry ? "planned" : "passed";
     checkpoint();
     rmSync(runRoot, { recursive: true, force: true });
+  }
+  if (!dry) {
+    const finalProblems = validateFinalAnonymousEvidence(evidence, release);
+    if (finalProblems.length > 0) throw new Error(finalProblems.join("\n"));
   }
   console.log(
     dry
