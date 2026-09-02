@@ -674,6 +674,38 @@ function exactObject(value, label) {
   return value;
 }
 
+function readRemovalReceiptJson(path, label) {
+  if (!existsSync(path)) throw new Error(`${label} is missing.`);
+  try {
+    return exactObject(JSON.parse(readFileSync(path, "utf8")), label);
+  } catch (error) {
+    if (error instanceof SyntaxError) throw new Error(`${label} must contain valid JSON.`, { cause: error });
+    throw error;
+  }
+}
+
+/** Validates that an applied sample removal belongs to this exact generated project and release. */
+export function validateRemovalReceipt({ projectRoot, expectedTemplateCommit } = {}) {
+  if (typeof projectRoot !== "string" || projectRoot.length === 0)
+    throw new Error("Sample removal receipt validation requires a project root.");
+  if (!/^[a-f0-9]{40}$/u.test(expectedTemplateCommit ?? ""))
+    throw new Error("Sample removal receipt validation requires the exact public Template commit.");
+  const metadata = readRemovalReceiptJson(join(projectRoot, ".vireo", "project.json"), "Project metadata");
+  const receipt = readRemovalReceiptJson(join(projectRoot, ".vireo", "remove-example.json"), "Sample removal receipt");
+  if (metadata.schemaVersion !== 1 || !/^[a-f0-9]{40}$/u.test(metadata.templateCommit ?? ""))
+    throw new Error("Project metadata has an invalid sample-removal identity.");
+  if (receipt.schemaVersion !== 1) throw new Error("Sample removal receipt has an unsupported schema version.");
+  if (!/^[a-f0-9]{40}$/u.test(receipt.templateCommit ?? ""))
+    throw new Error("Sample removal receipt has an invalid Template commit.");
+  if (receipt.removed !== true) throw new Error("Sample removal receipt does not confirm an applied removal.");
+  if (receipt.templateCommit !== metadata.templateCommit)
+    throw new Error("Sample removal receipt does not match the generated project's Template commit.");
+  if (metadata.templateCommit !== expectedTemplateCommit)
+    throw new Error("Sample removal project metadata does not match the exact public Template commit.");
+  if (existsSync(join(projectRoot, ".vireo", "example-manifest.json")))
+    throw new Error("Sample removal left its example ownership manifest behind.");
+}
+
 export function validateCreateDryRunJson(value, { directory, profile, release }) {
   const report = exactObject(value, "create-vireo dry-run report");
   if (
@@ -909,11 +941,10 @@ async function executeOperation(operation, { environment, runRoot }) {
     else if (observedDigests.get(operation.path) !== digest)
       throw new Error("Generated capability rerun changed managed bytes.");
   } else if (operation.kind === "assert-removal-receipt") {
-    const receipt = join(operation.path, ".vireo", "remove-example.json");
-    if (!existsSync(receipt)) throw new Error("Sample removal did not write its receipt.");
-    const text = JSON.stringify(JSON.parse(readFileSync(receipt, "utf8")));
-    if (/Item|item/i.test(text) === false)
-      throw new Error("Sample removal receipt is not attributable to the Template sample.");
+    validateRemovalReceipt({
+      projectRoot: operation.path,
+      expectedTemplateCommit: operation.release?.template?.commit,
+    });
   } else if (operation.kind === "mutate-managed-file" || operation.kind === "restore-managed-file") {
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
     const relativePath = managed.files?.[0]?.path;

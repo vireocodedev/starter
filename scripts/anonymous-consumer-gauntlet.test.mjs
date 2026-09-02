@@ -23,6 +23,7 @@ import {
   validatePolicy,
   validateReleaseIdentityJson,
   validateRegistryMetadataJson,
+  validateRemovalReceipt,
 } from "./anonymous-consumer-gauntlet.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -114,6 +115,24 @@ function writeDeploymentFixture(
   return projectRoot;
 }
 
+function writeRemovalReceiptFixture(t, { metadata, receipt, residualManifest = false } = {}) {
+  const projectRoot = mkdtempSync(join(tmpdir(), "vireo-removal-receipt-"));
+  const vireoRoot = join(projectRoot, ".vireo");
+  mkdirSync(vireoRoot, { recursive: true });
+  const templateCommit = release.template.commit;
+  writeFileSync(
+    join(vireoRoot, "project.json"),
+    `${JSON.stringify(metadata ?? { schemaVersion: 1, templateCommit }, null, 2)}\n`,
+  );
+  writeFileSync(
+    join(vireoRoot, "remove-example.json"),
+    `${JSON.stringify(receipt ?? { schemaVersion: 1, templateCommit, removed: true }, null, 2)}\n`,
+  );
+  if (residualManifest) writeFileSync(join(vireoRoot, "example-manifest.json"), "{}\n");
+  t.after(() => rmSync(projectRoot, { recursive: true, force: true }));
+  return projectRoot;
+}
+
 const identityOptions = new Map([
   ["--name", "projectName"],
   ["--display-name", "displayName"],
@@ -151,6 +170,92 @@ test("gauntlet policy covers every required scenario with exact public identity"
     new Set(policy.scenarios.map(scenario => JSON.stringify(scenario.recipe))).size,
     policy.scenarios.length,
   );
+});
+
+test("sample removal receipt binds an applied removal to the exact public Template and clears ownership", t => {
+  const projectRoot = writeRemovalReceiptFixture(t);
+  assert.doesNotThrow(() => validateRemovalReceipt({ projectRoot, expectedTemplateCommit: release.template.commit }));
+});
+
+test("sample removal receipt rejects attribution, state, schema, residual, and file mutants", t => {
+  const otherCommit = "0".repeat(40);
+  const mutations = [
+    {
+      name: "wrong receipt commit",
+      fixture: { receipt: { schemaVersion: 1, templateCommit: otherCommit, removed: true } },
+      expected: /does not match the generated project's Template commit/u,
+    },
+    {
+      name: "wrong public project commit",
+      fixture: {
+        metadata: { schemaVersion: 1, templateCommit: otherCommit },
+        receipt: { schemaVersion: 1, templateCommit: otherCommit, removed: true },
+      },
+      expected: /does not match the exact public Template commit/u,
+    },
+    {
+      name: "receipt reports no removal",
+      fixture: { receipt: { schemaVersion: 1, templateCommit: release.template.commit, removed: false } },
+      expected: /does not confirm an applied removal/u,
+    },
+    {
+      name: "unsupported receipt schema",
+      fixture: { receipt: { schemaVersion: 2, templateCommit: release.template.commit, removed: true } },
+      expected: /unsupported schema version/u,
+    },
+    {
+      name: "malformed receipt commit",
+      fixture: { receipt: { schemaVersion: 1, templateCommit: true, removed: true } },
+      expected: /invalid Template commit/u,
+    },
+    {
+      name: "malformed project metadata commit",
+      fixture: { metadata: { schemaVersion: 1, templateCommit: [] } },
+      expected: /invalid sample-removal identity/u,
+    },
+    {
+      name: "residual ownership manifest",
+      fixture: { residualManifest: true },
+      expected: /left its example ownership manifest behind/u,
+    },
+  ];
+  for (const mutation of mutations) {
+    const projectRoot = writeRemovalReceiptFixture(t, mutation.fixture);
+    assert.throws(
+      () => validateRemovalReceipt({ projectRoot, expectedTemplateCommit: release.template.commit }),
+      mutation.expected,
+      mutation.name,
+    );
+  }
+
+  for (const [name, path, contents, expected] of [
+    ["missing receipt", ".vireo/remove-example.json", undefined, /Sample removal receipt is missing/u],
+    ["malformed receipt", ".vireo/remove-example.json", "{", /Sample removal receipt must contain valid JSON/u],
+    ["missing project metadata", ".vireo/project.json", undefined, /Project metadata is missing/u],
+    ["malformed project metadata", ".vireo/project.json", "{", /Project metadata must contain valid JSON/u],
+  ]) {
+    const projectRoot = writeRemovalReceiptFixture(t);
+    const target = join(projectRoot, path);
+    if (contents === undefined) rmSync(target);
+    else writeFileSync(target, contents);
+    assert.throws(
+      () => validateRemovalReceipt({ projectRoot, expectedTemplateCommit: release.template.commit }),
+      expected,
+      name,
+    );
+  }
+
+  for (const [name, expectedTemplateCommit] of [
+    ["missing public Template commit", undefined],
+    ["malformed public Template commit", "not-a-template-commit"],
+  ]) {
+    const projectRoot = writeRemovalReceiptFixture(t);
+    assert.throws(
+      () => validateRemovalReceipt({ projectRoot, expectedTemplateCommit }),
+      /requires the exact public Template commit/u,
+      name,
+    );
+  }
 });
 
 test("public gauntlets derive the unique adjacent edge ending at the exact published release", () => {
