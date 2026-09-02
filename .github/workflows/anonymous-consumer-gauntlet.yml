@@ -108,9 +108,6 @@ jobs:
   gauntlet:
     needs: trusted-source
     if: always() && needs.trusted-source.result == 'success'
-    env:
-      VIREO_GAUNTLET_PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     permissions: {}
@@ -134,10 +131,14 @@ jobs:
       - run: corepack npm ci --ignore-scripts
       - run: docker version
       - run: corepack npm exec -- playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
       - name: Run exact public anonymous-consumer gauntlet
         env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
           REQUESTED_RELEASE_ID: ${{ inputs.release_id }}
           TRUSTED_SOURCE_COMMIT: ${{ needs.trusted-source.outputs.source_commit }}
+          VIREO_GAUNTLET_PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
         run: |
           if [ -n "$REQUESTED_RELEASE_ID" ] && ! printf '%s' "$REQUESTED_RELEASE_ID" | grep -Eq '^npm-[0-9]+\.[0-9]+\.[0-9]+_jvm-[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "workflow_dispatch release_id must be an exact npm-x.y.z_jvm-x.y.z release id" >&2
