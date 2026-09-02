@@ -558,6 +558,10 @@ function synchronizeCurrentReleaseGuidance({
   );
   const additionalGuidanceOutputs = synchronizeAdditionalCurrentGuidance({
     repositoryRoot,
+    oldTemplateCommit,
+    templateCommit,
+    oldTemplateVersion,
+    templateVersion,
     priorHistoricalUpgradeRelease,
     priorPublicUpgradeRelease,
     publicUpgradeRelease,
@@ -572,6 +576,10 @@ function synchronizeCurrentReleaseGuidance({
 
 function synchronizeAdditionalCurrentGuidance({
   repositoryRoot,
+  oldTemplateCommit,
+  templateCommit,
+  oldTemplateVersion,
+  templateVersion,
   priorHistoricalUpgradeRelease,
   priorPublicUpgradeRelease,
   publicUpgradeRelease,
@@ -624,11 +632,62 @@ function synchronizeAdditionalCurrentGuidance({
     `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance;`,
     "docs/roadmap/phase-4/production-readiness-criteria.md current release compatibility",
   );
+
+  const humanHandoffPath = join(repositoryRoot, "docs", "roadmap", "public-beta-human-handoff-2026-09-01.md");
+  let humanHandoff = replaceRequired(
+    readFileSync(humanHandoffPath, "utf8"),
+    `For a new frontend app, use the release-prepared ${publicUpgradeRelease} generator rather than cloning either`,
+    `For a new frontend app, use the release-prepared ${candidateUpgradeRelease} generator rather than cloning either`,
+    "docs/roadmap/public-beta-human-handoff-2026-09-01.md current generator prose",
+  );
+  humanHandoff = replaceRequired(
+    humanHandoff,
+    `npm create vireo@${publicUpgradeRelease} my-frontend-app -- --profile frontend --yes`,
+    `npm create vireo@${candidateUpgradeRelease} my-frontend-app -- --profile frontend --yes`,
+    "docs/roadmap/public-beta-human-handoff-2026-09-01.md current generator command",
+  );
+
+  const remainingWorkPath = join(repositoryRoot, "docs", "roadmap", "remaining-non-human-work.md");
+  const remainingWork = replaceRequired(
+    readFileSync(remainingWorkPath, "utf8"),
+    `the current release-prepared frontend profile is \`create-vireo@${publicUpgradeRelease}\`.`,
+    `the current release-prepared frontend profile is \`create-vireo@${candidateUpgradeRelease}\`.`,
+    "docs/roadmap/remaining-non-human-work.md current release",
+  );
+
+  const phaseTwoBacklogPath = join(repositoryRoot, "docs", "roadmap", "phase-2", "backlog.md");
+  const phaseTwoBacklog = replaceRequired(
+    readFileSync(phaseTwoBacklogPath, "utf8"),
+    `Done; \`create-vireo@${publicUpgradeRelease}\` is public, anonymously verified, and attested`,
+    `Done; \`create-vireo@${candidateUpgradeRelease}\` is public, anonymously verified, and attested`,
+    "docs/roadmap/phase-2/backlog.md current public verified coordinate",
+  );
+
+  const gapRegisterPath = join(repositoryRoot, "docs", "roadmap", "phase-0", "gap-register.md");
+  const gapRegister = replaceRequired(
+    readFileSync(gapRegisterPath, "utf8"),
+    `Public \`create-vireo\` ${publicUpgradeRelease} declares the current ${historicalEdge} dry-run/apply/refusal/ownership edge; frontend/full-stack fixtures exercise the transactional managed additions and sample-removal provenance while preserving application-owned source. Earlier supported pairs remain retained historical evidence`,
+    `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} dry-run/apply/refusal/ownership edge; frontend/full-stack fixtures exercise the transactional managed additions and sample-removal provenance while preserving application-owned source. Earlier supported pairs remain retained historical evidence`,
+    "docs/roadmap/phase-0/gap-register.md current adjacent release edge",
+  );
+
+  const topologyPath = join(repositoryRoot, "docs", "roadmap", "phase-0", "repository-topology.md");
+  const topology = replaceRequired(
+    readFileSync(topologyPath, "utf8"),
+    `Canonical Template implementation at immutable ${oldTemplateVersion} commit \`${oldTemplateCommit}\``,
+    `Canonical Template implementation at immutable ${templateVersion} commit \`${templateCommit}\``,
+    "docs/roadmap/phase-0/repository-topology.md current Template release",
+  );
   return [
     [frontendProfilePath, frontendProfile],
     [generatedOwnershipPath, generatedOwnership],
     [phaseBacklogPath, phaseBacklog],
     [readinessPath, readinessCriteria],
+    [humanHandoffPath, humanHandoff],
+    [remainingWorkPath, remainingWork],
+    [phaseTwoBacklogPath, phaseTwoBacklog],
+    [gapRegisterPath, gapRegister],
+    [topologyPath, topology],
   ];
 }
 

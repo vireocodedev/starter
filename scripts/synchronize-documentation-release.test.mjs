@@ -126,6 +126,30 @@ test("synchronizes release contracts and public version documentation from sourc
       readFileSync(join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"), "utf8"),
       /Public `create-vireo` 0\.3\.0 declares the current 0\.2\.0→0\.3\.0 edge.*introduced by the historical 0\.0\.0→0\.1\.0 edge\./u,
     );
+    const humanHandoff = readFileSync(join(root, "docs", "roadmap", "public-beta-human-handoff-2026-09-01.md"), "utf8");
+    assert.match(humanHandoff, /release-prepared 0\.3\.0 generator/u);
+    assert.match(humanHandoff, /npm create vireo@0\.3\.0 my-frontend-app -- --profile frontend --yes/u);
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "remaining-non-human-work.md"), "utf8"),
+      /current release-prepared frontend profile is `create-vireo@0\.3\.0`/u,
+    );
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-2", "backlog.md"), "utf8"),
+      /create-vireo@0\.3\.0` is public, anonymously verified, and attested/u,
+    );
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-0", "gap-register.md"), "utf8"),
+      /create-vireo` 0\.3\.0 declares the current 0\.2\.0→0\.3\.0.*Earlier supported pairs remain retained historical evidence/u,
+    );
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-0", "repository-topology.md"), "utf8"),
+      new RegExp("immutable 0\\.3\\.0 commit `" + "b".repeat(40) + "`", "u"),
+    );
+    const historicalHostedDemo = readFileSync(
+      join(root, "docs", "roadmap", "phase-5", "evidence", "hosted-demo-2026-08-28.md"),
+      "utf8",
+    );
+    assert.equal(historicalHostedDemo, `Historical hosted-demo evidence: create-vireo@0.2.0 ${"a".repeat(40)}.\n`);
     assert.match(readFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "utf8"), new RegExp(releaseId, "u"));
     assert.match(
       readFileSync(join(root, "packages", "create-vireo", "src", "index.ts"), "utf8"),
@@ -247,6 +271,72 @@ test("synchronizes release contracts and public version documentation from sourc
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("synchronizes two consecutive releases with stable gap-register guidance", async () => {
+  const root = makeFixture();
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    stageNextCandidateRelease(root);
+    await synchronizeFixtureDocumentationRelease(root);
+
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-0", "gap-register.md"), "utf8"),
+      /create-vireo` 0\.4\.0 declares the current 0\.3\.0→0\.4\.0.*Earlier supported pairs remain retained historical evidence/u,
+    );
+    assert.equal(
+      readFileSync(join(root, "docs", "roadmap", "phase-5", "evidence", "hosted-demo-2026-08-28.md"), "utf8"),
+      `Historical hosted-demo evidence: create-vireo@0.2.0 ${"a".repeat(40)}.\n`,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function stageNextCandidateRelease(root) {
+  const createPackagePath = join(root, "packages", "create-vireo", "package.json");
+  const createPackage = readJson(createPackagePath);
+  createPackage.version = "0.4.0";
+  writeJson(createPackagePath, createPackage);
+
+  const sourcePath = join(root, "packages", "create-vireo", "src", "index.ts");
+  const source = readFileSync(sourcePath, "utf8")
+    .replace(`TEMPLATE_COMMIT = "${"b".repeat(40)}"`, `TEMPLATE_COMMIT = "${"c".repeat(40)}"`)
+    .replace('CREATE_VIREO_PACKAGE_VERSION = "0.3.0"', 'CREATE_VIREO_PACKAGE_VERSION = "0.4.0"');
+  writeFileSync(sourcePath, source);
+
+  const upgradePolicyPath = join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json");
+  const upgradePolicy = readJson(upgradePolicyPath);
+  upgradePolicy.releaseGraph.candidateRelease = "0.4.0";
+  upgradePolicy.releaseGraph.releases.push({
+    release: "0.4.0",
+    status: "candidate",
+    templateCommit: "c".repeat(40),
+    rootVireoScript: "npx --yes --package=create-vireo@0.3.0 vireo",
+    starterJvmVersion: "0.4.0",
+  });
+  upgradePolicy.releaseGraph.edges.push({
+    from: "0.3.0",
+    to: "0.4.0",
+    lockfileRefresh: "not-required",
+    applicationOwnedActions: [],
+  });
+  writeJson(upgradePolicyPath, upgradePolicy);
+
+  const projectUpgradePath = join(root, "contracts", "project-upgrade-policy.json");
+  const projectUpgrade = readJson(projectUpgradePath);
+  projectUpgrade.previousRelease = "0.3.0";
+  projectUpgrade.candidateRelease = "0.4.0";
+  projectUpgrade.publicationState = "candidate";
+  projectUpgrade.finalization = { targetTemplateCommit: "c".repeat(40) };
+  projectUpgrade.releaseCoordinates["0.4.0"] = {
+    createVireo: "0.4.0",
+    templateVersion: "0.4.0",
+    templateCommit: "c".repeat(40),
+    starterJvmVersion: "0.4.0",
+    status: "candidate",
+  };
+  writeJson(projectUpgradePath, projectUpgrade);
+}
 
 test("fails closed when an allowlisted current site reference changes form", async () => {
   const root = makeFixture();
@@ -496,7 +586,10 @@ function makeFixture({
   mkdirSync(join(root, "jvm"));
   mkdirSync(join(root, "docs"));
   mkdirSync(join(root, "docs", "architecture"));
+  mkdirSync(join(root, "docs", "roadmap", "phase-0"), { recursive: true });
+  mkdirSync(join(root, "docs", "roadmap", "phase-2"), { recursive: true });
   mkdirSync(join(root, "docs", "roadmap", "phase-4"), { recursive: true });
+  mkdirSync(join(root, "docs", "roadmap", "phase-5", "evidence"), { recursive: true });
   mkdirSync(join(root, "site", "content"), { recursive: true });
   mkdirSync(join(root, "site", "content", "snapshots"), { recursive: true });
   mkdirSync(join(root, "site", "dist"), { recursive: true });
@@ -684,6 +777,30 @@ function makeFixture({
   writeFileSync(
     join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"),
     "Public `create-vireo` 0.2.0 declares the current 0.1.0→0.2.0 edge with dry run, explicit apply, refusal, ownership and rollback guidance; its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical 0.0.0→0.1.0 edge.\n",
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "public-beta-human-handoff-2026-09-01.md"),
+    "For a new frontend app, use the release-prepared 0.2.0 generator rather than cloning either\nrepository.\n\n```bash\nnpm create vireo@0.2.0 my-frontend-app -- --profile frontend --yes\n```\n",
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "remaining-non-human-work.md"),
+    "Historical milestone: the current release-prepared frontend profile is `create-vireo@0.2.0`.\n",
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "phase-2", "backlog.md"),
+    "| `P2-02` | Canonical create coordinate | Done; `create-vireo@0.2.0` is public, anonymously verified, and attested |\n",
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "phase-0", "gap-register.md"),
+    "Public `create-vireo` 0.2.0 declares the current 0.1.0→0.2.0 dry-run/apply/refusal/ownership edge; frontend/full-stack fixtures exercise the transactional managed additions and sample-removal provenance while preserving application-owned source. Earlier supported pairs remain retained historical evidence\n",
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "phase-0", "repository-topology.md"),
+    `Canonical Template implementation at immutable 0.2.0 commit \`${"a".repeat(40)}\`\n`,
+  );
+  writeFileSync(
+    join(root, "docs", "roadmap", "phase-5", "evidence", "hosted-demo-2026-08-28.md"),
+    `Historical hosted-demo evidence: create-vireo@0.2.0 ${"a".repeat(40)}.\n`,
   );
   writeFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "Current snapshot: `npm-0.2.0_jvm-0.3.0`.\n");
   writeFileSync(

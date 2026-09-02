@@ -1,5 +1,12 @@
 # create-vireo
 
+## 0.8.7
+
+### Patch Changes
+
+- 37b7d04: Format the regenerated capability registry during ejection so a generated project remains verification-clean after its last managed capability becomes application-owned.
+- 45603ee: Pin the 0.8.7 Template release and its adjacent 0.8.6 upgrade contract so generated projects retain exact managed provenance during a safe retry.
+
 ## 0.8.6
 
 ### Patch Changes

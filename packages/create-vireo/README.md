@@ -117,18 +117,18 @@ new capability or reconcile it manually; the command will not overwrite it.
 ## Upgrade a generated project
 
 The current supported adjacent release pair is a project created by `create-vireo`
-0.8.4 upgraded to 0.8.6. The 0.8.3→0.8.4 edge remains historical evidence. The 0.8.2→0.8.3 edge remains historical evidence. The 0.8.1→0.8.2 edge remains historical evidence. The 0.8.0→0.8.1 edge remains historical evidence. The 0.7.0→0.8.0 edge remains historical evidence. The command is non-writing by default:
+0.8.6 upgraded to 0.8.7. The 0.8.4→0.8.6 edge remains historical evidence. The 0.8.3→0.8.4 edge remains historical evidence. The 0.8.2→0.8.3 edge remains historical evidence. The 0.8.1→0.8.2 edge remains historical evidence. The 0.8.0→0.8.1 edge remains historical evidence. The 0.7.0→0.8.0 edge remains historical evidence. The command is non-writing by default:
 
 ```bash
-vireo upgrade --to 0.8.6 --dry-run
-vireo upgrade --to 0.8.6 --apply --accept-application-owned
+vireo upgrade --to 0.8.7 --dry-run
+vireo upgrade --to 0.8.7 --apply --accept-application-owned
 ```
 
 The preflight refuses unknown source commits, changed Vireo dependency declarations,
 lockfile drift, invalid/duplicate Flyway migration versions, and managed generated or
 wire-contract drift. Apply changes only the managed surfaces explicitly declared by the selected edge. Template files, domain logic, deployment, data migration, and adopted/ejected
 code remain application-owned and must be reviewed against the target Template
-commit `cef67cc74af3d28028fba424e1d5c6a92faa6fc9`. For the current 0.8.4→0.8.6
+commit `0557990f024a8736b6e661f8fc264861deb99b65`. For the current 0.8.6→0.8.7
 edge, Vireo applies only the declared managed edge surfaces, including dependency declarations and release identity/provenance where the edge declares them. This edge changes no dependency declarations, so Vireo preserves the application-owned lockfile without a refresh. Vireo never overwrites the application-owned root
 `AGENTS.md`, source, deployment descriptors, or `.github` review policy. Review the Template release notes and source-to-target diff, selectively
 port application-owned changes, refresh the appropriate lockfile, run setup, and
@@ -144,8 +144,8 @@ and `frontend/scripts/storybook-config-policy.test.mjs`. Vireo refuses a customi
 script value or customized bytes for any of these surfaces. Only unrelated application
 test configuration and tests remain application-owned and are never rewritten.
 
-The immutable `starter-template@0.8.6` source baseline uses
-`starterVersion=0.3.1`; `create-vireo@0.8.6` generates and upgrades
+The immutable `starter-template@0.8.7` source baseline uses
+`starterVersion=0.3.1`; `create-vireo@0.8.7` generates and upgrades
 full-stack consumers with the coordinated `0.3.1` JVM release. The frontend profile remains Gradle-free.
 
 ### Historical 0.2.0→0.3.0 checklist
