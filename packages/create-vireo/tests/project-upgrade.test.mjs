@@ -1556,6 +1556,14 @@ test("finalized 0.8.6 to 0.8.7 preserves exact managed provenance for both profi
     false,
     "0.8.7 must use the canonical 0.8.6 managed frontend scripts",
   );
+  assert.deepEqual(
+    target.templateSourceFrontendScripts,
+    {
+      "full-stack": { "architecture:check": immutable084ArchitectureCheck },
+      frontend: { "architecture:check": immutable084ArchitectureCheck },
+    },
+    "the candidate declares only its Template creation source scripts",
+  );
 
   for (const profile of ["full-stack", "frontend"]) {
     const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-086-provenance-`));
@@ -1716,6 +1724,23 @@ test("finalized 0.8.6 to 0.8.7 preserves exact managed provenance for both profi
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  }
+});
+
+test("template source frontend scripts must be structurally valid", async () => {
+  const root = await adjacentFixture("frontend");
+  try {
+    for (const malformed of [[], { frontend: [] }, { unsupported: { "architecture:check": "node check.mjs" } }]) {
+      const { candidatePolicy, targetRelease } = releaseLifecyclePolicies(adjacentPolicy, "0.8.6", "0.8.7");
+      const target = candidatePolicy.releaseGraph.releases.find(release => release.release === targetRelease);
+      target.templateSourceFrontendScripts = malformed;
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, candidatePolicy),
+        isPolicyError,
+      );
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });
 

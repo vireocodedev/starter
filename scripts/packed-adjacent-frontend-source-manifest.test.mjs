@@ -52,6 +52,14 @@ test("uses canonical 0.8.6 scripts for the 0.8.7 packed adjacent upgrade", () =>
   assert.ok(source && target, "the 0.8.6 source and 0.8.7 target must be declared");
   assert.ok(Object.hasOwn(source, "projectionSourceFrontendScripts"), "0.8.6 retains its historical source form");
   assert.equal(Object.hasOwn(target, "projectionSourceFrontendScripts"), false);
+  assert.deepEqual(target.templateSourceFrontendScripts, {
+    "full-stack": {
+      "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs",
+    },
+    frontend: {
+      "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs",
+    },
+  });
 
   const manifest = packedAdjacentFrontendSourceManifest({
     packedSource: source,
@@ -67,6 +75,20 @@ test("uses canonical 0.8.6 scripts for the 0.8.7 packed adjacent upgrade", () =>
     manifest.scripts["architecture:check"],
     "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs",
   );
+});
+
+test("does not consume Template-only source scripts in packed adjacent upgrades", () => {
+  const manifest = packedAdjacentFrontendSourceManifest({
+    packedSource: {
+      rootVireoScript: "vireo",
+      managedFrontendScripts: { frontend: { "architecture:check": "node canonical-architecture.mjs" } },
+    },
+    packedTarget: {
+      templateSourceFrontendScripts: { frontend: { "architecture:check": "node template-architecture.mjs" } },
+    },
+    dependencies: {},
+  });
+  assert.deepEqual(manifest.scripts, { vireo: "vireo", "architecture:check": "node canonical-architecture.mjs" });
 });
 
 test("builds a minimal manifest when the packed source has no managed root scripts", () => {

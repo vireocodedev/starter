@@ -12,7 +12,9 @@ type ReleaseRequirements = {
   frontendDependencies: DependencyMap;
   managedRootScripts?: DependencyMap;
   managedFrontendScripts?: Partial<Record<"full-stack" | "frontend", DependencyMap>>;
-  /** Exact legacy Template scripts that the staged projection may replace. */
+  /** Exact pinned Template scripts accepted only while creating a new projection. */
+  templateSourceFrontendScripts?: Partial<Record<"full-stack" | "frontend", DependencyMap>>;
+  /** Exact adjacent generated-consumer scripts that the staged projection may replace. */
   projectionSourceFrontendScripts?: Partial<Record<"full-stack" | "frontend", DependencyMap>>;
 };
 type ApplicationOwnedActionPolicy = {
@@ -375,6 +377,17 @@ async function readPolicy(override?: unknown): Promise<UpgradePolicy> {
               Array.isArray(scripts) ||
               Object.entries(scripts).some(([name, value]) => !name || typeof value !== "string" || !value.trim()),
           ))) ||
+      (release.templateSourceFrontendScripts !== undefined &&
+        (typeof release.templateSourceFrontendScripts !== "object" ||
+          Array.isArray(release.templateSourceFrontendScripts) ||
+          Object.entries(release.templateSourceFrontendScripts).some(
+            ([profile, scripts]) =>
+              !["full-stack", "frontend"].includes(profile) ||
+              !scripts ||
+              typeof scripts !== "object" ||
+              Array.isArray(scripts) ||
+              Object.entries(scripts).some(([name, value]) => !name || typeof value !== "string" || !value.trim()),
+          ))) ||
       (release.projectionSourceFrontendScripts !== undefined &&
         (typeof release.projectionSourceFrontendScripts !== "object" ||
           Array.isArray(release.projectionSourceFrontendScripts) ||
@@ -426,7 +439,7 @@ export async function currentFrontendProjectionRequirements(profile: "full-stack
   const baselines = activeManagedProjectionBaselines(policy, target.release, profile, baselinePrefix);
   return {
     scripts: managedScriptsForProfile(target, profile === "frontend"),
-    sourceScripts: target.projectionSourceFrontendScripts?.[profile] ?? {},
+    templateSourceScripts: target.templateSourceFrontendScripts?.[profile] ?? {},
     files: baselines.map(baseline => ({ path: baseline.path, contents: resolveBaselineTargetContent(baseline) })),
   };
 }
