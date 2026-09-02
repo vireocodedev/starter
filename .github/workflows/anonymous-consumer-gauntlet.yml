@@ -2,28 +2,6 @@ name: Anonymous consumer gauntlet
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/anonymous-consumer-gauntlet.yml"
-      - "contracts/anonymous-consumer-gauntlet-policy.json"
-      - "contracts/ecosystem-release-contract.json"
-      - "contracts/project-upgrade-policy.json"
-      - "contracts/public-release-attestation-policy.json"
-      - "scripts/anonymous-consumer-gauntlet.mjs"
-      - "scripts/anonymous-consumer-gauntlet.test.mjs"
-      - "scripts/lib/anonymous-consumer-*.mjs"
-      - "scripts/lib/anonymous-public-evidence*.mjs"
-      - "scripts/lib/anonymous-public-maven-evidence*.mjs"
-      - "scripts/verify-npm-public-release.mjs"
-      - "scripts/collect-public-release-evidence.mjs"
-      - "scripts/verify-public-maven-signatures.mjs"
-      - "scripts/verify-anonymous-consumer-signed-sboms.mjs"
-      - "scripts/verify-anonymous-consumer-signed-sboms.test.mjs"
-      - "contracts/vireo-release-signing-key.asc"
-      - "jvm/scripts/verify-central-consumer.sh"
-      - "packages/create-vireo/**"
-      - "contracts/application-projection-contract.json"
-      - "package.json"
-      - "package-lock.json"
   workflow_dispatch:
     inputs:
       release_id:

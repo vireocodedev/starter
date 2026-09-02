@@ -91,6 +91,9 @@ export async function synchronizeDocumentationRelease(
   const priorPublicUpgradeRelease = upgradePolicy.releaseGraph?.edges?.find(
     edge => edge.to === publicUpgradeRelease,
   )?.from;
+  const priorHistoricalUpgradeRelease = upgradePolicy.releaseGraph?.edges?.find(
+    edge => edge.to === priorPublicUpgradeRelease,
+  )?.from;
   const candidateTemplateCommit = projectUpgrade.finalization?.targetTemplateCommit;
   if (
     upgradePolicy.releaseGraph?.candidateRelease !== undefined &&
@@ -209,6 +212,7 @@ export async function synchronizeDocumentationRelease(
           templateCommit,
           oldTemplateVersion,
           templateVersion,
+          priorHistoricalUpgradeRelease,
           priorPublicUpgradeRelease,
           publicUpgradeRelease,
           candidateUpgradeRelease,
@@ -449,6 +453,7 @@ function synchronizeCurrentReleaseGuidance({
   templateCommit,
   oldTemplateVersion,
   templateVersion,
+  priorHistoricalUpgradeRelease,
   priorPublicUpgradeRelease,
   publicUpgradeRelease,
   candidateUpgradeRelease,
@@ -524,6 +529,7 @@ function synchronizeCurrentReleaseGuidance({
   );
   const additionalGuidanceOutputs = synchronizeAdditionalCurrentGuidance({
     repositoryRoot,
+    priorHistoricalUpgradeRelease,
     priorPublicUpgradeRelease,
     publicUpgradeRelease,
     candidateUpgradeRelease,
@@ -537,6 +543,7 @@ function synchronizeCurrentReleaseGuidance({
 
 function synchronizeAdditionalCurrentGuidance({
   repositoryRoot,
+  priorHistoricalUpgradeRelease,
   priorPublicUpgradeRelease,
   publicUpgradeRelease,
   candidateUpgradeRelease,
@@ -545,6 +552,9 @@ function synchronizeAdditionalCurrentGuidance({
   const currentEdge = `${publicUpgradeRelease}→${candidateUpgradeRelease}`;
   const historicalHyphenEdge = `${priorPublicUpgradeRelease}-to-${publicUpgradeRelease}`;
   const currentHyphenEdge = `${publicUpgradeRelease}-to-${candidateUpgradeRelease}`;
+  const retainedBacklogSuffix = priorHistoricalUpgradeRelease
+    ? `; ${escapeRegExp(`${priorHistoricalUpgradeRelease}→${priorPublicUpgradeRelease}`)} remains retained historical evidence`
+    : "";
   const frontendProfilePath = join(repositoryRoot, "docs", "architecture", "frontend-only-profile.md");
   let frontendProfile = replaceRequired(
     readFileSync(frontendProfilePath, "utf8"),
@@ -568,9 +578,12 @@ function synchronizeAdditionalCurrentGuidance({
   );
 
   const phaseBacklogPath = join(repositoryRoot, "docs", "roadmap", "phase-4", "backlog.md");
-  const phaseBacklog = replaceRequired(
+  const phaseBacklog = replacePatternOnce(
     readFileSync(phaseBacklogPath, "utf8"),
-    `The current public \`create-vireo@${publicUpgradeRelease}\` line and its supported ${historicalEdge}\nadjacent upgrade fixture are complete.`,
+    new RegExp(
+      `The current public \`create-vireo@${escapeRegExp(publicUpgradeRelease)}\` line and its supported ${escapeRegExp(historicalEdge)}\\nadjacent upgrade fixture are complete${retainedBacklogSuffix}\\.`,
+      "u",
+    ),
     `The current public \`create-vireo@${candidateUpgradeRelease}\` line and its supported ${currentEdge}\nadjacent upgrade fixture are complete; ${historicalEdge} remains retained historical evidence.`,
     "docs/roadmap/phase-4/backlog.md current release contract",
   );
@@ -578,8 +591,8 @@ function synchronizeAdditionalCurrentGuidance({
   const readinessPath = join(repositoryRoot, "docs", "roadmap", "phase-4", "production-readiness-criteria.md");
   const readinessCriteria = replaceRequired(
     readFileSync(readinessPath, "utf8"),
-    `Public \`create-vireo\` ${publicUpgradeRelease} declares the current ${historicalEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance; frontend/full-stack unit fixtures exercise the six managed application-skill additions for both profiles.`,
-    `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance; its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical ${historicalEdge} edge.`,
+    `Public \`create-vireo\` ${publicUpgradeRelease} declares the current ${historicalEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance;`,
+    `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance;`,
     "docs/roadmap/phase-4/production-readiness-criteria.md current release compatibility",
   );
   return [

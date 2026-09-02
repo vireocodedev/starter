@@ -2,11 +2,16 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { parseJobPermissions, validateReleasePrWorkflow } from "./workflow-security-policy.mjs";
+import {
+  parseJobPermissions,
+  validateAlwaysReportedPullRequestWorkflow,
+  validateReleasePrWorkflow,
+} from "./workflow-security-policy.mjs";
 
 const read = relative => readFileSync(new URL(`../${relative}`, import.meta.url), "utf8");
 const actionPolicy = JSON.parse(read("contracts/github-actions-policy.json"));
 const releaseWorkflow = read(".github/workflows/release.yml");
+const anonymousGauntletWorkflow = read(".github/workflows/anonymous-consumer-gauntlet.yml");
 
 test("accepts the narrowly scoped Changesets release-PR workflow", () => {
   assert.deepEqual(validateReleasePrWorkflow(releaseWorkflow, actionPolicy), []);
@@ -15,6 +20,34 @@ test("accepts the narrowly scoped Changesets release-PR workflow", () => {
 test("recognizes an explicit empty inline job permissions map", () => {
   const lines = ["  token-free:", "    permissions: {}", "    runs-on: ubuntu-24.04"];
   assert.deepEqual([...parseJobPermissions(lines, { start: 0, end: lines.length })], []);
+});
+
+test("requires the protected gauntlet plan to report on every pull request", () => {
+  assert.deepEqual(
+    validateAlwaysReportedPullRequestWorkflow(anonymousGauntletWorkflow, "anonymous-consumer-gauntlet.yml"),
+    [],
+  );
+  const pathFiltered = anonymousGauntletWorkflow.replace(
+    "  pull_request:\n",
+    "  pull_request:\n    paths: [package.json]\n",
+  );
+  assert.match(
+    validateAlwaysReportedPullRequestWorkflow(pathFiltered, "anonymous-consumer-gauntlet.yml").join("\n"),
+    /must run for every pull request without paths or paths-ignore filters/u,
+  );
+  const missingPlan = anonymousGauntletWorkflow.replace("  plan:\n", "  disabled-plan:\n");
+  assert.match(
+    validateAlwaysReportedPullRequestWorkflow(missingPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
+    /plan must exist and report unconditionally for every pull request/u,
+  );
+  const conditionalPlan = anonymousGauntletWorkflow.replace(
+    "    if: github.event_name == 'pull_request'",
+    "    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'",
+  );
+  assert.match(
+    validateAlwaysReportedPullRequestWorkflow(conditionalPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
+    /plan must exist and report unconditionally for every pull request/u,
+  );
 });
 
 test("rejects release-PR workflow operations outside reviewed version maintenance", () => {
