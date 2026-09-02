@@ -75,6 +75,7 @@ export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoo
       expectedExit: operation.expectedExit ?? 0,
       kind: operation.kind ?? "command",
       executable: operation.executable ?? null,
+      arguments: operation.arguments ?? [],
     })),
   }));
 }
@@ -423,7 +424,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     case "npm-consumer-surface": return [
       { kind: "exact-public-npm-consumer", id: "exact-public-npm-install", path: join(consumerRoot, "public-npm") },
       ...release.npm.map(({ name, version }) => command(`npm-pack-${name}`, "corepack", ["npm", "pack", `${name}@${version}`, "--json"], { assertOutput: /"filename"/u })),
-      command("public-release-evidence", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "public-release-evidence")], { cwdClass: "framework-verifier", timeoutMs: 30 * 60_000 }),
+      { kind: "assert-public-evidence", id: "npm-public-evidence-reuse", path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"), release },
     ];
     case "maven-consumer-surface": return [
       command("maven-central-consumer", "sh", [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
