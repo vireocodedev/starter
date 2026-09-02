@@ -1,5 +1,11 @@
 # create-vireo
 
+## 0.8.3
+
+### Patch Changes
+
+- 07cdf77: Prepare the next Vireo project-upgrade edge with an immutable Template target and exact current UI dependency floor.
+
 ## 0.8.2
 
 ### Patch Changes

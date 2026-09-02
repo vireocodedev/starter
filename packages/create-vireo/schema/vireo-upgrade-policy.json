@@ -1,9 +1,8 @@
 {
   "schemaVersion": 2,
   "releaseGraph": {
-    "publicRelease": "0.8.2",
+    "publicRelease": "0.8.3",
     "previousRelease": "0.8.2",
-    "candidateRelease": "0.8.3",
     "releases": [
       {
         "release": "0.2.0",
@@ -127,7 +126,7 @@
       },
       {
         "release": "0.8.2",
-        "status": "current",
+        "status": "historical",
         "templateCommit": "421ae56cdd6d1fa6863cc6f29503b15294e4aa99",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.2 vireo",
         "starterJvmVersion": "0.3.1",
@@ -143,7 +142,7 @@
       },
       {
         "release": "0.8.3",
-        "status": "candidate",
+        "status": "current",
         "templateCommit": "12485e7e7e9323a802d79c793d230557cad4c7fb",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.3 vireo",
         "starterJvmVersion": "0.3.1",

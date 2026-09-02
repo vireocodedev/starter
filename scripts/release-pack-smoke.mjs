@@ -19,6 +19,7 @@ import {
   assertPackedProjectUpgradeBaselines,
   managedConsumerSkillPaths,
 } from "./lib/packed-project-upgrade-baselines.mjs";
+import { packedAdjacentFrontendSourceManifest } from "./lib/packed-adjacent-frontend-source-manifest.mjs";
 import { assertPackableProjectUpgrade } from "./lib/project-upgrade-publication-state.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -427,7 +428,7 @@ try {
   const upgradeDependencies = { ...packedSource.frontendDependencies, react: "^19.0.0" };
   writeFileSync(
     join(upgradeFixture, "package.json"),
-    `${JSON.stringify({ name: "packed-adjacent-upgrade-fixture", scripts: { vireo: packedSource.rootVireoScript }, dependencies: upgradeDependencies }, null, 2)}\n`,
+    `${JSON.stringify(packedAdjacentFrontendSourceManifest({ packedSource, dependencies: upgradeDependencies }), null, 2)}\n`,
   );
   const activeBaselineKey = `${packedSource.release}->${packedTarget.release}`;
   const activeFrontendBaselines = packedPolicy.releaseGraph.baselines?.[activeBaselineKey]?.frontend ?? [];

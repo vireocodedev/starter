@@ -505,8 +505,14 @@ function synchronizeCurrentReleaseGuidance({
   }
   createReadme = replacePatternOnce(
     createReadme,
+    /wire-contract drift\. Apply changes only (?:Vireo-managed metadata and the pinned CLI\s+script|the managed surfaces explicitly declared by\s+the selected edge)\./u,
+    "wire-contract drift. Apply changes only the managed surfaces explicitly declared by the selected edge.",
+    "packages/create-vireo/README.md managed edge scope",
+  );
+  createReadme = replacePatternOnce(
+    createReadme,
     /For the current \d+\.\d+\.\d+→\d+\.\d+\.\d+\nedge, Vireo [\s\S]*?\.github`\s*review policy\./u,
-    `For the current ${currentEdge}\nedge, Vireo updates only the declared managed Doctor, release-coordinate, and provenance surfaces; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\` review policy.`,
+    `For the current ${currentEdge}\nedge, Vireo applies only the declared managed edge surfaces, including dependency declarations and release identity/provenance where the edge declares them. The lockfile remains application-owned and must be refreshed manually; Vireo never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\` review policy.`,
     "packages/create-vireo/README.md current managed edge description",
   );
   createReadme = replaceCurrentTemplateBaseline(

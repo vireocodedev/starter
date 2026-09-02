@@ -87,11 +87,17 @@ test("synchronizes release contracts and public version documentation from sourc
     assert.match(compatibilityMarkdown, /edge is 0\.2\.0→0\.3\.0/u);
     assert.match(compatibilityMarkdown, /starter-template@0\.3\.0/u);
     assert.doesNotMatch(compatibilityMarkdown, /JVM release\.\./u);
+    const createReadme = readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8");
+    assert.match(createReadme, /0\.2\.0 upgraded to 0\.3\.0/u);
+    assert.match(createReadme, /--to 0\.3\.0 --dry-run/u);
+    assert.match(createReadme, /Apply changes only the managed surfaces explicitly declared by the selected edge\./u);
+    assert.doesNotMatch(createReadme, /Apply changes only Vireo-managed metadata and the pinned CLI script/u);
     assert.match(
-      readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8"),
-      /0\.2\.0 upgraded to 0\.3\.0/u,
+      createReadme,
+      /Vireo applies only the declared managed edge surfaces, including dependency declarations and release identity\/provenance where the edge declares them\./u,
     );
-    assert.match(readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8"), /--to 0\.3\.0 --dry-run/u);
+    assert.match(createReadme, /The lockfile remains application-owned and must be refreshed manually/u);
+    assert.doesNotMatch(createReadme, /declared managed Doctor/u);
     assert.match(
       readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8"),
       /0\.1\.0→0\.2\.0 edge remains historical evidence/u,
@@ -259,6 +265,19 @@ test("fails closed when an allowlisted current site reference changes form", asy
   }
 });
 
+test("accepts an already-generic managed edge scope when synchronizing a later release", async () => {
+  const root = makeFixture({ managedEdgeScope: "generic" });
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    assert.match(
+      readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8"),
+      /Apply changes only the managed surfaces explicitly declared by the selected edge\./u,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("fails closed when release artifacts drift from public workspaces", async () => {
   const root = makeFixture();
   try {
@@ -410,7 +429,7 @@ test("rejects missing retained backlog evidence when the release graph has a pre
   }
 });
 
-function makeFixture() {
+function makeFixture({ managedEdgeScope = "legacy" } = {}) {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   mkdirSync(join(root, "contracts"));
   mkdirSync(join(root, "packages", "create-vireo", "src"), { recursive: true });
@@ -578,9 +597,13 @@ function makeFixture() {
     join(root, "docs", "COMPATIBILITY.md"),
     "| Artifact | Version |\n| --- | --- |\n| `create-vireo` | 0.2.0 |\n| `@vireocodedev/sqlite` | 0.2.1 |\n| `com.vireocode:vireo-*` | 0.3.0 |\n\nThe current supported project-upgrade\nedge is 0.1.0→0.2.0; other historical evidence remains retained.\n\nThe immutable `starter-template@0.2.0` source baseline retains\n`starterVersion=0.3.0`; `create-vireo@0.2.0` normalizes generated and upgraded\nfull-stack consumers to the coordinated `0.4.0` JVM release.\n",
   );
+  const managedEdgeScopeWording =
+    managedEdgeScope === "legacy"
+      ? "Apply changes only Vireo-managed metadata and the pinned CLI\nscript."
+      : "Apply changes only the managed surfaces explicitly declared by the selected edge.";
   writeFileSync(
     join(root, "packages", "create-vireo", "README.md"),
-    `The current supported adjacent release pair is a project created by \`create-vireo\`\n0.1.0 upgraded to 0.2.0.\n\n\`\`\`bash\nvireo upgrade --to 0.2.0 --dry-run\nvireo upgrade --to 0.2.0 --apply --accept-application-owned\n\`\`\`\n\nReview the target Template commit ${"a".repeat(40)}. For the current 0.1.0→0.2.0\nedge, Vireo adds the six managed application-skill files under\n\`.agents/skills/\`; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\`\nreview policy.\n\nThe immutable \`starter-template@0.2.0\` source commit intentionally retains its\n\`starterVersion=0.3.0\` baseline. Full-stack creation and the 0.1.0→0.2.0 upgrade\nnormalize that managed declaration to the current Vireo JVM release, \`0.4.0\`, before\nrecording managed hashes.\n`,
+    `The current supported adjacent release pair is a project created by \`create-vireo\`\n0.1.0 upgraded to 0.2.0.\n\n\`\`\`bash\nvireo upgrade --to 0.2.0 --dry-run\nvireo upgrade --to 0.2.0 --apply --accept-application-owned\n\`\`\`\n\nThe preflight refuses unknown source commits, changed Vireo dependency declarations,\nlockfile drift, invalid/duplicate Flyway migration versions, and managed generated or\nwire-contract drift. ${managedEdgeScopeWording} Template files, domain logic, deployment, data migration, and adopted/ejected\ncode remain application-owned and must be reviewed against the target Template\ncommit ${"a".repeat(40)}. For the current 0.1.0→0.2.0\nedge, Vireo adds the six managed application-skill files under\n\`.agents/skills/\`; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\`\nreview policy.\n\nThe immutable \`starter-template@0.2.0\` source commit intentionally retains its\n\`starterVersion=0.3.0\` baseline. Full-stack creation and the 0.1.0→0.2.0 upgrade\nnormalize that managed declaration to the current Vireo JVM release, \`0.4.0\`, before\nrecording managed hashes.\n`,
   );
   writeFileSync(
     join(root, "docs", "NPM_RELEASE.md"),
