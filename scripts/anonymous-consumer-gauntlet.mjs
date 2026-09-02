@@ -487,6 +487,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           [
             join(root, "scripts", "collect-public-release-evidence.mjs"),
             join(evidenceDirectory, "public-release-evidence"),
+            "--output-relative-paths",
           ],
           { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 },
         ),

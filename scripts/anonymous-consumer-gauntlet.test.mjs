@@ -50,6 +50,11 @@ test("deterministic plan gives a fake executor every required recipe and refusal
     ).length,
     1,
   );
+  assert.ok(
+    operations
+      .find(operation => operation.arguments.some(argument => String(argument).endsWith("collect-public-release-evidence.mjs")))
+      .arguments.includes("--output-relative-paths"),
+  );
   assert.equal(
     plan
       .find(scenario => scenario.id === "adjacent-public-upgrades")
