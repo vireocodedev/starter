@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { publicReleaseIdentity, readJson } from "./lib/anonymous-consumer-environment.mjs";
-import { buildExecutionPlan, executePlanForTest, validateManagedProvenance, validatePolicy } from "./anonymous-consumer-gauntlet.mjs";
+import { buildExecutionPlan, executePlanForTest, installedVireoPackageNames, validateManagedProvenance, validatePolicy } from "./anonymous-consumer-gauntlet.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = readJson(join(root, "contracts", "anonymous-consumer-gauntlet-policy.json"));
@@ -49,6 +49,14 @@ test("managed provenance rejects traversal and digest drift", () => {
   writeFileSync(join(directory, "file.txt"), "actual");
   const manifest = { schemaVersion: 1, templateCommit: "a".repeat(40), files: [{ path: "../escape", sha256: "b".repeat(64) }, { path: "file.txt", sha256: "b".repeat(64) }] };
   assert.match(validateManagedProvenance({ root: directory, manifest }).join("\n"), /unsafe|drift/u);
+});
+
+test("upgraded consumers validate only their installed exact Vireo subset", () => {
+  const release = { npm: [{ name: "@vireocodedev/ui", version: "1.2.3" }] };
+  const lock = { packages: { "node_modules/@vireocodedev/ui": { version: "1.2.3", resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui.tgz", integrity: "sha512-x" } } };
+  assert.deepEqual(installedVireoPackageNames({ lock, release }), ["@vireocodedev/ui"]);
+  lock.packages["node_modules/@vireocodedev/ui"].version = "9.9.9";
+  assert.throws(() => installedVireoPackageNames({ lock, release }));
 });
 
 test("gauntlet policy wiring remains public and scheduled", () => {

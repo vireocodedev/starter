@@ -44,6 +44,19 @@ export function validateManagedProvenance({ root, manifest }) {
   return problems;
 }
 
+export function installedVireoPackageNames({ lock, release }) {
+  const expected = new Map(release.npm.map(entry => [entry.name, entry.version]));
+  const names = Object.entries(lock?.packages ?? {})
+    .filter(([path]) => /^node_modules\/(?:@vireocodedev\/|create-vireo$)/u.test(path))
+    .map(([path, entry]) => ({ name: path.slice("node_modules/".length), entry }));
+  if (names.length === 0) throw new Error("Generated consumer has no installed Vireo package coordinates.");
+  for (const { name, entry } of names) {
+    if (expected.get(name) !== entry.version || !entry.resolved?.startsWith("https://registry.npmjs.org/") || !entry.integrity)
+      throw new Error(`Installed Vireo coordinate is not an exact public release package: ${name}.`);
+  }
+  return names.map(item => item.name);
+}
+
 export function validatePolicy(policy, release) {
   const problems = [];
   if (policy.schemaVersion !== 1 || policy.contractId !== "vireo-anonymous-consumer-zero-to-production") {
@@ -274,8 +287,9 @@ async function executeOperation(operation, { environment, runRoot }) {
     for (const file of managed.files ?? []) if (!existsSync(join(operation.path, file.path))) throw new Error(`Managed upgraded file is missing: ${file.path}`);
     if ((operation.profile === "full-stack" && project.database !== "h2") || (operation.profile === "frontend" && project.database !== undefined)) throw new Error("Upgraded project profile/database drifted.");
     const packageRoot = operation.profile === "full-stack" ? join(operation.path, "frontend") : operation.path;
+    const installedNames = installedVireoPackageNames({ lock: JSON.parse(readFileSync(join(packageRoot, "package-lock.json"), "utf8")), release: operation.release });
     assertAnonymousVireoLock({ consumerRoot: packageRoot, release: operation.release, registry: operation.registry });
-    assertAnonymousInstallation({ consumerRoot: packageRoot, packageNames: operation.release.npm.map(entry => entry.name), registry: operation.registry });
+    assertAnonymousInstallation({ consumerRoot: packageRoot, packageNames: installedNames, registry: operation.registry });
     if (operation.profile === "full-stack") {
       const properties = readFileSync(join(operation.path, "gradle.properties"), "utf8");
       if (!properties.includes(`starterVersion=${operation.release.maven.version}`)) throw new Error("Upgraded JVM starter version drifted.");
