@@ -45,10 +45,13 @@ function jobForLine(jobs, lineNumber) {
   return jobs.find(job => lineNumber >= job.start && lineNumber < job.end);
 }
 
-function parseJobPermissions(lines, job) {
+export function parseJobPermissions(lines, job) {
   const permissions = new Map();
-  const permissionLine = lines.slice(job.start, job.end).findIndex(line => line === "    permissions:");
+  const permissionLine = lines
+    .slice(job.start, job.end)
+    .findIndex(line => line === "    permissions:" || line === "    permissions: {}");
   if (permissionLine < 0) return null;
+  if (lines[job.start + permissionLine] === "    permissions: {}") return permissions;
 
   const start = job.start + permissionLine + 1;
   for (let index = start; index < job.end; index += 1) {

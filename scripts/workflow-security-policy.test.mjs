@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { validateReleasePrWorkflow } from "./workflow-security-policy.mjs";
+import { parseJobPermissions, validateReleasePrWorkflow } from "./workflow-security-policy.mjs";
 
 const read = relative => readFileSync(new URL(`../${relative}`, import.meta.url), "utf8");
 const actionPolicy = JSON.parse(read("contracts/github-actions-policy.json"));
@@ -10,6 +10,11 @@ const releaseWorkflow = read(".github/workflows/release.yml");
 
 test("accepts the narrowly scoped Changesets release-PR workflow", () => {
   assert.deepEqual(validateReleasePrWorkflow(releaseWorkflow, actionPolicy), []);
+});
+
+test("recognizes an explicit empty inline job permissions map", () => {
+  const lines = ["  token-free:", "    permissions: {}", "    runs-on: ubuntu-24.04"];
+  assert.deepEqual([...parseJobPermissions(lines, { start: 0, end: lines.length })], []);
 });
 
 test("rejects release-PR workflow operations outside reviewed version maintenance", () => {

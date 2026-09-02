@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "no-release",
+  "justification": "The anonymous-consumer gauntlet documentation and workflow contract change verification source only; no versioned site content, friendly snapshot, static distribution, or deployed documentation bytes are generated or changed."
+}

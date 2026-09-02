@@ -10,8 +10,10 @@ set of six artifacts represented by seven PURLs.
 
 - Keep the `com.vireocode` namespace verified through control of
   `vireocode.com`.
-- Keep the public signing key available from a public keyserver and keep its
-  private key plus recovery material outside the repository.
+- Keep the checked-in public verification key and its pinned fingerprint current;
+  public-consumption verification imports that key in an isolated GPG home and
+  hard-fails on any mismatch. Keep the private key plus recovery material outside
+  the repository.
 - Apply the checked-in [`maven-central` environment desired state](../.github/environments/maven-central.json): restrict it to `main`, add its documented reviewer, and disable administrator bypass. Capture an authenticated API export after applying it.
 - Store only these environment secrets:
   `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`, `MAVEN_SIGNING_KEY`, and

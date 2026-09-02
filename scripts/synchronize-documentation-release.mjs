@@ -498,10 +498,10 @@ function synchronizeCurrentReleaseGuidance({
       `packages/create-vireo/README.md current ${mode} command`,
     );
   }
-  createReadme = replaceRequired(
+  createReadme = replacePatternOnce(
     createReadme,
-    `For the current ${historicalEdge}\nedge, Vireo adds the six managed application-skill files under\n\`.agents/skills/\`; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\`\nreview policy.`,
-    `For the current ${currentEdge}\nedge, Vireo updates only managed release-coordinate, provenance, and pinned CLI metadata while retaining the six managed application-skill files introduced by the historical ${historicalEdge} edge; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\` review policy.`,
+    /For the current \d+\.\d+\.\d+→\d+\.\d+\.\d+\nedge, Vireo [\s\S]*?\.github`\s*review policy\./u,
+    `For the current ${currentEdge}\nedge, Vireo updates only the declared managed Doctor, release-coordinate, and provenance surfaces; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\` review policy.`,
     "packages/create-vireo/README.md current managed edge description",
   );
   createReadme = replaceCurrentTemplateBaseline(
@@ -603,7 +603,11 @@ function replaceCurrentTemplateBaseline(
   const pattern = new RegExp(
     "The immutable `starter-template@" +
       escapeRegExp(oldTemplateVersion) +
-      "` source (?:baseline retains\\n`starterVersion=[^`]+`; `create-vireo@" +
+      "` source (?:baseline uses\\n`starterVersion=[^`]+`; `create-vireo@" +
+      escapeRegExp(publicUpgradeRelease) +
+      "` generates and upgrades\\nfull-stack consumers with the coordinated `" +
+      escapeRegExp(jvmVersion) +
+      "` JVM release\\.|baseline retains\\n`starterVersion=[^`]+`; `create-vireo@" +
       escapeRegExp(publicUpgradeRelease) +
       "` normalizes generated and upgraded\\nfull-stack consumers to the coordinated `" +
       escapeRegExp(jvmVersion) +

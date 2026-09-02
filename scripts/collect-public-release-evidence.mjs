@@ -13,18 +13,40 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  manifestEvidencePath,
+  manifestEvidenceRoot,
+  parsePublicEvidenceCollectorArguments,
+  preservesRepositoryCleanliness,
+} from "./lib/public-release-evidence-paths.mjs";
 import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const outputArgument = process.argv[2];
-if (!outputArgument || process.argv.length !== 3) {
-  console.error("Usage: node scripts/collect-public-release-evidence.mjs <new-output-directory>");
+let collectorArguments;
+try {
+  collectorArguments = parsePublicEvidenceCollectorArguments(process.argv.slice(2));
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
   process.exit(2);
 }
 
+const { outputArgument, outputRelativePaths } = collectorArguments;
 const outputRoot = resolve(repositoryRoot, outputArgument);
+const outputIsGitignored = (() => {
+  try {
+    execFileSync("git", ["check-ignore", "--quiet", `${outputRoot}/`], { cwd: repositoryRoot, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+if (
+  process.env.GITHUB_ACTIONS === "true" &&
+  !preservesRepositoryCleanliness({ repositoryRoot, outputRoot, outputIsGitignored })
+)
+  throw new Error("Hosted public release evidence must be outside the checkout or a proven gitignored path.");
 if (existsSync(outputRoot)) throw new Error(`Public release evidence already exists: ${outputRoot}`);
 
 const policy = JSON.parse(
@@ -67,8 +89,12 @@ function digest(bytes, algorithm, encoding = "hex") {
   return createHash(algorithm).update(bytes).digest(encoding);
 }
 
-function normalizedPath(path) {
-  return relative(repositoryRoot, path).replaceAll("\\", "/");
+function manifestPath(path) {
+  return manifestEvidencePath({ repositoryRoot, outputRoot, path, outputRelativePaths });
+}
+
+function subjectPath(path) {
+  return resolve(manifestEvidenceRoot({ repositoryRoot, outputRoot, outputRelativePaths }), path);
 }
 
 async function pause(milliseconds) {
@@ -159,7 +185,7 @@ for (const expected of policy.npm.packages) {
     name: manifest.name,
     version: manifest.version,
     coordinate,
-    path: normalizedPath(path),
+    path: manifestPath(path),
     url: metadata.dist.tarball,
     provenance: metadata.dist.attestations.url,
     bytes: statSync(path).size,
@@ -172,7 +198,7 @@ for (const expected of policy.npm.packages) {
 console.log("Generating one CycloneDX SBOM from each exact public npm tarball...");
 for (const subject of npmSubjects) {
   const declared = policy.npm.packages.find(entry => entry.name === subject.name);
-  generatePackedNpmSbom(join(repositoryRoot, subject.path), join(sbomRoot, `${declared.sbomId}.cdx.json`), subject);
+  generatePackedNpmSbom(subjectPath(subject.path), join(sbomRoot, `${declared.sbomId}.cdx.json`), subject);
 }
 
 console.log("Downloading exact public Maven Central artifacts...");
@@ -200,7 +226,7 @@ for (const module of policy.maven.modules) {
     mavenSubjects.push({
       ecosystem: "maven",
       coordinate: `${policy.maven.group}:${module.name}:${mavenVersion}`,
-      path: normalizedPath(path),
+      path: manifestPath(path),
       url,
       bytes: statSync(path).size,
       sha256,
@@ -242,7 +268,7 @@ function writeChecksums(name, subjects) {
     .toSorted((left, right) => left.path.localeCompare(right.path))
     .map(subject => `${subject.sha256}  ${subject.path}`);
   writeFileSync(path, `${rows.join("\n")}\n`);
-  return normalizedPath(path);
+  return manifestPath(path);
 }
 
 const sboms = [
@@ -292,7 +318,9 @@ const manifest = {
   },
   subjects: [...npmSubjects, ...mavenSubjects],
 };
-const sbomProblems = validateReleaseSbomManifest(manifest, policy, { root: outputRoot });
+const sbomProblems = validateReleaseSbomManifest(manifest, policy, {
+  root: manifestEvidenceRoot({ repositoryRoot, outputRoot, outputRelativePaths }),
+});
 if (sbomProblems.length > 0) {
   throw new Error(
     `Public release SBOM evidence is invalid:\n${sbomProblems.map(problem => `- ${problem}`).join("\n")}`,

@@ -161,7 +161,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: vireocodedev/vireo-template
-          ref: 2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d
+          ref: 421ae56cdd6d1fa6863cc6f29503b15294e4aa99
           path: starter-template
           persist-credentials: false
           fetch-depth: 0

@@ -1,0 +1,202 @@
+name: Anonymous consumer gauntlet
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/anonymous-consumer-gauntlet.yml"
+      - "contracts/anonymous-consumer-gauntlet-policy.json"
+      - "contracts/ecosystem-release-contract.json"
+      - "contracts/project-upgrade-policy.json"
+      - "contracts/public-release-attestation-policy.json"
+      - "scripts/anonymous-consumer-gauntlet.mjs"
+      - "scripts/anonymous-consumer-gauntlet.test.mjs"
+      - "scripts/lib/anonymous-consumer-*.mjs"
+      - "scripts/lib/anonymous-public-evidence*.mjs"
+      - "scripts/lib/anonymous-public-maven-evidence*.mjs"
+      - "scripts/verify-npm-public-release.mjs"
+      - "scripts/collect-public-release-evidence.mjs"
+      - "scripts/verify-public-maven-signatures.mjs"
+      - "scripts/verify-anonymous-consumer-signed-sboms.mjs"
+      - "scripts/verify-anonymous-consumer-signed-sboms.test.mjs"
+      - "contracts/vireo-release-signing-key.asc"
+      - "jvm/scripts/verify-central-consumer.sh"
+      - "packages/create-vireo/**"
+      - "contracts/application-projection-contract.json"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+    inputs:
+      release_id:
+        required: false
+        type: string
+      source_commit:
+        required: false
+        type: string
+  workflow_run:
+    workflows: ["Publish npm release"]
+    types: [completed]
+  schedule:
+    - cron: "17 3 * * 2"
+
+permissions: {}
+
+concurrency:
+  group: anonymous-consumer-gauntlet-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: corepack npm ci --ignore-scripts
+      - run: corepack npm run consumer:gauntlet:check
+      - run: >-
+          node --test
+          scripts/anonymous-consumer-gauntlet.test.mjs
+          scripts/verify-anonymous-consumer-signed-sboms.test.mjs
+          scripts/lib/anonymous-consumer-*.test.mjs
+  trusted-source:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository))
+    outputs:
+      source_commit: ${{ steps.source.outputs.source_commit }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - id: source
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_REF: ${{ github.ref }}
+          REQUESTED_SOURCE_COMMIT: ${{ inputs.source_commit }}
+          WORKFLOW_RUN_SOURCE_COMMIT: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$EVENT_NAME" = workflow_dispatch ] && [ "$WORKFLOW_REF" != refs/heads/main ]; then
+            echo "workflow_dispatch is restricted to refs/heads/main" >&2
+            exit 1
+          fi
+          if [ -n "$REQUESTED_SOURCE_COMMIT" ] && ! printf '%s' "$REQUESTED_SOURCE_COMMIT" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "workflow_dispatch source_commit must be an exact 40-hex commit" >&2
+            exit 1
+          fi
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          candidate="$REQUESTED_SOURCE_COMMIT"
+          if [ -z "$candidate" ] && [ "$EVENT_NAME" = workflow_run ]; then candidate="$WORKFLOW_RUN_SOURCE_COMMIT"; fi
+          if [ -z "$candidate" ]; then candidate="$(git rev-parse origin/main)"; fi
+          git rev-parse --verify "$candidate^{commit}" >/dev/null
+          if ! git merge-base --is-ancestor "$candidate" origin/main; then
+            echo "source_commit must be an ancestor of fetched origin/main" >&2
+            exit 1
+          fi
+          echo "source_commit=$candidate" >> "$GITHUB_OUTPUT"
+
+  gauntlet:
+    needs: trusted-source
+    if: always() && needs.trusted-source.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    permissions: {}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Fetch the trusted public source without credentials
+        env:
+          TRUSTED_SOURCE_COMMIT: ${{ needs.trusted-source.outputs.source_commit }}
+        run: |
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$TRUSTED_SOURCE_COMMIT"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$TRUSTED_SOURCE_COMMIT"
+      - run: corepack npm ci --ignore-scripts
+      - run: docker version
+      - run: corepack npm exec -- playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
+      - name: Run exact public anonymous-consumer gauntlet
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
+          REQUESTED_RELEASE_ID: ${{ inputs.release_id }}
+          TRUSTED_SOURCE_COMMIT: ${{ needs.trusted-source.outputs.source_commit }}
+          VIREO_GAUNTLET_PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
+        run: |
+          if [ -n "$REQUESTED_RELEASE_ID" ] && ! printf '%s' "$REQUESTED_RELEASE_ID" | grep -Eq '^npm-[0-9]+\.[0-9]+\.[0-9]+_jvm-[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "workflow_dispatch release_id must be an exact npm-x.y.z_jvm-x.y.z release id" >&2
+            exit 1
+          fi
+          release_id="$REQUESTED_RELEASE_ID"
+          if [ -z "$release_id" ]; then release_id="$(node -p \"require('./contracts/ecosystem-release-contract.json').current.id\")"; fi
+          corepack npm run consumer:gauntlet -- --evidence-dir "$RUNNER_TEMP/anonymous-consumer-evidence" --release-id "$release_id" --source-commit "$TRUSTED_SOURCE_COMMIT"
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: anonymous-consumer-gauntlet-evidence
+          path: ${{ runner.temp }}/anonymous-consumer-evidence
+          if-no-files-found: error
+          retention-days: 90
+
+  verify-signed-sboms:
+    name: Verify signed public SBOM attestations
+    needs: [gauntlet, trusted-source]
+    if: >-
+      always() && github.event_name != 'pull_request' && needs.gauntlet.result == 'success' && needs.trusted-source.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      attestations: read
+      contents: read
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.trusted-source.outputs.source_commit }}
+          persist-credentials: false
+      - name: Revalidate trusted main ancestry before verifier execution
+        env:
+          TRUSTED_SOURCE_COMMIT: ${{ needs.trusted-source.outputs.source_commit }}
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          git rev-parse --verify "$TRUSTED_SOURCE_COMMIT^{commit}" >/dev/null
+          test "$(git rev-parse HEAD)" = "$TRUSTED_SOURCE_COMMIT"
+          git merge-base --is-ancestor "$TRUSTED_SOURCE_COMMIT" origin/main
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: anonymous-consumer-gauntlet-evidence
+          path: ${{ runner.temp }}/anonymous-consumer-evidence
+      - name: Verify every exact public subject's signed CycloneDX SBOM
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          node scripts/verify-anonymous-consumer-signed-sboms.mjs
+          --evidence-dir "$RUNNER_TEMP/anonymous-consumer-evidence"
+          --output "$RUNNER_TEMP/anonymous-consumer-signed-sbom-evidence/signed-sbom-verification.json"
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: anonymous-consumer-signed-sbom-evidence
+          path: ${{ runner.temp }}/anonymous-consumer-signed-sbom-evidence
+          if-no-files-found: error
+          retention-days: 90

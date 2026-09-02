@@ -31,6 +31,7 @@
           { "context": "Generated full-stack fixture", "integration_id": 15368 },
           { "context": "Generated frontend-only fixture", "integration_id": 15368 },
           { "context": "Public adjacent project-upgrade fixtures", "integration_id": 15368 },
+          { "context": "plan", "integration_id": 15368 },
           { "context": "Detect standalone website changes", "integration_id": 15368 },
           { "context": "Build standalone website", "integration_id": 15368 },
           { "context": "Java and TypeScript analysis", "integration_id": 15368 },

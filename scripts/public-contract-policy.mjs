@@ -26,6 +26,8 @@ const requiredFiles = [
   "contracts/public-release-attestation-policy.json",
   "contracts/documentation-release-policy.json",
   "contracts/public-beta-evidence-policy.json",
+  "contracts/anonymous-consumer-gauntlet-policy.json",
+  "docs/ANONYMOUS_CONSUMER_GAUNTLET.md",
   "site/content/manifest.json",
   "packages/ui/docs/PUBLIC_SURFACE.md",
   ".github/CODEOWNERS",

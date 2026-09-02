@@ -94,7 +94,7 @@ test("synchronizes release contracts and public version documentation from sourc
     assert.match(readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8"), /--to 0\.3\.0 --dry-run/u);
     assert.match(
       readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8"),
-      /historical 0\.1\.0→0\.2\.0 edge/u,
+      /0\.1\.0→0\.2\.0 edge remains historical evidence/u,
     );
     assert.match(
       readFileSync(join(root, "docs", "NPM_RELEASE.md"), "utf8"),

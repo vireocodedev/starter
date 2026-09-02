@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import {
   createVireo,
   findExampleReferences,
   removeExample,
+  renderFrontendDoctorScript,
   TEMPLATE_COMMIT,
   vireoProjectStatus,
 } from "../dist/index.js";
@@ -41,6 +43,29 @@ test("test fixture release identity tracks the private create-vireo version and 
     createVireoSource.match(/TEMPLATE_STARTER_JVM_BASELINE = "([^"]+)"/u)?.[1],
   );
   assert.match(fixtureReleaseIdentity.generatedStarterJvmVersion, /^\d+\.\d+\.\d+$/u);
+});
+
+test("fresh frontend Doctor projection matches the frozen 0.8.2 upgrade byte contract", async () => {
+  // Formatting is part of the public managed-byte contract: use the package's
+  // checked-in projection path so Prettier resolves the same repository config.
+  const path = fileURLToPath(new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.1.mjs", import.meta.url));
+  const rendered = await renderFrontendDoctorScript(path);
+  const target = JSON.parse(
+    await readFile(
+      new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.2.fixture.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const upgradePolicy = JSON.parse(
+    await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+  );
+  const baseline = upgradePolicy.releaseGraph.baselines["0.8.1->0.8.2"].frontend.find(
+    file => file.path === "scripts/vireo-frontend-doctor.mjs",
+  );
+  const digest = createHash("sha256").update(rendered).digest("hex");
+  assert.equal(digest, target.sha256);
+  assert.equal(Buffer.byteLength(rendered), target.bytes);
+  assert.equal(digest, baseline.targetSha256);
 });
 
 async function writeApplicationSkill(template, name) {
@@ -840,6 +865,7 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     }
     assert.equal(packageJson.scripts["identity:check"], "node scripts/project-identity-policy.mjs");
     assert.equal(packageJson.scripts["identity:check:release"], "node scripts/project-identity-policy.mjs --release");
+    assert.equal(packageJson.scripts["doctor:json"], "node scripts/vireo-frontend-doctor.mjs --json");
     assert.equal(
       packageJson.scripts["verify:release"],
       "corepack npm run identity:check:release && corepack npm run verify",
@@ -860,6 +886,72 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.match(await readFile(join(target, "scripts/pwa-update-fixture.mjs"), "utf8"), /export/u);
     assert.match(await readFile(join(target, "tests/pwa/production-pwa.spec.ts"), "utf8"), /export/u);
     assert.match(await readFile(join(target, "README.md"), "utf8"), /Ubuntu 24\.04 x86-64/u);
+    await mkdir(join(target, "node_modules"));
+    const readyDoctor = spawnSync(process.execPath, ["scripts/vireo-frontend-doctor.mjs", "--json"], {
+      cwd: target,
+      encoding: "utf8",
+    });
+    assert.equal(readyDoctor.status, 0, readyDoctor.stderr);
+    assert.equal(readyDoctor.stderr, "");
+    assert.doesNotMatch(readyDoctor.stdout, /Frontend profile is ready/u);
+    const readyReport = JSON.parse(readyDoctor.stdout);
+    assert.deepEqual(
+      {
+        schemaVersion: readyReport.schemaVersion,
+        ok: readyReport.ok,
+        project: readyReport.project,
+        profile: readyReport.profile,
+        databaseMode: readyReport.databaseMode,
+        hasDatabase: Object.hasOwn(readyReport, "database"),
+      },
+      {
+        schemaVersion: 1,
+        ok: true,
+        project: "operations-ui",
+        profile: "frontend",
+        databaseMode: "frontend",
+        hasDatabase: false,
+      },
+    );
+    assert.ok(Array.isArray(readyReport.results));
+    assert.ok(readyReport.results.every(result => typeof result.code === "string"));
+
+    await rm(join(target, "node_modules"), { recursive: true, force: true });
+    const preSetupDoctor = spawnSync(process.execPath, ["scripts/vireo-frontend-doctor.mjs", "--json"], {
+      cwd: target,
+      encoding: "utf8",
+    });
+    assert.equal(preSetupDoctor.status, 1, preSetupDoctor.stderr);
+    assert.equal(preSetupDoctor.stderr, "");
+    assert.doesNotMatch(preSetupDoctor.stdout, /Resolve the failed checks/u);
+    const preSetupReport = JSON.parse(preSetupDoctor.stdout);
+    assert.deepEqual(
+      {
+        schemaVersion: preSetupReport.schemaVersion,
+        ok: preSetupReport.ok,
+        project: preSetupReport.project,
+        profile: preSetupReport.profile,
+        databaseMode: preSetupReport.databaseMode,
+        hasDatabase: Object.hasOwn(preSetupReport, "database"),
+      },
+      {
+        schemaVersion: 1,
+        ok: false,
+        project: "operations-ui",
+        profile: "frontend",
+        databaseMode: "frontend",
+        hasDatabase: false,
+      },
+    );
+    assert.deepEqual(
+      preSetupReport.results.find(result => result.code === "VIR-DEPS-001"),
+      {
+        code: "VIR-DEPS-001",
+        status: "fail",
+        summary: "Frontend dependency installation",
+        remedy: "Run corepack npm run setup.",
+      },
+    );
     const metadata = JSON.parse(await readFile(join(target, ".vireo/project.json"), "utf8"));
     assert.equal(metadata.profile, "frontend");
     assert.deepEqual(

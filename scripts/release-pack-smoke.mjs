@@ -429,6 +429,28 @@ try {
     join(upgradeFixture, "package.json"),
     `${JSON.stringify({ name: "packed-adjacent-upgrade-fixture", scripts: { vireo: packedSource.rootVireoScript }, dependencies: upgradeDependencies }, null, 2)}\n`,
   );
+  const activeBaselineKey = `${packedSource.release}->${packedTarget.release}`;
+  const activeFrontendBaselines = packedPolicy.releaseGraph.baselines?.[activeBaselineKey]?.frontend ?? [];
+  const activeSourceManagedFiles = [];
+  for (const baseline of activeFrontendBaselines) {
+    if (baseline.operation === "add") continue;
+    let sourceBytes = baseline.sourceContent;
+    if (sourceBytes === undefined && baseline.path === "scripts/vireo-frontend-doctor.mjs") {
+      sourceBytes = readFileSync(
+        join(repoRoot, "packages", "create-vireo", "fixtures", "project-upgrades", "vireo-frontend-doctor.0.8.1.mjs"),
+        "utf8",
+      );
+    }
+    if (
+      typeof sourceBytes !== "string" ||
+      createHash("sha256").update(sourceBytes).digest("hex") !== baseline.sourceSha256
+    )
+      throw new Error(`Packed active source baseline lacks canonical bytes: ${baseline.path}`);
+    const path = join(upgradeFixture, baseline.path);
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, sourceBytes);
+    activeSourceManagedFiles.push({ path: baseline.path, sha256: baseline.sourceSha256 });
+  }
   writeFileSync(
     join(upgradeFixture, "package-lock.json"),
     `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies: upgradeDependencies } } }, null, 2)}\n`,
@@ -456,6 +478,7 @@ try {
                 .update(readFileSync(join(upgradeFixture, "package.json")))
                 .digest("hex"),
             },
+            ...activeSourceManagedFiles,
             ...managedSkillBaselines.map(baseline => ({ path: baseline.path, sha256: baseline.targetSha256 })),
           ],
         },
@@ -564,6 +587,21 @@ try {
     throw new Error("The packed vireo executable overwrote application-owned AGENTS.md.");
   }
   const packedManaged = JSON.parse(readFileSync(join(upgradeFixture, ".vireo", "managed-files.json"), "utf8"));
+  if (!packedPolicy.releaseGraph.candidateRelease) {
+    for (const baseline of activeFrontendBaselines) {
+      const path = join(upgradeFixture, baseline.path);
+      const managed = packedManaged.files.find(file => file.path === baseline.path);
+      if (baseline.operation === "delete") {
+        if (existsSync(path) || managed)
+          throw new Error(`Packed upgrade retained deleted managed baseline ${baseline.path}.`);
+      } else {
+        if (!existsSync(path)) throw new Error(`Packed upgrade omitted managed baseline ${baseline.path}.`);
+        const digest = createHash("sha256").update(readFileSync(path)).digest("hex");
+        if (digest !== baseline.targetSha256 || managed?.sha256 !== baseline.targetSha256)
+          throw new Error(`Packed upgrade wrote incoherent managed baseline provenance for ${baseline.path}.`);
+      }
+    }
+  }
   if (
     managedConsumerSkillPaths.some(path => !packedManaged.files.some(file => file.path === path)) ||
     packedManaged.files.some(file => file.path.startsWith(".vireo/application/.agents/"))
