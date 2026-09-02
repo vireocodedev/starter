@@ -48,6 +48,8 @@ test("template release operations are excluded from every project profile", () =
       ".github/rulesets/starter-template-0.8.0.json",
       ".github/rulesets/starter-template-0.8.1.json",
       ".github/rulesets/starter-template-0.8.2.json",
+      ".github/rulesets/starter-template-0.8.3.json",
+      "scripts/vireo-package-compatibility.test.mjs",
       "contracts/template-release-policy.json",
       "scripts/template-release-policy.mjs",
       "scripts/template-release-policy.test.mjs",
@@ -184,6 +186,8 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
       ".github/rulesets/starter-template-0.8.0.json",
       ".github/rulesets/starter-template-0.8.1.json",
       ".github/rulesets/starter-template-0.8.2.json",
+      ".github/rulesets/starter-template-0.8.3.json",
+      "scripts/vireo-package-compatibility.test.mjs",
     ]) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only");
     }
@@ -195,6 +199,10 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
       "maintainer-only",
     );
   }
+  assert.equal(
+    classifyProjectionPath(contract, "scripts/vireo-package-compatibility.mjs", "full-stack")?.category,
+    "managed",
+  );
   assert.equal(
     classifyProjectionPath(contract, "frontend/public/icons/icon-192x192.png", "full-stack")?.category,
     "application-owned",

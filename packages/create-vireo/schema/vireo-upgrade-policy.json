@@ -2,7 +2,8 @@
   "schemaVersion": 2,
   "releaseGraph": {
     "publicRelease": "0.8.2",
-    "previousRelease": "0.8.1",
+    "previousRelease": "0.8.2",
+    "candidateRelease": "0.8.3",
     "releases": [
       {
         "release": "0.2.0",
@@ -139,6 +140,22 @@
           "@vireocodedev/shell": "^0.2.2",
           "@vireocodedev/ui": "^0.3.0"
         }
+      },
+      {
+        "release": "0.8.3",
+        "status": "candidate",
+        "templateCommit": "12485e7e7e9323a802d79c793d230557cad4c7fb",
+        "rootVireoScript": "npx --yes --package=create-vireo@0.8.3 vireo",
+        "starterJvmVersion": "0.3.1",
+        "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
+        "frontendDependencies": {
+          "@vireocodedev/history": "^0.2.2",
+          "@vireocodedev/infrastructure": "^0.2.2",
+          "@vireocodedev/localization": "^0.2.2",
+          "@vireocodedev/query": "^0.2.2",
+          "@vireocodedev/shell": "^0.2.2",
+          "@vireocodedev/ui": "^0.3.1"
+        }
       }
     ],
     "edges": [
@@ -253,6 +270,35 @@
             "id": "application-owned-template-0.8.2-review",
             "paths": ["AGENTS.md", "frontend/src/", "src/", "deploy/", ".github/", "docs/", "scripts/"],
             "requirement": "Review the upstream Template 0.8.2 Doctor JSON release and selectively port application-owned changes. Vireo updates only the declared managed Doctor/provenance surfaces; retain local product decisions.",
+            "verificationCommands": [
+              "corepack npm install --package-lock-only --prefix frontend",
+              "corepack npm run setup",
+              "corepack npm run generate:check",
+              "./scripts/verify.sh"
+            ]
+          }
+        ]
+      },
+      {
+        "from": "0.8.2",
+        "to": "0.8.3",
+        "applicationOwnedActions": [
+          {
+            "id": "application-owned-template-0.8.3-dependency-review",
+            "paths": [
+              "AGENTS.md",
+              "frontend/package.json",
+              "frontend/package-lock.json",
+              "package.json",
+              "package-lock.json",
+              "frontend/src/",
+              "src/",
+              "deploy/",
+              ".github/",
+              "docs/",
+              "scripts/"
+            ],
+            "requirement": "Review the upstream Template 0.8.3 dependency-coordinate release and selectively port application-owned changes. Vireo updates only declared dependency metadata, release provenance, and the root Vireo script; do not accept fabricated lockfile records or overwrite product source, deployment, or repository policy.",
             "verificationCommands": [
               "corepack npm install --package-lock-only --prefix frontend",
               "corepack npm run setup",
@@ -386,6 +432,30 @@
             ]
           }
         ]
+      },
+      "0.8.2->0.8.3": {
+        "full-stack": [
+          {
+            "path": "scripts/vireo-package-compatibility.mjs",
+            "operation": "update",
+            "sourceSha256": "3977f8a2395446865462ab63ee290a938315ee3ba718834d4034eeb60d67b5e6",
+            "targetSha256": "38a6a40113dafd42c45a7cebff77741fde4419665d34fd9834c824304fa65c18",
+            "transforms": [
+              {
+                "from": "  return { compatible: problems.length === 0, problems };\n}\n",
+                "to": "  return { compatible: problems.length === 0, problems };\n}\n\nfunction vireoPackageNameFromLockPath(packagePath) {\n  const marker = \"node_modules/\";\n  const offset = packagePath.lastIndexOf(marker);\n  if (offset === -1) return undefined;\n\n  const name = packagePath.slice(offset + marker.length);\n  return name.startsWith(\"@vireocodedev/\") &&\n    !name.slice(\"@vireocodedev/\".length).includes(\"/\")\n    ? name\n    : undefined;\n}\n\nfunction expectedRegistryTarball(name, version) {\n  return `https://registry.npmjs.org/${name}/-/${name.split(\"/\").at(-1)}-${version}.tgz`;\n}\n\n/**\n * Verifies that the committed npm lock is the exact public Vireo package set that\n * the Template release contract declares. Ranges alone cannot provide this\n * guarantee because npm correctly retains an older semver-compatible lock entry.\n */\nexport function evaluateVireoPackageLockCompatibility({\n  dependencies,\n  lock,\n  contract,\n}) {\n  const problems = [];\n  const lockedPackages = contract.lockedPackages;\n  if (\n    !lockedPackages ||\n    typeof lockedPackages !== \"object\" ||\n    Array.isArray(lockedPackages)\n  ) {\n    return {\n      compatible: false,\n      problems: [\"Compatibility contract must declare lockedPackages.\"],\n    };\n  }\n\n  const rootDependencies = lock?.packages?.[\"\"]?.dependencies;\n  if (!rootDependencies || typeof rootDependencies !== \"object\")\n    problems.push(\"package-lock root dependencies are missing.\");\n\n  const declaredPackages = Object.entries(dependencies ?? {}).filter(([name]) =>\n    name.startsWith(\"@vireocodedev/\"),\n  );\n  for (const [name, declaration] of declaredPackages) {\n    if (rootDependencies?.[name] !== declaration)\n      problems.push(\n        `${name} root lock declaration must match frontend/package.json.`,\n      );\n    if (!lockedPackages[name])\n      problems.push(`${name} must declare an exact locked Vireo coordinate.`);\n    if (!lock?.packages?.[`node_modules/${name}`])\n      problems.push(\n        `${name} is missing its canonical top-level package-lock entry.`,\n      );\n  }\n\n  for (const name of Object.keys(lockedPackages)) {\n    if (!(name in (dependencies ?? {})))\n      problems.push(\n        `${name} is locked but not declared by frontend/package.json.`,\n      );\n  }\n\n  const seen = new Set();\n  for (const [packagePath, entry] of Object.entries(lock?.packages ?? {})) {\n    const name = vireoPackageNameFromLockPath(packagePath);\n    if (!name) continue;\n\n    const expectedVersion = lockedPackages[name];\n    if (!expectedVersion) {\n      problems.push(\n        `${name} at ${packagePath} is not an expected locked Vireo coordinate.`,\n      );\n      continue;\n    }\n    seen.add(name);\n    if (entry?.link === true)\n      problems.push(\n        `${name} at ${packagePath} must not be a linked local package.`,\n      );\n    if (entry?.version !== expectedVersion)\n      problems.push(\n        `${name} at ${packagePath} resolves ${entry?.version}; expected ${expectedVersion}.`,\n      );\n    if (entry?.resolved !== expectedRegistryTarball(name, expectedVersion))\n      problems.push(\n        `${name} at ${packagePath} must resolve from its exact public npm tarball.`,\n      );\n    if (\n      typeof entry?.integrity !== \"string\" ||\n      !entry.integrity.startsWith(\"sha512-\")\n    )\n      problems.push(\n        `${name} at ${packagePath} must retain a sha512 npm integrity.`,\n      );\n  }\n\n  for (const name of Object.keys(lockedPackages)) {\n    if (!seen.has(name))\n      problems.push(`${name} is missing from the committed package lock.`);\n  }\n\n  return { compatible: problems.length === 0, problems };\n}\n"
+              }
+            ]
+          },
+          {
+            "path": "contracts/vireo-package-compatibility.json",
+            "operation": "update",
+            "sourceSha256": "31c5987806d6ac232f39cefb6cf130552f48a3478987e32c67ad61ec3ff7ef70",
+            "targetSha256": "de5c595fddbba88479d0e091b9d51cda005999b5d8dc30484fd2aa5f5980435c",
+            "targetContent": "{\n  \"schemaVersion\": 1,\n  \"id\": \"vireo-template-0.8.3\",\n  \"packages\": {\n    \"@vireocodedev/history\": [\"^0.2.2\"],\n    \"@vireocodedev/infrastructure\": [\"^0.2.2\"],\n    \"@vireocodedev/localization\": [\"^0.2.2\"],\n    \"@vireocodedev/query\": [\"^0.2.2\"],\n    \"@vireocodedev/shell\": [\"^0.2.2\"],\n    \"@vireocodedev/sqlite\": [\"^0.2.2\", \"^0.2.3\"],\n    \"@vireocodedev/ui\": [\"^0.3.1\"]\n  },\n  \"lockedPackages\": {\n    \"@vireocodedev/history\": \"0.2.2\",\n    \"@vireocodedev/infrastructure\": \"0.2.2\",\n    \"@vireocodedev/localization\": \"0.2.2\",\n    \"@vireocodedev/query\": \"0.2.2\",\n    \"@vireocodedev/shell\": \"0.2.2\",\n    \"@vireocodedev/ui\": \"0.3.1\"\n  }\n}\n"
+          }
+        ],
+        "frontend": []
       },
       "0.6.0->0.7.0": {
         "full-stack": [

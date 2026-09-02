@@ -3,8 +3,13 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const contractPath = new URL("../contracts/ecosystem-release-contract.json", import.meta.url);
-const { validateEcosystemContract, validatePublicWorkspaceLockEntries, validateTemplateCoordinates } =
-  await import("./ecosystem-contract-policy.mjs");
+const {
+  validateCandidatePackageFloors,
+  validateEcosystemContract,
+  validateProjectUpgradeTemplateCheckout,
+  validatePublicWorkspaceLockEntries,
+  validateTemplateCoordinates,
+} = await import("./ecosystem-contract-policy.mjs");
 
 test("rejects public workspace lockfile version drift", () => {
   const packages = [{ directory: "create-vireo", name: "create-vireo", version: "0.6.0" }];
@@ -91,4 +96,61 @@ test("rejects template release coordinates that drift from create-vireo", () => 
       expected,
     );
   }
+});
+
+test("candidate Vireo dependencies exactly match the current public coordinate subset", () => {
+  const publicNode = {
+    frontendDependencies: {
+      "@vireocodedev/history": "^0.2.2",
+      "@vireocodedev/ui": "^0.3.0",
+    },
+  };
+  const currentNpm = [
+    { name: "@vireocodedev/history", version: "0.2.2" },
+    { name: "@vireocodedev/ui", version: "0.3.1" },
+  ];
+  assert.deepEqual(
+    validateCandidatePackageFloors(
+      { frontendDependencies: { "@vireocodedev/history": "^0.2.2", "@vireocodedev/ui": "^0.3.1" } },
+      publicNode,
+      currentNpm,
+    ),
+    [],
+  );
+  assert.match(
+    validateCandidatePackageFloors(
+      { frontendDependencies: { "@vireocodedev/history": "^0.2.2", "@vireocodedev/ui": "^0.3.0" } },
+      publicNode,
+      currentNpm,
+    ).join("\n"),
+    /@vireocodedev\/ui must exactly equal current public \^0\.3\.1/u,
+  );
+  assert.match(
+    validateCandidatePackageFloors(
+      { frontendDependencies: { "@vireocodedev/history": "^0.2.2", "@vireocodedev/ui": "^0.3.2" } },
+      publicNode,
+      currentNpm,
+    ).join("\n"),
+    /@vireocodedev\/ui must exactly equal current public \^0\.3\.1/u,
+  );
+  assert.match(
+    validateCandidatePackageFloors(
+      { frontendDependencies: { "@vireocodedev/history": "^0.2.2", "@vireocodedev/sqlite": "^0.2.3" } },
+      publicNode,
+      currentNpm,
+    ).join("\n"),
+    /@vireocodedev\/ui must exactly equal[\s\S]*@vireocodedev\/sqlite is not declared/u,
+  );
+});
+
+test("project-upgrade CI checks out the immutable active Template target", () => {
+  const commit = "a".repeat(40);
+  const workflow = `steps:\n  - uses: actions/checkout@sha\n    with:\n      repository: vireocodedev/vireo-template\n      ref: ${commit}\n`;
+  assert.deepEqual(validateProjectUpgradeTemplateCheckout(workflow, commit), []);
+  assert.match(
+    validateProjectUpgradeTemplateCheckout(workflow, "b".repeat(40)).join("\n"),
+    /must match active target/u,
+  );
+  assert.match(validateProjectUpgradeTemplateCheckout("steps: []\n", commit).join("\n"), /exactly one/u);
+  assert.match(validateProjectUpgradeTemplateCheckout(`${workflow}${workflow}`, commit).join("\n"), /exactly one/u);
 });
