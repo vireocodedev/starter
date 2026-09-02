@@ -291,7 +291,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           assertOutput: new RegExp(`"name"\\s*:\\s*"${name.replace("@", "@")}"[\\s\\S]*"version"\\s*:\\s*"${version}"`, "u"),
         }),
       ),
-        command("exact-public-npm-verifier", "node", [join(root, "scripts", "verify-npm-public-release.mjs"), join(evidenceDirectory, "exact-npm-public.json")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+        command("exact-public-npm-verifier", "node", [join(root, "scripts", "verify-npm-public-release.mjs"), join(evidenceDirectory, "exact-npm-public.json"), "--contract", "contracts/ecosystem-release-contract.json", "--expected-release-id", release.id], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
         command("public-evidence-collector", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "public-release-evidence")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
         { kind: "assert-public-evidence", id: "exact-public-evidence-contract", path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"), release },
       ];
@@ -492,7 +492,11 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     workflow: { repository: process.env.GITHUB_REPOSITORY ?? "local", run: process.env.GITHUB_RUN_ID ?? "local", attempt: process.env.GITHUB_RUN_ATTEMPT ?? "1", event: process.env.GITHUB_EVENT_NAME ?? "local" },
     scenarios: [],
   };
-  if (!dry) evidence.externalWarnings.push(...(await verifyPublicReleasePreflight({ release })).warnings);
+  if (!dry) {
+    const preflight = await verifyPublicReleasePreflight({ release });
+    evidence.releaseTagCommit = preflight.releaseTagCommit;
+    evidence.externalWarnings.push(...preflight.warnings);
+  }
   const checkpoint = () => writeEvidenceAtomically(join(evidenceDirectory, "evidence.json"), evidence);
   try {
     mkdirSync(join(runRoot, "consumer"), { recursive: true });
