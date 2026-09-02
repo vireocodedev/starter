@@ -17,7 +17,7 @@ the package manifests:
 
 | Artifact                       | Current version |
 | ------------------------------ | --------------: |
-| `create-vireo`                 |           0.8.6 |
+| `create-vireo`                 |           0.8.7 |
 | `@vireocodedev/history`        |           0.2.2 |
 | `@vireocodedev/infrastructure` |           0.2.2 |
 | `@vireocodedev/localization`   |           0.2.2 |
@@ -28,14 +28,14 @@ the package manifests:
 | `com.vireocode:vireo-*`        |           0.3.1 |
 
 `create-vireo` includes the frontend profile. The current supported project-upgrade
-edge is 0.8.4→0.8.6; 0.8.3→0.8.4 remains retained historical evidence; 0.8.2→0.8.3 remains retained historical evidence; 0.8.1→0.8.2 remains retained historical evidence; 0.8.0→0.8.1 remains retained historical evidence; 0.7.0→0.8.0 remains retained historical evidence; 0.6.0→0.7.0 and 0.2.0→0.3.0 remain retained historical evidence. Numeric
+edge is 0.8.6→0.8.7; 0.8.4→0.8.6 remains retained historical evidence; 0.8.3→0.8.4 remains retained historical evidence; 0.8.2→0.8.3 remains retained historical evidence; 0.8.1→0.8.2 remains retained historical evidence; 0.8.0→0.8.1 remains retained historical evidence; 0.7.0→0.8.0 remains retained historical evidence; 0.6.0→0.7.0 and 0.2.0→0.3.0 remain retained historical evidence. Numeric
 equality between npm packages or between npm and JVM versions is neither required
 nor implied. A Template commit or tag, together with its committed lockfiles and
 compatibility contract, records the exact frontend and backend combination proven
 by that Template revision.
 
-The immutable `starter-template@0.8.6` source baseline uses
-`starterVersion=0.3.1`; `create-vireo@0.8.6` generates and upgrades
+The immutable `starter-template@0.8.7` source baseline uses
+`starterVersion=0.3.1`; `create-vireo@0.8.7` generates and upgrades
 full-stack consumers with the coordinated `0.3.1` JVM release. Frontend consumers do
 not contain Gradle configuration.
 

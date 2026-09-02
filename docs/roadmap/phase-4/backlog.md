@@ -43,5 +43,5 @@ gate is silently waived by progress in the other phase.
 See the dated [Phase 4 closure review](closure-review-2026-08-28.md). The
 maintainer-automatable implementation is complete, but the Phase 4 exit gate is not:
 independent, manual, physical-device, field, and target-environment evidence remain
-open. The current public `create-vireo@0.8.6` line and its supported 0.8.4→0.8.6
-adjacent upgrade fixture are complete; 0.8.3→0.8.4 remains retained historical evidence.
+open. The current public `create-vireo@0.8.7` line and its supported 0.8.6→0.8.7
+adjacent upgrade fixture are complete; 0.8.4→0.8.6 remains retained historical evidence.
