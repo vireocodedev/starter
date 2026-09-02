@@ -12,6 +12,15 @@ const read = relative => readFileSync(new URL(`../${relative}`, import.meta.url)
 const actionPolicy = JSON.parse(read("contracts/github-actions-policy.json"));
 const releaseWorkflow = read(".github/workflows/release.yml");
 const anonymousGauntletWorkflow = read(".github/workflows/anonymous-consumer-gauntlet.yml");
+const websiteWorkflow = read(".github/workflows/website.yml");
+
+function standaloneWebsiteArtifactRetainsHiddenFiles(workflow) {
+  const start = workflow.indexOf("      - name: Upload standalone artifact\n");
+  if (start < 0) return false;
+  const next = workflow.indexOf("\n      - ", start + 1);
+  const uploadStep = workflow.slice(start, next < 0 ? undefined : next);
+  return /^          include-hidden-files: true$/mu.test(uploadStep);
+}
 
 test("accepts the narrowly scoped Changesets release-PR workflow", () => {
   assert.deepEqual(validateReleasePrWorkflow(releaseWorkflow, actionPolicy), []);
@@ -20,6 +29,15 @@ test("accepts the narrowly scoped Changesets release-PR workflow", () => {
 test("recognizes an explicit empty inline job permissions map", () => {
   const lines = ["  token-free:", "    permissions: {}", "    runs-on: ubuntu-24.04"];
   assert.deepEqual([...parseJobPermissions(lines, { start: 0, end: lines.length })], []);
+});
+
+test("standalone website artifacts retain generated hidden files", () => {
+  assert.equal(standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow), true);
+  assert.equal(
+    standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("include-hidden-files: true", "include-hidden-files: false")),
+    false,
+  );
+  assert.equal(standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("          include-hidden-files: true\n", "")), false);
 });
 
 test("requires the protected gauntlet plan to report on every pull request", () => {
