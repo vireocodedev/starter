@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 import {
   anonymousEnvironment,
   assertAnonymousInstallation,
@@ -36,8 +37,403 @@ const managedOriginals = new Map();
 const projectTrees = new Map();
 const transientCleanupErrorCodes = new Set(["EBUSY", "EMFILE", "ENFILE", "ENOTEMPTY", "EPERM"]);
 const anonymousConsumerRunRootPrefix = "vireo-anonymous-consumer-";
+const requiredSecurityHeaders = [
+  "content-security-policy: default-src 'self'",
+  "cross-origin-opener-policy: same-origin",
+  "permissions-policy: camera=(), geolocation=(), microphone=()",
+  "referrer-policy: strict-origin-when-cross-origin",
+  "x-content-type-options: nosniff",
+  "x-frame-options: DENY",
+];
 
 const waitForCleanupRetry = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+function uncommentedShell(source) {
+  return source
+    .split(/\r?\n/u)
+    .filter(line => !line.trimStart().startsWith("#"))
+    .map(line => line.replace(/\s+#.*$/u, ""))
+    .join("\n")
+    .replace(/\\\r?\n\s*/gu, " ");
+}
+
+function shellEvidenceReachable(source) {
+  let shell = uncommentedShell(source);
+  const functionDeclaration = /(?:^|\n)\s*(?:function\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*\(\)\s*\{[\s\S]*?^\s*\}\s*$/gmu;
+  shell = shell.replace(functionDeclaration, "");
+  const lines = shell.split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^\s*if\s+(?:false|!\s*true|\[\[\s*0\s+-eq\s+1\s*\]\]);\s*then\s*$/u.test(lines[index])) continue;
+    let depth = 1;
+    let end = index;
+    for (end += 1; end < lines.length && depth > 0; end += 1) {
+      if (/^\s*if\b.*;\s*then\s*$/u.test(lines[end])) depth += 1;
+      if (/^\s*fi\s*$/u.test(lines[end])) depth -= 1;
+    }
+    lines.splice(index, end - index);
+    index -= 1;
+  }
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^\s*while\s+false\s*;\s*do\s*$/u.test(lines[index])) continue;
+    let depth = 1;
+    let end = index;
+    for (end += 1; end < lines.length && depth > 0; end += 1) {
+      if (/^\s*(?:while|for)\b.*(?:;\s*)?do\s*$/u.test(lines[end])) depth += 1;
+      if (/^\s*done\s*$/u.test(lines[end])) depth -= 1;
+    }
+    lines.splice(index, end - index);
+    index -= 1;
+  }
+  const topLevelExit = lines.findIndex(line => /(?:^|;|&&|\|\|)\s*exit\s+0(?:\s*(?:;|&&|\|\||$))/u.test(line));
+  if (topLevelExit >= 0) lines.splice(topLevelExit);
+  return lines.join("\n");
+}
+
+function hasExitFailure(source) {
+  return uncommentedShell(source)
+    .split("\n")
+    .some(line => /(?:^\s*|;|&&|\|\|)\s*exit\s+1(?:\s*(?:;|&&|\|\||$))/u.test(line));
+}
+
+function normalizedPrivilegeSql(privilegeAssignment) {
+  const sql = privilegeAssignment?.[1].match(/--command\s+"([^"]*)"/u)?.[1];
+  return sql?.replace(/\s+/gu, " ").trim();
+}
+
+function topLevelSqlColumns(sql) {
+  const columns = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < sql.length; index += 1) {
+    if (sql[index] === "(") depth += 1;
+    else if (sql[index] === ")") depth -= 1;
+    else if (sql[index] === "," && depth === 0) {
+      columns.push(sql.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  columns.push(sql.slice(start).replace(/;$/u, "").trim());
+  return columns;
+}
+
+function expectedPrivilegeColumns() {
+  const runtime = "$runtime_user";
+  const schema = `has_schema_privilege('${runtime}', 'public', 'CREATE')`;
+  const item = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    .map(privilege => `has_table_privilege('${runtime}', 'item', '${privilege}')`)
+    .join(" AND ");
+  const flyway = ["INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
+    .map(privilege => `has_table_privilege('${runtime}', 'flyway_schema_history', '${privilege}')`)
+    .join(" OR ");
+  return [schema, item, flyway];
+}
+
+function composeAppEnvironment(source) {
+  let inServices = false;
+  let inApp = false;
+  let inEnvironment = false;
+  const environment = new Map();
+
+  for (const rawLine of source.split(/\r?\n/u)) {
+    if (!rawLine.trim() || rawLine.trimStart().startsWith("#")) continue;
+    const match = rawLine.match(/^(\s*)([A-Za-z_][A-Za-z0-9_-]*):(?:\s*(.*))?$/u);
+    if (!match) continue;
+    const [, whitespace, key, value = ""] = match;
+    const indentation = whitespace.length;
+
+    if (indentation === 0) {
+      inServices = key === "services" && value === "";
+      inApp = false;
+      inEnvironment = false;
+      continue;
+    }
+    if (!inServices) continue;
+    if (indentation === 2) {
+      inApp = key === "app" && value === "";
+      inEnvironment = false;
+      continue;
+    }
+    if (!inApp) continue;
+    if (indentation === 4) {
+      inEnvironment = key === "environment" && value === "";
+      continue;
+    }
+    if (!inEnvironment) continue;
+    if (indentation === 6) environment.set(key, value);
+    else if (indentation < 6) inEnvironment = false;
+  }
+  return environment;
+}
+
+function hasComposeBinding(environment, key, expression) {
+  return expression.test(environment.get(key) ?? "");
+}
+
+function configuredDeploymentTests(projectRoot) {
+  const frontendRoot = join(projectRoot, "frontend");
+  const configPath = join(frontendRoot, "playwright.deployment.config.ts");
+  if (!existsSync(configPath)) return [];
+  const config = uncommentedTypeScript(readFileSync(configPath, "utf8"));
+  if (
+    !/^\s*testDir:\s*["']\.\/tests\/deployment["'],?\s*$/mu.test(config) ||
+    /^\s*(?:testMatch|testIgnore)\s*:/mu.test(config)
+  )
+    return [];
+  const directory = join(frontendRoot, "tests", "deployment");
+  if (!existsSync(directory)) return [];
+  const collect = current =>
+    readdirSync(current, { withFileTypes: true }).flatMap(entry => {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) return collect(path);
+      return entry.isFile() && /\.(?:spec|test)\.(?:ts|js|mjs)$/u.test(entry.name) ? [path] : [];
+    });
+  return collect(directory);
+}
+
+function uncommentedTypeScript(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//gu, "")
+    .replace(/`[\s\S]*?`/gu, "")
+    .split(/\r?\n/u)
+    .filter(line => !line.trimStart().startsWith("//"))
+    .join("\n");
+}
+
+function directTestCallback(statement) {
+  if (!ts.isExpressionStatement(statement) || !ts.isCallExpression(statement.expression)) return undefined;
+  const call = statement.expression;
+  if (!ts.isIdentifier(call.expression) || call.expression.text !== "test") return undefined;
+  return call.arguments.find(argument => ts.isArrowFunction(argument) || ts.isFunctionExpression(argument));
+}
+
+function propertyCall(node, name) {
+  return ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    node.expression.name.text === name
+    ? node
+    : undefined;
+}
+
+function objectProperty(node, name, value) {
+  if (!node || !ts.isObjectLiteralExpression(node)) return false;
+  return node.properties.some(
+    property =>
+      ts.isPropertyAssignment(property) &&
+      ts.isIdentifier(property.name) &&
+      property.name.text === name &&
+      value(property.initializer),
+  );
+}
+
+function pageRoleCall(node, role, name) {
+  const call = propertyCall(node, "getByRole");
+  return (
+    call &&
+    ts.isIdentifier(call.expression.expression) &&
+    call.expression.expression.text === "page" &&
+    ts.isStringLiteral(call.arguments[0]) &&
+    call.arguments[0].text === role &&
+    objectProperty(call.arguments[1], "name", value => ts.isStringLiteral(value) && value.text === name)
+  );
+}
+
+function directTestControl(statement) {
+  if (!ts.isExpressionStatement(statement) || !ts.isCallExpression(statement.expression)) return false;
+  const call = statement.expression;
+  return (
+    ts.isPropertyAccessExpression(call.expression) &&
+    ts.isIdentifier(call.expression.expression) &&
+    call.expression.expression.text === "test" &&
+    ["skip", "fixme"].includes(call.expression.name.text)
+  );
+}
+
+function containsUnsafeCallbackNode(callback) {
+  let unsafe = false;
+  const visit = node => {
+    if (ts.isReturnStatement(node) || ts.isThrowStatement(node)) unsafe = true;
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      ts.isIdentifier(node.expression.expression) &&
+      node.expression.expression.text === "test" &&
+      ["skip", "fixme"].includes(node.expression.name.text)
+    )
+      unsafe = true;
+    ts.forEachChild(node, visit);
+  };
+  ts.forEachChild(callback.body, visit);
+  return unsafe;
+}
+
+function directPersistenceStep(statement) {
+  if (!ts.isExpressionStatement(statement) || !ts.isAwaitExpression(statement.expression)) return undefined;
+  const call = statement.expression.expression;
+  const click = propertyCall(call, "click");
+  if (click && pageRoleCall(click.expression.expression, "button", "Create item")) return "open";
+  const fill = propertyCall(call, "fill");
+  if (
+    fill &&
+    pageRoleCall(fill.expression.expression, "textbox", "Name") &&
+    ts.isIdentifier(fill.arguments[0]) &&
+    fill.arguments[0].text === "itemName"
+  )
+    return "name";
+  const submit = propertyCall(call, "click");
+  const last = submit && propertyCall(submit.expression.expression, "last");
+  if (last && pageRoleCall(last.expression.expression, "button", "Create item")) return "submit";
+  const reload = propertyCall(call, "reload");
+  if (reload && ts.isIdentifier(reload.expression.expression) && reload.expression.expression.text === "page")
+    return "reload";
+  const visible = propertyCall(call, "toBeVisible");
+  const expect =
+    visible && ts.isCallExpression(visible.expression.expression) ? visible.expression.expression : undefined;
+  const getByText = expect && ts.isCallExpression(expect.arguments[0]) ? expect.arguments[0] : undefined;
+  if (
+    expect &&
+    ts.isIdentifier(expect.expression) &&
+    expect.expression.text === "expect" &&
+    getByText &&
+    ts.isPropertyAccessExpression(getByText.expression) &&
+    ts.isIdentifier(getByText.expression.expression) &&
+    getByText.expression.expression.text === "page" &&
+    getByText.expression.name.text === "getByText" &&
+    ts.isIdentifier(getByText.arguments[0]) &&
+    getByText.arguments[0].text === "itemName" &&
+    objectProperty(getByText.arguments[1], "exact", value => value.kind === ts.SyntaxKind.TrueKeyword)
+  )
+    return "persisted";
+  return undefined;
+}
+
+function provesItemPersistence(source) {
+  const sourceFile = ts.createSourceFile("deployment.spec.ts", source, ts.ScriptTarget.Latest, true);
+  return sourceFile.statements.some(statement => {
+    const callback = directTestCallback(statement);
+    if (!callback || !ts.isBlock(callback.body)) return false;
+    if (callback.body.statements.some(directTestControl) || containsUnsafeCallbackNode(callback)) return false;
+    const steps = [];
+    for (const child of callback.body.statements) {
+      if (ts.isReturnStatement(child) || ts.isThrowStatement(child)) break;
+      const step = directPersistenceStep(child);
+      if (step) steps.push(step);
+    }
+    const expectedSteps = ["open", "name", "submit", "reload", "persisted"];
+    let expectedIndex = 0;
+    for (const step of steps) if (step === expectedSteps[expectedIndex]) expectedIndex += 1;
+    return expectedIndex === expectedSteps.length;
+  });
+}
+
+/**
+ * Validates the concrete, generated deployment evidence exercised by the
+ * anonymous PostgreSQL consumer. This is intentionally tied to executable
+ * boundaries rather than incidental prose in the deployment verifier.
+ */
+export function deploymentContractProblems(projectRoot) {
+  const verifierPath = join(projectRoot, "scripts", "verify-deployment.sh");
+  const composePath = join(projectRoot, "compose.yaml");
+  const problems = [];
+  const verifier = existsSync(verifierPath) ? readFileSync(verifierPath, "utf8") : undefined;
+  const compose = existsSync(composePath) ? readFileSync(composePath, "utf8") : undefined;
+  const browserTests = configuredDeploymentTests(projectRoot);
+
+  if (!verifier) problems.push("Generated deployment verifier is missing.");
+  if (!compose) problems.push("Generated Compose deployment manifest is missing.");
+  if (browserTests.length === 0) problems.push("Generated deployment Playwright persistence test is missing.");
+  if (!verifier || !compose || browserTests.length === 0) return problems;
+
+  const shell = shellEvidenceReachable(verifier);
+  const environment = composeAppEnvironment(compose);
+  const headerLoop = shell.match(/for\s+expected_header\s+in\s+([\s\S]*?);\s*do\s*([\s\S]*?)\bdone/u);
+  const responseHeadersCapture =
+    /(?:^|\n)\s*response_headers="\$\(\s*curl\b[^\n]*--head\s+[^\n]*http:\/\/127\.0\.0\.1:\$\{frontend_port\}\/[^\n]*\)"\s*$/mu.test(
+      shell,
+    );
+  const headerLoopFailure =
+    responseHeadersCapture &&
+    headerLoop &&
+    /grep\b[^\n]*\$expected_header[^\n]*<<<\s*"\$response_headers"/u.test(headerLoop[2]) &&
+    hasExitFailure(headerLoop[2]);
+
+  for (const header of requiredSecurityHeaders) {
+    if (!headerLoopFailure || !headerLoop[1].includes(header))
+      problems.push(`Deployment verifier does not enforce the ${header.split(":", 1)[0]} header.`);
+  }
+
+  const apiCapture =
+    /(?:^|\n)\s*api_status="\$\(\s*curl\b[^\n]*--write-out\s+['"]%\{http_code\}['"][^\n]*\/api\/auth\/me[^\n]*\)"\s*$/mu.test(
+      shell,
+    );
+  const apiFailure = shell.match(/if\s+\[\[\s*"\$api_status"\s*!=\s*"401"\s*\]\];\s*then([\s\S]*?)\bfi/u);
+  if (!apiCapture || !apiFailure || !hasExitFailure(apiFailure[1]))
+    problems.push("Deployment verifier does not prove the /api/auth/me proxy returns 401.");
+
+  const publicReadiness = shell.match(
+    /if\s+!\s+curl\b[^\n]*http:\/\/127\.0\.0\.1:\$\{frontend_port\}\/actuator\/health\/readiness[^\n]*\|\s*grep\s+--quiet\s+['"]"status":"UP"['"][^\n]*;\s*then([\s\S]*?)\bfi/u,
+  );
+  if (!publicReadiness || !hasExitFailure(publicReadiness[1]))
+    problems.push("Deployment verifier does not prove public backend readiness.");
+  const containerReadiness =
+    /(?:^|\n)\s*"\$\{compose_command\[@\]\}"[^\n]*\bexec\b[^\n]*\bfrontend\s+wget\b[^\n]*http:\/\/app:8080\/actuator\/health\/readiness[^\n]*\|\s*grep\s+--quiet\s+['"]"status":"UP"['"][^\n]*$/mu.test(
+      shell,
+    ) && /(?:^|\n)\s*set\s+-[A-Za-z]*e[A-Za-z]*[\s\S]*\bpipefail\b/mu.test(shell);
+  if (!containerReadiness) problems.push("Deployment verifier does not prove container backend readiness.");
+
+  const privilegeAssignment = shell.match(/(?:^|\n)\s*runtime_privileges="\$\(([\s\S]*?)\)"\s*$/mu);
+  const privilegeSql = normalizedPrivilegeSql(privilegeAssignment);
+  const privilegeSqlHasComment = privilegeSql && /--|\/\*|\*\//u.test(privilegeSql);
+  const privilegeColumns =
+    privilegeSql && !privilegeSqlHasComment ? topLevelSqlColumns(privilegeSql.replace(/^SELECT\s+/u, "")) : [];
+  const [expectedSchema, expectedItem, expectedFlyway] = expectedPrivilegeColumns();
+  const privilegeSqlMatches =
+    privilegeSql?.startsWith("SELECT ") &&
+    privilegeColumns.length === 3 &&
+    privilegeColumns[0] === expectedSchema &&
+    privilegeColumns[1] === expectedItem &&
+    privilegeColumns[2] === expectedFlyway;
+  if (
+    !privilegeAssignment ||
+    !/\bexec\b[^\n]*\bpostgres\s+psql\s+--username\b/u.test(privilegeAssignment[1]) ||
+    !privilegeAssignment[1].includes("--tuples-only --no-align") ||
+    !privilegeSql
+  )
+    problems.push("Deployment verifier does not execute the PostgreSQL privilege boundary query with psql.");
+  if (privilegeSqlHasComment) problems.push("Deployment verifier privilege SQL must not contain SQL comment markers.");
+
+  if (!hasComposeBinding(environment, "SPRING_DATASOURCE_USERNAME", /^\$\{POSTGRES_RUNTIME_USER:-[^}]+\}$/u))
+    problems.push("Compose does not bind the application datasource to the PostgreSQL runtime user.");
+  if (!hasComposeBinding(environment, "SPRING_DATASOURCE_PASSWORD", /^\$\{POSTGRES_RUNTIME_PASSWORD:\?[^}]+\}$/u))
+    problems.push("Compose does not bind the application datasource to the PostgreSQL runtime password.");
+  if (!hasComposeBinding(environment, "SPRING_FLYWAY_USER", /^\$\{POSTGRES_OWNER_USER:-[^}]+\}$/u))
+    problems.push("Compose does not bind Flyway to the PostgreSQL owner user.");
+  if (!hasComposeBinding(environment, "SPRING_FLYWAY_PASSWORD", /^\$\{POSTGRES_OWNER_PASSWORD:\?[^}]+\}$/u))
+    problems.push("Compose does not bind Flyway to the PostgreSQL owner password.");
+
+  if (privilegeColumns[0] !== expectedSchema || privilegeColumns[1] !== expectedItem)
+    problems.push("Deployment verifier does not prove runtime schema and Item DML boundaries.");
+  for (const privilege of ["INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]) {
+    if (!privilegeColumns[2]?.includes(`has_table_privilege('$runtime_user', 'flyway_schema_history', '${privilege}')`))
+      problems.push(`Deployment verifier does not query runtime Flyway history ${privilege} mutation privilege.`);
+  }
+  if (
+    !privilegeSqlMatches &&
+    privilegeColumns[0] === expectedSchema &&
+    privilegeColumns[1] === expectedItem &&
+    expectedFlyway.split(" OR ").every(predicate => privilegeColumns[2]?.includes(predicate))
+  )
+    problems.push("Deployment verifier does not use the required ordered three-column PostgreSQL privilege query.");
+  const runtimeFailure = shell.match(
+    /if\s+\[\[\s*"\$runtime_privileges"\s*!=\s*"f\|t\|f"\s*\]\];\s*then([\s\S]*?)\bfi/u,
+  );
+  if (!runtimeFailure || !hasExitFailure(runtimeFailure[1]))
+    problems.push("Deployment verifier does not require f|t|f runtime database privilege separation.");
+
+  if (!browserTests.some(path => provesItemPersistence(readFileSync(path, "utf8"))))
+    problems.push("Deployment Playwright test does not prove an Item persists after creation and reload.");
+
+  return problems;
+}
 
 export function validatedAnonymousConsumerRunRoot(runRoot, { temporaryDirectory = tmpdir() } = {}) {
   const temporaryRoot = resolve(temporaryDirectory);
@@ -548,11 +944,8 @@ async function executeOperation(operation, { environment, runRoot }) {
     if (operation.kind === "record-project-tree") projectTrees.set(operation.path, digest);
     else if (projectTrees.get(operation.path) !== digest) throw new Error("No-op upgrade changed project bytes.");
   } else if (operation.kind === "assert-deployment-contract") {
-    const script = readFileSync(join(operation.path, "scripts", "verify-deployment.sh"), "utf8");
-    for (const assertion of ["security", "header", "proxy", "/api", "postgres", "migration"]) {
-      if (!script.toLowerCase().includes(assertion))
-        throw new Error(`Generated deployment verifier does not prove ${assertion}.`);
-    }
+    const problems = deploymentContractProblems(operation.path);
+    if (problems.length > 0) throw new Error(problems.join("\n"));
   } else if (operation.kind === "assert-script") {
     const scripts = JSON.parse(readFileSync(join(operation.path, "package.json"), "utf8")).scripts ?? {};
     if (typeof scripts[operation.script] !== "string")
