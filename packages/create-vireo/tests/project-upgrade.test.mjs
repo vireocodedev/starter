@@ -692,6 +692,54 @@ test("0.8.4 to 0.8.5 refuses customized Overview bytes or a wrong predeclared di
   }
 });
 
+test("0.8.4 to 0.8.5 refuses a pre-existing target-edge upgrade receipt before writing", async () => {
+  const { finalizedPolicy, source } = synthetic085Policies();
+  const root = await overview085Fixture("frontend", source);
+  try {
+    await writeFile(join(root, ".vireo/upgrade-0.8.4-to-0.8.5.json"), "{}\n");
+    const before = await treeBytes(root);
+    await assert.rejects(
+      upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.5" }, finalizedPolicy),
+      error => error.code === "VIR-UPG-003" && /target-edge upgrade receipt already exists/u.test(error.message),
+    );
+    assertSameSnapshot(before, await treeBytes(root));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("already-target 0.8.5 refuses forged or stale historical upgrade receipts without writing", async () => {
+  const { finalizedPolicy, source } = synthetic085Policies();
+  for (const scenario of ["null", "wrong-commit", "wrong-surfaces", "wrong-actions", "extra-field"]) {
+    const root = await overview085Fixture("frontend", source);
+    try {
+      await upgradeVireoProjectForTest(
+        { projectDirectory: root, targetRelease: "0.8.5", dryRun: false, acceptApplicationOwned: true },
+        finalizedPolicy,
+      );
+      const receiptPath = join(root, ".vireo/upgrade-0.8.4-to-0.8.5.json");
+      const receipt = JSON.parse(await readFile(receiptPath, "utf8"));
+      if (scenario === "null") await writeFile(receiptPath, "null\n");
+      else {
+        if (scenario === "wrong-commit") receipt.targetTemplateCommit = "0".repeat(40);
+        if (scenario === "wrong-surfaces") receipt.managedSurfaces = ["package.json#scripts.vireo"];
+        if (scenario === "wrong-actions") receipt.applicationOwnedActions = [{ id: "forged" }];
+        if (scenario === "extra-field") receipt.forged = true;
+        await writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`);
+      }
+      const before = await treeBytes(root);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.5" }, finalizedPolicy),
+        error => error.code === "VIR-UPG-003",
+        scenario,
+      );
+      assertSameSnapshot(before, await treeBytes(root));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
+
 test("0.8.4 to 0.8.5 transactionally migrates a completed removal receipt without recreating example provenance", async () => {
   const { finalizedPolicy, source, target } = synthetic085Policies();
   const root = await overview085Fixture("frontend", source);

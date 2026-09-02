@@ -672,15 +672,31 @@ function validateExistingUpgradeReceipt(
   lockfileRefresh: "required" | "not-required",
   actions: VireoUpgradeManualAction[],
 ) {
-  let receipt: Record<string, unknown>;
+  let parsed: unknown;
   try {
-    receipt = JSON.parse(contents) as Record<string, unknown>;
+    parsed = JSON.parse(contents);
   } catch (error) {
     throw new VireoUpgradeError(
       "VIR-UPG-003",
       `Existing upgrade receipt is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    throw new VireoUpgradeError("VIR-UPG-003", "Existing upgrade receipt must be a JSON object.");
+  const receipt = parsed as Record<string, unknown>;
+  const expectedKeys = [
+    "schemaVersion",
+    "from",
+    "to",
+    "sourceTemplateCommit",
+    "targetTemplateCommit",
+    "managedSurfaces",
+    "lockfileRefresh",
+    "applicationOwnedActions",
+  ].sort();
+  const actualKeys = Object.keys(receipt).sort();
+  if (actualKeys.length !== expectedKeys.length || actualKeys.some((key, index) => key !== expectedKeys[index]))
+    throw new VireoUpgradeError("VIR-UPG-003", "Existing upgrade receipt has an unsupported top-level field.");
   const actualSurfaces = receipt.managedSurfaces;
   if (
     receipt.schemaVersion !== 2 ||
@@ -691,6 +707,7 @@ function validateExistingUpgradeReceipt(
     receipt.lockfileRefresh !== lockfileRefresh ||
     !Array.isArray(actualSurfaces) ||
     actualSurfaces.some(surface => typeof surface !== "string") ||
+    !Array.isArray(receipt.applicationOwnedActions) ||
     JSON.stringify(receipt.applicationOwnedActions) !== JSON.stringify(actions)
   ) {
     throw new VireoUpgradeError("VIR-UPG-003", "Existing upgrade receipt is invalid for this managed release edge.");
@@ -1102,6 +1119,15 @@ async function upgradeProjectWithPolicy(
     throw new VireoUpgradeError(
       "VIR-UPG-002",
       `No adjacent upgrade edge ${recordedRelease} -> ${target.release} is declared.`,
+    );
+  if (
+    !alreadyTarget &&
+    isOverviewManifestMigration(source, target) &&
+    (await safeFileState(projectDirectory, ".vireo/upgrade-0.8.4-to-0.8.5.json"))
+  )
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "A target-edge upgrade receipt already exists; resolve the conflicting provenance before upgrading.",
     );
   assertEqual(metadata.templateCommit, source.templateCommit, "source Template commit", "VIR-UPG-002");
   if (metadata.templateVersion !== undefined)
