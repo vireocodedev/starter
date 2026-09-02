@@ -6,7 +6,8 @@
   "evidence": {
     "schemaVersion": 1,
     "artifactName": "anonymous-consumer-gauntlet-evidence",
-    "retentionDays": 90
+    "retentionDays": 90,
+    "requiredSections": ["findings", "externalWarnings", "remainingHumanOnly"]
   },
   "mavenSignature": {
     "fingerprint": "C8C362C561046CD11C0F0DE01174796DD298F009",

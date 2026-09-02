@@ -50,6 +50,8 @@ export function validatePolicy(policy, release) {
   if (!policy.isolation?.forbidMavenLocal || !policy.isolation?.forbidWorkspacePackages) {
     problems.push("anonymous consumer policy must forbid Maven Local and workspace packages");
   }
+  if (JSON.stringify(policy.evidence?.requiredSections) !== JSON.stringify(["findings", "externalWarnings", "remainingHumanOnly"]))
+    problems.push("anonymous consumer evidence must distinguish findings, external warnings, and human-only work");
   if (!release?.createVireoVersion || !release.template.commit) problems.push("current ecosystem release is incomplete");
   return problems;
 }
@@ -68,6 +70,30 @@ export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoo
       executable: operation.executable ?? null,
     })),
   }));
+}
+
+export async function executePlanForTest(plan, executor, { dryRun = false } = {}) {
+  const evidence = { status: dryRun ? "planned" : "running", scenarios: [] };
+  for (const scenario of plan) {
+    const record = { id: scenario.id, status: dryRun ? "planned" : "running", commands: [] };
+    evidence.scenarios.push(record);
+    for (const operation of scenario.operations) {
+      const command = { ...operation, status: dryRun ? "planned" : "running" };
+      record.commands.push(command);
+      if (!dryRun) {
+        const result = await executor(operation);
+        if (result.timedOut || result.signal || result.exitCode !== operation.expectedExit) {
+          Object.assign(command, result, { status: "failed" });
+          record.status = evidence.status = "failed";
+          return evidence;
+        }
+        Object.assign(command, result, { status: "passed" });
+      }
+    }
+    record.status = dryRun ? "planned" : "passed";
+  }
+  evidence.status = dryRun ? "planned" : "passed";
+  return evidence;
 }
 
 function execute(command, options) {

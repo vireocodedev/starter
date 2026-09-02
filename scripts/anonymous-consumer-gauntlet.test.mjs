@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { publicReleaseIdentity, readJson } from "./lib/anonymous-consumer-environment.mjs";
-import { buildExecutionPlan, validatePolicy } from "./anonymous-consumer-gauntlet.mjs";
+import { buildExecutionPlan, executePlanForTest, validatePolicy } from "./anonymous-consumer-gauntlet.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = readJson(join(root, "contracts", "anonymous-consumer-gauntlet-policy.json"));
@@ -24,6 +24,17 @@ test("deterministic plan gives a fake executor every required recipe and refusal
   assert.ok(plan.every(scenario => scenario.operations.length > 0));
   assert.ok(plan.flatMap(scenario => scenario.operations).some(operation => operation.expectedExit === 1));
   assert.ok(plan.find(scenario => scenario.id === "cli-adversity").operations.some(operation => operation.id === "template-download-retry"));
+});
+
+test("fake executor preserves planned, expected-refusal, timeout, and failure evidence", async () => {
+  const plan = [{ id: "fixture", recipe: ["fixture"], operations: [{ id: "pass", expectedExit: 0 }, { id: "refusal", expectedExit: 1 }] }];
+  const passed = await executePlanForTest(plan, async operation => ({ exitCode: operation.expectedExit, timedOut: false, signal: null }));
+  assert.equal(passed.status, "passed");
+  const planned = await executePlanForTest(plan, async () => { throw new Error("dry run executed"); }, { dryRun: true });
+  assert.equal(planned.status, "planned");
+  const failed = await executePlanForTest(plan, async operation => operation.id === "pass" ? { exitCode: 0, timedOut: true, signal: "SIGTERM" } : { exitCode: 1 });
+  assert.equal(failed.status, "failed");
+  assert.equal(failed.scenarios[0].commands[0].status, "failed");
 });
 
 test("gauntlet policy wiring remains public and scheduled", () => {
