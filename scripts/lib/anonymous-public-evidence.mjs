@@ -25,14 +25,24 @@ export function validateAnonymousPublicEvidence({ manifest, release }) {
   return problems;
 }
 
-export function validateExactNpmRecord({ record, expected, releaseTagCommit }) {
+function allowedRepositories(policy) {
+  return new Set([policy?.canonicalRepository, ...(policy?.repositoryAliases ?? [])].filter(Boolean));
+}
+
+function repositoryClassification(repository, policy) {
+  if (!allowedRepositories(policy).has(repository)) return null;
+  return repository === policy.canonicalRepository ? "canonical" : "alias";
+}
+
+export function validateExactNpmRecord({ record, expected, releaseTagCommit, policy }) {
   const problems = [];
   if (record?.name !== expected.name || record?.version !== expected.version)
     problems.push("package identity/version mismatch");
   if (!/^sha512-/u.test(record?.integrity ?? "")) problems.push("registry integrity must be SHA-512");
   if (!/^[0-9a-f]{64}$/u.test(record?.sha256 ?? "")) problems.push("packed subject digest is invalid");
-  if (record?.repository !== "https://github.com/vireocodedev/vireo")
-    problems.push("package repository is not canonical");
+  const packedRepository = repositoryIdentity(record?.repository);
+  if (!repositoryClassification(packedRepository, policy))
+    problems.push("packed package repository is neither canonical nor a declared alias");
   if (!record?.license || record.license !== "MIT" || record.licenseFile !== "LICENSE")
     problems.push("package license metadata/file mismatch");
   if (record?.licenseContentVerified !== true || !/^[0-9a-f]{64}$/u.test(record?.licenseSha256 ?? ""))
@@ -40,13 +50,24 @@ export function validateExactNpmRecord({ record, expected, releaseTagCommit }) {
   if (!record?.inventorySafe || !record?.exportsSafe || !record?.binSafe)
     problems.push("package inventory or public targets are unsafe");
   const provenance = record?.provenance;
+  const provenanceRepositoryClassification = repositoryClassification(provenance?.repository, policy);
   if (
-    provenance?.repository !== "vireocodedev/vireo" ||
-    provenance?.workflow !== ".github/workflows/release-npm.yml" ||
-    provenance?.ref !== "refs/heads/main" ||
+    !provenanceRepositoryClassification ||
+    provenance?.repositoryClassification !== provenanceRepositoryClassification ||
+    provenance?.canonicalRepository !== policy?.canonicalRepository ||
+    provenance?.workflow !== policy?.workflowPath ||
+    provenance?.ref !== policy?.workflowRef ||
+    String(provenance?.repositoryId) !== String(policy?.repositoryId) ||
     provenance?.commit !== releaseTagCommit
   )
-    problems.push("npm provenance does not match the canonical release workflow/tag commit");
+    problems.push("npm provenance does not match the approved release workflow/tag commit");
+  const materialRepositoryClassification = repositoryClassification(provenance?.materialRepository, policy);
+  if (
+    !materialRepositoryClassification ||
+    provenance?.materialRepositoryClassification !== materialRepositoryClassification ||
+    provenance?.materialCommit !== releaseTagCommit
+  )
+    problems.push("npm provenance material does not match its approved coordinate tag commit");
   if (
     provenance?.statementType !== "https://in-toto.io/Statement/v1" ||
     provenance?.predicateType !== "https://slsa.dev/provenance/v1"
@@ -73,8 +94,11 @@ function npmPurl({ name, version }) {
 }
 
 function repositoryIdentity(value) {
-  const match = /github\.com[/:]([^/]+\/[^/@]+)(?:\.git)?(?:@|$|\/)/u.exec(value ?? "");
-  return match?.[1]?.replace(/\.git$/u, "") ?? null;
+  const match =
+    /^(?:git\+)?https:\/\/github\.com\/([^/@\s]+)\/([^/@\s]+?)(?:\.git)?(?:@(?:refs\/heads\/main|[a-f0-9]{40}))?$/u.exec(
+      value ?? "",
+    );
+  return match ? `${match[1]}/${match[2]}` : null;
 }
 
 function materialCommit(material) {
@@ -112,32 +136,35 @@ function statementProvenance({ statement, expected, integrity, releaseTagCommit,
   }
 
   const workflow = statement.predicate?.buildDefinition?.externalParameters?.workflow;
-  if (
-    repositoryIdentity(workflow?.repository) !== policy.canonicalRepository ||
-    workflow?.path !== policy.workflowPath ||
-    workflow?.ref !== policy.workflowRef
-  ) {
-    throw new Error(`${coordinate} provenance does not name the canonical release workflow.`);
-  }
-  if (
-    String(statement.predicate?.buildDefinition?.internalParameters?.github?.repository_id) !==
-    String(policy.repositoryId)
-  ) {
+  const workflowRepository = repositoryIdentity(workflow?.repository);
+  const workflowClassification = repositoryClassification(workflowRepository, policy);
+  if (!workflowClassification || workflow?.path !== policy.workflowPath || workflow?.ref !== policy.workflowRef)
+    throw new Error(`${coordinate} provenance does not name an approved release workflow.`);
+  const repositoryId = String(statement.predicate?.buildDefinition?.internalParameters?.github?.repository_id);
+  if (repositoryId !== String(policy.repositoryId)) {
     throw new Error(`${coordinate} provenance has an unexpected GitHub repository id.`);
   }
   const materials = statement.predicate?.buildDefinition?.resolvedDependencies ?? statement.predicate?.materials ?? [];
-  const material = materials.find(
-    candidate =>
-      repositoryIdentity(candidate?.uri) === policy.canonicalRepository &&
-      materialCommit(candidate) === releaseTagCommit,
-  );
-  if (!material) throw new Error(`${coordinate} provenance does not bind the peeled create-vireo tag commit.`);
+  const material = materials
+    .map(candidate => ({
+      candidate,
+      repository: repositoryIdentity(candidate?.uri),
+      commit: materialCommit(candidate),
+    }))
+    .find(candidate => repositoryClassification(candidate.repository, policy) && candidate.commit === releaseTagCommit);
+  if (!material) throw new Error(`${coordinate} provenance does not bind its peeled coordinate tag commit.`);
 
   return {
-    repository: policy.canonicalRepository,
+    repository: workflowRepository,
+    repositoryClassification: workflowClassification,
+    canonicalRepository: policy.canonicalRepository,
     workflow: policy.workflowPath,
     ref: policy.workflowRef,
+    repositoryId,
     commit: releaseTagCommit,
+    materialRepository: material.repository,
+    materialRepositoryClassification: repositoryClassification(material.repository, policy),
+    materialCommit: material.commit,
     statementType: statement._type,
     predicateType: statement.predicateType,
     subject: { name: subject.name, sha512: subject.digest.sha512 },
@@ -177,6 +204,6 @@ export function decodeExactNpmProvenance({ auditRecord, expected, integrity, rel
     }
   }
   throw new Error(
-    `${coordinate} verified npm audit bundles contain no exact canonical SLSA provenance: ${failures.join("; ")}`,
+    `${coordinate} verified npm audit bundles contain no exact approved SLSA provenance: ${failures.join("; ")}`,
   );
 }

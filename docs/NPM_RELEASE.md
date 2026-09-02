@@ -107,10 +107,11 @@ registry coordinate, cryptographically audits every already-public package in an
 isolated token-free consumer with `npm@12.0.2 audit signatures --json
 --include-attestations`, and checks its annotated coordinate tag before making
 either mutation. Every registry `200` is historical until its audited SLSA bundle
-binds the exact PURL and registry SRI to the stable repository identity, approved
-repository alias, workflow/ref, and resolved source commit. A historical tag must
-match that provenance commit; a missing one is created only at that commit and is
-never moved. The publisher passes only absent reviewed tarballs to `npm publish`
+binds the exact PURL and registry SRI to the stable GitHub repository id, approved
+canonical repository or checked-in repository alias, workflow/ref, and the commit
+peeled from that package's own `<package>@<version>` tag. A historical coordinate
+tag must match that provenance material commit; a missing one is created only at
+that commit and is never moved. The publisher passes only absent reviewed tarballs to `npm publish`
 and strictly confirms their exact SRI integrity afterwards. It does not rebuild
 package bytes. The production workflow is OIDC-only: it does not read
 `NPM_TOKEN` or `NODE_AUTH_TOKEN`. npm obtains a short-lived identity from GitHub
@@ -129,6 +130,15 @@ Successful publication automatically starts **Verify public npm release**. It:
 - type-checks all public entry points with `skipLibCheck: false`;
 - bundles every UI entry point through Vite; and
 - runs `npm audit signatures` over the installed dependency tree.
+
+For each of the eight coordinates, verification independently peels the exact
+`<package>@<version>` tag from the canonical `vireocodedev/vireo` repository and
+checks the audited SLSA material against that coordinate's commit. Packed package
+metadata may name `vireocodedev/vireo` or a checked-in continuity alias such as
+`vireocodedev/starter`; registry metadata is discovery evidence only and never
+authorizes a repository identity. Machine evidence retains the observed workflow
+and material repositories, their canonical/alias classification, repository id,
+and per-coordinate release tags.
 
 The workflow retains `.npm-public-verification.json` for 90 days. It can also be
 rerun manually from `main`; locally, after publication, use:
@@ -165,6 +175,10 @@ The 2026-09-01 repository rename completed this procedure for each of
 `@vireocodedev/sqlite`, and `@vireocodedev/ui`. The retained [continuity evidence](roadmap/phase-1/evidence/npm-release-continuity-2026-09-01.md)
 includes the successful post-rename `create-vireo@0.8.0` publication, anonymous
 verification, and SBOM attestation.
+
+Repository rename continuity is therefore per coordinate: retain or recreate each
+immutable `<package>@<version>` tag at the exact verified material commit before
+accepting a historical package under the canonical repository identity.
 
 Repeat this procedure when a public npm package changes repository identity or a
 new public package is introduced:
