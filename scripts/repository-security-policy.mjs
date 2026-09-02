@@ -149,6 +149,7 @@ validateMainRuleset(readJson(".github/rulesets/main.json"), [
   "Generated full-stack fixture:15368",
   "Generated frontend-only fixture:15368",
   "Public adjacent project-upgrade fixtures:15368",
+  "plan:15368",
   "Detect standalone website changes:15368",
   "Build standalone website:15368",
   "Java and TypeScript analysis:15368",
