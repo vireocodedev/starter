@@ -14,12 +14,33 @@ const releaseWorkflow = read(".github/workflows/release.yml");
 const anonymousGauntletWorkflow = read(".github/workflows/anonymous-consumer-gauntlet.yml");
 const websiteWorkflow = read(".github/workflows/website.yml");
 
+function indentation(line) {
+  return /^\s*/u.exec(line)?.[0].length ?? 0;
+}
+
+function namedWorkflowStep(workflow, name) {
+  const lines = workflow.split("\n");
+  const start = lines.indexOf(`      - name: ${name}`);
+  if (start < 0) return undefined;
+  let end = start + 1;
+  while (end < lines.length && !/^      - /u.test(lines[end])) end += 1;
+  return lines.slice(start, end);
+}
+
+function indentedSubsection(lines, key, indent) {
+  const start = lines.indexOf(`${" ".repeat(indent)}${key}:`);
+  if (start < 0) return undefined;
+  let end = start + 1;
+  while (end < lines.length && (lines[end].trim() === "" || indentation(lines[end]) > indent)) end += 1;
+  return lines.slice(start + 1, end);
+}
+
 function standaloneWebsiteArtifactRetainsHiddenFiles(workflow) {
-  const start = workflow.indexOf("      - name: Upload standalone artifact\n");
-  if (start < 0) return false;
-  const next = workflow.indexOf("\n      - ", start + 1);
-  const uploadStep = workflow.slice(start, next < 0 ? undefined : next);
-  return /^          include-hidden-files: true$/mu.test(uploadStep);
+  const uploadStep = namedWorkflowStep(workflow, "Upload standalone artifact");
+  if (!uploadStep || !uploadStep.some(line => /^        uses: actions\/upload-artifact@[a-f0-9]{40}(?:\s+#.*)?$/u.test(line)))
+    return false;
+  const withBlock = indentedSubsection(uploadStep, "with", 8);
+  return withBlock?.includes("          include-hidden-files: true") ?? false;
 }
 
 test("accepts the narrowly scoped Changesets release-PR workflow", () => {
@@ -38,6 +59,20 @@ test("standalone website artifacts retain generated hidden files", () => {
     false,
   );
   assert.equal(standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("          include-hidden-files: true\n", "")), false);
+  assert.equal(
+    standaloneWebsiteArtifactRetainsHiddenFiles(
+      websiteWorkflow
+        .replace("        with:\n", "        env:\n          include-hidden-files: true\n        with:\n")
+        .replace("          include-hidden-files: true\n          if-no-files-found", "          if-no-files-found"),
+    ),
+    false,
+  );
+  assert.equal(
+    standaloneWebsiteArtifactRetainsHiddenFiles(
+      websiteWorkflow.replace("uses: actions/upload-artifact@", "uses: actions/download-artifact@"),
+    ),
+    false,
+  );
 });
 
 test("requires the protected gauntlet plan to report on every pull request", () => {
