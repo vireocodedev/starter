@@ -19,6 +19,12 @@ const managedAdditions = [
   ".agents/skills/vireo-app-upgrader/SKILL.md",
   ".agents/skills/vireo-app-upgrader/agents/openai.yaml",
 ];
+const frontendEvidence = new Map([
+  [
+    "scripts/vireo-frontend-doctor.mjs",
+    join(repositoryRoot, "packages", "create-vireo", "fixtures", "project-upgrades", "vireo-frontend-doctor.0.7.0.mjs"),
+  ],
+]);
 const sha256 = value => createHash("sha256").update(value).digest("hex");
 const policy = JSON.parse(
   readFileSync(join(repositoryRoot, "packages/create-vireo/schema/vireo-upgrade-policy.json"), "utf8"),
@@ -78,7 +84,22 @@ for (const profile of ["full-stack", "frontend"]) {
   for (const file of files) {
     if (!/^[a-f0-9]{64}$/u.test(file.targetSha256 ?? ""))
       throw new Error(`${edge}:${profile}:${file.path} has no exact target hash.`);
-    if (!sourceObjectExists(target.templateCommit, file.path)) continue;
+    if (profile === "frontend") {
+      const fixturePath = frontendEvidence.get(file.path);
+      if (!fixturePath) throw new Error(`${edge}:frontend:${file.path} has no frozen Vireo-owned byte evidence.`);
+      const sourceBytes = readFileSync(fixturePath, "utf8");
+      if (sha256(sourceBytes) !== file.sourceSha256)
+        throw new Error(`${edge}:frontend:${file.path} source hash differs from its frozen Vireo fixture.`);
+      if (file.operation !== "update" || !file.transforms)
+        throw new Error(`${edge}:frontend:${file.path} must be an exact transformed update.`);
+      const targetBytes = applyTransforms(sourceBytes, file);
+      if (sha256(targetBytes) !== file.targetSha256)
+        throw new Error(`${edge}:frontend:${file.path} target hash differs from frozen Vireo byte evidence.`);
+      checked += 1;
+      continue;
+    }
+    if (!sourceObjectExists(target.templateCommit, file.path))
+      throw new Error(`${edge}:${profile}:${file.path} is absent from the immutable target Template.`);
     const targetBytes = gitObject(target.templateCommit, file.path);
     if (sha256(targetBytes) !== file.targetSha256)
       throw new Error(`${edge}:${profile}:${file.path} target hash differs from immutable Template bytes.`);

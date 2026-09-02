@@ -593,6 +593,19 @@ function applyBaselineTransforms(baseline: EdgeBaseline, source: string) {
     );
   return output;
 }
+async function baselineWriteContents(projectDirectory: string, baseline: EdgeBaseline): Promise<string | null> {
+  if (baseline.operation === "delete") return null;
+  if (baseline.transforms) {
+    if (baseline.operation !== "update")
+      throw new VireoUpgradeError("VIR-UPG-001", `Only managed updates may use transforms: ${baseline.path}`);
+    const source = await readFile(join(projectDirectory, baseline.path), "utf8");
+    return applyBaselineTransforms(baseline, source);
+  }
+  const target = resolveBaselineTargetContent(baseline);
+  if (target === undefined)
+    throw new VireoUpgradeError("VIR-UPG-001", `Managed baseline has no resolved target content: ${baseline.path}`);
+  return target;
+}
 function profileActions(actions: ApplicationOwnedActionPolicy[], profile: unknown): VireoUpgradeManualAction[] {
   const lockRefresh =
     profile === "frontend"
@@ -913,15 +926,7 @@ async function upgradeProjectWithPolicy(
         .filter(file => file.state === "add" || file.state === "update" || file.state === "delete")
         .map(async file => ({
           path: join(projectDirectory, file.baseline.path),
-          contents:
-            file.baseline.operation === "delete"
-              ? null
-              : file.baseline.transforms
-                ? applyBaselineTransforms(
-                    file.baseline,
-                    await readFile(join(projectDirectory, file.baseline.path), "utf8"),
-                  )
-                : resolveBaselineTargetContent(file.baseline)!,
+          contents: await baselineWriteContents(projectDirectory, file.baseline),
           previous: undefined,
         })),
     )),

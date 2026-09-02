@@ -33,6 +33,17 @@ test("gauntlet policy covers every required scenario with exact public identity"
   );
 });
 
+test("candidate adjacent upgrades advance from the immediate public release", () => {
+  const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
+  assert.equal(upgradePolicy.publicRelease, "0.8.1");
+  assert.equal(upgradePolicy.previousRelease, "0.8.1");
+  assert.equal(upgradePolicy.candidateRelease, "0.8.2");
+  assert.ok(
+    upgradePolicy.requiredEdges.some(edge => edge.from === "0.8.1" && edge.to === "0.8.2"),
+    "candidate must retain the immediate public-to-candidate edge",
+  );
+});
+
 test("deterministic plan gives a fake executor every required recipe and refusal", () => {
   const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
   const plan = buildExecutionPlan({ policy, release, upgradePolicy, consumerRoot: "/tmp/vireo-anonymous-plan" });

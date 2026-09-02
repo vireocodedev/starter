@@ -3,7 +3,7 @@
   "releaseGraph": {
     "publicRelease": "0.8.1",
     "candidateRelease": "0.8.2",
-    "previousRelease": "0.8.0",
+    "previousRelease": "0.8.1",
     "releases": [
       {
         "release": "0.2.0",
