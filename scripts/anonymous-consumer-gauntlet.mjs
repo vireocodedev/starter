@@ -29,6 +29,7 @@ const releaseIdArgument = process.argv.indexOf("--release-id");
 const sourceCommitArgument = process.argv.indexOf("--source-commit");
 const observedDigests = new Map();
 const managedOriginals = new Map();
+const projectTrees = new Map();
 
 export function validatePolicy(policy, release) {
   const problems = [];
@@ -220,6 +221,15 @@ async function executeOperation(operation, { environment, runRoot }) {
       if (!original) throw new Error("Managed-file restoration has no recorded original.");
       writeFileSync(original.target, original.contents);
     }
+  } else if (operation.kind === "record-project-tree" || operation.kind === "assert-project-tree") {
+    const collect = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+      if (["node_modules", ".git"].includes(entry.name)) return [];
+      const path = join(directory, entry.name);
+      return entry.isDirectory() ? collect(path) : entry.isFile() ? [[path, createHash("sha256").update(readFileSync(path)).digest("hex")]] : [];
+    });
+    const digest = createHash("sha256").update(JSON.stringify(collect(operation.path).sort(([left], [right]) => left.localeCompare(right)))).digest("hex");
+    if (operation.kind === "record-project-tree") projectTrees.set(operation.path, digest);
+    else if (projectTrees.get(operation.path) !== digest) throw new Error("No-op upgrade changed project bytes.");
   } else if (operation.kind === "assert-deployment-contract") {
     const script = readFileSync(join(operation.path, "scripts", "verify-deployment.sh"), "utf8");
     for (const assertion of ["security", "header", "proxy", "/api", "postgres", "migration"]) {
@@ -412,8 +422,12 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
             arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory],
           },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--apply", "--accept-application-owned", "--project", directory] },
+          { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
+          { kind: "assert-project-identity", id: `upgrade-${edge.from}-${edge.to}-${profile}-exact-target`, path: directory, release, profile, database: profile === "full-stack" ? "h2" : undefined },
+          { kind: "record-project-tree", id: `upgrade-${edge.from}-${edge.to}-${profile}-post-apply-snapshot`, path: directory },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--apply", "--project", directory], expectedExit: 1 },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory] },
+          { kind: "assert-project-tree", id: `upgrade-${edge.from}-${edge.to}-${profile}-no-op-snapshot`, path: directory },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "status", "--json", "--project", directory] },
           { kind: "assert-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-provenance`, path: join(directory, ".vireo", "project.json") },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "check", "--project", directory] },
