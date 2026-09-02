@@ -48,10 +48,7 @@ test("managed upgrade baselines can bind a prior generated projection source", (
       { from: "defineConfig({\n  test:", to: "defineConfig({\n  optimizeDeps: {}\n  test:" },
     ],
   };
-  assert.equal(
-    projectedBaselineSourceBytes(source, baseline),
-    "defineConfig({\n  optimizeDeps: {}\n  test:",
-  );
+  assert.equal(projectedBaselineSourceBytes(source, baseline), "defineConfig({\n  optimizeDeps: {}\n  test:");
 });
 
 test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", () => {
@@ -81,10 +78,9 @@ test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", 
   );
 
   const predecessorMissingForFrontendOnly = structuredClone(policy.releaseGraph);
-  predecessorMissingForFrontendOnly.baselines["0.8.3->0.8.4"].frontend =
-    predecessorMissingForFrontendOnly.baselines["0.8.3->0.8.4"].frontend.filter(
-      file => !file.path.endsWith("vitest.storybook.config.ts"),
-    );
+  predecessorMissingForFrontendOnly.baselines["0.8.3->0.8.4"].frontend = predecessorMissingForFrontendOnly.baselines[
+    "0.8.3->0.8.4"
+  ].frontend.filter(file => !file.path.endsWith("vitest.storybook.config.ts"));
   assert.throws(
     () => assertStorybookBaselineContinuity(predecessorMissingForFrontendOnly, edge),
     /0\.8\.4->0\.8\.6:frontend Storybook update has no 0\.8\.3->0\.8\.4 target provenance/u,
@@ -95,7 +91,10 @@ test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", 
   );
   const [sourceTransform] = frontendBaseline.sourceProjectionTransforms;
   const immutable084TemplateSource = frontendBaseline.sourceContent.replace(sourceTransform.to, sourceTransform.from);
-  assert.equal(projectedBaselineSourceBytes(immutable084TemplateSource, frontendBaseline), frontendBaseline.sourceContent);
+  assert.equal(
+    projectedBaselineSourceBytes(immutable084TemplateSource, frontendBaseline),
+    frontendBaseline.sourceContent,
+  );
   const transformDeletedForFrontendOnly = structuredClone(frontendBaseline);
   delete transformDeletedForFrontendOnly.sourceProjectionTransforms;
   assert.throws(
@@ -125,10 +124,7 @@ test("Storybook provenance continuity ignores empty, unrelated, and first-add ed
     ),
   );
   assert.doesNotThrow(() =>
-    assertStorybookBaselineContinuity(
-      graphWith([{ operation: "add", path: "vitest.storybook.config.ts" }]),
-      edge,
-    ),
+    assertStorybookBaselineContinuity(graphWith([{ operation: "add", path: "vitest.storybook.config.ts" }]), edge),
   );
 });
 

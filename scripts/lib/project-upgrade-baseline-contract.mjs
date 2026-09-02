@@ -73,10 +73,7 @@ export function assertStorybookBaselineContinuity(releaseGraph, edge) {
     ) {
       throw new Error(`${edge}:${profile} Storybook baseline must retain exact predecessor/source provenance.`);
     }
-    if (
-      predecessor.targetSha256 !== current.sourceSha256 ||
-      predecessor.targetContent !== current.sourceContent
-    ) {
+    if (predecessor.targetSha256 !== current.sourceSha256 || predecessor.targetContent !== current.sourceContent) {
       throw new Error(`${edge}:${profile} Storybook source must match ${predecessorEdge} target provenance.`);
     }
   }
@@ -86,6 +83,7 @@ function findManagedStorybookBaseline(files, profile) {
   const matches = (files ?? []).filter(
     file => file?.operation === "update" && file.path?.endsWith("vitest.storybook.config.ts"),
   );
-  if (matches.length > 1) throw new Error(`${profile} must declare at most one managed Storybook configuration baseline.`);
+  if (matches.length > 1)
+    throw new Error(`${profile} must declare at most one managed Storybook configuration baseline.`);
   return matches[0];
 }
