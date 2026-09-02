@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { classifyProjectionPath, readApplicationProjectionContract } from "./lib/application-projection-contract.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const templateRepositoryOption = process.argv.indexOf("--template-repository");
@@ -94,6 +95,27 @@ if (checkedOutTemplateCommit !== target.templateCommit)
 
 const activeBaselines = graph.baselines?.[edge];
 if (!activeBaselines) throw new Error(`The active ${edge} baseline set is missing.`);
+const projectionContract = readApplicationProjectionContract(
+  join(repositoryRoot, "contracts", "application-projection-contract.json"),
+);
+const changedTemplatePaths = execFileSync(
+  "git",
+  ["diff", "--name-only", source.templateCommit, target.templateCommit, "--"],
+  { cwd: templateRoot, encoding: "utf8" },
+)
+  .split("\n")
+  .filter(Boolean);
+for (const profile of ["full-stack", "frontend"]) {
+  const managedChangedPaths = changedTemplatePaths.filter(
+    path => classifyProjectionPath(projectionContract, path, profile)?.category === "managed",
+  );
+  const declaredBaselines = new Set((activeBaselines[profile] ?? []).map(file => file.path));
+  const missing = managedChangedPaths.filter(path => !declaredBaselines.has(path));
+  if (missing.length)
+    throw new Error(
+      `${edge}:${profile} has changed managed Template paths without immutable baselines: ${missing.join(", ")}`,
+    );
+}
 let checked = 0;
 for (const profile of ["full-stack", "frontend"]) {
   const files = activeBaselines[profile];

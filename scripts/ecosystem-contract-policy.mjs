@@ -36,6 +36,42 @@ export function validatePublicWorkspaceLockEntries(packageLock, publicWorkspaceP
   return problems;
 }
 
+/** Candidate declarations must exactly preserve the current public Vireo coordinate set. */
+export function validateCandidatePackageFloors(candidate, publicNode, currentNpm) {
+  const problems = [];
+  const current = new Map(currentNpm.map(({ name, version }) => [name, version]));
+  const sourceDependencies = publicNode?.frontendDependencies ?? {};
+  const candidateDependencies = candidate?.frontendDependencies ?? {};
+  const sourceNames = Object.keys(sourceDependencies)
+    .filter(name => name.startsWith("@vireocodedev/"))
+    .sort();
+  const candidateNames = Object.keys(candidateDependencies)
+    .filter(name => name.startsWith("@vireocodedev/"))
+    .sort();
+
+  for (const name of sourceNames) {
+    const exactCurrent = current.get(name);
+    const expected = exactCurrent && `^${exactCurrent}`;
+    if (candidateDependencies[name] !== expected) {
+      problems.push(
+        `candidate frontend dependency ${name} must exactly equal current public ${expected}; found ${candidateDependencies[name]}`,
+      );
+    }
+  }
+  for (const name of candidateNames.filter(name => !sourceNames.includes(name)))
+    problems.push(`candidate frontend dependency ${name} is not declared by the public Vireo dependency subset`);
+  return problems;
+}
+
+export function validateProjectUpgradeTemplateCheckout(workflow, expectedCommit) {
+  const matches = [...workflow.matchAll(/repository:\s*vireocodedev\/vireo-template\s*\n\s*ref:\s*([a-f0-9]{40})/gu)];
+  if (matches.length !== 1)
+    return ["CI must declare exactly one immutable Vireo Template checkout for project-upgrade verification"];
+  return matches[0][1] === expectedCommit
+    ? []
+    : [`CI project-upgrade Template checkout ${matches[0][1]} must match active target ${expectedCommit}`];
+}
+
 export function validateEcosystemContract(contract = readJson("contracts/ecosystem-release-contract.json")) {
   const problems = [];
 
@@ -148,6 +184,20 @@ export function validateEcosystemContract(contract = readJson("contracts/ecosyst
       if (publicNode?.starterJvmVersion !== contract.current?.maven?.version) {
         problems.push("current upgrade starterJvmVersion must match the ecosystem current Maven version");
       }
+      if (upgradeContract.candidateRelease) {
+        problems.push(...validateCandidatePackageFloors(targetNode, publicNode, contract.current?.npm ?? []));
+        if (
+          targetNode?.rootVireoScript !== `npx --yes --package=create-vireo@${upgradeContract.candidateRelease} vireo`
+        ) {
+          problems.push("candidate upgrade root Vireo script must use the candidate create-vireo version");
+        }
+      }
+      problems.push(
+        ...validateProjectUpgradeTemplateCheckout(
+          readFileSync(join(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
+          targetNode?.templateCommit,
+        ),
+      );
     }
   }
 

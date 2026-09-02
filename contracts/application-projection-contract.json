@@ -255,6 +255,7 @@
         ".github/rulesets/starter-template-0.8.0.json",
         ".github/rulesets/starter-template-0.8.1.json",
         ".github/rulesets/starter-template-0.8.2.json",
+        ".github/rulesets/starter-template-0.8.3.json",
         ".github/settings/actions.json",
         ".github/settings/selected-actions.json",
         ".github/settings/workflow-permissions.json",
@@ -279,7 +280,8 @@
         "scripts/platform-support-policy.test.mjs",
         "scripts/public-contract-policy.mjs",
         "scripts/verification-pipeline-policy.mjs",
-        "scripts/vireo-package-compatibility-policy.mjs"
+        "scripts/vireo-package-compatibility-policy.mjs",
+        "scripts/vireo-package-compatibility.test.mjs"
       ],
       "prefixes": []
     },
@@ -538,6 +540,7 @@
     { "path": ".github/rulesets/starter-template-0.8.0.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.8.1.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.8.2.json", "profile": "full-stack", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.8.3.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/settings/actions.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/settings/selected-actions.json", "profile": "full-stack", "category": "maintainer-only" },
     { "path": ".github/settings/workflow-permissions.json", "profile": "full-stack", "category": "maintainer-only" },
@@ -554,6 +557,11 @@
     { "path": "scripts/verification-pipeline-policy.mjs", "profile": "full-stack", "category": "maintainer-only" },
     {
       "path": "scripts/vireo-package-compatibility-policy.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/vireo-package-compatibility.test.mjs",
       "profile": "full-stack",
       "category": "maintainer-only"
     },
@@ -575,6 +583,7 @@
     { "path": ".github/rulesets/starter-template-0.8.0.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.8.1.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/rulesets/starter-template-0.8.2.json", "profile": "frontend", "category": "maintainer-only" },
+    { "path": ".github/rulesets/starter-template-0.8.3.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/settings/actions.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/settings/selected-actions.json", "profile": "frontend", "category": "maintainer-only" },
     { "path": ".github/settings/workflow-permissions.json", "profile": "frontend", "category": "maintainer-only" },
@@ -584,6 +593,7 @@
     { "path": "scripts/template-release-policy.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/template-release-policy.test.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/write-template-release-manifest.mjs", "profile": "frontend", "category": "maintainer-only" },
+    { "path": "scripts/vireo-package-compatibility.test.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "scripts/platform-support-policy.test.mjs", "profile": "frontend", "category": "maintainer-only" },
     { "path": "SECURITY.md", "profile": "full-stack", "category": "substitution-required" },
     { "path": "frontend/package.json", "profile": "frontend", "category": "substitution-required" },
