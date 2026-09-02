@@ -3,8 +3,10 @@
   "contractId": "vireo-project-upgrade-graph",
   "packedPolicy": "packages/create-vireo/schema/vireo-upgrade-policy.json",
   "publicRelease": "0.8.6",
-  "previousRelease": "0.8.4",
-  "publicationState": "final",
+  "previousRelease": "0.8.6",
+  "candidateRelease": "0.8.7",
+  "publicationState": "candidate",
+  "finalization": { "targetTemplateCommit": "0557990f024a8736b6e661f8fc264861deb99b65" },
   "releaseCoordinates": {
     "0.6.0": {
       "createVireo": "0.6.0",
@@ -61,6 +63,13 @@
       "templateCommit": "cef67cc74af3d28028fba424e1d5c6a92faa6fc9",
       "starterJvmVersion": "0.3.1",
       "status": "current"
+    },
+    "0.8.7": {
+      "createVireo": "0.8.7",
+      "templateVersion": "0.8.7",
+      "templateCommit": "0557990f024a8736b6e661f8fc264861deb99b65",
+      "starterJvmVersion": "0.3.1",
+      "status": "candidate"
     }
   },
   "historicalReleases": ["0.2.0", "0.3.0", "0.4.0", "0.5.0"],
@@ -72,7 +81,8 @@
     { "from": "0.8.1", "to": "0.8.2" },
     { "from": "0.8.2", "to": "0.8.3" },
     { "from": "0.8.3", "to": "0.8.4", "lockfileRefresh": "not-required" },
-    { "from": "0.8.4", "to": "0.8.6", "lockfileRefresh": "not-required" }
+    { "from": "0.8.4", "to": "0.8.6", "lockfileRefresh": "not-required" },
+    { "from": "0.8.6", "to": "0.8.7", "lockfileRefresh": "not-required" }
   ],
-  "maintenance": { "latestFixLine": "0.8.6", "priorCurrentUpgradeSource": "0.8.4", "backportsPromised": false }
+  "maintenance": { "latestFixLine": "0.8.7", "priorCurrentUpgradeSource": "0.8.6", "backportsPromised": false }
 }

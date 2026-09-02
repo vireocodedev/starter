@@ -52,6 +52,7 @@ test("template release operations are excluded from every project profile", () =
       ".github/rulesets/starter-template-0.8.4.json",
       ".github/rulesets/starter-template-0.8.5.json",
       ".github/rulesets/starter-template-0.8.6.json",
+      ".github/rulesets/starter-template-0.8.7.json",
       "scripts/vireo-package-compatibility.test.mjs",
       "contracts/template-release-policy.json",
       "scripts/template-release-policy.mjs",
@@ -212,6 +213,10 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
       ".github/rulesets/starter-template-0.8.1.json",
       ".github/rulesets/starter-template-0.8.2.json",
       ".github/rulesets/starter-template-0.8.3.json",
+      ".github/rulesets/starter-template-0.8.4.json",
+      ".github/rulesets/starter-template-0.8.5.json",
+      ".github/rulesets/starter-template-0.8.6.json",
+      ".github/rulesets/starter-template-0.8.7.json",
       "scripts/vireo-package-compatibility.test.mjs",
     ]) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only");

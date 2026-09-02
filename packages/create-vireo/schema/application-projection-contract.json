@@ -269,7 +269,8 @@
         "scripts/template-release-recovery-policy.test.mjs",
         ".github/rulesets/starter-template-0.8.4.json",
         ".github/rulesets/starter-template-0.8.5.json",
-        ".github/rulesets/starter-template-0.8.6.json"
+        ".github/rulesets/starter-template-0.8.6.json",
+        ".github/rulesets/starter-template-0.8.7.json"
       ],
       "prefixes": []
     },
@@ -1059,6 +1060,11 @@
       "category": "maintainer-only"
     },
     {
+      "path": ".github/rulesets/starter-template-0.8.7.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
       "path": "frontend/scripts/lighthouse-audit-support.mjs",
       "profile": "full-stack",
       "category": "managed"
@@ -1110,6 +1116,11 @@
     },
     {
       "path": ".github/rulesets/starter-template-0.8.6.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/rulesets/starter-template-0.8.7.json",
       "profile": "frontend",
       "category": "maintainer-only"
     },

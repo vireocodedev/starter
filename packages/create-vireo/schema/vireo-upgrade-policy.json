@@ -2,7 +2,8 @@
   "schemaVersion": 2,
   "releaseGraph": {
     "publicRelease": "0.8.6",
-    "previousRelease": "0.8.4",
+    "previousRelease": "0.8.6",
+    "candidateRelease": "0.8.7",
     "releases": [
       {
         "release": "0.2.0",
@@ -225,6 +226,42 @@
             "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs"
           }
         }
+      },
+      {
+        "release": "0.8.7",
+        "status": "candidate",
+        "templateCommit": "0557990f024a8736b6e661f8fc264861deb99b65",
+        "rootVireoScript": "npx --yes --package=create-vireo@0.8.7 vireo",
+        "starterJvmVersion": "0.3.1",
+        "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
+        "managedFrontendScripts": {
+          "full-stack": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs",
+            "performance:policy:test": "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
+            "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs"
+          },
+          "frontend": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs",
+            "performance:policy:test": "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
+            "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs"
+          }
+        },
+        "frontendDependencies": {
+          "@vireocodedev/history": "^0.2.2",
+          "@vireocodedev/infrastructure": "^0.2.2",
+          "@vireocodedev/localization": "^0.2.2",
+          "@vireocodedev/query": "^0.2.2",
+          "@vireocodedev/shell": "^0.2.2",
+          "@vireocodedev/ui": "^0.3.1"
+        },
+        "projectionSourceFrontendScripts": {
+          "full-stack": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs"
+          },
+          "frontend": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs"
+          }
+        }
       }
     ],
     "edges": [
@@ -396,7 +433,8 @@
           }
         ]
       },
-      { "from": "0.8.4", "to": "0.8.6", "lockfileRefresh": "not-required", "applicationOwnedActions": [] }
+      { "from": "0.8.4", "to": "0.8.6", "lockfileRefresh": "not-required", "applicationOwnedActions": [] },
+      { "from": "0.8.6", "to": "0.8.7", "lockfileRefresh": "not-required", "applicationOwnedActions": [] }
     ],
     "baselines": {
       "0.7.0->0.8.0": {
@@ -730,6 +768,7 @@
             "sourceSha256": "934db0401b803d3cca38f4278d2fbf1967bc649fb9c0daeb3380b3723cde9a74",
             "sourceContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
             "targetSha256": "89caa4ac6f065f5ffd3d014552e3441c2ae8d71dfa9955ad34f0a429e36909d1",
+            "targetContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    // Storybook's interaction runtime reaches this public boundary even when a\n    // generated application has only a minimal set of stories. Prebundle the\n    // package entry point so its CommonJS aria-query/lz-string dependencies do\n    // not become native ESM imports in the browser test runtime.\n    optimizeDeps: {\n      include: [\"@testing-library/dom\"],\n    },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
             "transforms": [
               {
                 "from": "    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test:",
@@ -757,6 +796,7 @@
             "sourceSha256": "934db0401b803d3cca38f4278d2fbf1967bc649fb9c0daeb3380b3723cde9a74",
             "sourceContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
             "targetSha256": "89caa4ac6f065f5ffd3d014552e3441c2ae8d71dfa9955ad34f0a429e36909d1",
+            "targetContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    // Storybook's interaction runtime reaches this public boundary even when a\n    // generated application has only a minimal set of stories. Prebundle the\n    // package entry point so its CommonJS aria-query/lz-string dependencies do\n    // not become native ESM imports in the browser test runtime.\n    optimizeDeps: {\n      include: [\"@testing-library/dom\"],\n    },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
             "transforms": [
               {
                 "from": "    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test:",
@@ -769,6 +809,36 @@
                 "to": "  defineConfig({\n    optimizeDeps: { include: [\"@testing-library/dom\"] },\n    test:"
               }
             ]
+          }
+        ]
+      },
+      "0.8.6->0.8.7": {
+        "full-stack": [
+          {
+            "path": "contracts/vireo-package-compatibility.json",
+            "operation": "update",
+            "sourceSha256": "24c3055d20f8d2017c4167c71b14d45c8c50662c6bea13dd2ea0981530e59685",
+            "sourceContent": "{\n  \"schemaVersion\": 1,\n  \"id\": \"vireo-template-0.8.6\",\n  \"packages\": {\n    \"@vireocodedev/history\": [\"^0.2.2\"],\n    \"@vireocodedev/infrastructure\": [\"^0.2.2\"],\n    \"@vireocodedev/localization\": [\"^0.2.2\"],\n    \"@vireocodedev/query\": [\"^0.2.2\"],\n    \"@vireocodedev/shell\": [\"^0.2.2\"],\n    \"@vireocodedev/sqlite\": [\"^0.2.2\", \"^0.2.3\"],\n    \"@vireocodedev/ui\": [\"^0.3.1\"]\n  },\n  \"lockedPackages\": {\n    \"@vireocodedev/history\": \"0.2.2\",\n    \"@vireocodedev/infrastructure\": \"0.2.2\",\n    \"@vireocodedev/localization\": \"0.2.2\",\n    \"@vireocodedev/query\": \"0.2.2\",\n    \"@vireocodedev/shell\": \"0.2.2\",\n    \"@vireocodedev/ui\": \"0.3.1\"\n  }\n}\n",
+            "targetSha256": "82b05db0bcc4cff3a31439cd915ee9e55632fbf3cc2144eb25ae391bdaa30f7f",
+            "targetContent": "{\n  \"schemaVersion\": 1,\n  \"id\": \"vireo-template-0.8.7\",\n  \"packages\": {\n    \"@vireocodedev/history\": [\"^0.2.2\"],\n    \"@vireocodedev/infrastructure\": [\"^0.2.2\"],\n    \"@vireocodedev/localization\": [\"^0.2.2\"],\n    \"@vireocodedev/query\": [\"^0.2.2\"],\n    \"@vireocodedev/shell\": [\"^0.2.2\"],\n    \"@vireocodedev/sqlite\": [\"^0.2.2\", \"^0.2.3\"],\n    \"@vireocodedev/ui\": [\"^0.3.1\"]\n  },\n  \"lockedPackages\": {\n    \"@vireocodedev/history\": \"0.2.2\",\n    \"@vireocodedev/infrastructure\": \"0.2.2\",\n    \"@vireocodedev/localization\": \"0.2.2\",\n    \"@vireocodedev/query\": \"0.2.2\",\n    \"@vireocodedev/shell\": \"0.2.2\",\n    \"@vireocodedev/ui\": \"0.3.1\"\n  }\n}\n"
+          },
+          {
+            "path": "frontend/vitest.storybook.config.ts",
+            "operation": "update",
+            "sourceSha256": "89caa4ac6f065f5ffd3d014552e3441c2ae8d71dfa9955ad34f0a429e36909d1",
+            "sourceContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    // Storybook's interaction runtime reaches this public boundary even when a\n    // generated application has only a minimal set of stories. Prebundle the\n    // package entry point so its CommonJS aria-query/lz-string dependencies do\n    // not become native ESM imports in the browser test runtime.\n    optimizeDeps: {\n      include: [\"@testing-library/dom\"],\n    },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
+            "targetSha256": "89caa4ac6f065f5ffd3d014552e3441c2ae8d71dfa9955ad34f0a429e36909d1",
+            "targetContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    // Storybook's interaction runtime reaches this public boundary even when a\n    // generated application has only a minimal set of stories. Prebundle the\n    // package entry point so its CommonJS aria-query/lz-string dependencies do\n    // not become native ESM imports in the browser test runtime.\n    optimizeDeps: {\n      include: [\"@testing-library/dom\"],\n    },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n"
+          }
+        ],
+        "frontend": [
+          {
+            "path": "vitest.storybook.config.ts",
+            "operation": "update",
+            "sourceSha256": "89caa4ac6f065f5ffd3d014552e3441c2ae8d71dfa9955ad34f0a429e36909d1",
+            "sourceContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    // Storybook's interaction runtime reaches this public boundary even when a\n    // generated application has only a minimal set of stories. Prebundle the\n    // package entry point so its CommonJS aria-query/lz-string dependencies do\n    // not become native ESM imports in the browser test runtime.\n    optimizeDeps: {\n      include: [\"@testing-library/dom\"],\n    },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n",
+            "targetSha256": "89caa4ac6f065f5ffd3d014552e3441c2ae8d71dfa9955ad34f0a429e36909d1",
+            "targetContent": "import { storybookTest } from \"@storybook/addon-vitest/vitest-plugin\";\nimport { playwright } from \"@vitest/browser-playwright\";\nimport path from \"node:path\";\nimport { defineConfig, mergeConfig } from \"vitest/config\";\nimport viteConfig from \"./vite.config.ts\";\n\nexport default mergeConfig(\n  viteConfig,\n  defineConfig({\n    // Storybook's interaction runtime reaches this public boundary even when a\n    // generated application has only a minimal set of stories. Prebundle the\n    // package entry point so its CommonJS aria-query/lz-string dependencies do\n    // not become native ESM imports in the browser test runtime.\n    optimizeDeps: {\n      include: [\"@testing-library/dom\"],\n    },\n    test: {\n      testTimeout: 30_000,\n      projects: [\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({}),\n              instances: [\n                { browser: \"chromium\", name: \"desktop\", viewport: { height: 900, width: 1440 } },\n                { browser: \"chromium\", name: \"mobile\", viewport: { height: 844, width: 390 } },\n              ],\n            },\n          },\n        },\n        {\n          extends: true,\n          plugins: [storybookTest({ configDir: path.join(import.meta.dirname, \".storybook\") })],\n          test: {\n            name: \"storybook-reduced-motion\",\n            browser: {\n              enabled: true,\n              headless: true,\n              provider: playwright({ contextOptions: { reducedMotion: \"reduce\" } }),\n              instances: [{ browser: \"chromium\", name: \"desktop-reduced\", viewport: { height: 900, width: 1440 } }],\n            },\n          },\n        },\n      ],\n    },\n  }),\n);\n"
           }
         ]
       }
