@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { retryTransientNpmRegistryOperation } from "./npm-registry-retry.mjs";
+import {
+  isExactNpmNotargetDiagnostic,
+  isTransientNpmRegistryError,
+  retryTransientNpmRegistryOperation,
+} from "./npm-registry-retry.mjs";
 
 describe("npm registry propagation retry", () => {
   it("retries transient registry 404s", async () => {
@@ -51,6 +55,76 @@ describe("npm registry propagation retry", () => {
         { attempts: 2, intervalMs: 1, sleep: () => {} },
       ),
       /still missing/u,
+    );
+    assert.equal(calls, 2);
+  });
+
+  it("retries only the exact caller-allowlisted npm ETARGET diagnostic", async () => {
+    const coordinate = "@vireocodedev/ui@0.8.4";
+    const error = Object.assign(new Error("not yet propagated"), {
+      stderr: `npm error code ETARGET\nnpm error notarget No matching version found for ${coordinate}.\n`,
+    });
+    assert.equal(isExactNpmNotargetDiagnostic(error, coordinate), true);
+    assert.equal(isTransientNpmRegistryError(error, { allowlistedNotargetCoordinates: [coordinate] }), true);
+
+    let calls = 0;
+    await retryTransientNpmRegistryOperation(
+      () => {
+        calls += 1;
+        if (calls === 1) throw error;
+        return "installed";
+      },
+      {
+        attempts: 2,
+        intervalMs: 1,
+        allowlistedNotargetCoordinates: [coordinate],
+        sleep: () => {},
+      },
+    );
+    assert.equal(calls, 2);
+  });
+
+  it("does not retry ETARGET diagnostics for another coordinate or malformed npm output", async () => {
+    const coordinate = "@vireocodedev/ui@0.8.4";
+    const anotherCoordinate = "@vireocodedev/history@0.8.4";
+    const cases = [
+      `npm error code ETARGET\nnpm error notarget No matching version found for ${anotherCoordinate}.\n`,
+      `npm error code ETARGET\nnpm error notarget No matching version found for ${coordinate} (cached).\n`,
+      `npm error code ETARGET\nNo matching version found for ${coordinate}.\n`,
+      `npm error code ERESOLVE\nnpm error notarget No matching version found for ${coordinate}.\n`,
+    ];
+    for (const stderr of cases) {
+      const error = Object.assign(new Error("must not retry"), { stderr });
+      assert.equal(isTransientNpmRegistryError(error, { allowlistedNotargetCoordinates: [coordinate] }), false);
+      let calls = 0;
+      await assert.rejects(
+        retryTransientNpmRegistryOperation(
+          () => {
+            calls += 1;
+            throw error;
+          },
+          { attempts: 2, intervalMs: 1, allowlistedNotargetCoordinates: [coordinate], sleep: () => {} },
+        ),
+        /must not retry/u,
+      );
+      assert.equal(calls, 1);
+    }
+  });
+
+  it("surfaces the final exact allowlisted ETARGET when propagation does not complete", async () => {
+    const coordinate = "create-vireo@0.8.4";
+    let calls = 0;
+    await assert.rejects(
+      retryTransientNpmRegistryOperation(
+        () => {
+          calls += 1;
+          throw Object.assign(new Error("still propagating"), {
+            stderr: `npm error code ETARGET\nnpm error notarget No matching version found for ${coordinate}.\n`,
+          });
+        },
+        { attempts: 2, intervalMs: 1, allowlistedNotargetCoordinates: [coordinate], sleep: () => {} },
+      ),
+      /still propagating/u,
     );
     assert.equal(calls, 2);
   });

@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   assertExactContract,
   exactAuditSignatureRecord,
+  exactNpmReleaseCoordinates,
   parseCommandLine,
   releaseTagName,
 } from "./verify-npm-public-release.mjs";
@@ -41,6 +42,11 @@ test("npm public verifier accepts an explicit contract and expected release id",
     assertExactContract({ contract, manifests: publicManifests, expectedReleaseId: "npm-1.2.3_jvm-4.5.6" }).id,
     "npm-1.2.3_jvm-4.5.6",
   );
+});
+
+test("npm public verifier derives ETARGET retry allowlists only from exact contract coordinates", () => {
+  assert.deepEqual(exactNpmReleaseCoordinates(contract.current), publicManifests.map(({ manifest }) => `${manifest.name}@1.2.3`));
+  assert.throws(() => exactNpmReleaseCoordinates({ npm: [{ name: "create-vireo", version: "latest" }] }), /valid package names/u);
 });
 
 test("npm public verifier names release tags from each exact package coordinate", () => {
