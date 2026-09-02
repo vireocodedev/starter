@@ -78,14 +78,22 @@ jobs:
           java-version: "21"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ inputs.source_commit || (github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha) }}
           persist-credentials: false
+      - id: source
+        run: |
+          requested='${{ inputs.source_commit }}'
+          if [ -n "$requested" ] && ! printf '%s' "$requested" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "workflow_dispatch source_commit must be an exact 40-hex commit" >&2
+            exit 1
+          fi
+          echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - run: corepack npm ci --ignore-scripts
       - id: release
         run: echo "release_id=$(node -p \"require('./contracts/ecosystem-release-contract.json').current.id\")" >> "$GITHUB_OUTPUT"
       - run: docker version
       - run: corepack npm exec -- playwright install --with-deps chromium
-      - run: corepack npm run consumer:gauntlet -- --evidence-dir anonymous-consumer-evidence --release-id "${{ inputs.release_id || steps.release.outputs.release_id }}" --source-commit "${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+      - run: corepack npm run consumer:gauntlet -- --evidence-dir anonymous-consumer-evidence --release-id "${{ inputs.release_id || steps.release.outputs.release_id }}" --source-commit "${{ steps.source.outputs.source_commit }}"
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

@@ -456,7 +456,7 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     release,
     requestedReleaseId: releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID,
     requestedSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
-    verifierSourceCommit: process.env.GITHUB_SHA ?? process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
+    verifierSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
   });
   if (preflightProblems.length > 0) throw new Error(preflightProblems.join("\n"));
   const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
@@ -487,7 +487,7 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
       { category: "physical-device", owner: "consumer", reason: "Brand and physical-device PWA installation evidence remains a product decision.", evidenceReferences: [] },
       { category: "adoption", owner: "product", reason: "Public-beta adoption evidence requires real consumer teams and cannot be manufactured by CI.", evidenceReferences: [] },
     ],
-    verifierSourceCommit: process.env.GITHUB_SHA ?? process.env.VIREO_GAUNTLET_SOURCE_COMMIT ?? "local-dry-run",
+    verifierSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT ?? "local-dry-run",
     requestedReleaseId: release.id,
     workflow: { repository: process.env.GITHUB_REPOSITORY ?? "local", run: process.env.GITHUB_RUN_ID ?? "local", attempt: process.env.GITHUB_RUN_ATTEMPT ?? "1", event: process.env.GITHUB_EVENT_NAME ?? "local" },
     scenarios: [],

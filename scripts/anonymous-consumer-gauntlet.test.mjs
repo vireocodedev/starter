@@ -52,5 +52,7 @@ test("gauntlet policy wiring remains public and scheduled", () => {
   assert.match(workflow, /workflow_run\.head_sha/u);
   assert.match(workflow, /--release-id/u);
   assert.match(workflow, /--source-commit/u);
+  assert.match(workflow, /git rev-parse HEAD/u);
+  assert.match(workflow, /source_commit must be an exact 40-hex/u);
   assert.match(workflow, /head_repository\.full_name == github\.repository/u);
 });
