@@ -79,6 +79,20 @@ test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", 
     () => assertStorybookBaselineContinuity(corrupted, edge),
     /0\.8\.4->0\.8\.6:frontend Storybook source must match 0\.8\.3->0\.8\.4 target provenance/u,
   );
+
+  const frontendBaseline = policy.releaseGraph.baselines[edge].frontend.find(file =>
+    file.path.endsWith("vitest.storybook.config.ts"),
+  );
+  const [sourceTransform] = frontendBaseline.sourceProjectionTransforms;
+  const immutable084TemplateSource = frontendBaseline.sourceContent.replace(sourceTransform.to, sourceTransform.from);
+  assert.equal(projectedBaselineSourceBytes(immutable084TemplateSource, frontendBaseline), frontendBaseline.sourceContent);
+  const transformDeletedForFrontendOnly = structuredClone(frontendBaseline);
+  delete transformDeletedForFrontendOnly.sourceProjectionTransforms;
+  assert.throws(
+    () => projectedBaselineSourceBytes(immutable084TemplateSource, transformDeletedForFrontendOnly),
+    /projected source bytes differ from declared source content/u,
+    "removing source projection provenance for one profile fails closed",
+  );
 });
 
 test("Storybook provenance continuity ignores empty, unrelated, and first-add edges", () => {

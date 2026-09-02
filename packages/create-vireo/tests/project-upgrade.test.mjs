@@ -476,8 +476,12 @@ test("the development administrator reaches a settled live Overview", async ({ p
 });
 `;
 const pristine084OverviewDigest = "aea0494de1223a26a132f64d4cad8e3f753348c5aa7f41519edf16798af4d3e3";
+const immutable084ArchitectureCheck =
+  "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs";
+const immutable086ArchitectureCheck =
+  "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs";
 
-function synthetic085Policies() {
+function synthetic086Policies() {
   const { candidatePolicy, finalizedPolicy } = releaseLifecyclePolicies(adjacentPolicy, "0.8.4", "0.8.6");
   const source = candidatePolicy.releaseGraph.releases.find(release => release.release === "0.8.4");
   const target = candidatePolicy.releaseGraph.releases.find(release => release.release === "0.8.6");
@@ -485,7 +489,7 @@ function synthetic085Policies() {
   return { candidatePolicy, finalizedPolicy, source, target };
 }
 
-async function overview085Fixture(profile, source) {
+async function overview086Fixture(profile, source) {
   const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-084-overview-`));
   const frontendOnly = profile === "frontend";
   const dependencies = { ...source.frontendDependencies, react: "^19.0.0" };
@@ -507,7 +511,7 @@ async function overview085Fixture(profile, source) {
     await writeFile(join(root, baseline.path), baseline.sourceContent);
   }
   if (!frontendOnly) await mkdir(join(root, "frontend/tests/e2e"), { recursive: true });
-  const scripts = source.managedFrontendScripts[profile];
+  const scripts = { ...source.managedFrontendScripts[profile], "architecture:check": immutable084ArchitectureCheck };
   const rootManifest = {
     name: `vireo-${profile}-overview`,
     scripts: frontendOnly
@@ -584,9 +588,9 @@ async function overview085Fixture(profile, source) {
 
 test("0.8.4 to 0.8.6 transactionally records the pristine Overview sample before removal for both profiles", async () => {
   assert.equal(sha256(pristine084OverviewSpec), pristine084OverviewDigest);
-  const { candidatePolicy, finalizedPolicy, source, target } = synthetic085Policies();
+  const { candidatePolicy, finalizedPolicy, source, target } = synthetic086Policies();
   for (const profile of ["full-stack", "frontend"]) {
-    const root = await overview085Fixture(profile, source);
+    const root = await overview086Fixture(profile, source);
     try {
       const lockPath = join(root, profile === "frontend" ? "package-lock.json" : "frontend/package-lock.json");
       const lockBefore = await readFile(lockPath, "utf8");
@@ -632,9 +636,17 @@ test("0.8.4 to 0.8.6 transactionally records the pristine Overview sample before
       const samplePath =
         profile === "frontend" ? "src/features/item/public.ts" : "frontend/src/features/item/public.ts";
       assert.equal(manifest.files[samplePath], sha256(await readFile(join(root, samplePath))));
+      const upgradedManifestPath = join(root, profile === "frontend" ? "package.json" : "frontend/package.json");
+      const upgradedManifest = JSON.parse(await readFile(upgradedManifestPath, "utf8"));
+      assert.equal(upgradedManifest.scripts["architecture:check"], immutable086ArchitectureCheck);
       const upgradeReceiptPath = join(root, ".vireo/upgrade-0.8.4-to-0.8.6.json");
       const receipt = JSON.parse(await readFile(upgradeReceiptPath, "utf8"));
       assert.ok(receipt.managedSurfaces.includes(".vireo/example-manifest.json"));
+      assert.ok(
+        receipt.managedSurfaces.includes(
+          `${profile === "frontend" ? "package.json" : "frontend/package.json"}#scripts.architecture:check`,
+        ),
+      );
       const receiptBeforeRepeat = await readFile(upgradeReceiptPath, "utf8");
       const repeatedBeforeRemoval = await upgradeVireoProjectForTest(
         { projectDirectory: root, targetRelease: "0.8.6" },
@@ -666,10 +678,37 @@ test("0.8.4 to 0.8.6 transactionally records the pristine Overview sample before
   }
 });
 
+test("0.8.4 to 0.8.6 refuses customized immutable architecture-check source scripts for both profiles", async () => {
+  const { finalizedPolicy, source } = synthetic086Policies();
+  for (const profile of ["full-stack", "frontend"]) {
+    const root = await overview086Fixture(profile, source);
+    try {
+      const manifestPath = join(root, profile === "frontend" ? "package.json" : "frontend/package.json");
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+      assert.equal(manifest.scripts["architecture:check"], immutable084ArchitectureCheck);
+      manifest.scripts["architecture:check"] = "node consumer-architecture.mjs";
+      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+      const managedPath = join(root, ".vireo/managed-files.json");
+      const managed = JSON.parse(await readFile(managedPath, "utf8"));
+      const managedPackagePath = profile === "frontend" ? "package.json" : "frontend/package.json";
+      managed.files.find(file => file.path === managedPackagePath).sha256 = sha256(await readFile(manifestPath));
+      await writeFile(managedPath, `${JSON.stringify(managed, null, 2)}\n`);
+      const before = await treeBytes(root);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.6" }, finalizedPolicy),
+        error => error.code === "VIR-UPG-003" && /scripts\.architecture:check differs from the declared source or target/u.test(error.message),
+      );
+      assertSameSnapshot(before, await treeBytes(root));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
+
 test("0.8.4 to 0.8.6 refuses customized Overview bytes or a wrong predeclared digest before writing", async () => {
-  const { finalizedPolicy, source } = synthetic085Policies();
+  const { finalizedPolicy, source } = synthetic086Policies();
   for (const scenario of ["customized-bytes", "wrong-declared-digest"]) {
-    const root = await overview085Fixture("full-stack", source);
+    const root = await overview086Fixture("full-stack", source);
     try {
       const overviewPath = join(root, "frontend/tests/e2e/overview.spec.ts");
       if (scenario === "customized-bytes") {
@@ -698,8 +737,8 @@ test("0.8.4 to 0.8.6 refuses customized Overview bytes or a wrong predeclared di
 });
 
 test("0.8.4 to 0.8.6 refuses a pre-existing target-edge upgrade receipt before writing", async () => {
-  const { finalizedPolicy, source } = synthetic085Policies();
-  const root = await overview085Fixture("frontend", source);
+  const { finalizedPolicy, source } = synthetic086Policies();
+  const root = await overview086Fixture("frontend", source);
   try {
     await writeFile(join(root, ".vireo/upgrade-0.8.4-to-0.8.6.json"), "{}\n");
     const before = await treeBytes(root);
@@ -714,9 +753,9 @@ test("0.8.4 to 0.8.6 refuses a pre-existing target-edge upgrade receipt before w
 });
 
 test("already-target 0.8.6 refuses forged or stale historical upgrade receipts without writing", async () => {
-  const { finalizedPolicy, source } = synthetic085Policies();
+  const { finalizedPolicy, source } = synthetic086Policies();
   for (const scenario of ["null", "wrong-commit", "wrong-surfaces", "wrong-actions", "extra-field"]) {
-    const root = await overview085Fixture("frontend", source);
+    const root = await overview086Fixture("frontend", source);
     try {
       await upgradeVireoProjectForTest(
         { projectDirectory: root, targetRelease: "0.8.6", dryRun: false, acceptApplicationOwned: true },
@@ -746,8 +785,8 @@ test("already-target 0.8.6 refuses forged or stale historical upgrade receipts w
 });
 
 test("0.8.4 to 0.8.6 transactionally migrates a completed removal receipt without recreating example provenance", async () => {
-  const { finalizedPolicy, source, target } = synthetic085Policies();
-  const root = await overview085Fixture("frontend", source);
+  const { finalizedPolicy, source, target } = synthetic086Policies();
+  const root = await overview086Fixture("frontend", source);
   try {
     await rm(join(root, ".vireo/example-manifest.json"));
     await rm(join(root, "src/features/item/public.ts"));
@@ -818,9 +857,9 @@ test("0.8.4 to 0.8.6 transactionally migrates a completed removal receipt withou
 });
 
 test("0.8.4 to 0.8.6 refuses missing, malformed, or conflicting example-removal provenance", async () => {
-  const { finalizedPolicy, source } = synthetic085Policies();
+  const { finalizedPolicy, source } = synthetic086Policies();
   for (const scenario of ["missing", "malformed-receipt", "conflicting-states", "symlink-receipt"]) {
-    const root = await overview085Fixture("frontend", source);
+    const root = await overview086Fixture("frontend", source);
     try {
       const manifestPath = join(root, ".vireo/example-manifest.json");
       const receiptPath = join(root, ".vireo/remove-example.json");

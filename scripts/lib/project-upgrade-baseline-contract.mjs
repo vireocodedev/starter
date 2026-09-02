@@ -32,7 +32,11 @@ export function projectedBaselineBytes(profile, templateBytes, file) {
 
 /** Exact projected source bytes retained by a prior generated release. */
 export function projectedBaselineSourceBytes(templateBytes, file) {
-  return applyExactBaselineTransforms(templateBytes, { ...file, transforms: file.sourceProjectionTransforms });
+  const output = applyExactBaselineTransforms(templateBytes, { ...file, transforms: file.sourceProjectionTransforms });
+  if (file.sourceContent !== undefined && output !== file.sourceContent) {
+    throw new Error(`Baseline projected source bytes differ from declared source content: ${file.path}`);
+  }
+  return output;
 }
 
 /**
@@ -46,17 +50,19 @@ export function assertStorybookBaselineContinuity(releaseGraph, edge) {
   const activeBaselines = releaseGraph?.baselines?.[edge];
   const activeStorybookBaselines = new Map(
     ["full-stack", "frontend"]
-      .map(profile => [profile, findProjectedStorybookBaseline(activeBaselines?.[profile], profile)])
+      .map(profile => [profile, findManagedStorybookBaseline(activeBaselines?.[profile], profile)])
       .filter(([, baseline]) => baseline !== undefined),
   );
   if (activeStorybookBaselines.size === 0) return;
   const predecessorEdges = releaseGraph?.edges?.filter(candidate => candidate.to === sourceRelease) ?? [];
+  if (predecessorEdges.length === 0) return;
   if (predecessorEdges.length !== 1) {
     throw new Error(`${edge} must have exactly one predecessor edge for Storybook provenance.`);
   }
   const predecessorEdge = `${predecessorEdges[0].from}->${sourceRelease}`;
   for (const [profile, current] of activeStorybookBaselines) {
     const predecessor = findManagedStorybookBaseline(releaseGraph?.baselines?.[predecessorEdge]?.[profile], profile);
+    if (predecessor === undefined) continue;
     if (
       typeof predecessor.targetSha256 !== "string" ||
       typeof predecessor.targetContent !== "string" ||
@@ -74,26 +80,10 @@ export function assertStorybookBaselineContinuity(releaseGraph, edge) {
   }
 }
 
-function findProjectedStorybookBaseline(files, profile) {
-  const matches = (files ?? []).filter(
-    file =>
-      file?.operation === "update" &&
-      file.path?.endsWith("vitest.storybook.config.ts") &&
-      Array.isArray(file.sourceProjectionTransforms),
-  );
-  if (matches.length > 1) {
-    throw new Error(`${profile} must declare at most one projected Storybook configuration baseline.`);
-  }
-  return matches[0];
-}
-
 function findManagedStorybookBaseline(files, profile) {
   const matches = (files ?? []).filter(
     file => file?.operation === "update" && file.path?.endsWith("vitest.storybook.config.ts"),
   );
-  if (matches.length !== 1) {
-    throw new Error(`${profile} must declare exactly one managed Storybook configuration baseline.`);
-  }
-  const [baseline] = matches;
-  return baseline;
+  if (matches.length > 1) throw new Error(`${profile} must declare at most one managed Storybook configuration baseline.`);
+  return matches[0];
 }

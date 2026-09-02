@@ -1201,12 +1201,15 @@ async function upgradeProjectWithPolicy(
   const targetScriptManifest = frontendOnly ? targetRootManifest : targetFrontendManifest;
   const sourceManagedScripts = managedScriptsForProfile(source, frontendOnly);
   const targetManagedScripts = managedScriptsForProfile(target, frontendOnly);
+  const targetProjectionSourceScripts =
+    target.projectionSourceFrontendScripts?.[frontendOnly ? "frontend" : "full-stack"] ?? {};
   for (const [name, value] of Object.entries(targetManagedScripts)) {
     const current = targetScriptManifest.scripts?.[name];
-    if (current !== undefined && current !== value && current !== sourceManagedScripts[name])
+    const sourceValue = sourceManagedScripts[name] ?? targetProjectionSourceScripts[name];
+    if (current !== value && current !== sourceValue)
       throw new VireoUpgradeError(
         "VIR-UPG-003",
-        `Managed package.json scripts.${name} differs from the declared target; resolve the customization before upgrading.`,
+        `Managed package.json scripts.${name} differs from the declared source or target; resolve the customization before upgrading.`,
       );
   }
   targetRootManifest.scripts = {

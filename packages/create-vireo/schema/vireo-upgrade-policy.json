@@ -200,10 +200,12 @@
         "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
         "managedFrontendScripts": {
           "full-stack": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs",
             "performance:policy:test": "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
             "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs"
           },
           "frontend": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs",
             "performance:policy:test": "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
             "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs"
           }
@@ -215,6 +217,14 @@
           "@vireocodedev/query": "^0.2.2",
           "@vireocodedev/shell": "^0.2.2",
           "@vireocodedev/ui": "^0.3.1"
+        },
+        "projectionSourceFrontendScripts": {
+          "full-stack": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs"
+          },
+          "frontend": {
+            "architecture:check": "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs"
+          }
         }
       }
     ],

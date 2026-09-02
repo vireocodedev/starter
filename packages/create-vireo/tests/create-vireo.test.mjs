@@ -25,6 +25,10 @@ const fixtureTemplateTag = `starter-template@${fixtureReleaseIdentity.createVire
 const fixtureTemplateReleaseContractUrl =
   `https://github.com/vireocodedev/vireo-template/blob/${encodeURIComponent(fixtureTemplateTag)}` +
   "/contracts/template-release-policy.json";
+const immutable084ArchitectureCheck =
+  "node --test scripts/architecture-policy.test.mjs && node scripts/check-architecture.mjs";
+const immutable086ArchitectureCheck =
+  "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs";
 
 function gradleProperties(starterVersion) {
   return `org.gradle.caching=true\nstarterVersion=${starterVersion}\norg.gradle.jvmargs=-Xmx2g\n`;
@@ -242,7 +246,7 @@ export {};
         "build-storybook": "storybook build",
         "starter:mode:published": "node scripts/mode.mjs",
         "starter:boundary:check": "node scripts/boundary.mjs",
-        "architecture:check": "node scripts/architecture.mjs",
+        "architecture:check": immutable084ArchitectureCheck,
         "bundle:check": "node scripts/bundle.mjs",
         "performance:policy:test": "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
         "performance:audit": "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
@@ -462,6 +466,7 @@ test("creates and customizes a project atomically from a local fixture", async (
       frontendPackage.scripts["performance:audit"],
       "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
     );
+    assert.equal(frontendPackage.scripts["architecture:check"], immutable086ArchitectureCheck);
     assert.match(
       await readFile(join(target, "frontend/vitest.storybook.config.ts"), "utf8"),
       /include: \["@testing-library\/dom"\]/u,
@@ -932,6 +937,7 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
       packageJson.scripts["performance:audit"],
       "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
     );
+    assert.equal(packageJson.scripts["architecture:check"], immutable086ArchitectureCheck);
     assert.match(
       await readFile(join(target, "scripts/lighthouse-budget.mjs"), "utf8"),
       /path\.resolve\(frontendRoot, "\.performance-evidence"\)/u,
