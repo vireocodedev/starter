@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "contractId": "vireo-project-upgrade-graph",
   "packedPolicy": "packages/create-vireo/schema/vireo-upgrade-policy.json",
-  "publicRelease": "0.8.3",
+  "publicRelease": "0.8.4",
   "previousRelease": "0.8.3",
-  "publicationState": "candidate",
+  "publicationState": "final",
   "releaseCoordinates": {
     "0.6.0": {
       "createVireo": "0.6.0",
@@ -46,54 +46,25 @@
       "templateVersion": "0.8.3",
       "templateCommit": "12485e7e7e9323a802d79c793d230557cad4c7fb",
       "starterJvmVersion": "0.3.1",
-      "status": "current"
+      "status": "historical"
     },
     "0.8.4": {
       "createVireo": "0.8.4",
       "templateVersion": "0.8.4",
       "templateCommit": "09cd526d32907bedfe5bb6ab45a2d4d221b0d47b",
       "starterJvmVersion": "0.3.1",
-      "status": "candidate"
+      "status": "current"
     }
   },
   "historicalReleases": ["0.2.0", "0.3.0", "0.4.0", "0.5.0"],
   "requiredEdges": [
-    {
-      "from": "0.2.0",
-      "to": "0.3.0"
-    },
-    {
-      "from": "0.6.0",
-      "to": "0.7.0"
-    },
-    {
-      "from": "0.7.0",
-      "to": "0.8.0"
-    },
-    {
-      "from": "0.8.0",
-      "to": "0.8.1"
-    },
-    {
-      "from": "0.8.1",
-      "to": "0.8.2"
-    },
-    {
-      "from": "0.8.2",
-      "to": "0.8.3"
-    },
-    {
-      "from": "0.8.3",
-      "to": "0.8.4"
-    }
+    { "from": "0.2.0", "to": "0.3.0" },
+    { "from": "0.6.0", "to": "0.7.0" },
+    { "from": "0.7.0", "to": "0.8.0" },
+    { "from": "0.8.0", "to": "0.8.1" },
+    { "from": "0.8.1", "to": "0.8.2" },
+    { "from": "0.8.2", "to": "0.8.3" },
+    { "from": "0.8.3", "to": "0.8.4" }
   ],
-  "maintenance": {
-    "latestFixLine": "0.8.4",
-    "priorCurrentUpgradeSource": "0.8.3",
-    "backportsPromised": false
-  },
-  "candidateRelease": "0.8.4",
-  "finalization": {
-    "targetTemplateCommit": "09cd526d32907bedfe5bb6ab45a2d4d221b0d47b"
-  }
+  "maintenance": { "latestFixLine": "0.8.4", "priorCurrentUpgradeSource": "0.8.3", "backportsPromised": false }
 }

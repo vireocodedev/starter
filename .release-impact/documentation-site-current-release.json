@@ -3,5 +3,5 @@
   "artifact": "application:documentation-site",
   "decision": "release",
   "bump": "deploy",
-  "summary": "Deploy the synchronized Vireo documentation snapshot for npm-0.8.3_jvm-0.3.1 (0e453b280e3116effc466fb73a19174305d63d2e1b3e7bcc785694abd409e80c)."
+  "summary": "Deploy the synchronized Vireo documentation snapshot for npm-0.8.4_jvm-0.3.1 (066309d88f0198437556ebf872d7a43b1c2691870ea4c412785420a4631410da)."
 }

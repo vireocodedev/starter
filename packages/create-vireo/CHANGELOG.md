@@ -1,5 +1,11 @@
 # create-vireo
 
+## 0.8.4
+
+### Patch Changes
+
+- 021152d: Pin generated projects and the adjacent-upgrade contract to Vireo Template 0.8.4, including managed, project-local Lighthouse policy evidence and deterministic Storybook dependency optimization for both project profiles.
+
 ## 0.8.3
 
 ### Patch Changes

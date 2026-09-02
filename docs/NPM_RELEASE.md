@@ -82,7 +82,7 @@ version is outside the approved `0.x` line, or there is nothing new to publish.
 
 The current npm line depends on the coordinated public Maven line. Keep this
 order protected: publish the reviewed Template release first (the
-`starter-template@0.8.3` release is already published), then stage and publish the
+`starter-template@0.8.4` release is already published), then stage and publish the
 matching Maven Central deployment, and run its anonymous six-coordinate consumer
 verification. Only after that proof succeeds may a maintainer dispatch and approve
 the npm publication environment. The npm verify job independently repeats that
