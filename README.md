@@ -15,16 +15,16 @@ adversarial admission checklist are in
 [Vireo Template](https://github.com/vireocodedev/vireo-template) for the
 current runnable full-stack composition.
 
-[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/vireo-template/2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
+[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/vireo-template/50ca39292810fd57049e3cc73b68e71f9b5c746c/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
 
 This is the current Template pinned by the release contract, not a concept render. [Try the disposable live demo](https://demo.vireocode.com), follow the [guided build](https://vireocode.com/docs/getting-started/), or read [who Vireo does and does not fit](https://vireocode.com/docs/getting-started/choose-your-profile/) before installing.
 
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
 creation, doctor diagnostics, and target-aware entity generator are implemented.
 The standalone frontend profile was introduced in `create-vireo@0.4.0` and is current
-in `create-vireo@0.8.0`. Its version-aware
-project upgrade currently supports the explicit adjacent 0.7.0→0.8.0 release
-pair; the 0.6.0→0.7.0 and original 0.2.0→0.3.0 pairs remain retained historical evidence.
+in `create-vireo@0.8.1`. Its version-aware
+project upgrade currently supports the explicit adjacent 0.8.0→0.8.1 release
+pair; 0.7.0→0.8.0 remains retained historical evidence; the 0.6.0→0.7.0 and original 0.2.0→0.3.0 pairs remain retained historical evidence.
 
 ## Start here
 
@@ -69,7 +69,7 @@ Public-beta evaluation is open, but readiness and independent adoption are not y
 
 | Package                                                   | Version | Description                                                                                               |
 | --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.8.0   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
+| [`create-vireo`](packages/create-vireo)                   | 0.8.1   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
 | [`@vireocodedev/ui`](packages/ui)                         | 0.3.1   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
 | [`@vireocodedev/query`](packages/queryengine)             | 0.2.2   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
 | [`@vireocodedev/shell`](packages/shell)                   | 0.2.2   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
