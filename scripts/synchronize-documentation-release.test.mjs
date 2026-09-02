@@ -118,11 +118,7 @@ test("synchronizes release contracts and public version documentation from sourc
     );
     assert.match(
       readFileSync(join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"), "utf8"),
-      /current 0\.2\.0→0\.3\.0 edge/u,
-    );
-    assert.match(
-      readFileSync(join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"), "utf8"),
-      /0\.0\.0→0\.1\.0 remains retained historical evidence/u,
+      /Public `create-vireo` 0\.3\.0 declares the current 0\.2\.0→0\.3\.0 edge.*introduced by the historical 0\.0\.0→0\.1\.0 edge\./u,
     );
     assert.match(readFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "utf8"), new RegExp(releaseId, "u"));
     assert.match(
@@ -384,6 +380,21 @@ test("rejects unsafe documentation release IDs before writing release outputs", 
   }
 });
 
+test("rejects an undeclared retained backlog edge", async () => {
+  const root = makeFixture();
+  try {
+    const path = join(root, "docs", "roadmap", "phase-4", "backlog.md");
+    writeFileSync(path, readFileSync(path, "utf8").replace("0.0.0→0.1.0", "9.9.8→9.9.9"));
+
+    await assert.rejects(
+      synchronizeFixtureDocumentationRelease(root),
+      /docs\/roadmap\/phase-4\/backlog\.md current release contract must contain exactly one current-state reference/u,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function makeFixture() {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   mkdirSync(join(root, "contracts"));
@@ -428,6 +439,13 @@ function makeFixture() {
       previousRelease: "0.2.0",
       releases: [
         {
+          release: "0.0.0",
+          status: "historical",
+          templateCommit: "a".repeat(40),
+          rootVireoScript: "npx --yes --package=create-vireo@0.0.0 vireo",
+          starterJvmVersion: "0.3.0",
+        },
+        {
           release: "0.1.0",
           status: "historical",
           templateCommit: "a".repeat(40),
@@ -450,6 +468,7 @@ function makeFixture() {
         },
       ],
       edges: [
+        { from: "0.0.0", to: "0.1.0", applicationOwnedActions: [] },
         { from: "0.1.0", to: "0.2.0", applicationOwnedActions: [] },
         { from: "0.2.0", to: "0.3.0", applicationOwnedActions: [] },
       ],
@@ -566,7 +585,7 @@ function makeFixture() {
   );
   writeFileSync(
     join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"),
-    "Public `create-vireo` 0.2.0 declares the current 0.1.0→0.2.0 edge with dry run, explicit apply, refusal, ownership and rollback guidance; its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical 0.0.0→0.1.0 edge. The 0.0.0→0.1.0 remains retained historical evidence.\n",
+    "Public `create-vireo` 0.2.0 declares the current 0.1.0→0.2.0 edge with dry run, explicit apply, refusal, ownership and rollback guidance; its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical 0.0.0→0.1.0 edge.\n",
   );
   writeFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "Current snapshot: `npm-0.2.0_jvm-0.3.0`.\n");
   writeFileSync(
