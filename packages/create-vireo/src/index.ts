@@ -12,7 +12,11 @@ import {
   validateApplicationProjectionContract,
 } from "./application-projection-contract.mjs";
 import { sha256 } from "./entity-generator.js";
-import { currentVireoReleaseRequirements } from "./project-upgrade.js";
+import {
+  currentFrontendProjectionRequirements,
+  currentProjectionCompatibilityRequirements,
+  currentVireoReleaseRequirements,
+} from "./project-upgrade.js";
 
 export {
   checkGeneratedEntities,
@@ -826,6 +830,13 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
       throw new Error(`Pinned Template frontend package.json must define ${name}.`);
     return script;
   };
+  const performance = await currentFrontendProjectionRequirements();
+  for (const [name, expected] of Object.entries(performance.scripts)) {
+    const templateValue = packageJson.scripts?.[name];
+    const sourceValue = performance.sourceScripts[name];
+    if (templateValue !== undefined && templateValue !== expected && templateValue !== sourceValue)
+      throw new Error(`Pinned Template frontend package.json defines an incompatible ${name} command.`);
+  }
   packageJson.scripts = {
     setup: "corepack npm ci",
     doctor: "node scripts/vireo-frontend-doctor.mjs",
@@ -844,6 +855,8 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
     "starter:boundary:check": packageJson.scripts["starter:boundary:check"],
     "architecture:check": packageJson.scripts["architecture:check"],
     "bundle:check": packageJson.scripts["bundle:check"],
+    "performance:policy:test": performance.scripts["performance:policy:test"],
+    "performance:audit": performance.scripts["performance:audit"],
     "pwa:check:source": requiredScript("pwa:check:source"),
     "pwa:check:built": requiredScript("pwa:check:built"),
     "pretest:pwa": requiredScript("pretest:pwa"),
@@ -857,6 +870,14 @@ async function projectFrontendTemplate(staging: string, projectName: string, pro
     "verify:release": "corepack npm run identity:check:release && corepack npm run verify",
   };
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+
+  for (const file of performance.files) {
+    if (typeof file.contents !== "string")
+      throw new Error(`Active frontend performance baseline has no target bytes: ${file.path}`);
+    const path = join(staging, file.path);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, file.contents);
+  }
 
   const lockPath = join(staging, "package-lock.json");
   const lock = JSON.parse(await readFile(lockPath, "utf8")) as {
@@ -885,6 +906,7 @@ dist/
 playwright-report/
 test-results/
 storybook-static/
+.performance-evidence/
 .env
 .env.*
 !.env.example
@@ -895,6 +917,48 @@ storybook-static/
   await chmod(join(staging, "scripts", "verify-frontend-profile.sh"), 0o755);
   const doctorPath = join(staging, "scripts", "vireo-frontend-doctor.mjs");
   await writeFile(doctorPath, await renderFrontendDoctorScript(doctorPath));
+  return performance.files.map(file => file.path);
+}
+
+async function applyFullStackPerformanceProjection(staging: string) {
+  const performance = await currentFrontendProjectionRequirements("full-stack");
+  const packagePath = join(staging, "frontend", "package.json");
+  const packageJson = JSON.parse(await readFile(packagePath, "utf8")) as { scripts?: Record<string, string> };
+  if (!packageJson.scripts) throw new Error("Pinned Template frontend/package.json does not declare scripts.");
+  for (const [name, expected] of Object.entries(performance.scripts)) {
+    const templateValue = packageJson.scripts[name];
+    const sourceValue = performance.sourceScripts[name];
+    if (templateValue !== undefined && templateValue !== expected && templateValue !== sourceValue)
+      throw new Error(`Pinned Template frontend/package.json defines an incompatible ${name} command.`);
+    packageJson.scripts[name] = expected;
+  }
+  await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+  for (const file of performance.files) {
+    if (typeof file.contents !== "string")
+      throw new Error(`Active full-stack performance baseline has no target bytes: ${file.path}`);
+    const path = join(staging, file.path);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, file.contents);
+  }
+  return performance.files.map(file => file.path);
+}
+
+async function applyProjectionCompatibility(staging: string, profile: VireoProfile) {
+  const files = await currentProjectionCompatibilityRequirements(profile);
+  for (const file of files) {
+    if (typeof file.source !== "string" || typeof file.contents !== "string")
+      throw new Error(`Active projection compatibility baseline has incomplete immutable bytes: ${file.path}`);
+    const path = join(staging, file.path);
+    const existing = await readFile(path, "utf8").catch(error => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT")
+        throw new Error(`Pinned Template compatibility baseline is missing: ${file.path}`);
+      throw error;
+    });
+    if (existing !== file.source && existing !== file.contents)
+      throw new Error(`Pinned Template compatibility baseline is customized: ${file.path}`);
+    await writeFile(path, file.contents);
+  }
+  return files.map(file => file.path);
 }
 
 async function pinGeneratedProjectCli(staging: string) {
@@ -1354,14 +1418,18 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
       profile === "frontend" ? "." : "frontend",
     );
     await renameJavaPackage(staging, javaPackage);
-    if (profile === "frontend") await projectFrontendTemplate(staging, projectName, productName);
-    else {
+    const frontendPerformancePaths =
+      profile === "frontend" ? await projectFrontendTemplate(staging, projectName, productName) : [];
+    const fullStackPerformancePaths =
+      profile === "full-stack" ? await applyFullStackPerformanceProjection(staging) : [];
+    if (profile !== "frontend") {
       await pinGeneratedProjectCli(staging);
       await normalizeGeneratedStarterJvmVersion(staging);
       await normalizeGeneratedAppToolchainPolicy(staging);
       await normalizeGeneratedAppVerification(staging);
       await normalizeGeneratedAppWorkflowPolicy(staging);
     }
+    const projectionCompatibilityPaths = await applyProjectionCompatibility(staging, profile);
     await renderProjectIdentityPolicy(staging, profile);
     await renderApplicationDocumentation(staging, profile, projectName);
     await renderPublicIdentity(staging, identity, profile);
@@ -1374,6 +1442,9 @@ export async function createVireo(options: CreateVireoOptions): Promise<CreateVi
     const managedPaths = [
       ...new Set([
         ...projectedManagedPaths,
+        ...frontendPerformancePaths,
+        ...fullStackPerformancePaths,
+        ...projectionCompatibilityPaths,
         ...(profile === "full-stack"
           ? ["package.json", "frontend/package.json", "gradle.properties"]
           : ["package.json"]),

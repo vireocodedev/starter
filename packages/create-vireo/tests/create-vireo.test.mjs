@@ -244,6 +244,7 @@ export {};
         "starter:boundary:check": "node scripts/boundary.mjs",
         "architecture:check": "node scripts/architecture.mjs",
         "bundle:check": "node scripts/bundle.mjs",
+        "performance:audit": "node scripts/lighthouse-budget.mjs",
         "pwa:check:source": "node scripts/check-pwa-contract.mjs --source --require-nginx",
         "pwa:check:built": "node scripts/check-pwa-contract.mjs --built",
         "pretest:pwa": "node scripts/prepare-pwa-update-fixture.mjs",
@@ -264,6 +265,13 @@ export {};
     }),
   );
   await writeFile(join(template, "frontend/vite.config.ts"), 'import { createPwaManifest } from "./pwa-policy.mjs";\n');
+  const candidatePolicy = JSON.parse(
+    await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+  );
+  const storybookBaseline = candidatePolicy.releaseGraph.baselines["0.8.3->0.8.4"]["full-stack"].find(
+    file => file.path === "frontend/vitest.storybook.config.ts",
+  );
+  await writeFile(join(template, "frontend/vitest.storybook.config.ts"), storybookBaseline.sourceContent);
   await writeFile(
     join(template, "frontend/pwa-policy.mjs"),
     `export const APP_IDENTITY = Object.freeze({
@@ -285,6 +293,14 @@ export {};
   await writeFile(join(template, "frontend/scripts/pwa-update-fixture.mjs"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/pwa-update-fixture.d.mts"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/app-identity-html.mjs"), "export {};\n");
+  await writeFile(join(template, "frontend/scripts/lighthouse-audit-support.mjs"), "export {};\n");
+  await writeFile(join(template, "frontend/scripts/lighthouse-audit-support.test.mjs"), "export {};\n");
+  await writeFile(
+    join(template, "frontend/scripts/lighthouse-budget.mjs"),
+    'const evidenceDirectory = path.resolve(frontendRoot, "../.performance-evidence");\n',
+  );
+  await writeFile(join(template, "frontend/scripts/lighthouse-policy.mjs"), "export {};\n");
+  await writeFile(join(template, "frontend/scripts/lighthouse-policy.test.mjs"), "export {};\n");
   await writeFile(join(template, "frontend/scripts/verify.sh"), "#!/usr/bin/env bash\nset -euo pipefail\n");
   await writeFile(
     join(template, "frontend/tests/pwa/production-pwa.spec.ts"),
@@ -297,6 +313,7 @@ export {};
   await writeFile(join(template, "frontend/tests/demo/flagship-demo.spec.ts"), "export {};\n");
   await writeFile(join(template, "frontend/tests/deployment/smoke.spec.ts"), "export {};\n");
   await writeFile(join(template, "frontend/tests/e2e/login.spec.ts"), "export {};\n");
+  await writeFile(join(template, "frontend/tests/e2e/overview.spec.ts"), "export {};\n");
   await writeFile(join(template, "frontend/playwright.demo.config.ts"), "export {};\n");
   await writeFile(join(template, "frontend/playwright.deployment.config.ts"), "export {};\n");
   await writeFile(
@@ -433,6 +450,28 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.match(identity, /description: "Sample App is a production-oriented application\."/u);
     assert.doesNotMatch(identity, /Vireo Starter/u);
     assert.ok((await readFile(join(target, "package.json"), "utf8")).includes(`create-vireo@${createVireoVersion}`));
+    const frontendPackage = JSON.parse(await readFile(join(target, "frontend/package.json"), "utf8"));
+    assert.equal(
+      frontendPackage.scripts["performance:policy:test"],
+      "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
+    );
+    assert.equal(
+      frontendPackage.scripts["performance:audit"],
+      "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
+    );
+    assert.match(
+      await readFile(join(target, "frontend/vitest.storybook.config.ts"), "utf8"),
+      /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
+    );
+    for (const path of [
+      "frontend/scripts/lighthouse-audit-support.mjs",
+      "frontend/scripts/lighthouse-audit-support.test.mjs",
+      "frontend/scripts/lighthouse-budget.mjs",
+      "frontend/scripts/lighthouse-policy.mjs",
+      "frontend/scripts/lighthouse-policy.test.mjs",
+    ]) {
+      await assert.doesNotReject(readFile(join(target, path)), path);
+    }
     assert.equal(
       await readFile(join(target, "gradle.properties"), "utf8"),
       gradleProperties(fixtureReleaseIdentity.generatedStarterJvmVersion),
@@ -442,6 +481,19 @@ test("creates and customizes a project atomically from a local fixture", async (
       /package dev\.example\.sample/u,
     );
     const metadata = JSON.parse(await readFile(join(target, ".vireo/project.json"), "utf8"));
+    const managedFiles = JSON.parse(await readFile(join(target, ".vireo/managed-files.json"), "utf8"));
+    for (const path of [
+      "frontend/scripts/lighthouse-audit-support.mjs",
+      "frontend/scripts/lighthouse-audit-support.test.mjs",
+      "frontend/scripts/lighthouse-budget.mjs",
+      "frontend/scripts/lighthouse-policy.mjs",
+      "frontend/scripts/lighthouse-policy.test.mjs",
+    ]) {
+      assert.ok(
+        managedFiles.files.some(file => file.path === path),
+        `${path} is managed`,
+      );
+    }
     assert.equal(metadata.createdBy, `create-vireo@${createVireoVersion}`);
     assert.deepEqual(
       {
@@ -592,6 +644,7 @@ test("creates and customizes a project atomically from a local fixture", async (
       "frontend/tests/demo/flagship-demo.spec.ts",
       "frontend/tests/deployment/smoke.spec.ts",
       "frontend/tests/e2e/login.spec.ts",
+      "frontend/tests/e2e/overview.spec.ts",
     ]) {
       assert.match(await readFile(join(target, path), "utf8"), /export/u);
     }
@@ -856,8 +909,10 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.match(environment, /VITE_API_MODE=mock/u);
     assert.doesNotMatch(environment, /VITE_APP_NAME/u);
     assert.match(await readFile(join(target, ".gitignore"), "utf8"), /^\.pwa-update-fixture\/$/mu);
+    assert.match(await readFile(join(target, ".gitignore"), "utf8"), /^\.performance-evidence\/$/mu);
     assert.match(await readFile(join(target, ".gitignore"), "utf8"), /^!\.env\.development$/mu);
     const packageJson = JSON.parse(await readFile(join(target, "package.json"), "utf8"));
+    const frontendManaged = JSON.parse(await readFile(join(target, ".vireo/managed-files.json"), "utf8"));
     assert.equal(packageJson.version, "0.1.0");
     assert.equal(packageJson.scripts["release:policy"], undefined);
     for (const script of ["pwa:check:source", "pwa:check:built", "pretest:pwa", "test:pwa"]) {
@@ -866,6 +921,35 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
     assert.equal(packageJson.scripts["identity:check"], "node scripts/project-identity-policy.mjs");
     assert.equal(packageJson.scripts["identity:check:release"], "node scripts/project-identity-policy.mjs --release");
     assert.equal(packageJson.scripts["doctor:json"], "node scripts/vireo-frontend-doctor.mjs --json");
+    assert.equal(
+      packageJson.scripts["performance:policy:test"],
+      "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
+    );
+    assert.equal(
+      packageJson.scripts["performance:audit"],
+      "corepack npm run performance:policy:test && node scripts/lighthouse-budget.mjs",
+    );
+    assert.match(
+      await readFile(join(target, "scripts/lighthouse-budget.mjs"), "utf8"),
+      /path\.resolve\(frontendRoot, "\.performance-evidence"\)/u,
+    );
+    assert.match(
+      await readFile(join(target, "vitest.storybook.config.ts"), "utf8"),
+      /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
+    );
+    for (const path of [
+      "scripts/lighthouse-audit-support.mjs",
+      "scripts/lighthouse-audit-support.test.mjs",
+      "scripts/lighthouse-budget.mjs",
+      "scripts/lighthouse-policy.mjs",
+      "scripts/lighthouse-policy.test.mjs",
+    ]) {
+      await assert.doesNotReject(readFile(join(target, path)), path);
+      assert.ok(
+        frontendManaged.files.some(file => file.path === path),
+        `${path} is managed`,
+      );
+    }
     assert.equal(
       packageJson.scripts["verify:release"],
       "corepack npm run identity:check:release && corepack npm run verify",
@@ -977,11 +1061,68 @@ test("creates a standalone frontend profile without Java, Gradle, or database fi
       "tests/demo/flagship-demo.spec.ts",
       "tests/deployment/smoke.spec.ts",
       "tests/e2e/login.spec.ts",
+      "tests/e2e/overview.spec.ts",
     ]) {
       await assert.rejects(readFile(join(target, path)), /ENOENT/u);
+      assert.equal(
+        frontendManaged.files.some(file => file.path === path),
+        false,
+        `${path} is excluded`,
+      );
     }
     await assert.rejects(readFile(join(target, "settings.gradle")), /ENOENT/u);
     await assert.rejects(readFile(join(target, "src/main/java/App.java")), /ENOENT/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("frontend performance projection materializes immutable candidate bytes when an adjacent Template omits them", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-frontend-performance-baseline-"));
+  try {
+    const template = await fixture(root);
+    const templatePackagePath = join(template, "frontend/package.json");
+    const templatePackage = JSON.parse(await readFile(templatePackagePath, "utf8"));
+    delete templatePackage.scripts["performance:policy:test"];
+    delete templatePackage.scripts["performance:audit"];
+    await writeFile(templatePackagePath, `${JSON.stringify(templatePackage, null, 2)}\n`);
+    for (const path of [
+      "lighthouse-audit-support.mjs",
+      "lighthouse-audit-support.test.mjs",
+      "lighthouse-budget.mjs",
+      "lighthouse-policy.mjs",
+      "lighthouse-policy.test.mjs",
+    ]) {
+      await rm(join(template, "frontend/scripts", path));
+    }
+    const target = join(root, "operations-ui");
+    await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
+    const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
+    for (const baseline of policy.releaseGraph.baselines["0.8.3->0.8.4"].frontend) {
+      assert.equal(await readFile(join(target, baseline.path), "utf8"), baseline.targetContent, baseline.path);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("frontend performance projection refuses incompatible Template commands", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-frontend-performance-command-"));
+  try {
+    const template = await fixture(root);
+    const path = join(template, "frontend/package.json");
+    const manifest = JSON.parse(await readFile(path, "utf8"));
+    manifest.scripts["performance:policy:test"] = "node unexpected.mjs";
+    await writeFile(path, `${JSON.stringify(manifest, null, 2)}\n`);
+    await assert.rejects(
+      createVireo({
+        directory: join(root, "operations-ui"),
+        profile: "frontend",
+        git: false,
+        templateDirectory: template,
+      }),
+      /incompatible performance:policy:test command/u,
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

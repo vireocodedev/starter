@@ -4,6 +4,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { classifyProjectionPath, readApplicationProjectionContract } from "./lib/application-projection-contract.mjs";
+import {
+  applyExactBaselineTransforms,
+  projectedBaselineBytes,
+  templatePathForBaseline,
+} from "./lib/project-upgrade-baseline-contract.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const templateRepositoryOption = process.argv.indexOf("--template-repository");
@@ -61,15 +66,6 @@ function sourceObjectExists(commit, path) {
     return false;
   }
 }
-function applyTransforms(source, file) {
-  let output = source;
-  for (const transform of file.transforms ?? []) {
-    if (!transform?.from || typeof transform.to !== "string" || output.split(transform.from).length !== 2)
-      throw new Error(`Baseline transform is not exact: ${file.path}`);
-    output = output.replace(transform.from, transform.to);
-  }
-  return output;
-}
 
 const graph = policy.releaseGraph;
 const sourceRelease = graph.previousRelease;
@@ -109,7 +105,9 @@ for (const profile of ["full-stack", "frontend"]) {
   const managedChangedPaths = changedTemplatePaths.filter(
     path => classifyProjectionPath(projectionContract, path, profile)?.category === "managed",
   );
-  const declaredBaselines = new Set((activeBaselines[profile] ?? []).map(file => file.path));
+  const declaredBaselines = new Set(
+    (activeBaselines[profile] ?? []).map(file => templatePathForBaseline(profile, file.path)),
+  );
   const missing = managedChangedPaths.filter(path => !declaredBaselines.has(path));
   if (missing.length)
     throw new Error(
@@ -121,9 +119,8 @@ for (const profile of ["full-stack", "frontend"]) {
   const files = activeBaselines[profile];
   if (!Array.isArray(files)) throw new Error(`${edge}:${profile} baseline list is missing.`);
   for (const file of files) {
-    if (profile === "frontend") {
-      const fixture = frontendEvidence.get(file.path);
-      if (!fixture) throw new Error(`${edge}:frontend:${file.path} has no frozen Vireo-owned byte evidence.`);
+    const fixture = profile === "frontend" ? frontendEvidence.get(file.path) : undefined;
+    if (fixture) {
       const sourceBytes = readFileSync(fixture.source, "utf8");
       const targetFixture = JSON.parse(readFileSync(fixture.target, "utf8"));
       if (
@@ -139,7 +136,7 @@ for (const profile of ["full-stack", "frontend"]) {
         throw new Error(`${edge}:frontend:${file.path} source hash differs from its frozen Vireo fixture.`);
       if (file.operation !== "update" || !file.transforms)
         throw new Error(`${edge}:frontend:${file.path} must be an exact transformed update.`);
-      const targetBytes = applyTransforms(sourceBytes, file);
+      const targetBytes = applyExactBaselineTransforms(sourceBytes, file);
       if (Buffer.byteLength(targetBytes) !== targetFixture.bytes)
         throw new Error(`${edge}:frontend:${file.path} target length differs from frozen Vireo byte evidence.`);
       if (sha256(targetBytes) !== targetFixture.sha256 || targetFixture.sha256 !== file.targetSha256)
@@ -147,15 +144,22 @@ for (const profile of ["full-stack", "frontend"]) {
       checked += 1;
       continue;
     }
+    const templatePath = templatePathForBaseline(profile, file.path);
+    const templateManaged =
+      sourceObjectExists(source.templateCommit, templatePath) ||
+      sourceObjectExists(target.templateCommit, templatePath);
+    if (profile === "frontend" && !templateManaged) {
+      throw new Error(`${edge}:frontend:${file.path} has no frozen Vireo-owned byte evidence.`);
+    }
     if (file.operation === "add") {
       if (!/^[a-f0-9]{64}$/u.test(file.targetSha256 ?? ""))
         throw new Error(`${edge}:${profile}:${file.path} add has no exact target hash.`);
-      if (!sourceObjectExists(target.templateCommit, file.path))
+      if (!sourceObjectExists(target.templateCommit, templatePath))
         throw new Error(`${edge}:${profile}:${file.path} add is absent from the immutable target Template.`);
-      const targetBytes = gitObject(target.templateCommit, file.path);
+      const targetBytes = projectedBaselineBytes(profile, gitObject(target.templateCommit, templatePath), file);
       if (sha256(targetBytes) !== file.targetSha256)
         throw new Error(`${edge}:${profile}:${file.path} add hash differs from immutable Template bytes.`);
-      if (sourceObjectExists(source.templateCommit, file.path))
+      if (sourceObjectExists(source.templateCommit, templatePath))
         throw new Error(`${edge}:${profile}:${file.path} unexpectedly exists in the source Template.`);
       if (file.targetContent !== targetBytes)
         throw new Error(`${edge}:${profile}:${file.path} stored target bytes differ from the immutable Template.`);
@@ -163,28 +167,28 @@ for (const profile of ["full-stack", "frontend"]) {
       if (!/^[a-f0-9]{64}$/u.test(file.sourceSha256 ?? "") || !/^[a-f0-9]{64}$/u.test(file.targetSha256 ?? ""))
         throw new Error(`${edge}:${profile}:${file.path} update has no exact source/target hash.`);
       if (
-        !sourceObjectExists(source.templateCommit, file.path) ||
-        !sourceObjectExists(target.templateCommit, file.path)
+        !sourceObjectExists(source.templateCommit, templatePath) ||
+        !sourceObjectExists(target.templateCommit, templatePath)
       )
         throw new Error(`${edge}:${profile}:${file.path} update is absent from an immutable Template endpoint.`);
-      const sourceBytes = gitObject(source.templateCommit, file.path);
-      const targetBytes = gitObject(target.templateCommit, file.path);
+      const sourceBytes = gitObject(source.templateCommit, templatePath);
+      const targetBytes = projectedBaselineBytes(profile, gitObject(target.templateCommit, templatePath), file);
       if (sha256(sourceBytes) !== file.sourceSha256)
         throw new Error(`${edge}:${profile}:${file.path} source hash differs from immutable Template bytes.`);
       if (sha256(targetBytes) !== file.targetSha256)
         throw new Error(`${edge}:${profile}:${file.path} target hash differs from immutable Template bytes.`);
       if (file.targetContent !== undefined && file.targetContent !== targetBytes)
         throw new Error(`${edge}:${profile}:${file.path} stored target bytes differ from the immutable Template.`);
-      if (file.transforms && applyTransforms(sourceBytes, file) !== targetBytes)
+      if (file.transforms && applyExactBaselineTransforms(sourceBytes, file) !== targetBytes)
         throw new Error(`${edge}:${profile}:${file.path} transforms do not reproduce immutable Template bytes.`);
     } else if (file.operation === "delete") {
       if (!/^[a-f0-9]{64}$/u.test(file.sourceSha256 ?? "") || typeof file.sourceContent !== "string")
         throw new Error(`${edge}:${profile}:${file.path} delete has no exact source bytes.`);
-      if (!sourceObjectExists(source.templateCommit, file.path))
+      if (!sourceObjectExists(source.templateCommit, templatePath))
         throw new Error(`${edge}:${profile}:${file.path} delete is absent from the immutable source Template.`);
-      if (sourceObjectExists(target.templateCommit, file.path))
+      if (sourceObjectExists(target.templateCommit, templatePath))
         throw new Error(`${edge}:${profile}:${file.path} delete remains in the immutable target Template.`);
-      const sourceBytes = gitObject(source.templateCommit, file.path);
+      const sourceBytes = gitObject(source.templateCommit, templatePath);
       if (sha256(sourceBytes) !== file.sourceSha256 || file.sourceContent !== sourceBytes)
         throw new Error(`${edge}:${profile}:${file.path} delete source differs from immutable Template bytes.`);
     } else {

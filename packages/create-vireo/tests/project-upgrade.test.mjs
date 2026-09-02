@@ -906,6 +906,187 @@ test("0.8.2 to 0.8.3 refreshes only declarations and provenance for both profile
   }
 });
 
+test("0.8.3 to 0.8.4 manages Lighthouse policy for both profiles without lockfile churn", async () => {
+  const sourceRelease = "0.8.3";
+  const targetRelease = "0.8.4";
+  const edge = `${sourceRelease}->${targetRelease}`;
+  const { candidatePolicy, finalizedPolicy } = releaseLifecyclePolicies(adjacentPolicy, sourceRelease, targetRelease);
+  const source = candidatePolicy.releaseGraph.releases.find(release => release.release === sourceRelease);
+  const target = candidatePolicy.releaseGraph.releases.find(release => release.release === targetRelease);
+  assert.ok(source && target, "the 0.8.3 source and 0.8.4 candidate must be declared");
+
+  for (const profile of ["full-stack", "frontend"]) {
+    const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-083-performance-`));
+    try {
+      const frontendOnly = profile === "frontend";
+      const baselines = candidatePolicy.releaseGraph.baselines[edge][profile];
+      const update = baselines.find(file => file.operation === "update" && file.path.endsWith("lighthouse-budget.mjs"));
+      assert.ok(update?.sourceContent, `${profile} has a source Lighthouse budget baseline`);
+      await mkdir(join(root, ".vireo"), { recursive: true });
+      if (!frontendOnly) {
+        await mkdir(join(root, "frontend/scripts"), { recursive: true });
+        await mkdir(join(root, "contracts"), { recursive: true });
+      } else await mkdir(join(root, "scripts"), { recursive: true });
+      const dependencies = { ...source.frontendDependencies, react: "^19.0.0" };
+      const frontendScripts = frontendOnly
+        ? {
+            vireo: source.rootVireoScript,
+            "doctor:json": source.managedRootScripts["doctor:json"],
+          }
+        : source.managedFrontendScripts["full-stack"];
+      await writeFile(
+        join(root, "package.json"),
+        `${JSON.stringify(
+          {
+            name: `vireo-${profile}-upgrade`,
+            scripts: frontendOnly ? frontendScripts : { vireo: source.rootVireoScript },
+            ...(frontendOnly ? { dependencies } : {}),
+          },
+          null,
+          2,
+        )}\n`,
+      );
+      if (!frontendOnly)
+        await writeFile(
+          join(root, "frontend/package.json"),
+          `${JSON.stringify({ scripts: frontendScripts, dependencies }, null, 2)}\n`,
+        );
+      const lockPath = join(root, frontendOnly ? "package-lock.json" : "frontend/package-lock.json");
+      await writeFile(
+        lockPath,
+        `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies } } }, null, 2)}\n`,
+      );
+      if (!frontendOnly)
+        await writeFile(join(root, "gradle.properties"), `starterVersion=${source.starterJvmVersion}\n`);
+      for (const baseline of baselines.filter(file => file.operation === "update")) {
+        await mkdir(join(root, dirname(baseline.path)), { recursive: true });
+        await writeFile(join(root, baseline.path), baseline.sourceContent);
+      }
+      await writeFile(join(root, "product-note.txt"), "do not modify\n");
+      await writeFile(
+        join(root, ".vireo/project.json"),
+        `${JSON.stringify(
+          {
+            schemaVersion: 1,
+            profile,
+            projectName: `vireo-${profile}-upgrade`,
+            ...(frontendOnly ? {} : { javaPackage: "dev.example.upgrade", database: "h2" }),
+            templateCommit: source.templateCommit,
+            templateVersion: sourceRelease,
+            templateTag: `starter-template@${sourceRelease}`,
+            createdBy: `create-vireo@${sourceRelease}`,
+            lastUpgradedBy: `create-vireo@${sourceRelease}`,
+          },
+          null,
+          2,
+        )}\n`,
+      );
+      const managedPaths = [
+        "package.json",
+        ...(frontendOnly ? [] : ["frontend/package.json", "gradle.properties"]),
+        ...baselines.filter(file => file.operation === "update").map(file => file.path),
+      ];
+      await writeFile(
+        join(root, ".vireo/managed-files.json"),
+        `${JSON.stringify(
+          {
+            schemaVersion: 1,
+            templateCommit: source.templateCommit,
+            files: await Promise.all(
+              managedPaths.map(async path => ({ path, sha256: sha256(await readFile(join(root, path))) })),
+            ),
+          },
+          null,
+          2,
+        )}\n`,
+      );
+
+      const beforeCandidate = await treeBytes(root);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, candidatePolicy),
+        error => error.code === "VIR-UPG-008",
+      );
+      assertSameSnapshot(beforeCandidate, await treeBytes(root));
+
+      const lockBefore = await readFile(lockPath, "utf8");
+      const preview = await upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy);
+      assert.equal(preview.checks.find(check => check.id === "lockfile")?.status, "pass");
+      assert.match(preview.checks.find(check => check.id === "lockfile")?.detail, /lockfile is preserved/u);
+      assert.ok(preview.files.some(file => file.path.endsWith("lighthouse-policy.mjs") && file.status === "create"));
+      assert.ok(
+        preview.files.some(file => file.path.endsWith("vitest.storybook.config.ts") && file.status === "update"),
+        "Storybook optimizer compatibility baseline is managed",
+      );
+      assert.equal(
+        preview.manualActions[0].verificationCommands[0],
+        frontendOnly
+          ? "corepack npm run performance:policy:test"
+          : "corepack npm --prefix frontend run performance:policy:test",
+      );
+      assert.equal(
+        preview.manualActions[0].verificationCommands[1],
+        frontendOnly ? "corepack npm run performance:audit" : "corepack npm --prefix frontend run performance:audit",
+      );
+      const manifestPath = join(root, frontendOnly ? "package.json" : "frontend/package.json");
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+      manifest.scripts["performance:policy:test"] = "customized";
+      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy),
+        error => error.code === "VIR-UPG-003",
+      );
+      if (frontendOnly) delete manifest.scripts["performance:policy:test"];
+      else manifest.scripts["performance:policy:test"] = undefined;
+      if (manifest.scripts["performance:policy:test"] === undefined) delete manifest.scripts["performance:policy:test"];
+      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+      const storybookBaseline = baselines.find(file => file.path.endsWith("vitest.storybook.config.ts"));
+      assert.ok(storybookBaseline?.sourceContent, `${profile} has an exact Storybook source baseline`);
+      await writeFile(join(root, storybookBaseline.path), `${storybookBaseline.sourceContent}// customized\n`);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy),
+        error => error.code === "VIR-UPG-003",
+      );
+      await writeFile(join(root, storybookBaseline.path), storybookBaseline.sourceContent);
+
+      await upgradeVireoProjectForTest(
+        { projectDirectory: root, targetRelease, dryRun: false, acceptApplicationOwned: true },
+        finalizedPolicy,
+      );
+      assert.equal(await readFile(lockPath, "utf8"), lockBefore, "lockfiles remain byte-identical");
+      assert.equal(await readFile(join(root, "product-note.txt"), "utf8"), "do not modify\n");
+      const upgraded = JSON.parse(await readFile(manifestPath, "utf8"));
+      assert.equal(
+        upgraded.scripts["performance:policy:test"],
+        target.managedFrontendScripts[profile]["performance:policy:test"],
+      );
+      assert.equal(upgraded.scripts["performance:audit"], target.managedFrontendScripts[profile]["performance:audit"]);
+      assert.match(
+        await readFile(join(root, storybookBaseline.path), "utf8"),
+        /optimizeDeps: \{ include: \["@testing-library\/dom"\] \}/u,
+      );
+      for (const baseline of baselines) {
+        const contents = await readFile(join(root, baseline.path), "utf8");
+        assert.equal(sha256(contents), baseline.targetSha256, `${profile} baseline ${baseline.path}`);
+      }
+      for (const path of frontendOnly
+        ? ["tests/demo/flagship-demo.spec.ts", "tests/e2e/overview.spec.ts"]
+        : ["frontend/tests/demo/flagship-demo.spec.ts", "frontend/tests/e2e/overview.spec.ts"]) {
+        await assert.rejects(readFile(join(root, path)), /ENOENT/u, `${profile} does not add optional browser tests`);
+      }
+      const metadata = JSON.parse(await readFile(join(root, ".vireo/project.json"), "utf8"));
+      assert.equal(metadata.templateCommit, target.templateCommit);
+      assert.equal(metadata.lastUpgrade.lockfileRefresh, "not-required");
+      const receipt = JSON.parse(await readFile(join(root, ".vireo/upgrade-0.8.3-to-0.8.4.json"), "utf8"));
+      assert.equal(receipt.lockfileRefresh, "not-required");
+      const repeated = await upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy);
+      assert.ok(repeated.files.every(file => file.status === "unchanged"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
+
 test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves application bytes, and is idempotent", async () => {
   const sourceRelease = "0.8.1";
   const targetRelease = "0.8.2";

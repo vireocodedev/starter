@@ -429,7 +429,22 @@ test("rejects missing retained backlog evidence when the release graph has a pre
   }
 });
 
-function makeFixture({ managedEdgeScope = "legacy" } = {}) {
+test("documents adjacent edges that preserve application lockfiles", async () => {
+  const root = makeFixture({ lockfileRefresh: "not-required" });
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    const readme = readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8");
+    assert.match(
+      readme,
+      /This edge changes no dependency declarations, so Vireo preserves the application-owned lockfile without a refresh\./u,
+    );
+    assert.doesNotMatch(readme, /The lockfile remains application-owned and must be refreshed manually/u);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function makeFixture({ managedEdgeScope = "legacy", lockfileRefresh = "required" } = {}) {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   mkdirSync(join(root, "contracts"));
   mkdirSync(join(root, "packages", "create-vireo", "src"), { recursive: true });
@@ -504,7 +519,7 @@ function makeFixture({ managedEdgeScope = "legacy" } = {}) {
       edges: [
         { from: "0.0.0", to: "0.1.0", applicationOwnedActions: [] },
         { from: "0.1.0", to: "0.2.0", applicationOwnedActions: [] },
-        { from: "0.2.0", to: "0.3.0", applicationOwnedActions: [] },
+        { from: "0.2.0", to: "0.3.0", lockfileRefresh, applicationOwnedActions: [] },
       ],
     },
   });
