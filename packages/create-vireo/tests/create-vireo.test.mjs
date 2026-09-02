@@ -19,6 +19,10 @@ const fixtureReleaseIdentity = JSON.parse(
 );
 const createVireoSource = await readFile(new URL("../src/index.ts", import.meta.url), "utf8");
 const applicationSkillNames = ["vireo-app-feature-author", "vireo-app-upgrader", "vireo-app-production-readiness"];
+const fixtureTemplateTag = `starter-template@${fixtureReleaseIdentity.createVireoVersion}`;
+const fixtureTemplateReleaseContractUrl =
+  `https://github.com/vireocodedev/vireo-template/blob/${encodeURIComponent(fixtureTemplateTag)}` +
+  "/contracts/template-release-policy.json";
 
 function gradleProperties(starterVersion) {
   return `org.gradle.caching=true\nstarterVersion=${starterVersion}\norg.gradle.jvmargs=-Xmx2g\n`;
@@ -109,7 +113,7 @@ async function fixture(root) {
   );
   await writeFile(
     join(template, "docs/generated-capabilities.md"),
-    "The [`starter-template@0.8.0` release contract](https://github.com/vireocodedev/vireo-template/blob/starter-template%400.8.0/contracts/template-release-policy.json) is immutable.\n",
+    `The [\`${fixtureTemplateTag}\` release contract](${fixtureTemplateReleaseContractUrl}) is immutable.\n`,
   );
   for (const directory of ["docs", "frontend/docs"]) {
     await mkdir(join(template, directory), { recursive: true });
@@ -384,12 +388,10 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.match(await readFile(join(target, "settings.gradle"), "utf8"), /sample-app/u);
     assert.match(await readFile(join(target, "README.md"), "utf8"), /^# Sample App$/mu);
     const generatedCapabilities = await readFile(join(target, "docs", "generated-capabilities.md"), "utf8");
-    assert.match(generatedCapabilities, /starter-template@0\.8\.0/u);
-    assert.match(
-      generatedCapabilities,
-      /https:\/\/github\.com\/vireocodedev\/vireo-template\/blob\/starter-template%400\.8\.0\/contracts\/template-release-policy\.json/u,
-    );
-    assert.doesNotMatch(generatedCapabilities, /sample-app(?:@|%40)0\.8\.0/u);
+    assert.ok(generatedCapabilities.includes(fixtureTemplateTag));
+    assert.ok(generatedCapabilities.includes(fixtureTemplateReleaseContractUrl));
+    assert.equal(generatedCapabilities.includes(`sample-app@${fixtureReleaseIdentity.createVireoVersion}`), false);
+    assert.equal(generatedCapabilities.includes(`sample-app%40${fixtureReleaseIdentity.createVireoVersion}`), false);
     for (const path of [
       "docs/provider-controls-2026-08-31.md",
       "docs/hosted-demo-recovery-rehearsal-2026-09-01.md",
