@@ -34,6 +34,94 @@ const sourceCommitArgument = process.argv.indexOf("--source-commit");
 const observedDigests = new Map();
 const managedOriginals = new Map();
 const projectTrees = new Map();
+const transientCleanupErrorCodes = new Set(["EBUSY", "EMFILE", "ENFILE", "ENOTEMPTY", "EPERM"]);
+const anonymousConsumerRunRootPrefix = "vireo-anonymous-consumer-";
+
+const waitForCleanupRetry = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+export function validatedAnonymousConsumerRunRoot(runRoot, { temporaryDirectory = tmpdir() } = {}) {
+  const temporaryRoot = resolve(temporaryDirectory);
+  const candidate = resolve(runRoot);
+  if (dirname(candidate) !== temporaryRoot || !basename(candidate).startsWith(anonymousConsumerRunRootPrefix))
+    throw new Error(
+      "Anonymous consumer cleanup target must be a direct, named child of the system temporary directory.",
+    );
+  return candidate;
+}
+
+/**
+ * Removes a disposable anonymous-consumer run directory without allowing a
+ * transient filesystem race to obscure the gauntlet result.
+ */
+export async function cleanupAnonymousConsumerRunRoot({
+  runRoot,
+  remove = rmSync,
+  wait = waitForCleanupRetry,
+  maxRetries = 3,
+  retryDelayMs = 100,
+  temporaryDirectory = tmpdir(),
+}) {
+  if (!Number.isInteger(maxRetries) || maxRetries < 0)
+    throw new Error("Anonymous consumer cleanup maxRetries must be a non-negative integer.");
+  if (!Number.isInteger(retryDelayMs) || retryDelayMs < 0)
+    throw new Error("Anonymous consumer cleanup retryDelayMs must be a non-negative integer.");
+  const cleanupRoot = validatedAnonymousConsumerRunRoot(runRoot, { temporaryDirectory });
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    try {
+      await remove(cleanupRoot, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      const retryable = transientCleanupErrorCodes.has(error?.code);
+      if (!retryable || attempt === maxRetries) throw error;
+      await wait(retryDelayMs);
+    }
+  }
+}
+
+/**
+ * Completes evidence and cleanup while retaining the operation failure that
+ * caused the gauntlet to stop. If cleanup also fails, callers receive both.
+ */
+export async function finishAnonymousConsumerRun({
+  primaryError,
+  hasPrimaryError = primaryError !== undefined,
+  checkpoint,
+  cleanup,
+  evidence,
+}) {
+  const cleanupFailures = [];
+  try {
+    checkpoint();
+  } catch (error) {
+    cleanupFailures.push(error);
+  }
+  try {
+    await cleanup();
+  } catch (error) {
+    cleanupFailures.push(error);
+  }
+
+  if (cleanupFailures.length > 0 && evidence) {
+    evidence.status = "failed";
+    evidence.findings.push(finalizationFailureFinding());
+    try {
+      checkpoint();
+    } catch (error) {
+      cleanupFailures.push(error);
+    }
+  }
+
+  if (hasPrimaryError && cleanupFailures.length > 0)
+    throw new AggregateError(
+      [primaryError, ...cleanupFailures],
+      "Anonymous consumer gauntlet failed and finalization was incomplete.",
+    );
+  if (hasPrimaryError) throw primaryError;
+  if (cleanupFailures.length === 1) throw cleanupFailures[0];
+  if (cleanupFailures.length > 1)
+    throw new AggregateError(cleanupFailures, "Anonymous consumer gauntlet finalization was incomplete.");
+}
 
 export function validateManagedProvenance({ root, manifest, templateCommit }) {
   const problems = [];
@@ -265,6 +353,17 @@ export function preflightFailureFinding() {
     severity: "error",
     remediation: "Repair the exact public release identity or its provider-backed publication evidence.",
     evidenceReferences: ["preflight"],
+  };
+}
+
+export function finalizationFailureFinding() {
+  return {
+    id: "VIR-GAUNTLET-FINALIZATION",
+    owner: "framework",
+    severity: "error",
+    remediation:
+      "Repair anonymous-consumer evidence finalization or temporary-run cleanup before release qualification.",
+    evidenceReferences: ["finalization"],
   };
 }
 
@@ -1344,6 +1443,8 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     scenarios: [],
   };
   const checkpoint = () => writeEvidenceAtomically(join(evidenceDirectory, "evidence.json"), evidence);
+  let primaryError;
+  let hasPrimaryError = false;
   try {
     try {
       const preflightProblems = preflightIdentityProblems();
@@ -1439,10 +1540,17 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
       result.status = dry ? "planned" : "passed";
       checkpoint();
     }
-  } finally {
-    checkpoint();
-    rmSync(runRoot, { recursive: true, force: true });
+  } catch (error) {
+    hasPrimaryError = true;
+    primaryError = error;
   }
+  await finishAnonymousConsumerRun({
+    primaryError,
+    hasPrimaryError,
+    checkpoint,
+    evidence,
+    cleanup: () => cleanupAnonymousConsumerRunRoot({ runRoot }),
+  });
   if (!dry) {
     const finalProblems = validateFinalAnonymousEvidence({ ...evidence, status: "passed" }, release, policy);
     if (finalProblems.length > 0) {

@@ -9,7 +9,10 @@ import { publicReleaseIdentity, readJson } from "./lib/anonymous-consumer-enviro
 import { validateApplicationIdentity } from "./lib/application-projection-contract.mjs";
 import {
   buildExecutionPlan,
+  cleanupAnonymousConsumerRunRoot,
   executePlanForTest,
+  finalizationFailureFinding,
+  finishAnonymousConsumerRun,
   installedVireoPackageNames,
   parseBoundedJsonOutput,
   preflightFailureFinding,
@@ -338,6 +341,155 @@ test("preflight failures have a stable machine-actionable finding", () => {
     remediation: "Repair the exact public release identity or its provider-backed publication evidence.",
     evidenceReferences: ["preflight"],
   });
+});
+
+test("finalization failures have a stable machine-actionable finding", () => {
+  assert.deepEqual(finalizationFailureFinding(), {
+    id: "VIR-GAUNTLET-FINALIZATION",
+    owner: "framework",
+    severity: "error",
+    remediation:
+      "Repair anonymous-consumer evidence finalization or temporary-run cleanup before release qualification.",
+    evidenceReferences: ["finalization"],
+  });
+});
+
+test("anonymous run cleanup retries transient filesystem races with a bounded delay", async () => {
+  const removals = [];
+  const waits = [];
+  const runRoot = join(tmpdir(), "vireo-anonymous-consumer-cleanup-retry");
+  await cleanupAnonymousConsumerRunRoot({
+    runRoot,
+    maxRetries: 3,
+    retryDelayMs: 7,
+    remove: (path, options) => {
+      removals.push({ path, options });
+      if (removals.length < 3) {
+        const error = new Error("directory is temporarily non-empty");
+        error.code = "ENOTEMPTY";
+        throw error;
+      }
+    },
+    wait: async milliseconds => waits.push(milliseconds),
+  });
+  assert.equal(removals.length, 3);
+  assert.deepEqual(waits, [7, 7]);
+  assert.deepEqual(removals[0], {
+    path: runRoot,
+    options: { recursive: true, force: true },
+  });
+});
+
+test("anonymous run cleanup rejects unsafe targets and bounds retry behavior", async () => {
+  const temporaryDirectory = join(tmpdir(), "anonymous-cleanup-parent");
+  const runRoot = join(temporaryDirectory, "vireo-anonymous-consumer-cleanup-exhaustion");
+  for (const unsafe of ["/", temporaryDirectory, join(temporaryDirectory, "unrelated-sibling")]) {
+    await assert.rejects(
+      cleanupAnonymousConsumerRunRoot({ runRoot: unsafe, temporaryDirectory }),
+      /direct, named child/u,
+    );
+  }
+
+  let nontransientCalls = 0;
+  const nontransient = new Error("access denied");
+  nontransient.code = "EACCES";
+  await assert.rejects(
+    cleanupAnonymousConsumerRunRoot({
+      runRoot,
+      temporaryDirectory,
+      remove: async () => {
+        nontransientCalls += 1;
+        throw nontransient;
+      },
+      wait: async () => {
+        throw new Error("non-transient cleanup must not wait");
+      },
+    }),
+    error => error === nontransient,
+  );
+  assert.equal(nontransientCalls, 1);
+
+  let exhaustedCalls = 0;
+  const waits = [];
+  const exhausted = new Error("directory remains non-empty");
+  exhausted.code = "ENOTEMPTY";
+  await assert.rejects(
+    cleanupAnonymousConsumerRunRoot({
+      runRoot,
+      temporaryDirectory,
+      maxRetries: 2,
+      retryDelayMs: 5,
+      remove: async () => {
+        exhaustedCalls += 1;
+        throw exhausted;
+      },
+      wait: async milliseconds => waits.push(milliseconds),
+    }),
+    error => error === exhausted,
+  );
+  assert.equal(exhaustedCalls, 3);
+  assert.deepEqual(waits, [5, 5]);
+});
+
+test("anonymous run finalization preserves the operation failure and reports cleanup failures", async () => {
+  const primary = new Error("exact public coordinate assertion failed");
+  await assert.rejects(
+    finishAnonymousConsumerRun({
+      primaryError: primary,
+      checkpoint: () => {},
+      cleanup: async () => {},
+    }),
+    error => error === primary,
+  );
+
+  await assert.rejects(
+    finishAnonymousConsumerRun({
+      primaryError: undefined,
+      hasPrimaryError: true,
+      checkpoint: () => {},
+      cleanup: async () => {},
+    }),
+    error => error === undefined,
+  );
+
+  const cleanup = new Error("temporary directory remains non-empty");
+  const cleanupOnlyEvidence = { status: "running", findings: [] };
+  const cleanupOnlyCheckpoints = [];
+  await assert.rejects(
+    finishAnonymousConsumerRun({
+      checkpoint: () => cleanupOnlyCheckpoints.push(structuredClone(cleanupOnlyEvidence)),
+      cleanup: async () => {
+        throw cleanup;
+      },
+      evidence: cleanupOnlyEvidence,
+    }),
+    error => error === cleanup,
+  );
+  assert.equal(cleanupOnlyEvidence.status, "failed");
+  assert.deepEqual(cleanupOnlyEvidence.findings, [finalizationFailureFinding()]);
+  assert.deepEqual(cleanupOnlyCheckpoints.at(-1), cleanupOnlyEvidence);
+
+  const primaryAndCleanupEvidence = { status: "running", findings: [] };
+  const primaryAndCleanupCheckpoints = [];
+  await assert.rejects(
+    finishAnonymousConsumerRun({
+      primaryError: primary,
+      checkpoint: () => primaryAndCleanupCheckpoints.push(structuredClone(primaryAndCleanupEvidence)),
+      cleanup: async () => {
+        throw cleanup;
+      },
+      evidence: primaryAndCleanupEvidence,
+    }),
+    error => {
+      assert.ok(error instanceof AggregateError);
+      assert.deepEqual(error.errors, [primary, cleanup]);
+      assert.match(error.message, /failed and finalization was incomplete/u);
+      return true;
+    },
+  );
+  assert.equal(primaryAndCleanupEvidence.status, "failed");
+  assert.deepEqual(primaryAndCleanupEvidence.findings, [finalizationFailureFinding()]);
+  assert.deepEqual(primaryAndCleanupCheckpoints.at(-1), primaryAndCleanupEvidence);
 });
 
 test("malformed release input writes preflight evidence before any scenario can run", t => {
