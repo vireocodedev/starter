@@ -1,8 +1,6 @@
 import { existsSync, lstatSync, mkdirSync, realpathSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
-const credentialKey = /(?:^|_)(?:auth|token|password|secret|credential|apikey|api_key)(?:_|$)/iu;
-
 export function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
 }

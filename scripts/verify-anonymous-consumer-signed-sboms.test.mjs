@@ -169,7 +169,7 @@ test("workflow isolates signed-SBOM verification after the token-free gauntlet",
   const job = workflow.slice(start);
   assert.match(job, /needs: gauntlet/u);
   assert.match(job, /github\.event_name != 'pull_request'/u);
-  assert.match(job, /attestations: read\n      contents: read/u);
+  assert.match(job, /attestations: read\n {6}contents: read/u);
   assert.match(job, /actions\/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8\.0\.1/u);
   assert.match(job, /name: anonymous-consumer-gauntlet-evidence/u);
   assert.match(job, /GH_TOKEN: \$\{\{ github\.token \}\}/u);
