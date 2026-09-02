@@ -1547,6 +1547,15 @@ test("finalized 0.8.6 to 0.8.7 preserves exact managed provenance for both profi
   const source = candidatePolicy.releaseGraph.releases.find(release => release.release === sourceRelease);
   const target = candidatePolicy.releaseGraph.releases.find(release => release.release === targetRelease);
   assert.ok(source && target, "the 0.8.6 source and 0.8.7 candidate must be declared");
+  assert.ok(
+    Object.hasOwn(source, "projectionSourceFrontendScripts"),
+    "0.8.6 retains its historical pre-transform source form",
+  );
+  assert.equal(
+    Object.hasOwn(target, "projectionSourceFrontendScripts"),
+    false,
+    "0.8.7 must use the canonical 0.8.6 managed frontend scripts",
+  );
 
   for (const profile of ["full-stack", "frontend"]) {
     const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-086-provenance-`));
@@ -1664,6 +1673,14 @@ test("finalized 0.8.6 to 0.8.7 preserves exact managed provenance for both profi
       );
       assert.equal(await readFile(lockPath, "utf8"), lockBefore, "lockfile remains application-owned");
       assert.equal(await readFile(join(root, "application-owned.txt"), "utf8"), "retain this product decision\n");
+      const upgradedFrontendManifest = JSON.parse(
+        await readFile(join(root, frontendOnly ? "package.json" : "frontend/package.json"), "utf8"),
+      );
+      assert.equal(
+        upgradedFrontendManifest.scripts["architecture:check"],
+        source.managedFrontendScripts[profile]["architecture:check"],
+        `${profile} retains the canonical 0.8.6 architecture script`,
+      );
       assert.equal(
         sha256(await readFile(join(root, storybookBaseline.path))),
         storybookBaseline.targetSha256,

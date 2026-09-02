@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { packedAdjacentFrontendSourceManifest } from "./lib/packed-adjacent-frontend-source-manifest.mjs";
+
+const upgradePolicy = JSON.parse(
+  readFileSync(new URL("../packages/create-vireo/schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+);
 
 test("builds a packed adjacent frontend manifest with every exact managed source script", () => {
   assert.deepEqual(
@@ -37,6 +42,30 @@ test("builds a packed adjacent frontend manifest with every exact managed source
       },
       dependencies: { "@vireocodedev/ui": "^0.3.0", react: "^19.0.0" },
     },
+  );
+});
+
+test("uses canonical 0.8.6 scripts for the 0.8.7 packed adjacent upgrade", () => {
+  const releases = upgradePolicy.releaseGraph.releases;
+  const source = releases.find(release => release.release === "0.8.6");
+  const target = releases.find(release => release.release === "0.8.7");
+  assert.ok(source && target, "the 0.8.6 source and 0.8.7 target must be declared");
+  assert.ok(Object.hasOwn(source, "projectionSourceFrontendScripts"), "0.8.6 retains its historical source form");
+  assert.equal(Object.hasOwn(target, "projectionSourceFrontendScripts"), false);
+
+  const manifest = packedAdjacentFrontendSourceManifest({
+    packedSource: source,
+    packedTarget: target,
+    dependencies: { ...source.frontendDependencies, react: "^19.0.0" },
+  });
+  assert.deepEqual(manifest.scripts, {
+    vireo: source.rootVireoScript,
+    ...source.managedRootScripts,
+    ...source.managedFrontendScripts.frontend,
+  });
+  assert.equal(
+    manifest.scripts["architecture:check"],
+    "node --test scripts/architecture-policy.test.mjs scripts/storybook-config-policy.test.mjs && node scripts/check-architecture.mjs",
   );
 });
 
