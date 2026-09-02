@@ -226,6 +226,14 @@ export function validateReleasePrWorkflow(source, actionPolicy) {
   return problems;
 }
 
+export function validateAlwaysReportedPullRequestWorkflow(source, fileName) {
+  const beforePermissions = source.slice(0, source.indexOf("permissions:"));
+  if (!/^on:\n {2}pull_request:\s*\n {2}[A-Za-z_-]+:/mu.test(beforePermissions)) {
+    return [`${fileName} must run for every pull request without paths or paths-ignore filters`];
+  }
+  return [];
+}
+
 const workflowFiles = readdirSync(workflowsRoot)
   .filter(file => /\.ya?ml$/.test(file))
   .sort();
@@ -237,6 +245,9 @@ for (const fileName of workflowFiles) {
 
   if (fileName === "release.yml") problems.push(...validateReleasePrWorkflow(source, policy));
   if (fileName === "release-npm.yml") problems.push(...validateNpmReleaseMavenPrerequisite(source));
+  if (fileName === "anonymous-consumer-gauntlet.yml") {
+    problems.push(...validateAlwaysReportedPullRequestWorkflow(source, fileName));
+  }
 
   if (source.includes("pull_request_target:")) {
     problems.push(`${fileName} may not use pull_request_target`);
