@@ -17,6 +17,14 @@ export function publicReleaseIdentity(contract) {
     throw new Error("Ecosystem contract must declare an exact public create-vireo version.");
   }
   if (!isExactVersion(current.maven.version)) throw new Error("Ecosystem contract must declare an exact public Maven version.");
+  if (current.id !== `npm-${createVireo.version}_jvm-${current.maven.version}`)
+    throw new Error("Ecosystem contract release id must exactly match the public npm and Maven coordinates.");
+  if (!isExactVersion(current.template?.version) || current.template.version !== createVireo.version) {
+    throw new Error("Ecosystem contract Template version must match the public create-vireo version.");
+  }
+  if (!/^[0-9a-f]{40}$/u.test(current.template?.commit ?? "") || current.template.tag !== `starter-template@${current.template.version}`) {
+    throw new Error("Ecosystem contract Template commit/tag is not immutable and coherent.");
+  }
   for (const entry of current.npm) {
     if (typeof entry?.name !== "string" || !isExactVersion(entry.version)) {
       throw new Error("Ecosystem contract contains an invalid public npm coordinate.");
@@ -35,7 +43,7 @@ function isExactVersion(value) {
   return typeof value === "string" && /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(value);
 }
 
-export function anonymousEnvironment({ root, environment = process.env, registry }) {
+export function anonymousEnvironment({ root, environment = process.env, registry, playwrightBrowsersPath }) {
   const pathEntries = String(environment.PATH ?? "")
     .split(":")
     .filter(entry => entry && !/(?:node_modules\/\.bin|vireocode|starter)/iu.test(entry));
@@ -47,7 +55,10 @@ export function anonymousEnvironment({ root, environment = process.env, registry
   const mavenRepository = join(root, "maven-repository");
   const corepackHome = join(root, "corepack");
   const dockerConfig = join(root, "docker-config");
-  const playwrightBrowsers = join(root, "playwright-browsers");
+  const playwrightBrowsers = playwrightBrowsersPath ?? join(root, "vireo-anonymous-playwright");
+  if (!/^(?:\/|[A-Za-z]:[\\/])/u.test(playwrightBrowsers) || !/vireo-anonymous-playwright/u.test(playwrightBrowsers)) {
+    throw new Error("Anonymous consumer Playwright browser cache must be an explicit dedicated absolute path.");
+  }
   for (const directory of [home, npmCache, gradleUserHome, mavenRepository, corepackHome, dockerConfig, playwrightBrowsers])
     mkdirSync(directory, { recursive: true });
   mkdirSync(gradleUserHome, { recursive: true });

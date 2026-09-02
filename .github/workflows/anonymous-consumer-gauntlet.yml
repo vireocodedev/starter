@@ -13,8 +13,11 @@ concurrency:
 
 jobs:
   gauntlet:
+    env:
+      VIREO_GAUNTLET_PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
+      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 240
     permissions:
       contents: read
     steps:
@@ -37,5 +40,5 @@ jobs:
         with:
           name: anonymous-consumer-gauntlet-evidence
           path: anonymous-consumer-evidence
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 90

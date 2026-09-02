@@ -40,6 +40,7 @@ test("public release identity requires exact public coordinates", () => {
     },
   });
   assert.equal(identity.createVireoVersion, "1.2.3");
+  assert.throws(() => publicReleaseIdentity({ current: { id: "wrong", npm: [{ name: "create-vireo", version: "1.2.3" }], maven: { group: "com.example", version: "4.5.6", modules: [] }, template: { version: "1.2.3", commit: "a".repeat(40), tag: "starter-template@1.2.3" } } }));
 });
 
 test("anonymous installation refuses links and non-registry lock entries", () => {

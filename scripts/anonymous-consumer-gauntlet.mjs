@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -64,8 +64,17 @@ function execute(command, options) {
     let stderrBytes = 0;
     let excerpt = "";
     let finished = false;
-    const child = spawn(command.executable, command.arguments, { ...options, stdio: ["ignore", "pipe", "pipe"] });
-    const timeout = setTimeout(() => child.kill("SIGTERM"), command.timeoutMs ?? 20 * 60_000);
+    const child = spawn(command.executable, command.arguments, { ...options, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
+    let timedOut = false;
+    const stop = signal => {
+      if (process.platform !== "win32" && child.pid) process.kill(-child.pid, signal);
+      else child.kill(signal);
+    };
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      stop("SIGTERM");
+      setTimeout(() => stop("SIGKILL"), 5_000).unref();
+    }, command.timeoutMs ?? 20 * 60_000);
     child.stdout.on("data", chunk => {
       stdout.update(chunk);
       stdoutBytes += chunk.length;
@@ -77,8 +86,8 @@ function execute(command, options) {
       if (excerpt.length < 4096) excerpt += chunk.toString("utf8", 0, Math.min(chunk.length, 4096 - excerpt.length));
     });
     child.on("error", () => finish(1));
-    child.on("close", code => finish(code ?? 1));
-    function finish(exitCode) {
+    child.on("close", (code, signal) => finish(code ?? 1, signal));
+    function finish(exitCode, signal) {
       if (finished) return;
       finished = true;
       clearTimeout(timeout);
@@ -87,13 +96,16 @@ function execute(command, options) {
         endedAt: new Date().toISOString(),
         durationMs: Math.round(performance.now() - started),
         exitCode,
+        signal: signal ?? null,
+        timedOut,
         expectedExit: command.expectedExit,
         cwdClass: command.cwdClass ?? "consumer",
         argumentCategories: command.argumentCategories ?? [],
         stdout: { bytes: stdoutBytes, sha256: stdout.digest("hex") },
         stderr: { bytes: stderrBytes, sha256: stderr.digest("hex") },
       };
-      if (exitCode === command.expectedExit && (!command.assertOutput || command.assertOutput.test(excerpt))) resolvePromise(result);
+      const assertionPassed = !command.assertOutput || command.assertOutput.test(excerpt);
+      if (exitCode === command.expectedExit && !timedOut && !signal && assertionPassed) resolvePromise(result);
       else reject(Object.assign(new Error(`${command.id} expected exit ${command.expectedExit}, received ${exitCode}.`), { result }));
     }
   });
@@ -141,6 +153,28 @@ async function executeOperation(operation, { environment, runRoot }) {
       if (!script.toLowerCase().includes(assertion))
         throw new Error(`Generated deployment verifier does not prove ${assertion}.`);
     }
+  } else if (operation.kind === "assert-script") {
+    const scripts = JSON.parse(readFileSync(join(operation.path, "package.json"), "utf8")).scripts ?? {};
+    if (typeof scripts[operation.script] !== "string") throw new Error(`${operation.id} requires generated script ${operation.script}.`);
+  } else if (operation.kind === "assert-project-identity") {
+    const project = JSON.parse(readFileSync(join(operation.path, ".vireo", "project.json"), "utf8"));
+    if (
+      project.createdBy !== `create-vireo@${operation.release.createVireoVersion}` ||
+      project.templateCommit !== operation.release.template.commit ||
+      project.templateVersion !== operation.release.template.version ||
+      project.templateTag !== operation.release.template.tag ||
+      project.profile !== operation.profile ||
+      (operation.database !== undefined && project.database !== operation.database)
+    ) throw new Error(`${operation.id} found incoherent generated release identity/provenance.`);
+    if (!existsSync(join(operation.path, ".vireo", "managed-files.json")))
+      throw new Error(`${operation.id} is missing managed-file provenance.`);
+  } else if (operation.kind === "assert-ejected-marker") {
+    const visit = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+      const path = join(directory, entry.name);
+      return entry.isDirectory() && entry.name !== "node_modules" ? visit(path) : entry.isFile() ? [path] : [];
+    });
+    if (!visit(operation.path).some(path => readFileSync(path, "utf8").includes("@vireo-ejected")))
+      throw new Error("Ejection did not retain application code with an ejected marker.");
   } else throw new Error(`Unsupported anonymous gauntlet operation ${operation.kind}.`);
   return {
     startedAt,
@@ -181,27 +215,27 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     case "cli-adversity": {
       const occupied = join(consumerRoot, "occupied-target");
       const failed = join(consumerRoot, "failed-download");
-      const recovered = join(consumerRoot, "recovered-download");
       const fetchBlocker = join(consumerRoot, "block-template-download.cjs");
       return [
         command("cli-help", "corepack", ["npm", "exec", "--yes", `--package=create-vireo@${release.createVireoVersion}`, "--", "create-vireo", "--help"], { assertOutput: /Create a Vireo application/u }),
         command("cli-json-dry-run", "corepack", ["npm", "exec", "--yes", `--package=create-vireo@${release.createVireoVersion}`, "--", "create-vireo", join(consumerRoot, "dry-run"), "--dry-run", "--json", "--yes", "--no-git"], { assertOutput: /"dryRun"\s*:\s*true/u }),
-        { ...create(join(consumerRoot, "invalid-name"), "frontend", ["--name", "Invalid_Name"]), id: "invalid-project-name", expectedExit: 1 },
-        { ...create(join(consumerRoot, "invalid-java"), "full-stack", ["--java-package", "not-a-java-package"]), id: "invalid-java-package", expectedExit: 1 },
-        { ...create(join(consumerRoot, "invalid-repository"), "frontend", ["--repository-url", "ftp://example.invalid"]), id: "invalid-repository-url", expectedExit: 1 },
-        { ...create(join(consumerRoot, "invalid-support"), "frontend", ["--support-url", "javascript:alert(1)"]), id: "invalid-support-url", expectedExit: 1 },
+        { ...create(join(consumerRoot, "invalid-name"), "frontend", ["--name", "Invalid_Name"]), id: "invalid-project-name", expectedExit: 1, assertOutput: /projectName|kebab/u },
+        { ...create(join(consumerRoot, "invalid-java"), "full-stack", ["--java-package", "not-a-java-package"]), id: "invalid-java-package", expectedExit: 1, assertOutput: /javaPackage|Java package/u },
+        { ...create(join(consumerRoot, "invalid-repository"), "frontend", ["--repository-url", "ftp://example.invalid"]), id: "invalid-repository-url", expectedExit: 1, assertOutput: /repositoryUrl|repository URL/u },
+        { ...create(join(consumerRoot, "invalid-support"), "frontend", ["--support-url", "javascript:alert(1)"]), id: "invalid-support-url", expectedExit: 1, assertOutput: /supportUrl|support URL/u },
         { kind: "write", id: "occupied-sentinel", path: occupied, contents: "do not overwrite\n" },
-        { ...create(occupied, "frontend"), id: "occupied-target-refusal", expectedExit: 1 },
+        { ...create(occupied, "frontend"), id: "occupied-target-refusal", expectedExit: 1, assertOutput: /already exists|target/u },
         { kind: "assert-file", id: "occupied-sentinel-retained", path: occupied, contents: "do not overwrite\n" },
         { kind: "write", id: "template-download-blocker", path: fetchBlocker, contents: "globalThis.fetch = async () => { throw new Error('intentional anonymous gauntlet download failure'); };\n" },
-        { ...create(failed, "frontend"), id: "template-download-failure", expectedExit: 1, env: { NODE_OPTIONS: `--require=${fetchBlocker}` } },
+        { ...create(failed, "frontend"), id: "template-download-failure", expectedExit: 1, env: { NODE_OPTIONS: `--require=${fetchBlocker}` }, assertOutput: /download failure|template/i },
         { kind: "assert-absent", id: "failed-download-cleanup", path: failed },
-        { ...create(recovered, "frontend"), id: "template-download-retry", expectedExit: 0 },
-        { kind: "assert-file", id: "retry-project-provenance", path: join(recovered, ".vireo", "project.json") },
+        { ...create(failed, "frontend"), id: "template-download-retry", expectedExit: 0 },
+        { kind: "assert-file", id: "retry-project-provenance", path: join(failed, ".vireo", "project.json") },
       ];
     }
     case "frontend-creation": return [
       create(frontend, "frontend"),
+      { kind: "assert-project-identity", id: "frontend-exact-provenance", path: frontend, release, profile: "frontend" },
       command("frontend-setup", "corepack", ["npm", "run", "setup"], { cwd: frontend }),
       command("frontend-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: frontend }),
       command("frontend-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], { cwd: frontend }),
@@ -210,6 +244,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     ];
     case "full-stack-h2-creation": return [
       create(h2, "full-stack", ["--java-package", "com.example.gauntlet", "--database", "h2"]),
+      { kind: "assert-project-identity", id: "h2-exact-provenance", path: h2, release, profile: "full-stack", database: "h2" },
       command("h2-setup", "corepack", ["npm", "run", "setup"], { cwd: h2 }),
       command("h2-doctor-json", "corepack", ["npm", "run", "doctor", "--", "--json"], { cwd: h2 }),
       command("h2-release-identity", "corepack", ["npm", "run", "identity:check:release", "--", "--json"], { cwd: h2 }),
@@ -232,13 +267,17 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     ];
     case "sample-removal-and-ejection": return [
       vireo(h2, "remove-example", "--status"), vireo(h2, "remove-example", "--dry-run"), vireo(h2, "remove-example", "--apply"),
-      vireo(h2, "remove-example", "--status"), vireo(h2, "eject", "purchase-orders", "--dry-run"),
+      vireo(h2, "remove-example", "--status"), vireo(h2, "remove-example", "--apply"), vireo(h2, "eject", "purchase-orders"),
+      { kind: "assert-absent", id: "ejected-management-removed", path: join(h2, ".vireo", "generated", "purchase-orders.json") },
+      { kind: "assert-file", id: "ejected-capability-provenance", path: join(h2, ".vireo", "ejected-capabilities.json") },
+      { kind: "assert-ejected-marker", id: "ejected-application-code-retained", path: h2 },
       { kind: "assert-file", id: "managed-provenance-retained", path: join(h2, ".vireo", "managed-files.json") },
     ];
     case "postgresql-production": {
       const postgresql = join(consumerRoot, "full-stack-postgresql");
       return [
         create(postgresql, "full-stack", ["--java-package", "com.example.postgresql", "--database", "postgresql"]),
+        { kind: "assert-project-identity", id: "postgresql-exact-provenance", path: postgresql, release, profile: "full-stack", database: "postgresql" },
         command("postgresql-setup", "corepack", ["npm", "run", "setup"], { cwd: postgresql }),
         command("postgresql-production-compose", "sh", ["scripts/verify-deployment.sh"], { cwd: postgresql, timeoutMs: 45 * 60_000 }),
         { kind: "assert-deployment-contract", id: "postgresql-deployment-boundaries", path: postgresql },
@@ -265,6 +304,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         if (profile === "full-stack") creation.arguments.push("--java-package", "com.example.upgrade", "--database", "h2");
         return [
           creation,
+          { executable: "corepack", arguments: ["npm", "run", "setup"], cwd: directory, timeoutMs: 20 * 60_000 },
           {
             executable: "corepack",
             arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory],
@@ -273,6 +313,8 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--apply", "--project", directory], expectedExit: 1 },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "upgrade", "--to", edge.to, "--dry-run", "--project", directory] },
           { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "status", "--json", "--project", directory] },
+          { kind: "assert-file", id: `upgrade-${edge.from}-${edge.to}-${profile}-provenance`, path: join(directory, ".vireo", "project.json") },
+          { executable: "corepack", arguments: ["npm", "exec", "--yes", `--package=create-vireo@${edge.to}`, "--", "vireo", "check", "--project", directory] },
           { executable: "corepack", arguments: ["npm", "run", "verify"], cwd: directory, timeoutMs: 45 * 60_000 },
         ];
       }));
@@ -290,7 +332,9 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       command("full-stack-boot-jar", "./gradlew", ["bootJar", "--no-daemon", "--no-build-cache"], { cwd: h2, timeoutMs: 30 * 60_000 }),
     ];
     case "browser-and-pwa": return [
-      command("browser-smoke", "corepack", ["npm", "run", "test:e2e"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
+      { kind: "assert-script", id: "h2-browser-smoke-script", path: join(h2, "frontend"), script: "test:e2e" },
+      command("browser-smoke", "corepack", ["npm", "run", "test:e2e"], { cwd: join(h2, "frontend"), timeoutMs: 20 * 60_000 }),
+      { kind: "assert-script", id: "frontend-pwa-lifecycle-script", path: frontend, script: "test:pwa" },
       command("pwa-two-build-lifecycle", "corepack", ["npm", "run", "test:pwa"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
     ];
     case "container-and-network-boundaries": return [
@@ -314,7 +358,11 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
   }
 
   const runRoot = mkdtempSync(join(tmpdir(), "vireo-anonymous-consumer-"));
-  const environment = anonymousEnvironment({ root: runRoot, registry: policy.registry });
+  const environment = anonymousEnvironment({
+    root: runRoot,
+    registry: policy.registry,
+    playwrightBrowsersPath: process.env.VIREO_GAUNTLET_PLAYWRIGHT_BROWSERS_PATH,
+  });
   const evidence = {
     schemaVersion: policy.evidence.schemaVersion,
     release,
@@ -360,7 +408,15 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
           };
           result.commands.push(record);
           checkpoint();
-          if (!dry) Object.assign(record, await executeOperation(command, { environment, runRoot }), { status: "passed" });
+          if (!dry) {
+            try {
+              Object.assign(record, await executeOperation(command, { environment, runRoot }), { status: "passed" });
+            } catch (error) {
+              Object.assign(record, error?.result ?? {}, { status: "failed", error: error instanceof Error ? error.message : String(error) });
+              checkpoint();
+              throw error;
+            }
+          }
           checkpoint();
         }
         if (!dry && ["frontend-creation", "full-stack-h2-creation"].includes(scenario.id)) {
