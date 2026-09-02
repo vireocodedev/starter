@@ -62,7 +62,9 @@ export function assertStorybookBaselineContinuity(releaseGraph, edge) {
   const predecessorEdge = `${predecessorEdges[0].from}->${sourceRelease}`;
   for (const [profile, current] of activeStorybookBaselines) {
     const predecessor = findManagedStorybookBaseline(releaseGraph?.baselines?.[predecessorEdge]?.[profile], profile);
-    if (predecessor === undefined) continue;
+    if (predecessor === undefined) {
+      throw new Error(`${edge}:${profile} Storybook update has no ${predecessorEdge} target provenance.`);
+    }
     if (
       typeof predecessor.targetSha256 !== "string" ||
       typeof predecessor.targetContent !== "string" ||

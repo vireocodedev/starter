@@ -464,10 +464,13 @@ test("preserves the repository's stable version-neutral README upgrade guidance 
 
 test("preserves the repository's version-neutral Storybook upgrade guidance during candidate finalization", async () => {
   const repositoryReadme = readFileSync(new URL("../packages/create-vireo/README.md", import.meta.url), "utf8");
+  const expectedStorybookGuidance =
+    "### Managed Storybook compatibility\n\nFor the 0.8.4→target transaction, frontend projects manage\n`package.json#scripts.architecture:check`, `vitest.storybook.config.ts`, and\n`scripts/storybook-config-policy.test.mjs`; full-stack projects manage\n`frontend/package.json#scripts.architecture:check`, `frontend/vitest.storybook.config.ts`,\nand `frontend/scripts/storybook-config-policy.test.mjs`. Vireo refuses a customized\nscript value or customized bytes for any of these surfaces. Only unrelated application\ntest configuration and tests remain application-owned and are never rewritten.";
   const storybookGuidance = repositoryReadme.match(
-    /### Managed Storybook compatibility\n\nFor the 0\.8\.4→target transaction,[\s\S]*?never\nrewritten\./u,
+    /### Managed Storybook compatibility\n\nFor the 0\.8\.4→target transaction, frontend projects manage\n`package\.json#scripts\.architecture:check`, `vitest\.storybook\.config\.ts`, and\n`scripts\/storybook-config-policy\.test\.mjs`; full-stack projects manage\n`frontend\/package\.json#scripts\.architecture:check`, `frontend\/vitest\.storybook\.config\.ts`,\nand `frontend\/scripts\/storybook-config-policy\.test\.mjs`\. Vireo refuses a customized\nscript value or customized bytes for any of these surfaces\. Only unrelated application\ntest configuration and tests remain application-owned and are never rewritten\./u,
   )?.[0];
   assert.ok(storybookGuidance, "the create-vireo README declares version-neutral Storybook ownership guidance");
+  assert.equal(storybookGuidance, expectedStorybookGuidance);
 
   const root = makeFixture({ storybookGuidance });
   try {

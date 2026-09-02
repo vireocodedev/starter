@@ -80,6 +80,16 @@ test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", 
     /0\.8\.4->0\.8\.6:frontend Storybook source must match 0\.8\.3->0\.8\.4 target provenance/u,
   );
 
+  const predecessorMissingForFrontendOnly = structuredClone(policy.releaseGraph);
+  predecessorMissingForFrontendOnly.baselines["0.8.3->0.8.4"].frontend =
+    predecessorMissingForFrontendOnly.baselines["0.8.3->0.8.4"].frontend.filter(
+      file => !file.path.endsWith("vitest.storybook.config.ts"),
+    );
+  assert.throws(
+    () => assertStorybookBaselineContinuity(predecessorMissingForFrontendOnly, edge),
+    /0\.8\.4->0\.8\.6:frontend Storybook update has no 0\.8\.3->0\.8\.4 target provenance/u,
+  );
+
   const frontendBaseline = policy.releaseGraph.baselines[edge].frontend.find(file =>
     file.path.endsWith("vitest.storybook.config.ts"),
   );

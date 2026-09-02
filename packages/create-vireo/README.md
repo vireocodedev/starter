@@ -136,11 +136,13 @@ complete full verification before accepting the upgrade.
 
 ### Managed Storybook compatibility
 
-For the 0.8.4→target transaction, Vireo manages `vitest.storybook.config.ts` and
-`scripts/storybook-config-policy.test.mjs` at the frontend-project root and under
-`frontend/` in full-stack projects. It refuses customized bytes for either managed
-file. All other application test configuration remains application-owned and is never
-rewritten.
+For the 0.8.4→target transaction, frontend projects manage
+`package.json#scripts.architecture:check`, `vitest.storybook.config.ts`, and
+`scripts/storybook-config-policy.test.mjs`; full-stack projects manage
+`frontend/package.json#scripts.architecture:check`, `frontend/vitest.storybook.config.ts`,
+and `frontend/scripts/storybook-config-policy.test.mjs`. Vireo refuses a customized
+script value or customized bytes for any of these surfaces. Only unrelated application
+test configuration and tests remain application-owned and are never rewritten.
 
 The immutable `starter-template@0.8.4` source baseline uses
 `starterVersion=0.3.1`; `create-vireo@0.8.4` generates and upgrades
