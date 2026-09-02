@@ -179,9 +179,7 @@ test("plans and verifies every exact npm and Maven subject against the release t
   assert.ok(
     calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--predicate-type", "https://cyclonedx.org/bom")),
   );
-  assert.ok(
-    calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--source-digest", "c".repeat(40))),
-  );
+  assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--source-digest", "c".repeat(40))));
   assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--format", "json")));
   assert.equal(
     records[0].verification.certIdentity,
