@@ -74,6 +74,21 @@ release records. Review those generated changes and run the ordinary ecosystem
 and release gates before merging. Application decisions and no-release
 exemptions remain as the reviewable audit trail.
 
+## Changesets version pull requests
+
+`corepack npm run version-packages` synchronizes the current documentation release
+after Changesets updates public package versions. It also regenerates the current
+friendly `site/content/snapshots/<version>.json` archive and writes a deterministic
+`application:documentation-site` deploy record at
+`.release-impact/documentation-site-current-release.json`. Its summary includes the
+exact current documentation coordinate and a digest of the full release object, so a
+non-`create-vireo` package change updates the reviewed deployment decision without
+creating duplicate records.
+
+Review both generated artifacts in the version pull request. The synchronizer only
+updates the current friendly snapshot; retained historical archives and `site/dist`
+remain unchanged.
+
 ## Checking a branch
 
 Compare the proposed head to the pull request base:

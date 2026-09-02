@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { validateReleaseImpact } from "./release-impact-policy.mjs";
 import { synchronizeDocumentationRelease } from "./synchronize-documentation-release.mjs";
 
 test("synchronizes release contracts and public version documentation from source", async () => {
   const root = makeFixture();
   try {
-    await synchronizeDocumentationRelease(root);
+    await synchronizeFixtureDocumentationRelease(root);
 
     const releaseId = "npm-0.3.0_jvm-0.4.0";
     const ecosystem = readJson(join(root, "contracts", "ecosystem-release-contract.json"));
@@ -179,6 +180,53 @@ test("synchronizes release contracts and public version documentation from sourc
     assert.ok(historicalSiteSource.includes("a".repeat(40)));
     assert.match(historicalSiteSource, /pinned 0\.2\.0 Template/u);
     assert.ok(readFileSync(join(root, "site/dist/current.md"), "utf8").includes("a".repeat(40)));
+
+    const snapshotPath = join(root, "site", "content", "snapshots", "0.2.json");
+    const snapshot = readJson(snapshotPath);
+    assert.equal(snapshot.documentationVersion, "0.2");
+    assert.equal(snapshot.payload.releaseId, releaseId);
+    assert.match(snapshot.payload.currentOfflineGuide, /b{40}/u);
+
+    const impactRecords = generatedDocumentationSiteImpactRecords(root);
+    assert.equal(impactRecords.length, 1);
+    assert.deepEqual(impactRecords, ["documentation-site-current-release.json"]);
+    const impactRecord = readJson(join(root, ".release-impact", impactRecords[0]));
+    assert.deepEqual(
+      { ...impactRecord, summary: undefined },
+      {
+        schemaVersion: 1,
+        artifact: "application:documentation-site",
+        decision: "release",
+        bump: "deploy",
+        summary: undefined,
+      },
+    );
+    assert.match(
+      impactRecord.summary,
+      /^Deploy the synchronized Vireo documentation snapshot for npm-0\.3\.0_jvm-0\.4\.0 \([a-f0-9]{64}\)\.$/u,
+    );
+    const humanRecordPath = join(root, ".release-impact", "documentation-site-human-release.json");
+    const humanRecord = readFileSync(humanRecordPath, "utf8");
+
+    const firstSnapshot = readFileSync(snapshotPath, "utf8");
+    const firstImpact = readFileSync(join(root, ".release-impact", impactRecords[0]), "utf8");
+    await synchronizeFixtureDocumentationRelease(root);
+    assert.equal(readFileSync(snapshotPath, "utf8"), firstSnapshot, "reruns keep the current snapshot byte-stable");
+    assert.equal(
+      readFileSync(join(root, ".release-impact", impactRecords[0]), "utf8"),
+      firstImpact,
+      "reruns keep the generated deploy decision byte-stable",
+    );
+    assert.deepEqual(
+      generatedDocumentationSiteImpactRecords(root),
+      impactRecords,
+      "reruns do not add duplicate deploy records",
+    );
+    assert.equal(
+      readFileSync(humanRecordPath, "utf8"),
+      humanRecord,
+      "generated intent preserves unrelated human records",
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -193,7 +241,7 @@ test("fails closed when an allowlisted current site reference changes form", asy
       readFileSync(offlinePath, "utf8").replace("pinned 0.2.0 Template", "pinned Template 0.2.0"),
     );
     await assert.rejects(
-      synchronizeDocumentationRelease(root),
+      synchronizeFixtureDocumentationRelease(root),
       /site\/content\/offline\.md current Template version must contain exactly 1 current-state reference/u,
     );
   } finally {
@@ -210,7 +258,7 @@ test("fails closed when release artifacts drift from public workspaces", async (
     writeJson(ecosystemPath, ecosystem);
 
     await assert.rejects(
-      synchronizeDocumentationRelease(root),
+      synchronizeFixtureDocumentationRelease(root),
       /Ecosystem release npm artifacts do not match the public workspaces/u,
     );
   } finally {
@@ -227,9 +275,96 @@ test("fails closed when a public workspace is missing from the root package lock
     writeJson(packageLockPath, packageLock);
 
     await assert.rejects(
-      synchronizeDocumentationRelease(root),
+      synchronizeFixtureDocumentationRelease(root),
       /Root package-lock\.json is missing public workspace entry packages\/create-vireo/u,
     );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("documentation-site deploy intent reuses one canonical record for every public package coordinate", async () => {
+  const root = makeFixture();
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    const [recordName] = generatedDocumentationSiteImpactRecords(root);
+    const recordPath = join(root, ".release-impact", recordName);
+    const firstRecord = readFileSync(recordPath, "utf8");
+
+    const sqliteManifestPath = join(root, "packages", "sqlite", "package.json");
+    const sqliteManifest = readJson(sqliteManifestPath);
+    sqliteManifest.version = "0.2.3";
+    writeJson(sqliteManifestPath, sqliteManifest);
+    await synchronizeFixtureDocumentationRelease(root);
+
+    assert.deepEqual(generatedDocumentationSiteImpactRecords(root), ["documentation-site-current-release.json"]);
+    assert.notEqual(readFileSync(recordPath, "utf8"), firstRecord, "the full-coordinate digest updates the record");
+    const releaseImpact = validateReleaseImpact({
+      policy: readJson(new URL("../contracts/release-impact-policy.json", import.meta.url)),
+      ecosystemContract: readJson(new URL("../contracts/ecosystem-release-contract.json", import.meta.url)),
+      changes: [
+        { path: "site/content/snapshots/0.2.json", status: "M" },
+        {
+          path: ".release-impact/documentation-site-current-release.json",
+          status: "M",
+          headContent: readFileSync(recordPath, "utf8"),
+        },
+      ],
+    });
+    assert.deepEqual(
+      releaseImpact.problems,
+      [],
+      "the canonical generated record satisfies the release-impact policy without duplicate decisions",
+    );
+    assert.equal(releaseImpact.decisions.length, 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("rejects unsafe documentation snapshot versions before writing release outputs", async () => {
+  const root = makeFixture();
+  try {
+    const documentationPath = join(root, "contracts", "documentation-release-policy.json");
+    const documentation = readJson(documentationPath);
+    documentation.releases[0].documentationVersion = "../escaped";
+    writeJson(documentationPath, documentation);
+    const readme = readFileSync(join(root, "README.md"), "utf8");
+
+    await assert.rejects(
+      synchronizeFixtureDocumentationRelease(root),
+      /Current documentation release must declare a friendly 0\.x documentationVersion/u,
+    );
+
+    assert.equal(existsSync(join(root, "site", "content", "escaped.json")), false);
+    assert.equal(existsSync(join(root, "site", "content", "snapshots", "0.2.json")), false);
+    assert.deepEqual(generatedDocumentationSiteImpactRecords(root), []);
+    assert.equal(readFileSync(join(root, "README.md"), "utf8"), readme);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("rejects unsafe documentation release IDs before writing release outputs", async () => {
+  const root = makeFixture();
+  try {
+    const documentationPath = join(root, "contracts", "documentation-release-policy.json");
+    const documentation = readJson(documentationPath);
+    const unsafeId = "npm-0.3.0_jvm-0.4.0/../../escaped";
+    documentation.currentRelease = unsafeId;
+    documentation.releases[0].id = unsafeId;
+    writeJson(documentationPath, documentation);
+    const readme = readFileSync(join(root, "README.md"), "utf8");
+
+    await assert.rejects(
+      synchronizeFixtureDocumentationRelease(root),
+      /Current documentation release must declare a safe npm-<version>_jvm-<version> ID/u,
+    );
+
+    assert.equal(existsSync(join(root, ".release-impact", "escaped.json")), false);
+    assert.equal(existsSync(join(root, "site", "content", "snapshots", "0.2.json")), false);
+    assert.deepEqual(generatedDocumentationSiteImpactRecords(root), []);
+    assert.equal(readFileSync(join(root, "README.md"), "utf8"), readme);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -248,6 +383,14 @@ function makeFixture() {
   mkdirSync(join(root, "site", "content"), { recursive: true });
   mkdirSync(join(root, "site", "content", "snapshots"), { recursive: true });
   mkdirSync(join(root, "site", "dist"), { recursive: true });
+  mkdirSync(join(root, ".release-impact"));
+  writeJson(join(root, ".release-impact", "documentation-site-human-release.json"), {
+    schemaVersion: 1,
+    artifact: "application:documentation-site",
+    decision: "release",
+    bump: "deploy",
+    summary: "Reviewed human deployment record that must remain untouched.",
+  });
   writeJson(join(root, "packages", "create-vireo", "package.json"), {
     name: "create-vireo",
     version: "0.3.0",
@@ -439,4 +582,27 @@ function readJson(path) {
 
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+async function synchronizeFixtureDocumentationRelease(root) {
+  return synchronizeDocumentationRelease(root, {
+    createSnapshotArchive: ({ root: snapshotRoot }) => {
+      const documentation = readJson(join(snapshotRoot, "contracts", "documentation-release-policy.json"));
+      const release = documentation.releases.find(candidate => candidate.id === documentation.currentRelease);
+      return {
+        documentationVersion: release.documentationVersion,
+        payload: {
+          releaseId: release.id,
+          currentOfflineGuide: readFileSync(join(snapshotRoot, "site", "content", "offline.md"), "utf8"),
+        },
+      };
+    },
+    serializeSnapshot: archive => archive,
+  });
+}
+
+function generatedDocumentationSiteImpactRecords(root) {
+  return readdirSync(join(root, ".release-impact"))
+    .filter(name => name === "documentation-site-current-release.json")
+    .sort();
 }
