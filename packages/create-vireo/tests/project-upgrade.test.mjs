@@ -371,17 +371,33 @@ const adjacentPolicy = JSON.parse(
 const adjacentSource = adjacentPolicy.releaseGraph.releases.find(release => release.release === adjacentSourceRelease);
 const adjacentTarget = adjacentPolicy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease);
 
-function releaseLifecyclePolicies(policy, sourceRelease = "0.8.1", targetRelease = "0.8.2") {
+function releaseLifecyclePolicies(policy, sourceRelease, targetRelease) {
   const candidatePolicy = structuredClone(policy);
   const graph = candidatePolicy.releaseGraph;
-  graph.releases = graph.releases.filter(release => release.release !== graph.candidateRelease);
-  graph.edges = graph.edges.filter(edge => edge.from !== graph.candidateRelease && edge.to !== graph.candidateRelease);
+  const releases = new Set(graph.releases.map(release => release.release));
+  if (!releases.has(sourceRelease) || !releases.has(targetRelease)) {
+    throw new Error("Release lifecycle fixture requires declared source and target releases.");
+  }
+  if (!graph.edges.some(edge => edge.from === sourceRelease && edge.to === targetRelease)) {
+    throw new Error("Release lifecycle fixture requires a direct source-to-target edge.");
+  }
+  const descendants = new Set();
+  const pending = [targetRelease];
+  while (pending.length > 0) {
+    const release = pending.pop();
+    for (const edge of graph.edges.filter(edge => edge.from === release)) {
+      if (descendants.has(edge.to)) continue;
+      descendants.add(edge.to);
+      pending.push(edge.to);
+    }
+  }
+  graph.releases = graph.releases.filter(release => !descendants.has(release.release));
+  graph.edges = graph.edges.filter(edge => !descendants.has(edge.from) && !descendants.has(edge.to));
   delete graph.candidateRelease;
   const source = graph.releases.find(release => release.release === sourceRelease);
   const target = graph.releases.find(release => release.release === targetRelease);
-  if (!source || !target || !graph.edges.some(edge => edge.from === sourceRelease && edge.to === targetRelease)) {
-    throw new Error("Release lifecycle fixture requires the retained prior-current edge.");
-  }
+  if (!source || !target) throw new Error("Release lifecycle fixture pruned its source or target release.");
+  for (const release of graph.releases) release.status = "historical";
   graph.publicRelease = sourceRelease;
   graph.previousRelease = sourceRelease;
   graph.candidateRelease = targetRelease;
@@ -576,7 +592,11 @@ test("0.7.0 to 0.8.0 adds managed skills once and preserves application-owned by
 test("structurally valid candidate policy rejects preview and apply without writes", async () => {
   const root = await adjacentFixture("frontend");
   try {
-    const { candidatePolicy, targetRelease } = releaseLifecyclePolicies(adjacentPolicy);
+    const { candidatePolicy, targetRelease } = releaseLifecyclePolicies(
+      adjacentPolicy,
+      adjacentSourceRelease,
+      adjacentTargetRelease,
+    );
     const beforeCandidate = await treeBytes(root);
     for (const options of [
       { projectDirectory: root, targetRelease, dryRun: true },
@@ -728,7 +748,7 @@ test("0.8.2 to 0.8.3 refreshes only declarations and provenance for both profile
   const sourceRelease = "0.8.2";
   const targetRelease = "0.8.3";
   const edge = `${sourceRelease}->${targetRelease}`;
-  const candidatePolicy = structuredClone(adjacentPolicy);
+  const { candidatePolicy, finalizedPolicy } = releaseLifecyclePolicies(adjacentPolicy, sourceRelease, targetRelease);
   const source = candidatePolicy.releaseGraph.releases.find(release => release.release === sourceRelease);
   const target = candidatePolicy.releaseGraph.releases.find(release => release.release === targetRelease);
   assert.ok(source && target, "the 0.8.2 source and 0.8.3 candidate must be declared");
@@ -744,13 +764,6 @@ test("0.8.2 to 0.8.3 refreshes only declarations and provenance for both profile
   );
   assert.equal(sha256(packageCompatibilitySource), packageCompatibilityBaseline.sourceSha256);
   assert.equal(sha256(packageCompatibilityContractSource), packageCompatibilityContractBaseline.sourceSha256);
-
-  const finalizedPolicy = structuredClone(candidatePolicy);
-  delete finalizedPolicy.releaseGraph.candidateRelease;
-  finalizedPolicy.releaseGraph.publicRelease = targetRelease;
-  finalizedPolicy.releaseGraph.previousRelease = sourceRelease;
-  finalizedPolicy.releaseGraph.releases.find(release => release.release === sourceRelease).status = "historical";
-  finalizedPolicy.releaseGraph.releases.find(release => release.release === targetRelease).status = "current";
 
   for (const profile of ["full-stack", "frontend"]) {
     const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-082-`));
@@ -901,7 +914,7 @@ test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves a
   const target = adjacentPolicy.releaseGraph.releases.find(release => release.release === targetRelease);
   const sourceDoctor = adjacentPolicy.releaseGraph.baselines["0.6.0->0.7.0"].frontend[0].targetContent;
   const targetDoctor = adjacentPolicy.releaseGraph.baselines[edge].frontend[0];
-  const { candidatePolicy, finalizedPolicy } = releaseLifecyclePolicies(adjacentPolicy);
+  const { candidatePolicy, finalizedPolicy } = releaseLifecyclePolicies(adjacentPolicy, sourceRelease, targetRelease);
   const root = await mkdtemp(join(tmpdir(), "vireo-081-frontend-"));
   try {
     await mkdir(join(root, ".vireo"), { recursive: true });
@@ -1019,18 +1032,7 @@ test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves a
 test("finalized 0.8.1 full-stack Doctor migration updates realistic managed provenance exactly", async () => {
   const sourceRelease = "0.8.1";
   const targetRelease = "0.8.2";
-  const policy = structuredClone(adjacentPolicy);
-  policy.releaseGraph.releases = policy.releaseGraph.releases.filter(
-    release => release.release !== policy.releaseGraph.candidateRelease,
-  );
-  policy.releaseGraph.edges = policy.releaseGraph.edges.filter(
-    edge => edge.from !== policy.releaseGraph.candidateRelease && edge.to !== policy.releaseGraph.candidateRelease,
-  );
-  delete policy.releaseGraph.candidateRelease;
-  policy.releaseGraph.publicRelease = targetRelease;
-  policy.releaseGraph.previousRelease = sourceRelease;
-  policy.releaseGraph.releases.find(release => release.release === sourceRelease).status = "historical";
-  policy.releaseGraph.releases.find(release => release.release === targetRelease).status = "current";
+  const { finalizedPolicy: policy } = releaseLifecyclePolicies(adjacentPolicy, sourceRelease, targetRelease);
   const source = policy.releaseGraph.releases.find(release => release.release === sourceRelease);
   const target = policy.releaseGraph.releases.find(release => release.release === targetRelease);
   const baselines = policy.releaseGraph.baselines[`${sourceRelease}->${targetRelease}`]["full-stack"];
