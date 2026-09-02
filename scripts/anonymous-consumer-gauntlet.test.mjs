@@ -2,10 +2,11 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { publicReleaseIdentity, readJson } from "./lib/anonymous-consumer-environment.mjs";
+import { validateApplicationIdentity } from "./lib/application-projection-contract.mjs";
 import {
   buildExecutionPlan,
   executePlanForTest,
@@ -23,6 +24,36 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = readJson(join(root, "contracts", "anonymous-consumer-gauntlet-policy.json"));
 const release = publicReleaseIdentity(readJson(join(root, "contracts", "ecosystem-release-contract.json")));
+const applicationProjectionContract = readJson(join(root, "contracts", "application-projection-contract.json"));
+
+const identityOptions = new Map([
+  ["--name", "projectName"],
+  ["--display-name", "displayName"],
+  ["--owner-name", "ownerName"],
+  ["--repository-url", "repositoryUrl"],
+  ["--support-url", "supportUrl"],
+  ["--security-contact", "securityContact"],
+]);
+
+function effectiveCreateIdentity(operation) {
+  const createIndex = operation.arguments.indexOf("create-vireo");
+  assert.notEqual(createIndex, -1, `${operation.id} is not a create-vireo command`);
+  const directory = operation.arguments[createIndex + 1];
+  assert.equal(typeof directory, "string", `${operation.id} has no create-vireo target directory`);
+  const identity = { projectName: basename(directory), displayName: basename(directory) };
+  for (let index = createIndex + 2; index < operation.arguments.length; index += 1) {
+    const field = identityOptions.get(operation.arguments[index]);
+    if (!field) continue;
+    assert.equal(
+      typeof operation.arguments[index + 1],
+      "string",
+      `${operation.id} has no value for ${operation.arguments[index]}`,
+    );
+    identity[field] = operation.arguments[index + 1];
+    index += 1;
+  }
+  return identity;
+}
 
 test("gauntlet policy covers every required scenario with exact public identity", () => {
   assert.deepEqual(validatePolicy(policy, release), []);
@@ -156,6 +187,58 @@ test("deterministic plan gives a fake executor every required recipe and refusal
     .operations.map(operation => operation.id);
   assert.ok(removal.includes("sample-removal-first-apply-snapshot"));
   assert.ok(removal.includes("sample-removal-repeat-preserves-tree"));
+});
+
+test("shared create commands carry one valid release identity except for their intended identity refusal", () => {
+  const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
+  const plan = buildExecutionPlan({ policy, release, upgradePolicy, consumerRoot: "/tmp/vireo-anonymous-plan" });
+  const creates = plan
+    .flatMap(scenario => scenario.operations)
+    .filter(operation => operation.arguments?.includes("create-vireo") && operation.arguments.includes("--owner-name"));
+  assert.ok(creates.length > 0);
+  const intendedProblems = new Map([
+    ["invalid-project-name", ["projectName must use kebab-case format"]],
+    ["invalid-repository-url", ["repositoryUrl must use https-url format"]],
+    ["invalid-support-url", ["supportUrl must use https-or-mailto-url format"]],
+  ]);
+  for (const operation of creates) {
+    for (const option of [
+      "--owner-name",
+      "--display-name",
+      "--repository-url",
+      "--support-url",
+      "--security-contact",
+    ]) {
+      assert.ok(operation.arguments.includes(option), `${operation.id} must bind ${option}`);
+    }
+    const identity = effectiveCreateIdentity(operation);
+    assert.equal(identity.securityContact, "mailto:security@example.invalid", `${operation.id} masks security contact`);
+    assert.equal(identity.ownerName, "Vireo CI", `${operation.id} masks owner identity`);
+    assert.equal(identity.displayName, "Anonymous Gauntlet", `${operation.id} masks display identity`);
+    assert.deepEqual(
+      validateApplicationIdentity(applicationProjectionContract, identity),
+      intendedProblems.get(operation.id) ?? [],
+      `${operation.id} has an unexpected masked public identity defect`,
+    );
+  }
+  for (const id of [
+    "invalid-java-package",
+    "occupied-target-refusal",
+    "template-download-failure",
+    "template-download-retry",
+  ]) {
+    const operation = creates.find(candidate => candidate.id === id);
+    assert.ok(operation, `missing ${id}`);
+    assert.deepEqual(
+      validateApplicationIdentity(applicationProjectionContract, effectiveCreateIdentity(operation)),
+      [],
+    );
+  }
+  for (const id of intendedProblems.keys())
+    assert.ok(
+      creates.some(operation => operation.id === id),
+      `missing ${id}`,
+    );
 });
 
 test("JSON command assertions accept only bounded exact ready reports", () => {
