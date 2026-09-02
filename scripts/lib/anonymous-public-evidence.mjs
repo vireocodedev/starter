@@ -31,3 +31,97 @@ export function validateExactNpmRecord({ record, expected, releaseTagCommit }) {
   if (!record?.attestationUrl || !record?.registrySignaturesValid) problems.push("npm attestation/signature evidence is incomplete");
   return problems;
 }
+
+function sha512HexFromIntegrity(integrity) {
+  const match = /^sha512-([A-Za-z0-9+/]+={0,2})$/u.exec(integrity ?? "");
+  if (!match) throw new Error(`Invalid SHA-512 npm integrity ${JSON.stringify(integrity)}.`);
+  const bytes = Buffer.from(match[1], "base64");
+  if (bytes.length !== 64 || bytes.toString("base64") !== match[1]) {
+    throw new Error(`Invalid SHA-512 npm integrity ${JSON.stringify(integrity)}.`);
+  }
+  return bytes.toString("hex");
+}
+
+function npmPurl({ name, version }) {
+  const encodedName = name.startsWith("@") ? `%40${name.slice(1)}` : encodeURIComponent(name);
+  return `pkg:npm/${encodedName}@${version}`;
+}
+
+function repositoryIdentity(value) {
+  const match = /github\.com[/:]([^/]+\/[^/@]+)(?:\.git)?(?:@|$|\/)/u.exec(value ?? "");
+  return match?.[1]?.replace(/\.git$/u, "") ?? null;
+}
+
+function materialCommit(material) {
+  const digest = material?.digest ?? {};
+  for (const key of ["gitCommit", "sha1", "sha256"]) {
+    if (/^[a-f0-9]{40}$/u.test(digest[key] ?? "")) return digest[key];
+  }
+  return /@([a-f0-9]{40})(?:$|[?#])/u.exec(material?.uri ?? "")?.[1] ?? null;
+}
+
+function decodeDsseStatement(bundle, coordinate) {
+  const payload = bundle?.dsseEnvelope?.payload;
+  if (typeof payload !== "string") throw new Error(`${coordinate} attestation lacks a DSSE payload.`);
+  try {
+    return JSON.parse(Buffer.from(payload, "base64").toString("utf8"));
+  } catch (error) {
+    throw new Error(`${coordinate} attestation has invalid DSSE JSON.`, { cause: error });
+  }
+}
+
+/**
+ * Decodes the npm registry's SLSA bundle and proves that it binds one exact
+ * public package byte stream to Vireo's canonical release workflow and tag.
+ */
+export function decodeExactNpmProvenance({ attestation, expected, integrity, releaseTagCommit, policy }) {
+  const coordinate = `${expected?.name}@${expected?.version}`;
+  if (!/^[a-f0-9]{40}$/u.test(releaseTagCommit ?? "")) {
+    throw new Error(`${coordinate} requires a peeled 40-character release tag commit.`);
+  }
+  const attestations = attestation?.attestations;
+  if (!Array.isArray(attestations) || attestations.length === 0) {
+    throw new Error(`${coordinate} registry response has no attestations.`);
+  }
+  const statement = attestations
+    .map(entry => ({ entry, statement: decodeDsseStatement(entry?.bundle, coordinate) }))
+    .find(({ statement: candidate }) => candidate?.predicateType === policy.predicateType)?.statement;
+  if (!statement) throw new Error(`${coordinate} registry response has no SLSA v1 provenance statement.`);
+
+  const expectedPurl = npmPurl(expected);
+  const expectedDigest = sha512HexFromIntegrity(integrity);
+  const subject = statement.subject?.find(
+    candidate => candidate?.name === expectedPurl && candidate?.digest?.sha512 === expectedDigest,
+  );
+  if (!subject) throw new Error(`${coordinate} provenance does not bind the exact npm SHA-512 subject.`);
+  if (statement._type !== policy.statementType || statement.predicateType !== policy.predicateType) {
+    throw new Error(`${coordinate} provenance is not an accepted SLSA v1 statement.`);
+  }
+
+  const workflow = statement.predicate?.buildDefinition?.externalParameters?.workflow;
+  if (
+    repositoryIdentity(workflow?.repository) !== policy.canonicalRepository ||
+    workflow?.path !== policy.workflowPath ||
+    workflow?.ref !== policy.workflowRef
+  ) {
+    throw new Error(`${coordinate} provenance does not name the canonical release workflow.`);
+  }
+  if (String(statement.predicate?.buildDefinition?.internalParameters?.github?.repository_id) !== String(policy.repositoryId)) {
+    throw new Error(`${coordinate} provenance has an unexpected GitHub repository id.`);
+  }
+  const materials = statement.predicate?.buildDefinition?.resolvedDependencies ?? statement.predicate?.materials ?? [];
+  const material = materials.find(
+    candidate => repositoryIdentity(candidate?.uri) === policy.canonicalRepository && materialCommit(candidate) === releaseTagCommit,
+  );
+  if (!material) throw new Error(`${coordinate} provenance does not bind the peeled create-vireo tag commit.`);
+
+  return {
+    repository: policy.canonicalRepository,
+    workflow: policy.workflowPath,
+    ref: policy.workflowRef,
+    commit: releaseTagCommit,
+    statementType: statement._type,
+    predicateType: statement.predicateType,
+    subject: { name: subject.name, sha512: subject.digest.sha512 },
+  };
+}
