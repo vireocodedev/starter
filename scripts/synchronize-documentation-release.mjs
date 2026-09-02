@@ -568,17 +568,23 @@ function synchronizeAdditionalCurrentGuidance({
   );
 
   const phaseBacklogPath = join(repositoryRoot, "docs", "roadmap", "phase-4", "backlog.md");
-  const phaseBacklog = replaceRequired(
+  const phaseBacklog = replacePatternOnce(
     readFileSync(phaseBacklogPath, "utf8"),
-    `The current public \`create-vireo@${publicUpgradeRelease}\` line and its supported ${historicalEdge}\nadjacent upgrade fixture are complete.`,
+    new RegExp(
+      `The current public \`create-vireo@${escapeRegExp(publicUpgradeRelease)}\` line and its supported ${escapeRegExp(historicalEdge)}\\nadjacent upgrade fixture are complete(?:; \\d+\\.\\d+\\.\\d+→\\d+\\.\\d+\\.\\d+ remains retained historical evidence)?\\.`,
+      "u",
+    ),
     `The current public \`create-vireo@${candidateUpgradeRelease}\` line and its supported ${currentEdge}\nadjacent upgrade fixture are complete; ${historicalEdge} remains retained historical evidence.`,
     "docs/roadmap/phase-4/backlog.md current release contract",
   );
 
   const readinessPath = join(repositoryRoot, "docs", "roadmap", "phase-4", "production-readiness-criteria.md");
-  const readinessCriteria = replaceRequired(
+  const readinessCriteria = replacePatternOnce(
     readFileSync(readinessPath, "utf8"),
-    `Public \`create-vireo\` ${publicUpgradeRelease} declares the current ${historicalEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance; frontend/full-stack unit fixtures exercise the six managed application-skill additions for both profiles.`,
+    new RegExp(
+      `Public \`create-vireo\` ${escapeRegExp(publicUpgradeRelease)} declares the current ${escapeRegExp(historicalEdge)} edge with dry run, explicit apply, refusal, ownership and rollback guidance; (?:frontend/full-stack unit fixtures exercise the six managed application-skill additions for both profiles|its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical \\d+\\.\\d+\\.\\d+→\\d+\\.\\d+\\.\\d+ edge)\\.`,
+      "u",
+    ),
     `Public \`create-vireo\` ${candidateUpgradeRelease} declares the current ${currentEdge} edge with dry run, explicit apply, refusal, ownership and rollback guidance; its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical ${historicalEdge} edge.`,
     "docs/roadmap/phase-4/production-readiness-criteria.md current release compatibility",
   );

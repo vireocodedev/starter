@@ -113,8 +113,16 @@ test("synchronizes release contracts and public version documentation from sourc
       /create-vireo@0\.3\.0.*0\.2\.0→0\.3\.0/su,
     );
     assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-4", "backlog.md"), "utf8"),
+      /0\.1\.0→0\.2\.0 remains retained historical evidence/u,
+    );
+    assert.match(
       readFileSync(join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"), "utf8"),
       /current 0\.2\.0→0\.3\.0 edge/u,
+    );
+    assert.match(
+      readFileSync(join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"), "utf8"),
+      /0\.0\.0→0\.1\.0 remains retained historical evidence/u,
     );
     assert.match(readFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "utf8"), new RegExp(releaseId, "u"));
     assert.match(
@@ -554,11 +562,11 @@ function makeFixture() {
   );
   writeFileSync(
     join(root, "docs", "roadmap", "phase-4", "backlog.md"),
-    "The current public `create-vireo@0.2.0` line and its supported 0.1.0→0.2.0\nadjacent upgrade fixture are complete.\n",
+    "The current public `create-vireo@0.2.0` line and its supported 0.1.0→0.2.0\nadjacent upgrade fixture are complete; 0.0.0→0.1.0 remains retained historical evidence.\n",
   );
   writeFileSync(
     join(root, "docs", "roadmap", "phase-4", "production-readiness-criteria.md"),
-    "Public `create-vireo` 0.2.0 declares the current 0.1.0→0.2.0 edge with dry run, explicit apply, refusal, ownership and rollback guidance; frontend/full-stack unit fixtures exercise the six managed application-skill additions for both profiles.\n",
+    "Public `create-vireo` 0.2.0 declares the current 0.1.0→0.2.0 edge with dry run, explicit apply, refusal, ownership and rollback guidance; its metadata/provenance fixtures retain the six managed application-skill additions introduced by the historical 0.0.0→0.1.0 edge. The 0.0.0→0.1.0 remains retained historical evidence.\n",
   );
   writeFileSync(join(root, "docs", "DOCUMENTATION_PORTAL.md"), "Current snapshot: `npm-0.2.0_jvm-0.3.0`.\n");
   writeFileSync(
