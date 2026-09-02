@@ -378,17 +378,15 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       ];
     }
     case "adjacent-public-upgrades": {
-      const supportedTargets = Object.entries(upgradePolicy.releaseCoordinates ?? {})
-        .filter(([, coordinate]) => coordinate.status === "supported")
-        .map(([version]) => version);
-      const targets = supportedTargets.length > 0 ? supportedTargets : [upgradePolicy.publicRelease];
-      const edges = targets.flatMap(target => (upgradePolicy.requiredEdges ?? []).filter(edge => edge.to === target));
+      const target = upgradePolicy.publicRelease;
+      const edges = (upgradePolicy.requiredEdges ?? []).filter(edge => edge.from === upgradePolicy.maintenance?.priorCurrentUpgradeSource && edge.to === target);
+      const source = upgradePolicy.releaseCoordinates?.[upgradePolicy.maintenance?.priorCurrentUpgradeSource];
+      const targetCoordinate = upgradePolicy.releaseCoordinates?.[target];
       if (
-        edges.length === 0 ||
+        edges.length !== 1 ||
         upgradePolicy.publicRelease !== release.createVireoVersion ||
-        !targets.includes(release.createVireoVersion) ||
-        ![...edges.map(edge => edge.from), upgradePolicy.publicRelease].includes(upgradePolicy.maintenance?.priorCurrentUpgradeSource) ||
-        edges.some(edge => upgradePolicy.releaseCoordinates?.[edge.to]?.status === "candidate")
+        !["historical", "current"].includes(source?.status) ||
+        targetCoordinate?.status !== "current"
       ) {
         throw new Error("Project-upgrade policy must expose an adjacent public edge for the current public create-vireo release.");
       }
