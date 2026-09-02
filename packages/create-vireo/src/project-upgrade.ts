@@ -463,11 +463,32 @@ export async function currentProjectionCompatibilityRequirements(profile: "full-
       "VIR-UPG-001",
       `Active projection compatibility for ${profile} must declare one immutable Storybook optimizer baseline.`,
     );
-  return files.map(baseline => ({
-    path: baseline.path,
-    source: baseline.sourceContent,
-    contents: resolveBaselineTargetContent(baseline),
-  }));
+  return files.map(baseline => {
+    const compatibleContents = new Set<string>();
+    let release = target.release;
+    while (true) {
+      const incoming = graph.edges.filter(edge => edge.to === release);
+      if (incoming.length === 0) break;
+      if (incoming.length !== 1)
+        throw new VireoUpgradeError(
+          "VIR-UPG-001",
+          "Managed projection history must have one incoming edge per release.",
+        );
+      const [edge] = incoming;
+      const historical = edgeBaselines(policy, edge.from, edge.to, profile).find(file => file.path === baseline.path);
+      if (historical) {
+        if (historical.sourceContent !== undefined) compatibleContents.add(historical.sourceContent);
+        const historicalTarget = resolveBaselineTargetContent(historical);
+        if (historicalTarget !== undefined) compatibleContents.add(historicalTarget);
+      }
+      release = edge.from;
+    }
+    return {
+      path: baseline.path,
+      compatibleContents: [...compatibleContents],
+      contents: resolveBaselineTargetContent(baseline),
+    };
+  });
 }
 function requirementsMatch(
   manifest: PackageManifest,

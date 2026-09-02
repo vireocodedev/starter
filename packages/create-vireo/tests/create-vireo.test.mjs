@@ -1126,6 +1126,30 @@ test("frontend performance projection materializes immutable candidate bytes whe
   }
 });
 
+test("projection compatibility composes every immutable Storybook baseline from the pinned public Template", async () => {
+  const root = await mkdtemp(join(tmpdir(), "create-vireo-storybook-baseline-chain-"));
+  try {
+    const template = await fixture(root);
+    const policy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
+    const sourceBaseline = policy.releaseGraph.baselines["0.8.3->0.8.4"]["full-stack"].find(
+      file => file.path === "frontend/vitest.storybook.config.ts",
+    );
+    const targetBaseline = policy.releaseGraph.baselines["0.8.4->0.8.6"]["full-stack"].find(
+      file => file.path === "frontend/vitest.storybook.config.ts",
+    );
+    await writeFile(join(template, "frontend/vitest.storybook.config.ts"), sourceBaseline.sourceContent);
+
+    const target = join(root, "composed-app");
+    await createVireo({ directory: target, git: false, templateDirectory: template });
+
+    let expected = targetBaseline.sourceContent;
+    for (const transform of targetBaseline.transforms) expected = expected.replace(transform.from, transform.to);
+    assert.equal(await readFile(join(target, "frontend/vitest.storybook.config.ts"), "utf8"), expected);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("frontend performance projection refuses incompatible Template commands", async () => {
   const root = await mkdtemp(join(tmpdir(), "create-vireo-frontend-performance-command-"));
   try {

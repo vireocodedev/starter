@@ -945,7 +945,7 @@ async function applyFullStackPerformanceProjection(staging: string) {
 async function applyProjectionCompatibility(staging: string, profile: VireoProfile) {
   const files = await currentProjectionCompatibilityRequirements(profile);
   for (const file of files) {
-    if (typeof file.source !== "string" || typeof file.contents !== "string")
+    if (file.compatibleContents.length === 0 || typeof file.contents !== "string")
       throw new Error(`Active projection compatibility baseline has incomplete immutable bytes: ${file.path}`);
     const path = join(staging, file.path);
     const existing = await readFile(path, "utf8").catch(error => {
@@ -953,7 +953,7 @@ async function applyProjectionCompatibility(staging: string, profile: VireoProfi
         throw new Error(`Pinned Template compatibility baseline is missing: ${file.path}`);
       throw error;
     });
-    if (existing !== file.source && existing !== file.contents)
+    if (!file.compatibleContents.includes(existing))
       throw new Error(`Pinned Template compatibility baseline is customized: ${file.path}`);
     await writeFile(path, file.contents);
   }
