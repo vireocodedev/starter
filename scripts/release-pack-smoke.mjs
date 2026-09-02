@@ -441,7 +441,10 @@ try {
         "utf8",
       );
     }
-    if (typeof sourceBytes !== "string" || createHash("sha256").update(sourceBytes).digest("hex") !== baseline.sourceSha256)
+    if (
+      typeof sourceBytes !== "string" ||
+      createHash("sha256").update(sourceBytes).digest("hex") !== baseline.sourceSha256
+    )
       throw new Error(`Packed active source baseline lacks canonical bytes: ${baseline.path}`);
     const path = join(upgradeFixture, baseline.path);
     mkdirSync(dirname(path), { recursive: true });
@@ -589,7 +592,8 @@ try {
       const path = join(upgradeFixture, baseline.path);
       const managed = packedManaged.files.find(file => file.path === baseline.path);
       if (baseline.operation === "delete") {
-        if (existsSync(path) || managed) throw new Error(`Packed upgrade retained deleted managed baseline ${baseline.path}.`);
+        if (existsSync(path) || managed)
+          throw new Error(`Packed upgrade retained deleted managed baseline ${baseline.path}.`);
       } else {
         if (!existsSync(path)) throw new Error(`Packed upgrade omitted managed baseline ${baseline.path}.`);
         const digest = createHash("sha256").update(readFileSync(path)).digest("hex");

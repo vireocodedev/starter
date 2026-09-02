@@ -494,7 +494,10 @@ async function executeOperation(operation, { environment, runRoot }) {
     )
       throw new Error("Upgraded consumer target identity drifted.");
     const managed = JSON.parse(readFileSync(join(operation.path, ".vireo", "managed-files.json"), "utf8"));
-    if (managed.templateCommit !== project.templateCommit || managed.templateCommit !== operation.target.template.commit)
+    if (
+      managed.templateCommit !== project.templateCommit ||
+      managed.templateCommit !== operation.target.template.commit
+    )
       throw new Error("Upgraded managed-file provenance does not bind the exact target Template commit.");
     const managedProblems = validateManagedProvenance({
       root: operation.path,

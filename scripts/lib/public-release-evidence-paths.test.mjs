@@ -40,7 +40,12 @@ test("nested collector output records paths relative to its evidence root and va
   mkdirSync(join(outputRoot, "mappings"), { recursive: true });
   writeFileSync(subjectFile, "exact public bytes");
 
-  const subjectPath = manifestEvidencePath({ repositoryRoot, outputRoot, path: subjectFile, outputRelativePaths: true });
+  const subjectPath = manifestEvidencePath({
+    repositoryRoot,
+    outputRoot,
+    path: subjectFile,
+    outputRelativePaths: true,
+  });
   assert.equal(subjectPath, "subjects/npm/example-1.2.3.tgz");
   assert.equal(manifestEvidenceRoot({ repositoryRoot, outputRoot, outputRelativePaths: true }), outputRoot);
   assert.ok(existsSync(join(outputRoot, subjectPath)), "nested evidence resolves the subject exactly once");
@@ -71,7 +76,11 @@ test("nested collector output records paths relative to its evidence root and va
   };
   writeFileSync(
     join(outputRoot, "sbom", "npm-example.cdx.json"),
-    JSON.stringify({ bomFormat: "CycloneDX", specVersion: "1.6", metadata: { component: { name: "example", version: "1.2.3" } } }),
+    JSON.stringify({
+      bomFormat: "CycloneDX",
+      specVersion: "1.6",
+      metadata: { component: { name: "example", version: "1.2.3" } },
+    }),
   );
   writeFileSync(join(outputRoot, "mappings", "npm-example.sha256"), `${"a".repeat(64)}  ${subjectPath}\n`);
   assert.deepEqual(validateReleaseSbomManifest(manifest, policy, { root: outputRoot }), []);

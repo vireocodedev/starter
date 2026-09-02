@@ -45,7 +45,12 @@ test("public gauntlets derive the unique adjacent edge ending at the exact publi
   assert.ok(upgrades.every(operation => operation.target.createVireoVersion === release.createVireoVersion));
   const candidatePolicy = structuredClone(upgradePolicy);
   candidatePolicy.candidateRelease = "unpublished-candidate";
-  const candidatePlan = buildExecutionPlan({ policy, release, upgradePolicy: candidatePolicy, consumerRoot: "/tmp/vireo-anonymous-plan" });
+  const candidatePlan = buildExecutionPlan({
+    policy,
+    release,
+    upgradePolicy: candidatePolicy,
+    consumerRoot: "/tmp/vireo-anonymous-plan",
+  });
   assert.deepEqual(
     candidatePlan
       .find(scenario => scenario.id === "adjacent-public-upgrades")
@@ -251,7 +256,11 @@ test("managed provenance rejects traversal and digest drift", () => {
   };
   assert.match(validateManagedProvenance({ root: directory, manifest }).join("\n"), /unsafe|drift/u);
   assert.match(
-    validateManagedProvenance({ root: directory, manifest: { ...manifest, templateCommit: "a".repeat(40), files: [] }, templateCommit: "b".repeat(40) }).join("\n"),
+    validateManagedProvenance({
+      root: directory,
+      manifest: { ...manifest, templateCommit: "a".repeat(40), files: [] },
+      templateCommit: "b".repeat(40),
+    }).join("\n"),
     /does not match/u,
   );
 });

@@ -32,7 +32,10 @@ test("final evidence rejects incomplete successful claims", () => {
 
 test("final evidence requires every policy recipe and nonempty passed operation set", () => {
   const release = { id: "npm-1.2.3_jvm-4.5.6", template: { commit: "a".repeat(40) } };
-  const policy = { requiredScenarios: ["public-artifacts"], scenarios: [{ id: "public-artifacts", recipe: ["exact"] }] };
+  const policy = {
+    requiredScenarios: ["public-artifacts"],
+    scenarios: [{ id: "public-artifacts", recipe: ["exact"] }],
+  };
   const evidence = {
     status: "passed",
     verifierSourceCommit: "b".repeat(40),

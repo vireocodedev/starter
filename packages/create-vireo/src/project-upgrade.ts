@@ -194,11 +194,17 @@ function recordedReleaseFromMetadata(metadata: ProjectMetadata, policy: UpgradeP
   const known = new Set(policy.releaseGraph.releases.map(release => release.release));
   const created = releaseFrom(metadata.createdBy);
   if (!created || !known.has(created))
-    throw new VireoUpgradeError("VIR-UPG-002", ".vireo/project.json must record a recognized createdBy create-vireo release.");
+    throw new VireoUpgradeError(
+      "VIR-UPG-002",
+      ".vireo/project.json must record a recognized createdBy create-vireo release.",
+    );
   if (metadata.lastUpgradedBy === undefined) return created;
   const upgraded = releaseFrom(metadata.lastUpgradedBy);
   if (!upgraded || !known.has(upgraded))
-    throw new VireoUpgradeError("VIR-UPG-002", ".vireo/project.json has an invalid lastUpgradedBy create-vireo release.");
+    throw new VireoUpgradeError(
+      "VIR-UPG-002",
+      ".vireo/project.json has an invalid lastUpgradedBy create-vireo release.",
+    );
   return upgraded;
 }
 function assertEqual(actual: unknown, expected: unknown, surface: string, code = "VIR-UPG-003") {
@@ -571,13 +577,19 @@ function edgeBaselines(policy: UpgradePolicy, from: string | null, to: string | 
       if (!file.targetSha256 || transformedTarget === undefined)
         throw new VireoUpgradeError("VIR-UPG-001", `Managed add baseline requires target bytes: ${file.path}`);
     } else if (file.operation === "update") {
-      if (!file.sourceSha256 || (!file.targetSha256 || (transformedTarget === undefined && !file.transforms)))
-        throw new VireoUpgradeError("VIR-UPG-001", `Managed update baseline requires source and target bytes: ${file.path}`);
+      if (!file.sourceSha256 || !file.targetSha256 || (transformedTarget === undefined && !file.transforms))
+        throw new VireoUpgradeError(
+          "VIR-UPG-001",
+          `Managed update baseline requires source and target bytes: ${file.path}`,
+        );
     } else {
       if (!file.sourceSha256 || file.sourceContent === undefined)
         throw new VireoUpgradeError("VIR-UPG-001", `Managed delete baseline requires source bytes: ${file.path}`);
       if (file.targetSha256 !== undefined || file.targetContent !== undefined || file.transforms !== undefined)
-        throw new VireoUpgradeError("VIR-UPG-001", `Managed delete baseline must not declare target bytes: ${file.path}`);
+        throw new VireoUpgradeError(
+          "VIR-UPG-001",
+          `Managed delete baseline must not declare target bytes: ${file.path}`,
+        );
     }
   }
   return files;
@@ -848,7 +860,7 @@ async function upgradeProjectWithPolicy(
   if (generatedProblems.length)
     throw new VireoUpgradeError("VIR-UPG-006", `Generated/wire-contract drift: ${generatedProblems.join("; ")}`);
   const targetRootManifest = structuredClone(rootManifest);
-  for (const [name, value] of Object.entries(frontendOnly ? target.managedRootScripts ?? {} : {})) {
+  for (const [name, value] of Object.entries(frontendOnly ? (target.managedRootScripts ?? {}) : {})) {
     const current = targetRootManifest.scripts?.[name];
     if (current !== undefined && current !== value)
       throw new VireoUpgradeError(
@@ -935,12 +947,12 @@ async function upgradeProjectWithPolicy(
           baselineByPath.get(file.path)?.operation === "update"
             ? baselineTargetHash(baselineByPath.get(file.path))
             : file.path === "package.json"
-            ? sha256(`${JSON.stringify(frontendOnly ? targetFrontendManifest : targetRootManifest, null, 2)}\n`)
-            : file.path === "frontend/package.json"
-              ? sha256(`${JSON.stringify(targetFrontendManifest, null, 2)}\n`)
-              : file.path === "gradle.properties" && targetGradleProperties !== undefined
-                ? sha256(targetGradleProperties)
-                : file.sha256,
+              ? sha256(`${JSON.stringify(frontendOnly ? targetFrontendManifest : targetRootManifest, null, 2)}\n`)
+              : file.path === "frontend/package.json"
+                ? sha256(`${JSON.stringify(targetFrontendManifest, null, 2)}\n`)
+                : file.path === "gradle.properties" && targetGradleProperties !== undefined
+                  ? sha256(targetGradleProperties)
+                  : file.sha256,
       })),
     ...baselineFiles
       .filter(

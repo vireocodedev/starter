@@ -12,7 +12,8 @@ export function validateFinalAnonymousEvidence(evidence, release, policy) {
     const requiredScenarios = policy.requiredScenarios ?? [];
     const actualScenarios = evidence.scenarios ?? [];
     if (
-      JSON.stringify(actualScenarios.map(scenario => scenario.id).sort()) !== JSON.stringify([...requiredScenarios].sort())
+      JSON.stringify(actualScenarios.map(scenario => scenario.id).sort()) !==
+      JSON.stringify([...requiredScenarios].sort())
     )
       problems.push("scenario coverage is incomplete or duplicate");
     for (const scenario of actualScenarios) {

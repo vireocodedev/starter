@@ -745,13 +745,24 @@ test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves a
     );
     await writeFile(
       join(root, ".vireo/managed-files.json"),
-      `${JSON.stringify({ schemaVersion: 1, templateCommit: source.templateCommit, files: [
-        { path: "package.json", sha256: sha256(await readFile(join(root, "package.json")) ) },
-        { path: "scripts/vireo-frontend-doctor.mjs", sha256: sha256(sourceDoctor) },
-      ] }, null, 2)}\n`,
+      `${JSON.stringify(
+        {
+          schemaVersion: 1,
+          templateCommit: source.templateCommit,
+          files: [
+            { path: "package.json", sha256: sha256(await readFile(join(root, "package.json"))) },
+            { path: "scripts/vireo-frontend-doctor.mjs", sha256: sha256(sourceDoctor) },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
     );
     const originalApplicationBytes = await readFile(join(root, "application-owned.txt"));
-    await assert.rejects(upgradeVireoProject({ projectDirectory: root, targetRelease }), error => error.code === "VIR-UPG-008");
+    await assert.rejects(
+      upgradeVireoProject({ projectDirectory: root, targetRelease }),
+      error => error.code === "VIR-UPG-008",
+    );
     const preview = await upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy);
     assert.ok(
       preview.files.some(file => file.path === "scripts/vireo-frontend-doctor.mjs" && file.status === "update"),

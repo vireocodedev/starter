@@ -140,7 +140,10 @@ for (const profile of ["full-stack", "frontend"]) {
     } else if (file.operation === "update") {
       if (!/^[a-f0-9]{64}$/u.test(file.sourceSha256 ?? "") || !/^[a-f0-9]{64}$/u.test(file.targetSha256 ?? ""))
         throw new Error(`${edge}:${profile}:${file.path} update has no exact source/target hash.`);
-      if (!sourceObjectExists(source.templateCommit, file.path) || !sourceObjectExists(target.templateCommit, file.path))
+      if (
+        !sourceObjectExists(source.templateCommit, file.path) ||
+        !sourceObjectExists(target.templateCommit, file.path)
+      )
         throw new Error(`${edge}:${profile}:${file.path} update is absent from an immutable Template endpoint.`);
       const sourceBytes = gitObject(source.templateCommit, file.path);
       const targetBytes = gitObject(target.templateCommit, file.path);
@@ -183,7 +186,9 @@ for (const profile of ["full-stack", "frontend"]) {
   for (const file of files) {
     const templatePath = `.vireo/application/${file.path}`;
     if (sourceObjectExists("a670d7f95f720a91705c7c156d19e605582fb4c8", templatePath))
-      throw new Error(`${historicalEdge}:${profile}:${file.path} unexpectedly exists in the immutable source Template.`);
+      throw new Error(
+        `${historicalEdge}:${profile}:${file.path} unexpectedly exists in the immutable source Template.`,
+      );
     if (!sourceObjectExists("2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d", templatePath))
       throw new Error(`${historicalEdge}:${profile}:${file.path} is absent from the immutable target Template.`);
     const targetBytes = gitObject("2aa661d1458b9c2bb5e72f3ec35a6617a2bec04d", templatePath);

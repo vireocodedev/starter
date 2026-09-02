@@ -48,14 +48,17 @@ test("test fixture release identity tracks the private create-vireo version and 
 test("fresh frontend Doctor projection matches the frozen 0.8.2 upgrade byte contract", async () => {
   // Formatting is part of the public managed-byte contract: use the package's
   // checked-in projection path so Prettier resolves the same repository config.
-  const path = fileURLToPath(
-    new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.1.mjs", import.meta.url),
-  );
+  const path = fileURLToPath(new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.1.mjs", import.meta.url));
   const rendered = await renderFrontendDoctorScript(path);
   const target = JSON.parse(
-    await readFile(new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.2.fixture.json", import.meta.url), "utf8"),
+    await readFile(
+      new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.2.fixture.json", import.meta.url),
+      "utf8",
+    ),
   );
-  const upgradePolicy = JSON.parse(await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"));
+  const upgradePolicy = JSON.parse(
+    await readFile(new URL("../schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+  );
   const baseline = upgradePolicy.releaseGraph.baselines["0.8.1->0.8.2"].frontend.find(
     file => file.path === "scripts/vireo-frontend-doctor.mjs",
   );
