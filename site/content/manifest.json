@@ -122,7 +122,7 @@
           "description": "Understand the offline shell guarantee, queue boundaries and the domain decisions Vireo deliberately does not infer.",
           "category": "Build",
           "file": "offline.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/docs/offline.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/docs/offline.md",
           "sourceLabel": "Pinned Starter Template offline contract"
         },
         {
@@ -153,7 +153,7 @@
           "description": "Apply Vireo's stable visual, responsive, interaction and quality contracts while retaining application-owned product decisions.",
           "category": "Design system",
           "file": "design-system-overview.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/VISUAL_LANGUAGE.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/VISUAL_LANGUAGE.md",
           "sourceLabel": "Design-system source contract"
         },
         {
@@ -162,7 +162,7 @@
           "description": "Compose operational interfaces with semantic surfaces, clear hierarchy, intentional color roles and accessible command surfaces.",
           "category": "Design system",
           "file": "design-system-visual-language.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/VISUAL_LANGUAGE.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/VISUAL_LANGUAGE.md",
           "sourceLabel": "Visual-language source contract"
         },
         {
@@ -171,7 +171,7 @@
           "description": "Preserve tasks, state and accessibility across wide and compact navigation, page and data-view compositions.",
           "category": "Design system",
           "file": "design-system-responsive-shell.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/architecture/routing-and-shell.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/architecture/routing-and-shell.md",
           "sourceLabel": "Shell source contract"
         },
         {
@@ -180,7 +180,7 @@
           "description": "Use calm, accessible feedback that explains change without depending on animation or adding visual noise.",
           "category": "Design system",
           "file": "design-system-motion.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/INTERACTION_MOTION.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/INTERACTION_MOTION.md",
           "sourceLabel": "Motion source contract"
         },
         {
@@ -198,7 +198,7 @@
           "description": "Structure models, form modes, validation timing and submission feedback for accessible, reliable workflows.",
           "category": "Design system",
           "file": "design-system-forms-and-validation.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/architecture/models-forms-and-validation.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/architecture/models-forms-and-validation.md",
           "sourceLabel": "Form source contract"
         },
         {
@@ -207,7 +207,7 @@
           "description": "Normalize session, transport and rendering failures into accessible, contextual recovery experiences.",
           "category": "Design system",
           "file": "design-system-authentication-and-errors.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/architecture/authentication-and-errors.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/architecture/authentication-and-errors.md",
           "sourceLabel": "Authentication and error source contract"
         },
         {
@@ -216,7 +216,7 @@
           "description": "Keep copy, validation, accessible labels and temporal formatting consistent in every supported locale.",
           "category": "Design system",
           "file": "design-system-localization.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/architecture/localization.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/architecture/localization.md",
           "sourceLabel": "Localization source contract"
         },
         {
@@ -225,7 +225,7 @@
           "description": "Turn visual, responsive, accessibility and recovery expectations into repeatable release evidence.",
           "category": "Design system",
           "file": "design-system-quality-and-release.md",
-          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/50ca39292810fd57049e3cc73b68e71f9b5c746c/frontend/docs/architecture/storybook-and-testing.md",
+          "sourceUrl": "https://github.com/vireocodedev/vireo-template/blob/421ae56cdd6d1fa6863cc6f29503b15294e4aa99/frontend/docs/architecture/storybook-and-testing.md",
           "sourceLabel": "Quality source contract"
         }
       ]

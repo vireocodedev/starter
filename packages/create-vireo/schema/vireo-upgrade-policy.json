@@ -1,8 +1,7 @@
 {
   "schemaVersion": 2,
   "releaseGraph": {
-    "publicRelease": "0.8.1",
-    "candidateRelease": "0.8.2",
+    "publicRelease": "0.8.2",
     "previousRelease": "0.8.1",
     "releases": [
       {
@@ -112,7 +111,7 @@
       },
       {
         "release": "0.8.1",
-        "status": "current",
+        "status": "historical",
         "templateCommit": "50ca39292810fd57049e3cc73b68e71f9b5c746c",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.1 vireo",
         "starterJvmVersion": "0.3.1",
@@ -127,13 +126,11 @@
       },
       {
         "release": "0.8.2",
-        "status": "candidate",
+        "status": "current",
         "templateCommit": "421ae56cdd6d1fa6863cc6f29503b15294e4aa99",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.2 vireo",
         "starterJvmVersion": "0.3.1",
-        "managedRootScripts": {
-          "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json"
-        },
+        "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
         "frontendDependencies": {
           "@vireocodedev/history": "^0.2.2",
           "@vireocodedev/infrastructure": "^0.2.2",
