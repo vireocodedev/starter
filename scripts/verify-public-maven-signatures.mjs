@@ -5,9 +5,17 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { validatePublicMavenRecord } from "./lib/anonymous-public-maven-evidence.mjs";
 
-const [version, output] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const [version, output] = args;
+const option = (name, fallback) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : fallback; };
+const policyPath = option("--policy", join(import.meta.dirname, "..", "contracts", "public-release-attestation-policy.json"));
+const contractPath = option("--contract", join(import.meta.dirname, "..", "contracts", "ecosystem-release-contract.json"));
+const policy = JSON.parse(readFileSync(policyPath, "utf8"));
+const contract = JSON.parse(readFileSync(contractPath, "utf8"));
 const fingerprint = "C8C362C561046CD11C0F0DE01174796DD298F009";
-const modules = ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"];
+const maven = policy.maven;
+if (!maven?.group || !Array.isArray(maven.modules)) throw new Error("Maven attestation policy has no artifact contract.");
+if (Array.isArray(contract.current?.maven?.modules) && JSON.stringify(contract.current.maven.modules) !== JSON.stringify(maven.modules.map(module => module.name))) throw new Error("Maven policy and ecosystem contract modules diverge.");
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(version ?? "")) throw new Error("Expected exact Maven version.");
 const root = mkdtempSync(join(tmpdir(), "vireo-public-signatures-"));
 try {
@@ -15,9 +23,11 @@ try {
   const listed = execFileSync("gpg", ["--homedir", root, "--with-colons", "--fingerprint", fingerprint], { encoding: "utf8" });
   if (!listed.includes(`fpr:::::::::${fingerprint}:`)) throw new Error("Public keyserver returned an unexpected Vireo signer.");
   const verified = [];
-  for (const module of modules) for (const suffix of module === "vireo-bom" ? [".pom"] : [".pom", ".jar", "-sources.jar", "-javadoc.jar", ".module"]) {
-    const subject = `${module}-${version}${suffix}`;
-    const url = `https://repo.maven.apache.org/maven2/com/vireocode/${module}/${version}/${subject}`;
+  for (const module of maven.modules) for (const artifactSpec of module.artifacts ?? []) {
+    const classifier = artifactSpec.classifier ?? "";
+    const extension = artifactSpec.extension;
+    const subject = `${module.name}-${version}${classifier}.${extension}`;
+    const url = `${maven.registry.replace(/\/$/u, "")}/${maven.group.replaceAll(".", "/")}/${module.name}/${version}/${subject}`;
     const artifact = join(root, subject);
     const signature = `${artifact}.asc`;
     const response = await fetch(url); if (!response.ok) throw new Error(`Missing public Maven subject ${subject}.`);
@@ -28,18 +38,19 @@ try {
     const asc = await fetch(`${url}.asc`); if (!asc.ok) throw new Error(`Missing detached signature ${subject}.asc.`);
     writeFileSync(signature, Buffer.from(await asc.arrayBuffer()));
     execFileSync("gpg", ["--homedir", root, "--batch", "--verify", signature, artifact], { stdio: "ignore" });
-    const record = { module, version, group: "com.vireocode", subject, sha256: expected, checksumVerified: true, signatureVerified: true, pomMitLicense: true, binaryJarMitLicense: !suffix.endsWith(".jar") };
-    if (suffix === ".pom") {
+    const record = { module: module.name, version, group: maven.group, subject, classifier, extension, sha256: expected, checksumVerified: true, signatureVerified: true, pomMitLicense: true, binaryJarMitLicense: true };
+    if (extension === "pom") {
       const pom = readFileSync(artifact, "utf8");
-      record.pomMitLicense = pom.includes("<groupId>com.vireocode</groupId>") && pom.includes(`<artifactId>${module}</artifactId>`) && pom.includes(`<version>${version}</version>`) && /<name>MIT License<\/name>/u.test(pom);
+      record.pomMitLicense = /<name>MIT License<\/name>/u.test(pom);
     }
-    if (suffix === ".jar" && !module.endsWith("bom")) {
+    if (extension === "jar") {
       const listing = execFileSync("jar", ["tf", artifact], { encoding: "utf8" });
-      record.binaryJarMitLicense = listing.split(/\r?\n/u).includes("META-INF/LICENSE");
+      record.binaryJarMitLicense = listing.split(/\r?\n/u).includes("META-INF/LICENSE") && /MIT/u.test(execFileSync("unzip", ["-p", artifact, "META-INF/LICENSE"], { encoding: "utf8" }));
     }
-    const problems = validatePublicMavenRecord({ record, group: "com.vireocode", version });
+    const problems = validatePublicMavenRecord({ record, group: maven.group, version });
     if (problems.length > 0) throw new Error(`${subject}: ${problems.join(", ")}`);
     verified.push(record);
   }
-  writeFileSync(output, `${JSON.stringify({ version, fingerprint, keyAsset: "contracts/vireo-release-signing-key.asc", verified }, null, 2)}\n`);
+  if (verified.length !== maven.expectedSubjectCount) throw new Error(`Expected ${maven.expectedSubjectCount} Maven subjects, verified ${verified.length}.`);
+  writeFileSync(output, `${JSON.stringify({ version, fingerprint, policy: policyPath, contract: contractPath, verified }, null, 2)}\n`);
 } finally { rmSync(root, { recursive: true, force: true }); }
