@@ -51,6 +51,7 @@ type EdgeBaseline = {
   targetSha256?: string;
   targetContent?: string;
   transforms?: Array<{ from: string; to: string }>;
+  sourceProjectionTransforms?: Array<{ from: string; to: string }>;
   projectionTransforms?: Array<{ from: string; to: string }>;
 };
 type ProjectMetadata = Record<string, unknown> & {
@@ -405,23 +406,44 @@ export async function currentFrontendProjectionRequirements(profile: "full-stack
   const graph = policy.releaseGraph;
   const targetRelease = graph.candidateRelease ?? graph.publicRelease;
   const target = graph.releases.find(release => release.release === targetRelease);
-  const source = graph.releases.find(release => release.release === graph.previousRelease);
-  if (!source || !target)
+  if (!target)
     throw new VireoUpgradeError("VIR-UPG-001", "Frontend projection requirements have no adjacent release nodes.");
   const baselinePrefix = profile === "frontend" ? "scripts/lighthouse-" : "frontend/scripts/lighthouse-";
-  const baselines = edgeBaselines(policy, source.release, target.release, profile).filter(baseline =>
-    baseline.path.startsWith(baselinePrefix),
-  );
-  if (targetRelease === "0.8.4" && baselines.length !== 5)
-    throw new VireoUpgradeError(
-      "VIR-UPG-001",
-      "Frontend performance projection must declare five immutable managed baselines.",
-    );
+  const baselines = activeManagedProjectionBaselines(policy, target.release, profile, baselinePrefix);
   return {
     scripts: managedScriptsForProfile(target, profile === "frontend"),
     sourceScripts: target.projectionSourceFrontendScripts?.[profile] ?? {},
     files: baselines.map(baseline => ({ path: baseline.path, contents: resolveBaselineTargetContent(baseline) })),
   };
+}
+
+/**
+ * A staged edge may leave existing managed projection bytes unchanged. Walk the
+ * declared linear history backwards so creation still uses their latest exact
+ * baseline instead of silently dropping a managed surface at the next release.
+ */
+function activeManagedProjectionBaselines(
+  policy: UpgradePolicy,
+  targetRelease: string,
+  profile: "full-stack" | "frontend",
+  prefix: string,
+) {
+  const baselines = new Map<string, EdgeBaseline>();
+  const visited = new Set<string>();
+  let release = targetRelease;
+  while (!visited.has(release)) {
+    visited.add(release);
+    const incoming = policy.releaseGraph.edges.filter(edge => edge.to === release);
+    if (incoming.length === 0) break;
+    if (incoming.length !== 1)
+      throw new VireoUpgradeError("VIR-UPG-001", "Managed projection history must have one incoming edge per release.");
+    const [edge] = incoming;
+    for (const baseline of edgeBaselines(policy, edge.from, edge.to, profile)) {
+      if (baseline.path.startsWith(prefix) && !baselines.has(baseline.path)) baselines.set(baseline.path, baseline);
+    }
+    release = edge.from;
+  }
+  return [...baselines.values()].sort((left, right) => left.path.localeCompare(right.path));
 }
 
 /** @internal Immutable managed compatibility bytes that bridge the public Template to the staged release. */
@@ -436,10 +458,10 @@ export async function currentProjectionCompatibilityRequirements(profile: "full-
   const files = edgeBaselines(policy, source.release, target.release, profile).filter(baseline =>
     baseline.path.endsWith("vitest.storybook.config.ts"),
   );
-  if (targetRelease === "0.8.4" && files.length !== 1)
+  if (files.length !== 1)
     throw new VireoUpgradeError(
       "VIR-UPG-001",
-      `Projection compatibility for ${profile} must declare one immutable Storybook optimizer baseline.`,
+      `Active projection compatibility for ${profile} must declare one immutable Storybook optimizer baseline.`,
     );
   return files.map(baseline => ({
     path: baseline.path,

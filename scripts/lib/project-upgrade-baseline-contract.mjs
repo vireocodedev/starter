@@ -29,3 +29,8 @@ export function projectedBaselineBytes(profile, templateBytes, file) {
   }
   return output;
 }
+
+/** Exact projected source bytes retained by a prior generated release. */
+export function projectedBaselineSourceBytes(templateBytes, file) {
+  return applyExactBaselineTransforms(templateBytes, { ...file, transforms: file.sourceProjectionTransforms });
+}

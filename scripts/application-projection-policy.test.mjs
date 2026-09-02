@@ -50,6 +50,7 @@ test("template release operations are excluded from every project profile", () =
       ".github/rulesets/starter-template-0.8.2.json",
       ".github/rulesets/starter-template-0.8.3.json",
       ".github/rulesets/starter-template-0.8.4.json",
+      ".github/rulesets/starter-template-0.8.5.json",
       "scripts/vireo-package-compatibility.test.mjs",
       "contracts/template-release-policy.json",
       "scripts/template-release-policy.mjs",

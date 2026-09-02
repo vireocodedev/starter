@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   applyExactBaselineTransforms,
   projectedBaselineBytes,
+  projectedBaselineSourceBytes,
   templatePathForBaseline,
 } from "./project-upgrade-baseline-contract.mjs";
 
@@ -34,6 +35,20 @@ test("managed Storybook optimizer baseline is an exact projection transform", ()
   assert.equal(
     projectedBaselineBytes("frontend", "  defineConfig({\n    test:", baseline),
     '  defineConfig({\n    optimizeDeps: { include: ["@testing-library/dom"] },\n    test:',
+  );
+});
+
+test("managed upgrade baselines can bind a prior generated projection source", () => {
+  const source = "defineConfig({\n  test:";
+  const baseline = {
+    path: "vitest.storybook.config.ts",
+    sourceProjectionTransforms: [
+      { from: "defineConfig({\n  test:", to: "defineConfig({\n  optimizeDeps: {}\n  test:" },
+    ],
+  };
+  assert.equal(
+    projectedBaselineSourceBytes(source, baseline),
+    "defineConfig({\n  optimizeDeps: {}\n  test:",
   );
 });
 

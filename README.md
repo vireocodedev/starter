@@ -22,9 +22,8 @@ This is the current Template pinned by the release contract, not a concept rende
 This public `0.x` line is production-shaped, not a production-readiness claim. Project
 creation, doctor diagnostics, and target-aware entity generator are implemented.
 The standalone frontend profile was introduced in `create-vireo@0.4.0` and is current
-in `create-vireo@0.8.4`. Its version-aware
-project upgrade currently supports the explicit adjacent 0.8.3→0.8.4 release
-pair; 0.8.2→0.8.3 remains retained historical evidence; 0.8.1→0.8.2 remains retained historical evidence; 0.8.0→0.8.1 remains retained historical evidence; 0.7.0→0.8.0 remains retained historical evidence; the 0.6.0→0.7.0 and original 0.2.0→0.3.0 pairs remain retained historical evidence.
+in the published release. Its version-aware project upgrade supports the declared
+adjacent public release edge; earlier edges remain retained historical evidence.
 
 ## Start here
 

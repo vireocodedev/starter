@@ -478,30 +478,10 @@ test("the development administrator reaches a settled live Overview", async ({ p
 const pristine084OverviewDigest = "aea0494de1223a26a132f64d4cad8e3f753348c5aa7f41519edf16798af4d3e3";
 
 function synthetic085Policies() {
-  const candidatePolicy = structuredClone(adjacentPolicy);
-  const graph = candidatePolicy.releaseGraph;
-  const source = graph.releases.find(release => release.release === "0.8.4");
-  if (!source) throw new Error("Synthetic 0.8.5 policy requires the published 0.8.4 release.");
-  const target = {
-    ...structuredClone(source),
-    release: "0.8.5",
-    status: "candidate",
-    templateCommit: "5".repeat(40),
-    rootVireoScript: "npx --yes --package=create-vireo@0.8.5 vireo",
-  };
-  graph.releases.push(target);
-  graph.edges.push({ from: "0.8.4", to: "0.8.5", lockfileRefresh: "not-required", applicationOwnedActions: [] });
-  graph.publicRelease = "0.8.4";
-  graph.previousRelease = "0.8.4";
-  graph.candidateRelease = "0.8.5";
-  for (const release of graph.releases) release.status = release.release === "0.8.4" ? "current" : release.status;
-
-  const finalizedPolicy = structuredClone(candidatePolicy);
-  delete finalizedPolicy.releaseGraph.candidateRelease;
-  finalizedPolicy.releaseGraph.publicRelease = "0.8.5";
-  finalizedPolicy.releaseGraph.previousRelease = "0.8.4";
-  finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.4").status = "historical";
-  finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.5").status = "current";
+  const { candidatePolicy, finalizedPolicy } = releaseLifecyclePolicies(adjacentPolicy, "0.8.4", "0.8.5");
+  const source = candidatePolicy.releaseGraph.releases.find(release => release.release === "0.8.4");
+  const target = candidatePolicy.releaseGraph.releases.find(release => release.release === "0.8.5");
+  if (!source || !target) throw new Error("Active 0.8.5 policy requires its declared adjacent releases.");
   return { candidatePolicy, finalizedPolicy, source, target };
 }
 
@@ -511,8 +491,21 @@ async function overview085Fixture(profile, source) {
   const dependencies = { ...source.frontendDependencies, react: "^19.0.0" };
   await mkdir(join(root, ".vireo"), { recursive: true });
   const samplePath = frontendOnly ? "src/features/item/public.ts" : "frontend/src/features/item/public.ts";
+  const compatibilityBaselines = adjacentPolicy.releaseGraph.baselines["0.8.4->0.8.5"][profile];
+  const storybookBaseline = compatibilityBaselines.find(
+    file => file.path.endsWith("vitest.storybook.config.ts"),
+  );
+  if (!storybookBaseline?.sourceContent) {
+    throw new Error(`${profile} requires an exact 0.8.4 Storybook baseline.`);
+  }
   await mkdir(join(root, dirname(samplePath)), { recursive: true });
   await writeFile(join(root, samplePath), "export type Item = { id: number };\n");
+  await writeFile(join(root, storybookBaseline.path), storybookBaseline.sourceContent);
+  for (const baseline of compatibilityBaselines.filter(file => file.operation === "update")) {
+    if (baseline.path === storybookBaseline.path) continue;
+    await mkdir(join(root, dirname(baseline.path)), { recursive: true });
+    await writeFile(join(root, baseline.path), baseline.sourceContent);
+  }
   if (!frontendOnly) await mkdir(join(root, "frontend/tests/e2e"), { recursive: true });
   const scripts = source.managedFrontendScripts[profile];
   const rootManifest = {
@@ -556,7 +549,10 @@ async function overview085Fixture(profile, source) {
       2,
     )}\n`,
   );
-  const managedPaths = frontendOnly ? ["package.json"] : ["package.json", "frontend/package.json", "gradle.properties"];
+  const managedPaths = [
+    ...(frontendOnly ? ["package.json"] : ["package.json", "frontend/package.json", "gradle.properties"]),
+    ...compatibilityBaselines.filter(file => file.operation === "update").map(file => file.path),
+  ];
   await writeFile(
     join(root, ".vireo/managed-files.json"),
     `${JSON.stringify(
@@ -611,6 +607,10 @@ test("0.8.4 to 0.8.5 transactionally records the pristine Overview sample before
         "update",
         `${profile} plans the manifest migration`,
       );
+      const storybookBaseline = candidatePolicy.releaseGraph.baselines["0.8.4->0.8.5"][profile].find(
+        file => file.path.endsWith("vitest.storybook.config.ts"),
+      );
+      assert.equal(preview.files.find(file => file.path === storybookBaseline.path)?.status, "update");
       assertSameSnapshot(beforeCandidate, await treeBytes(root));
 
       await upgradeVireoProjectForTest(
@@ -618,6 +618,11 @@ test("0.8.4 to 0.8.5 transactionally records the pristine Overview sample before
         finalizedPolicy,
       );
       assert.equal(await readFile(lockPath, "utf8"), lockBefore, `${profile} lockfile remains byte-identical`);
+      assert.equal(
+        sha256(await readFile(join(root, storybookBaseline.path))),
+        storybookBaseline.targetSha256,
+        `${profile} receives immutable Storybook optimizer compatibility bytes`,
+      );
       const manifest = JSON.parse(await readFile(join(root, ".vireo/example-manifest.json"), "utf8"));
       assert.equal(manifest.templateCommit, target.templateCommit);
       assert.equal(
