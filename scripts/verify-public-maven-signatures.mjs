@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { validatePublicMavenRecord } from "./lib/anonymous-public-maven-evidence.mjs";
 
 const [version, output] = process.argv.slice(2);
 const fingerprint = "C8C362C561046CD11C0F0DE01174796DD298F009";
@@ -27,7 +28,18 @@ try {
     const asc = await fetch(`${url}.asc`); if (!asc.ok) throw new Error(`Missing detached signature ${subject}.asc.`);
     writeFileSync(signature, Buffer.from(await asc.arrayBuffer()));
     execFileSync("gpg", ["--homedir", root, "--batch", "--verify", signature, artifact], { stdio: "ignore" });
-    verified.push({ subject, sha256: expected });
+    const record = { module, version, group: "com.vireocode", subject, sha256: expected, checksumVerified: true, signatureVerified: true, pomMitLicense: true, binaryJarMitLicense: !suffix.endsWith(".jar") };
+    if (suffix === ".pom") {
+      const pom = readFileSync(artifact, "utf8");
+      record.pomMitLicense = pom.includes("<groupId>com.vireocode</groupId>") && pom.includes(`<artifactId>${module}</artifactId>`) && pom.includes(`<version>${version}</version>`) && /<name>MIT License<\/name>/u.test(pom);
+    }
+    if (suffix === ".jar" && !module.endsWith("bom")) {
+      const listing = execFileSync("jar", ["tf", artifact], { encoding: "utf8" });
+      record.binaryJarMitLicense = listing.split(/\r?\n/u).includes("META-INF/LICENSE");
+    }
+    const problems = validatePublicMavenRecord({ record, group: "com.vireocode", version });
+    if (problems.length > 0) throw new Error(`${subject}: ${problems.join(", ")}`);
+    verified.push(record);
   }
   writeFileSync(output, `${JSON.stringify({ version, fingerprint, keyAsset: "contracts/vireo-release-signing-key.asc", verified }, null, 2)}\n`);
 } finally { rmSync(root, { recursive: true, force: true }); }
