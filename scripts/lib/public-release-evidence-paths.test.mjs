@@ -106,11 +106,11 @@ test("a nonexistent established collector directory is proven gitignored before 
   execFileSync("git", ["init", "--quiet"], { cwd: repositoryRoot });
   writeFileSync(join(repositoryRoot, ".gitignore"), ".public-release-evidence/\n");
   const outputRoot = join(repositoryRoot, ".public-release-evidence");
-  const ignored =
-    execFileSync("git", ["check-ignore", "--quiet", `${outputRoot}/`], {
-      cwd: repositoryRoot,
-      stdio: "ignore",
-    }) === undefined;
+  execFileSync("git", ["check-ignore", "--quiet", `${outputRoot}/`], {
+    cwd: repositoryRoot,
+    stdio: "ignore",
+  });
+  const ignored = true;
   assert.equal(ignored, true);
   assert.equal(preservesRepositoryCleanliness({ repositoryRoot, outputRoot, outputIsGitignored: ignored }), true);
 });

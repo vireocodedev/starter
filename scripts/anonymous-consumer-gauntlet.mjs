@@ -140,6 +140,9 @@ export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoo
       kind: operation.kind ?? "command",
       executable: operation.executable ?? null,
       arguments: operation.arguments ?? [],
+      ...(operation.source ? { source: operation.source } : {}),
+      ...(operation.target ? { target: operation.target } : {}),
+      ...(operation.profile ? { profile: operation.profile } : {}),
     })),
   }));
 }
