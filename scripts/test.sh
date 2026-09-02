@@ -22,6 +22,12 @@ node --test \
   scripts/project-upgrade-publication-state.test.mjs \
   scripts/packed-project-upgrade-baselines.test.mjs \
   scripts/lib/verification-evidence-source.test.mjs \
+  scripts/lib/anonymous-public-evidence.test.mjs \
+  scripts/lib/anonymous-public-maven-evidence.test.mjs \
+  scripts/lib/anonymous-consumer-final-evidence.test.mjs \
+  scripts/lib/anonymous-consumer-release-preflight.test.mjs \
+  scripts/anonymous-consumer-gauntlet.test.mjs \
+  scripts/verify-npm-public-release.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
   scripts/third-party-license-policy.test.mjs \
   site/build.test.mjs

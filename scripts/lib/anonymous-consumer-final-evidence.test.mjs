@@ -4,7 +4,7 @@ import { validateFinalAnonymousEvidence } from "./anonymous-consumer-final-evide
 test("final evidence rejects incomplete successful claims", () => {
   const release = { id: "npm-1.2.3_jvm-4.5.6", template: { commit: "a".repeat(40) } };
   const evidence = {
-    status: "passed", verifierSourceCommit: "b".repeat(40), requestedReleaseId: release.id, workflow: { run: 1 }, release,
+    status: "passed", verifierSourceCommit: "b".repeat(40), releaseTagCommit: "e".repeat(40), requestedReleaseId: release.id, workflow: { run: 1 }, release,
     scenarios: [{ id: "x", commands: [{ id: "y", status: "passed", stdout: { sha256: "c".repeat(64) }, stderr: { sha256: "d".repeat(64) } }] }], externalWarnings: [],
   };
   assert.deepEqual(validateFinalAnonymousEvidence(evidence, release), []);

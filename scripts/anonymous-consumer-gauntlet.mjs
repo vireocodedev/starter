@@ -559,6 +559,7 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
       } catch (error) {
         result.status = "failed";
         result.error = error instanceof Error ? error.message : String(error);
+        evidence.findings.push({ id: "VIR-GAUNTLET-OPERATION", owner: "framework", severity: "error", remediation: "Inspect the indexed operation evidence and repair the failing public contract.", evidenceReferences: [`${scenario.id}/${result.commands.at(-1)?.id ?? "setup"}`] });
         evidence.status = "failed";
         checkpoint();
         throw error;
@@ -567,13 +568,19 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
       checkpoint();
     }
   } finally {
-    if (evidence.status === "running") evidence.status = dry ? "planned" : "passed";
     checkpoint();
     rmSync(runRoot, { recursive: true, force: true });
   }
   if (!dry) {
-    const finalProblems = validateFinalAnonymousEvidence(evidence, release);
-    if (finalProblems.length > 0) throw new Error(finalProblems.join("\n"));
+    const finalProblems = validateFinalAnonymousEvidence({ ...evidence, status: "passed" }, release, policy);
+    if (finalProblems.length > 0) {
+      evidence.findings.push({ id: "VIR-GAUNTLET-FINAL-EVIDENCE", owner: "framework", severity: "error", remediation: "Repair the final evidence contract before release qualification.", evidenceReferences: ["evidence.json"] });
+      evidence.status = "failed";
+      checkpoint();
+      throw new Error(finalProblems.join("\n"));
+    }
+    evidence.status = "passed";
+    checkpoint();
   }
   console.log(
     dry

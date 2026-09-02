@@ -1,14 +1,18 @@
 const sha256 = /^[0-9a-f]{64}$/u;
-export function validateFinalAnonymousEvidence(evidence, release) {
+export function validateFinalAnonymousEvidence(evidence, release, policy) {
   const problems = [];
   if (evidence.status !== "passed") problems.push("final evidence is not passed");
   for (const key of ["verifierSourceCommit", "requestedReleaseId", "workflow"]) if (!evidence[key]) problems.push(`missing ${key}`);
   if (evidence.requestedReleaseId !== release.id) problems.push("requested release id drifted");
   if (evidence.release?.template?.commit !== release.template.commit) problems.push("Template coordinate drifted");
+  if (!/^[0-9a-f]{40}$/u.test(evidence.releaseTagCommit ?? "")) problems.push("missing release tag commit");
+  if (policy && JSON.stringify((evidence.scenarios ?? []).map(scenario => scenario.id).sort()) !== JSON.stringify([...policy.requiredScenarios].sort())) problems.push("scenario coverage is incomplete or duplicate");
+  if ((evidence.findings ?? []).length > 0) problems.push("passed evidence may not retain machine-actionable findings");
+  if (JSON.stringify(evidence).match(/(?:token|password|secret|authorization)"\s*:/iu)) problems.push("evidence contains a secret-shaped field");
   for (const scenario of evidence.scenarios ?? []) for (const operation of scenario.commands ?? []) {
     if (operation.status !== "passed") problems.push(`${scenario.id}/${operation.id} is not passed`);
     for (const stream of [operation.stdout, operation.stderr]) if (!stream || !sha256.test(stream.sha256 ?? "")) problems.push(`${scenario.id}/${operation.id} lacks a valid digest`);
   }
-  for (const warning of evidence.externalWarnings ?? []) if (warning.version !== "0.8.1" || warning.owner !== "provider") problems.push("external warning is not allowlisted");
+  for (const warning of evidence.externalWarnings ?? []) if (warning.version !== "0.8.1" || warning.owner !== "provider" || warning.category !== "external-warning" || typeof warning.reason !== "string") problems.push("external warning is not allowlisted");
   return problems;
 }
