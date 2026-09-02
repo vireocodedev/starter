@@ -10,11 +10,11 @@
 Vireo currently has one active framework repository, one active Template repository,
 and an older private Template repository:
 
-| Current repository                          | Baseline role                                                               | Finding                                                                                       |
-| ------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `vireocodedev/vireo`                        | TypeScript and JVM libraries, contracts, generators, verification, and docs | Canonical framework source                                                                    |
-| `vireocodedev/vireo-template`               | Active full-stack reference/golden-path consumer                            | Canonical Template implementation at the reviewed 0.8.0 commit                                |
-| `vireocodedev/starter` / `starter-template` | Historical provider names                                                   | GitHub redirects preserve old public links; they are not canonical release/source coordinates |
+| Current repository                          | Baseline role                                                               | Finding                                                                                                |
+| ------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `vireocodedev/vireo`                        | TypeScript and JVM libraries, contracts, generators, verification, and docs | Canonical framework source                                                                             |
+| `vireocodedev/vireo-template`               | Active full-stack reference/golden-path consumer                            | Canonical Template implementation at immutable 0.8.6 commit `cef67cc74af3d28028fba424e1d5c6a92faa6fc9` |
+| `vireocodedev/starter` / `starter-template` | Historical provider names                                                   | GitHub redirects preserve old public links; they are not canonical release/source coordinates          |
 
 Creating a repository for every deliverable would increase navigation, security,
 release, issue, and maintenance cost before the project has external contributors.

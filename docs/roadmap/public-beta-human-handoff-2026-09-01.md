@@ -6,6 +6,8 @@ currently records zero workflow sessions, zero qualifying teams, and zero mainta
 deployment upgrades; that is an honest starting state, not a failure hidden by the
 engineering closure.
 
+The release instructions below were refreshed after the 2026-09-02 public release.
+
 ## Remaining human work
 
 | Gate                                   | Public-beta hold? | Current state                             | Required qualification and evidence path                                                                                                                                                                                                            |
@@ -30,12 +32,12 @@ data, identities, or vulnerability details. Security findings go through the pri
 
 ## Colleague frontend-only start
 
-For a new frontend app, use the release-prepared 0.8.0 generator rather than cloning either
+For a new frontend app, use the release-prepared 0.8.6 generator rather than cloning either
 framework repository. Install the Node/Corepack versions listed in the canonical
 [getting-started guide](https://vireocode.com/docs/getting-started/) first:
 
 ```sh
-npm create vireo@0.8.0 my-frontend-app -- --profile frontend --yes
+npm create vireo@0.8.6 my-frontend-app -- --profile frontend --yes
 cd my-frontend-app
 corepack npm run setup
 corepack npm run doctor
