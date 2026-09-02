@@ -399,6 +399,10 @@ test("generation is idempotent, detects wire drift, refuses customization, and e
   const ejected = await ejectEntity(root, "api-clients");
   assert.ok(ejected.retainedFiles.length > 10);
   assert.match(await readFile(model, "utf8"), /@vireo-ejected/u);
+  assert.equal(
+    await readFile(join(root, "frontend/src/generated/vireo.capabilities.ts"), "utf8"),
+    "// @vireo-regenerated schema-v1 -- do not customize; run vireo eject first.\n\nexport const VIREO_GENERATED_CAPABILITIES = [] as const;\n",
+  );
   await stat(model);
   assert.deepEqual(await checkGeneratedEntities(root), []);
 });
@@ -449,6 +453,10 @@ test("frontend projects generate, check, and eject only root-level TypeScript ca
 
   await ejectEntity(root, "api-clients");
   assert.match(await readFile(join(root, "src/generated/api-clients/models/APIClient.ts"), "utf8"), /@vireo-ejected/u);
+  assert.equal(
+    await readFile(join(root, "src/generated/vireo.capabilities.ts"), "utf8"),
+    "// @vireo-regenerated schema-v1 -- do not customize; run vireo eject first.\n\nexport const VIREO_GENERATED_CAPABILITIES = [] as const;\n",
+  );
   assert.deepEqual(await checkGeneratedEntities(root), []);
 });
 

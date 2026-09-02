@@ -508,10 +508,13 @@ export async function ejectEntity(projectDirectory: string, plural: string, dryR
       const content = await readFile(target, "utf8");
       writes.push({ path: file.path, content: content.replace("@vireo-generated-once", "@vireo-ejected") });
     }
-    writes.push({
+    const registry = await formatGeneratedFile(root, {
       path: `${project.profile === "frontend" ? "" : "frontend/"}src/generated/vireo.capabilities.ts`,
       content: registryFromManifests(remaining),
+      ownership: "regenerated",
+      role: "registry",
     });
+    writes.push({ path: registry.path, content: registry.content });
     writes.push({ path: `.vireo/generated/${plural}.json`, content: null });
     writes.push({ path: `.vireo/schemas/${plural}.json`, content: null });
     writes.push({ path: `.vireo/contracts/${plural}.contract.json`, content: null });
