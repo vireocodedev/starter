@@ -15,6 +15,7 @@ import {
 } from "./lib/anonymous-consumer-environment.mjs";
 import { writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
 import { validateAnonymousPublicEvidence } from "./lib/anonymous-public-evidence.mjs";
+import { validateReleasePreflightIdentity } from "./lib/anonymous-consumer-release-preflight.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policyPath = join(root, "contracts", "anonymous-consumer-gauntlet-policy.json");
@@ -23,6 +24,8 @@ const checkOnly = args.has("--check");
 const dryRun = args.has("--dry-run");
 const evidenceArgument = process.argv.indexOf("--evidence-dir");
 const evidenceDirectory = evidenceArgument >= 0 ? resolve(process.argv[evidenceArgument + 1]) : join(root, ".anonymous-consumer-evidence");
+const releaseIdArgument = process.argv.indexOf("--release-id");
+const sourceCommitArgument = process.argv.indexOf("--source-commit");
 const observedDigests = new Map();
 const managedOriginals = new Map();
 
@@ -451,6 +454,12 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
 export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dryRun } = {}) {
   const policy = readJson(policyPath);
   const release = publicReleaseIdentity(readJson(join(root, policy.releaseSource)));
+  const preflightProblems = validateReleasePreflightIdentity({
+    release,
+    requestedReleaseId: releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID,
+    requestedSourceCommit: sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT,
+  });
+  if (preflightProblems.length > 0) throw new Error(preflightProblems.join("\n"));
   const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
   const problems = validatePolicy(policy, release);
   if (problems.length > 0)

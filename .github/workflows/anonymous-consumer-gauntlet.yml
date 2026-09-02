@@ -20,6 +20,16 @@ on:
       - "package.json"
       - "package-lock.json"
   workflow_dispatch:
+    inputs:
+      release_id:
+        required: false
+        type: string
+      source_commit:
+        required: false
+        type: string
+  workflow_run:
+    workflows: ["Publish npm release"]
+    types: [completed]
   schedule:
     - cron: "17 3 * * 2"
 
@@ -30,7 +40,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: corepack npm ci --ignore-scripts
+      - run: corepack npm run consumer:gauntlet:check
+      - run: node --test scripts/anonymous-consumer-gauntlet.test.mjs scripts/lib/anonymous-consumer-*.test.mjs
   gauntlet:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     env:
       VIREO_GAUNTLET_PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
       PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
