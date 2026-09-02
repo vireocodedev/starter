@@ -53,11 +53,11 @@ export async function verifyPublicReleasePreflight({ release, fetchImpl = fetch 
   if (!asset?.browser_download_url) throw new Error("Template release has no immutable manifest asset.");
   const manifestResponse = await fetchImpl(asset.browser_download_url);
   const manifest = await manifestResponse.json();
-  if (!manifestResponse.ok || manifest.templateVersion !== release.template.version || manifest.createVireoVersion !== release.createVireoVersion || manifest.version !== release.template.version || manifest.tag !== release.template.tag || manifest.commit !== release.template.commit)
+  if (!manifestResponse.ok || manifest.schemaVersion !== 1 || manifest.version !== release.template.version || manifest.tag !== release.template.tag || manifest.createVireoVersion !== release.createVireoVersion || manifest.ecosystemRelease !== release.id || manifest.repository !== "vireocodedev/vireo-template" || manifest.immutableReleasesRequired !== true || manifest.commit !== release.template.commit)
     throw new Error("Template release manifest does not match the declared release coordinate.");
   const vireoRelease = await fetchImpl(`https://api.github.com/repos/vireocodedev/vireo/releases/tags/create-vireo%40${release.createVireoVersion}`);
   const vireoPayload = await vireoRelease.json();
-  if (!vireoRelease.ok) throw new Error("Vireo npm release is missing its GitHub Release.");
+  if (!vireoRelease.ok || vireoPayload.tag_name !== `create-vireo@${release.createVireoVersion}`) throw new Error("Vireo npm release is missing its exact GitHub Release.");
   const warning = vireoReleaseImmutabilityFinding({ version: release.createVireoVersion, immutable: vireoPayload.immutable === true });
   if (warning) warnings.push(warning);
   const releaseTag = `create-vireo@${release.createVireoVersion}`;
