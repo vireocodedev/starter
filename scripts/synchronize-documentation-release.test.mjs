@@ -125,6 +125,12 @@ test("synchronizes release contracts and public version documentation from sourc
       readFileSync(join(root, "packages", "create-vireo", "src", "index.ts"), "utf8"),
       /TEMPLATE_STARTER_JVM_BASELINE = "0\.4\.0"/u,
     );
+    assert.deepEqual(readJson(join(root, "packages", "create-vireo", "fixtures", "release-identity.json")), {
+      schemaVersion: 1,
+      createVireoVersion: "0.3.0",
+      templateStarterJvmBaseline: "0.4.0",
+      generatedStarterJvmVersion: "0.4.0",
+    });
     const upgradePolicy = readJson(join(root, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json"));
     assert.equal(
       upgradePolicy.releaseGraph.releases.find(
@@ -375,6 +381,7 @@ function makeFixture() {
   mkdirSync(join(root, "contracts"));
   mkdirSync(join(root, "packages", "create-vireo", "src"), { recursive: true });
   mkdirSync(join(root, "packages", "create-vireo", "schema"));
+  mkdirSync(join(root, "packages", "create-vireo", "fixtures"));
   mkdirSync(join(root, "packages", "sqlite"));
   mkdirSync(join(root, "jvm"));
   mkdirSync(join(root, "docs"));
@@ -394,6 +401,12 @@ function makeFixture() {
   writeJson(join(root, "packages", "create-vireo", "package.json"), {
     name: "create-vireo",
     version: "0.3.0",
+  });
+  writeJson(join(root, "packages", "create-vireo", "fixtures", "release-identity.json"), {
+    schemaVersion: 1,
+    createVireoVersion: "0.2.0",
+    templateStarterJvmBaseline: "0.3.0",
+    generatedStarterJvmVersion: "0.3.0",
   });
   writeFileSync(
     join(root, "packages", "create-vireo", "src", "index.ts"),

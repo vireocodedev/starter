@@ -14,7 +14,30 @@ import {
 } from "../dist/index.js";
 
 const createVireoVersion = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")).version;
+const fixtureReleaseIdentity = JSON.parse(
+  await readFile(new URL("../fixtures/release-identity.json", import.meta.url), "utf8"),
+);
+const createVireoSource = await readFile(new URL("../src/index.ts", import.meta.url), "utf8");
 const applicationSkillNames = ["vireo-app-feature-author", "vireo-app-upgrader", "vireo-app-production-readiness"];
+
+function gradleProperties(starterVersion) {
+  return `org.gradle.caching=true\nstarterVersion=${starterVersion}\norg.gradle.jvmargs=-Xmx2g\n`;
+}
+
+function differentStarterVersion(version) {
+  const [major, minor, patch] = version.split(".").map(Number);
+  return `${major}.${minor}.${patch + 1}`;
+}
+
+test("test fixture release identity tracks the private create-vireo version and raw Template baseline", () => {
+  assert.equal(fixtureReleaseIdentity.schemaVersion, 1);
+  assert.equal(fixtureReleaseIdentity.createVireoVersion, createVireoVersion);
+  assert.equal(
+    fixtureReleaseIdentity.templateStarterJvmBaseline,
+    createVireoSource.match(/TEMPLATE_STARTER_JVM_BASELINE = "([^"]+)"/u)?.[1],
+  );
+  assert.match(fixtureReleaseIdentity.generatedStarterJvmVersion, /^\d+\.\d+\.\d+$/u);
+});
 
 async function writeApplicationSkill(template, name) {
   const skill = join(template, ".vireo", "application", ".agents", "skills", name);
@@ -147,7 +170,7 @@ export {};
   await writeFile(join(template, "settings.gradle"), "rootProject.name = 'starter-template'\n");
   await writeFile(
     join(template, "gradle.properties"),
-    "org.gradle.caching=true\nstarterVersion=0.3.0\norg.gradle.jvmargs=-Xmx2g\n",
+    gradleProperties(fixtureReleaseIdentity.templateStarterJvmBaseline),
   );
   await writeFile(join(template, "README.md"), "# Vireo Starter Template\n");
   await writeFile(
@@ -385,7 +408,7 @@ test("creates and customizes a project atomically from a local fixture", async (
     assert.ok((await readFile(join(target, "package.json"), "utf8")).includes(`create-vireo@${createVireoVersion}`));
     assert.equal(
       await readFile(join(target, "gradle.properties"), "utf8"),
-      "org.gradle.caching=true\nstarterVersion=0.3.1\norg.gradle.jvmargs=-Xmx2g\n",
+      gradleProperties(fixtureReleaseIdentity.generatedStarterJvmVersion),
     );
     assert.match(
       await readFile(join(target, "src/main/java/dev/example/sample/App.java"), "utf8"),
@@ -584,11 +607,11 @@ test("normalizes the immutable Template JVM baseline only for full-stack project
     await createVireo({ directory: frontend, profile: "frontend", git: false, templateDirectory: template });
     assert.equal(
       await readFile(join(template, "gradle.properties"), "utf8"),
-      "org.gradle.caching=true\nstarterVersion=0.3.0\norg.gradle.jvmargs=-Xmx2g\n",
+      gradleProperties(fixtureReleaseIdentity.templateStarterJvmBaseline),
     );
     assert.equal(
       await readFile(join(fullStack, "gradle.properties"), "utf8"),
-      "org.gradle.caching=true\nstarterVersion=0.3.1\norg.gradle.jvmargs=-Xmx2g\n",
+      gradleProperties(fixtureReleaseIdentity.generatedStarterJvmVersion),
     );
     await assert.rejects(readFile(join(frontend, "gradle.properties")), /ENOENT/u);
   } finally {
@@ -600,8 +623,8 @@ test("refuses malformed, missing, duplicate, or drifted Template starterVersion 
   const cases = [
     "",
     "starterVersion=not-a-version\n",
-    "starterVersion=0.2.0\n",
-    "starterVersion=0.3.0\nstarterVersion=0.3.0\n",
+    `starterVersion=${differentStarterVersion(fixtureReleaseIdentity.templateStarterJvmBaseline)}\n`,
+    `starterVersion=${fixtureReleaseIdentity.templateStarterJvmBaseline}\nstarterVersion=${fixtureReleaseIdentity.templateStarterJvmBaseline}\n`,
   ];
   for (const [index, gradleProperties] of cases.entries()) {
     const root = await mkdtemp(join(tmpdir(), `create-vireo-jvm-baseline-${index}-`));
@@ -610,7 +633,10 @@ test("refuses malformed, missing, duplicate, or drifted Template starterVersion 
       await writeFile(join(template, "gradle.properties"), gradleProperties);
       await assert.rejects(
         createVireo({ directory: join(root, "invalid-app"), git: false, templateDirectory: template }),
-        /exactly one starterVersion=0\.3\.0 baseline/u,
+        error =>
+          error.message.includes(
+            `exactly one starterVersion=${fixtureReleaseIdentity.templateStarterJvmBaseline} baseline`,
+          ),
       );
     } finally {
       await rm(root, { recursive: true, force: true });

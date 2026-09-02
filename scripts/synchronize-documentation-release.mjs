@@ -73,6 +73,10 @@ export async function synchronizeDocumentationRelease(
   if (!declaredTemplateStarterJvmBaseline) {
     throw new Error("create-vireo does not declare its starter JVM baseline");
   }
+  if (!isStableSemver(declaredTemplateStarterJvmBaseline)) {
+    throw new Error("create-vireo must declare a stable starter JVM baseline");
+  }
+  let templateStarterJvmBaseline = declaredTemplateStarterJvmBaseline;
   createSource = createSource.replace(
     `CREATE_VIREO_PACKAGE_VERSION = "${declaredCreateVireoVersion}"`,
     `CREATE_VIREO_PACKAGE_VERSION = "${createVireoVersion}"`,
@@ -109,6 +113,7 @@ export async function synchronizeDocumentationRelease(
       `TEMPLATE_STARTER_JVM_BASELINE = "${declaredTemplateStarterJvmBaseline}"`,
       `TEMPLATE_STARTER_JVM_BASELINE = "${jvmVersion}"`,
     );
+    templateStarterJvmBaseline = jvmVersion;
     templateCommit = candidateTemplateCommit;
   }
   finalizeCandidateUpgrade({ upgradePolicy, projectUpgrade, createVireoVersion, templateCommit });
@@ -218,6 +223,15 @@ export async function synchronizeDocumentationRelease(
     [createSourcePath, createSource],
     [upgradePolicyPath, JSON.stringify(upgradePolicy)],
     [projectUpgradePath, JSON.stringify(projectUpgrade)],
+    [
+      join(repositoryRoot, "packages", "create-vireo", "fixtures", "release-identity.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        createVireoVersion,
+        templateStarterJvmBaseline,
+        generatedStarterJvmVersion: jvmVersion,
+      }),
+    ],
     [packageLockPath, JSON.stringify(packageLock)],
     [readmePath, currentReleaseGuidance?.readme ?? readme],
     [compatibilityPath, currentReleaseGuidance?.compatibilityMarkdown ?? compatibilityMarkdown],
