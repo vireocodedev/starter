@@ -40,7 +40,10 @@ function standaloneWebsiteArtifactRetainsHiddenFiles(workflow) {
   if (!uploadStep || !uploadStep.some(line => /^        uses: actions\/upload-artifact@[a-f0-9]{40}(?:\s+#.*)?$/u.test(line)))
     return false;
   const withBlock = indentedSubsection(uploadStep, "with", 8);
-  return withBlock?.includes("          include-hidden-files: true") ?? false;
+  return (
+    withBlock?.includes("          path: site/dist") === true &&
+    withBlock.includes("          include-hidden-files: true")
+  );
 }
 
 test("accepts the narrowly scoped Changesets release-PR workflow", () => {
@@ -62,9 +65,15 @@ test("standalone website artifacts retain generated hidden files", () => {
   assert.equal(
     standaloneWebsiteArtifactRetainsHiddenFiles(
       websiteWorkflow
-        .replace("        with:\n", "        env:\n          include-hidden-files: true\n        with:\n")
-        .replace("          include-hidden-files: true\n          if-no-files-found", "          if-no-files-found"),
+        .replace(
+          "        with:\n          name: vireo-website-${{ github.sha }}\n          path: site/dist\n          include-hidden-files: true",
+          "        env:\n          include-hidden-files: true\n        with:\n          name: vireo-website-${{ github.sha }}\n          path: site/dist",
+        ),
     ),
+    false,
+  );
+  assert.equal(
+    standaloneWebsiteArtifactRetainsHiddenFiles(websiteWorkflow.replace("          path: site/dist", "          path: site/build")),
     false,
   );
   assert.equal(
