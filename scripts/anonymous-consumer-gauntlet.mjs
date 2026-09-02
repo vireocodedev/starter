@@ -65,19 +65,21 @@ export function validateManagedProvenance({ root, manifest, templateCommit }) {
 
 export function installedVireoPackageNames({ lock, release }) {
   const expected = new Map(release.npm.map(entry => [entry.name, entry.version]));
+  const lockPackageName = path => /(?:^|\/)node_modules\/(@vireocodedev\/[^/]+|create-vireo)$/u.exec(path)?.[1];
   const names = Object.entries(lock?.packages ?? {})
-    .filter(([path]) => /^node_modules\/(?:@vireocodedev\/|create-vireo$)/u.test(path))
-    .map(([path, entry]) => ({ name: path.slice("node_modules/".length), entry }));
+    .map(([path, entry]) => ({ entry, name: lockPackageName(path) }))
+    .filter(item => item.name !== undefined);
   if (names.length === 0) throw new Error("Generated consumer has no installed Vireo package coordinates.");
   for (const { name, entry } of names) {
     if (
       expected.get(name) !== entry.version ||
+      entry.link === true ||
       !entry.resolved?.startsWith("https://registry.npmjs.org/") ||
       !entry.integrity
     )
       throw new Error(`Installed Vireo coordinate is not an exact public release package: ${name}.`);
   }
-  return names.map(item => item.name);
+  return [...new Set(names.map(item => item.name))];
 }
 
 export function validatePolicy(policy, release) {

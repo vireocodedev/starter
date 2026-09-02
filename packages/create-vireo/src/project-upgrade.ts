@@ -190,6 +190,17 @@ function sha256(value: string | Uint8Array) {
 function releaseFrom(value: unknown) {
   return typeof value === "string" ? /^create-vireo@(\d+\.\d+\.\d+)$/u.exec(value)?.[1] : undefined;
 }
+function recordedReleaseFromMetadata(metadata: ProjectMetadata, policy: UpgradePolicy) {
+  const known = new Set(policy.releaseGraph.releases.map(release => release.release));
+  const created = releaseFrom(metadata.createdBy);
+  if (!created || !known.has(created))
+    throw new VireoUpgradeError("VIR-UPG-002", ".vireo/project.json must record a recognized createdBy create-vireo release.");
+  if (metadata.lastUpgradedBy === undefined) return created;
+  const upgraded = releaseFrom(metadata.lastUpgradedBy);
+  if (!upgraded || !known.has(upgraded))
+    throw new VireoUpgradeError("VIR-UPG-002", ".vireo/project.json has an invalid lastUpgradedBy create-vireo release.");
+  return upgraded;
+}
 function assertEqual(actual: unknown, expected: unknown, surface: string, code = "VIR-UPG-003") {
   if (actual !== expected)
     throw new VireoUpgradeError(
@@ -666,7 +677,7 @@ async function projectStatusWithPolicy(
   const metadata = (await safeFileState(root, ".vireo/project.json"))
     ? await optionalJson<ProjectMetadata>(join(root, ".vireo/project.json"))
     : undefined;
-  const recordedRelease = releaseFrom(metadata?.lastUpgradedBy) ?? releaseFrom(metadata?.createdBy) ?? null,
+  const recordedRelease = metadata ? recordedReleaseFromMetadata(metadata, policy) : null,
     edge = recordedRelease
       ? policy.releaseGraph.edges.find(candidate => candidate.from === recordedRelease)
       : undefined;
@@ -782,9 +793,7 @@ async function upgradeProjectWithPolicy(
   const rootManifest = JSON.parse(rootManifestText) as PackageManifest,
     frontendManifest = frontendOnly ? rootManifest : (JSON.parse(frontendManifestText) as PackageManifest),
     frontendLock = JSON.parse(frontendLockText) as PackageLock;
-  const recordedRelease = releaseFrom(metadata.lastUpgradedBy) ?? releaseFrom(metadata.createdBy);
-  if (!recordedRelease)
-    throw new VireoUpgradeError("VIR-UPG-002", ".vireo/project.json has no recognized create-vireo release.");
+  const recordedRelease = recordedReleaseFromMetadata(metadata, policy);
   const source = graph.releases.find(release => release.release === recordedRelease);
   if (!source) throw new VireoUpgradeError("VIR-UPG-002", `Release ${recordedRelease} is not declared by this CLI.`);
   const edge = graph.edges.find(candidate => candidate.from === recordedRelease && candidate.to === target.release),

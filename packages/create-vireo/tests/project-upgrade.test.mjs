@@ -670,6 +670,31 @@ test("0.7.0 adjacent upgrades reject unknown commits, managed drift, unsafe path
   }
 });
 
+test("upgrade provenance requires a recognized creation identity and a valid present upgrade identity", async () => {
+  for (const mutate of [
+    metadata => {
+      metadata.createdBy = "create-vireo@99.99.99";
+    },
+    metadata => {
+      metadata.lastUpgradedBy = "not-a-create-vireo-identity";
+    },
+  ]) {
+    const root = await adjacentFixture("frontend");
+    try {
+      const metadataPath = join(root, ".vireo/project.json");
+      const metadata = JSON.parse(await readFile(metadataPath, "utf8"));
+      mutate(metadata);
+      await writeFile(metadataPath, JSON.stringify(metadata));
+      await assert.rejects(
+        upgradeVireoProject({ projectDirectory: root, targetRelease: adjacentTargetRelease }),
+        error => error.code === "VIR-UPG-002",
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
+
 test("interrupted 0.7.0 upgrade journals are non-writing in preview and recover before apply", async () => {
   const root = await adjacentFixture("frontend");
   try {

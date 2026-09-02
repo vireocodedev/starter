@@ -111,19 +111,22 @@ export function assertAnonymousInstallation({ consumerRoot, packageNames, regist
   }
 }
 
+function vireoLockPackageName(path) {
+  return /(?:^|\/)node_modules\/(@vireocodedev\/[^/]+|create-vireo)$/u.exec(path)?.[1];
+}
+
 export function assertAnonymousVireoLock({ consumerRoot, release, registry }) {
   const lock = readJson(join(consumerRoot, "package-lock.json"));
   const expectedVersions = new Map(release.npm.map(entry => [entry.name, entry.version]));
-  const entries = Object.entries(lock.packages ?? {}).filter(([path]) =>
-    path.startsWith("node_modules/@vireocodedev/"),
-  );
+  const entries = Object.entries(lock.packages ?? {})
+    .map(([path, entry]) => ({ entry, name: vireoLockPackageName(path) }))
+    .filter(entry => entry.name !== undefined);
   if (entries.length === 0) throw new Error("Anonymous consumer lockfile contains no Vireo public packages.");
-  for (const [path, entry] of entries) {
-    const name = path.slice("node_modules/".length);
+  for (const { entry, name } of entries) {
     if (!expectedVersions.has(name) || entry.version !== expectedVersions.get(name)) {
       throw new Error(`${name} does not match an exact current public Vireo coordinate.`);
     }
-    if (!entry.resolved?.startsWith(`${registry}/`) || !entry.integrity) {
+    if (entry.link === true || !entry.resolved?.startsWith(`${registry}/`) || !entry.integrity) {
       throw new Error(`${name} was not resolved from the public npm registry.`);
     }
   }

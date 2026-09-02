@@ -90,6 +90,11 @@ test("anonymous lockfile accepts only exact public Vireo coordinates", () => {
           resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui-1.2.3.tgz",
           integrity: "sha512-public",
         },
+        "node_modules/example/node_modules/@vireocodedev/ui": {
+          version: "1.2.3",
+          resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui-1.2.3.tgz",
+          integrity: "sha512-public-nested",
+        },
       },
     }),
   );
@@ -99,6 +104,21 @@ test("anonymous lockfile accepts only exact public Vireo coordinates", () => {
   );
   assert.throws(() =>
     assertAnonymousVireoLock({ consumerRoot: root, release: { npm: [] }, registry: "https://registry.npmjs.org" }),
+  );
+  const lock = JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8"));
+  lock.packages["node_modules/example/node_modules/@vireocodedev/ui"].resolved = "file:../stale-ui";
+  writeFileSync(join(root, "package-lock.json"), JSON.stringify(lock));
+  assert.throws(() =>
+    assertAnonymousVireoLock({ consumerRoot: root, release, registry: "https://registry.npmjs.org" }),
+    /public npm registry/u,
+  );
+  lock.packages["node_modules/example/node_modules/@vireocodedev/ui"].resolved =
+    "https://registry.npmjs.org/@vireocodedev/ui/-/ui-1.2.3.tgz";
+  lock.packages["node_modules/example/node_modules/@vireocodedev/ui"].link = true;
+  writeFileSync(join(root, "package-lock.json"), JSON.stringify(lock));
+  assert.throws(() =>
+    assertAnonymousVireoLock({ consumerRoot: root, release, registry: "https://registry.npmjs.org" }),
+    /public npm registry/u,
   );
 });
 

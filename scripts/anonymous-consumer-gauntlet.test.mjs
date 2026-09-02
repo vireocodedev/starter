@@ -265,10 +265,18 @@ test("upgraded consumers validate only their installed exact Vireo subset", () =
         resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui.tgz",
         integrity: "sha512-x",
       },
+      "node_modules/example/node_modules/@vireocodedev/ui": {
+        version: "1.2.3",
+        resolved: "https://registry.npmjs.org/@vireocodedev/ui/-/ui.tgz",
+        integrity: "sha512-nested",
+      },
     },
   };
   assert.deepEqual(installedVireoPackageNames({ lock, release }), ["@vireocodedev/ui"]);
   lock.packages["node_modules/@vireocodedev/ui"].version = "9.9.9";
+  assert.throws(() => installedVireoPackageNames({ lock, release }));
+  lock.packages["node_modules/@vireocodedev/ui"].version = "1.2.3";
+  lock.packages["node_modules/example/node_modules/@vireocodedev/ui"].link = true;
   assert.throws(() => installedVireoPackageNames({ lock, release }));
 });
 
