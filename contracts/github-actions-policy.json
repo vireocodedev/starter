@@ -93,6 +93,10 @@
     "website.yml": {
       "group": "website-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}",
       "cancelInProgress": true
+    },
+    "anonymous-consumer-gauntlet.yml": {
+      "group": "anonymous-consumer-gauntlet-${{ github.ref }}",
+      "cancelInProgress": false
     }
   },
   "checkoutCredentialJobs": []

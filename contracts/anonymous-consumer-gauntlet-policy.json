@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "contractId": "vireo-anonymous-consumer-zero-to-production",
+  "releaseSource": "contracts/ecosystem-release-contract.json",
+  "registry": "https://registry.npmjs.org",
+  "evidence": {
+    "schemaVersion": 1,
+    "artifactName": "anonymous-consumer-gauntlet-evidence",
+    "retentionDays": 90
+  },
+  "isolation": {
+    "scrubbedEnvironment": true,
+    "isolatedNpmCache": true,
+    "isolatedGradleUserHome": true,
+    "forbidMavenLocal": true,
+    "forbidWorkspacePackages": true
+  },
+  "requiredScenarios": [
+    "public-artifacts",
+    "cli-adversity",
+    "frontend-creation",
+    "full-stack-h2-creation",
+    "postgresql-production",
+    "release-identity-and-doctor",
+    "capability-lifecycle",
+    "sample-removal-and-ejection",
+    "storybook-and-production-builds",
+    "browser-and-pwa",
+    "container-and-network-boundaries",
+    "adjacent-public-upgrades",
+    "npm-consumer-surface",
+    "maven-consumer-surface"
+  ],
+  "scenarios": [
+    { "id": "public-artifacts", "summary": "Registry metadata, provenance, SBOM, license and immutable release coordinates." },
+    { "id": "cli-adversity", "summary": "CLI help, JSON/dry-run, invalid identity, malformed URL, occupied target, failed download and retry cleanup." },
+    { "id": "frontend-creation", "summary": "Anonymous frontend-only creation, setup, doctor and complete verification." },
+    { "id": "full-stack-h2-creation", "summary": "Anonymous full-stack H2 creation, setup, doctor and complete verification." },
+    { "id": "postgresql-production", "summary": "PostgreSQL creation and supported production-like hosted deployment verification." },
+    { "id": "release-identity-and-doctor", "summary": "Generated release identity, provenance markers and Doctor output." },
+    { "id": "capability-lifecycle", "summary": "Capability generation/checking, idempotence and customized-file refusal." },
+    { "id": "sample-removal-and-ejection", "summary": "Sample removal, ejection and managed-file provenance preservation." },
+    { "id": "storybook-and-production-builds", "summary": "Storybook interaction/static output plus production frontend and JVM builds." },
+    { "id": "browser-and-pwa", "summary": "Browser smoke and PWA install/update lifecycle where the hosted runner supports Chromium." },
+    { "id": "container-and-network-boundaries", "summary": "Container context, security headers, API proxying and database-role separation." },
+    { "id": "adjacent-public-upgrades", "summary": "Every supported adjacent public upgrade for frontend and full-stack profiles." },
+    { "id": "npm-consumer-surface", "summary": "Public imports/exports, exact npm package contents, licenses, SBOM and provenance." },
+    { "id": "maven-consumer-surface", "summary": "Maven Central BOM/module consumption without Maven Local." }
+  ]
+}
