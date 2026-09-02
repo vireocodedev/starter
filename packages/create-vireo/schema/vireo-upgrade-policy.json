@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "releaseGraph": {
-    "publicRelease": "0.8.3",
+    "publicRelease": "0.8.4",
     "previousRelease": "0.8.3",
     "releases": [
       {
@@ -130,9 +130,7 @@
         "templateCommit": "421ae56cdd6d1fa6863cc6f29503b15294e4aa99",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.2 vireo",
         "starterJvmVersion": "0.3.1",
-        "managedRootScripts": {
-          "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json"
-        },
+        "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
         "frontendDependencies": {
           "@vireocodedev/history": "^0.2.2",
           "@vireocodedev/infrastructure": "^0.2.2",
@@ -144,13 +142,11 @@
       },
       {
         "release": "0.8.3",
-        "status": "current",
+        "status": "historical",
         "templateCommit": "12485e7e7e9323a802d79c793d230557cad4c7fb",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.3 vireo",
         "starterJvmVersion": "0.3.1",
-        "managedRootScripts": {
-          "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json"
-        },
+        "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
         "frontendDependencies": {
           "@vireocodedev/history": "^0.2.2",
           "@vireocodedev/infrastructure": "^0.2.2",
@@ -160,21 +156,17 @@
           "@vireocodedev/ui": "^0.3.1"
         },
         "managedFrontendScripts": {
-          "full-stack": {
-            "performance:audit": "node scripts/lighthouse-budget.mjs"
-          },
+          "full-stack": { "performance:audit": "node scripts/lighthouse-budget.mjs" },
           "frontend": {}
         }
       },
       {
         "release": "0.8.4",
-        "status": "candidate",
+        "status": "current",
         "templateCommit": "09cd526d32907bedfe5bb6ab45a2d4d221b0d47b",
         "rootVireoScript": "npx --yes --package=create-vireo@0.8.4 vireo",
         "starterJvmVersion": "0.3.1",
-        "managedRootScripts": {
-          "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json"
-        },
+        "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
         "managedFrontendScripts": {
           "full-stack": {
             "performance:policy:test": "node --test scripts/lighthouse-policy.test.mjs scripts/lighthouse-audit-support.test.mjs",
@@ -194,12 +186,8 @@
           "@vireocodedev/ui": "^0.3.1"
         },
         "projectionSourceFrontendScripts": {
-          "full-stack": {
-            "performance:audit": "node scripts/lighthouse-budget.mjs"
-          },
-          "frontend": {
-            "performance:audit": "node scripts/lighthouse-budget.mjs"
-          }
+          "full-stack": { "performance:audit": "node scripts/lighthouse-budget.mjs" },
+          "frontend": { "performance:audit": "node scripts/lighthouse-budget.mjs" }
         }
       }
     ],
@@ -452,10 +440,7 @@
           }
         ]
       },
-      "0.8.0->0.8.1": {
-        "full-stack": [],
-        "frontend": []
-      },
+      "0.8.0->0.8.1": { "full-stack": [], "frontend": [] },
       "0.8.1->0.8.2": {
         "full-stack": [
           {
@@ -686,7 +671,6 @@
           }
         ]
       }
-    },
-    "candidateRelease": "0.8.4"
+    }
   }
 }
