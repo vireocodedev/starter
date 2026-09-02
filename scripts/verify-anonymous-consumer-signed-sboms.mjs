@@ -11,6 +11,7 @@ import { validateReleaseSbomManifest } from "./lib/release-sbom-evidence.mjs";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const predicateType = "https://cyclonedx.org/bom";
 const sourceRef = "refs/heads/main";
+const oidcIssuer = "https://token.actions.githubusercontent.com";
 
 function argumentValue(arguments_, name) {
   const index = arguments_.indexOf(name);
@@ -56,7 +57,10 @@ export function signedSbomVerificationPlan({ evidenceRoot, release, policy, read
   if (evidence?.status !== "passed") problems.push("anonymous consumer evidence is not passed");
   if (!sameRelease(evidence?.release, release)) problems.push("anonymous consumer evidence does not match the exact release contract");
   if (!/^[0-9a-f]{40}$/u.test(evidence?.releaseTagCommit ?? "")) problems.push("anonymous consumer evidence has no exact release tag commit");
+  if (!/^[0-9a-f]{40}$/u.test(evidence?.verifierSourceCommit ?? "")) problems.push("anonymous consumer evidence has no exact verifier source commit");
   if (manifest?.source?.repository !== `https://github.com/${policy.repository}`) problems.push("public evidence has an unexpected source repository");
+  if (manifest?.source?.commit !== evidence?.verifierSourceCommit) problems.push("public evidence source commit does not match the verifier source commit");
+  if (manifest?.source?.clean !== true) problems.push("public evidence source checkout is not clean");
 
   const mappingForSubject = new Map();
   for (const mapping of manifest?.sboms ?? []) {
@@ -110,6 +114,98 @@ export function signedSbomVerificationPlan({ evidenceRoot, release, policy, read
   };
 }
 
+function actualRun(uri, repository) {
+  const match = new RegExp(`^https://github\\.com/${repository}/actions/runs/(\\d+)/attempts/(\\d+)$`, "u").exec(uri ?? "");
+  if (!match) throw new Error("verified certificate has no canonical GitHub Actions run invocation URI");
+  return { id: match[1], attempt: match[2], url: uri };
+}
+
+function expectedSbomComponent(subject) {
+  if (subject.ecosystem === "npm") {
+    const separator = subject.coordinate.lastIndexOf("@");
+    if (separator <= 0) throw new Error(`invalid npm subject coordinate ${subject.coordinate}`);
+    return { name: subject.coordinate.slice(0, separator), version: subject.coordinate.slice(separator + 1) };
+  }
+  const [group, name, version, extra] = subject.coordinate.split(":");
+  if (!group || !name || !version || extra) throw new Error(`invalid Maven subject coordinate ${subject.coordinate}`);
+  return { group, name, version };
+}
+
+function validateSignedCycloneDx({ predicate, subject }) {
+  const expected = expectedSbomComponent(subject);
+  const component = predicate?.metadata?.component;
+  if (predicate?.bomFormat !== "CycloneDX" || !/^\d+\.\d+(?:\.\d+)?$/u.test(predicate?.specVersion ?? "")) {
+    throw new Error(`verified attestation for ${subject.path} does not contain a valid CycloneDX SBOM.`);
+  }
+  if (component?.name !== expected.name || component?.version !== expected.version || (expected.group && component?.group !== expected.group)) {
+    throw new Error(`verified CycloneDX SBOM does not describe ${subject.coordinate}.`);
+  }
+  return { bomFormat: predicate.bomFormat, specVersion: predicate.specVersion, component: expected };
+}
+
+/** Parses and enforces the machine-readable result returned by `gh`, not merely its exit status. */
+export function verifiedAttestationRecord({ output, subject, repository, releaseTagCommit, certIdentity }) {
+  let entries;
+  try {
+    entries = JSON.parse(output);
+  } catch (error) {
+    throw new Error("gh attestation verify returned malformed JSON.", { cause: error });
+  }
+  if (!Array.isArray(entries) || entries.length === 0) throw new Error("gh attestation verify returned no verified attestations.");
+
+  const actual = [];
+  for (const entry of entries) {
+    if (!entry?.attestation?.bundle) throw new Error("gh attestation verify returned no attestation bundle.");
+    const result = entry?.verificationResult;
+    const certificate = result?.signature?.certificate;
+    const matchingSubject = result?.statement?.subject?.find(candidate => candidate?.digest?.sha256 === subject.sha256);
+    if (!matchingSubject) throw new Error(`verified attestation does not bind ${subject.path} to its exact SHA-256 digest.`);
+    if (result?.statement?.predicateType !== predicateType) throw new Error(`verified attestation for ${subject.path} has an unexpected predicate.`);
+    const sbom = validateSignedCycloneDx({ predicate: result.statement.predicate, subject });
+    const expectedCertificate = {
+      subjectAlternativeName: certIdentity,
+      githubWorkflowRepository: repository,
+      githubWorkflowRef: sourceRef,
+      githubWorkflowSHA: releaseTagCommit,
+      buildSignerURI: certIdentity,
+      buildSignerDigest: releaseTagCommit,
+      sourceRepositoryURI: `https://github.com/${repository}`,
+      sourceRepositoryDigest: releaseTagCommit,
+      sourceRepositoryRef: sourceRef,
+      buildConfigURI: certIdentity,
+      buildConfigDigest: releaseTagCommit,
+    };
+    for (const [field, expected] of Object.entries(expectedCertificate)) {
+      if (certificate?.[field] !== expected) throw new Error(`verified certificate ${field} does not match the canonical release identity.`);
+    }
+    if (certificate?.issuer !== oidcIssuer) {
+      throw new Error("verified certificate has an unexpected OIDC issuer.");
+    }
+    const timestamps = result?.verifiedTimestamps;
+    if (!Array.isArray(timestamps) || timestamps.length === 0) throw new Error("verified attestation has no verified timestamp.");
+    actual.push({
+      statement: { subjectSha256: matchingSubject.digest.sha256, predicateType: result.statement.predicateType },
+      sbom,
+      certificate: {
+        subjectAlternativeName: certificate.subjectAlternativeName,
+        githubWorkflowRepository: certificate.githubWorkflowRepository,
+        githubWorkflowRef: certificate.githubWorkflowRef,
+        githubWorkflowSHA: certificate.githubWorkflowSHA,
+        buildSignerURI: certificate.buildSignerURI,
+        buildSignerDigest: certificate.buildSignerDigest,
+        sourceRepositoryURI: certificate.sourceRepositoryURI,
+        sourceRepositoryDigest: certificate.sourceRepositoryDigest,
+        sourceRepositoryRef: certificate.sourceRepositoryRef,
+        buildConfigURI: certificate.buildConfigURI,
+        buildConfigDigest: certificate.buildConfigDigest,
+        run: actualRun(certificate.runInvocationURI, repository),
+      },
+      verifiedTimestampCount: timestamps.length,
+    });
+  }
+  return actual;
+}
+
 export function verifySignedSbomPlan({ plan, repository, execute = execFileSync, run, onVerified = () => {} }) {
   const certIdentity = `https://github.com/${repository}/.github/workflows/attest-public-release.yml@refs/heads/main`;
   const verification = {
@@ -122,7 +218,7 @@ export function verifySignedSbomPlan({ plan, repository, execute = execFileSync,
   };
   const verifiedSubjects = [];
   for (const subject of plan.subjects) {
-    execute(
+    const executeResult = execute(
       "gh",
       [
         "attestation",
@@ -134,20 +230,31 @@ export function verifySignedSbomPlan({ plan, repository, execute = execFileSync,
         predicateType,
         "--cert-identity",
         certIdentity,
+        "--cert-oidc-issuer",
+        oidcIssuer,
         "--source-ref",
         sourceRef,
         "--source-digest",
         plan.releaseTagCommit,
+        "--format",
+        "json",
       ],
-      { stdio: "inherit", env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" } },
+      { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" } },
     );
+    const attestations = verifiedAttestationRecord({
+      output: executeResult,
+      subject,
+      repository,
+      releaseTagCommit: plan.releaseTagCommit,
+      certIdentity,
+    });
     verifiedSubjects.push({
       path: subject.path,
       sha256: subject.sha256,
       coordinate: subject.coordinate,
       ecosystem: subject.ecosystem,
       sbomId: subject.sbomId,
-      verification,
+      verification: { ...verification, attestations },
     });
     onVerified(verifiedSubjects.at(-1));
   }

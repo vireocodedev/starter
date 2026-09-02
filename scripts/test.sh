@@ -27,6 +27,7 @@ node --test \
   scripts/lib/anonymous-consumer-final-evidence.test.mjs \
   scripts/lib/anonymous-consumer-release-preflight.test.mjs \
   scripts/anonymous-consumer-gauntlet.test.mjs \
+  scripts/verify-anonymous-consumer-signed-sboms.test.mjs \
   scripts/verify-npm-public-release.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
   scripts/third-party-license-policy.test.mjs \

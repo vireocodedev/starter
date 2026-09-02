@@ -4,7 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { signedSbomVerificationPlan, verifySignedSbomPlan } from "./verify-anonymous-consumer-signed-sboms.mjs";
+import {
+  signedSbomVerificationPlan,
+  verifiedAttestationRecord,
+  verifySignedSbomPlan,
+} from "./verify-anonymous-consumer-signed-sboms.mjs";
 
 const release = {
   id: "npm-1.2.3_jvm-4.5.6",
@@ -47,11 +51,55 @@ function fixture(t) {
     writeFileSync(join(publicRoot, mapping.path), JSON.stringify({ bomFormat: "CycloneDX", specVersion: "1.6", metadata: { component }, components: [] }));
     writeFileSync(join(publicRoot, mapping.checksums), `${subject.sha256}  ${subject.path}\n`);
   }
-  writeFileSync(join(root, "evidence.json"), JSON.stringify({ status: "passed", release, releaseTagCommit: "c".repeat(40) }));
-  const manifest = { schemaVersion: 2, source: { repository: "https://github.com/vireocodedev/vireo" }, versions: { npm: { example: "1.2.3" }, maven: { group: "com.example", version: "4.5.6" } }, subjects, sboms };
+  writeFileSync(join(root, "evidence.json"), JSON.stringify({ status: "passed", release, releaseTagCommit: "c".repeat(40), verifierSourceCommit: "e".repeat(40) }));
+  const manifest = {
+    schemaVersion: 2,
+    source: { repository: "https://github.com/vireocodedev/vireo", commit: "e".repeat(40), clean: true },
+    versions: { npm: { example: "1.2.3" }, maven: { group: "com.example", version: "4.5.6" } },
+    subjects,
+    sboms,
+  };
   writeFileSync(join(publicRoot, "public-release-manifest.json"), JSON.stringify(manifest));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   return { root, manifest, hash, manifestPath: join(publicRoot, "public-release-manifest.json") };
+}
+
+function verifiedOutput(subject) {
+  const commit = "c".repeat(40);
+  const identity = "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main";
+  const component = subject.ecosystem === "maven"
+    ? { group: "com.example", name: "example-core", version: "4.5.6" }
+    : { name: "example", version: "1.2.3" };
+  return JSON.stringify([
+    {
+      attestation: { bundle: { mediaType: "application/vnd.dev.sigstore.bundle.v0.3+json" } },
+      verificationResult: {
+        statement: {
+          predicateType: "https://cyclonedx.org/bom",
+          subject: [{ name: subject.path, digest: { sha256: subject.sha256 } }],
+          predicate: { bomFormat: "CycloneDX", specVersion: "1.6", metadata: { component } },
+        },
+        signature: {
+          certificate: {
+            subjectAlternativeName: identity,
+            issuer: "https://token.actions.githubusercontent.com",
+            githubWorkflowRepository: "vireocodedev/vireo",
+            githubWorkflowRef: "refs/heads/main",
+            githubWorkflowSHA: commit,
+            buildSignerURI: identity,
+            buildSignerDigest: commit,
+            sourceRepositoryURI: "https://github.com/vireocodedev/vireo",
+            sourceRepositoryDigest: commit,
+            sourceRepositoryRef: "refs/heads/main",
+            buildConfigURI: identity,
+            buildConfigDigest: commit,
+            runInvocationURI: "https://github.com/vireocodedev/vireo/actions/runs/123456/attempts/1",
+          },
+        },
+        verifiedTimestamps: [{ type: "Tlog", timestamp: "2026-01-01T00:00:00Z" }],
+      },
+    },
+  ]);
 }
 
 test("plans and verifies every exact npm and Maven subject against the release tag", t => {
@@ -64,12 +112,17 @@ test("plans and verifies every exact npm and Maven subject against the release t
     plan,
     repository: policy.repository,
     run: { id: "123" },
-    execute: (command, arguments_) => calls.push([command, arguments_]),
+    execute: (command, arguments_) => {
+      calls.push([command, arguments_]);
+      return verifiedOutput(plan.subjects.find(subject => subject.absolutePath === arguments_[2]));
+    },
   });
   assert.equal(calls.length, 2);
   assert.ok(calls.every(([, arguments_]) => arguments_.includes("--predicate-type") && arguments_.includes("https://cyclonedx.org/bom")));
   assert.ok(calls.every(([, arguments_]) => arguments_.includes("--source-digest") && arguments_.includes("c".repeat(40))));
+  assert.ok(calls.every(([, arguments_]) => arguments_.includes("--format") && arguments_.includes("json")));
   assert.equal(records[0].verification.certIdentity, "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main");
+  assert.equal(records[0].verification.attestations[0].certificate.run.id, "123456");
 });
 
 test("rejects missing, extra, cross-coordinate, and digest-drifted subjects", t => {
@@ -83,6 +136,32 @@ test("rejects missing, extra, cross-coordinate, and digest-drifted subjects", t 
   assert.throws(() => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash }), /missing or extra|no SBOM mapping/u);
 });
 
+test("rejects source drift and malformed or falsely bound verifier output", t => {
+  const { root, manifest, hash, manifestPath } = fixture(t);
+  manifest.source.commit = "d".repeat(40);
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.throws(() => signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash }), /source commit/u);
+  manifest.source.commit = "e".repeat(40);
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, hash });
+  const input = {
+    subject: plan.subjects[0],
+    repository: policy.repository,
+    releaseTagCommit: plan.releaseTagCommit,
+    certIdentity: "https://github.com/vireocodedev/vireo/.github/workflows/attest-public-release.yml@refs/heads/main",
+  };
+  assert.throws(() => verifiedAttestationRecord({ ...input, output: "not-json" }), /malformed JSON/u);
+  const falseOutput = JSON.parse(verifiedOutput(plan.subjects[0]));
+  falseOutput[0].verificationResult.signature.certificate.sourceRepositoryDigest = "d".repeat(40);
+  assert.throws(() => verifiedAttestationRecord({ ...input, output: JSON.stringify(falseOutput) }), /sourceRepositoryDigest/u);
+  falseOutput[0].verificationResult.signature.certificate.sourceRepositoryDigest = "c".repeat(40);
+  falseOutput[0].verificationResult.statement.subject[0].digest.sha256 = "d".repeat(64);
+  assert.throws(() => verifiedAttestationRecord({ ...input, output: JSON.stringify(falseOutput) }), /exact SHA-256/u);
+  falseOutput[0].verificationResult.statement.subject[0].digest.sha256 = plan.subjects[0].sha256;
+  falseOutput[0].verificationResult.statement.predicate.metadata.component.name = "wrong-package";
+  assert.throws(() => verifiedAttestationRecord({ ...input, output: JSON.stringify(falseOutput) }), /does not describe/u);
+});
+
 test("workflow isolates signed-SBOM verification after the token-free gauntlet", () => {
   const workflow = readFileSync(new URL("../.github/workflows/anonymous-consumer-gauntlet.yml", import.meta.url), "utf8");
   const start = workflow.indexOf("  verify-signed-sboms:");
@@ -94,6 +173,8 @@ test("workflow isolates signed-SBOM verification after the token-free gauntlet",
   assert.match(job, /actions\/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8\.0\.1/u);
   assert.match(job, /name: anonymous-consumer-gauntlet-evidence/u);
   assert.match(job, /GH_TOKEN: \$\{\{ github\.token \}\}/u);
+  const verifier = readFileSync(new URL("./verify-anonymous-consumer-signed-sboms.mjs", import.meta.url), "utf8");
+  assert.match(verifier, /"--format",\s+"json"/u);
   assert.match(job, /anonymous-consumer-signed-sbom-evidence/u);
   assert.match(workflow, /workflow_run:/u);
   assert.match(workflow, /workflow_dispatch:/u);
