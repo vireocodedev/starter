@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import {
   createVireo,
@@ -45,7 +46,11 @@ test("test fixture release identity tracks the private create-vireo version and 
 });
 
 test("fresh frontend Doctor projection matches the frozen 0.8.2 upgrade byte contract", async () => {
-  const path = join(tmpdir(), "vireo-frontend-doctor-projection.mjs");
+  // Formatting is part of the public managed-byte contract: use the package's
+  // checked-in projection path so Prettier resolves the same repository config.
+  const path = fileURLToPath(
+    new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.1.mjs", import.meta.url),
+  );
   const rendered = await renderFrontendDoctorScript(path);
   const target = JSON.parse(
     await readFile(new URL("../fixtures/project-upgrades/vireo-frontend-doctor.0.8.2.fixture.json", import.meta.url), "utf8"),
