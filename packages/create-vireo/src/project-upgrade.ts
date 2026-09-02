@@ -697,7 +697,13 @@ async function migrateExampleManifest(
     validateRemovalReceipt(receipt, source.templateCommit);
     // A completed removal deliberately replaces the example manifest. Do not
     // recreate ownership after removal, regardless of which profile was removed.
-    return undefined;
+    const targetReceipt = structuredClone(receipt);
+    targetReceipt.templateCommit = target.templateCommit;
+    return {
+      path: join(projectDirectory, receiptPath),
+      contents: `${JSON.stringify(targetReceipt, null, 2)}\n`,
+      previous: await readFile(join(projectDirectory, receiptPath), "utf8"),
+    };
   }
   if (hasReceipt)
     throw new VireoUpgradeError(
@@ -747,6 +753,19 @@ async function migrateExampleManifest(
     contents: `${JSON.stringify(targetManifest, null, 2)}\n`,
     previous,
   };
+}
+async function recordedExampleProvenancePath(projectDirectory: string, source: ReleaseNode, target: ReleaseNode) {
+  if (!isOverviewManifestMigration(source, target)) return undefined;
+  const manifestPath = ".vireo/example-manifest.json";
+  const receiptPath = ".vireo/remove-example.json";
+  const hasManifest = await safeFileState(projectDirectory, manifestPath);
+  const hasReceipt = await safeFileState(projectDirectory, receiptPath);
+  if (hasManifest === hasReceipt)
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Example ownership provenance must contain exactly one of the manifest or completed removal receipt.",
+    );
+  return hasManifest ? manifestPath : receiptPath;
 }
 async function safeFileState(root: string, path: string) {
   assertBaselinePath(path);
@@ -1070,7 +1089,7 @@ async function upgradeProjectWithPolicy(
       }
     }
   }
-  const exampleManifestChange = await migrateExampleManifest(projectDirectory, source, target, frontendOnly);
+  const exampleStateChange = await migrateExampleManifest(projectDirectory, source, target, frontendOnly);
   const managedBaselines = edgeBaselines(policy, source.release, edge?.to, metadata.profile);
   const baselineFiles = await Promise.all(
     managedBaselines.map(async baseline => ({ baseline, state: await baselineState(projectDirectory, baseline) })),
@@ -1140,12 +1159,13 @@ async function upgradeProjectWithPolicy(
       ? graph.edges.find(candidate => candidate.from === previousUpgrade.from && candidate.to === target.release)
       : undefined);
   const recordSource = recordedEdge ? graph.releases.find(release => release.release === recordedEdge.from)! : source;
+  const recordedExampleProvenance = await recordedExampleProvenancePath(projectDirectory, recordSource, target);
   const receiptBaselines = recordedEdge
     ? edgeBaselines(policy, recordSource.release, target.release, metadata.profile)
     : managedBaselines;
   const receiptManagedSurfaces = [
     ...managedSurfaces,
-    ...(exampleManifestChange ? [".vireo/example-manifest.json"] : []),
+    ...(recordedExampleProvenance ? [recordedExampleProvenance] : []),
     ...Object.keys(targetManagedScripts).map(
       name => `${frontendOnly ? "package.json" : "frontend/package.json"}#scripts.${name}`,
     ),
@@ -1224,7 +1244,7 @@ async function upgradeProjectWithPolicy(
           previous: undefined,
         })),
     )),
-    ...(exampleManifestChange ? [exampleManifestChange] : []),
+    ...(exampleStateChange ? [exampleStateChange] : []),
     { path: metadataPath, contents: `${JSON.stringify(targetMetadata, null, 2)}\n`, previous: metadataText },
     {
       path: join(projectDirectory, ".vireo/managed-files.json"),
