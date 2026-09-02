@@ -14,6 +14,7 @@ import {
   readJson,
 } from "./lib/anonymous-consumer-environment.mjs";
 import { writeEvidenceAtomically } from "./lib/anonymous-consumer-evidence.mjs";
+import { validateAnonymousPublicEvidence } from "./lib/anonymous-public-evidence.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const policyPath = join(root, "contracts", "anonymous-consumer-gauntlet-policy.json");
@@ -210,6 +211,9 @@ async function executeOperation(operation, { environment, runRoot }) {
     ) throw new Error(`${operation.id} found incoherent generated release identity/provenance.`);
     if (!existsSync(join(operation.path, ".vireo", "managed-files.json")))
       throw new Error(`${operation.id} is missing managed-file provenance.`);
+  } else if (operation.kind === "assert-public-evidence") {
+    const problems = validateAnonymousPublicEvidence({ manifest: JSON.parse(readFileSync(operation.path, "utf8")), release: operation.release });
+    if (problems.length > 0) throw new Error(problems.join("\n"));
   } else if (operation.kind === "assert-ejected-marker") {
     const visit = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
       const path = join(directory, entry.name);
@@ -257,6 +261,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       ),
         command("exact-public-npm-verifier", "node", [join(root, "scripts", "verify-npm-public-release.mjs"), join(evidenceDirectory, "exact-npm-public.json")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
         command("public-evidence-collector", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "public-release-evidence")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+        { kind: "assert-public-evidence", id: "exact-public-evidence-contract", path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"), release },
       ];
     case "cli-adversity": {
       const occupied = join(consumerRoot, "occupied-target");
@@ -367,13 +372,13 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
     }
     case "npm-consumer-surface": return [
       { kind: "exact-public-npm-consumer", id: "exact-public-npm-install", path: join(consumerRoot, "public-npm") },
-      command("npm-pack", "corepack", ["npm", "pack", `create-vireo@${release.createVireoVersion}`, "--json"]),
+      ...release.npm.map(({ name, version }) => command(`npm-pack-${name}`, "corepack", ["npm", "pack", `${name}@${version}`, "--json"], { assertOutput: /"filename"/u })),
       command("public-release-evidence", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "public-release-evidence")], { cwdClass: "framework-verifier", timeoutMs: 30 * 60_000 }),
     ];
     case "maven-consumer-surface": return [
       command("maven-central-consumer", "sh", [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
       command("maven-detached-signatures", "node", [join(root, "scripts", "verify-public-maven-signatures.mjs"), release.maven.version, join(evidenceDirectory, "maven-signatures.json")], { cwdClass: "framework-verifier", timeoutMs: 30 * 60_000 }),
-      command("maven-public-evidence", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "maven-public-evidence")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+      { kind: "assert-public-evidence", id: "maven-public-evidence-contract", path: join(evidenceDirectory, "public-release-evidence", "public-release-manifest.json"), release },
     ];
     case "storybook-and-production-builds": return [
       command("storybook-interaction", "corepack", ["npm", "run", "test:storybook"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
