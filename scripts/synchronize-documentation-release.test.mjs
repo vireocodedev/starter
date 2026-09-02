@@ -444,7 +444,25 @@ test("documents adjacent edges that preserve application lockfiles", async () =>
   }
 });
 
-function makeFixture({ managedEdgeScope = "legacy", lockfileRefresh = "required" } = {}) {
+test("preserves the repository's stable version-neutral README upgrade guidance during candidate finalization", async () => {
+  const repositoryReadme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+  const stableReadmeGuidance = repositoryReadme.match(
+    /in the published release\. Its version-aware project upgrade supports the declared\nadjacent public release edge; earlier edges remain retained historical evidence\./u,
+  )?.[0];
+  assert.ok(stableReadmeGuidance, "the repository README declares stable version-neutral upgrade guidance");
+
+  const root = makeFixture({ readmeUpgradeGuidance: stableReadmeGuidance });
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    const readme = readFileSync(join(root, "README.md"), "utf8");
+    assert.ok(readme.includes(stableReadmeGuidance));
+    assert.doesNotMatch(readme, /explicit adjacent 0\.2\.0→0\.3\.0 release/u);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function makeFixture({ managedEdgeScope = "legacy", lockfileRefresh = "required", readmeUpgradeGuidance } = {}) {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   mkdirSync(join(root, "contracts"));
   mkdirSync(join(root, "packages", "create-vireo", "src"), { recursive: true });
@@ -604,9 +622,12 @@ function makeFixture({ managedEdgeScope = "legacy", lockfileRefresh = "required"
   writeJson(join(root, "contracts", "release-lifecycle-policy.json"), {
     supportLines: [{ id: "current", release: "npm-0.2.0_jvm-0.3.0" }],
   });
+  const currentReadmeGuidance =
+    readmeUpgradeGuidance ??
+    "This is current in `create-vireo@0.2.0`. Its version-aware\nproject upgrade currently supports the explicit adjacent 0.1.0→0.2.0 release\npair; other historical edges remain retained.";
   writeFileSync(
     join(root, "README.md"),
-    `| Package | Version |\n| --- | --- |\n| \`create-vireo\` | 0.2.0 |\n| \`@vireocodedev/sqlite\` | 0.2.1 |\n\nThis is current in \`create-vireo@0.2.0\`. Its version-aware\nproject upgrade currently supports the explicit adjacent 0.1.0→0.2.0 release\npair; other historical edges remain retained. Template evidence: ${"a".repeat(40)}.\n`,
+    `| Package | Version |\n| --- | --- |\n| \`create-vireo\` | 0.2.0 |\n| \`@vireocodedev/sqlite\` | 0.2.1 |\n\n${currentReadmeGuidance} Template evidence: ${"a".repeat(40)}.\n`,
   );
   writeFileSync(
     join(root, "docs", "COMPATIBILITY.md"),
