@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   applyExactBaselineTransforms,
+  assertStorybookBaselineContinuity,
   projectedBaselineBytes,
   projectedBaselineSourceBytes,
   templatePathForBaseline,
@@ -49,6 +51,33 @@ test("managed upgrade baselines can bind a prior generated projection source", (
   assert.equal(
     projectedBaselineSourceBytes(source, baseline),
     "defineConfig({\n  optimizeDeps: {}\n  test:",
+  );
+});
+
+test("0.8.4 to 0.8.5 Storybook baselines retain predecessor target provenance", () => {
+  const policy = JSON.parse(
+    readFileSync(new URL("../../packages/create-vireo/schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
+  );
+  const edge = "0.8.4->0.8.5";
+  assert.doesNotThrow(() => assertStorybookBaselineContinuity(policy.releaseGraph, edge));
+
+  for (const profile of ["full-stack", "frontend"]) {
+    const predecessor = policy.releaseGraph.baselines["0.8.3->0.8.4"][profile].find(file =>
+      file.path.endsWith("vitest.storybook.config.ts"),
+    );
+    const current = policy.releaseGraph.baselines[edge][profile].find(file =>
+      file.path.endsWith("vitest.storybook.config.ts"),
+    );
+    assert.equal(current.sourceSha256, predecessor.targetSha256);
+    assert.equal(current.sourceContent, predecessor.targetContent);
+  }
+
+  const corrupted = structuredClone(policy.releaseGraph);
+  corrupted.baselines[edge].frontend.find(file => file.path.endsWith("vitest.storybook.config.ts")).sourceSha256 =
+    "0".repeat(64);
+  assert.throws(
+    () => assertStorybookBaselineContinuity(corrupted, edge),
+    /0\.8\.4->0\.8\.5:frontend Storybook source must match 0\.8\.3->0\.8\.4 target provenance/u,
   );
 });
 

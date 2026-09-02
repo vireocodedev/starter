@@ -462,7 +462,28 @@ test("preserves the repository's stable version-neutral README upgrade guidance 
   }
 });
 
-function makeFixture({ managedEdgeScope = "legacy", lockfileRefresh = "required", readmeUpgradeGuidance } = {}) {
+test("preserves the repository's version-neutral Storybook upgrade guidance during candidate finalization", async () => {
+  const repositoryReadme = readFileSync(new URL("../packages/create-vireo/README.md", import.meta.url), "utf8");
+  const storybookGuidance = repositoryReadme.match(
+    /### Managed Storybook compatibility\n\nFor the 0\.8\.4→target transaction,[\s\S]*?never\nrewritten\./u,
+  )?.[0];
+  assert.ok(storybookGuidance, "the create-vireo README declares version-neutral Storybook ownership guidance");
+
+  const root = makeFixture({ storybookGuidance });
+  try {
+    await synchronizeFixtureDocumentationRelease(root);
+    assert.ok(readFileSync(join(root, "packages", "create-vireo", "README.md"), "utf8").includes(storybookGuidance));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function makeFixture({
+  managedEdgeScope = "legacy",
+  lockfileRefresh = "required",
+  readmeUpgradeGuidance,
+  storybookGuidance = "",
+} = {}) {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   mkdirSync(join(root, "contracts"));
   mkdirSync(join(root, "packages", "create-vireo", "src"), { recursive: true });
@@ -639,7 +660,7 @@ function makeFixture({ managedEdgeScope = "legacy", lockfileRefresh = "required"
       : "Apply changes only the managed surfaces explicitly declared by the selected edge.";
   writeFileSync(
     join(root, "packages", "create-vireo", "README.md"),
-    `The current supported adjacent release pair is a project created by \`create-vireo\`\n0.1.0 upgraded to 0.2.0.\n\n\`\`\`bash\nvireo upgrade --to 0.2.0 --dry-run\nvireo upgrade --to 0.2.0 --apply --accept-application-owned\n\`\`\`\n\nThe preflight refuses unknown source commits, changed Vireo dependency declarations,\nlockfile drift, invalid/duplicate Flyway migration versions, and managed generated or\nwire-contract drift. ${managedEdgeScopeWording} Template files, domain logic, deployment, data migration, and adopted/ejected\ncode remain application-owned and must be reviewed against the target Template\ncommit ${"a".repeat(40)}. For the current 0.1.0→0.2.0\nedge, Vireo adds the six managed application-skill files under\n\`.agents/skills/\`; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\`\nreview policy.\n\nThe immutable \`starter-template@0.2.0\` source commit intentionally retains its\n\`starterVersion=0.3.0\` baseline. Full-stack creation and the 0.1.0→0.2.0 upgrade\nnormalize that managed declaration to the current Vireo JVM release, \`0.4.0\`, before\nrecording managed hashes.\n`,
+    `The current supported adjacent release pair is a project created by \`create-vireo\`\n0.1.0 upgraded to 0.2.0.\n\n\`\`\`bash\nvireo upgrade --to 0.2.0 --dry-run\nvireo upgrade --to 0.2.0 --apply --accept-application-owned\n\`\`\`\n\nThe preflight refuses unknown source commits, changed Vireo dependency declarations,\nlockfile drift, invalid/duplicate Flyway migration versions, and managed generated or\nwire-contract drift. ${managedEdgeScopeWording} Template files, domain logic, deployment, data migration, and adopted/ejected\ncode remain application-owned and must be reviewed against the target Template\ncommit ${"a".repeat(40)}. For the current 0.1.0→0.2.0\nedge, Vireo adds the six managed application-skill files under\n\`.agents/skills/\`; it never overwrites the application-owned root\n\`AGENTS.md\`, source, deployment descriptors, or \`.github\`\nreview policy.\n\n${storybookGuidance}\n\nThe immutable \`starter-template@0.2.0\` source commit intentionally retains its\n\`starterVersion=0.3.0\` baseline. Full-stack creation and the 0.1.0→0.2.0 upgrade\nnormalize that managed declaration to the current Vireo JVM release, \`0.4.0\`, before\nrecording managed hashes.\n`,
   );
   writeFileSync(
     join(root, "docs", "NPM_RELEASE.md"),

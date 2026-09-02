@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { classifyProjectionPath, readApplicationProjectionContract } from "./lib/application-projection-contract.mjs";
 import {
   applyExactBaselineTransforms,
+  assertStorybookBaselineContinuity,
   projectedBaselineBytes,
   projectedBaselineSourceBytes,
   templatePathForBaseline,
@@ -92,6 +93,7 @@ if (checkedOutTemplateCommit !== target.templateCommit)
 
 const activeBaselines = graph.baselines?.[edge];
 if (!activeBaselines) throw new Error(`The active ${edge} baseline set is missing.`);
+assertStorybookBaselineContinuity(graph, edge);
 const projectionContract = readApplicationProjectionContract(
   join(repositoryRoot, "contracts", "application-projection-contract.json"),
 );
