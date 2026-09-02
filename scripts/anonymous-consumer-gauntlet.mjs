@@ -445,7 +445,6 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       command("pwa-two-build-lifecycle", "corepack", ["npm", "run", "test:pwa"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
     ];
     case "container-and-network-boundaries": return [
-      command("container-boundary-verifier", "sh", ["scripts/verify-deployment.sh"], { cwd: join(consumerRoot, "full-stack-postgresql"), timeoutMs: 45 * 60_000 }),
       { kind: "assert-deployment-contract", id: "container-security-proxy-database-contract", path: join(consumerRoot, "full-stack-postgresql") },
     ];
     default: throw new Error(`No implementation recipe for ${scenario.id}.`);

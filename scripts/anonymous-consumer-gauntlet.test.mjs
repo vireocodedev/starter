@@ -24,6 +24,10 @@ test("deterministic plan gives a fake executor every required recipe and refusal
   assert.ok(plan.every(scenario => scenario.operations.length > 0));
   assert.ok(plan.flatMap(scenario => scenario.operations).some(operation => operation.expectedExit === 1));
   assert.ok(plan.find(scenario => scenario.id === "cli-adversity").operations.some(operation => operation.id === "template-download-retry"));
+  const operations = plan.flatMap(scenario => scenario.operations);
+  assert.equal(operations.filter(operation => operation.id === "postgresql-production-compose").length, 1);
+  assert.equal(operations.filter(operation => operation.id === "public-evidence-collector").length, 1);
+  assert.equal(plan.find(scenario => scenario.id === "adjacent-public-upgrades").operations.filter(operation => operation.id.includes("managed-refusal-mutation")).length, 2);
 });
 
 test("fake executor preserves planned, expected-refusal, timeout, and failure evidence", async () => {
