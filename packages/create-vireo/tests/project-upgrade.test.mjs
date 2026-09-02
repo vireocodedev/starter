@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   checkGeneratedEntities,
   generateEntity,
+  removeExample,
   sha256,
   stableJson,
   upgradeVireoProject,
@@ -459,6 +460,252 @@ async function treeBytes(root, directory = root) {
   }
   return result;
 }
+
+const pristine084OverviewSpec = `import { expect, test } from "@playwright/test";
+import { authenticateAsDevelopmentAdministrator } from "./support/authentication";
+
+test("the development administrator reaches a settled live Overview", async ({ page }) => {
+  await authenticateAsDevelopmentAdministrator(page);
+
+  await expect(page.locator('[data-app-overview-state="loaded"]')).toBeVisible();
+  const overviewHero = page.locator("[data-app-overview-hero]");
+  const liveSnapshot = overviewHero.getByText("Live snapshot", { exact: true });
+  await expect(liveSnapshot).toHaveCount(1);
+  await expect(liveSnapshot).toBeVisible();
+  await expect(page.locator("[data-app-overview-metrics]")).toBeVisible();
+});
+`;
+const pristine084OverviewDigest = "aea0494de1223a26a132f64d4cad8e3f753348c5aa7f41519edf16798af4d3e3";
+
+function synthetic085Policies() {
+  const candidatePolicy = structuredClone(adjacentPolicy);
+  const graph = candidatePolicy.releaseGraph;
+  const source = graph.releases.find(release => release.release === "0.8.4");
+  if (!source) throw new Error("Synthetic 0.8.5 policy requires the published 0.8.4 release.");
+  const target = {
+    ...structuredClone(source),
+    release: "0.8.5",
+    status: "candidate",
+    templateCommit: "5".repeat(40),
+    rootVireoScript: "npx --yes --package=create-vireo@0.8.5 vireo",
+  };
+  graph.releases.push(target);
+  graph.edges.push({ from: "0.8.4", to: "0.8.5", lockfileRefresh: "not-required", applicationOwnedActions: [] });
+  graph.publicRelease = "0.8.4";
+  graph.previousRelease = "0.8.4";
+  graph.candidateRelease = "0.8.5";
+  for (const release of graph.releases) release.status = release.release === "0.8.4" ? "current" : release.status;
+
+  const finalizedPolicy = structuredClone(candidatePolicy);
+  delete finalizedPolicy.releaseGraph.candidateRelease;
+  finalizedPolicy.releaseGraph.publicRelease = "0.8.5";
+  finalizedPolicy.releaseGraph.previousRelease = "0.8.4";
+  finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.4").status = "historical";
+  finalizedPolicy.releaseGraph.releases.find(release => release.release === "0.8.5").status = "current";
+  return { candidatePolicy, finalizedPolicy, source, target };
+}
+
+async function overview085Fixture(profile, source) {
+  const root = await mkdtemp(join(tmpdir(), `vireo-${profile}-084-overview-`));
+  const frontendOnly = profile === "frontend";
+  const dependencies = { ...source.frontendDependencies, react: "^19.0.0" };
+  await mkdir(join(root, ".vireo"), { recursive: true });
+  if (!frontendOnly) await mkdir(join(root, "frontend/tests/e2e"), { recursive: true });
+  const scripts = source.managedFrontendScripts[profile];
+  const rootManifest = {
+    name: `vireo-${profile}-overview`,
+    scripts: frontendOnly
+      ? { vireo: source.rootVireoScript, ...source.managedRootScripts, ...scripts }
+      : { vireo: source.rootVireoScript },
+    ...(frontendOnly ? { dependencies } : {}),
+  };
+  await writeFile(join(root, "package.json"), `${JSON.stringify(rootManifest, null, 2)}\n`);
+  if (frontendOnly) {
+    await writeFile(
+      join(root, "package-lock.json"),
+      `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies } } }, null, 2)}\n`,
+    );
+  } else {
+    await writeFile(join(root, "frontend/package.json"), `${JSON.stringify({ scripts, dependencies }, null, 2)}\n`);
+    await writeFile(
+      join(root, "frontend/package-lock.json"),
+      `${JSON.stringify({ lockfileVersion: 3, packages: { "": { dependencies } } }, null, 2)}\n`,
+    );
+    await writeFile(join(root, "gradle.properties"), `starterVersion=${source.starterJvmVersion}\n`);
+    await writeFile(join(root, "frontend/tests/e2e/overview.spec.ts"), pristine084OverviewSpec);
+    await writeFile(join(root, "frontend/tests/e2e/login.spec.ts"), "export {};\n");
+  }
+  await writeFile(
+    join(root, ".vireo/project.json"),
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        profile,
+        projectName: `vireo-${profile}-overview`,
+        ...(frontendOnly ? {} : { javaPackage: "dev.example.overview", database: "h2" }),
+        templateCommit: source.templateCommit,
+        templateVersion: source.release,
+        templateTag: `starter-template@${source.release}`,
+        createdBy: `create-vireo@${source.release}`,
+        lastUpgradedBy: `create-vireo@${source.release}`,
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  const managedPaths = frontendOnly ? ["package.json"] : ["package.json", "frontend/package.json", "gradle.properties"];
+  await writeFile(
+    join(root, ".vireo/managed-files.json"),
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        templateCommit: source.templateCommit,
+        files: await Promise.all(
+          managedPaths.map(async path => ({ path, sha256: sha256(await readFile(join(root, path))) })),
+        ),
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  await writeFile(
+    join(root, ".vireo/example-manifest.json"),
+    `${JSON.stringify({ schemaVersion: 1, templateCommit: source.templateCommit, files: {} }, null, 2)}\n`,
+  );
+  return root;
+}
+
+test("0.8.4 to 0.8.5 transactionally records the pristine Overview sample before removal for both profiles", async () => {
+  assert.equal(sha256(pristine084OverviewSpec), pristine084OverviewDigest);
+  const { candidatePolicy, finalizedPolicy, source, target } = synthetic085Policies();
+  for (const profile of ["full-stack", "frontend"]) {
+    const root = await overview085Fixture(profile, source);
+    try {
+      const lockPath = join(root, profile === "frontend" ? "package-lock.json" : "frontend/package-lock.json");
+      const lockBefore = await readFile(lockPath, "utf8");
+      const beforeCandidate = await treeBytes(root);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.5" }, candidatePolicy),
+        error => error.code === "VIR-UPG-008",
+      );
+      assertSameSnapshot(beforeCandidate, await treeBytes(root));
+
+      const preview = await upgradeVireoProjectForTest(
+        { projectDirectory: root, targetRelease: "0.8.5" },
+        finalizedPolicy,
+      );
+      assert.equal(preview.checks.find(check => check.id === "lockfile")?.status, "pass");
+      assert.equal(
+        preview.files.find(file => file.path === ".vireo/example-manifest.json")?.status,
+        "update",
+        `${profile} plans the manifest migration`,
+      );
+      assertSameSnapshot(beforeCandidate, await treeBytes(root));
+
+      await upgradeVireoProjectForTest(
+        { projectDirectory: root, targetRelease: "0.8.5", dryRun: false, acceptApplicationOwned: true },
+        finalizedPolicy,
+      );
+      assert.equal(await readFile(lockPath, "utf8"), lockBefore, `${profile} lockfile remains byte-identical`);
+      const manifest = JSON.parse(await readFile(join(root, ".vireo/example-manifest.json"), "utf8"));
+      assert.equal(manifest.templateCommit, target.templateCommit);
+      assert.equal(
+        manifest.files["frontend/tests/e2e/overview.spec.ts"],
+        profile === "full-stack" ? pristine084OverviewDigest : undefined,
+      );
+      const receipt = JSON.parse(await readFile(join(root, ".vireo/upgrade-0.8.4-to-0.8.5.json"), "utf8"));
+      assert.ok(receipt.managedSurfaces.includes(".vireo/example-manifest.json"));
+
+      const removal = await removeExample(root, true);
+      assert.equal(removal.state, "removed");
+      await assert.rejects(readFile(join(root, ".vireo/example-manifest.json")), /ENOENT/u);
+      if (profile === "full-stack") {
+        await assert.rejects(readFile(join(root, "frontend/tests/e2e/overview.spec.ts")), /ENOENT/u);
+        assert.equal(await readFile(join(root, "frontend/tests/e2e/login.spec.ts"), "utf8"), "export {};\n");
+      }
+      const repeated = await upgradeVireoProjectForTest(
+        { projectDirectory: root, targetRelease: "0.8.5" },
+        finalizedPolicy,
+      );
+      assert.equal(
+        repeated.files.some(file => file.path === ".vireo/example-manifest.json"),
+        false,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("0.8.4 to 0.8.5 refuses a customized full-stack Overview sample before writing", async () => {
+  const { finalizedPolicy, source } = synthetic085Policies();
+  const root = await overview085Fixture("full-stack", source);
+  try {
+    const overviewPath = join(root, "frontend/tests/e2e/overview.spec.ts");
+    await writeFile(overviewPath, `${pristine084OverviewSpec}// consumer customization\n`);
+    const before = await treeBytes(root);
+    await assert.rejects(
+      upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.5" }, finalizedPolicy),
+      error => error.code === "VIR-UPG-003" && /Overview sample differs/u.test(error.message),
+    );
+    assertSameSnapshot(before, await treeBytes(root));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("0.8.4 to 0.8.5 preserves a completed removal receipt without recreating example provenance", async () => {
+  const { finalizedPolicy, source } = synthetic085Policies();
+  const root = await overview085Fixture("frontend", source);
+  try {
+    await rm(join(root, ".vireo/example-manifest.json"));
+    await writeFile(
+      join(root, ".vireo/remove-example.json"),
+      `${JSON.stringify({ schemaVersion: 1, templateCommit: source.templateCommit, removed: true }, null, 2)}\n`,
+    );
+    await upgradeVireoProjectForTest(
+      { projectDirectory: root, targetRelease: "0.8.5", dryRun: false, acceptApplicationOwned: true },
+      finalizedPolicy,
+    );
+    await assert.rejects(readFile(join(root, ".vireo/example-manifest.json")), /ENOENT/u);
+    assert.equal(JSON.parse(await readFile(join(root, ".vireo/remove-example.json"), "utf8")).removed, true);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("0.8.4 to 0.8.5 refuses missing, malformed, or conflicting example-removal provenance", async () => {
+  const { finalizedPolicy, source } = synthetic085Policies();
+  for (const scenario of ["missing", "malformed-receipt", "conflicting-states", "symlink-receipt"]) {
+    const root = await overview085Fixture("frontend", source);
+    try {
+      const manifestPath = join(root, ".vireo/example-manifest.json");
+      const receiptPath = join(root, ".vireo/remove-example.json");
+      if (scenario !== "conflicting-states") await rm(manifestPath);
+      if (scenario === "malformed-receipt") await writeFile(receiptPath, '{"removed":false}\n');
+      if (scenario === "conflicting-states") {
+        await writeFile(
+          receiptPath,
+          `${JSON.stringify({ schemaVersion: 1, templateCommit: source.templateCommit, removed: true }, null, 2)}\n`,
+        );
+      }
+      if (scenario === "symlink-receipt") {
+        const outsideReceipt = join(root, "outside-receipt.json");
+        await writeFile(outsideReceipt, "{}\n");
+        await symlink(outsideReceipt, receiptPath, "file");
+      }
+      const before = await treeBytes(root);
+      await assert.rejects(
+        upgradeVireoProjectForTest({ projectDirectory: root, targetRelease: "0.8.5" }, finalizedPolicy),
+        error => error.code === "VIR-UPG-003",
+        scenario,
+      );
+      assertSameSnapshot(before, await treeBytes(root));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
 
 test("0.7.0 projects expose a non-writing adjacent 0.8.0 status and dry run for both profiles", async () => {
   for (const profile of ["full-stack", "frontend"]) {

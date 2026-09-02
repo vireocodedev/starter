@@ -1383,6 +1383,13 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
       ].map(path => [path, "Item maintainer-only evidence\n"]),
     );
     const ownership = JSON.parse(await readFile(join(target, ".vireo/example-manifest.json"), "utf8"));
+    const overviewPath = "frontend/tests/e2e/overview.spec.ts";
+    const overviewContents = await readFile(join(target, overviewPath));
+    assert.equal(
+      ownership.files[overviewPath],
+      createHash("sha256").update(overviewContents).digest("hex"),
+      "fresh full-stack generation records the Overview sample as example-owned",
+    );
     assert.equal(
       ownership.files["frontend/src/features/item/sample.bin"],
       createHash("sha256")
@@ -1408,6 +1415,7 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
     assert.equal(preview.dryRun, true);
     assert.equal(preview.state, "present");
     assert.match(await readFile(samplePath, "utf8"), /Item/u);
+    assert.equal(preview.files.find(file => file.path === overviewPath)?.status, "delete");
     for (const path of protectedInfrastructure.keys()) {
       assert.equal(
         preview.files.some(file => file.path === path && file.status === "delete"),
@@ -1446,6 +1454,16 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
     await writeFile(samplePath, "export type Item = { id: number; customized: true };\n");
     await assert.rejects(removeExample(target, true), /customized example file/u);
     await writeFile(samplePath, "export type Item = { id: number };\n");
+
+    await writeFile(join(target, overviewPath), `${overviewContents}\n// consumer customization\n`);
+    await assert.rejects(removeExample(target, true), /customized example file/u);
+    await writeFile(join(target, overviewPath), overviewContents);
+
+    const staleOwnership = structuredClone(ownership);
+    delete staleOwnership.files[overviewPath];
+    await writeFile(join(target, ".vireo/example-manifest.json"), `${JSON.stringify(staleOwnership, null, 2)}\n`);
+    await assert.rejects(removeExample(target, true), /unowned example references/u);
+    await writeFile(join(target, ".vireo/example-manifest.json"), `${JSON.stringify(ownership, null, 2)}\n`);
 
     const unowned = join(target, "custom-item-note.md");
     await writeFile(unowned, "The Item integration is customized here.\n");
@@ -1486,8 +1504,16 @@ test("remove-example is dry-run first, rejects drift, removes owned references, 
 
     const applied = await removeExample(target, true);
     assert.equal(applied.state, "removed");
-    assert.deepEqual(await findExampleReferences(target), []);
+    const residualReferences = await findExampleReferences(target);
+    assert.deepEqual(residualReferences, []);
+    assert.equal(
+      residualReferences.includes("frontend/src/pages/home/AppPageHomeView.tsx"),
+      false,
+      "the rewritten product-neutral home page is not retained as a sample reference",
+    );
     await assert.rejects(readFile(samplePath), /ENOENT/u);
+    await assert.rejects(readFile(join(target, overviewPath)), /ENOENT/u);
+    assert.match(await readFile(join(target, "frontend/tests/e2e/login.spec.ts"), "utf8"), /export/u);
     await assert.rejects(
       readFile(join(target, "src/main/resources/db/migration/V3__enforce_item_value_constraints.sql")),
       /ENOENT/u,
@@ -1583,6 +1609,9 @@ test("remove-example retains framework contract infrastructure in standalone fro
     const template = await fixture(root);
     const target = join(root, "sample-frontend");
     await createVireo({ directory: target, profile: "frontend", git: false, templateDirectory: template });
+    const ownership = JSON.parse(await readFile(join(target, ".vireo/example-manifest.json"), "utf8"));
+    assert.equal(ownership.files["tests/e2e/overview.spec.ts"], undefined);
+    await assert.rejects(readFile(join(target, "tests/e2e/overview.spec.ts")), /ENOENT/u);
     const protectedInfrastructure = new Map(
       await Promise.all(
         ["scripts/architecture-policy.test.mjs", "scripts/pwa-contract.mjs", "tests/pwa/production-pwa.spec.ts"].map(

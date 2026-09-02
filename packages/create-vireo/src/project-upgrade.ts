@@ -65,7 +65,11 @@ type PackageManifest = Record<string, unknown> & {
 };
 type PackageLock = Record<string, unknown> & { packages?: Record<string, { dependencies?: Record<string, unknown> }> };
 type ManagedManifest = { schemaVersion: 1; templateCommit: string; files: Array<{ path: string; sha256: string }> };
+type ExampleManifest = { schemaVersion: 1; templateCommit: string; files: Record<string, string> };
+type RemovalReceipt = { schemaVersion: 1; templateCommit: string; removed: true };
 const TEMPLATE_COMMIT_PENDING_RELEASE = "TEMPLATE_COMMIT_PENDING_RELEASE";
+const FULL_STACK_OVERVIEW_SPEC = "frontend/tests/e2e/overview.spec.ts";
+const PRISTINE_084_OVERVIEW_SPEC_SHA256 = "aea0494de1223a26a132f64d4cad8e3f753348c5aa7f41519edf16798af4d3e3";
 
 export type VireoUpgradeOptions = {
   projectDirectory: string;
@@ -625,6 +629,125 @@ function validateManagedManifest(value: ManagedManifest | undefined): asserts va
     paths.add(file.path);
   }
 }
+function validateExampleManifest(value: unknown, templateCommit: string): asserts value is ExampleManifest {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    (value as Partial<ExampleManifest>).schemaVersion !== 1 ||
+    (value as Partial<ExampleManifest>).templateCommit !== templateCommit ||
+    !(value as Partial<ExampleManifest>).files ||
+    typeof (value as Partial<ExampleManifest>).files !== "object" ||
+    Array.isArray((value as Partial<ExampleManifest>).files)
+  ) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Example ownership provenance must be a schema version 1 manifest for the source Template commit.",
+    );
+  }
+  for (const [path, digest] of Object.entries((value as ExampleManifest).files)) {
+    assertBaselinePath(path);
+    if (!/^[a-f0-9]{64}$/u.test(digest))
+      throw new VireoUpgradeError("VIR-UPG-003", "Example ownership provenance has an invalid file digest.");
+  }
+}
+function validateRemovalReceipt(value: unknown, templateCommit: string): asserts value is RemovalReceipt {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    (value as Partial<RemovalReceipt>).schemaVersion !== 1 ||
+    (value as Partial<RemovalReceipt>).templateCommit !== templateCommit ||
+    (value as Partial<RemovalReceipt>).removed !== true
+  ) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Removal receipt must be a completed schema version 1 receipt for the source Template commit.",
+    );
+  }
+}
+function isOverviewManifestMigration(source: ReleaseNode, target: ReleaseNode) {
+  return source.release === "0.8.4" && target.release === "0.8.5";
+}
+async function migrateExampleManifest(
+  projectDirectory: string,
+  source: ReleaseNode,
+  target: ReleaseNode,
+  frontendOnly: boolean,
+) {
+  if (!isOverviewManifestMigration(source, target)) return undefined;
+  const manifestPath = ".vireo/example-manifest.json";
+  const receiptPath = ".vireo/remove-example.json";
+  await safeFileState(projectDirectory, manifestPath);
+  const previous = await optionalText(join(projectDirectory, manifestPath));
+  const hasReceipt = await safeFileState(projectDirectory, receiptPath);
+  if (previous === undefined) {
+    if (!hasReceipt)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "Example ownership provenance is missing and no completed removal receipt was found.",
+      );
+    let receipt: unknown;
+    try {
+      receipt = JSON.parse(await readFile(join(projectDirectory, receiptPath), "utf8"));
+    } catch (error) {
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        `Removal receipt is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    validateRemovalReceipt(receipt, source.templateCommit);
+    // A completed removal deliberately replaces the example manifest. Do not
+    // recreate ownership after removal, regardless of which profile was removed.
+    return undefined;
+  }
+  if (hasReceipt)
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      "Example ownership manifest conflicts with a completed removal receipt.",
+    );
+  let sourceManifest: unknown;
+  try {
+    sourceManifest = JSON.parse(previous);
+  } catch (error) {
+    throw new VireoUpgradeError(
+      "VIR-UPG-003",
+      `Example ownership provenance is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  validateExampleManifest(sourceManifest, source.templateCommit);
+  const targetManifest = structuredClone(sourceManifest);
+  if (frontendOnly) {
+    if (FULL_STACK_OVERVIEW_SPEC in targetManifest.files)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "Frontend-only example provenance must not claim the full-stack Overview sample.",
+      );
+  } else {
+    if (!(await safeFileState(projectDirectory, FULL_STACK_OVERVIEW_SPEC)))
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "The full-stack Overview sample is missing; restore or adapt it before upgrading.",
+      );
+    const overview = await readFile(join(projectDirectory, FULL_STACK_OVERVIEW_SPEC));
+    if (sha256(overview) !== PRISTINE_084_OVERVIEW_SPEC_SHA256)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "The full-stack Overview sample differs from the immutable 0.8.4 baseline; restore or adapt it before upgrading.",
+      );
+    const declaredDigest = targetManifest.files[FULL_STACK_OVERVIEW_SPEC];
+    if (declaredDigest !== undefined && declaredDigest !== PRISTINE_084_OVERVIEW_SPEC_SHA256)
+      throw new VireoUpgradeError(
+        "VIR-UPG-003",
+        "Example ownership provenance has a customized full-stack Overview sample digest.",
+      );
+    targetManifest.files[FULL_STACK_OVERVIEW_SPEC] = PRISTINE_084_OVERVIEW_SPEC_SHA256;
+  }
+  targetManifest.templateCommit = target.templateCommit;
+  return {
+    path: join(projectDirectory, manifestPath),
+    contents: `${JSON.stringify(targetManifest, null, 2)}\n`,
+    previous,
+  };
+}
 async function safeFileState(root: string, path: string) {
   assertBaselinePath(path);
   const target = resolve(root, path);
@@ -947,6 +1070,7 @@ async function upgradeProjectWithPolicy(
       }
     }
   }
+  const exampleManifestChange = await migrateExampleManifest(projectDirectory, source, target, frontendOnly);
   const managedBaselines = edgeBaselines(policy, source.release, edge?.to, metadata.profile);
   const baselineFiles = await Promise.all(
     managedBaselines.map(async baseline => ({ baseline, state: await baselineState(projectDirectory, baseline) })),
@@ -1021,6 +1145,7 @@ async function upgradeProjectWithPolicy(
     : managedBaselines;
   const receiptManagedSurfaces = [
     ...managedSurfaces,
+    ...(exampleManifestChange ? [".vireo/example-manifest.json"] : []),
     ...Object.keys(targetManagedScripts).map(
       name => `${frontendOnly ? "package.json" : "frontend/package.json"}#scripts.${name}`,
     ),
@@ -1099,6 +1224,7 @@ async function upgradeProjectWithPolicy(
           previous: undefined,
         })),
     )),
+    ...(exampleManifestChange ? [exampleManifestChange] : []),
     { path: metadataPath, contents: `${JSON.stringify(targetMetadata, null, 2)}\n`, previous: metadataText },
     {
       path: join(projectDirectory, ".vireo/managed-files.json"),
