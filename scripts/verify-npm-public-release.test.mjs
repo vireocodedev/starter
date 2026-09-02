@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertExactContract, parseCommandLine } from "./verify-npm-public-release.mjs";
+import { assertExactContract, exactAuditSignatureRecord, parseCommandLine } from "./verify-npm-public-release.mjs";
 
 const publicManifests = [
   ["create-vireo", "create-vireo"],
@@ -43,4 +43,18 @@ test("npm public verifier rejects a local public manifest that drifts from its c
   manifests[0].manifest.version = "1.2.4";
   assert.throws(() => assertExactContract({ contract, manifests }), /does not match/u);
   assert.throws(() => parseCommandLine(["--expected-release-id"]), /requires/u);
+});
+
+test("npm public verifier selects exactly one audit-verified matching package/version", () => {
+  const expected = { name: "create-vireo", version: "1.2.3" };
+  const auditRecord = { ...expected, attestationBundles: [{ bundle: {} }] };
+  assert.deepEqual(exactAuditSignatureRecord({ verified: [auditRecord] }, expected).auditRecord, auditRecord);
+  assert.throws(
+    () => exactAuditSignatureRecord({ verified: [auditRecord, structuredClone(auditRecord)] }, expected),
+    /not fully verified/u,
+  );
+  assert.throws(
+    () => exactAuditSignatureRecord({ verified: [{ ...auditRecord, version: "1.2.4" }] }, expected),
+    /not fully verified/u,
+  );
 });

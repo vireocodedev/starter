@@ -31,6 +31,8 @@ test("exact npm record rejects repository workflow commit digest license and inv
     repository: "https://github.com/vireocodedev/vireo",
     license: "MIT",
     licenseFile: "LICENSE",
+    licenseContentVerified: true,
+    licenseSha256: "d".repeat(64),
     inventorySafe: true,
     exportsSafe: true,
     binSafe: true,
@@ -57,7 +59,7 @@ test("exact npm record rejects repository workflow commit digest license and inv
   );
 });
 
-test("decoded registry provenance binds its exact npm subject and peeled release tag commit", () => {
+test("decoded verified-audit provenance binds its exact npm subject and peeled release tag commit", () => {
   const commit = "b".repeat(40);
   const integrity = `sha512-${Buffer.alloc(64, 7).toString("base64")}`;
   const statement = {
@@ -81,8 +83,10 @@ test("decoded registry provenance binds its exact npm subject and peeled release
     },
   };
   const provenance = decodeExactNpmProvenance({
-    attestation: {
-      attestations: [
+    auditRecord: {
+      name: "create-vireo",
+      version: "1.2.3",
+      attestationBundles: [
         { bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64") } } },
       ],
     },
@@ -103,8 +107,10 @@ test("decoded registry provenance binds its exact npm subject and peeled release
   assert.throws(
     () =>
       decodeExactNpmProvenance({
-        attestation: {
-          attestations: [
+        auditRecord: {
+          name: "create-vireo",
+          version: "1.2.3",
+          attestationBundles: [
             { bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64") } } },
           ],
         },
@@ -121,5 +127,67 @@ test("decoded registry provenance binds its exact npm subject and peeled release
         },
       }),
     /peeled create-vireo tag/u,
+  );
+});
+
+test("canonical registry metadata cannot override a wrong verified audit bundle", () => {
+  const commit = "b".repeat(40);
+  const integrity = `sha512-${Buffer.alloc(64, 7).toString("base64")}`;
+  const statement = {
+    _type: "https://in-toto.io/Statement/v1",
+    predicateType: "https://slsa.dev/provenance/v1",
+    subject: [{ name: "pkg:npm/create-vireo@1.2.3", digest: { sha512: Buffer.alloc(64, 7).toString("hex") } }],
+    predicate: {
+      buildDefinition: {
+        externalParameters: {
+          workflow: {
+            repository: "https://github.com/vireocodedev/vireo",
+            path: ".github/workflows/release-npm.yml",
+            ref: "refs/heads/main",
+          },
+        },
+        internalParameters: { github: { repository_id: "1304974749" } },
+        resolvedDependencies: [
+          { uri: `git+https://github.com/vireocodedev/vireo@${commit}`, digest: { gitCommit: commit } },
+        ],
+      },
+    },
+  };
+  const policy = {
+    canonicalRepository: "vireocodedev/vireo",
+    workflowPath: ".github/workflows/release-npm.yml",
+    workflowRef: "refs/heads/main",
+    repositoryId: "1304974749",
+    statementType: "https://in-toto.io/Statement/v1",
+    predicateType: "https://slsa.dev/provenance/v1",
+  };
+  const bundle = candidate => ({
+    bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(candidate)).toString("base64") } },
+  });
+  const rawRegistryAttestation = { attestations: [bundle(statement)] };
+  const wrongAuditStatement = structuredClone(statement);
+  wrongAuditStatement.predicate.buildDefinition.externalParameters.workflow.path = "wrong.yml";
+  assert.throws(
+    () =>
+      decodeExactNpmProvenance({
+        // This canonical-looking registry response is intentionally ignored.
+        attestation: rawRegistryAttestation,
+        auditRecord: { name: "create-vireo", version: "1.2.3", attestationBundles: [bundle(wrongAuditStatement)] },
+        expected: { name: "create-vireo", version: "1.2.3" },
+        integrity,
+        releaseTagCommit: commit,
+        policy,
+      }),
+    /no exact canonical SLSA provenance/u,
+  );
+  assert.equal(
+    decodeExactNpmProvenance({
+      auditRecord: { name: "create-vireo", version: "1.2.3", attestationBundles: [bundle(statement)] },
+      expected: { name: "create-vireo", version: "1.2.3" },
+      integrity,
+      releaseTagCommit: commit,
+      policy,
+    }).commit,
+    commit,
   );
 });

@@ -35,6 +35,8 @@ export function validateExactNpmRecord({ record, expected, releaseTagCommit }) {
     problems.push("package repository is not canonical");
   if (!record?.license || record.license !== "MIT" || record.licenseFile !== "LICENSE")
     problems.push("package license metadata/file mismatch");
+  if (!record?.licenseContentVerified || !/^[0-9a-f]{64}$/u.test(record?.licenseSha256 ?? ""))
+    problems.push("packed package MIT license content evidence is incomplete");
   if (!record?.inventorySafe || !record?.exportsSafe || !record?.binSafe)
     problems.push("package inventory or public targets are unsafe");
   const provenance = record?.provenance;
@@ -94,23 +96,11 @@ function decodeDsseStatement(bundle, coordinate) {
 }
 
 /**
- * Decodes the npm registry's SLSA bundle and proves that it binds one exact
- * public package byte stream to Vireo's canonical release workflow and tag.
+ * Validates one SLSA statement against the exact public package byte stream,
+ * Vireo's canonical release workflow, and the peeled release tag.
  */
-export function decodeExactNpmProvenance({ attestation, expected, integrity, releaseTagCommit, policy }) {
+function statementProvenance({ statement, expected, integrity, releaseTagCommit, policy }) {
   const coordinate = `${expected?.name}@${expected?.version}`;
-  if (!/^[a-f0-9]{40}$/u.test(releaseTagCommit ?? "")) {
-    throw new Error(`${coordinate} requires a peeled 40-character release tag commit.`);
-  }
-  const attestations = attestation?.attestations;
-  if (!Array.isArray(attestations) || attestations.length === 0) {
-    throw new Error(`${coordinate} registry response has no attestations.`);
-  }
-  const statement = attestations
-    .map(entry => ({ entry, statement: decodeDsseStatement(entry?.bundle, coordinate) }))
-    .find(({ statement: candidate }) => candidate?.predicateType === policy.predicateType)?.statement;
-  if (!statement) throw new Error(`${coordinate} registry response has no SLSA v1 provenance statement.`);
-
   const expectedPurl = npmPurl(expected);
   const expectedDigest = sha512HexFromIntegrity(integrity);
   const subject = statement.subject?.find(
@@ -152,4 +142,41 @@ export function decodeExactNpmProvenance({ attestation, expected, integrity, rel
     predicateType: statement.predicateType,
     subject: { name: subject.name, sha512: subject.digest.sha512 },
   };
+}
+
+/**
+ * Decodes provenance solely from the exact package/version entry npm has
+ * already verified with `npm audit signatures --include-attestations`. The
+ * registry attestation URL is discovery metadata, not an authority for the
+ * SLSA identity claims.
+ */
+export function decodeExactNpmProvenance({ auditRecord, expected, integrity, releaseTagCommit, policy }) {
+  const coordinate = `${expected?.name}@${expected?.version}`;
+  if (!/^[a-f0-9]{40}$/u.test(releaseTagCommit ?? "")) {
+    throw new Error(`${coordinate} requires a peeled 40-character release tag commit.`);
+  }
+  if (auditRecord?.name !== expected?.name || auditRecord?.version !== expected?.version) {
+    throw new Error(`${coordinate} npm signature audit entry does not match the exact package/version.`);
+  }
+  const bundles = auditRecord?.attestationBundles;
+  if (!Array.isArray(bundles) || bundles.length === 0) {
+    throw new Error(`${coordinate} verified npm signature audit entry has no attestation bundles.`);
+  }
+  const failures = [];
+  for (const entry of bundles) {
+    try {
+      return statementProvenance({
+        statement: decodeDsseStatement(entry?.bundle, coordinate),
+        expected,
+        integrity,
+        releaseTagCommit,
+        policy,
+      });
+    } catch (error) {
+      failures.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+  throw new Error(
+    `${coordinate} verified npm audit bundles contain no exact canonical SLSA provenance: ${failures.join("; ")}`,
+  );
 }

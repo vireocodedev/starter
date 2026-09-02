@@ -16,6 +16,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { decodeExactNpmProvenance, validateExactNpmRecord } from "./lib/anonymous-public-evidence.mjs";
+import { verifyCanonicalMitLicense } from "./lib/mit-license-evidence.mjs";
 import { retryTransientNpmRegistryOperation } from "./npm-registry-retry.mjs";
 import { resolvePackageBin } from "./package-bin.mjs";
 
@@ -244,6 +245,10 @@ function inspectPackedPackage({ tarball, expected, metadata, auditRoot }) {
     const files = inventory(directory);
     if (!files.includes("package.json") || !files.includes("LICENSE") || manifest.license !== "MIT")
       throw new Error(`${expected.name} packed package must include LICENSE and declare MIT.`);
+    const licenseEvidence = verifyCanonicalMitLicense(
+      readFileSync(join(directory, "LICENSE")),
+      `${expected.name} LICENSE`,
+    );
     const exports = publishedTargets(manifest);
     for (const target of exports) {
       if (!target.startsWith("./"))
@@ -266,6 +271,7 @@ function inspectPackedPackage({ tarball, expected, metadata, auditRoot }) {
       metadataRepository: canonicalRepository(metadata.repository),
       license: manifest.license,
       licenseFile: "LICENSE",
+      ...licenseEvidence,
       packageJson: { name: manifest.name, version: manifest.version, type: manifest.type ?? null },
       inventory: files,
       unpackedBytes: files.reduce((total, path) => total + statSync(join(directory, path)).size, 0),
@@ -280,11 +286,19 @@ function inspectPackedPackage({ tarball, expected, metadata, auditRoot }) {
     rmSync(unpackRoot, { recursive: true, force: true });
   }
 }
-function signatureRecord(audit, expected) {
-  const verified = audit?.verified?.find(entry => entry?.name === expected.name && entry?.version === expected.version);
-  if (!verified || !Array.isArray(verified.attestationBundles) || verified.attestationBundles.length === 0)
+export function exactAuditSignatureRecord(audit, expected) {
+  const matches =
+    audit?.verified?.filter(entry => entry?.name === expected.name && entry?.version === expected.version) ?? [];
+  if (
+    matches.length !== 1 ||
+    !Array.isArray(matches[0].attestationBundles) ||
+    matches[0].attestationBundles.length === 0
+  )
     throw new Error(`${expected.name}@${expected.version} was not fully verified by npm audit signatures.`);
-  return { registrySignaturesValid: true, verifiedAttestationBundles: verified.attestationBundles.length };
+  return {
+    auditRecord: matches[0],
+    evidence: { registrySignaturesValid: true, verifiedAttestationBundles: matches[0].attestationBundles.length },
+  };
 }
 
 export async function verifyNpmPublicRelease({ outputPath, contractPath, expectedReleaseId }) {
@@ -395,9 +409,9 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
         `${expected.name.replace(/^@/u, "").replaceAll("/", "-")}-${expected.version}.tgz`,
       );
       writeFileSync(tarball, bytes);
-      const attestation = await (await fetchRequired(entry.attestationUrl)).json();
+      const audited = exactAuditSignatureRecord(audit, expected);
       const provenance = decodeExactNpmProvenance({
-        attestation,
+        auditRecord: audited.auditRecord,
         expected,
         integrity: entry.metadata.dist.integrity,
         releaseTagCommit: releaseTag.commit,
@@ -425,7 +439,7 @@ export async function verifyNpmPublicRelease({ outputPath, contractPath, expecte
         sha512: sha512(bytes),
         attestationUrl: entry.attestationUrl,
         ...inspectPackedPackage({ tarball, expected, metadata: entry.metadata, auditRoot }),
-        ...signatureRecord(audit, expected),
+        ...audited.evidence,
         provenance,
         installed: { resolved: lock.resolved, integrity: lock.integrity, exports: specifiers(installedManifest) },
       };

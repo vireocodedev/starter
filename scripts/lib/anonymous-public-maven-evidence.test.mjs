@@ -10,7 +10,8 @@ test("Maven evidence binds coordinate and license checks", () => {
     classifier: "",
     pomCoordinateVerified: true,
     pomMitLicense: true,
-    binaryJarMitLicense: false,
+    licenseContentVerified: null,
+    licenseSha256: null,
     checksumVerified: true,
     signatureVerified: true,
   };
@@ -46,9 +47,29 @@ test("non-jar metadata does not inherit jar license state", () => {
     version: "0.3.1",
     extension: "module",
     pomMitLicense: false,
-    binaryJarMitLicense: false,
+    licenseContentVerified: null,
+    licenseSha256: null,
     checksumVerified: true,
     signatureVerified: true,
   };
   assert.deepEqual(validatePublicMavenRecord({ record, group: "com.vireocode", version: "0.3.1" }), []);
+});
+
+test("JAR license evidence requires canonical content verification and a byte digest", () => {
+  const record = {
+    group: "com.vireocode",
+    module: "vireo-core",
+    version: "0.3.1",
+    extension: "jar",
+    checksumVerified: true,
+    signatureVerified: true,
+    licenseContentVerified: true,
+    licenseSha256: "a".repeat(64),
+  };
+  assert.deepEqual(validatePublicMavenRecord({ record, group: "com.vireocode", version: "0.3.1" }), []);
+  record.licenseSha256 = "MIT";
+  assert.match(
+    validatePublicMavenRecord({ record, group: "com.vireocode", version: "0.3.1" }).join("\n"),
+    /incomplete/u,
+  );
 });

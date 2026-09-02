@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { validatePublicMavenRecord } from "./lib/anonymous-public-maven-evidence.mjs";
+import { verifyCanonicalMitLicense } from "./lib/mit-license-evidence.mjs";
 
 const args = process.argv.slice(2);
 const [version, output] = args;
@@ -77,7 +78,8 @@ try {
         checksumVerified: true,
         signatureVerified: true,
         pomMitLicense: true,
-        binaryJarMitLicense: true,
+        licenseContentVerified: null,
+        licenseSha256: null,
       };
       if (extension === "pom") {
         const pom = readFileSync(artifact, "utf8");
@@ -88,9 +90,15 @@ try {
       }
       if (extension === "jar") {
         const listing = execFileSync("jar", ["tf", artifact], { encoding: "utf8" });
-        record.binaryJarMitLicense =
-          listing.split(/\r?\n/u).includes("META-INF/LICENSE") &&
-          /MIT/u.test(execFileSync("unzip", ["-p", artifact, "META-INF/LICENSE"], { encoding: "utf8" }));
+        if (!listing.split(/\r?\n/u).includes("META-INF/LICENSE"))
+          throw new Error(`${subject} JAR does not contain META-INF/LICENSE.`);
+        Object.assign(
+          record,
+          verifyCanonicalMitLicense(
+            execFileSync("unzip", ["-p", artifact, "META-INF/LICENSE"]),
+            `${subject} META-INF/LICENSE`,
+          ),
+        );
       }
       const problems = validatePublicMavenRecord({ record, group: maven.group, version });
       if (problems.length > 0) throw new Error(`${subject}: ${problems.join(", ")}`);
