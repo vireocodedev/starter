@@ -370,18 +370,30 @@ const adjacentPolicy = JSON.parse(
 );
 const adjacentSource = adjacentPolicy.releaseGraph.releases.find(release => release.release === adjacentSourceRelease);
 const adjacentTarget = adjacentPolicy.releaseGraph.releases.find(release => release.release === adjacentTargetRelease);
-const candidateTargetRelease = syntheticCandidateTargetRelease(adjacentPolicy);
 
-function syntheticCandidateTargetRelease(policy) {
-  const targetRelease = policy.releaseGraph.candidateRelease ?? policy.releaseGraph.publicRelease;
-  if (
-    typeof targetRelease !== "string" ||
-    targetRelease === adjacentTargetRelease ||
-    !policy.releaseGraph.releases.some(release => release.release === targetRelease)
-  ) {
-    throw new Error("Adjacent upgrade fixture requires a distinct declared synthetic candidate target.");
+function releaseLifecyclePolicies(policy) {
+  const candidatePolicy = structuredClone(policy);
+  const graph = candidatePolicy.releaseGraph;
+  const targetRelease = graph.candidateRelease ?? graph.publicRelease;
+  const sourceRelease = graph.candidateRelease ? graph.publicRelease : graph.previousRelease;
+  const source = graph.releases.find(release => release.release === sourceRelease);
+  const target = graph.releases.find(release => release.release === targetRelease);
+  if (!source || !target || !graph.edges.some(edge => edge.from === sourceRelease && edge.to === targetRelease)) {
+    throw new Error("Release lifecycle fixture requires the retained prior-current edge.");
   }
-  return targetRelease;
+  graph.publicRelease = sourceRelease;
+  graph.previousRelease = sourceRelease;
+  graph.candidateRelease = targetRelease;
+  source.status = "current";
+  target.status = "candidate";
+
+  const finalizedPolicy = structuredClone(candidatePolicy);
+  delete finalizedPolicy.releaseGraph.candidateRelease;
+  finalizedPolicy.releaseGraph.publicRelease = targetRelease;
+  finalizedPolicy.releaseGraph.previousRelease = sourceRelease;
+  finalizedPolicy.releaseGraph.releases.find(release => release.release === sourceRelease).status = "historical";
+  finalizedPolicy.releaseGraph.releases.find(release => release.release === targetRelease).status = "current";
+  return { candidatePolicy, finalizedPolicy, sourceRelease, targetRelease };
 }
 
 async function adjacentFixture(profile) {
@@ -563,12 +575,13 @@ test("0.7.0 to 0.8.0 adds managed skills once and preserves application-owned by
 test("structurally valid candidate policy rejects preview and apply without writes", async () => {
   const root = await adjacentFixture("frontend");
   try {
+    const { candidatePolicy, targetRelease } = releaseLifecyclePolicies(adjacentPolicy);
     const beforeCandidate = await treeBytes(root);
     for (const options of [
-      { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: true },
-      { projectDirectory: root, targetRelease: candidateTargetRelease, dryRun: false, acceptApplicationOwned: true },
+      { projectDirectory: root, targetRelease, dryRun: true },
+      { projectDirectory: root, targetRelease, dryRun: false, acceptApplicationOwned: true },
     ]) {
-      await assert.rejects(upgradeVireoProjectForTest(options, adjacentPolicy), error => error.code === "VIR-UPG-008");
+      await assert.rejects(upgradeVireoProjectForTest(options, candidatePolicy), error => error.code === "VIR-UPG-008");
       assertSameSnapshot(beforeCandidate, await treeBytes(root));
     }
   } finally {
@@ -718,12 +731,7 @@ test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves a
   const target = adjacentPolicy.releaseGraph.releases.find(release => release.release === targetRelease);
   const sourceDoctor = adjacentPolicy.releaseGraph.baselines["0.6.0->0.7.0"].frontend[0].targetContent;
   const targetDoctor = adjacentPolicy.releaseGraph.baselines[edge].frontend[0];
-  const finalizedPolicy = structuredClone(adjacentPolicy);
-  delete finalizedPolicy.releaseGraph.candidateRelease;
-  finalizedPolicy.releaseGraph.publicRelease = targetRelease;
-  finalizedPolicy.releaseGraph.previousRelease = sourceRelease;
-  finalizedPolicy.releaseGraph.releases.find(release => release.release === sourceRelease).status = "historical";
-  finalizedPolicy.releaseGraph.releases.find(release => release.release === targetRelease).status = "current";
+  const { candidatePolicy, finalizedPolicy } = releaseLifecyclePolicies(adjacentPolicy);
   const root = await mkdtemp(join(tmpdir(), "vireo-081-frontend-"));
   try {
     await mkdir(join(root, ".vireo"), { recursive: true });
@@ -760,7 +768,7 @@ test("0.8.1 frontend Doctor upgrade is exact, refuses customization, preserves a
     );
     const originalApplicationBytes = await readFile(join(root, "application-owned.txt"));
     await assert.rejects(
-      upgradeVireoProject({ projectDirectory: root, targetRelease }),
+      upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, candidatePolicy),
       error => error.code === "VIR-UPG-008",
     );
     const preview = await upgradeVireoProjectForTest({ projectDirectory: root, targetRelease }, finalizedPolicy);

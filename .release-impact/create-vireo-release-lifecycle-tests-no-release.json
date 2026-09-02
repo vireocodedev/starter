@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:create-vireo",
+  "decision": "no-release",
+  "justification": "Only release-lifecycle regression tests changed; tests are excluded from the packed package, and create-vireo runtime, declarations, public exports, and consumer behavior are unchanged."
+}
