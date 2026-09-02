@@ -1,5 +1,13 @@
 # create-vireo
 
+## 0.8.1
+
+### Patch Changes
+
+- 122cb25: Harden generated application identity validation and staging cleanup, keep generated
+  Storybook stories backend-independent, and make sample removal preserve framework
+  verification, deployment smoke coverage, and managed-file provenance.
+
 ## 0.8.0
 
 ### Minor Changes
