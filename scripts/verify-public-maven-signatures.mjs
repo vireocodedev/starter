@@ -15,7 +15,8 @@ const contract = JSON.parse(readFileSync(contractPath, "utf8"));
 const fingerprint = "C8C362C561046CD11C0F0DE01174796DD298F009";
 const maven = policy.maven;
 if (!maven?.group || !Array.isArray(maven.modules)) throw new Error("Maven attestation policy has no artifact contract.");
-if (Array.isArray(contract.current?.maven?.modules) && JSON.stringify(contract.current.maven.modules) !== JSON.stringify(maven.modules.map(module => module.name))) throw new Error("Maven policy and ecosystem contract modules diverge.");
+if (!contract.current?.maven?.version || version !== contract.current.maven.version) throw new Error("Requested Maven version does not match the ecosystem contract.");
+if (contract.current.maven.group !== maven.group || JSON.stringify(contract.current.maven.modules) !== JSON.stringify(maven.modules.map(module => module.name))) throw new Error("Maven policy and ecosystem contract coordinates diverge.");
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(version ?? "")) throw new Error("Expected exact Maven version.");
 const root = mkdtempSync(join(tmpdir(), "vireo-public-signatures-"));
 try {
@@ -41,7 +42,9 @@ try {
     const record = { module: module.name, version, group: maven.group, subject, classifier, extension, sha256: expected, checksumVerified: true, signatureVerified: true, pomMitLicense: true, binaryJarMitLicense: true };
     if (extension === "pom") {
       const pom = readFileSync(artifact, "utf8");
-      record.pomMitLicense = /<name>MIT License<\/name>/u.test(pom);
+      const tag = (name) => new RegExp(`<${name}>\\s*([^<]+?)\\s*<\\/${name}>`, "u").exec(pom)?.[1]?.trim();
+      record.pomCoordinateVerified = tag("groupId") === maven.group && tag("artifactId") === module.name && tag("version") === version;
+      record.pomMitLicense = tag("name") === "MIT License" && /<url>\s*https?:\/\/[^<]*mit[^<]*<\/url>/iu.test(pom);
     }
     if (extension === "jar") {
       const listing = execFileSync("jar", ["tf", artifact], { encoding: "utf8" });
