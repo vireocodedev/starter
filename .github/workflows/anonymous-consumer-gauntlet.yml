@@ -114,17 +114,12 @@ jobs:
       - name: Run exact public anonymous-consumer gauntlet
         env:
           PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
-          REQUESTED_RELEASE_ID: ${{ inputs.release_id }}
-          TRUSTED_SOURCE_COMMIT: ${{ needs.trusted-source.outputs.source_commit }}
+          VIREO_GAUNTLET_RELEASE_ID: ${{ inputs.release_id }}
+          VIREO_GAUNTLET_SOURCE_COMMIT: ${{ needs.trusted-source.outputs.source_commit }}
           VIREO_GAUNTLET_PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/vireo-anonymous-playwright
-        run: |
-          if [ -n "$REQUESTED_RELEASE_ID" ] && ! printf '%s' "$REQUESTED_RELEASE_ID" | grep -Eq '^npm-[0-9]+\.[0-9]+\.[0-9]+_jvm-[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "workflow_dispatch release_id must be an exact npm-x.y.z_jvm-x.y.z release id" >&2
-            exit 1
-          fi
-          release_id="$REQUESTED_RELEASE_ID"
-          if [ -z "$release_id" ]; then release_id="$(node -p \"require('./contracts/ecosystem-release-contract.json').current.id\")"; fi
-          corepack npm run consumer:gauntlet -- --evidence-dir "$RUNNER_TEMP/anonymous-consumer-evidence" --release-id "$release_id" --source-commit "$TRUSTED_SOURCE_COMMIT"
+        run: >-
+          corepack npm run consumer:gauntlet --
+          --evidence-dir "$RUNNER_TEMP/anonymous-consumer-evidence"
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

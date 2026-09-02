@@ -18,13 +18,21 @@ test("release preflight binds exact release and source coordinates", () => {
     }),
     [],
   );
-  assert.match(
+  assert.deepEqual(
     validateReleasePreflightIdentity({
       release,
       requestedReleaseId: "npm-0.8.0_jvm-0.3.1",
       verifierSourceCommit: "b".repeat(40),
-    }).join("\n"),
-    /requested release/u,
+    }),
+    ["requested release id does not match ecosystem current release"],
+  );
+  assert.deepEqual(
+    validateReleasePreflightIdentity({
+      release,
+      requestedReleaseId: "npm-0.8.1_jvm-0.3.1-extra",
+      verifierSourceCommit: "b".repeat(40),
+    }),
+    ["requested release id is not an exact npm-x.y.z_jvm-x.y.z release id"],
   );
 });
 test("only the historical Template release immutability warning is narrow", () => {
