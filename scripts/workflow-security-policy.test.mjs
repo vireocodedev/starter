@@ -23,7 +23,7 @@ function namedWorkflowStep(workflow, name) {
   const start = lines.indexOf(`      - name: ${name}`);
   if (start < 0) return undefined;
   let end = start + 1;
-  while (end < lines.length && !/^      - /u.test(lines[end])) end += 1;
+  while (end < lines.length && !/^ {6}- /u.test(lines[end])) end += 1;
   return lines.slice(start, end);
 }
 
@@ -37,7 +37,7 @@ function indentedSubsection(lines, key, indent) {
 
 function standaloneWebsiteArtifactRetainsHiddenFiles(workflow) {
   const uploadStep = namedWorkflowStep(workflow, "Upload standalone artifact");
-  if (!uploadStep || !uploadStep.some(line => /^        uses: actions\/upload-artifact@[a-f0-9]{40}(?:\s+#.*)?$/u.test(line)))
+  if (!uploadStep || !uploadStep.some(line => /^ {8}uses: actions\/upload-artifact@[a-f0-9]{40}(?:\s+#.*)?$/u.test(line)))
     return false;
   const withBlock = indentedSubsection(uploadStep, "with", 8);
   return (
