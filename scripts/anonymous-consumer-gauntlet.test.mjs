@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,7 @@ import { validateApplicationIdentity } from "./lib/application-projection-contra
 import {
   buildExecutionPlan,
   cleanupAnonymousConsumerRunRoot,
+  deploymentContractProblems,
   executePlanForTest,
   finalizationFailureFinding,
   finishAnonymousConsumerRun,
@@ -28,6 +29,90 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = readJson(join(root, "contracts", "anonymous-consumer-gauntlet-policy.json"));
 const release = publicReleaseIdentity(readJson(join(root, "contracts", "ecosystem-release-contract.json")));
 const applicationProjectionContract = readJson(join(root, "contracts", "application-projection-contract.json"));
+
+const deploymentVerifierFixture = `#!/usr/bin/env bash
+set -euo pipefail
+frontend_port=3000
+compose_command=(docker compose)
+response_headers="$(curl --fail --silent --show-error --head "http://127.0.0.1:\${frontend_port}/")"
+for expected_header in \\
+  "content-security-policy: default-src 'self'" \\
+  "cross-origin-opener-policy: same-origin" \\
+  "permissions-policy: camera=(), geolocation=(), microphone=()" \\
+  "referrer-policy: strict-origin-when-cross-origin" \\
+  "x-content-type-options: nosniff" \\
+  "x-frame-options: DENY"; do
+  if ! grep --ignore-case --fixed-strings --quiet "$expected_header" <<<"$response_headers"; then
+    printf 'Frontend deployment is missing security header: %s\\n' "$expected_header" >&2
+    exit 1
+  fi
+done
+api_status="$(curl --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:\${frontend_port}/api/auth/me")"
+if [[ "$api_status" != "401" ]]; then
+  exit 1
+fi
+if ! curl --fail --silent --show-error "http://127.0.0.1:\${frontend_port}/actuator/health/readiness" | grep --quiet '"status":"UP"'; then
+  exit 1
+fi
+"\${compose_command[@]}" --project-name deployment exec --no-TTY frontend \\
+  wget --quiet --output-document=- http://app:8080/actuator/health/readiness | grep --quiet '"status":"UP"'
+runtime_privileges="$("\${compose_command[@]}" --project-name deployment exec --no-TTY postgres \\
+  psql --username "$POSTGRES_OWNER_USER" --tuples-only --no-align \\
+  --command "SELECT has_schema_privilege('$runtime_user', 'public', 'CREATE'), has_table_privilege('$runtime_user', 'item', 'SELECT') AND has_table_privilege('$runtime_user', 'item', 'INSERT') AND has_table_privilege('$runtime_user', 'item', 'UPDATE') AND has_table_privilege('$runtime_user', 'item', 'DELETE'), has_table_privilege('$runtime_user', 'flyway_schema_history', 'INSERT') OR has_table_privilege('$runtime_user', 'flyway_schema_history', 'UPDATE') OR has_table_privilege('$runtime_user', 'flyway_schema_history', 'DELETE') OR has_table_privilege('$runtime_user', 'flyway_schema_history', 'TRUNCATE') OR has_table_privilege('$runtime_user', 'flyway_schema_history', 'REFERENCES') OR has_table_privilege('$runtime_user', 'flyway_schema_history', 'TRIGGER');")"
+if [[ "$runtime_privileges" != "f|t|f" ]]; then
+  exit 1
+fi
+`;
+
+const deploymentComposeFixture = `services:
+  app:
+    environment:
+      SPRING_DATASOURCE_USERNAME: \${POSTGRES_RUNTIME_USER:-starter_template_runtime}
+      SPRING_DATASOURCE_PASSWORD: \${POSTGRES_RUNTIME_PASSWORD:?Set POSTGRES_RUNTIME_PASSWORD}
+      SPRING_FLYWAY_USER: \${POSTGRES_OWNER_USER:-starter_template_owner}
+      SPRING_FLYWAY_PASSWORD: \${POSTGRES_OWNER_PASSWORD:?Set POSTGRES_OWNER_PASSWORD}
+`;
+
+const deploymentConfigFixture = `export default {
+  testDir: "./tests/deployment",
+};
+`;
+
+const deploymentBrowserFixture = `import { expect, test } from "@playwright/test";
+test("the built stack persists an authenticated item mutation", async ({ page }) => {
+  const itemName = "Persistent Item";
+  await page.getByRole("button", { name: "Create item" }).click();
+  await page.getByRole("textbox", { name: "Name" }).fill(itemName);
+  await page.getByRole("button", { name: "Create item" }).last().click();
+  await expect(page.getByText(itemName, { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText(itemName, { exact: true })).toBeVisible();
+});
+`;
+
+function writeDeploymentFixture(
+  t,
+  {
+    verifier = deploymentVerifierFixture,
+    compose = deploymentComposeFixture,
+    config = deploymentConfigFixture,
+    browserTests = { "tests/deployment/item-persistence.spec.ts": deploymentBrowserFixture },
+  } = {},
+) {
+  const projectRoot = mkdtempSync(join(tmpdir(), "vireo-deployment-contract-"));
+  mkdirSync(join(projectRoot, "scripts"), { recursive: true });
+  mkdirSync(join(projectRoot, "frontend"), { recursive: true });
+  writeFileSync(join(projectRoot, "scripts", "verify-deployment.sh"), verifier);
+  writeFileSync(join(projectRoot, "compose.yaml"), compose);
+  writeFileSync(join(projectRoot, "frontend", "playwright.deployment.config.ts"), config);
+  for (const [relativePath, source] of Object.entries(browserTests)) {
+    const path = join(projectRoot, "frontend", relativePath);
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, source);
+  }
+  t.after(() => rmSync(projectRoot, { recursive: true, force: true }));
+  return projectRoot;
+}
 
 const identityOptions = new Map([
   ["--name", "projectName"],
@@ -193,6 +278,281 @@ test("deterministic plan gives a fake executor every required recipe and refusal
     .operations.map(operation => operation.id);
   assert.ok(removal.includes("sample-removal-first-apply-snapshot"));
   assert.ok(removal.includes("sample-removal-repeat-preserves-tree"));
+});
+
+test("deployment contract validates executable security, proxy, readiness, database, and persistence boundaries", t => {
+  const projectRoot = writeDeploymentFixture(t);
+  assert.equal(deploymentVerifierFixture.includes("migration"), false);
+  assert.equal(spawnSync("bash", ["-n", join(projectRoot, "scripts", "verify-deployment.sh")]).status, 0);
+  assert.deepEqual(deploymentContractProblems(projectRoot), []);
+});
+
+test("deployment contract scopes Compose credentials to the app environment and separate runtime and owner roles", t => {
+  const cases = [
+    [
+      "SPRING_DATASOURCE_USERNAME: ${POSTGRES_RUNTIME_USER",
+      "SPRING_DATASOURCE_USERNAME: ${POSTGRES_OWNER_USER",
+      "Compose does not bind the application datasource to the PostgreSQL runtime user.",
+    ],
+    [
+      "SPRING_DATASOURCE_PASSWORD: ${POSTGRES_RUNTIME_PASSWORD",
+      "SPRING_DATASOURCE_PASSWORD: ${POSTGRES_OWNER_PASSWORD",
+      "Compose does not bind the application datasource to the PostgreSQL runtime password.",
+    ],
+    [
+      "SPRING_FLYWAY_USER: ${POSTGRES_OWNER_USER",
+      "SPRING_FLYWAY_USER: ${POSTGRES_RUNTIME_USER",
+      "Compose does not bind Flyway to the PostgreSQL owner user.",
+    ],
+    [
+      "SPRING_FLYWAY_PASSWORD: ${POSTGRES_OWNER_PASSWORD",
+      "SPRING_FLYWAY_PASSWORD: ${POSTGRES_RUNTIME_PASSWORD",
+      "Compose does not bind Flyway to the PostgreSQL owner password.",
+    ],
+  ];
+  for (const [from, to, expected] of cases) {
+    const projectRoot = writeDeploymentFixture(t, { compose: deploymentComposeFixture.replace(from, to) });
+    assert.deepEqual(deploymentContractProblems(projectRoot), [expected]);
+  }
+
+  const outOfScopeOwner = writeDeploymentFixture(t, {
+    compose: deploymentComposeFixture
+      .replace("SPRING_FLYWAY_USER: ${POSTGRES_OWNER_USER", "SPRING_FLYWAY_USER: ${POSTGRES_RUNTIME_USER")
+      .concat(
+        "  postgres:\n    environment:\n      SPRING_FLYWAY_USER: ${POSTGRES_OWNER_USER:-starter_template_owner}\n",
+      ),
+  });
+  assert.deepEqual(deploymentContractProblems(outOfScopeOwner), [
+    "Compose does not bind Flyway to the PostgreSQL owner user.",
+  ]);
+});
+
+test("deployment contract rejects every missing Flyway-history mutation boundary and a combined privilege result", t => {
+  for (const privilege of ["INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]) {
+    const projectRoot = writeDeploymentFixture(t, {
+      verifier: deploymentVerifierFixture.replace(
+        `has_table_privilege('$runtime_user', 'flyway_schema_history', '${privilege}')`,
+        "false",
+      ),
+    });
+    assert.deepEqual(deploymentContractProblems(projectRoot), [
+      `Deployment verifier does not query runtime Flyway history ${privilege} mutation privilege.`,
+    ]);
+  }
+
+  const privilegeResult = writeDeploymentFixture(t, {
+    verifier: deploymentVerifierFixture.replace("f|t|f", "f|t|x"),
+  });
+  assert.deepEqual(deploymentContractProblems(privilegeResult), [
+    "Deployment verifier does not require f|t|f runtime database privilege separation.",
+  ]);
+});
+
+test("deployment contract derives all configured deployment specs and requires persistence after reload", t => {
+  const persistence = writeDeploymentFixture(t, {
+    browserTests: {
+      "tests/deployment/item-persistence.spec.ts": deploymentBrowserFixture.replace("  await page.reload();\n", ""),
+    },
+  });
+  assert.deepEqual(deploymentContractProblems(persistence), [
+    "Deployment Playwright test does not prove an Item persists after creation and reload.",
+  ]);
+
+  const splitFlow = writeDeploymentFixture(t, {
+    browserTests: {
+      "tests/deployment/item-persistence.spec.ts": `${deploymentBrowserFixture.replace(
+        "  await page.reload();\n  await expect(page.getByText(itemName, { exact: true })).toBeVisible();\n",
+        "",
+      )}\ntest("unrelated reload", async ({ page }) => {\n  await page.reload();\n  await expect(page.getByText(itemName, { exact: true })).toBeVisible();\n});\n`,
+    },
+  });
+  assert.deepEqual(deploymentContractProblems(splitFlow), [
+    "Deployment Playwright test does not prove an Item persists after creation and reload.",
+  ]);
+
+  const falseBranch = writeDeploymentFixture(t, {
+    browserTests: {
+      "tests/deployment/item-persistence.spec.ts": deploymentBrowserFixture
+        .replace('  const itemName = "Persistent Item";', '  if (false) {\n  const itemName = "Persistent Item";')
+        .replace(
+          "  await expect(page.getByText(itemName, { exact: true })).toBeVisible();\n});",
+          "  await expect(page.getByText(itemName, { exact: true })).toBeVisible();\n  }\n});",
+        ),
+    },
+  });
+  assert.deepEqual(deploymentContractProblems(falseBranch), [
+    "Deployment Playwright test does not prove an Item persists after creation and reload.",
+  ]);
+
+  const templateLiteral = writeDeploymentFixture(t, {
+    browserTests: {
+      "tests/deployment/item-persistence.spec.ts": deploymentBrowserFixture.replace(
+        '  await page.getByRole("button", { name: "Create item" }).click();\n  await page.getByRole("textbox", { name: "Name" }).fill(itemName);\n  await page.getByRole("button", { name: "Create item" }).last().click();\n  await expect(page.getByText(itemName, { exact: true })).toBeVisible();\n  await page.reload();\n  await expect(page.getByText(itemName, { exact: true })).toBeVisible();',
+        '  const unreachable = `\n  await page.getByRole("button", { name: "Create item" }).click();\n  await page.getByRole("textbox", { name: "Name" }).fill(itemName);\n  await page.getByRole("button", { name: "Create item" }).last().click();\n  await expect(page.getByText(itemName, { exact: true })).toBeVisible();\n  await page.reload();\n  await expect(page.getByText(itemName, { exact: true })).toBeVisible();\n  `;',
+      ),
+    },
+  });
+  assert.deepEqual(deploymentContractProblems(templateLiteral), [
+    "Deployment Playwright test does not prove an Item persists after creation and reload.",
+  ]);
+
+  for (const source of [
+    deploymentBrowserFixture.replace('test("the built stack', 'test.skip("the built stack'),
+    deploymentBrowserFixture.replace('test("the built stack', 'test.fixme("the built stack'),
+    'test.describe.skip("deployment suite", () => {\n' + deploymentBrowserFixture + "});\n",
+    'test.describe.fixme("deployment suite", () => {\n' + deploymentBrowserFixture + "});\n",
+    deploymentBrowserFixture.replace(
+      '  const itemName = "Persistent Item";',
+      '  return;\n  const itemName = "Persistent Item";',
+    ),
+    deploymentBrowserFixture.replace(
+      '  const itemName = "Persistent Item";',
+      '  test.skip(true, "disabled");\n  const itemName = "Persistent Item";',
+    ),
+    deploymentBrowserFixture.replace(
+      '  const itemName = "Persistent Item";',
+      '  test.fixme(true, "disabled");\n  const itemName = "Persistent Item";',
+    ),
+    deploymentBrowserFixture.replace(
+      '  const itemName = "Persistent Item";',
+      '  if (enabled) {\n    test.skip(true, "disabled");\n  }\n  const itemName = "Persistent Item";',
+    ),
+    deploymentBrowserFixture.replace(
+      '  const itemName = "Persistent Item";',
+      '  if (enabled) {\n    return;\n  }\n  const itemName = "Persistent Item";',
+    ),
+    deploymentBrowserFixture.replace(
+      '  const itemName = "Persistent Item";',
+      '  if (enabled) {\n    throw new Error("disabled");\n  }\n  const itemName = "Persistent Item";',
+    ),
+    deploymentBrowserFixture.replace(
+      '  await page.getByRole("button", { name: "Create item" }).click();',
+      '  await Promise.resolve(\'page.getByRole("button", { name: "Create item" }).click()\');',
+    ),
+  ]) {
+    const projectRoot = writeDeploymentFixture(t, {
+      browserTests: { "tests/deployment/item-persistence.spec.ts": source },
+    });
+    assert.deepEqual(deploymentContractProblems(projectRoot), [
+      "Deployment Playwright test does not prove an Item persists after creation and reload.",
+    ]);
+  }
+
+  const renamedMultiple = writeDeploymentFixture(t, {
+    browserTests: {
+      "tests/deployment/login.spec.ts": "test('login', async () => {});\n",
+      "tests/deployment/nested/item-durability.test.ts": deploymentBrowserFixture,
+    },
+  });
+  assert.deepEqual(deploymentContractProblems(renamedMultiple), []);
+
+  for (const option of ["testMatch", "testIgnore"]) {
+    const projectRoot = writeDeploymentFixture(t, {
+      config: deploymentConfigFixture.replace("};", "  " + option + ': "**/*.spec.ts",\\n};'),
+    });
+    assert.deepEqual(deploymentContractProblems(projectRoot), [
+      "Generated deployment Playwright persistence test is missing.",
+    ]);
+  }
+});
+
+test("deployment contract ignores comments and dead strings while enforcing network boundaries", t => {
+  const security = writeDeploymentFixture(t, {
+    verifier: `${deploymentVerifierFixture.replace("x-frame-options: DENY", "x-frame-options: SAMEORIGIN")}\nprintf 'x-frame-options: DENY\\n'\n`,
+  });
+  assert.deepEqual(deploymentContractProblems(security), [
+    "Deployment verifier does not enforce the x-frame-options header.",
+  ]);
+
+  const proxy = writeDeploymentFixture(t, {
+    verifier: `${deploymentVerifierFixture.replace("/api/auth/me", "/api/session")}\n# /api/auth/me\nprintf '/api/auth/me\\n'\n`,
+  });
+  assert.deepEqual(deploymentContractProblems(proxy), [
+    "Deployment verifier does not prove the /api/auth/me proxy returns 401.",
+  ]);
+
+  const publicReadiness = writeDeploymentFixture(t, {
+    verifier: deploymentVerifierFixture.replace(
+      "http://127.0.0.1:${frontend_port}/actuator/health/readiness",
+      "http://127.0.0.1:${frontend_port}/actuator/health/live",
+    ),
+  });
+  assert.deepEqual(deploymentContractProblems(publicReadiness), [
+    "Deployment verifier does not prove public backend readiness.",
+  ]);
+
+  const containerReadiness = writeDeploymentFixture(t, {
+    verifier: deploymentVerifierFixture.replace("http://app:8080/actuator/health/readiness", "http://app:8080/healthz"),
+  });
+  assert.deepEqual(deploymentContractProblems(containerReadiness), [
+    "Deployment verifier does not prove container backend readiness.",
+  ]);
+});
+
+test("deployment contract rejects evidence hidden in unreachable shell flow and SQL comments", t => {
+  const uncalledFunction = writeDeploymentFixture(t, {
+    verifier: "function prove_deployment() {\n" + deploymentVerifierFixture + "}\n",
+  });
+  assert.ok(
+    deploymentContractProblems(uncalledFunction).includes(
+      "Deployment verifier does not enforce the content-security-policy header.",
+    ),
+  );
+
+  const constantFalse = writeDeploymentFixture(t, {
+    verifier: "if false; then\n" + deploymentVerifierFixture + "fi\n",
+  });
+  assert.ok(
+    deploymentContractProblems(constantFalse).includes(
+      "Deployment verifier does not prove the /api/auth/me proxy returns 401.",
+    ),
+  );
+
+  for (const verifier of [
+    "exit 0\n" + deploymentVerifierFixture,
+    "exit 0;\n" + deploymentVerifierFixture,
+    "exit 0 # already successful\n" + deploymentVerifierFixture,
+    "  exit 0;\n" + deploymentVerifierFixture,
+    "printf 'early'; exit 0\n" + deploymentVerifierFixture,
+    ":; exit 0\n" + deploymentVerifierFixture,
+    "if ! true; then\n" + deploymentVerifierFixture + "fi\n",
+    "while false; do\n" + deploymentVerifierFixture + "done\n",
+    "function prove_deployment() {\n" + deploymentVerifierFixture + "}\nif false; then\n  prove_deployment\nfi\n",
+    "function prove_deployment() {\n" + deploymentVerifierFixture + "}\nexit 0\nprove_deployment\n",
+  ]) {
+    const projectRoot = writeDeploymentFixture(t, { verifier });
+    assert.ok(
+      deploymentContractProblems(projectRoot).includes(
+        "Deployment verifier does not enforce the content-security-policy header.",
+      ),
+    );
+  }
+
+  const bashTrue = writeDeploymentFixture(t, {
+    verifier: "if [[ false ]]; then\n" + deploymentVerifierFixture + "fi\n",
+  });
+  assert.deepEqual(deploymentContractProblems(bashTrue), []);
+
+  const commentedFailure = writeDeploymentFixture(t, {
+    verifier: deploymentVerifierFixture.replace("    exit 1", "    : # exit 1"),
+  });
+  assert.ok(
+    deploymentContractProblems(commentedFailure).includes(
+      "Deployment verifier does not enforce the content-security-policy header.",
+    ),
+  );
+
+  const sqlComment = writeDeploymentFixture(t, {
+    verifier: deploymentVerifierFixture.replace(
+      "SELECT has_schema_privilege",
+      "SELECT /* bypass */ has_schema_privilege",
+    ),
+  });
+  assert.ok(
+    deploymentContractProblems(sqlComment).includes(
+      "Deployment verifier privilege SQL must not contain SQL comment markers.",
+    ),
+  );
 });
 
 test("shared create commands carry one valid release identity except for their intended identity refusal", () => {
