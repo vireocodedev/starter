@@ -54,6 +54,22 @@ export function validatePolicy(policy, release) {
   return problems;
 }
 
+/** Returns plain, validated data so unit tests can execute every scenario through a fake executor. */
+export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoot }) {
+  const problems = validatePolicy(policy, release);
+  if (problems.length > 0) throw new Error(problems.join("\n"));
+  return policy.scenarios.map(scenario => ({
+    id: scenario.id,
+    recipe: [...scenario.recipe],
+    operations: scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }).map((operation, index) => ({
+      id: operation.id ?? `${scenario.id}-${index + 1}`,
+      expectedExit: operation.expectedExit ?? 0,
+      kind: operation.kind ?? "command",
+      executable: operation.executable ?? null,
+    })),
+  }));
+}
+
 function execute(command, options) {
   return new Promise((resolvePromise, reject) => {
     const startedAt = new Date().toISOString();
@@ -207,11 +223,15 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
   const h2 = join(consumerRoot, "full-stack-h2");
   switch (scenario.id) {
     case "public-artifacts":
-      return release.npm.map(({ name, version }) =>
+      return [
+        ...release.npm.map(({ name, version }) =>
         command(`registry-${name}`, "corepack", ["npm", "view", `${name}@${version}`, "--json"], {
           assertOutput: new RegExp(`"name"\\s*:\\s*"${name.replace("@", "@")}"[\\s\\S]*"version"\\s*:\\s*"${version}"`, "u"),
         }),
-      );
+      ),
+        command("exact-public-npm-verifier", "node", [join(root, "scripts", "verify-npm-public-release.mjs"), join(evidenceDirectory, "exact-npm-public.json")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+        command("public-evidence-collector", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "public-release-evidence")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+      ];
     case "cli-adversity": {
       const occupied = join(consumerRoot, "occupied-target");
       const failed = join(consumerRoot, "failed-download");
@@ -324,7 +344,10 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       command("npm-pack", "corepack", ["npm", "pack", `create-vireo@${release.createVireoVersion}`, "--json"]),
       command("public-release-evidence", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "public-release-evidence")], { cwdClass: "framework-verifier", timeoutMs: 30 * 60_000 }),
     ];
-    case "maven-consumer-surface": return [command("maven-central-consumer", "sh", [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 })];
+    case "maven-consumer-surface": return [
+      command("maven-central-consumer", "sh", [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+      command("maven-public-evidence", "node", [join(root, "scripts", "collect-public-release-evidence.mjs"), join(evidenceDirectory, "maven-public-evidence")], { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 }),
+    ];
     case "storybook-and-production-builds": return [
       command("storybook-interaction", "corepack", ["npm", "run", "test:storybook"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
       command("storybook-static", "corepack", ["npm", "run", "build-storybook"], { cwd: frontend, timeoutMs: 20 * 60_000 }),
@@ -369,6 +392,12 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
     isolation: policy.isolation,
     dryRun: dry,
     status: dry ? "planned" : "running",
+    findings: [],
+    externalWarnings: [],
+    remainingHumanOnly: [
+      { category: "physical-device", owner: "consumer", reason: "Brand and physical-device PWA installation evidence remains a product decision.", evidenceReferences: [] },
+      { category: "adoption", owner: "product", reason: "Public-beta adoption evidence requires real consumer teams and cannot be manufactured by CI.", evidenceReferences: [] },
+    ],
     scenarios: [],
   };
   const checkpoint = () => writeEvidenceAtomically(join(evidenceDirectory, "evidence.json"), evidence);
