@@ -576,8 +576,12 @@ function resolveBaselineTargetContent(baseline: EdgeBaseline) {
   if (!baseline.transforms || baseline.sourceContent === undefined) return undefined;
   return applyBaselineTransforms(baseline, baseline.sourceContent);
 }
-function applyBaselineTransforms(baseline: EdgeBaseline, source: string) {
-  if (!baseline.transforms) return baseline.targetContent;
+function applyBaselineTransforms(baseline: EdgeBaseline, source: string): string {
+  if (!baseline.transforms) {
+    if (baseline.targetContent === undefined)
+      throw new VireoUpgradeError("VIR-UPG-001", `Managed baseline has no target content: ${baseline.path}`);
+    return baseline.targetContent;
+  }
   let output = source;
   for (const transform of baseline.transforms) {
     if (
