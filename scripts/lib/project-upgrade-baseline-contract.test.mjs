@@ -54,11 +54,11 @@ test("managed upgrade baselines can bind a prior generated projection source", (
   );
 });
 
-test("0.8.4 to 0.8.5 Storybook baselines retain predecessor target provenance", () => {
+test("0.8.4 to 0.8.6 Storybook baselines retain predecessor target provenance", () => {
   const policy = JSON.parse(
     readFileSync(new URL("../../packages/create-vireo/schema/vireo-upgrade-policy.json", import.meta.url), "utf8"),
   );
-  const edge = "0.8.4->0.8.5";
+  const edge = "0.8.4->0.8.6";
   assert.doesNotThrow(() => assertStorybookBaselineContinuity(policy.releaseGraph, edge));
 
   for (const profile of ["full-stack", "frontend"]) {
@@ -77,14 +77,14 @@ test("0.8.4 to 0.8.5 Storybook baselines retain predecessor target provenance", 
     "0".repeat(64);
   assert.throws(
     () => assertStorybookBaselineContinuity(corrupted, edge),
-    /0\.8\.4->0\.8\.5:frontend Storybook source must match 0\.8\.3->0\.8\.4 target provenance/u,
+    /0\.8\.4->0\.8\.6:frontend Storybook source must match 0\.8\.3->0\.8\.4 target provenance/u,
   );
 });
 
 test("Storybook provenance continuity ignores empty, unrelated, and first-add edges", () => {
-  const edge = "0.8.5->0.8.6";
+  const edge = "0.9.0->0.9.1";
   const graphWith = files => ({
-    edges: [{ from: "0.8.5", to: "0.8.6" }],
+    edges: [{ from: "0.9.0", to: "0.9.1" }],
     baselines: {
       [edge]: {
         "full-stack": structuredClone(files),

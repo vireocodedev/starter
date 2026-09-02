@@ -3,7 +3,7 @@
   "releaseGraph": {
     "publicRelease": "0.8.4",
     "previousRelease": "0.8.4",
-    "candidateRelease": "0.8.5",
+    "candidateRelease": "0.8.6",
     "releases": [
       {
         "release": "0.2.0",
@@ -192,10 +192,10 @@
         }
       },
       {
-        "release": "0.8.5",
+        "release": "0.8.6",
         "status": "candidate",
-        "templateCommit": "89b7419d7e97168073ce11c5082219731dc50f67",
-        "rootVireoScript": "npx --yes --package=create-vireo@0.8.5 vireo",
+        "templateCommit": "cef67cc74af3d28028fba424e1d5c6a92faa6fc9",
+        "rootVireoScript": "npx --yes --package=create-vireo@0.8.6 vireo",
         "starterJvmVersion": "0.3.1",
         "managedRootScripts": { "doctor:json": "node scripts/vireo-frontend-doctor.mjs --json" },
         "managedFrontendScripts": {
@@ -389,7 +389,7 @@
       },
       {
         "from": "0.8.4",
-        "to": "0.8.5",
+        "to": "0.8.6",
         "lockfileRefresh": "not-required",
         "applicationOwnedActions": []
       }
@@ -704,15 +704,15 @@
           }
         ]
       },
-      "0.8.4->0.8.5": {
+      "0.8.4->0.8.6": {
         "full-stack": [
           {
             "path": "contracts/vireo-package-compatibility.json",
             "operation": "update",
             "sourceSha256": "ffba1d0652572403fe327f9cd5c67e587ae879485257903ceb232483bf4ac335",
             "sourceContent": "{\n  \"schemaVersion\": 1,\n  \"id\": \"vireo-template-0.8.4\",\n  \"packages\": {\n    \"@vireocodedev/history\": [\"^0.2.2\"],\n    \"@vireocodedev/infrastructure\": [\"^0.2.2\"],\n    \"@vireocodedev/localization\": [\"^0.2.2\"],\n    \"@vireocodedev/query\": [\"^0.2.2\"],\n    \"@vireocodedev/shell\": [\"^0.2.2\"],\n    \"@vireocodedev/sqlite\": [\"^0.2.2\", \"^0.2.3\"],\n    \"@vireocodedev/ui\": [\"^0.3.1\"]\n  },\n  \"lockedPackages\": {\n    \"@vireocodedev/history\": \"0.2.2\",\n    \"@vireocodedev/infrastructure\": \"0.2.2\",\n    \"@vireocodedev/localization\": \"0.2.2\",\n    \"@vireocodedev/query\": \"0.2.2\",\n    \"@vireocodedev/shell\": \"0.2.2\",\n    \"@vireocodedev/ui\": \"0.3.1\"\n  }\n}\n",
-            "targetSha256": "5480d56b7d5c3024ce5ee7fd441d2f13dbc63dc873488efa1629d41c1dda0309",
-            "targetContent": "{\n  \"schemaVersion\": 1,\n  \"id\": \"vireo-template-0.8.5\",\n  \"packages\": {\n    \"@vireocodedev/history\": [\"^0.2.2\"],\n    \"@vireocodedev/infrastructure\": [\"^0.2.2\"],\n    \"@vireocodedev/localization\": [\"^0.2.2\"],\n    \"@vireocodedev/query\": [\"^0.2.2\"],\n    \"@vireocodedev/shell\": [\"^0.2.2\"],\n    \"@vireocodedev/sqlite\": [\"^0.2.2\", \"^0.2.3\"],\n    \"@vireocodedev/ui\": [\"^0.3.1\"]\n  },\n  \"lockedPackages\": {\n    \"@vireocodedev/history\": \"0.2.2\",\n    \"@vireocodedev/infrastructure\": \"0.2.2\",\n    \"@vireocodedev/localization\": \"0.2.2\",\n    \"@vireocodedev/query\": \"0.2.2\",\n    \"@vireocodedev/shell\": \"0.2.2\",\n    \"@vireocodedev/ui\": \"0.3.1\"\n  }\n}\n"
+            "targetSha256": "24c3055d20f8d2017c4167c71b14d45c8c50662c6bea13dd2ea0981530e59685",
+            "targetContent": "{\n  \"schemaVersion\": 1,\n  \"id\": \"vireo-template-0.8.6\",\n  \"packages\": {\n    \"@vireocodedev/history\": [\"^0.2.2\"],\n    \"@vireocodedev/infrastructure\": [\"^0.2.2\"],\n    \"@vireocodedev/localization\": [\"^0.2.2\"],\n    \"@vireocodedev/query\": [\"^0.2.2\"],\n    \"@vireocodedev/shell\": [\"^0.2.2\"],\n    \"@vireocodedev/sqlite\": [\"^0.2.2\", \"^0.2.3\"],\n    \"@vireocodedev/ui\": [\"^0.3.1\"]\n  },\n  \"lockedPackages\": {\n    \"@vireocodedev/history\": \"0.2.2\",\n    \"@vireocodedev/infrastructure\": \"0.2.2\",\n    \"@vireocodedev/localization\": \"0.2.2\",\n    \"@vireocodedev/query\": \"0.2.2\",\n    \"@vireocodedev/shell\": \"0.2.2\",\n    \"@vireocodedev/ui\": \"0.3.1\"\n  }\n}\n"
           },
           {
             "path": "frontend/scripts/storybook-config-policy.test.mjs",

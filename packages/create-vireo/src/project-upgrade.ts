@@ -747,7 +747,7 @@ function validateExistingUpgradeReceipt(
     );
 }
 function isOverviewManifestMigration(source: ReleaseNode, target: ReleaseNode) {
-  return source.release === "0.8.4" && target.release === "0.8.5";
+  return source.release === "0.8.4" && target.release === "0.8.6";
 }
 async function migrateExampleManifest(
   projectDirectory: string,
@@ -1145,7 +1145,7 @@ async function upgradeProjectWithPolicy(
   if (
     !alreadyTarget &&
     isOverviewManifestMigration(source, target) &&
-    (await safeFileState(projectDirectory, ".vireo/upgrade-0.8.4-to-0.8.5.json"))
+    (await safeFileState(projectDirectory, ".vireo/upgrade-0.8.4-to-0.8.6.json"))
   )
     throw new VireoUpgradeError(
       "VIR-UPG-003",
