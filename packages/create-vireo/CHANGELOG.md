@@ -1,5 +1,11 @@
 # create-vireo
 
+## 0.8.6
+
+### Patch Changes
+
+- 31b033a: Track the full-stack Overview sample in example provenance so upgrades and sample removal fail closed on customized bytes, and stage the immutable 0.8.6 projection compatibility upgrade.
+
 ## 0.8.4
 
 ### Patch Changes

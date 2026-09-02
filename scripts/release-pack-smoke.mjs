@@ -428,7 +428,11 @@ try {
   const upgradeDependencies = { ...packedSource.frontendDependencies, react: "^19.0.0" };
   writeFileSync(
     join(upgradeFixture, "package.json"),
-    `${JSON.stringify(packedAdjacentFrontendSourceManifest({ packedSource, dependencies: upgradeDependencies }), null, 2)}\n`,
+    `${JSON.stringify(
+      packedAdjacentFrontendSourceManifest({ packedSource, packedTarget, dependencies: upgradeDependencies }),
+      null,
+      2,
+    )}\n`,
   );
   const activeBaselineKey = `${packedSource.release}->${packedTarget.release}`;
   const activeFrontendBaselines = packedPolicy.releaseGraph.baselines?.[activeBaselineKey]?.frontend ?? [];
@@ -460,6 +464,24 @@ try {
     join(upgradeFixture, ".vireo/project.json"),
     `${JSON.stringify({ schemaVersion: 1, profile: "frontend", projectName: "packed-adjacent-upgrade-fixture", templateCommit: packedSource.templateCommit, createdBy: `create-vireo@${packedSource.release}` }, null, 2)}\n`,
   );
+  if (packedSource.release === "0.8.4" && packedTarget.release === "0.8.6") {
+    const examplePath = "src/features/item/public.ts";
+    const exampleContents = "export type Item = { id: number };\n";
+    mkdirSync(dirname(join(upgradeFixture, examplePath)), { recursive: true });
+    writeFileSync(join(upgradeFixture, examplePath), exampleContents);
+    writeFileSync(
+      join(upgradeFixture, ".vireo/example-manifest.json"),
+      `${JSON.stringify(
+        {
+          schemaVersion: 1,
+          templateCommit: packedSource.templateCommit,
+          files: { [examplePath]: createHash("sha256").update(exampleContents).digest("hex") },
+        },
+        null,
+        2,
+      )}\n`,
+    );
+  }
   if (!skillsAddedByCurrentEdge) {
     for (const baseline of managedSkillBaselines) {
       const path = join(upgradeFixture, baseline.path);

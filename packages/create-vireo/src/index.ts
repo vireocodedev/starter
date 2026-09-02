@@ -67,12 +67,12 @@ export {
   type RemoveExampleResult,
 } from "./remove-example.js";
 
-const CREATE_VIREO_PACKAGE_VERSION = "0.8.4";
+const CREATE_VIREO_PACKAGE_VERSION = "0.8.6";
 const TEMPLATE_VERSION = CREATE_VIREO_PACKAGE_VERSION;
 const TEMPLATE_TAG = `starter-template@${TEMPLATE_VERSION}`;
 const TEMPLATE_STARTER_JVM_BASELINE = "0.3.1";
 const INITIAL_APPLICATION_VERSION = "0.1.0";
-export const TEMPLATE_COMMIT = "09cd526d32907bedfe5bb6ab45a2d4d221b0d47b";
+export const TEMPLATE_COMMIT = "cef67cc74af3d28028fba424e1d5c6a92faa6fc9";
 export const TEMPLATE_ARCHIVE_URL = `https://codeload.github.com/vireocodedev/vireo-template/tar.gz/${TEMPLATE_COMMIT}`;
 const CREATE_VIREO_COMMAND = `npx --yes --package=create-vireo@${CREATE_VIREO_PACKAGE_VERSION} vireo`;
 
