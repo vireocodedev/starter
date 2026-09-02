@@ -271,6 +271,11 @@ test("public gauntlets derive the unique adjacent edge ending at the exact publi
   assert.ok(upgrades.every(operation => operation.source.createVireoVersion === matching[0].from));
   assert.ok(upgrades.every(operation => operation.target.createVireoVersion === release.createVireoVersion));
   assert.ok(upgrades.every(operation => operation.lockfileRefresh === (matching[0].lockfileRefresh ?? "required")));
+  assert.deepEqual(
+    Object.fromEntries(upgrades.map(operation => [operation.profile, operation.lockfileRefresh])),
+    { frontend: "not-required", "full-stack": "not-required" },
+    "both public upgrade profiles retain the exact declared edge lockfile policy",
+  );
   const [upgrade] = upgrades;
   const expectedLastUpgrade = {
     schemaVersion: 2,
@@ -317,8 +322,16 @@ test("public gauntlets derive the unique adjacent edge ending at the exact publi
     candidatePlan
       .find(scenario => scenario.id === "adjacent-public-upgrades")
       .operations.filter(operation => operation.kind === "assert-upgraded-consumer")
-      .map(operation => [operation.source.createVireoVersion, operation.target.createVireoVersion]),
-    upgrades.map(operation => [operation.source.createVireoVersion, operation.target.createVireoVersion]),
+      .map(operation => [
+        operation.source.createVireoVersion,
+        operation.target.createVireoVersion,
+        operation.lockfileRefresh,
+      ]),
+    upgrades.map(operation => [
+      operation.source.createVireoVersion,
+      operation.target.createVireoVersion,
+      operation.lockfileRefresh,
+    ]),
   );
 });
 

@@ -627,6 +627,7 @@ export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoo
       ...(operation.source ? { source: operation.source } : {}),
       ...(operation.target ? { target: operation.target } : {}),
       ...(operation.profile ? { profile: operation.profile } : {}),
+      ...(operation.lockfileRefresh ? { lockfileRefresh: operation.lockfileRefresh } : {}),
     })),
   }));
 }
