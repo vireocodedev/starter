@@ -26,6 +26,7 @@ node --test \
   scripts/lib/verification-evidence-source.test.mjs \
   scripts/lib/anonymous-public-evidence.test.mjs \
   scripts/lib/anonymous-public-maven-evidence.test.mjs \
+  scripts/lib/maven-pom-evidence.test.mjs \
   scripts/lib/mit-license-evidence.test.mjs \
   scripts/lib/public-release-evidence-paths.test.mjs \
   scripts/lib/anonymous-consumer-final-evidence.test.mjs \

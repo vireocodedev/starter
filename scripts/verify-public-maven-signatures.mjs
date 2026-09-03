@@ -3,8 +3,13 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { publicMavenCoordinatesMatch, validatePublicMavenRecord } from "./lib/anonymous-public-maven-evidence.mjs";
+import {
+  publicMavenCoordinatesMatch,
+  publicMavenModulesInVerificationOrder,
+  validatePublicMavenRecord,
+} from "./lib/anonymous-public-maven-evidence.mjs";
 import { verifyCanonicalMitLicense } from "./lib/mit-license-evidence.mjs";
+import { inspectPublicMavenPom } from "./lib/maven-pom-evidence.mjs";
 
 const args = process.argv.slice(2);
 const [version, output] = args;
@@ -43,9 +48,12 @@ try {
   });
   if (!listed.includes(`fpr:::::::::${fingerprint}:`))
     throw new Error("Checked-in Vireo public key does not match the pinned signer fingerprint.");
+  const modules = publicMavenModulesInVerificationOrder(maven);
+  if (!modules) throw new Error("Maven attestation policy does not match the exact public Vireo artifact family.");
   const verified = [];
-  for (const module of maven.modules)
-    for (const artifactSpec of module.artifacts ?? []) {
+  for (const module of modules) {
+    let verifiedPom = null;
+    for (const artifactSpec of module.artifacts) {
       const classifier = artifactSpec.classifier ?? "";
       const extension = artifactSpec.extension;
       const subject = `${module.name}-${version}${classifier}.${extension}`;
@@ -74,18 +82,18 @@ try {
         sha256: expected,
         checksumVerified: true,
         signatureVerified: true,
-        pomMitLicense: true,
+        pomCoordinateVerified: null,
+        pomMitLicense: null,
         licenseContentVerified: null,
         licenseSha256: null,
       };
       if (extension === "pom") {
         const pom = readFileSync(artifact, "utf8");
-        const tag = name => new RegExp(`<${name}>\\s*([^<]+?)\\s*<\\/${name}>`, "u").exec(pom)?.[1]?.trim();
-        record.pomCoordinateVerified =
-          tag("groupId") === maven.group && tag("artifactId") === module.name && tag("version") === version;
-        record.pomMitLicense = tag("name") === "MIT License" && /<url>\s*https?:\/\/[^<]*mit[^<]*<\/url>/iu.test(pom);
+        const inspectionPassed = inspectPublicMavenPom({ pom, group: maven.group, module: module.name, version });
+        record.pomCoordinateVerified = inspectionPassed;
+        record.pomMitLicense = inspectionPassed;
       }
-      if (extension === "jar") {
+      if (extension === "jar" && classifier === "") {
         const listing = execFileSync("jar", ["tf", artifact], { encoding: "utf8" });
         if (!listing.split(/\r?\n/u).includes("META-INF/LICENSE"))
           throw new Error(`${subject} JAR does not contain META-INF/LICENSE.`);
@@ -97,10 +105,16 @@ try {
           ),
         );
       }
-      const problems = validatePublicMavenRecord({ record, group: maven.group, version });
+      if (extension !== "pom") {
+        record.publicationPomSubject = verifiedPom?.subject ?? null;
+        record.publicationPomSha256 = verifiedPom?.sha256 ?? null;
+      }
+      const problems = validatePublicMavenRecord({ record, group: maven.group, version, verifiedPom });
       if (problems.length > 0) throw new Error(`${subject}: ${problems.join(", ")}`);
       verified.push(record);
+      if (extension === "pom") verifiedPom = record;
     }
+  }
   if (verified.length !== maven.expectedSubjectCount)
     throw new Error(`Expected ${maven.expectedSubjectCount} Maven subjects, verified ${verified.length}.`);
   writeFileSync(
