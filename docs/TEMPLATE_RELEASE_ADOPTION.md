@@ -30,6 +30,20 @@ single `create-vireo` Changeset, so it produces the version, changelog,
 lockfile, and synchronized contracts on this adoption PR rather than opening a
 second Changesets PR.
 
+When (and only when) the checked-in plan contains `upgrade.ready: true`, the
+same polling workflow reconstructs the candidate from current `main` without
+credentials, then inspects it. It can merge only one non-draft App-authored
+commit whose parent is current `main`, tree and changed paths exactly match the
+reconstructed candidate, canonical marker/title/body match, all exact main
+ruleset checks from their expected integrations are successful, the merge state
+is clean, and every review conversation is resolved. The protected job receives
+the App key only after that read-only inspection succeeds, repeats every check,
+and sends an expected-head-SHA REST squash merge. It never enables persistent
+auto-merge. Pending, stale, altered, or unresolved candidates remain untouched;
+altered candidates fail the read-only reconciliation job closed. Current planning deliberately emits
+`upgrade.ready: false` unless a deterministic Vireo-owned consumer-upgrade
+proof exists, so ordinary adoption PRs remain draft for human/product work.
+
 On the resulting `main` push, `release-npm.yml` may automatically publish only
 the absent exact `create-vireo@X` coordinate. It rejects any absent library,
 receipt drift, incomplete Template evidence, or mismatched Maven baseline.

@@ -179,6 +179,10 @@ validateEnvironment(".github/environments/github-pages.json", {
   reviewers: [],
   policies: [{ name: "main", type: "branch" }],
 });
+validateEnvironment(".github/environments/website-deployment.json", {
+  reviewers: [],
+  policies: [{ name: "main", type: "branch" }],
+});
 validateEnvironment(".github/environments/template-adoption.json", {
   reviewers: [],
   policies: [{ name: "main", type: "branch" }],
@@ -193,6 +197,20 @@ if (
     "template-adoption environment must declare exactly the repository-scoped GitHub App key and ID prerequisites",
   );
 }
+const websiteDeploymentAssertions = readJson(".github/environments/website-deployment.live-assertions.json");
+if (
+  JSON.stringify(websiteDeploymentAssertions.required_secret_names) !==
+    JSON.stringify(["VIREO_WEBSITE_DEPLOY_SSH_PRIVATE_KEY"]) ||
+  JSON.stringify(websiteDeploymentAssertions.required_variable_names) !==
+    JSON.stringify([
+      "VIREO_WEBSITE_DEPLOY_HOST",
+      "VIREO_WEBSITE_DEPLOY_PORT",
+      "VIREO_WEBSITE_DEPLOY_USER",
+      "VIREO_WEBSITE_DEPLOY_KNOWN_HOSTS",
+      "VIREO_WEBSITE_PUBLIC_URL",
+    ])
+)
+  problems.push("website-deployment environment must declare only the exact SSH secret and deployment variables");
 if (
   readText(".github/CODEOWNERS")
     .split("\n")
@@ -206,5 +224,5 @@ if (problems.length) {
   process.exit(1);
 }
 console.log(
-  "Repository security desired-state policy passed: main/tags, Actions, workflow defaults, 4 environments, and issue-form labels.",
+  "Repository security desired-state policy passed: main/tags, Actions, workflow defaults, 5 environments, and issue-form labels.",
 );

@@ -1,0 +1,12 @@
+{
+  "can_admins_bypass": false,
+  "required_secret_names": ["VIREO_WEBSITE_DEPLOY_SSH_PRIVATE_KEY"],
+  "required_variable_names": [
+    "VIREO_WEBSITE_DEPLOY_HOST",
+    "VIREO_WEBSITE_DEPLOY_PORT",
+    "VIREO_WEBSITE_DEPLOY_USER",
+    "VIREO_WEBSITE_DEPLOY_KNOWN_HOSTS",
+    "VIREO_WEBSITE_PUBLIC_URL"
+  ],
+  "evidence": "GitHub UI environment setting plus authenticated environment GET export"
+}

@@ -16,12 +16,25 @@ const templateProviderOnlyPaths = [
   ".github/rulesets/main.json",
   ".github/settings/actions.json",
   ".github/settings/selected-actions.json",
+  ".github/settings/template-release-automation.required-variables.json",
   ".github/settings/workflow-permissions.json",
 ];
 const durableTemplateReleaseRecoveryPaths = [
   ".github/workflows/template-release-recover.yml",
   "scripts/template-release-reconciliation.mjs",
   "scripts/template-release-reconciliation.test.mjs",
+];
+const hostedTemplatePreparationPaths = [
+  ".github/workflows/template-release-preparation.yml",
+  ".github/workflows/template-release-preparation-reconcile.yml",
+  ".github/environments/template-preparation.json",
+  ".github/environments/template-preparation.deployment-branch-policies.json",
+  ".github/environments/template-preparation.live-assertions.json",
+  ".github/environments/template-preparation.required-credentials.json",
+  "scripts/template-release-preparation-workflow.mjs",
+  "scripts/template-release-preparation-workflow.test.mjs",
+  "scripts/template-release-preparation-reconciler.mjs",
+  "scripts/template-release-preparation-reconciler.test.mjs",
 ];
 
 test("the checked-in application projection contract is semantically valid", () => {
@@ -51,6 +64,7 @@ test("template release operations are excluded from every project profile", () =
     for (const path of [
       ".github/workflows/template-release.yml",
       ...durableTemplateReleaseRecoveryPaths,
+      ...hostedTemplatePreparationPaths,
       ...templateProviderOnlyPaths,
       ".github/rulesets/starter-template-0.8.0.json",
       ".github/rulesets/starter-template-0.8.1.json",
@@ -233,6 +247,9 @@ test("classification is profile-aware, specificity-based, and fail closed", () =
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only");
     }
     for (const path of templateProviderOnlyPaths) {
+      assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only", path);
+    }
+    for (const path of hostedTemplatePreparationPaths) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.category, "maintainer-only", path);
     }
     assert.equal(

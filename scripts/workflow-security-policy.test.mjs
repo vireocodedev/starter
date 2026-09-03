@@ -8,6 +8,7 @@ import {
   validateReleasePrWorkflow,
   validateNpmTemplatePublicationWorkflow,
   validatePostPublicationActivityGate,
+  validateWebsiteDeploymentWorkflow,
   validateTemplateAdoptionWorkflow,
 } from "./workflow-security-policy.mjs";
 
@@ -87,6 +88,24 @@ test("requires Basic x-access-token authentication for the App-token Git push", 
     'http.extraheader="AUTHORIZATION: bearer $GH_TOKEN"',
   );
   assert.match(validateTemplateAdoptionWorkflow(bearer).join("\n"), /must not use bearer authentication/u);
+});
+
+test("requires checks: read before reconciling a ready adoption candidate", () => {
+  assert.match(
+    validateTemplateAdoptionWorkflow(templateAdoptionWorkflow.replace("      checks: read\n", "")).join("\n"),
+    /checks, and pull-requests read/u,
+  );
+});
+
+test("requires post-mint read-token reconciliation before the App-only adoption merge", () => {
+  const weakened = templateAdoptionWorkflow.replace(
+    'candidate="$(GH_TOKEN="$READ_GH_TOKEN" node scripts/reconcile-template-adoption.mjs --plan .template-adoption-plan.json --json)"',
+    'candidate="{\\"eligible\\":true}"',
+  );
+  assert.match(
+    validateTemplateAdoptionWorkflow(weakened).join("\n"),
+    /repeat full reconciliation with github\.token after minting/u,
+  );
 });
 
 test("retains the hidden immutable Template plan artifact even when planning fails", () => {
@@ -194,6 +213,28 @@ test("standalone website artifacts retain generated hidden files", () => {
       websiteWorkflow.replace("uses: actions/upload-artifact@", "uses: actions/download-artifact@"),
     ),
     false,
+  );
+});
+
+test("website deployment remains artifact-bound and forced-command only", () => {
+  assert.deepEqual(validateWebsiteDeploymentWorkflow(websiteWorkflow), []);
+  assert.match(
+    validateWebsiteDeploymentWorkflow(
+      websiteWorkflow.replaceAll("StrictHostKeyChecking=yes", "StrictHostKeyChecking=no"),
+    ).join("\n"),
+    /forced-command/u,
+  );
+  assert.match(
+    validateWebsiteDeploymentWorkflow(
+      websiteWorkflow.replace('"${ssh_command[@]}" status', '"${ssh_command[@]}" "mkdir -p /tmp"'),
+    ).join("\n"),
+    /unrestricted remote shell/u,
+  );
+  assert.match(
+    validateWebsiteDeploymentWorkflow(
+      websiteWorkflow.replace("github.event_name == 'workflow_dispatch'", "github.event_name == 'schedule'"),
+    ).join("\n"),
+    /artifact-bound forced-command/u,
   );
 });
 
