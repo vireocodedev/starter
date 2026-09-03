@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:create-vireo",
+  "decision": "no-release",
+  "justification": "Classify Template release-recovery and flagship-deployment infrastructure before the next coordinated Template/CLI release; this ownership-only schema update intentionally leaves create-vireo@0.8.7 unchanged so starter-template@0.8.8 remains the first published coordinate in the required Template-first adoption order."
+}
