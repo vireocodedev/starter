@@ -871,6 +871,80 @@ test("JSON command assertions accept only bounded exact ready reports", () => {
   assert.throws(() => validateReleaseIdentityJson({ phase: "creation", ok: true, problems: [] }), /exact ready/u);
 });
 
+test("JSON command output limits retain the default cap and permit only bounded npm-pack expansion", async () => {
+  const largeJson = JSON.stringify({ payload: "x".repeat(190 * 1024) });
+  const expectedBytes = Buffer.byteLength(largeJson);
+  assert.ok(expectedBytes > 186 * 1024);
+  assert.ok(expectedBytes < 200 * 1024);
+  assert.throws(() => parseBoundedJsonOutput(largeJson), /exceeds/u);
+
+  await assert.rejects(
+    execute(
+      {
+        id: "default-json-limit",
+        executable: process.execPath,
+        arguments: ["-e", 'process.stdout.write(JSON.stringify({payload: "x".repeat(190 * 1024)}))'],
+        expectedExit: 0,
+        jsonValidator: () => ({ type: "large-json" }),
+      },
+      { cwd: root, env: process.env },
+    ),
+    /exceeds/u,
+  );
+
+  const passed = await execute(
+    {
+      id: "npm-pack-json-limit",
+      executable: process.execPath,
+      arguments: ["-e", 'process.stdout.write(JSON.stringify({payload: "x".repeat(190 * 1024)}))'],
+      expectedExit: 0,
+      maximumJsonOutputBytes: 512 * 1024,
+      jsonValidator: value => ({ type: "large-json", payloadBytes: Buffer.byteLength(value.payload) }),
+    },
+    { cwd: root, env: process.env },
+  );
+  assert.deepEqual(passed.assertions.json, { type: "large-json", payloadBytes: 190 * 1024 });
+  assert.equal(passed.stdout.bytes, expectedBytes);
+  assert.match(passed.stdout.sha256, /^[a-f0-9]{64}$/u);
+  assert.deepEqual(Object.keys(passed.stdout).sort(), ["bytes", "sha256"]);
+  assert.deepEqual(Object.keys(passed.stderr).sort(), ["bytes", "sha256"]);
+
+  for (const maximumJsonOutputBytes of [0, 1.5, 512 * 1024 + 1, Number.MAX_SAFE_INTEGER + 1]) {
+    await assert.rejects(
+      execute(
+        {
+          id: "invalid-json-limit",
+          executable: "this-command-must-not-start",
+          arguments: [],
+          expectedExit: 0,
+          maximumJsonOutputBytes,
+          jsonValidator: () => ({ type: "impossible" }),
+        },
+        { cwd: root, env: process.env },
+      ),
+      /positive safe integer/u,
+    );
+  }
+});
+
+test("execution plans retain the JSON expansion only for npm pack commands", () => {
+  const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
+  const operations = buildExecutionPlan({
+    policy,
+    release,
+    upgradePolicy,
+    consumerRoot: "/tmp/vireo-anonymous-plan",
+  }).flatMap(scenario => scenario.operations);
+  const npmPack = operations.filter(operation => operation.id.startsWith("npm-pack-"));
+  assert.equal(npmPack.length, release.npm.length);
+  assert.ok(npmPack.every(operation => operation.maximumJsonOutputBytes === 512 * 1024));
+  assert.ok(
+    operations
+      .filter(operation => !operation.id.startsWith("npm-pack-"))
+      .every(operation => operation.maximumJsonOutputBytes === undefined),
+  );
+});
+
 test("npm registry metadata accepts only an exact direct object or singleton result", () => {
   const expected = { name: "@vireocodedev/ui", version: "0.3.1" };
   assert.deepEqual(validateRegistryMetadataJson(expected, expected), {
