@@ -149,10 +149,11 @@ function releaseRunSteps(lines, job) {
 
 /**
  * The repository setting that permits Actions to create PRs also permits PR
- * approval. This narrow policy keeps the sole PR-writing workflow limited to
- * Changesets version-PR maintenance. It deliberately allowlists operations
- * instead of attempting to enumerate every future approval, merge, publish, or
- * deployment command.
+ * approval. This narrow policy keeps ordinary workflow-token PR writing limited
+ * to Changesets version-PR maintenance. Template adoption instead uses a
+ * repository-scoped GitHub App token from a main-only environment so its PR
+ * events trigger normal required checks; it must remain a draft-only, one-PR
+ * creator and never receive workflow-token write permissions.
  */
 export function validateReleasePrWorkflow(source, actionPolicy) {
   const problems = [];
@@ -226,6 +227,72 @@ export function validateReleasePrWorkflow(source, actionPolicy) {
   return problems;
 }
 
+export function validateTemplateAdoptionWorkflow(source) {
+  const problems = [];
+  const lines = source.split(/\r?\n/u);
+  const jobs = parseJobs(lines);
+  const plan = jobs.find(job => job.name === "plan");
+  const stage = jobs.find(job => job.name === "stage");
+  if (
+    !/^on:\n {2}schedule:\n(?:[\s\S]*?) {2}workflow_dispatch:\s*$/mu.test(
+      source.slice(0, source.indexOf("concurrency:")),
+    )
+  )
+    problems.push("adopt-template-release.yml must use only schedule and workflow_dispatch triggers");
+  if (!plan || !stage || jobs.length !== 2)
+    problems.push("adopt-template-release.yml must contain exactly read-only plan and staged draft jobs");
+  if (plan && !mapMatches(parseJobPermissions(lines, plan), new Map([["contents", "read"]])))
+    problems.push("adopt-template-release.yml:plan must have only contents: read");
+  if (stage && !mapMatches(parseJobPermissions(lines, stage), new Map([["contents", "read"]])))
+    problems.push(
+      "adopt-template-release.yml:stage must have only contents: read; GitHub App writes are separately scoped",
+    );
+  const stageLines = stage ? lines.slice(stage.start, stage.end).join("\n") : "";
+  for (const fragment of [
+    "environment: template-adoption",
+    "TEMPLATE_ADOPTION_APP_ID: ${{ vars.TEMPLATE_ADOPTION_APP_ID }}",
+    "TEMPLATE_ADOPTION_APP_PRIVATE_KEY: ${{ secrets.TEMPLATE_ADOPTION_APP_PRIVATE_KEY }}",
+    "Accept only an exact untouched existing adoption pull request",
+    "baseRefName,headRefName",
+    "baseRefName')\" = main",
+    'headRefName\')" = "$branch"',
+    "gh pr create",
+    "--draft",
+    "git write-tree",
+    "git reset -- .template-adoption-plan.json",
+    "git ls-remote --exit-code --heads origin",
+    "reuse_remote=true",
+    "git rev-list --count",
+    "git show -s --format=%T",
+    'test "$REUSE_REMOTE" != true',
+    "printf '%s:%s' x-access-token \"$GH_TOKEN\" | base64",
+    "::add-mask::$basic_auth",
+    'http.extraheader="AUTHORIZATION: Basic $basic_auth"',
+  ]) {
+    if (!stageLines.includes(fragment)) problems.push(`adopt-template-release.yml:stage must retain ${fragment}`);
+  }
+  if (/git\s+-c\s+http\.extraheader=.*AUTHORIZATION:\s*bearer/iu.test(stageLines))
+    problems.push("adopt-template-release.yml must not use bearer authentication for an App-token Git push");
+  if (stageLines.includes("gh pr merge") || stageLines.includes("--auto"))
+    problems.push("adopt-template-release.yml may not approve, merge, or auto-merge its draft");
+  return problems;
+}
+
+export function validateNpmTemplatePublicationWorkflow(source) {
+  const problems = [];
+  if (!source.includes("MANUAL_CONFIRMATION: ${{ inputs.confirmation }}"))
+    problems.push(
+      "release-npm.yml:plan must pass manual confirmation only to preserve the ordinary manual release path",
+    );
+  if (
+    !source.includes(
+      "inputs.confirmation == 'publish' || needs.plan.outputs.action == 'publish-create-vireo' || needs.plan.outputs.action == 'recover-create-vireo'",
+    )
+  )
+    problems.push("release-npm.yml:verify must admit confirmed manual releases and only exact automatic CLI actions");
+  return problems;
+}
+
 export function validateAlwaysReportedPullRequestWorkflow(source, fileName) {
   const problems = [];
   const beforePermissions = source.slice(0, source.indexOf("permissions:"));
@@ -250,7 +317,13 @@ for (const fileName of workflowFiles) {
   const jobs = parseJobs(lines);
 
   if (fileName === "release.yml") problems.push(...validateReleasePrWorkflow(source, policy));
-  if (fileName === "release-npm.yml") problems.push(...validateNpmReleaseMavenPrerequisite(source));
+  if (fileName === "adopt-template-release.yml") problems.push(...validateTemplateAdoptionWorkflow(source));
+  if (fileName === "release-npm.yml")
+    problems.push(...validateNpmReleaseMavenPrerequisite(source), ...validateNpmTemplatePublicationWorkflow(source));
+  if (fileName === "release-npm.yml" && !source.includes("GITHUB_TOKEN: ${{ github.token }}"))
+    problems.push(
+      "release-npm.yml:plan must pass github.token explicitly for bounded release-workflow evidence lookup",
+    );
   if (fileName === "anonymous-consumer-gauntlet.yml") {
     problems.push(...validateAlwaysReportedPullRequestWorkflow(source, fileName));
   }

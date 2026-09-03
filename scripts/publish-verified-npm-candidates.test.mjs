@@ -8,6 +8,7 @@ import test from "node:test";
 import {
   inspectExistingTag,
   inspectRegistryCandidate,
+  anonymousNpmEnvironment,
   npmPurl,
   publishVerifiedCandidates,
   reconcileCandidateTags,
@@ -103,6 +104,23 @@ test("uses the established bounded npm visibility budget and rejects malformed e
     () => registryConfirmationSettings({ NPM_CANDIDATE_CONFIRM_INTERVAL_MS: "0" }),
     /NPM_CANDIDATE_CONFIRM_INTERVAL_MS must be a positive integer/u,
   );
+});
+
+test("anonymous npm provenance audits isolate user, global, and XDG configuration from inherited credentials", () => {
+  const environment = anonymousNpmEnvironment("/tmp/vireo-anonymous-audit", {
+    NPM_CONFIG_USERCONFIG: "/secret/.npmrc",
+    npm_config_globalconfig: "/secret/global",
+    NPM_TOKEN: "secret",
+  });
+  assert.equal(environment.HOME, "/tmp/vireo-anonymous-audit/home");
+  assert.equal(environment.XDG_CONFIG_HOME, "/tmp/vireo-anonymous-audit/xdg-config");
+  assert.equal(environment.npm_config_userconfig, "/tmp/vireo-anonymous-audit/anonymous-user.npmrc");
+  assert.equal(environment.npm_config_globalconfig, "/tmp/vireo-anonymous-audit/anonymous-global.npmrc");
+  assert.equal(environment.npm_config_prefix, "/tmp/vireo-anonymous-audit/npm-prefix");
+  assert.equal(environment.npm_config_always_auth, "false");
+  assert.equal(environment.npm_config_registry, "https://registry.npmjs.org");
+  assert.equal(environment.NPM_CONFIG_USERCONFIG, undefined);
+  assert.equal(environment.NPM_TOKEN, undefined);
 });
 
 function gitFailure(status) {
@@ -444,6 +462,23 @@ test("treats matching registry bytes as historical when their audited provenance
     ...tags.options,
   });
   assert.deepEqual(result, []);
+  assert.deepEqual(tags.created, []);
+});
+
+test("automatic Template adoption rejects a historical CLI whose registry integrity differs from reviewed bytes", async () => {
+  const candidate = verifyNpmCandidates(fixture(), commit).at(-1);
+  const tags = tagOperations({ existingTags: new Map([[candidate.coordinate, "b".repeat(40)]]) });
+  await assert.rejects(
+    publishVerifiedCandidates([candidate], {
+      expectedCommit: commit,
+      automaticTemplateAdoption: true,
+      fetchRegistry: async () => metadataResponse(candidate, { dist: { integrity: alternateIntegrity(candidate) } }),
+      publish: async () => assert.fail("mismatched historical CLI must not publish"),
+      auditHistoricalCandidates: auditedProvenance(new Map([[candidate.coordinate, "b".repeat(40)]])),
+      ...tags.options,
+    }),
+    /Automatic Template adoption requires registry integrity/u,
+  );
   assert.deepEqual(tags.created, []);
 });
 

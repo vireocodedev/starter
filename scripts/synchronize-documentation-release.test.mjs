@@ -681,6 +681,20 @@ function makeFixture({
       },
     },
   });
+  writeJson(join(root, "contracts", "template-adoption-intent.json"), {
+    schemaVersion: 1,
+    status: "candidate",
+    template: {
+      repository: "vireocodedev/vireo-template",
+      version: "0.3.0",
+      tag: "starter-template@0.3.0",
+      commit: "b".repeat(40),
+      releaseUrl: "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.3.0",
+    },
+    createVireoVersion: "0.3.0",
+    ecosystemRelease: "npm-0.3.0_jvm-0.4.0",
+    maven: { version: "0.4.0" },
+  });
   writeJson(join(root, "packages", "sqlite", "package.json"), {
     name: "@vireocodedev/sqlite",
     version: "0.2.2",

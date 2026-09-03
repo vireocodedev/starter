@@ -169,7 +169,7 @@ if (permissions.default_workflow_permissions !== "read" || permissions.can_appro
   );
 const reviewer = [{ type: "User", id: 53398175 }];
 validateEnvironment(".github/environments/package-release.json", {
-  reviewers: reviewer,
+  reviewers: [],
   policies: [{ name: "main", type: "branch" }],
 });
 validateEnvironment(".github/environments/maven-central.json", {
@@ -180,6 +180,20 @@ validateEnvironment(".github/environments/github-pages.json", {
   reviewers: [],
   policies: [{ name: "main", type: "branch" }],
 });
+validateEnvironment(".github/environments/template-adoption.json", {
+  reviewers: [],
+  policies: [{ name: "main", type: "branch" }],
+});
+const templateAdoptionAssertions = readJson(".github/environments/template-adoption.live-assertions.json");
+if (
+  JSON.stringify(templateAdoptionAssertions.required_secret_names) !==
+    JSON.stringify(["TEMPLATE_ADOPTION_APP_PRIVATE_KEY"]) ||
+  JSON.stringify(templateAdoptionAssertions.required_variable_names) !== JSON.stringify(["TEMPLATE_ADOPTION_APP_ID"])
+) {
+  problems.push(
+    "template-adoption environment must declare exactly the repository-scoped GitHub App key and ID prerequisites",
+  );
+}
 if (
   readText(".github/CODEOWNERS")
     .split("\n")
@@ -193,5 +207,5 @@ if (problems.length) {
   process.exit(1);
 }
 console.log(
-  "Repository security desired-state policy passed: main/tags, Actions, workflow defaults, 3 environments, and issue-form labels.",
+  "Repository security desired-state policy passed: main/tags, Actions, workflow defaults, 4 environments, and issue-form labels.",
 );

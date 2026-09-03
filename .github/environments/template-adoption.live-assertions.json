@@ -1,0 +1,5 @@
+{
+  "can_admins_bypass": false,
+  "required_secret_names": ["TEMPLATE_ADOPTION_APP_PRIVATE_KEY"],
+  "required_variable_names": ["TEMPLATE_ADOPTION_APP_ID"]
+}
