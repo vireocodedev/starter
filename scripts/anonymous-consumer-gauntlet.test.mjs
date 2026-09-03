@@ -22,6 +22,7 @@ import {
   validateCreateDryRunJson,
   validateDoctorJson,
   validateManagedProvenance,
+  validateNpmPackJson,
   validatePolicy,
   validateReleaseIdentityJson,
   validateRegistryMetadataJson,
@@ -890,6 +891,42 @@ test("npm registry metadata accepts only an exact direct object or singleton res
     () => validateRegistryMetadataJson([{ ...expected, name: "@vireocodedev/query" }], expected),
     /exact public/u,
   );
+});
+
+test("npm pack JSON accepts only the exact legacy singleton list or npm 11 package map", () => {
+  const expected = { name: "@vireocodedev/ui", version: "0.3.1" };
+  const entry = { ...expected, filename: "vireocodedev-ui-0.3.1.tgz" };
+  const assertion = { type: "npm-pack", coordinate: "@vireocodedev/ui@0.3.1" };
+  const createVireo = { name: "create-vireo", version: "0.8.7" };
+  const createVireoEntry = { ...createVireo, filename: "create-vireo-0.8.7.tgz" };
+
+  assert.deepEqual(validateNpmPackJson([entry], expected), assertion);
+  assert.deepEqual(validateNpmPackJson({ [expected.name]: entry }, expected), assertion);
+  assert.deepEqual(validateNpmPackJson([createVireoEntry], createVireo), {
+    type: "npm-pack",
+    coordinate: "create-vireo@0.8.7",
+  });
+
+  for (const malformed of [
+    entry,
+    [],
+    [entry, entry],
+    {},
+    { [expected.name]: entry, "@vireocodedev/query": entry },
+    { "@vireocodedev/query": entry },
+    [null],
+    [{ ...entry, name: "@vireocodedev/query" }],
+    [{ ...entry, version: "0.3.2" }],
+    [{ ...entry, filename: "vireocodedev-query-0.3.1.tgz" }],
+    [{ ...entry, filename: "../vireocodedev-ui-0.3.1.tgz" }],
+    [{ ...entry, filename: "   " }],
+    [{ name: entry.name, version: entry.version }],
+    { [expected.name]: [] },
+    null,
+    "pack",
+  ]) {
+    assert.throws(() => validateNpmPackJson(malformed, expected));
+  }
 });
 
 test("preflight failures have a stable machine-actionable finding", () => {
