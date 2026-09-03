@@ -1803,7 +1803,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       return [
         command(
           "maven-central-consumer",
-          "sh",
+          "bash",
           [join(root, "jvm", "scripts", "verify-central-consumer.sh"), release.maven.version],
           { cwdClass: "framework-verifier", timeoutMs: 45 * 60_000 },
         ),

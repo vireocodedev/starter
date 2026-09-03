@@ -411,6 +411,13 @@ test("deterministic plan gives a fake executor every required recipe and refusal
   assert.equal(postgresqlProductionCompose.length, 1);
   assert.equal(postgresqlProductionCompose[0].executable, "bash");
   assert.deepEqual(postgresqlProductionCompose[0].arguments, ["scripts/verify-deployment.sh"]);
+  const mavenCentralConsumer = operations.filter(operation => operation.id === "maven-central-consumer");
+  assert.equal(mavenCentralConsumer.length, 1);
+  assert.equal(mavenCentralConsumer[0].executable, "bash");
+  assert.deepEqual(mavenCentralConsumer[0].arguments, [
+    join(root, "jvm", "scripts", "verify-central-consumer.sh"),
+    release.maven.version,
+  ]);
   assert.equal(
     operations.filter(operation =>
       operation.arguments.some(argument => String(argument).endsWith("collect-public-release-evidence.mjs")),
