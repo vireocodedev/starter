@@ -254,10 +254,10 @@ test("recovery is emitted for an exact immutable manifest receipt once all packa
     manifests,
     policy,
     rebind,
-    fetchResponse: async url => ({
-      status: url.includes("api.github.com") ? 404 : 200,
-      ok: !url.includes("api.github.com"),
-    }),
+    fetchResponse: async url => {
+      const isGitHubApi = new URL(url).hostname === "api.github.com";
+      return { status: isGitHubApi ? 404 : 200, ok: !isGitHubApi };
+    },
   });
   assert.equal(result.action, "recover-create-vireo");
 });
