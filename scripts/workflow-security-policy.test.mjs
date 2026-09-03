@@ -66,6 +66,46 @@ test("requires Basic x-access-token authentication for the App-token Git push", 
   assert.match(validateTemplateAdoptionWorkflow(bearer).join("\n"), /must not use bearer authentication/u);
 });
 
+test("retains the hidden immutable Template plan artifact even when planning fails", () => {
+  assert.deepEqual(validateTemplateAdoptionWorkflow(templateAdoptionWorkflow), []);
+  for (const [before, after] of [
+    ["if: always()", "if: success()"],
+    ["include-hidden-files: true", "include-hidden-files: false"],
+    ["if-no-files-found: error", "if-no-files-found: warn"],
+    ["path: .template-adoption-plan.json", "path: plan.json"],
+    ["path: .template-adoption-plan.json", "path: .template-adoption-plan.json*"],
+  ]) {
+    assert.match(
+      validateTemplateAdoptionWorkflow(templateAdoptionWorkflow.replace(before, after)).join("\n"),
+      /plan artifact upload/u,
+      before,
+    );
+  }
+  const uploadName = "      - name: Upload immutable Template adoption plan";
+  for (const mutated of [
+    templateAdoptionWorkflow.replace(uploadName, "      # Upload immutable Template adoption plan"),
+    templateAdoptionWorkflow
+      .replace(uploadName, "      # Upload immutable Template adoption plan")
+      .replace("  stage:\n", `  stage:\n${uploadName}\n`),
+    templateAdoptionWorkflow.replace(uploadName, `${uploadName}\n${uploadName}`),
+    templateAdoptionWorkflow.replace("include-hidden-files: true", "# include-hidden-files: true"),
+    templateAdoptionWorkflow.replace(
+      "          path: .template-adoption-plan.json",
+      "          path: .template-adoption-plan.json\n          path: .template-adoption-plan.json",
+    ),
+    templateAdoptionWorkflow.replace(
+      "          path: .template-adoption-plan.json",
+      "          path: .template-adoption-plan.json\n          'path': '**'",
+    ),
+    templateAdoptionWorkflow.replace(
+      "          path: .template-adoption-plan.json",
+      "          path: .template-adoption-plan.json\n          path : '**'",
+    ),
+  ]) {
+    assert.match(validateTemplateAdoptionWorkflow(mutated).join("\n"), /plan artifact upload/u);
+  }
+});
+
 test("requires runtime-bound GitHub App bot authorship", () => {
   const hardcodedIdentity = templateAdoptionWorkflow
     .replace('git config user.name "$APP_LOGIN"', 'git config user.name "fixed[bot]"')

@@ -248,6 +248,73 @@ export function validateTemplateAdoptionWorkflow(source) {
       "adopt-template-release.yml:stage must have only contents: read; GitHub App writes are separately scoped",
     );
   const stageLines = stage ? lines.slice(stage.start, stage.end).join("\n") : "";
+  const uploadName = "      - name: Upload immutable Template adoption plan";
+  const uploadStarts = plan
+    ? lines.slice(plan.start, plan.end).flatMap((line, offset) => (line === uploadName ? [plan.start + offset] : []))
+    : [];
+  if (uploadStarts.length !== 1) {
+    problems.push("adopt-template-release.yml:plan artifact upload must contain exactly one named upload step in plan");
+  } else {
+    const uploadStart = uploadStarts[0];
+    let uploadEnd = plan.end;
+    for (let index = uploadStart + 1; index < plan.end; index += 1) {
+      if (/^ {6}- /u.test(lines[index])) {
+        uploadEnd = index;
+        break;
+      }
+    }
+    const stepProperties = new Map();
+    const withProperties = new Map();
+    let inWith = false;
+    for (const line of lines.slice(uploadStart + 1, uploadEnd)) {
+      if (line.trim() === "") continue;
+      const direct = /^ {8}([A-Za-z][A-Za-z-]*):(?:\s*(.*))?$/u.exec(line);
+      if (direct) {
+        inWith = direct[1] === "with";
+        const values = stepProperties.get(direct[1]) ?? [];
+        values.push((direct[2] ?? "").trim());
+        stepProperties.set(direct[1], values);
+        continue;
+      }
+      if (!inWith) {
+        problems.push("adopt-template-release.yml:plan artifact upload has noncanonical step syntax");
+        continue;
+      }
+      const nested = /^ {10}([A-Za-z][A-Za-z-]*):(?:\s*(.*))?$/u.exec(line);
+      if (!nested) {
+        problems.push("adopt-template-release.yml:plan artifact upload has noncanonical with syntax");
+        continue;
+      }
+      const values = withProperties.get(nested[1]) ?? [];
+      values.push((nested[2] ?? "").trim());
+      withProperties.set(nested[1], values);
+    }
+    const expectedStep = new Map([
+      ["if", "always()"],
+      ["uses", "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1"],
+      ["with", ""],
+    ]);
+    const expectedWith = new Map([
+      ["name", "template-adoption-plan-${{ github.sha }}"],
+      ["path", ".template-adoption-plan.json"],
+      ["include-hidden-files", "true"],
+      ["if-no-files-found", "error"],
+      ["retention-days", "90"],
+    ]);
+    const exactProperties = (actual, expected, location) => {
+      if (actual.size !== expected.size || [...actual.keys()].some(key => !expected.has(key)))
+        problems.push(`adopt-template-release.yml:plan artifact upload has unexpected ${location} properties`);
+      for (const [key, value] of expected) {
+        const values = actual.get(key) ?? [];
+        if (values.length !== 1 || values[0] !== value)
+          problems.push(
+            `adopt-template-release.yml:plan artifact upload must retain exact ${location} ${key}: ${value}`,
+          );
+      }
+    };
+    exactProperties(stepProperties, expectedStep, "step");
+    exactProperties(withProperties, expectedWith, "with");
+  }
   for (const fragment of [
     "environment: template-adoption",
     "TEMPLATE_ADOPTION_APP_ID: ${{ vars.TEMPLATE_ADOPTION_APP_ID }}",
