@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:create-vireo",
+  "decision": "no-release",
+  "justification": "Install the adoption workflow and packed projection exclusions before the next coordinated Template/CLI release; this infrastructure PR intentionally leaves all current public coordinates unchanged."
+}

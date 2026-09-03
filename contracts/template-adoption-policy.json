@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "templateRepository": "vireocodedev/vireo-template",
+  "templateRepositoryUrl": "https://github.com/vireocodedev/vireo-template",
+  "releaseTagPrefix": "starter-template@",
+  "releaseManifestAsset": "template-release-manifest.json",
+  "adoptionBranchPrefix": "automation/template-",
+  "prMarkerPrefix": "vireo-template-adoption",
+  "polling": { "maximumReleasePages": 5 },
+  "requiredNpmPackages": [
+    "@vireocodedev/history",
+    "@vireocodedev/infrastructure",
+    "@vireocodedev/localization",
+    "@vireocodedev/query",
+    "@vireocodedev/shell",
+    "@vireocodedev/sqlite",
+    "@vireocodedev/ui"
+  ],
+  "requiredMavenModules": ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"],
+  "requiredTemplateBoundFiles": [
+    "contracts/template-release-policy.json",
+    ".vireo/template.json",
+    "package.json",
+    "frontend/package.json",
+    "frontend/package-lock.json",
+    "contracts/vireo-package-compatibility.json",
+    "contracts/project-upgrade-policy.json",
+    "gradle.properties"
+  ],
+  "automaticPublication": {
+    "onlyPackage": "create-vireo",
+    "requireExactImmutableTemplate": true,
+    "requirePublishedLibraries": true,
+    "requirePublishedMaven": true
+  }
+}

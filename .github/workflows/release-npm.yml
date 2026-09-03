@@ -1,6 +1,8 @@
 name: Publish npm release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       confirmation:
@@ -15,9 +17,38 @@ concurrency:
 permissions: {}
 
 jobs:
+  plan:
+    name: Plan automatic create-vireo publication
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      deployments: read
+    outputs:
+      action: ${{ steps.plan.outputs.action }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: plan
+        name: Allow only a fully adopted CLI-only publication
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MANUAL_CONFIRMATION: ${{ inputs.confirmation }}
+        run: node scripts/npm-template-adoption-publication-plan.mjs
+
   verify:
     name: Verify npm release candidate
-    if: github.ref == 'refs/heads/main'
+    needs: plan
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (inputs.confirmation == 'publish' || needs.plan.outputs.action == 'publish-create-vireo' || needs.plan.outputs.action == 'recover-create-vireo')
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
@@ -26,7 +57,8 @@ jobs:
       - name: Confirm protected release intent
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
-        run: test "$GITHUB_REF" = "refs/heads/main" && test "$CONFIRMATION" = "publish"
+          AUTOMATIC_ACTION: ${{ needs.plan.outputs.action }}
+        run: test "$GITHUB_REF" = "refs/heads/main" && { test "$CONFIRMATION" = "publish" || test "$AUTOMATIC_ACTION" = "publish-create-vireo" || test "$AUTOMATIC_ACTION" = "recover-create-vireo"; }
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.18.1
@@ -92,8 +124,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+          AUTOMATIC_TEMPLATE_ADOPTION: ${{ github.event_name == 'push' }}
       - name: Report evidence-backed publication and tag recovery result
         id: publication-result
+        env:
+          AUTOMATIC_TEMPLATE_ADOPTION: ${{ github.event_name == 'push' }}
         run: corepack npm run release:report-publication
       - name: Verify the anonymous public release
         run: corepack npm run release:verify-public

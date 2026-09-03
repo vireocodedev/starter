@@ -179,21 +179,23 @@ async function confirmPublishedCandidate(candidate, { fetchRegistry, sleep, retr
   throw new Error(`npm registry did not confirm ${candidate.coordinate} after ${retryAttempts} attempts`);
 }
 
-function anonymousNpmEnvironment(auditRoot) {
+export function anonymousNpmEnvironment(auditRoot, inherited = process.env) {
   const environment = Object.fromEntries(
-    Object.entries(process.env).filter(
-      ([key]) =>
-        !/(?:^|_)(?:node_auth_token|npm_token|github_token)$/iu.test(key) &&
-        !(key.toLowerCase().startsWith("npm_config_") && /auth|token|userconfig/iu.test(key)),
+    Object.entries(inherited).filter(
+      ([key]) => !/(?:^|_)(?:node_auth_token|npm_token|github_token)$/iu.test(key) && !/^npm_config_/iu.test(key),
     ),
   );
   return {
     ...environment,
     CI: "true",
+    HOME: join(auditRoot, "home"),
+    XDG_CONFIG_HOME: join(auditRoot, "xdg-config"),
     npm_config_always_auth: "false",
     npm_config_cache: join(auditRoot, "npm-cache"),
+    npm_config_globalconfig: join(auditRoot, "anonymous-global.npmrc"),
+    npm_config_prefix: join(auditRoot, "npm-prefix"),
     npm_config_registry: registry,
-    npm_config_userconfig: join(auditRoot, "anonymous.npmrc"),
+    npm_config_userconfig: join(auditRoot, "anonymous-user.npmrc"),
   };
 }
 
@@ -318,8 +320,12 @@ export function auditHistoricalCandidates(candidates, options = {}) {
   const auditRoot = mkdtempSync(join(tmpdir(), "vireo-release-provenance-"));
   const consumerRoot = join(auditRoot, "consumer");
   try {
+    mkdirSync(join(auditRoot, "home"), { recursive: true });
+    mkdirSync(join(auditRoot, "xdg-config"), { recursive: true });
     mkdirSync(consumerRoot, { recursive: true });
-    writeFileSync(join(auditRoot, "anonymous.npmrc"), `registry=${registry}/\nalways-auth=false\n`);
+    const anonymousNpmrc = `registry=${registry}/\nalways-auth=false\n`;
+    writeFileSync(join(auditRoot, "anonymous-user.npmrc"), anonymousNpmrc);
+    writeFileSync(join(auditRoot, "anonymous-global.npmrc"), anonymousNpmrc);
     writeFileSync(
       join(consumerRoot, "package.json"),
       `${JSON.stringify({ name: "vireo-release-provenance-audit", private: true, dependencies: Object.fromEntries(candidates.map(c => [c.name, c.version])) })}\n`,
@@ -471,6 +477,18 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
     const registryState = await inspectRegistryCandidate(candidate, fetchRegistry);
     registryStates.set(candidate.coordinate, registryState);
     if (registryState.state === "absent") unpublished.push(candidate);
+  }
+  if (options.automaticTemplateAdoption === true || process.env.AUTOMATIC_TEMPLATE_ADOPTION === "true") {
+    if (unpublished.some(candidate => candidate.name !== "create-vireo")) {
+      throw new Error("Automatic Template adoption may publish only create-vireo; a library candidate is absent.");
+    }
+    for (const candidate of candidates) {
+      const state = registryStates.get(candidate.coordinate);
+      if (state.state === "historical" && state.integrity !== candidate.integrity)
+        throw new Error(
+          `Automatic Template adoption requires registry integrity to match reviewed candidate bytes for ${candidate.coordinate}.`,
+        );
+    }
   }
 
   const historicalCandidates = candidates

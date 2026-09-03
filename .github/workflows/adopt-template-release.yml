@@ -1,0 +1,152 @@
+name: Adopt immutable Vireo Template release
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: template-adoption
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  plan:
+    name: Plan public Template adoption
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      action: ${{ steps.plan.outputs.action }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: plan
+        name: Validate the next public immutable Template release
+        run: node scripts/plan-template-adoption.mjs --output .template-adoption-plan.json --json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: template-adoption-plan-${{ github.sha }}
+          path: .template-adoption-plan.json
+          if-no-files-found: error
+          retention-days: 90
+
+  stage:
+    name: Open a safe Template adoption draft
+    needs: plan
+    if: needs.plan.outputs.action == 'stage' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: template-adoption
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: template-adoption-plan-${{ github.sha }}
+      - id: app-token
+        name: Mint the repository-scoped GitHub App token
+        env:
+          TEMPLATE_ADOPTION_APP_ID: ${{ vars.TEMPLATE_ADOPTION_APP_ID }}
+          TEMPLATE_ADOPTION_APP_PRIVATE_KEY: ${{ secrets.TEMPLATE_ADOPTION_APP_PRIVATE_KEY }}
+        run: node scripts/create-template-adoption-app-token.mjs
+      - name: Deterministically stage the candidate before comparing an existing PR
+        run: |
+          node scripts/stage-template-adoption.mjs --plan .template-adoption-plan.json --json
+          if test "$(node -p "require('./.template-adoption-plan.json').upgrade.ready === true")" = true; then
+            corepack npm ci --ignore-scripts
+            corepack npm run version-packages
+          fi
+      - id: existing
+        name: Accept only an exact untouched existing adoption pull request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_LOGIN: ${{ steps.app-token.outputs.login }}
+          APP_EMAIL: ${{ steps.app-token.outputs.email }}
+        run: |
+          version="$(node -p "require('./.template-adoption-plan.json').version")"
+          branch="automation/template-$version"
+          prs="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$branch" --json number,body,isDraft,author,baseRefName,headRefName --jq '.')"
+          count="$(printf '%s' "$prs" | jq length)"
+          if [ "$count" = 0 ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            git add -A
+            git reset -- .template-adoption-plan.json
+            expected_tree="$(git write-tree)"
+            if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null; then
+              git fetch --no-tags origin "refs/heads/$branch:refs/remotes/origin/$branch"
+              remote_sha="$(git rev-parse "refs/remotes/origin/$branch")"
+              test "$(git rev-list --count "HEAD..$remote_sha")" = 1
+              test "$(git rev-parse "$remote_sha^")" = "$(git rev-parse HEAD)"
+              test "$(git show -s --format=%T "$remote_sha")" = "$expected_tree"
+              test "$(git show -s --format='%an <%ae>' "$remote_sha")" = "$APP_LOGIN <$APP_EMAIL>"
+              echo "reuse_remote=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "reuse_remote=false" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "$count" = 1 ]; then
+            number="$(printf '%s' "$prs" | jq -r '.[0].number')"
+            printf '%s' "$prs" | jq -r '.[0].body' | grep -F "<!-- vireo-template-adoption:starter-template@$version -->"
+            test "$(printf '%s' "$prs" | jq -r '.[0].author.login')" = "$APP_LOGIN"
+            test "$(printf '%s' "$prs" | jq -r '.[0].baseRefName')" = main
+            test "$(printf '%s' "$prs" | jq -r '.[0].headRefName')" = "$branch"
+            expected_draft="true"
+            if test "$(node -p "require('./.template-adoption-plan.json').upgrade.ready === true")" = true; then expected_draft="false"; fi
+            test "$(printf '%s' "$prs" | jq -r '.[0].isDraft')" = "$expected_draft"
+            commits="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$number/commits")"
+            test "$(printf '%s' "$commits" | jq length)" = 1
+            test "$(printf '%s' "$commits" | jq -r '.[0].commit.message')" = "chore(template): stage $version adoption"
+            git add -A
+            git reset -- .template-adoption-plan.json
+            expected_tree="$(git write-tree)"
+            test "$(printf '%s' "$commits" | jq -r '.[0].commit.tree.sha')" = "$expected_tree"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Multiple adoption PRs collide for starter-template@$version" >&2
+            exit 1
+          fi
+      - if: steps.existing.outputs.skip != 'true'
+        name: Commit and publish the draft branch through the GitHub App
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_LOGIN: ${{ steps.app-token.outputs.login }}
+          APP_EMAIL: ${{ steps.app-token.outputs.email }}
+          REUSE_REMOTE: ${{ steps.existing.outputs.reuse_remote }}
+        run: |
+          version="$(node -p "require('./.template-adoption-plan.json').version")"
+          branch="automation/template-$version"
+          if test "$REUSE_REMOTE" != true; then
+            git switch -c "$branch"
+            git config user.name "$APP_LOGIN"
+            git config user.email "$APP_EMAIL"
+            git add -A
+            git reset -- .template-adoption-plan.json
+            git commit -m "chore(template): stage $version adoption"
+            basic_auth="$(printf '%s:%s' x-access-token "$GH_TOKEN" | base64 | tr -d '\n')"
+            echo "::add-mask::$basic_auth"
+            git -c http.extraheader="AUTHORIZATION: Basic $basic_auth" push origin "HEAD:$branch"
+          fi
+          draft="--draft"
+          body="This draft pins an immutable public Template release. It remains draft until Vireo-owned project-upgrade transforms are reviewed. See \`contracts/template-adoption-unresolved.json\`."
+          if test "$(node -p "require('./.template-adoption-plan.json').upgrade.ready === true")" = true; then
+            draft=""
+            body="This ready PR pins the immutable public Template release and contains the deterministic create-vireo version, changelog, lockfile, and synchronized release contracts."
+          fi
+          pr_body="$(printf '%s\n\n%s' "<!-- vireo-template-adoption:starter-template@$version -->" "$body")"
+          gh pr create --repo "$GITHUB_REPOSITORY" --head "$branch" --base main $draft --title "chore(template): adopt starter-template@$version" --body "$pr_body"

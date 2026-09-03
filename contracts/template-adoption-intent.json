@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "status": "adopted",
+  "template": {
+    "repository": "vireocodedev/vireo-template",
+    "version": "0.8.7",
+    "tag": "starter-template@0.8.7",
+    "commit": "0557990f024a8736b6e661f8fc264861deb99b65",
+    "releaseUrl": "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.7"
+  },
+  "createVireoVersion": "0.8.7",
+  "ecosystemRelease": "npm-0.8.7_jvm-0.3.1",
+  "source": "immutable-template-release"
+}

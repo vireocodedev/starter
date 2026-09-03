@@ -58,6 +58,10 @@ test("template release operations are excluded from every project profile", () =
       "scripts/template-release-policy.mjs",
       "scripts/template-release-policy.test.mjs",
       "scripts/write-template-release-manifest.mjs",
+      "scripts/template-release-artifacts.mjs",
+      "scripts/template-release-coordinate-change.mjs",
+      "scripts/template-release-state.mjs",
+      "scripts/template-release-state.test.mjs",
     ]) {
       const classification = classifyProjectionPath(contract, path, profile);
       assert.equal(classification?.category, "maintainer-only", `${profile}: ${path}`);

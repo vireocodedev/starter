@@ -6,6 +6,8 @@ import {
   parseJobPermissions,
   validateAlwaysReportedPullRequestWorkflow,
   validateReleasePrWorkflow,
+  validateNpmTemplatePublicationWorkflow,
+  validateTemplateAdoptionWorkflow,
 } from "./workflow-security-policy.mjs";
 
 const read = relative => readFileSync(new URL(`../${relative}`, import.meta.url), "utf8");
@@ -13,6 +15,8 @@ const actionPolicy = JSON.parse(read("contracts/github-actions-policy.json"));
 const releaseWorkflow = read(".github/workflows/release.yml");
 const anonymousGauntletWorkflow = read(".github/workflows/anonymous-consumer-gauntlet.yml");
 const websiteWorkflow = read(".github/workflows/website.yml");
+const templateAdoptionWorkflow = read(".github/workflows/adopt-template-release.yml");
+const npmReleaseWorkflow = read(".github/workflows/release-npm.yml");
 
 function indentation(line) {
   return /^\s*/u.exec(line)?.[0].length ?? 0;
@@ -51,6 +55,32 @@ function standaloneWebsiteArtifactRetainsHiddenFiles(workflow) {
 
 test("accepts the narrowly scoped Changesets release-PR workflow", () => {
   assert.deepEqual(validateReleasePrWorkflow(releaseWorkflow, actionPolicy), []);
+});
+
+test("requires Basic x-access-token authentication for the App-token Git push", () => {
+  assert.deepEqual(validateTemplateAdoptionWorkflow(templateAdoptionWorkflow), []);
+  const bearer = templateAdoptionWorkflow.replace(
+    'http.extraheader="AUTHORIZATION: Basic $basic_auth"',
+    'http.extraheader="AUTHORIZATION: bearer $GH_TOKEN"',
+  );
+  assert.match(validateTemplateAdoptionWorkflow(bearer).join("\n"), /must not use bearer authentication/u);
+});
+
+test("requires runtime-bound GitHub App bot authorship", () => {
+  const hardcodedIdentity = templateAdoptionWorkflow
+    .replace('git config user.name "$APP_LOGIN"', 'git config user.name "fixed[bot]"')
+    .replace('git config user.email "$APP_EMAIL"', 'git config user.email "1+fixed[bot]@users.noreply.github.com"');
+  assert.match(validateTemplateAdoptionWorkflow(hardcodedIdentity).join("\n"), /APP_LOGIN|APP_EMAIL/u);
+});
+
+test("preserves confirmed manual npm dispatch while constraining automatic CLI publication", () => {
+  assert.deepEqual(validateNpmTemplatePublicationWorkflow(npmReleaseWorkflow), []);
+  assert.match(
+    validateNpmTemplatePublicationWorkflow(
+      npmReleaseWorkflow.replace("MANUAL_CONFIRMATION: ${{ inputs.confirmation }}\n", ""),
+    ).join("\n"),
+    /manual confirmation/u,
+  );
 });
 
 test("recognizes an explicit empty inline job permissions map", () => {

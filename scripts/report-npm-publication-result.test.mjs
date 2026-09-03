@@ -87,6 +87,22 @@ test("rejects an overlap, unknown coordinate, or malformed audited provenance", 
   );
 });
 
+test("automatic Template adoption cannot publish a library coordinate", () => {
+  const values = candidates();
+  const input = resultFor([values[1], values[0], ...values.slice(2)]);
+  const previous = process.env.AUTOMATIC_TEMPLATE_ADOPTION;
+  process.env.AUTOMATIC_TEMPLATE_ADOPTION = "true";
+  try {
+    assert.throws(
+      () => publicationResultSummary(input, candidates(), commit),
+      /only the exact create-vireo candidate/u,
+    );
+  } finally {
+    if (previous === undefined) delete process.env.AUTOMATIC_TEMPLATE_ADOPTION;
+    else process.env.AUTOMATIC_TEMPLATE_ADOPTION = previous;
+  }
+});
+
 test("writes scalar GitHub outputs and JSON arrays without JSON-quoting scalars", () => {
   const writes = [];
   writeGitHubOutput(publicationResultSummary(resultFor(), candidates(), commit), value => writes.push(value));

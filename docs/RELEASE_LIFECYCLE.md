@@ -1,5 +1,7 @@
 # Release lifecycle
 
+For the Template-to-CLI handoff, see [immutable Template adoption](TEMPLATE_RELEASE_ADOPTION.md). The canonical order is: publish and verify the seven npm libraries and JVM artifacts; prepare and publish the immutable Template; let Vireo open one adoption draft; complete any reviewed project-upgrade semantics and version that same PR; then merge it to automatically publish `create-vireo`.
+
 Vireo publishes independently versioned npm packages and a versioned Maven BOM. The machine-readable source for release channels and supported lines is [`contracts/release-lifecycle-policy.json`](../contracts/release-lifecycle-policy.json); this page explains the operator contract.
 
 ## Channels
@@ -12,12 +14,14 @@ The prerelease channel is currently `not-enabled`. Enabling it requires a review
 
 ## Coordinated publication order
 
-When one release line spans Template, Maven, and npm artifacts, publish the reviewed
-Template first, then stage/publish Maven and complete anonymous Maven Central
-verification, then dispatch and approve npm publication. The npm verify stage
-enforces the exact Maven prerequisite from the ecosystem contract before its
-protected environment is reachable; Changesets release pull requests remain
-mergeable without this public-artifact check.
+When one release line spans Template, Maven, and npm artifacts, publish and
+verify the seven Vireo npm libraries and the Maven artifacts first. Then prepare
+and publish the immutable Template release. Vireo opens one adoption draft;
+maintainers add any necessary project-upgrade semantics and version that same
+PR before merging it. The merge can then publish only `create-vireo`. The npm
+verify stage enforces the exact Maven prerequisite from the ecosystem contract
+before its protected environment is reachable; Changesets release pull requests
+remain mergeable without this public-artifact check.
 
 ## Supported lines
 

@@ -1,10 +1,12 @@
 # Public npm release
 
 Seven `@vireocodedev/*` libraries and the unscoped `create-vireo` command publish as eight public packages on npm. A
-release is deliberately split into three independently observable stages:
+release is deliberately split into independently observable stages:
 
 1. Changesets prepares a version pull request.
-2. A maintainer approves one protected publication from `main`.
+2. An ordinary library release is manually dispatched from protected `main`; an
+   exact `create-vireo` adoption release is authorized by merging its protected
+   Template-adoption PR.
 3. A credential-free workflow installs and verifies the immutable public result.
 
 Local builds, pull requests, ordinary CI, and public consumers require no npm
@@ -28,7 +30,7 @@ and provenance. Package versions are immutable after publication.
 
 1. Confirm that the `vireocodedev` npm organization is controlled by the release
    owners and that publishing accounts use two-factor authentication.
-2. Apply the checked-in [`package-release` environment desired state](../.github/environments/package-release.json): restrict it to `main`, add its documented reviewer, and disable administrator bypass. Capture an authenticated API export after applying it.
+2. Apply the checked-in [`package-release` environment desired state](../.github/environments/package-release.json): restrict it to `main`, require no recurring environment reviewer, and disable administrator bypass. Protected `main` authorization, immutable candidate checks, and release qualification remain mandatory. Capture an authenticated API export after applying it.
 3. Only when bootstrapping a previously unpublished package, use a short-lived
    granular npm access token owned by the applicable package owner. Temporarily store it only as the `NPM_TOKEN` secret on the
    `package-release` environment and explicitly wire it into the publish step in
@@ -80,26 +82,27 @@ version is outside the approved `0.x` line, or there is nothing new to publish.
 
 ## Protected cross-artifact release order
 
-The current npm line depends on the coordinated public Maven line. Keep this
-order protected: publish the reviewed Template release first (the
-`starter-template@0.8.7` release is already published), then stage and publish the
-matching Maven Central deployment, and run its anonymous six-coordinate consumer
-verification. Only after that proof succeeds may a maintainer dispatch and approve
-the npm publication environment. The npm verify job independently repeats that
-anonymous Maven prerequisite using the exact `current.maven.version` from the
-ecosystem contract, so it blocks publication rather than the release pull-request
-merge.
+The current npm line depends on coordinated public libraries and Maven artifacts.
+Publish and verify the seven libraries and matching Maven Central deployment first.
+Then prepare and publish the immutable Template release. Vireo opens one adoption
+draft; maintainers complete any project-upgrade work and version the same PR.
+Merging that protected PR can publish only its exact absent `create-vireo@X`
+coordinate. The npm verify job independently repeats the anonymous Maven
+prerequisite using the exact `current.maven.version` from the ecosystem contract,
+so it blocks publication rather than the release pull-request merge.
 
 ## Publish
 
-1. Open GitHub Actions → **Publish npm release** → **Run workflow**.
-2. Confirm the matching Maven Central release has already passed anonymous public
-   verification, select `main`, enter `publish`, and start the run.
-3. Review the retained release-candidate evidence from the verify job, including
-   its Maven availability prerequisite.
-4. Approve the `package-release` environment deployment.
-5. Confirm that the publish job reports the packages it published, or an explicit
-   successful recovery when every reviewed coordinate was already public.
+For an ordinary library release, open GitHub Actions → **Publish npm release** →
+**Run workflow**, select `main`, enter `publish`, and start the run after Maven
+public verification. For an exact Template adoption, merge the protected,
+fully-versioned adoption PR; its resulting `main` push plans and may publish only
+the exact absent `create-vireo@X` candidate. Neither path has a recurring
+`package-release` environment reviewer.
+
+In both cases, review the retained verify evidence and confirm the publish job
+reports the published packages, or an explicit successful recovery when every
+reviewed coordinate was already public.
 
 The publish job downloads the retained evidence from the verify job, requires its
 source commit and all eight tarball SHA-256 digests to match, then preflights every

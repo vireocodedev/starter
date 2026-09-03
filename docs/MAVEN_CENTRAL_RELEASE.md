@@ -98,11 +98,13 @@ HTTP `204`, and waits until Central reports `PUBLISHED`. The upload remains
    consumer proof succeeds.
 
 For a coordinated npm release, this anonymous Maven proof is a protected
-prerequisite: publish the Template first, then stage/publish Maven and verify all
-six public coordinates, and only then dispatch and approve the npm
-`package-release` environment. The npm workflow reads the required Maven version
-from the ecosystem contract and repeats this check before its candidate can reach
-publication; it does not affect merging the Changesets release pull request.
+prerequisite. Publish and verify the seven npm libraries and Maven artifacts
+first, then prepare and publish the immutable Template. The resulting Vireo
+adoption draft is completed and versioned in the same protected PR; merging it
+may automatically publish only the exact `create-vireo` candidate. Ordinary
+library publication remains a manually dispatched `main` workflow. The npm
+workflow reads the required Maven version from the ecosystem contract and repeats
+this check before its candidate can reach publication.
 
 ## Recover an already-validated deployment
 

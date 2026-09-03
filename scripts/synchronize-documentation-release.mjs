@@ -85,7 +85,9 @@ export async function synchronizeDocumentationRelease(
   const upgradePolicyPath = join(repositoryRoot, "packages", "create-vireo", "schema", "vireo-upgrade-policy.json");
   const upgradePolicy = readJson(upgradePolicyPath);
   const projectUpgradePath = join(repositoryRoot, "contracts", "project-upgrade-policy.json");
+  const templateAdoptionIntentPath = join(repositoryRoot, "contracts", "template-adoption-intent.json");
   const projectUpgrade = readJson(projectUpgradePath);
+  const templateAdoptionIntent = readJson(templateAdoptionIntentPath);
   const publicUpgradeRelease = upgradePolicy.releaseGraph?.publicRelease;
   const candidateUpgradeRelease = upgradePolicy.releaseGraph?.candidateRelease;
   const priorPublicUpgradeRelease = upgradePolicy.releaseGraph?.edges?.find(
@@ -145,11 +147,17 @@ export async function synchronizeDocumentationRelease(
   currentReleaseCoordinate.templateVersion = templateVersion;
   currentReleaseCoordinate.templateCommit = templateCommit;
   currentReleaseCoordinate.starterJvmVersion = jvmVersion;
-
   const oldReleaseId = ecosystem.current?.id;
   if (!oldReleaseId || documentation.currentRelease !== oldReleaseId) {
     throw new Error("Ecosystem and documentation current release IDs do not match");
   }
+  finalizeTemplateAdoptionIntent({
+    intent: templateAdoptionIntent,
+    createVireoVersion,
+    templateCommit,
+    jvmVersion,
+    releaseId: nextReleaseId,
+  });
   updateNpmEntries(ecosystem.current?.npm, packageVersions, "Ecosystem release");
   ecosystem.current.id = nextReleaseId;
   ecosystem.current.maven.version = jvmVersion;
@@ -232,6 +240,7 @@ export async function synchronizeDocumentationRelease(
     [createSourcePath, createSource],
     [upgradePolicyPath, JSON.stringify(upgradePolicy)],
     [projectUpgradePath, JSON.stringify(projectUpgrade)],
+    [templateAdoptionIntentPath, JSON.stringify(templateAdoptionIntent)],
     [
       join(repositoryRoot, "packages", "create-vireo", "fixtures", "release-identity.json"),
       JSON.stringify({
@@ -258,6 +267,21 @@ export async function synchronizeDocumentationRelease(
 
   writeCurrentDocumentationSnapshot({ repositoryRoot, currentDocumentation, createSnapshotArchive, serializeSnapshot });
   writeDocumentationSiteReleaseImpact({ repositoryRoot, currentDocumentation });
+}
+
+function finalizeTemplateAdoptionIntent({ intent, createVireoVersion, templateCommit, jvmVersion, releaseId }) {
+  if (intent?.status === "adopted") return;
+  if (
+    intent?.status !== "candidate" ||
+    intent?.createVireoVersion !== createVireoVersion ||
+    intent?.template?.commit !== templateCommit ||
+    intent?.template?.version !== createVireoVersion ||
+    intent?.maven?.version !== jvmVersion ||
+    intent?.ecosystemRelease !== releaseId
+  ) {
+    throw new Error("Template adoption receipt is not exact enough to finalize the create-vireo release.");
+  }
+  intent.status = "adopted";
 }
 
 function writeCurrentDocumentationSnapshot({

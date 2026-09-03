@@ -29,21 +29,21 @@ manifest digest. Its tag and digest are recorded in the same policy contract.
 All workflows start with `permissions: {}`. Each job opts into only its required
 scopes:
 
-| Workflow/job               | Access                                                                                 | Reason                                        |
-| -------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------- |
-| CI TypeScript/JVM          | `contents: read`, `packages: read`                                                     | Checkout, install, build, and verify          |
-| Security secret scan       | `contents: read`                                                                       | Fetch and scan complete history               |
-| Storybook build            | `contents: read`, `packages: read`                                                     | Build the deployment artifact                 |
-| Storybook deploy           | `pages: write`, `id-token: write`                                                      | Deploy through GitHub Pages OIDC              |
-| Scheduled support evidence | `contents: read`, optional `packages: read`                                            | Build matrix evidence and retain metadata     |
-| Release verification       | `contents: read`, `packages: read`                                                     | Verify the exact candidate without writes     |
-| Release evidence           | `contents: read`, `packages: read`                                                     | Build checksums, SBOM, and dry-run artifacts  |
-| Public SBOM attestation    | `contents: read`, `id-token: write`, `attestations: write`, `artifact-metadata: write` | Sign exact registry subjects with GitHub OIDC |
-| npm release PR maintenance | `contents: write`, `pull-requests: write`                                              | Create or refresh the Changesets release PR   |
-| npm publication            | `contents: write`, `id-token: write`                                                   | Publish human-approved candidate packages     |
-| JVM publication            | `contents: read`, `packages: write`                                                    | Query and publish Maven artifacts             |
-| JVM tag                    | `contents: write`                                                                      | Create the version marker only                |
-| Published JVM verification | `contents: read`, `packages: read`                                                     | Resolve artifacts as an external consumer     |
+| Workflow/job               | Access                                                                                 | Reason                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| CI TypeScript/JVM          | `contents: read`, `packages: read`                                                     | Checkout, install, build, and verify                                                    |
+| Security secret scan       | `contents: read`                                                                       | Fetch and scan complete history                                                         |
+| Storybook build            | `contents: read`, `packages: read`                                                     | Build the deployment artifact                                                           |
+| Storybook deploy           | `pages: write`, `id-token: write`                                                      | Deploy through GitHub Pages OIDC                                                        |
+| Scheduled support evidence | `contents: read`, optional `packages: read`                                            | Build matrix evidence and retain metadata                                               |
+| Release verification       | `contents: read`, `packages: read`                                                     | Verify the exact candidate without writes                                               |
+| Release evidence           | `contents: read`, `packages: read`                                                     | Build checksums, SBOM, and dry-run artifacts                                            |
+| Public SBOM attestation    | `contents: read`, `id-token: write`, `attestations: write`, `artifact-metadata: write` | Sign exact registry subjects with GitHub OIDC                                           |
+| npm release PR maintenance | `contents: write`, `pull-requests: write`                                              | Create or refresh the Changesets release PR                                             |
+| npm publication            | `contents: write`, `id-token: write`                                                   | Publish a manually dispatched library release or exact protected-adoption CLI candidate |
+| JVM publication            | `contents: read`, `packages: write`                                                    | Query and publish Maven artifacts                                                       |
+| JVM tag                    | `contents: write`                                                                      | Create the version marker only                                                          |
+| Published JVM verification | `contents: read`, `packages: read`                                                     | Resolve artifacts as an external consumer                                               |
 
 Checkout credentials are disabled everywhere except the isolated JVM tag job.
 Dependency lifecycle scripts are disabled during installation in the npm write
@@ -135,8 +135,9 @@ The live application must cover:
 - prohibit force pushes and deletion of `main`; tightly limit bypass identities;
 - protect the `github-pages` environment and restrict it to the intended branch;
 - before moving publication to a public registry, split release-PR maintenance from
-  publication and put npm/Maven publication jobs behind a `package-release`
-  environment with required reviewers and deployment-branch/tag restrictions; and
+  publication and put npm/Maven publication jobs behind protected deployment
+  branch/tag restrictions; the later adopted `package-release` policy has no
+  recurring reviewer because protected `main` authorization is the release gate; and
 - give at least two trusted maintainers recoverable access to the organization,
   registries, environments, security inbox, and signing/provenance identities.
 
@@ -148,9 +149,11 @@ by that reviewed workflow scope rather than a creation-only provider capability.
 The current provider setting is recorded in the 2026-09-01 follow-up to
 [`provider-controls-2026-08-31.md`](provider-controls-2026-08-31.md), not in the
 historical 2026-08-27 audit above.
-Publication remains manually dispatched from `main` and protected by its
-environment approval gate. The authenticated record confirms the rulesets,
-Actions restrictions, environment ref restrictions, and
+Ordinary multi-package publication and operator recovery remain manually dispatched
+from `main`. An exact CLI-only Template-adoption candidate may publish automatically
+after its protected adoption PR merges; the main-only `package-release` environment
+has no recurring reviewer because that merge is the authorization gate. The
+authenticated record confirms the rulesets, Actions restrictions, environment ref restrictions, and
 `can_admins_bypass: false` for all four protected environments after the UI-only
 settings were changed. Only one trusted maintainer is currently evidenced, so the
 interim rules cannot honestly require an independent CODEOWNERS approval.
@@ -233,7 +236,8 @@ Before each stable public release, attach or link:
 
 - the reviewed action/image policy diff;
 - green read-only candidate verification and secret scan;
-- protected-environment approval and publisher identity;
+- protected publication authorization (the adoption PR merge or any required
+  environment approval) and publisher identity;
 - published-coordinate consumer verification from empty caches;
 - generated candidate and exact-public npm/JVM SBOM/checksum evidence, signed SBOM
   attestation verification, plus published provenance and signature verification;
