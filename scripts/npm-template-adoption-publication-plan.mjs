@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -27,6 +28,24 @@ const approvedAssetHosts = new Set([
   "objects.githubusercontent.com",
   "release-assets.githubusercontent.com",
 ]);
+const legacyCreateVireoVersion = "0.8.7";
+const legacyCreateVireoIntegrity =
+  "sha512-ghr+ldc4sXm3QqSAwvBPo8LERAoySB7vZiJmMlwZYkTkMsriePb92aC0hpE7UHoKD/nOeQNlFmvh3p8B6hc6XA==";
+const legacyCreateVireoTagCommit = "b7b3c97ad230148189c4353fbccdccc2a9239018";
+const legacyReceipt = {
+  schemaVersion: 1,
+  status: "adopted",
+  template: {
+    repository: "vireocodedev/vireo-template",
+    version: legacyCreateVireoVersion,
+    tag: "starter-template@0.8.7",
+    commit: "0557990f024a8736b6e661f8fc264861deb99b65",
+    releaseUrl: "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.7",
+  },
+  createVireoVersion: legacyCreateVireoVersion,
+  ecosystemRelease: "npm-0.8.7_jvm-0.3.1",
+  source: "immutable-template-release",
+};
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -44,6 +63,85 @@ function publicManifests(repositoryRoot = root) {
   return ["create-vireo", "history", "infrastructure", "localization", "queryengine", "shell", "sqlite", "ui"].map(
     directory => readJson(join(repositoryRoot, "packages", directory, "package.json")),
   );
+}
+
+function legacyTagIdentity() {
+  const tag = `create-vireo@${legacyCreateVireoVersion}`;
+  const type = execFileSync("git", ["cat-file", "-t", tag], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+  const commit = execFileSync("git", ["rev-parse", `${tag}^{}`], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+  return { annotated: type === "tag", commit };
+}
+
+async function legacyReceiptNoop({ ecosystem, intent, manifests, fetchResponse, readLegacyTag = legacyTagIdentity }) {
+  const appearsLegacy =
+    intent?.template?.version === legacyCreateVireoVersion || intent?.createVireoVersion === legacyCreateVireoVersion;
+  if (!appearsLegacy) return null;
+  if (stableJson(intent) !== stableJson(legacyReceipt))
+    return {
+      action: "fail",
+      reason: "Historical 0.8.7 Template receipt must exactly match the checked-in legacy receipt.",
+    };
+  const currentTemplate = ecosystem?.current?.template;
+  for (const [key, value] of Object.entries({
+    repository: "https://github.com/vireocodedev/vireo-template",
+    version: legacyReceipt.template.version,
+    tag: legacyReceipt.template.tag,
+    commit: legacyReceipt.template.commit,
+    releaseUrl: legacyReceipt.template.releaseUrl,
+  })) {
+    if (currentTemplate?.[key] !== value)
+      return { action: "fail", reason: `Historical 0.8.7 Template identity drifted at ${key}.` };
+  }
+  const ecosystemCreate = ecosystem?.current?.npm?.find(entry => entry?.name === "create-vireo");
+  if (ecosystemCreate?.version !== legacyCreateVireoVersion)
+    return { action: "fail", reason: "Historical 0.8.7 ecosystem create-vireo entry drifted." };
+  const localCreate = manifests?.find(manifest => manifest?.name === "create-vireo");
+  if (localCreate?.version !== legacyCreateVireoVersion)
+    return { action: "fail", reason: "Local create-vireo manifest does not match historical 0.8.7." };
+  let tag;
+  try {
+    tag = readLegacyTag();
+  } catch {
+    return { action: "fail", reason: "Historical create-vireo@0.8.7 annotated tag could not be verified." };
+  }
+  if (tag?.annotated !== true || tag?.commit !== legacyCreateVireoTagCommit)
+    return { action: "fail", reason: "Historical create-vireo@0.8.7 annotated tag drifted." };
+  let response;
+  try {
+    response = await fetchResponse(`https://registry.npmjs.org/create-vireo/${legacyCreateVireoVersion}`, {
+      headers: { Accept: "application/json" },
+      redirect: "error",
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    return { action: "fail", reason: "Historical create-vireo@0.8.7 registry lookup failed." };
+  }
+  if (!response?.ok)
+    return { action: "fail", reason: "Historical create-vireo@0.8.7 registry lookup was not successful." };
+  let metadata;
+  try {
+    metadata = await boundedJson(response, "Historical create-vireo@0.8.7 registry metadata");
+  } catch {
+    return { action: "fail", reason: "Historical create-vireo@0.8.7 registry metadata is invalid." };
+  }
+  if (
+    metadata?.name !== "create-vireo" ||
+    metadata?.version !== legacyCreateVireoVersion ||
+    metadata?.dist?.integrity !== legacyCreateVireoIntegrity
+  )
+    return {
+      action: "fail",
+      reason: "Historical create-vireo@0.8.7 registry metadata does not match the pinned immutable package.",
+    };
+  return { action: "no-op", reason: "Exact historical create-vireo@0.8.7 receipt is already publicly released." };
 }
 
 function exactEntries(entries, names, label) {
@@ -248,7 +346,10 @@ export async function planAutomaticTemplatePublication({
   policy = readJson(join(root, "contracts/template-adoption-policy.json")),
   fetchResponse = fetch,
   rebind = rebindImmutableTemplateIntent,
+  readLegacyTag = legacyTagIdentity,
 }) {
+  const legacy = await legacyReceiptNoop({ ecosystem, intent, manifests, fetchResponse, readLegacyTag });
+  if (legacy) return legacy;
   const problems = validateAutomaticTemplatePublication({ ecosystem, intent, manifests, policy });
   if (problems.length) return { action: "fail", reason: problems.join(" ") };
   try {

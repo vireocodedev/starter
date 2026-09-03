@@ -35,7 +35,14 @@ the absent exact `create-vireo@X` coordinate. It rejects any absent library,
 receipt drift, incomplete Template evidence, or mismatched Maven baseline.
 Existing candidate validation, registry provenance checks, anonymous public
 verification, and SBOM attestation remain mandatory. Manual dispatch with
-`confirmation=publish` is retained only for operator recovery.
+`confirmation=publish` remains the ordinary library-release and operator-recovery
+path; it is separate from automatic CLI adoption.
+
+The pre-adoption `0.8.7` receipt is a one-time compatibility exception: it is
+never published or recovered automatically. It can only return a no-op after its
+entire checked-in receipt, current Template identity, local annotated
+`create-vireo@0.8.7` tag, and pinned public npm integrity all match exactly.
+Any drift fails closed; later receipts use the schema-2 immutable-manifest path.
 
 ## One-time provider setup
 
