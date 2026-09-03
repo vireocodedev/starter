@@ -800,6 +800,30 @@ export function validateRegistryMetadataJson(value, { name, version }) {
   return { type: "registry-metadata", coordinate: `${name}@${version}` };
 }
 
+/** Accepts only the legacy singleton list or npm 11 singleton package-map response. */
+export function validateNpmPackJson(value, { name, version } = {}) {
+  if (typeof name !== "string" || name.length === 0 || typeof version !== "string" || version.length === 0)
+    throw new Error("npm pack JSON validation requires an exact package name and version.");
+  let entry;
+  if (Array.isArray(value)) {
+    if (value.length !== 1) throw new Error("npm pack JSON array must contain exactly one package entry.");
+    [entry] = value;
+  } else {
+    const response = exactObject(value, "npm pack JSON");
+    const keys = Object.keys(response);
+    if (keys.length !== 1) throw new Error("npm pack JSON map must contain exactly one package entry.");
+    if (keys[0] !== name) throw new Error("npm pack JSON map key does not match the exact public package name.");
+    entry = response[name];
+  }
+  const packed = exactObject(entry, "npm pack JSON entry");
+  if (packed.name !== name || packed.version !== version)
+    throw new Error("npm pack JSON does not match the exact public package coordinate.");
+  const expectedFilename = `${name.replace(/^@/u, "").replaceAll("/", "-")}-${version}.tgz`;
+  if (packed.filename !== expectedFilename)
+    throw new Error("npm pack JSON entry filename does not match the exact public package tarball.");
+  return { type: "npm-pack", coordinate: `${name}@${version}` };
+}
+
 export function validateJsonValue(value, type) {
   if (value === null || (typeof value !== "object" && !Array.isArray(value)))
     throw new Error(`${type} JSON must be an object or array.`);
@@ -1743,11 +1767,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         { kind: "exact-public-npm-consumer", id: "exact-public-npm-install", path: join(consumerRoot, "public-npm") },
         ...release.npm.map(({ name, version }) =>
           command(`npm-pack-${name}`, "corepack", ["npm", "pack", `${name}@${version}`, "--json"], {
-            jsonValidator: value => {
-              if (!Array.isArray(value) || !value.some(entry => typeof entry?.filename === "string"))
-                throw new Error("npm pack JSON has no packed filename.");
-              return { type: "npm-pack", coordinate: `${name}@${version}` };
-            },
+            jsonValidator: value => validateNpmPackJson(value, { name, version }),
           }),
         ),
         {
