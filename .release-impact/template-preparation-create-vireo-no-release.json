@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "npm:create-vireo",
+  "decision": "no-release",
+  "justification": "Classify the new Template preparation operations as maintainer-only before their first coordinated Template/CLI release; this ownership-only projection update intentionally leaves create-vireo@0.8.7 unchanged."
+}

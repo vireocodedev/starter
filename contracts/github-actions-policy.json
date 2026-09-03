@@ -95,8 +95,8 @@
       "cancelInProgress": true
     },
     "website.yml": {
-      "group": "website-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}",
-      "cancelInProgress": true
+      "group": "website-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}",
+      "cancelInProgress": false
     },
     "anonymous-consumer-gauntlet.yml": {
       "group": "anonymous-consumer-gauntlet-${{ github.ref }}",

@@ -247,9 +247,15 @@
       "paths": [
         ".github/workflows/template-release.yml",
         ".github/workflows/template-release-recover.yml",
+        ".github/workflows/template-release-preparation.yml",
+        ".github/workflows/template-release-preparation-reconcile.yml",
         ".github/environments/template-release.json",
         ".github/environments/template-release.deployment-branch-policies.json",
         ".github/environments/template-release.live-assertions.json",
+        ".github/environments/template-preparation.json",
+        ".github/environments/template-preparation.deployment-branch-policies.json",
+        ".github/environments/template-preparation.live-assertions.json",
+        ".github/environments/template-preparation.required-credentials.json",
         ".github/rulesets/main.json",
         ".github/rulesets/starter-template-0.6.0.json",
         ".github/rulesets/starter-template-0.7.0.json",
@@ -259,6 +265,7 @@
         ".github/rulesets/starter-template-0.8.3.json",
         ".github/settings/actions.json",
         ".github/settings/selected-actions.json",
+        ".github/settings/template-release-automation.required-variables.json",
         ".github/settings/workflow-permissions.json",
         "contracts/template-release-policy.json",
         "contracts/template-release-artifacts.json",
@@ -269,6 +276,10 @@
         "scripts/template-release-policy.test.mjs",
         "scripts/template-release-prepare.mjs",
         "scripts/template-release-prepare.test.mjs",
+        "scripts/template-release-preparation-workflow.mjs",
+        "scripts/template-release-preparation-workflow.test.mjs",
+        "scripts/template-release-preparation-reconciler.mjs",
+        "scripts/template-release-preparation-reconciler.test.mjs",
         "scripts/template-release-artifacts.mjs",
         "scripts/template-release-coordinate-change.mjs",
         "scripts/template-release-state.mjs",
@@ -677,6 +688,11 @@
       "category": "maintainer-only"
     },
     {
+      "path": ".github/settings/template-release-automation.required-variables.json",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
       "path": ".github/settings/workflow-permissions.json",
       "profile": "full-stack",
       "category": "maintainer-only"
@@ -823,6 +839,11 @@
     },
     {
       "path": ".github/settings/selected-actions.json",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": ".github/settings/template-release-automation.required-variables.json",
       "profile": "frontend",
       "category": "maintainer-only"
     },

@@ -12,6 +12,8 @@ vireocode.com {
 		X-Frame-Options "DENY"
 	}
 
+	@deploymentProof path /.well-known/vireo-deployment.json
+	header @deploymentProof Cache-Control "no-store"
 	@metadata path /healthz /robots.txt /search-index.json /site.json /sitemap.xml /versions.json /manifest.webmanifest /sw.js /assets/asset-manifest.json
 	header @metadata Cache-Control "no-cache"
 	@versionedMetadata path_regexp versionedMetadata ^/docs/[^/]+/search-index\.json$

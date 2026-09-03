@@ -238,19 +238,47 @@ export function validateTemplateAdoptionWorkflow(source) {
   const jobs = parseJobs(lines);
   const plan = jobs.find(job => job.name === "plan");
   const stage = jobs.find(job => job.name === "stage");
+  const inspect = jobs.find(job => job.name === "inspect-ready");
+  const merge = jobs.find(job => job.name === "merge-ready");
   if (
     !/^on:\n {2}schedule:\n(?:[\s\S]*?) {2}workflow_dispatch:\s*$/mu.test(
       source.slice(0, source.indexOf("concurrency:")),
     )
   )
     problems.push("adopt-template-release.yml must use only schedule and workflow_dispatch triggers");
-  if (!plan || !stage || jobs.length !== 2)
-    problems.push("adopt-template-release.yml must contain exactly read-only plan and staged draft jobs");
+  if (!plan || !stage || !inspect || !merge || jobs.length !== 4)
+    problems.push("adopt-template-release.yml must contain exact plan, stage, inspect-ready, and merge-ready jobs");
   if (plan && !mapMatches(parseJobPermissions(lines, plan), new Map([["contents", "read"]])))
     problems.push("adopt-template-release.yml:plan must have only contents: read");
   if (stage && !mapMatches(parseJobPermissions(lines, stage), new Map([["contents", "read"]])))
     problems.push(
       "adopt-template-release.yml:stage must have only contents: read; GitHub App writes are separately scoped",
+    );
+  if (
+    !inspect ||
+    !mapMatches(
+      parseJobPermissions(lines, inspect),
+      new Map([
+        ["contents", "read"],
+        ["checks", "read"],
+        ["pull-requests", "read"],
+      ]),
+    )
+  )
+    problems.push("adopt-template-release.yml:inspect-ready must have only contents, checks, and pull-requests read");
+  if (
+    !merge ||
+    !mapMatches(
+      parseJobPermissions(lines, merge),
+      new Map([
+        ["contents", "read"],
+        ["checks", "read"],
+        ["pull-requests", "read"],
+      ]),
+    )
+  )
+    problems.push(
+      "adopt-template-release.yml:merge-ready must have only contents, checks, and pull-requests read; the GitHub App owns merge writes",
     );
   const stageLines = stage ? lines.slice(stage.start, stage.end).join("\n") : "";
   const uploadName = "      - name: Upload immutable Template adoption plan";
@@ -353,6 +381,57 @@ export function validateTemplateAdoptionWorkflow(source) {
     problems.push("adopt-template-release.yml must not use bearer authentication for an App-token Git push");
   if (stageLines.includes("gh pr merge") || stageLines.includes("--auto"))
     problems.push("adopt-template-release.yml may not approve, merge, or auto-merge its draft");
+  const inspectLines = inspect ? lines.slice(inspect.start, inspect.end).join("\n") : "";
+  const mergeLines = merge ? lines.slice(merge.start, merge.end).join("\n") : "";
+  for (const fragment of [
+    "Reconstruct the deterministic ready candidate without credentials",
+    "node scripts/reconcile-template-adoption.mjs --plan .template-adoption-plan.json --json",
+    "GH_TOKEN: ${{ github.token }}",
+    "corepack npm run version-packages",
+  ])
+    if (!inspectLines.includes(fragment))
+      problems.push(`adopt-template-release.yml:inspect-ready must retain ${fragment}`);
+  if (inspectLines.includes("environment:") || inspectLines.includes("TEMPLATE_ADOPTION_APP_PRIVATE_KEY"))
+    problems.push(
+      "adopt-template-release.yml:inspect-ready must remain credential-free and outside protected environments",
+    );
+  for (const fragment of [
+    "environment: template-adoption",
+    "needs.inspect-ready.outputs.eligible == 'true'",
+    "Revalidate eligibility immediately before accessing the App credential",
+    "Mint the repository-scoped GitHub App token only for the eligible candidate",
+    "TEMPLATE_ADOPTION_APP_ID: ${{ vars.TEMPLATE_ADOPTION_APP_ID }}",
+    "TEMPLATE_ADOPTION_APP_PRIVATE_KEY: ${{ secrets.TEMPLATE_ADOPTION_APP_PRIVATE_KEY }}",
+    "Revalidate after token mint and perform an expected-head squash merge",
+    "READ_GH_TOKEN: ${{ github.token }}",
+    "APP_GH_TOKEN: ${{ steps.app-token.outputs.token }}",
+    'GH_TOKEN="$READ_GH_TOKEN" node scripts/reconcile-template-adoption.mjs',
+    'GH_TOKEN="$APP_GH_TOKEN" gh api --method PUT',
+    "gh api --method PUT",
+    "merge_method=squash",
+    "jq -r '.merged'",
+    "EXPECTED_HEAD_SHA",
+    "EXPECTED_PULL_NUMBER",
+  ])
+    if (!mergeLines.includes(fragment)) problems.push(`adopt-template-release.yml:merge-ready must retain ${fragment}`);
+  const appTokenStart = mergeLines.indexOf("- id: app-token");
+  const preAppLines = appTokenStart < 0 ? "" : mergeLines.slice(0, appTokenStart);
+  const appTokenAndMergeLines = appTokenStart < 0 ? mergeLines : mergeLines.slice(appTokenStart);
+  if (
+    !preAppLines.includes("GH_TOKEN: ${{ github.token }}") ||
+    !preAppLines.includes("node scripts/reconcile-template-adoption.mjs")
+  )
+    problems.push(
+      "adopt-template-release.yml:merge-ready must complete full revalidation with github.token before minting the narrow App token",
+    );
+  if (!appTokenAndMergeLines.includes('GH_TOKEN="$READ_GH_TOKEN" node scripts/reconcile-template-adoption.mjs'))
+    problems.push(
+      "adopt-template-release.yml:merge-ready must repeat full reconciliation with github.token after minting and immediately before merge",
+    );
+  if (mergeLines.includes("gh pr merge") || mergeLines.includes("--auto"))
+    problems.push(
+      "adopt-template-release.yml:merge-ready may use only the expected-head REST merge, never persistent auto-merge",
+    );
   return problems;
 }
 
@@ -435,6 +514,35 @@ export function validatePostPublicationActivityGate(source, fileName) {
   return problems;
 }
 
+export function validateWebsiteDeploymentWorkflow(source) {
+  const problems = [];
+  for (const fragment of [
+    "name: Deploy verified website artifact",
+    "environment: website-deployment",
+    "actions/download-artifact@",
+    "site/build-deployment-bundle.mjs",
+    "StrictHostKeyChecking=yes",
+    "VIREO_WEBSITE_DEPLOY_SSH_PRIVATE_KEY",
+    "github.event_name == 'workflow_dispatch'",
+    "Require the build commit is still main before activation",
+    "stage $GITHUB_RUN_ID",
+    "activate $GITHUB_RUN_ID",
+    "accept $GITHUB_RUN_ID",
+    "rollback $GITHUB_RUN_ID",
+    "/.well-known/vireo-deployment.json",
+    "IdentitiesOnly=yes",
+    "github.event_name == 'schedule'",
+    "Reconcile interrupted website deployment",
+    'test "$PUBLIC_URL" = "https://vireocode.com"',
+    "cancel-in-progress: false",
+  ])
+    if (!source.includes(fragment))
+      problems.push(`website.yml must retain artifact-bound forced-command deployment: ${fragment}`);
+  if (/ssh[^\n]*(?:mkdir|tar -x|ln -s|bash|sh -c)/u.test(source))
+    problems.push("website.yml must not execute unrestricted remote shell commands");
+  return problems;
+}
+
 const workflowFiles = readdirSync(workflowsRoot)
   .filter(file => /\.ya?ml$/.test(file))
   .sort();
@@ -445,6 +553,7 @@ for (const fileName of workflowFiles) {
   const jobs = parseJobs(lines);
 
   if (fileName === "release.yml") problems.push(...validateReleasePrWorkflow(source, policy));
+  if (fileName === "website.yml") problems.push(...validateWebsiteDeploymentWorkflow(source));
   if (fileName === "adopt-template-release.yml") problems.push(...validateTemplateAdoptionWorkflow(source));
   if (fileName === "release-npm.yml")
     problems.push(...validateNpmReleaseMavenPrerequisite(source), ...validateNpmTemplatePublicationWorkflow(source));

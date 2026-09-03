@@ -69,6 +69,9 @@ The checked-in Caddy matchers make fingerprinted CSS/JS and mutable assets
 mutually exclusive. Verify final response headers on the deployment host with the
 installed Caddy binary and an HTTPS request; local source checks cannot prove host
 configuration or intermediary-cache behavior.
+Future changes to this Caddyfile are a privileged host change: review the diff and
+rerun the root installer (or an equivalently reviewed manual host procedure) so it
+validates, reloads, and restores the prior site fragment on failure.
 
 ## Local build
 
@@ -90,32 +93,40 @@ The `website.yml` workflow validates and builds the standalone artifact on every
 relevant `main` change. It uploads the exact static output for inspection and VPS
 deployment; it does not replace or deploy through GitHub Pages.
 
-## VPS activation
+## VPS continuous deployment
 
 The checked-in `Caddyfile` serves release directories through the atomic
-`/srv/www/vireocode/current` symlink. One privileged host setup is required.
-Build and stage the first release from the development machine:
+`/srv/www/vireocode/current` symlink. One privileged host setup is required. On
+the VPS, from a reviewed checkout, install the forced-command receiver with the
+dedicated GitHub deployment public key:
 
 ```bash
-corepack npm run site:build
-corepack npm run site:check:artifact
-corepack npm run site:stage:vps
+sudo sh site/install-vps-cd.sh deploy /path/to/github-website-deploy.pub
 ```
 
-The staging command prints one `sudo sh .../bootstrap-vps.sh ...` command to run
-on the VPS. That reviewed bootstrap creates `/srv/www/vireocode` and its release
-directory as `deploy`, activates the staged release, installs the Caddy site,
-validates the complete Caddy configuration, and reloads Caddy. It leaves the
-staged copy in `/tmp` for inspection and eventual system cleanup.
+The receiver accepts only `status`, bounded digest-checked `upload`, and typed
+`stage`, `activate`, `accept`, or `rollback` verbs. Its authorized key is forced
+to `/usr/local/libexec/vireo-website-receiver`; no CI job receives a shell. The
+root-owned controller validates the repository, commit, archive, and embedded
+revision proof, serializes mutations, atomically switches the symlink, and keeps
+the accepted and rollback releases only.
 
-After that one-time setup, deployments do not require root:
+Before enabling CI, create protected `website-deployment` with the declared secret
+and variables in `.github/environments/website-deployment.live-assertions.json`.
+The `website.yml` main build downloads its own verified artifact, produces a
+deterministic bounded envelope, verifies public `/healthz`, routes, security
+headers, and `/.well-known/vireo-deployment.json`, then accepts or rolls back the
+exact transaction. Legacy direct SSH scripts now fail closed.
 
-```bash
-corepack npm run site:build
-corepack npm run site:check:artifact
-corepack npm run site:deploy:vps
-```
-
-The deploy script uploads a new revision-and-time directory and atomically switches
-the `current` symlink. It intentionally does not delete older releases; retention
-must be added only with a reviewed rollback policy.
+If a runner is interrupted after staging or activation, the scheduled protected
+reconciliation job rolls back that old exact-run pending transaction to its last
+accepted (including legacy) target; it does not build or deploy new bytes. A manual
+**Build Vireo website** dispatch from `main` is safe for an already accepted
+content identity, but never clears a different pending transaction. On its first
+use, the controller records an existing `current` symlink as a legacy rollback
+predecessor; a failed first qualification restores that symlink before any cleanup.
+Incoming archives are short-lived, bounded, and copied into a root-private
+controller snapshot by exact byte count before validation; trailing or truncated
+uploads are rejected. The deployment proof's `siteDigest` is SHA-256 over compact
+UTF-8 JSON of sorted `[printable-ASCII path, file SHA-256]` pairs, excluding the
+proof itself. CI never receives a shell or site credentials.

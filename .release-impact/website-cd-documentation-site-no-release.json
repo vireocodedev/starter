@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "no-release",
+  "justification": "Install transactional delivery and host-security automation for the already-versioned website artifact; this operational change does not alter the current documentation content or its public release identity."
+}
