@@ -639,6 +639,9 @@ export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoo
       ...(operation.target ? { target: operation.target } : {}),
       ...(operation.profile ? { profile: operation.profile } : {}),
       ...(operation.lockfileRefresh ? { lockfileRefresh: operation.lockfileRefresh } : {}),
+      ...(operation.maximumJsonOutputBytes !== undefined
+        ? { maximumJsonOutputBytes: operation.maximumJsonOutputBytes }
+        : {}),
     })),
   }));
 }
@@ -668,11 +671,26 @@ export async function executePlanForTest(plan, executor, { dryRun = false } = {}
 }
 
 const maximumJsonOutputBytes = 128 * 1024;
+const absoluteMaximumJsonOutputBytes = 512 * 1024;
+
+function validateJsonOutputMaximumBytes(maximumBytes) {
+  if (!Number.isSafeInteger(maximumBytes) || maximumBytes <= 0 || maximumBytes > absoluteMaximumJsonOutputBytes) {
+    throw new Error(
+      `JSON command output limit must be a positive safe integer no greater than ${absoluteMaximumJsonOutputBytes} bytes.`,
+    );
+  }
+  return maximumBytes;
+}
+
+function resolveJsonOutputMaximumBytes(command) {
+  return validateJsonOutputMaximumBytes(command.maximumJsonOutputBytes ?? maximumJsonOutputBytes);
+}
 
 /** Parses only one bounded JSON value. Callers retain a summary, never this raw output. */
 export function parseBoundedJsonOutput(output, { maximumBytes = maximumJsonOutputBytes } = {}) {
+  const resolvedMaximumBytes = validateJsonOutputMaximumBytes(maximumBytes);
   const bytes = Buffer.isBuffer(output) ? output : Buffer.from(String(output), "utf8");
-  if (bytes.length > maximumBytes) throw new Error("JSON command output exceeds the anonymous evidence limit.");
+  if (bytes.length > resolvedMaximumBytes) throw new Error("JSON command output exceeds the anonymous evidence limit.");
   if (bytes.length === 0) throw new Error("JSON command output is empty.");
   try {
     return JSON.parse(bytes.toString("utf8"));
@@ -853,6 +871,7 @@ export function finalizationFailureFinding() {
 
 export function execute(command, options) {
   return new Promise((resolvePromise, reject) => {
+    const jsonMaximumBytes = command.jsonValidator ? resolveJsonOutputMaximumBytes(command) : undefined;
     const startedAt = new Date().toISOString();
     const started = performance.now();
     const stdout = createHash("sha256");
@@ -890,7 +909,7 @@ export function execute(command, options) {
       stdoutTail = Buffer.concat([stdoutTail, chunk]).subarray(-4_096);
       if (command.jsonValidator) {
         jsonBytes += chunk.length;
-        if (jsonBytes <= maximumJsonOutputBytes) jsonChunks.push(chunk);
+        if (jsonBytes <= jsonMaximumBytes) jsonChunks.push(chunk);
         else jsonTooLarge = true;
       }
       if (excerpt.length < 4096) excerpt += chunk.toString("utf8", 0, Math.min(chunk.length, 4096 - excerpt.length));
@@ -925,7 +944,9 @@ export function execute(command, options) {
       if (command.jsonValidator) {
         try {
           if (jsonTooLarge) throw new Error("JSON command output exceeds the anonymous evidence limit.");
-          jsonAssertion = command.jsonValidator(parseBoundedJsonOutput(Buffer.concat(jsonChunks)));
+          jsonAssertion = command.jsonValidator(
+            parseBoundedJsonOutput(Buffer.concat(jsonChunks), { maximumBytes: jsonMaximumBytes }),
+          );
         } catch (error) {
           jsonProblem = error instanceof Error ? error.message : String(error);
         }
@@ -1768,6 +1789,7 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
         ...release.npm.map(({ name, version }) =>
           command(`npm-pack-${name}`, "corepack", ["npm", "pack", `${name}@${version}`, "--json"], {
             jsonValidator: value => validateNpmPackJson(value, { name, version }),
+            maximumJsonOutputBytes: absoluteMaximumJsonOutputBytes,
           }),
         ),
         {
