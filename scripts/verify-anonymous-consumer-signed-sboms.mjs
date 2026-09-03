@@ -13,6 +13,14 @@ const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const predicateType = "https://cyclonedx.org/bom";
 const commitPattern = /^[0-9a-f]{40}$/u;
 
+/**
+ * `gh attestation verify --format json` includes complete Sigstore bundles and
+ * can legitimately exceed Node's 1 MiB child-process default. Keep the bound
+ * finite so a malicious or unexpectedly large response cannot grow without
+ * limit.
+ */
+export const ghAttestationVerifyMaxBufferBytes = 16 * 1024 * 1024;
+
 function argumentValue(arguments_, name) {
   const index = arguments_.indexOf(name);
   if (index < 0 || !arguments_[index + 1] || arguments_[index + 1].startsWith("--")) {
@@ -380,6 +388,7 @@ export function verifySignedSbomPlan({
       ],
       {
         encoding: "utf8",
+        maxBuffer: ghAttestationVerifyMaxBufferBytes,
         stdio: ["ignore", "pipe", "pipe"],
         env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" },
       },
