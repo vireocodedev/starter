@@ -120,6 +120,7 @@
     "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "saxes": "6.0.0",
     "storybook": "^10.5.10",
     "turbo": "^2.10.12",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
