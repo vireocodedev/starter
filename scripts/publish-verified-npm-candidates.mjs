@@ -10,6 +10,33 @@ const registry = "https://registry.npmjs.org";
 const provenanceContract = JSON.parse(
   readFileSync(join(repositoryRoot, "contracts/ecosystem-release-contract.json"), "utf8"),
 ).npmPublicationProvenance;
+const classicLibraries = new Set([
+  "@vireocodedev/history",
+  "@vireocodedev/infrastructure",
+  "@vireocodedev/localization",
+  "@vireocodedev/query",
+  "@vireocodedev/shell",
+  "@vireocodedev/sqlite",
+  "@vireocodedev/ui",
+]);
+
+export function publicationScope(environment = process.env) {
+  const scope =
+    environment.NPM_PUBLICATION_SCOPE ??
+    (environment.AUTOMATIC_TEMPLATE_ADOPTION === "true" ? "template-adoption" : "manual");
+  if (!new Set(["manual", "template-adoption", "classic-libraries"]).has(scope))
+    throw new Error(`Unknown npm publication scope ${JSON.stringify(scope)}.`);
+  if (scope !== "classic-libraries") return { scope, expected: null };
+  let coordinates;
+  try {
+    coordinates = JSON.parse(environment.NPM_ALLOWED_LIBRARY_COORDINATES ?? "");
+  } catch {
+    throw new Error("Classic-library publication requires JSON NPM_ALLOWED_LIBRARY_COORDINATES.");
+  }
+  if (!Array.isArray(coordinates) || coordinates.length === 0 || new Set(coordinates).size !== coordinates.length)
+    throw new Error("Classic-library publication requires a non-empty unique intended coordinate set.");
+  return { scope, expected: new Set(coordinates) };
+}
 
 function positiveInteger(value, fallback, variableName) {
   if (value == null || value === "") return fallback;
@@ -391,6 +418,8 @@ async function preflightCandidateTags(candidates, expectedCommit, options) {
   if (!/^[0-9a-f]{40}$/u.test(expectedCommit)) throw new Error("Expected release commit must be a full Git commit.");
   const resolveTag = options.resolveTag ?? inspectExistingTag;
   const registryStates = options.registryStates;
+  const permittedTagCoordinates =
+    options.permittedTagCoordinates ?? new Set(candidates.map(candidate => candidate.coordinate));
   const missingTags = new Set();
 
   for (const candidate of candidates) {
@@ -407,16 +436,22 @@ async function preflightCandidateTags(candidates, expectedCommit, options) {
       const provenance = registryState.provenance;
       if (!/^[a-f0-9]{40}$/u.test(provenance?.commit ?? ""))
         throw new Error(`Historical npm registry candidate ${candidate.coordinate} lacks audited provenance commit.`);
-      if (target === null) missingTags.add(candidate.coordinate);
-      else if (target !== provenance.commit)
+      if (target === null) {
+        if (!permittedTagCoordinates.has(candidate.coordinate))
+          throw new Error(`Out-of-scope historical npm coordinate ${candidate.coordinate} has no immutable tag.`);
+        missingTags.add(candidate.coordinate);
+      } else if (target !== provenance.commit)
         throw new Error(
           `Release tag ${candidate.coordinate} resolves to ${target}, not audited provenance commit ${provenance.commit}`,
         );
       continue;
     }
 
-    if (target === null) missingTags.add(candidate.coordinate);
-    else if (target !== expectedCommit) {
+    if (target === null) {
+      if (!permittedTagCoordinates.has(candidate.coordinate))
+        throw new Error(`Out-of-scope absent npm coordinate ${candidate.coordinate} cannot be tagged by this release.`);
+      missingTags.add(candidate.coordinate);
+    } else if (target !== expectedCommit) {
       throw new Error(
         `Release tag ${candidate.coordinate} resolves to ${target}, not expected commit ${expectedCommit}`,
       );
@@ -460,6 +495,11 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
   const retryAttempts = options.retryAttempts ?? confirmation.retryAttempts;
   const retryDelay = options.retryDelay ?? confirmation.retryDelay;
   const expectedCommit = options.expectedCommit ?? process.env.GITHUB_SHA;
+  const scoped =
+    options.publicationScope ??
+    (options.automaticTemplateAdoption === true
+      ? { scope: "template-adoption", expected: null }
+      : publicationScope(options.environment ?? process.env));
   if (!Number.isInteger(retryAttempts) || retryAttempts < 1)
     throw new Error("Registry confirmation attempts must be a positive integer.");
   if (!Number.isInteger(retryDelay) || retryDelay < 0)
@@ -478,7 +518,7 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
     registryStates.set(candidate.coordinate, registryState);
     if (registryState.state === "absent") unpublished.push(candidate);
   }
-  if (options.automaticTemplateAdoption === true || process.env.AUTOMATIC_TEMPLATE_ADOPTION === "true") {
+  if (scoped.scope === "template-adoption") {
     if (unpublished.some(candidate => candidate.name !== "create-vireo")) {
       throw new Error("Automatic Template adoption may publish only create-vireo; a library candidate is absent.");
     }
@@ -490,6 +530,36 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
         );
     }
   }
+  if (scoped.scope === "classic-libraries") {
+    const candidateCoordinates = new Set(candidates.map(candidate => candidate.coordinate));
+    for (const coordinate of scoped.expected) {
+      if (!candidateCoordinates.has(coordinate))
+        throw new Error(`Classic-library publication intent references missing candidate ${coordinate}.`);
+      const name = coordinate.slice(0, coordinate.lastIndexOf("@"));
+      if (!classicLibraries.has(name))
+        throw new Error(`Classic-library publication intent may not include ${coordinate}.`);
+    }
+    for (const candidate of candidates) {
+      const state = registryStates.get(candidate.coordinate);
+      const intended = scoped.expected.has(candidate.coordinate);
+      if (state.state === "absent" && !intended)
+        throw new Error(`Unexpected absent npm candidate ${candidate.coordinate}; classic-library scope fails closed.`);
+      if (candidate.name === "create-vireo" && state.state === "absent")
+        throw new Error("Classic-library publication may never publish create-vireo.");
+      if (intended && state.state === "historical" && state.integrity !== candidate.integrity)
+        throw new Error(
+          `Historical intended classic-library candidate ${candidate.coordinate} differs from reviewed bytes.`,
+        );
+    }
+  }
+  const permittedTagCoordinates =
+    scoped.scope === "classic-libraries"
+      ? scoped.expected
+      : scoped.scope === "template-adoption"
+        ? new Set(
+            candidates.filter(candidate => candidate.name === "create-vireo").map(candidate => candidate.coordinate),
+          )
+        : new Set(candidates.map(candidate => candidate.coordinate));
 
   const historicalCandidates = candidates
     .filter(candidate => registryStates.get(candidate.coordinate).state === "historical")
@@ -509,6 +579,7 @@ export async function publishVerifiedCandidates(candidates, options = {}) {
   const missingTags = await preflightCandidateTags(candidates, expectedCommit, {
     ...options,
     registryStates,
+    permittedTagCoordinates,
   });
 
   for (const candidate of unpublished) {

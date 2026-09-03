@@ -103,6 +103,39 @@ test("automatic Template adoption cannot publish a library coordinate", () => {
   }
 });
 
+test("classic-library scope permits only its exact planned library coordinate and tag mutation", () => {
+  const values = candidates();
+  const library = values[1];
+  const input = resultFor([library, ...values.filter(candidate => candidate !== library)]);
+  input.recoveredTags = [];
+  const previousScope = process.env.NPM_PUBLICATION_SCOPE;
+  const previousCoordinates = process.env.NPM_ALLOWED_LIBRARY_COORDINATES;
+  process.env.NPM_PUBLICATION_SCOPE = "classic-libraries";
+  process.env.NPM_ALLOWED_LIBRARY_COORDINATES = JSON.stringify([library.coordinate]);
+  try {
+    assert.deepEqual(publicationResultSummary(input, values, commit).publishedPackages, [library.coordinate]);
+    assert.throws(
+      () => publicationResultSummary({ ...input, recoveredTags: [values[2].coordinate] }, values, commit),
+      /out-of-scope tag mutation/u,
+    );
+    const cliPublication = {
+      ...input,
+      published: [library.coordinate, values[0].coordinate],
+      publishedTags: [library.coordinate, values[0].coordinate],
+      auditedHistorical: input.auditedHistorical.filter(item => item.coordinate !== values[0].coordinate),
+    };
+    assert.throws(
+      () => publicationResultSummary(cliPublication, values, commit),
+      /outside the authorized release plan/u,
+    );
+  } finally {
+    if (previousScope === undefined) delete process.env.NPM_PUBLICATION_SCOPE;
+    else process.env.NPM_PUBLICATION_SCOPE = previousScope;
+    if (previousCoordinates === undefined) delete process.env.NPM_ALLOWED_LIBRARY_COORDINATES;
+    else process.env.NPM_ALLOWED_LIBRARY_COORDINATES = previousCoordinates;
+  }
+});
+
 test("writes scalar GitHub outputs and JSON arrays without JSON-quoting scalars", () => {
   const writes = [];
   writeGitHubOutput(publicationResultSummary(resultFor(), candidates(), commit), value => writes.push(value));

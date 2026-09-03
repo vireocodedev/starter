@@ -70,6 +70,7 @@
     "changeset": "changeset",
     "release-impact:check": "node scripts/release-impact-policy.mjs",
     "release-impact:test": "node --test scripts/release-impact-policy.test.mjs scripts/release-impact-version.test.mjs",
+    "release:automation:test": "node --test scripts/ecosystem-publication-plan.test.mjs scripts/maven-central-release-state.test.mjs scripts/maven-recovery-source-run.test.mjs scripts/release-run-artifacts.test.mjs scripts/prepare-jvm-only-release-trigger.test.mjs scripts/finalize-jvm-release.test.mjs scripts/finalize-npm-releases.test.mjs scripts/template-publication-eligibility.test.mjs scripts/publish-verified-npm-candidates.test.mjs scripts/report-npm-publication-result.test.mjs scripts/release-workflow-activity.test.mjs scripts/maven-central-publication.test.mjs scripts/workflow-security-policy.test.mjs",
     "release:lifecycle:check": "node --test scripts/release-lifecycle-policy.test.mjs && node scripts/release-lifecycle-policy.mjs",
     "version:jvm-impact": "node scripts/release-impact-version.mjs",
     "version-packages": "node scripts/changeset-version-adapter.mjs",

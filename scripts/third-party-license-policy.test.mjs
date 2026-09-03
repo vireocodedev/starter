@@ -189,7 +189,7 @@ test("license gate is wired into contracts, verification, CI, and release eviden
     /third-party-license-policy\.mjs --ecosystem jvm/u,
   );
   assert.match(
-    readFileSync(join(root, ".github", "workflows", "release-maven-central.yml"), "utf8"),
+    readFileSync(join(root, ".github", "workflows", "release-npm.yml"), "utf8"),
     /third-party-license-policy\.mjs --ecosystem jvm/u,
   );
 });

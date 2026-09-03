@@ -4,9 +4,9 @@ Seven `@vireocodedev/*` libraries and the unscoped `create-vireo` command publis
 release is deliberately split into independently observable stages:
 
 1. Changesets prepares a version pull request.
-2. An ordinary library release is manually dispatched from protected `main`; an
-   exact `create-vireo` adoption release is authorized by merging its protected
-   Template-adoption PR.
+2. Merging the exact generated ecosystem release PR authorizes the seven classic
+   libraries. An exact `create-vireo` adoption remains authorized only by its
+   protected Template-adoption PR.
 3. A credential-free workflow installs and verifies the immutable public result.
 
 Local builds, pull requests, ordinary CI, and public consumers require no npm
@@ -62,11 +62,11 @@ corepack npm exec changeset
 corepack npm run verify -- silent
 ```
 
-After that pull request merges, the trusted, `main`-only **Maintain npm release
+After that pull request merges, the trusted, `main`-only **Maintain ecosystem release
 PR** workflow creates or refreshes the version pull request. Review its package
 versions, changelogs, lockfile, and the complete CI result. Its reviewed, pinned
-steps contain no approval or merge operation; merging it updates source metadata
-but does not publish.
+steps contain no approval or merge operation; merging it is the sole routine
+authorization for the exact generated ecosystem release.
 
 Before starting publication, the release owner can run:
 
@@ -83,7 +83,8 @@ version is outside the approved `0.x` line, or there is nothing new to publish.
 ## Protected cross-artifact release order
 
 The current npm line depends on coordinated public libraries and Maven artifacts.
-Publish and verify the seven libraries and matching Maven Central deployment first.
+For mixed releases, the coordinator publishes and anonymously proves Maven Central
+first, finalizes its immutable JVM release, then publishes and proves the seven libraries.
 Then prepare and publish the immutable Template release. Vireo opens one adoption
 draft; maintainers complete any project-upgrade work and version the same PR.
 Merging that protected PR can publish only its exact absent `create-vireo@X`
@@ -93,9 +94,9 @@ so it blocks publication rather than the release pull-request merge.
 
 ## Publish
 
-For an ordinary library release, open GitHub Actions → **Publish npm release** →
-**Run workflow**, select `main`, enter `publish`, and start the run after Maven
-public verification. For an exact Template adoption, merge the protected,
+For an ordinary library release, merge the exact generated ecosystem release PR;
+the protected coordinator plans and publishes only the coordinates advanced by that
+merge. For an exact Template adoption, merge the protected,
 fully-versioned adoption PR; its resulting `main` push plans and may publish only
 the exact absent `create-vireo@X` candidate. Neither path has a recurring
 `package-release` environment reviewer.
@@ -103,6 +104,14 @@ the exact absent `create-vireo@X` candidate. Neither path has a recurring
 In both cases, review the retained verify evidence and confirm the publish job
 reports the published packages, or an explicit successful recovery when every
 reviewed coordinate was already public.
+
+The coordinator uses the pinned Changesets action only to publish the exact
+planner-authorized coordinates and create their annotated remote tags. It then
+runs `finalize-npm-releases.mjs`, which creates or reconciles one immutable,
+stable GitHub Release per authorized coordinate using that package's exact current
+changelog entry. A retry where npm and the tag succeeded but GitHub Release
+creation was interrupted recovers only that missing exact coordinate Release; it
+never scans or mutates unrelated historical coordinates.
 
 The checked-in pre-adoption `create-vireo@0.8.7` receipt is not a publication
 path. It has a narrowly pinned no-op compatibility check only; any receipt,

@@ -643,3 +643,25 @@ test("fails closed on registry errors before publishing", async () => {
     /HTTP 503/u,
   );
 });
+
+test("classic-library scope never creates an out-of-scope missing tag", async () => {
+  const all = verifyNpmCandidates(fixture(), commit);
+  const intended = all.find(candidate => candidate.name === "@vireocodedev/history");
+  const untouched = all.find(candidate => candidate.name === "@vireocodedev/ui");
+  const tags = tagOperations({ existingTags: new Map([[intended.coordinate, commit]]) });
+  await assert.rejects(
+    publishVerifiedCandidates([intended, untouched], {
+      expectedCommit: commit,
+      environment: {
+        NPM_PUBLICATION_SCOPE: "classic-libraries",
+        NPM_ALLOWED_LIBRARY_COORDINATES: JSON.stringify([intended.coordinate]),
+      },
+      fetchRegistry: async url => metadataResponse(candidateFromUrl([intended, untouched], url)),
+      auditHistoricalCandidates: auditedProvenance(),
+      publish: async () => assert.fail("no candidate may publish"),
+      ...tags.options,
+    }),
+    /Out-of-scope historical npm coordinate/u,
+  );
+  assert.deepEqual(tags.created, []);
+});

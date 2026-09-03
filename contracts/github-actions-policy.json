@@ -73,16 +73,20 @@
   "writePermissionJobs": {
     "attest-public-release.yml:attest": ["artifact-metadata", "attestations", "id-token"],
     "codeql.yml:analyze": ["security-events"],
+    "release-npm.yml:finalize-jvm": ["contents"],
     "release-npm.yml:publish": ["contents", "id-token"],
-    "release.yml:version": ["contents", "pull-requests"],
+    "recover-maven-central-deployment.yml:finalize": ["contents"],
+    "recover-maven-central-deployment.yml:resume": ["actions"],
     "storybook-pages.yml:deploy": ["id-token", "pages"]
   },
   "pullRequestWriteJobs": ["codeql.yml:analyze"],
   "mainOnlyManualWriteJobs": [
     "attest-public-release.yml:attest",
     "codeql.yml:analyze",
+    "release-npm.yml:finalize-jvm",
     "release-npm.yml:publish",
-    "release.yml:version",
+    "recover-maven-central-deployment.yml:finalize",
+    "recover-maven-central-deployment.yml:resume",
     "storybook-pages.yml:deploy"
   ],
   "requiredConcurrencyWorkflows": {

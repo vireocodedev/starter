@@ -36,15 +36,17 @@ test("rejects Maven prerequisite bypasses and structural drift", () => {
 });
 
 test("rejects publication jobs that do not depend exactly on successful verify", () => {
-  for (const source of [
-    workflow.replace("    needs: verify\n", ""),
-    workflow.replace("    needs: verify", "    needs: [verify, another]"),
-    workflow.replace("    needs: verify\n", "    needs: verify\n    needs: another\n"),
-    workflow.replaceAll("    if: github.ref == 'refs/heads/main'", "    if: always()"),
-  ]) {
+  const mutations = [
+    workflow.replace("    needs: [plan, verify]\n", ""),
+    workflow.replace("    needs: [plan, verify]", "    needs: [verify, another]"),
+    workflow.replace("    needs: [plan, verify]\n", "    needs: [plan, verify]\n    needs: another\n"),
+    workflow.replace("    if: needs.verify.result == 'success'", "    if: always()"),
+  ];
+  for (const source of mutations) {
+    assert.notEqual(source, workflow, "negative policy fixture must mutate the current workflow invariant");
     assert.match(
       problems(source),
-      /must require successful verify|must declare exactly one needs dependency|main-only success-gated publish condition/u,
+      /must require the authorized plan and successful verify|must declare exactly one needs dependency|scoped success-gated publish condition/u,
     );
   }
 });

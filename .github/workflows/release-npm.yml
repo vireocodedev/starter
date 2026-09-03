@@ -1,33 +1,29 @@
-name: Publish npm release
+name: Publish Vireo ecosystem
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      confirmation:
-        description: Type publish to release absent reviewed manifest versions or recover an exact prior release
-        required: true
-        type: string
 
 concurrency:
-  group: npm-public-release
+  group: vireo-ecosystem-public-release-${{ github.sha }}
   cancel-in-progress: false
 
 permissions: {}
 
 jobs:
   plan:
-    name: Plan automatic create-vireo publication
+    name: Authorize exact ecosystem release merge
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
-      actions: read
       contents: read
-      deployments: read
+      pull-requests: read
     outputs:
-      action: ${{ steps.plan.outputs.action }}
+      action: ${{ steps.ecosystem.outputs.action }}
+      classic-coordinates: ${{ steps.ecosystem.outputs.classic-coordinates }}
+      jvm-version: ${{ steps.ecosystem.outputs.jvm-version }}
+      template-action: ${{ steps.template.outputs.action }}
     steps:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -37,29 +33,264 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - id: plan
-        name: Allow only a fully adopted CLI-only publication
+      - id: template-eligibility
+        name: Determine whether immutable Template publication is relevant
+        run: node scripts/template-publication-eligibility.mjs
+      - id: template
+        name: Preserve the independent immutable Template adoption path
+        if: steps.template-eligibility.outputs.should-plan == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          MANUAL_CONFIRMATION: ${{ inputs.confirmation }}
+          MANUAL_CONFIRMATION: ""
         run: node scripts/npm-template-adoption-publication-plan.mjs
+      - id: ecosystem
+        name: Fail closed unless this is the exact generated ecosystem release PR
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TEMPLATE_ACTION: ${{ steps.template.outputs.action }}
+        run: node scripts/ecosystem-publication-plan.mjs
+
+  maven:
+    name: Publish authorized JVM release
+    needs: [plan, maven-state]
+    if: needs.plan.outputs.action == 'jvm-only' || needs.plan.outputs.action == 'jvm-then-libraries'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: maven-central
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      exact-binding: ${{ steps.binding.outputs.exact-binding }}
+    defaults:
+      run:
+        working-directory: jvm
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - name: Recover only one exact prior-attempt Central receipt and signed bundle
+        id: prior
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.plan.outputs.jvm-version }}
+        run: |
+          artifacts_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100")"
+          artifacts="$(ARTIFACTS_JSON="$artifacts_json" RELEASE_RUN_ID="$GITHUB_RUN_ID" node ../scripts/release-run-artifacts.mjs)"
+          intent_count="$(printf '%s' "$artifacts" | jq '.intents | length')"
+          receipt_lines="$(printf '%s' "$artifacts" | jq -r '.receipts[] | [.id,.name] | @tsv')"
+          receipt_count="$(printf '%s\n' "$receipt_lines" | sed '/^$/d' | wc -l | tr -d ' ')"
+          if [ "$receipt_count" = 0 ] && [ "$intent_count" != 0 ] && [ "${{ needs.maven-state.outputs.visibility }}" = absent ]; then echo "Prior upload intent has no accepted receipt; Central acknowledgement is ambiguous." >&2; exit 1; fi
+          if [ "$receipt_count" -gt 1 ]; then echo "More than one prior Central receipt exists; refusing ambiguous recovery." >&2; exit 1; fi
+          if [ "$receipt_count" = 0 ]; then echo "recovered=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          receipt_id="$(printf '%s\n' "$receipt_lines" | cut -f 1)"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$receipt_id/zip" > "$RUNNER_TEMP/prior-receipt.zip"
+          mkdir "$RUNNER_TEMP/prior-receipt"; unzip -q "$RUNNER_TEMP/prior-receipt.zip" -d "$RUNNER_TEMP/prior-receipt"
+          receipt="$(find "$RUNNER_TEMP/prior-receipt" -type f -name maven-deployment-receipt.json -print -quit)"; test -n "$receipt"
+          attempt="$(RECEIPT="$receipt" node -e 'const r=require(process.env.RECEIPT); if(r.schemaVersion!==1||r.version!==process.env.VERSION||r.sha!==process.env.GITHUB_SHA||r.runId!==process.env.GITHUB_RUN_ID||!/^[0-9a-f-]{36}$/i.test(r.deploymentId||""))process.exit(1); process.stdout.write(r.runAttempt)')"
+          intent_id="$(printf '%s' "$artifacts" | jq -r --arg exact "maven-central-intent-$GITHUB_RUN_ID-$attempt" '.intents[] | select(.name == $exact) | .id')"
+          test -n "$intent_id" && test "$(printf '%s\n' "$intent_id" | wc -l | tr -d ' ')" = 1
+          promotion_count="$(printf '%s' "$artifacts" | jq -r --arg exact "maven-central-promotion-attempt-$GITHUB_RUN_ID-$attempt" '[.promotionAttempts[] | select(.name == $exact)] | length')"
+          if [ "$promotion_count" -gt 1 ]; then echo "More than one prior Central promotion-attempt artifact exists; refusing ambiguous recovery." >&2; exit 1; fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$intent_id/zip" > "$RUNNER_TEMP/prior-intent.zip"
+          mkdir "$RUNNER_TEMP/prior-intent"; unzip -q "$RUNNER_TEMP/prior-intent.zip" -d "$RUNNER_TEMP/prior-intent"
+          bundle="$(find "$RUNNER_TEMP/prior-intent" -type f -name '*.zip' -print -quit)"; test -n "$bundle"
+          BUNDLE="$bundle" RECEIPT="$receipt" node -e 'const fs=require("fs"),crypto=require("crypto"),r=require(process.env.RECEIPT); if(crypto.createHash("sha256").update(fs.readFileSync(process.env.BUNDLE)).digest("hex")!==r.bundle)process.exit(1)'
+          echo "deployment-id=$(RECEIPT="$receipt" node -p 'require(process.env.RECEIPT).deploymentId')" >> "$GITHUB_OUTPUT"
+          echo "receipt-path=$receipt" >> "$GITHUB_OUTPUT"
+          echo "attempt=$attempt" >> "$GITHUB_OUTPUT"
+          echo "bundle-path=$bundle" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "promotion-attempt=$([ "$promotion_count" = 1 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "recovered=true" >> "$GITHUB_OUTPUT"
+      - name: Verify the JVM release candidate
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        run: ./gradlew clean check aggregateJavadoc --no-build-cache
+      - name: Enforce JVM third-party license policy
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        run: node ../scripts/third-party-license-policy.mjs --ecosystem jvm
+      - name: Verify isolated publication and consumer
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        run: ./scripts/verify-publication-consumer.sh
+      - name: Build and audit the signed Central bundle
+        id: bundle
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        env:
+          MAVEN_SIGNING_KEY: ${{ secrets.MAVEN_SIGNING_KEY }}
+          MAVEN_SIGNING_PASSWORD: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+        run: ./scripts/build-central-bundle.sh "$RUNNER_TEMP/central-bundle"
+      - name: Preserve exact signed release candidate and upload intent
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        run: |
+          bundle_sha="$(sha256sum "${{ steps.prior.outputs.bundle-path || steps.bundle.outputs.bundle }}" | cut -d ' ' -f 1)"
+          BUNDLE_SHA="$bundle_sha" node -e 'import("../scripts/maven-central-release-state.mjs").then(({bundleReceipt}) => console.log(JSON.stringify(bundleReceipt({version:process.env.VERSION,sha:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,bundle:process.env.BUNDLE_SHA}))))' > "$RUNNER_TEMP/maven-upload-intent.json"
+        env:
+          VERSION: ${{ steps.prior.outputs.version || steps.bundle.outputs.version }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        with:
+          name: maven-central-intent-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ steps.prior.outputs.bundle-path || steps.bundle.outputs.bundle }}
+            ${{ runner.temp }}/maven-upload-intent.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload once for user-managed Central validation
+        id: central
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: ./scripts/upload-central-bundle.sh "${{ steps.prior.outputs.bundle-path || steps.bundle.outputs.bundle }}" "vireo-jvm-${{ steps.prior.outputs.version || steps.bundle.outputs.version }}"
+      - name: Persist accepted Central deployment receipt before promotion
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        env:
+          VERSION: ${{ steps.prior.outputs.version || steps.bundle.outputs.version }}
+          DEPLOYMENT_ID: ${{ steps.central.outputs.deployment-id }}
+          BUNDLE: ${{ steps.prior.outputs.bundle-path || steps.bundle.outputs.bundle }}
+        run: |
+          bundle_sha="$(sha256sum "$BUNDLE" | cut -d ' ' -f 1)"
+          BUNDLE_SHA="$bundle_sha" node -e 'import("../scripts/maven-central-release-state.mjs").then(({bundleReceipt,finalizeReceipt}) => console.log(JSON.stringify(finalizeReceipt(bundleReceipt({version:process.env.VERSION,sha:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,bundle:process.env.BUNDLE_SHA}),process.env.DEPLOYMENT_ID))))' > "$RUNNER_TEMP/maven-deployment-receipt.json"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.recovered != 'true'
+        with:
+          name: maven-central-receipt-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/maven-deployment-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Wait for exact Central validation before recording a promotion attempt
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.promotion-attempt != 'true'
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          DEPLOYMENT_ID: ${{ steps.prior.outputs.deployment-id || steps.central.outputs.deployment-id }}
+        run: ./scripts/wait-central-validation.sh "$DEPLOYMENT_ID" VALIDATED
+      - name: Persist exact Central promotion-attempt evidence before the irreversible request
+        if: needs.maven-state.outputs.visibility == 'absent' && steps.prior.outputs.promotion-attempt != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: maven-central-promotion-attempt-${{ github.run_id }}-${{ steps.prior.outputs.attempt || github.run_attempt }}
+          path: ${{ steps.prior.outputs.receipt-path || format('{0}/maven-deployment-receipt.json', runner.temp) }}
+          if-no-files-found: error
+          retention-days: 90
+      - name: Validate then publish exact Central deployment once
+        if: needs.maven-state.outputs.visibility == 'absent' || steps.prior.outputs.recovered == 'true'
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          DEPLOYMENT_ID: ${{ steps.prior.outputs.deployment-id || steps.central.outputs.deployment-id }}
+          VERSION: ${{ steps.prior.outputs.version || steps.bundle.outputs.version }}
+        run: |
+          if [ "${{ needs.maven-state.outputs.visibility }}" = absent ] && [ "${{ steps.prior.outputs.promotion-attempt }}" = true ]; then
+            ./scripts/wait-central-validation.sh "$DEPLOYMENT_ID" PUBLISHED
+            ./scripts/publish-central-deployment.sh "$DEPLOYMENT_ID" "$VERSION" --require-published
+          elif [ "${{ needs.maven-state.outputs.visibility }}" = absent ]; then
+            ./scripts/publish-central-deployment.sh "$DEPLOYMENT_ID" "$VERSION"
+          else
+            ./scripts/publish-central-deployment.sh "$DEPLOYMENT_ID" "$VERSION" --require-published
+          fi
+      - name: Bind Maven finalization to this release transaction
+        id: binding
+        env:
+          VISIBILITY: ${{ needs.maven-state.outputs.visibility }}
+          RECEIPT: ${{ steps.prior.outputs.recovered }}
+        run: |
+          if [ "$VISIBILITY" = absent ] || [ "$RECEIPT" = true ]; then
+            echo "exact-binding=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exact-binding=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  maven-state:
+    name: Classify exact Maven Central public state
+    needs: plan
+    if: needs.plan.outputs.action == 'jvm-only' || needs.plan.outputs.action == 'jvm-then-libraries'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      visibility: ${{ steps.state.outputs.visibility }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: state
+        env:
+          VERSION: ${{ needs.plan.outputs.jvm-version }}
+        run: |
+          statuses=()
+          for module in vireo-bom vireo-core vireo-auth vireo-query vireo-offline vireo-history; do
+            statuses+=("$(curl --fail --silent --show-error --connect-timeout 10 --max-time 30 --output /dev/null --write-out '%{http_code}' "https://repo1.maven.org/maven2/com/vireocode/$module/$VERSION/$module-$VERSION.pom" || true)")
+          done
+          visibility="$(node -e 'import("./scripts/maven-central-release-state.mjs").then(({classifyCentralVisibility}) => console.log(classifyCentralVisibility(process.argv.slice(1).map(Number))))' "${statuses[@]}")"
+          echo "visibility=$visibility" >> "$GITHUB_OUTPUT"
+
+  finalize-jvm:
+    name: Verify and finalize immutable JVM release
+    needs: [plan, maven-state, maven]
+    if: >-
+      always() && needs.maven.result == 'success' &&
+      (needs.plan.outputs.action == 'jvm-only' || needs.plan.outputs.action == 'jvm-then-libraries')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - name: Prove anonymous Maven Central consumption before immutable finalization
+        env:
+          VERSION: ${{ needs.plan.outputs.jvm-version }}
+        run: ./jvm/scripts/verify-central-consumer.sh "$VERSION"
+      - name: Create or recover exact immutable JVM tag and GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.plan.outputs.jvm-version }}
+        run: |
+          if [ "${{ needs.maven-state.outputs.visibility }}" = public ] && [ "${{ needs.maven.outputs.exact-binding }}" != true ]; then
+            node scripts/finalize-jvm-release.mjs "$VERSION" "$GITHUB_SHA" --recover-only
+          else
+            node scripts/finalize-jvm-release.mjs "$VERSION" "$GITHUB_SHA"
+          fi
 
   verify:
-    name: Verify npm release candidate
-    needs: plan
+    name: Verify scoped npm release candidate
+    needs: [plan, maven, finalize-jvm]
     if: >-
-      github.ref == 'refs/heads/main' &&
-      (inputs.confirmation == 'publish' || needs.plan.outputs.action == 'publish-create-vireo' || needs.plan.outputs.action == 'recover-create-vireo')
+      always() && (
+      (needs.plan.outputs.action == 'jvm-then-libraries' && needs.maven.result == 'success' && needs.finalize-jvm.result == 'success') ||
+      (needs.plan.outputs.action == 'libraries-only' && needs.maven.result == 'skipped' && needs.finalize-jvm.result == 'skipped') ||
+      ((needs.plan.outputs.template-action == 'publish-create-vireo' || needs.plan.outputs.template-action == 'recover-create-vireo') && needs.plan.outputs.action == 'no-op' && needs.maven.result == 'skipped' && needs.finalize-jvm.result == 'skipped')
+      )
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: read
     steps:
-      - name: Confirm protected release intent
-        env:
-          CONFIRMATION: ${{ inputs.confirmation }}
-          AUTOMATIC_ACTION: ${{ needs.plan.outputs.action }}
-        run: test "$GITHUB_REF" = "refs/heads/main" && { test "$CONFIRMATION" = "publish" || test "$AUTOMATIC_ACTION" = "publish-create-vireo" || test "$AUTOMATIC_ACTION" = "recover-create-vireo"; }
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.18.1
@@ -87,11 +318,11 @@ jobs:
           retention-days: 90
 
   publish:
-    name: Publish public npm packages
-    needs: verify
-    if: github.ref == 'refs/heads/main'
+    name: Publish authorized npm packages
+    needs: [plan, verify]
+    if: needs.verify.result == 'success'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment: package-release
     permissions:
       contents: write
@@ -115,42 +346,27 @@ jobs:
         with:
           name: npm-release-candidate-${{ github.sha }}
           path: .release-evidence
-      - name: Recheck immutable registry state
-        run: corepack npm run release:validate
-      - name: Publish reviewed candidate bytes with registry-backed provenance
+      - run: corepack npm run release:validate
+      - name: Publish reviewed candidate bytes and push reconciled immutable tags
         id: changesets
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           publish: corepack npm run release:publish-candidates
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_PUBLICATION_SCOPE: ${{ (needs.plan.outputs.action == 'libraries-only' || needs.plan.outputs.action == 'jvm-then-libraries') && 'classic-libraries' || 'template-adoption' }}
+          NPM_ALLOWED_LIBRARY_COORDINATES: ${{ needs.plan.outputs.classic-coordinates }}
           NPM_CONFIG_PROVENANCE: true
-          AUTOMATIC_TEMPLATE_ADOPTION: ${{ github.event_name == 'push' }}
-      - name: Report evidence-backed publication and tag recovery result
+      - name: Report evidence-backed scoped publication result
         id: publication-result
         env:
-          AUTOMATIC_TEMPLATE_ADOPTION: ${{ github.event_name == 'push' }}
+          NPM_PUBLICATION_SCOPE: ${{ (needs.plan.outputs.action == 'libraries-only' || needs.plan.outputs.action == 'jvm-then-libraries') && 'classic-libraries' || 'template-adoption' }}
+          NPM_ALLOWED_LIBRARY_COORDINATES: ${{ needs.plan.outputs.classic-coordinates }}
         run: corepack npm run release:report-publication
-      - name: Verify the anonymous public release
-        run: corepack npm run release:verify-public
-      - name: Record publication or recovery summary
+      - name: Create or recover immutable GitHub Releases for authorized npm coordinates
         env:
-          PUBLISHED: ${{ steps.publication-result.outputs.published }}
-          PUBLISHED_PACKAGES: ${{ steps.publication-result.outputs.publishedPackages }}
-          RECOVERED_TAGS: ${{ steps.publication-result.outputs.recoveredTags }}
-        run: |
-          {
-            if [ "$PUBLISHED" = "true" ]; then
-              echo "## Published npm packages"
-            else
-              echo "## Recovered npm release"
-              echo
-              echo "All reviewed candidate bytes were already public; anonymous verification completed successfully."
-            fi
-            echo
-            echo '```json'
-            echo "${PUBLISHED_PACKAGES:-[]}"
-            echo '```'
-            echo
-            echo "Recovered provenance tags: ${RECOVERED_TAGS:-[]}"
-          } >> "$GITHUB_STEP_SUMMARY"
+          GITHUB_TOKEN: ${{ github.token }}
+          NPM_PUBLICATION_SCOPE: ${{ (needs.plan.outputs.action == 'libraries-only' || needs.plan.outputs.action == 'jvm-then-libraries') && 'classic-libraries' || 'template-adoption' }}
+          NPM_ALLOWED_LIBRARY_COORDINATES: ${{ needs.plan.outputs.classic-coordinates }}
+        run: node scripts/finalize-npm-releases.mjs .release-evidence/npm-publication-result.json
+      - run: corepack npm run release:verify-public

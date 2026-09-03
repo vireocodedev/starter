@@ -168,12 +168,12 @@ is required when no package release is intended.
 
 1. `corepack npm exec changeset` — describe the change and select each affected
    package's semver bump.
-2. Merge to `main`. **Maintain npm release PR** opens or refreshes the version PR.
-3. Review and merge that PR. This updates versions and changelogs but does not
-   publish.
-4. Manually run **Publish npm release** on `main`, enter `publish`, and approve
-   the protected `package-release` environment.
-5. Require the automatic **Verify public npm release** workflow to pass its
+2. Merge to `main`. **Maintain ecosystem release PR** opens or refreshes the
+   generated version PR.
+3. Review and merge that exact PR. It is the routine authorization: the protected
+   coordinator first handles any JVM release, then publishes only its planned
+   library coordinates through npm OIDC.
+4. Require the automatic **Verify public npm release** workflow to pass its
    anonymous cold-consumer and provenance checks.
 
 Versioning is a contract per package:
@@ -198,23 +198,17 @@ The `jvm/` half uses machine-readable `.release-impact` records as its Changeset
 equivalent. One version still covers all six artifacts — they are a set, and the
 BOM exists so a consumer never mixes them.
 
-1. Add a release-impact record for every affected module. On the release branch,
-   run `corepack npm run version:jvm-impact`; this applies the highest requested
-   bump to `jvm/gradle.properties`, writes the module summaries to
-   `jvm/CHANGELOG.md`, and consumes those release records.
+1. Add a release-impact record for every affected module. The generated ecosystem
+   release PR applies the highest requested bump to `jvm/gradle.properties`,
+   writes module summaries to `jvm/CHANGELOG.md`, and consumes those records.
 2. If the change moved the public API, run `./gradlew apiSurfaceUpdate` in `jvm/`
    and commit the updated `api-surface.txt` files. This is the forcing function:
    the check task fails the build until the snapshot matches, so a widened
    surface always shows up in the diff next to the version bump.
-3. Merge to `main`, then manually run **Stage Maven Central release** with the
-   exact version. The protected `maven-central` environment builds one signed,
-   audited bundle, uploads it as a `USER_MANAGED` deployment, and waits for
-   Central validation. It does not publish automatically.
-4. Review the validated deployment in Central Portal and explicitly publish it.
-   Then run **Verify Maven Central release** for the same version. That workflow
-   resolves the public BOM and every versionless module through the checked-in
-   standalone consumer with an empty Gradle home, so "it published" and "it is
-   usable" are checked separately.
+3. Merge the exact generated ecosystem release PR. For a JVM release, the
+   protected coordinator builds one signed audited `USER_MANAGED` bundle,
+   validates and promotes its exact Central deployment, anonymously consumes it,
+   and only then finalizes the immutable JVM tag and GitHub Release.
 
 The same bump table applies. Note that MapStruct's generated `*Impl` classes are
 part of the recorded surface, because they are genuinely part of the jar.
@@ -223,7 +217,7 @@ Run `./gradlew clean check aggregateJavadoc --no-build-cache` for the complete
 source gate and `./scripts/verify-publication-consumer.sh` to prove the local
 Maven publications before opening or merging a release pull request.
 
-The complete credential, signing, staging, manual-publication, and recovery
+The complete credential, signing, automated-publication, and recovery
 procedure is in [Maven Central release](docs/MAVEN_CENTRAL_RELEASE.md).
 
 JVM library work follows the repository's

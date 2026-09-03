@@ -1,4 +1,4 @@
-name: Maintain npm release PR
+name: Maintain ecosystem release PR
 
 on:
   push:
@@ -13,13 +13,13 @@ permissions: {}
 
 jobs:
   version:
-    name: Create or update the npm release PR
+    name: Create or update the ecosystem release PR
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    environment: template-adoption
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -29,11 +29,19 @@ jobs:
         with:
           persist-credentials: false
       - run: corepack npm ci --ignore-scripts
-      - name: Create or update the Changesets release PR
+      - name: Prepare a JVM-only Changesets trigger when required
+        run: node scripts/prepare-jvm-only-release-trigger.mjs
+      - id: app-token
+        name: Mint the repository-scoped GitHub App token
+        env:
+          TEMPLATE_ADOPTION_APP_ID: ${{ vars.TEMPLATE_ADOPTION_APP_ID }}
+          TEMPLATE_ADOPTION_APP_PRIVATE_KEY: ${{ secrets.TEMPLATE_ADOPTION_APP_PRIVATE_KEY }}
+        run: node scripts/create-template-adoption-app-token.mjs
+      - name: Create or update the Changesets ecosystem release PR
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           version: corepack npm run version-packages
-          commit: "chore(npm): version public packages"
-          title: "chore(npm): version public packages"
+          commit: "chore(release): version public ecosystem"
+          title: "chore(release): version public ecosystem"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

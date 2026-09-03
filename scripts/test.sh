@@ -5,6 +5,9 @@ corepack npm run codex:check
 
 node --test \
   scripts/changeset-publish-adapter.test.mjs \
+  scripts/ecosystem-publication-plan.test.mjs \
+  scripts/finalize-jvm-release.test.mjs \
+  scripts/finalize-npm-releases.test.mjs \
   scripts/codex-customization-policy.test.mjs \
   scripts/documentation-ownership-policy.test.mjs \
   scripts/npm-registry-retry.test.mjs \
@@ -13,12 +16,18 @@ node --test \
   scripts/generated-fixture-template-pin.test.mjs \
   scripts/local-vireo-maven-candidate-fixture.test.mjs \
   scripts/maven-central-publication.test.mjs \
+  scripts/maven-central-release-state.test.mjs \
+  scripts/maven-recovery-source-run.test.mjs \
+  scripts/release-run-artifacts.test.mjs \
   scripts/package-bin.test.mjs \
   scripts/publish-verified-npm-candidates.test.mjs \
+  scripts/report-npm-publication-result.test.mjs \
+  scripts/release-workflow-activity.test.mjs \
   scripts/reference-symbol-anchors.test.mjs \
   scripts/release-impact-policy.test.mjs \
   scripts/release-impact-version.test.mjs \
   scripts/release-lifecycle-policy.test.mjs \
+  scripts/prepare-jvm-only-release-trigger.test.mjs \
   scripts/project-upgrade-publication-state.test.mjs \
   scripts/packed-project-upgrade-baselines.test.mjs \
   scripts/packed-adjacent-frontend-source-manifest.test.mjs \
@@ -35,6 +44,7 @@ node --test \
   scripts/verify-anonymous-consumer-signed-sboms.test.mjs \
   scripts/verify-npm-public-release.test.mjs \
   scripts/synchronize-documentation-release.test.mjs \
+  scripts/template-publication-eligibility.test.mjs \
   scripts/third-party-license-policy.test.mjs \
   site/build.test.mjs
 sh -n site/bootstrap-vps.sh

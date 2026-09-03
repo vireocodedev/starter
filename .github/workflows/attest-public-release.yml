@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows:
-      - Publish npm release
+      - Publish Vireo ecosystem
       - Verify Maven Central release
     branches: [main]
     types:
@@ -17,11 +17,50 @@ concurrency:
 permissions: {}
 
 jobs:
+  activity:
+    name: Classify exact public release activity
+    if: >-
+      github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      any-activity: ${{ steps.activity.outputs.any-activity }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - id: activity
+        env:
+          PARENT_WORKFLOW: ${{ github.event.workflow_run.name }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PARENT_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          if [ "$PARENT_WORKFLOW" = "Verify Maven Central release" ]; then
+            echo "any-activity=true" >> "$GITHUB_OUTPUT"
+          elif [ "$PARENT_WORKFLOW" = "Publish Vireo ecosystem" ]; then
+            node scripts/release-workflow-activity.mjs
+          else
+            echo "Unexpected workflow_run parent: $PARENT_WORKFLOW" >&2
+            exit 1
+          fi
+
   collect:
     name: Collect and classify exact public artifacts
+    needs: activity
     if: >-
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
-      github.event.workflow_run.conclusion == 'success'
+      always() && ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository && needs.activity.result == 'success' &&
+      needs.activity.outputs.any-activity == 'true'))
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     permissions:
