@@ -66,6 +66,13 @@ test("requires Basic x-access-token authentication for the App-token Git push", 
   assert.match(validateTemplateAdoptionWorkflow(bearer).join("\n"), /must not use bearer authentication/u);
 });
 
+test("requires runtime-bound GitHub App bot authorship", () => {
+  const hardcodedIdentity = templateAdoptionWorkflow
+    .replace('git config user.name "$APP_LOGIN"', 'git config user.name "fixed[bot]"')
+    .replace('git config user.email "$APP_EMAIL"', 'git config user.email "1+fixed[bot]@users.noreply.github.com"');
+  assert.match(validateTemplateAdoptionWorkflow(hardcodedIdentity).join("\n"), /APP_LOGIN|APP_EMAIL/u);
+});
+
 test("preserves confirmed manual npm dispatch while constraining automatic CLI publication", () => {
   assert.deepEqual(validateNpmTemplatePublicationWorkflow(npmReleaseWorkflow), []);
   assert.match(

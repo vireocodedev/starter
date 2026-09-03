@@ -58,11 +58,35 @@ export async function createInstallationToken({ appId, privateKey, fetchResponse
   ) {
     throw new Error("GitHub App installation token was not narrowed to the required Vireo repository permissions.");
   }
-  return { token, login: `${slug}[bot]` };
+  const login = `${slug}[bot]`;
+  const identityResponse = await fetchResponse(`https://api.github.com/users/${encodeURIComponent(login)}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+    },
+    redirect: "error",
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!identityResponse.ok)
+    throw new Error(`GitHub App bot identity lookup failed with HTTP ${identityResponse.status}.`);
+  const identity = await identityResponse.json();
+  if (
+    identity?.login !== login ||
+    identity?.type !== "Bot" ||
+    !Number.isSafeInteger(identity?.id) ||
+    identity.id <= 0
+  ) {
+    throw new Error("GitHub App bot identity did not exactly match the authenticated App.");
+  }
+  return {
+    token,
+    login,
+    email: `${identity.id}+${login}@users.noreply.github.com`,
+  };
 }
 
 if (process.argv[1]?.endsWith("create-template-adoption-app-token.mjs")) {
-  const { token, login } = await createInstallationToken({
+  const { token, login, email } = await createInstallationToken({
     appId: process.env.TEMPLATE_ADOPTION_APP_ID,
     privateKey: process.env.TEMPLATE_ADOPTION_APP_PRIVATE_KEY,
   });
@@ -70,6 +94,6 @@ if (process.argv[1]?.endsWith("create-template-adoption-app-token.mjs")) {
     throw new Error("GITHUB_OUTPUT is required to pass the short-lived App token to this workflow.");
   console.log(`::add-mask::${token}`);
   await import("node:fs/promises").then(({ appendFile }) =>
-    appendFile(process.env.GITHUB_OUTPUT, `token=${token}\nlogin=${login}\n`),
+    appendFile(process.env.GITHUB_OUTPUT, `token=${token}\nlogin=${login}\nemail=${email}\n`),
   );
 }

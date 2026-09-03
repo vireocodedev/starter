@@ -78,6 +78,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           APP_LOGIN: ${{ steps.app-token.outputs.login }}
+          APP_EMAIL: ${{ steps.app-token.outputs.email }}
         run: |
           version="$(node -p "require('./.template-adoption-plan.json').version")"
           branch="automation/template-$version"
@@ -94,7 +95,7 @@ jobs:
               test "$(git rev-list --count "HEAD..$remote_sha")" = 1
               test "$(git rev-parse "$remote_sha^")" = "$(git rev-parse HEAD)"
               test "$(git show -s --format=%T "$remote_sha")" = "$expected_tree"
-              test "$(git show -s --format='%an <%ae>' "$remote_sha")" = "vireo-template-adoption[bot] <178593438+vireo-template-adoption[bot]@users.noreply.github.com>"
+              test "$(git show -s --format='%an <%ae>' "$remote_sha")" = "$APP_LOGIN <$APP_EMAIL>"
               echo "reuse_remote=true" >> "$GITHUB_OUTPUT"
             else
               echo "reuse_remote=false" >> "$GITHUB_OUTPUT"
@@ -124,14 +125,16 @@ jobs:
         name: Commit and publish the draft branch through the GitHub App
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_LOGIN: ${{ steps.app-token.outputs.login }}
+          APP_EMAIL: ${{ steps.app-token.outputs.email }}
           REUSE_REMOTE: ${{ steps.existing.outputs.reuse_remote }}
         run: |
           version="$(node -p "require('./.template-adoption-plan.json').version")"
           branch="automation/template-$version"
           if test "$REUSE_REMOTE" != true; then
             git switch -c "$branch"
-            git config user.name "vireo-template-adoption[bot]"
-            git config user.email "178593438+vireo-template-adoption[bot]@users.noreply.github.com"
+            git config user.name "$APP_LOGIN"
+            git config user.email "$APP_EMAIL"
             git add -A
             git reset -- .template-adoption-plan.json
             git commit -m "chore(template): stage $version adoption"
