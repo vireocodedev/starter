@@ -611,6 +611,16 @@ export function validatePolicy(policy, release) {
   return problems;
 }
 
+export function versionToProjectSegment(version) {
+  if (typeof version !== "string") throw new Error("Project directory version must be a string.");
+  const segment = version
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, "-")
+    .replace(/^-+|-+$/gu, "");
+  if (!segment) throw new Error("Project directory version must contain an alphanumeric character.");
+  return segment;
+}
+
 /** Returns plain, validated data so unit tests can execute every scenario through a fake executor. */
 export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoot }) {
   const problems = validatePolicy(policy, release);
@@ -624,6 +634,7 @@ export function buildExecutionPlan({ policy, release, upgradePolicy, consumerRoo
       kind: operation.kind ?? "command",
       executable: operation.executable ?? null,
       arguments: operation.arguments ?? [],
+      ...(operation.path ? { path: operation.path } : {}),
       ...(operation.source ? { source: operation.source } : {}),
       ...(operation.target ? { target: operation.target } : {}),
       ...(operation.profile ? { profile: operation.profile } : {}),
@@ -1480,7 +1491,10 @@ function scenarioCommands({ scenario, release, consumerRoot, upgradePolicy }) {
       }
       return edges.flatMap(edge =>
         ["frontend", "full-stack"].flatMap(profile => {
-          const directory = join(consumerRoot, `upgrade-${edge.from}-to-${edge.to}-${profile}`);
+          const directory = join(
+            consumerRoot,
+            `upgrade-${versionToProjectSegment(edge.from)}-to-${versionToProjectSegment(edge.to)}-${profile}`,
+          );
           const creation = {
             executable: "corepack",
             arguments: [

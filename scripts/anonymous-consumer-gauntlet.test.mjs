@@ -26,6 +26,7 @@ import {
   validateReleaseIdentityJson,
   validateRegistryMetadataJson,
   validateRemovalReceipt,
+  versionToProjectSegment,
 } from "./anonymous-consumer-gauntlet.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -333,6 +334,46 @@ test("public gauntlets derive the unique adjacent edge ending at the exact publi
       operation.lockfileRefresh,
     ]),
   );
+});
+
+test("adjacent public upgrades use safe project basenames while retaining exact release coordinates", () => {
+  const upgradePolicy = readJson(join(root, "contracts", "project-upgrade-policy.json"));
+  const plan = buildExecutionPlan({ policy, release, upgradePolicy, consumerRoot: "/tmp/vireo-anonymous-plan" });
+  const operations = plan.find(scenario => scenario.id === "adjacent-public-upgrades").operations;
+  const creations = operations.filter(operation => operation.arguments.includes("create-vireo"));
+  const upgrades = operations.filter(operation => operation.kind === "assert-upgraded-consumer");
+  const expectedBasenames = {
+    frontend: "upgrade-0-8-6-to-0-8-7-frontend",
+    "full-stack": "upgrade-0-8-6-to-0-8-7-full-stack",
+  };
+
+  assert.equal(versionToProjectSegment("0.8.6"), "0-8-6");
+  assert.equal(versionToProjectSegment("V0.8.7-RC.1"), "v0-8-7-rc-1");
+  assert.throws(() => versionToProjectSegment("..."), /alphanumeric/u);
+  assert.throws(() => versionToProjectSegment(undefined), /string/u);
+
+  assert.deepEqual(
+    Object.fromEntries(
+      ["frontend", "full-stack"].map(profile => {
+        const creation = creations.find(operation => operation.arguments.includes(profile));
+        const directory = creation.arguments[creation.arguments.indexOf("create-vireo") + 1];
+        return [profile, basename(directory)];
+      }),
+    ),
+    expectedBasenames,
+  );
+  for (const profile of ["frontend", "full-stack"]) {
+    const creation = creations.find(operation => operation.arguments.includes(profile));
+    const directory = creation.arguments[creation.arguments.indexOf("create-vireo") + 1];
+    const upgraded = upgrades.find(operation => operation.profile === profile);
+    assert.ok(upgraded, `${profile} has an upgraded-consumer assertion`);
+    assert.equal(upgraded.path, directory, `${profile} assertion uses the created project path`);
+    assert.doesNotMatch(basename(directory), /\./u);
+    assert.match(basename(directory), /^[a-z0-9]+(?:-[a-z0-9]+)*$/u);
+    assert.ok(creation.arguments.includes("--package=create-vireo@0.8.6"));
+  }
+  assert.ok(upgrades.every(operation => operation.source.createVireoVersion === "0.8.6"));
+  assert.ok(upgrades.every(operation => operation.target.createVireoVersion === "0.8.7"));
 });
 
 test("deterministic plan gives a fake executor every required recipe and refusal", () => {
