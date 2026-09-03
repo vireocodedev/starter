@@ -1194,6 +1194,43 @@ test("malformed release input writes preflight evidence before any scenario can 
   assert.equal(evidence.releaseTagCommit, undefined);
 });
 
+test("an explicitly empty workflow release id falls back to the checked-out ecosystem release", t => {
+  const evidenceDirectory = mkdtempSync(join(tmpdir(), "vireo-empty-release-id-preflight-"));
+  t.after(() => rmSync(evidenceDirectory, { recursive: true, force: true }));
+  const result = spawnSync(
+    process.execPath,
+    ["scripts/anonymous-consumer-gauntlet.mjs", "--dry-run", "--evidence-dir", evidenceDirectory],
+    {
+      cwd: root,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        VIREO_GAUNTLET_RELEASE_ID: "",
+        VIREO_GAUNTLET_SOURCE_COMMIT: "a".repeat(40),
+      },
+    },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  const evidence = JSON.parse(readFileSync(join(evidenceDirectory, "evidence.json"), "utf8"));
+  assert.equal(evidence.requestedReleaseId, release.id);
+});
+
+test("explicit CLI release-id values reject missing, empty, whitespace, malformed, and mismatched values", () => {
+  const sourceEnvironment = { ...process.env, VIREO_GAUNTLET_SOURCE_COMMIT: "a".repeat(40) };
+  const invoke = value =>
+    spawnSync(
+      process.execPath,
+      ["scripts/anonymous-consumer-gauntlet.mjs", "--check", "--release-id", ...(value === null ? [] : [value])],
+      { cwd: root, encoding: "utf8", env: sourceEnvironment },
+    );
+  for (const value of [null, "", " ", "npm-0.8.2_jvm-0.3.1-extra", "npm-0.8.6_jvm-0.3.1"]) {
+    const result = invoke(value);
+    assert.notEqual(result.status, 0, JSON.stringify(value));
+    assert.match(result.stderr, /requested release id/u);
+  }
+  assert.equal(invoke(release.id).status, 0);
+});
+
 test("fake executor preserves planned, expected-refusal, timeout, and failure evidence", async () => {
   const plan = [
     {

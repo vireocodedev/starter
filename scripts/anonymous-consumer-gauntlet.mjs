@@ -1872,7 +1872,11 @@ export async function runAnonymousConsumerGauntlet({ check = checkOnly, dry = dr
   const policy = readJson(policyPath);
   const release = publicReleaseIdentity(readJson(join(root, policy.releaseSource)));
   const requestedReleaseId =
-    releaseIdArgument >= 0 ? process.argv[releaseIdArgument + 1] : process.env.VIREO_GAUNTLET_RELEASE_ID;
+    releaseIdArgument >= 0
+      ? (process.argv[releaseIdArgument + 1] ?? "")
+      : process.env.VIREO_GAUNTLET_RELEASE_ID === ""
+        ? undefined
+        : process.env.VIREO_GAUNTLET_RELEASE_ID;
   const verifierSourceCommit =
     sourceCommitArgument >= 0 ? process.argv[sourceCommitArgument + 1] : process.env.VIREO_GAUNTLET_SOURCE_COMMIT;
   const preflightIdentityProblems = () =>
