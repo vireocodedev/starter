@@ -88,6 +88,42 @@ const ecosystem = {
 };
 const manifests = [{ name: "create-vireo", version: "0.8.8" }, ...libraries.map(name => ({ name, version: "0.2.8" }))];
 const rebind = async () => true;
+const legacyIntegrity =
+  "sha512-ghr+ldc4sXm3QqSAwvBPo8LERAoySB7vZiJmMlwZYkTkMsriePb92aC0hpE7UHoKD/nOeQNlFmvh3p8B6hc6XA==";
+const legacyIntent = {
+  schemaVersion: 1,
+  status: "adopted",
+  template: {
+    repository: "vireocodedev/vireo-template",
+    version: "0.8.7",
+    tag: "starter-template@0.8.7",
+    commit: "0557990f024a8736b6e661f8fc264861deb99b65",
+    releaseUrl: "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.7",
+  },
+  createVireoVersion: "0.8.7",
+  ecosystemRelease: "npm-0.8.7_jvm-0.3.1",
+  source: "immutable-template-release",
+};
+const legacyEcosystem = {
+  current: {
+    template: {
+      repository: "https://github.com/vireocodedev/vireo-template",
+      version: "0.8.7",
+      tag: "starter-template@0.8.7",
+      commit: "0557990f024a8736b6e661f8fc264861deb99b65",
+      releaseUrl: "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.8.7",
+    },
+    npm: [{ name: "create-vireo", version: "0.8.7" }, ...libraries.map(name => ({ name, version: "9.9.9" }))],
+    maven: { group: "com.vireocode", version: "9.9.9", modules },
+  },
+};
+const legacyManifests = [
+  { name: "create-vireo", version: "0.8.7" },
+  ...libraries.map(name => ({ name, version: "9.9.9" })),
+];
+const legacyTag = () => ({ annotated: true, commit: "b7b3c97ad230148189c4353fbccdccc2a9239018" });
+const legacyRegistry = metadata => async () =>
+  responseJson(metadata ?? { name: "create-vireo", version: "0.8.7", dist: { integrity: legacyIntegrity } });
 
 function responseJson(value) {
   return { ok: true, status: 200, json: async () => value };
@@ -197,6 +233,69 @@ test("a confirmed manual dispatch preserves the ordinary release path while an a
     fetchResponse: async () => assert.fail("shallow automatic receipt must fail before networking"),
   });
   assert.equal(automatic.action, "fail");
+});
+
+test("the exact historical 0.8.7 receipt is a no-op even after unrelated library and Maven advances", async () => {
+  const result = await planAutomaticTemplatePublication({
+    ecosystem: legacyEcosystem,
+    intent: legacyIntent,
+    manifests: legacyManifests,
+    fetchResponse: legacyRegistry(),
+    readLegacyTag: legacyTag,
+  });
+  assert.equal(result.action, "no-op");
+});
+
+test("historical 0.8.7 no-op rejects altered receipts, identity/tag/local-manifest, and provider evidence", async () => {
+  const cases = [
+    ["extra receipt field", { intent: { ...legacyIntent, extra: true } }],
+    [
+      "missing receipt field",
+      {
+        intent: (() => {
+          const receipt = structuredClone(legacyIntent);
+          delete receipt.source;
+          return receipt;
+        })(),
+      },
+    ],
+    [
+      "Template identity",
+      {
+        ecosystem: {
+          ...legacyEcosystem,
+          current: {
+            ...legacyEcosystem.current,
+            template: { ...legacyEcosystem.current.template, commit: "a".repeat(40) },
+          },
+        },
+      },
+    ],
+    ["local manifest", { manifests: [{ name: "create-vireo", version: "0.8.8" }, ...legacyManifests.slice(1)] }],
+    ["tag", { readLegacyTag: () => ({ annotated: true, commit: "a".repeat(40) }) }],
+    [
+      "lightweight tag",
+      { readLegacyTag: () => ({ annotated: false, commit: "b7b3c97ad230148189c4353fbccdccc2a9239018" }) },
+    ],
+    [
+      "registry",
+      {
+        fetchResponse: legacyRegistry({ name: "create-vireo", version: "0.8.7", dist: { integrity: "sha512-wrong" } }),
+      },
+    ],
+    ["provider failure", { fetchResponse: async () => ({ ok: false, status: 503 }) }],
+  ];
+  for (const [name, overrides] of cases) {
+    const result = await planAutomaticTemplatePublication({
+      ecosystem: legacyEcosystem,
+      intent: legacyIntent,
+      manifests: legacyManifests,
+      fetchResponse: legacyRegistry(),
+      readLegacyTag: legacyTag,
+      ...overrides,
+    });
+    assert.equal(result.action, "fail", name);
+  }
 });
 
 test("automatic planning rejects a synthesized finalized receipt with missing immutable evidence before registry reads", async () => {

@@ -104,6 +104,10 @@ In both cases, review the retained verify evidence and confirm the publish job
 reports the published packages, or an explicit successful recovery when every
 reviewed coordinate was already public.
 
+The checked-in pre-adoption `create-vireo@0.8.7` receipt is not a publication
+path. It has a narrowly pinned no-op compatibility check only; any receipt,
+Template identity, tag, or registry-integrity drift fails the automatic planner.
+
 The publish job downloads the retained evidence from the verify job, requires its
 source commit and all eight tarball SHA-256 digests to match, then preflights every
 registry coordinate, cryptographically audits every already-public package in an
