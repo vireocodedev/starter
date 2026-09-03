@@ -10,9 +10,9 @@ export function validateReleasePreflightIdentity({
   verifierSourceCommit,
 }) {
   const problems = [];
-  if (requestedReleaseId && !/^npm-\d+\.\d+\.\d+_jvm-\d+\.\d+\.\d+$/u.test(requestedReleaseId))
+  if (requestedReleaseId !== undefined && !/^npm-\d+\.\d+\.\d+_jvm-\d+\.\d+\.\d+$/u.test(requestedReleaseId))
     problems.push("requested release id is not an exact npm-x.y.z_jvm-x.y.z release id");
-  else if (requestedReleaseId && requestedReleaseId !== release.id)
+  else if (requestedReleaseId !== undefined && requestedReleaseId !== release.id)
     problems.push("requested release id does not match ecosystem current release");
   if (requestedSourceCommit && requestedSourceCommit !== verifierSourceCommit)
     problems.push("requested source commit does not match the verifier checkout");

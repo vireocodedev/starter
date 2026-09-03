@@ -34,6 +34,17 @@ test("release preflight binds exact release and source coordinates", () => {
     }),
     ["requested release id is not an exact npm-x.y.z_jvm-x.y.z release id"],
   );
+  for (const requestedReleaseId of ["", " ", "\t", "npm-0.8.1_jvm-0.3.1-extra"]) {
+    assert.deepEqual(
+      validateReleasePreflightIdentity({ release, requestedReleaseId, verifierSourceCommit: "b".repeat(40) }),
+      ["requested release id is not an exact npm-x.y.z_jvm-x.y.z release id"],
+      JSON.stringify(requestedReleaseId),
+    );
+  }
+  assert.deepEqual(
+    validateReleasePreflightIdentity({ release, requestedReleaseId: undefined, verifierSourceCommit: "b".repeat(40) }),
+    [],
+  );
 });
 test("only the historical Template release immutability warning is narrow", () => {
   assert.equal(vireoReleaseImmutabilityFinding({ version: "0.8.1", immutable: false }).category, "external-warning");
