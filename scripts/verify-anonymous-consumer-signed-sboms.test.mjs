@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -6,6 +7,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  ghAttestationVerifyMaxBufferBytes,
   signedSbomVerificationPlan,
   verifiedAttestationRecord,
   verifySignedSbomPlan,
@@ -192,6 +194,8 @@ function verifiedOutput(subject, options) {
 test("plans and verifies every exact npm and Maven subject against a distinct trusted attester commit", t => {
   const { root, hash } = fixture(t);
   const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
+  assert.equal(ghAttestationVerifyMaxBufferBytes, 16 * 1024 * 1024);
+  assert.ok(Number.isFinite(ghAttestationVerifyMaxBufferBytes));
   assert.equal(plan.subjects.length, 2);
   assert.equal(plan.releaseTagCommit, commits.releaseTag);
   assert.equal(plan.verifierSourceCommit, commits.verifier);
@@ -205,8 +209,8 @@ test("plans and verifies every exact npm and Maven subject against a distinct tr
       ancestryCalls += 1;
       return trustedAncestry(ancestor, descendant);
     },
-    execute: (command, arguments_) => {
-      calls.push([command, arguments_]);
+    execute: (command, arguments_, options) => {
+      calls.push({ command, arguments_, options });
       return verifiedOutput(plan.subjects.find(subject => subject.absolutePath === arguments_[2]));
     },
   });
@@ -216,16 +220,106 @@ test("plans and verifies every exact npm and Maven subject against a distinct tr
     return indexes.length === 1 && arguments_[indexes[0] + 1] === value;
   };
   assert.ok(
-    calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--predicate-type", "https://cyclonedx.org/bom")),
+    calls.every(({ arguments_ }) => hasExactOptionValue(arguments_, "--predicate-type", "https://cyclonedx.org/bom")),
   );
-  assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--source-ref", "refs/heads/main")));
-  assert.ok(calls.every(([, arguments_]) => !arguments_.includes("--source-digest")));
-  assert.ok(calls.every(([, arguments_]) => hasExactOptionValue(arguments_, "--format", "json")));
+  assert.ok(calls.every(({ arguments_ }) => hasExactOptionValue(arguments_, "--source-ref", "refs/heads/main")));
+  assert.ok(calls.every(({ arguments_ }) => !arguments_.includes("--source-digest")));
+  assert.ok(calls.every(({ arguments_ }) => hasExactOptionValue(arguments_, "--format", "json")));
+  assert.deepEqual(
+    calls.map(({ command, options }) => ({ command, options })),
+    [
+      {
+        command: "gh",
+        options: {
+          encoding: "utf8",
+          maxBuffer: ghAttestationVerifyMaxBufferBytes,
+          stdio: ["ignore", "pipe", "pipe"],
+          env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" },
+        },
+      },
+      {
+        command: "gh",
+        options: {
+          encoding: "utf8",
+          maxBuffer: ghAttestationVerifyMaxBufferBytes,
+          stdio: ["ignore", "pipe", "pipe"],
+          env: { ...process.env, GH_PROMPT_DISABLED: "1", NO_COLOR: "1" },
+        },
+      },
+    ],
+  );
   assert.equal(records[0].verification.releaseTagCommit, commits.releaseTag);
   assert.equal(records[0].verification.verifierSourceCommit, commits.verifier);
   assert.equal(records[0].verification.attestations[0].certificate.attesterSourceCommit, commits.attester);
   assert.equal(records[0].verification.attestations[0].certificate.run.id, "123456");
   assert.equal(ancestryCalls, 3, "shared attester ancestry must be cached across subjects");
+});
+
+test("accepts bounded large gh JSON while retaining only compact verified evidence", t => {
+  const { root, hash } = fixture(t);
+  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
+  const paddingBytes = 1_200_000;
+  const execute = (command, arguments_, options) => {
+    assert.equal(command, "gh");
+    const subject = plan.subjects.find(candidate => candidate.absolutePath === arguments_[2]);
+    const entry = verifiedEntry(subject);
+    const program = [
+      `const entry = ${JSON.stringify(entry)};`,
+      `entry.padding = "x".repeat(${paddingBytes});`,
+      "process.stdout.write(JSON.stringify([entry]));",
+    ].join(" ");
+    const output = execFileSync(process.execPath, ["--input-type=module", "--eval", program], options);
+    assert.ok(Buffer.byteLength(output) > 1024 * 1024, "fixture must exceed Node's default child-process buffer");
+    return output;
+  };
+  const records = verifySignedSbomPlan({
+    plan,
+    repository: policy.repository,
+    run: { id: "123" },
+    isAncestor: trustedAncestry,
+    execute,
+  });
+
+  assert.equal(records.length, 2);
+  assert.deepEqual(records.map(record => record.verification.attestations[0].sbom.component.name).toSorted(), [
+    "example",
+    "example-core",
+  ]);
+  const compactRecords = JSON.stringify(records);
+  assert.ok(!compactRecords.includes("padding"), "records must not retain raw gh response padding");
+  assert.ok(Buffer.byteLength(compactRecords) < 10_000, "records must not retain raw gh response tails");
+});
+
+test("rejects a large but invalid gh attestation response after bounded execution", t => {
+  const { root, hash } = fixture(t);
+  const plan = signedSbomVerificationPlan({ evidenceRoot: root, release, policy, gauntletPolicy, hash });
+  const paddingBytes = 1_200_000;
+  const execute = (command, arguments_, options) => {
+    assert.equal(command, "gh");
+    const subject = plan.subjects.find(candidate => candidate.absolutePath === arguments_[2]);
+    const entry = verifiedEntry(subject);
+    entry.verificationResult.statement.predicateType = "https://example.invalid/not-cyclonedx";
+    const program = [
+      `const entry = ${JSON.stringify(entry)};`,
+      `entry.padding = "x".repeat(${paddingBytes});`,
+      "process.stdout.write(JSON.stringify([entry]));",
+    ].join(" ");
+    const output = execFileSync(process.execPath, ["--input-type=module", "--eval", program], options);
+    assert.ok(Buffer.byteLength(output) > 1024 * 1024, "fixture must exceed Node's default child-process buffer");
+    return output;
+  };
+
+  assert.throws(
+    () =>
+      verifySignedSbomPlan({
+        plan,
+        repository: policy.repository,
+        run: { id: "123" },
+        isAncestor: trustedAncestry,
+        execute,
+      }),
+    /unexpected predicate/u,
+  );
 });
 
 test("accepts and records multiple eligible attestations while ignoring only future attestations", t => {
