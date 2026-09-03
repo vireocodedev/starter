@@ -18,6 +18,11 @@ const templateProviderOnlyPaths = [
   ".github/settings/selected-actions.json",
   ".github/settings/workflow-permissions.json",
 ];
+const durableTemplateReleaseRecoveryPaths = [
+  ".github/workflows/template-release-recover.yml",
+  "scripts/template-release-reconciliation.mjs",
+  "scripts/template-release-reconciliation.test.mjs",
+];
 
 test("the checked-in application projection contract is semantically valid", () => {
   assert.deepEqual(validateApplicationProjectionContract(contract), []);
@@ -33,6 +38,7 @@ test("flagship operations and historical evidence are excluded from every projec
       ".verification-evidence/latest.json",
       "contracts/flagship-demo-policy.json",
       "deploy/hetzner/deploy.sh",
+      "deploy/hetzner/flagship-host-deploy.sh",
       "docs/flagship.md",
     ]) {
       assert.equal(classifyProjectionPath(contract, path, profile)?.disposition, "exclude", `${profile}: ${path}`);
@@ -44,6 +50,7 @@ test("template release operations are excluded from every project profile", () =
   for (const profile of contract.profiles) {
     for (const path of [
       ".github/workflows/template-release.yml",
+      ...durableTemplateReleaseRecoveryPaths,
       ...templateProviderOnlyPaths,
       ".github/rulesets/starter-template-0.8.0.json",
       ".github/rulesets/starter-template-0.8.1.json",
@@ -275,6 +282,28 @@ test("the validator rejects ambiguous and missing ownership decisions", () => {
     validateApplicationProjectionContract(missingPlatformSupportTest).join("\n"),
     /platform-support-policy\.test\.mjs/u,
   );
+
+  const missingDurableRecoveryWorkflow = clone(contract);
+  missingDurableRecoveryWorkflow.rules = missingDurableRecoveryWorkflow.rules.map(rule => ({
+    ...rule,
+    paths: rule.paths.filter(path => path !== ".github/workflows/template-release-recover.yml"),
+  }));
+  assert.match(
+    validateApplicationProjectionContract(missingDurableRecoveryWorkflow).join("\n"),
+    /template-release-recover\.yml is unclassified for full-stack/u,
+  );
+
+  for (const path of durableTemplateReleaseRecoveryPaths.slice(1)) {
+    const missingDurableRecoveryScript = clone(contract);
+    missingDurableRecoveryScript.rules = missingDurableRecoveryScript.rules.map(rule => ({
+      ...rule,
+      paths: rule.paths.filter(candidate => candidate !== path),
+    }));
+    assert.match(
+      validateApplicationProjectionContract(missingDurableRecoveryScript).join("\n"),
+      new RegExp(`${path} must be maintainer-only for full-stack, got managed`, "u"),
+    );
+  }
 
   for (const path of templateProviderOnlyPaths) {
     const missingProviderSurface = clone(contract);

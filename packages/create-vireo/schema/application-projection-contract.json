@@ -246,6 +246,7 @@
       "profiles": ["full-stack", "frontend"],
       "paths": [
         ".github/workflows/template-release.yml",
+        ".github/workflows/template-release-recover.yml",
         ".github/environments/template-release.json",
         ".github/environments/template-release.deployment-branch-policies.json",
         ".github/environments/template-release.live-assertions.json",
@@ -272,6 +273,8 @@
         "scripts/template-release-coordinate-change.mjs",
         "scripts/template-release-state.mjs",
         "scripts/template-release-state.test.mjs",
+        "scripts/template-release-reconciliation.mjs",
+        "scripts/template-release-reconciliation.test.mjs",
         "scripts/write-template-release-manifest.mjs",
         "scripts/template-release-recovery-policy.mjs",
         "scripts/template-release-recovery-policy.test.mjs",
@@ -609,6 +612,11 @@
       "category": "maintainer-only"
     },
     {
+      "path": ".github/workflows/template-release-recover.yml",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
       "path": ".github/environments/template-release.json",
       "profile": "full-stack",
       "category": "maintainer-only"
@@ -695,6 +703,16 @@
     },
     {
       "path": "scripts/template-release-policy.test.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-reconciliation.mjs",
+      "profile": "full-stack",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-reconciliation.test.mjs",
       "profile": "full-stack",
       "category": "maintainer-only"
     },
@@ -744,6 +762,11 @@
       "category": "maintainer-only"
     },
     {
+      "path": ".github/workflows/template-release-recover.yml",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
       "path": ".github/environments/template-release.json",
       "profile": "frontend",
       "category": "maintainer-only"
@@ -830,6 +853,16 @@
     },
     {
       "path": "scripts/template-release-policy.test.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-reconciliation.mjs",
+      "profile": "frontend",
+      "category": "maintainer-only"
+    },
+    {
+      "path": "scripts/template-release-reconciliation.test.mjs",
       "profile": "frontend",
       "category": "maintainer-only"
     },
