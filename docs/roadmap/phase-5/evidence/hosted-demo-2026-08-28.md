@@ -4,7 +4,7 @@
 
 - Public URL: <https://demo.vireocode.com>
 - Initial activation revision: Template `aa7d17bb065626e9eac41b80e701b5b8a19552d8`
-- Current verified deployment: Template 0.8.6 commit `cef67cc74af3d28028fba424e1d5c6a92faa6fc9`, activated on 2026-09-02
+- Current verified deployment: Template 0.8.7 commit `0557990f024a8736b6e661f8fc264861deb99b65`, activated on 2026-09-03
 - Activation-policy revision: Template `802d488fac81e7ed829ce880197f55800df6f11f`
 - Data boundary: disposable public synthetic data only
 - Availability: best effort, no uptime or response-time SLA
@@ -36,6 +36,8 @@ and 4 MiB respectively on the 2-vCPU/4-GB host.
   [GitHub Actions run 33159094461](https://github.com/vireocodedev/vireo-template/actions/runs/33159094461)
 - Template 0.8.6 post-deployment health and authenticated read-only journey:
   [GitHub Actions run 33687209258](https://github.com/vireocodedev/vireo-template/actions/runs/33687209258)
+- Template 0.8.7 post-deployment health and authenticated read-only journey:
+  [GitHub Actions run 33698943532](https://github.com/vireocodedev/vireo-template/actions/runs/33698943532)
 - Hourly monitoring is active through `.github/workflows/flagship-demo.yml`.
 - The persistent `vireo-flagship-demo-reset.timer` is enabled and schedules the
   isolated reset within every 24-hour window.
