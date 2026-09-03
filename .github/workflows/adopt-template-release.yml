@@ -32,10 +32,13 @@ jobs:
       - id: plan
         name: Validate the next public immutable Template release
         run: node scripts/plan-template-adoption.mjs --output .template-adoption-plan.json --json
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - name: Upload immutable Template adoption plan
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: template-adoption-plan-${{ github.sha }}
           path: .template-adoption-plan.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 
