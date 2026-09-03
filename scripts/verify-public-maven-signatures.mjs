@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { validatePublicMavenRecord } from "./lib/anonymous-public-maven-evidence.mjs";
+import { publicMavenCoordinatesMatch, validatePublicMavenRecord } from "./lib/anonymous-public-maven-evidence.mjs";
 import { verifyCanonicalMitLicense } from "./lib/mit-license-evidence.mjs";
 
 const args = process.argv.slice(2);
@@ -28,10 +28,7 @@ if (!maven?.group || !Array.isArray(maven.modules))
   throw new Error("Maven attestation policy has no artifact contract.");
 if (!contract.current?.maven?.version || version !== contract.current.maven.version)
   throw new Error("Requested Maven version does not match the ecosystem contract.");
-if (
-  contract.current.maven.group !== maven.group ||
-  JSON.stringify(contract.current.maven.modules) !== JSON.stringify(maven.modules.map(module => module.name))
-)
+if (!publicMavenCoordinatesMatch({ policyMaven: maven, contractMaven: contract.current.maven }))
   throw new Error("Maven policy and ecosystem contract coordinates diverge.");
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(version ?? "")) throw new Error("Expected exact Maven version.");
 const root = mkdtempSync(join(tmpdir(), "vireo-public-signatures-"));
