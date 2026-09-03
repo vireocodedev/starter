@@ -10,12 +10,11 @@ const maximumPomBytes = 1024 * 1024;
  */
 export function inspectPublicMavenPom({ pom, group, module, version }) {
   if (typeof pom !== "string" || Buffer.byteLength(pom, "utf8") > maximumPomBytes) return false;
-  const withoutComments = pom.replace(/<!--[\s\S]*?-->/gu, "");
   if (
-    /<!DOCTYPE\b/iu.test(withoutComments) ||
-    /<!ENTITY\b/iu.test(withoutComments) ||
-    /<!\[CDATA\[/u.test(withoutComments) ||
-    /&(?:#[0-9]+|#x[0-9a-f]+|[A-Za-z_:][A-Za-z0-9._:-]*);/iu.test(withoutComments)
+    /<!DOCTYPE\b/iu.test(pom) ||
+    /<!ENTITY\b/iu.test(pom) ||
+    /<!\[CDATA\[/u.test(pom) ||
+    /&(?:#[0-9]+|#x[0-9a-f]+|[A-Za-z_:][A-Za-z0-9._:-]*);/iu.test(pom)
   )
     return false;
 

@@ -63,6 +63,7 @@ test("public Maven POM inspection fails closed for malformed or non-exact XML", 
   const cases = [
     ["non-string", null],
     ["comment-only full fake", `<!-- ${pom()} -->`],
+    ["comment containing unsafe XML token", `<!-- <!DOCTYPE project> &amp; <![CDATA[MIT]]> -->${pom()}`],
     ["wrong root namespace", pom().replace("http://maven.apache.org/POM/4.0.0", "https://wrong.invalid/POM")],
     ["wrong group", pom({ group: "com.example" })],
     ["wrong artifact", pom({ module: "vireo-auth" })],
