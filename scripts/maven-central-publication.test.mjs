@@ -11,7 +11,7 @@ const publishScript = join(repositoryRoot, "jvm/scripts/publish-central-deployme
 const waitScript = join(repositoryRoot, "jvm/scripts/wait-central-validation.sh");
 const publishScriptSource = readFileSync(publishScript, "utf8");
 const waitScriptSource = readFileSync(waitScript, "utf8");
-const workflow = readFileSync(join(repositoryRoot, ".github/workflows/release-maven-central.yml"), "utf8");
+const workflow = readFileSync(join(repositoryRoot, ".github/workflows/release-npm.yml"), "utf8");
 const recoveryWorkflow = readFileSync(
   join(repositoryRoot, ".github/workflows/recover-maven-central-deployment.yml"),
   "utf8",
@@ -200,6 +200,18 @@ test("fails closed before promotion for a mismatched deployment UUID or non-VALI
   }
 });
 
+test("strict public-state recovery requires the exact deployment already PUBLISHED and never posts", () => {
+  for (const [state, expectedStatus] of [
+    ["VALIDATED", 1],
+    ["PUBLISHED", 0],
+  ]) {
+    const mocked = fixture([centralStatus({ state })]);
+    const result = execute(publishScript, [deploymentId, version, "--require-published"], mocked.env);
+    assert.equal(result.status, expectedStatus, `${state}: ${result.stderr}`);
+    assert.equal(promotionRequests(mocked.curlLog).length, 0, state);
+  }
+});
+
 test("fails closed when the Central promotion response is not exactly HTTP 204", () => {
   const mocked = fixture([centralStatus({ state: "VALIDATED" })], "202");
   const result = execute(publishScript, [deploymentId, version], mocked.env);
@@ -244,24 +256,35 @@ test("waiter rejects FAILED, unknown, and mismatched deployment-ID responses", (
   }
 });
 
-test("release workflow keeps USER_MANAGED upload defaulting to explicit protected publication after validation", () => {
-  assert.match(
-    workflow,
-    /publish:\n\s+description: Publish the validated deployment to Maven Central \(defaults to staging only\)\n\s+required: false\n\s+default: false\n\s+type: boolean/u,
-  );
-  assert.match(workflow, /if: github\.ref == 'refs\/heads\/main'/u);
+test("combined ecosystem workflow keeps USER_MANAGED automatic promotion and receipt recovery", () => {
+  assert.doesNotMatch(workflow, /workflow_dispatch:/u);
+  assert.match(workflow, /needs\.plan\.outputs\.action == 'jvm-only'/u);
   assert.match(workflow, /environment: maven-central/u);
-  assert.match(workflow, /permissions:\n\s+contents: read/u);
-  assert.match(workflow, /timeout-minutes: 65/u);
-  assert.match(workflow, /if: inputs\.publish/u);
-  assert.match(
-    workflow,
-    /publish-central-deployment\.sh "\$\{\{ steps\.central\.outputs\.deployment-id \}\}" "\$\{\{ steps\.bundle\.outputs\.version \}\}"/u,
+  assert.match(workflow, /actions: read\n\s+contents: read/u);
+  assert.match(workflow, /Prior upload intent has no accepted receipt/u);
+  assert.match(workflow, /node \.\.\/scripts\/release-run-artifacts\.mjs/u);
+  assert.match(workflow, /needs\.maven-state\.outputs\.visibility \}\}" = absent/u);
+  assert.match(workflow, /maven-central-receipt-\$\{\{ github\.run_id \}\}/u);
+  assert.match(workflow, /publish-central-deployment\.sh "\$DEPLOYMENT_ID" "\$VERSION"/u);
+  assert.match(workflow, /--require-published/u);
+  assert.match(workflow, /receipt-path=\$receipt/u);
+  assert.match(workflow, /steps\.prior\.outputs\.attempt \|\| github\.run_attempt/u);
+  assert.match(workflow, /wait-central-validation\.sh "\$DEPLOYMENT_ID" PUBLISHED/u);
+  assert.match(recoveryWorkflow, /if \[ "\$\{\{ steps\.central-state\.outputs\.visibility \}\}" = absent \]; then/u);
+  assert.ok(
+    workflow.indexOf("Wait for exact Central validation before recording a promotion attempt") <
+      workflow.indexOf("Persist exact Central promotion-attempt evidence before the irreversible request") &&
+      workflow.indexOf("Persist exact Central promotion-attempt evidence before the irreversible request") <
+        workflow.indexOf("Validate then publish exact Central deployment once"),
   );
-  assert.ok(workflow.indexOf("wait-central-validation.sh") < workflow.indexOf("if: inputs.publish"));
+  assert.ok(workflow.indexOf("wait-central-validation.sh") < workflow.indexOf("publish-central-deployment.sh"));
   assert.match(uploadScript, /publishingType=USER_MANAGED/u);
   assert.doesNotMatch(workflow, /publishingType=AUTOMATIC/u);
-  assert.match(workflow, /Publication identity: \\`6 artifacts \/ 7 exact PURLs\\`/u);
+  assert.match(workflow, /finalize-jvm/u);
+  assert.match(workflow, /exact-binding: \$\{\{ steps\.binding\.outputs\.exact-binding \}\}/u);
+  assert.match(workflow, /VISIBILITY: \$\{\{ needs\.maven-state\.outputs\.visibility \}\}/u);
+  assert.match(workflow, /RECEIPT: \$\{\{ steps\.prior\.outputs\.recovered \}\}/u);
+  assert.match(workflow, /needs\.maven\.outputs\.exact-binding/u);
 });
 
 test("anonymous public Maven verification cannot request the protected publication environment", () => {
@@ -269,36 +292,57 @@ test("anonymous public Maven verification cannot request the protected publicati
   assert.match(verifyWorkflow, /permissions:\n\s+contents: read/u);
 });
 
-test("recovery workflow promotes one existing validated deployment without building or uploading another bundle", () => {
+test("recovery workflow binds one deployment to an exact release commit and completes no-secret finalization", () => {
   assert.match(recoveryWorkflow, /^name: Recover validated Maven Central deployment$/mu);
   assert.match(recoveryWorkflow, /workflow_dispatch:\n\s+inputs:\n\s+version:/u);
+  assert.match(recoveryWorkflow, /source_commit:/u);
+  assert.match(recoveryWorkflow, /source_run_id:/u);
   assert.match(recoveryWorkflow, /deployment_id:/u);
   assert.match(recoveryWorkflow, /confirmation:/u);
   assert.match(recoveryWorkflow, /if: github\.ref == 'refs\/heads\/main'/u);
+  assert.match(recoveryWorkflow, /group: vireo-ecosystem-public-release/u);
+  assert.match(workflow, /group: vireo-ecosystem-public-release-\$\{\{ github\.sha \}\}/u);
+  assert.match(recoveryWorkflow, /group: vireo-ecosystem-public-release-\$\{\{ inputs\.source_commit \}\}/u);
+  assert.doesNotMatch(recoveryWorkflow, /maven-central-recovery-|group: vireo-ecosystem-public-release\s*$/mu);
+  assert.match(recoveryWorkflow, /cancel-in-progress: false/u);
   assert.match(recoveryWorkflow, /environment: maven-central/u);
   assert.match(recoveryWorkflow, /permissions:\n\s+contents: read/u);
   assert.match(recoveryWorkflow, /PUBLISH_VALIDATED_DEPLOYMENT/u);
-  assert.match(recoveryWorkflow, /case "\$status" in\n\s+404\)/u);
   assert.match(
     recoveryWorkflow,
-    /DEPLOYMENT_ID: \$\{\{ inputs\.deployment_id \}\}\n\s+REQUESTED_VERSION: \$\{\{ inputs\.version \}\}/u,
+    /for module in vireo-bom vireo-core vireo-auth vireo-query vireo-offline vireo-history/u,
   );
+  assert.match(recoveryWorkflow, /classifyCentralVisibility/u);
+  assert.match(recoveryWorkflow, /echo "visibility=\$visibility"/u);
+  assert.match(recoveryWorkflow, /--require-published/u);
+  assert.match(recoveryWorkflow, /node scripts\/ecosystem-publication-plan\.mjs/u);
+  assert.match(recoveryWorkflow, /node scripts\/maven-recovery-source-run\.mjs/u);
+  assert.match(recoveryWorkflow, /node scripts\/release-run-artifacts\.mjs/u);
+  assert.match(recoveryWorkflow, /retain exactly one signed Maven upload intent/u);
+  assert.match(recoveryWorkflow, /accepted receipt deployment UUID does not match the requested recovery deployment/u);
+  assert.match(recoveryWorkflow, /more than one accepted Central receipt/u);
+  assert.match(recoveryWorkflow, /exactly one signed bundle and intent record/u);
+  assert.match(recoveryWorkflow, /validateBundleReceipt/u);
+  assert.match(recoveryWorkflow, /git merge-base --is-ancestor "\$SOURCE_COMMIT" origin\/main/u);
+  assert.match(recoveryWorkflow, /pull-requests: read/u);
+  assert.match(recoveryWorkflow, /actions: read/u);
+  assert.match(recoveryWorkflow, /needs: recover/u);
+  assert.match(recoveryWorkflow, /contents: write/u);
+  assert.match(recoveryWorkflow, /verify-central-consumer\.sh/u);
+  assert.match(recoveryWorkflow, /finalize-jvm-release\.mjs "\$VERSION" "\$SOURCE_COMMIT"/u);
+  assert.match(recoveryWorkflow, /name: Resume exact interrupted ecosystem release run/u);
+  assert.match(recoveryWorkflow, /actions: write/u);
+  assert.match(recoveryWorkflow, /actions\/runs\/\$SOURCE_RUN_ID\/rerun/u);
+  assert.match(recoveryWorkflow, /completed:failure\|completed:cancelled\|completed:timed_out/u);
   assert.match(recoveryWorkflow, /publish-central-deployment\.sh "\$DEPLOYMENT_ID" "\$REQUESTED_VERSION"/u);
-  assert.equal(recoveryWorkflow.match(/publish-central-deployment\.sh/gu)?.length, 1);
+  assert.equal(recoveryWorkflow.match(/publish-central-deployment\.sh/gu)?.length, 2);
   assert.doesNotMatch(recoveryWorkflow, /build-central-bundle\.sh|upload-central-bundle\.sh|publishMavenPublication/u);
   assert.match(recoveryWorkflow, /Publication identity: \\`6 artifacts \/ 7 exact PURLs\\`/u);
 
   const inputInterpolationLines = recoveryWorkflow.split("\n").filter(line => line.includes("${{ inputs."));
-  assert.deepEqual(inputInterpolationLines, [
-    "  group: maven-central-recovery-${{ inputs.deployment_id }}",
-    "    name: Recover ${{ inputs.version }} from ${{ inputs.deployment_id }}",
-    "          CONFIRMATION: ${{ inputs.confirmation }}",
-    "          REQUESTED_VERSION: ${{ inputs.version }}",
-    "          DEPLOYMENT_ID: ${{ inputs.deployment_id }}",
-    "          REQUESTED_VERSION: ${{ inputs.version }}",
-    "          VERSION: ${{ inputs.version }}",
-    "          DEPLOYMENT_ID: ${{ inputs.deployment_id }}",
-  ]);
+  assert.ok(inputInterpolationLines.includes("          SOURCE_COMMIT: ${{ inputs.source_commit }}"));
+  assert.ok(inputInterpolationLines.includes("          SOURCE_RUN_ID: ${{ inputs.source_run_id }}"));
+  assert.ok(inputInterpolationLines.includes("          DEPLOYMENT_ID: ${{ inputs.deployment_id }}"));
 });
 
 test("status reads have bounded retries and timeouts while the irreversible publication request is a single timed call", () => {

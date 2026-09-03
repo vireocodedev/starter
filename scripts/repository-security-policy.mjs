@@ -163,17 +163,16 @@ validateActions(readJson(".github/settings/actions.json"), readJson(".github/set
   "changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d",
 ]);
 const permissions = readJson(".github/settings/workflow-permissions.json");
-if (permissions.default_workflow_permissions !== "read" || permissions.can_approve_pull_request_reviews !== true)
+if (permissions.default_workflow_permissions !== "read" || permissions.can_approve_pull_request_reviews !== false)
   problems.push(
-    "workflow-token defaults must remain read-only while allowing explicitly scoped trusted workflows to create release pull requests",
+    "workflow-token defaults must remain read-only and unable to approve pull-request reviews; scoped App tokens own release-PR writes",
   );
-const reviewer = [{ type: "User", id: 53398175 }];
 validateEnvironment(".github/environments/package-release.json", {
   reviewers: [],
   policies: [{ name: "main", type: "branch" }],
 });
 validateEnvironment(".github/environments/maven-central.json", {
-  reviewers: reviewer,
+  reviewers: [],
   policies: [{ name: "main", type: "branch" }],
 });
 validateEnvironment(".github/environments/github-pages.json", {

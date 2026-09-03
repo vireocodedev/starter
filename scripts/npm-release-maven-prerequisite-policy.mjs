@@ -65,17 +65,17 @@ export function validateNpmReleaseMavenPrerequisite(workflow) {
     }
   }
 
-  if (publish.filter(line => line === "    needs: verify").length !== 1) {
-    problems.push("release-npm.yml:publish must require successful verify with exact needs: verify.");
+  if (publish.filter(line => line === "    needs: [plan, verify]").length !== 1) {
+    problems.push("release-npm.yml:publish must require the authorized plan and successful verify.");
   }
   if (publish.filter(line => /^ {4}needs:/u.test(line)).length !== 1) {
     problems.push("release-npm.yml:publish must declare exactly one needs dependency.");
   }
   if (
     publish.filter(line => /^ {4}if:/u.test(line)).length !== 1 ||
-    !publish.includes("    if: github.ref == 'refs/heads/main'")
+    !publish.includes("    if: needs.verify.result == 'success'")
   ) {
-    problems.push("release-npm.yml:publish must retain the main-only success-gated publish condition.");
+    problems.push("release-npm.yml:publish must retain the scoped success-gated publish condition.");
   }
   return problems;
 }

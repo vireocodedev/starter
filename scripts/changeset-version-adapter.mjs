@@ -4,6 +4,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { synchronizeDocumentationRelease } from "./synchronize-documentation-release.mjs";
 import { applyJvmReleaseImpact } from "./release-impact-version.mjs";
+import { consumeJvmOnlyReleaseTrigger } from "./prepare-jvm-only-release-trigger.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const localNpx = join(repositoryRoot, "node_modules", ".bin", "npx");
@@ -15,6 +16,10 @@ if (existsSync(localNpx)) {
 
 symlinkSync(relative(dirname(localNpx), declaredNpx), localNpx);
 try {
+  // A JVM-only generated release PR is opened by the pinned Changesets action
+  // using an untracked sentinel. Remove only the exact sentinel before the
+  // Changesets CLI reads metadata, preventing a synthetic npm bump.
+  consumeJvmOnlyReleaseTrigger({ repositoryRoot });
   const result = spawnSync("changeset", ["version", ...process.argv.slice(2)], {
     cwd: repositoryRoot,
     env: process.env,

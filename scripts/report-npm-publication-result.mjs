@@ -2,7 +2,7 @@ import { appendFileSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { npmPurl, verifyNpmCandidates } from "./publish-verified-npm-candidates.mjs";
+import { npmPurl, publicationScope, verifyNpmCandidates } from "./publish-verified-npm-candidates.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -75,13 +75,25 @@ export function publicationResultSummary(result, candidates, expectedCommit) {
   if (result.publishedTags.some(coordinate => !published.has(coordinate))) {
     throw new Error("npm publication result publishedTags must be published coordinates.");
   }
-  if (process.env.AUTOMATIC_TEMPLATE_ADOPTION === "true") {
+  const scope = publicationScope();
+  if (scope.scope === "template-adoption") {
     const allowed = new Set(
       candidates.filter(candidate => candidate.name === "create-vireo").map(candidate => candidate.coordinate),
     );
     if (result.published.some(coordinate => !allowed.has(coordinate))) {
       throw new Error("Automatic Template adoption may publish only the exact create-vireo candidate.");
     }
+    if ([...result.recoveredTags, ...result.publishedTags].some(coordinate => !allowed.has(coordinate)))
+      throw new Error("Automatic Template adoption may mutate only the exact create-vireo tag.");
+  }
+  if (scope.scope === "classic-libraries") {
+    const expectedClassic = scope.expected;
+    if (result.published.some(coordinate => !expectedClassic.has(coordinate)))
+      throw new Error("Classic-library publication result contains a coordinate outside the authorized release plan.");
+    if (result.published.some(coordinate => coordinate.startsWith("create-vireo@")))
+      throw new Error("Classic-library publication result may never publish create-vireo.");
+    if ([...result.recoveredTags, ...result.publishedTags].some(coordinate => !expectedClassic.has(coordinate)))
+      throw new Error("Classic-library publication result contains an out-of-scope tag mutation.");
   }
   return {
     published: result.published.length > 0,

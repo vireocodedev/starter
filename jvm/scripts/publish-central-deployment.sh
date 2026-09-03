@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 2 ]]; then
-    echo "Usage: $0 <deployment id> <release version>" >&2
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+    echo "Usage: $0 <deployment id> <release version> [--require-published]" >&2
     exit 2
 fi
 
@@ -11,6 +11,11 @@ fi
 
 deployment_id="$1"
 version="$2"
+require_published="${3:-}"
+[[ -z "$require_published" || "$require_published" == "--require-published" ]] || {
+    echo "The only optional mode is --require-published." >&2
+    exit 2
+}
 [[ "$deployment_id" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]] || {
     echo "Invalid Central deployment identifier." >&2
     exit 2
@@ -94,8 +99,8 @@ deployment_state="$(jq -er '.deploymentState | strings' <<< "$response")" || {
     echo "Central status response does not contain a deployment state." >&2
     exit 1
 }
-[[ "$deployment_state" == "VALIDATED" ]] || {
-    echo "Central deployment $deployment_id must be VALIDATED before publication; received $deployment_state." >&2
+[[ "$deployment_state" == "VALIDATED" || "$deployment_state" == "PUBLISHED" ]] || {
+    echo "Central deployment $deployment_id must be VALIDATED or PUBLISHED; received $deployment_state." >&2
     exit 1
 }
 
@@ -110,6 +115,16 @@ expected_purls_json="$(printf '%s\n' "${expected_purls[@]}" | jq -R . | jq -sc '
     echo "Actual PURLs: $actual_purls" >&2
     exit 1
 }
+
+if [[ "$require_published" == "--require-published" && "$deployment_state" != "PUBLISHED" ]]; then
+    echo "Central deployment $deployment_id must already be PUBLISHED in strict recovery mode; received $deployment_state." >&2
+    exit 1
+fi
+
+if [[ "$deployment_state" == "PUBLISHED" ]]; then
+    echo "Central already reports the exact reviewed deployment $deployment_id as published; no second publication request will be sent."
+    exit 0
+fi
 
 response_file="$(mktemp)"
 trap 'rm -f -- "$response_file"' EXIT

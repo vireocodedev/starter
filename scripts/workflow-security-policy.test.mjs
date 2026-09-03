@@ -7,6 +7,7 @@ import {
   validateAlwaysReportedPullRequestWorkflow,
   validateReleasePrWorkflow,
   validateNpmTemplatePublicationWorkflow,
+  validatePostPublicationActivityGate,
   validateTemplateAdoptionWorkflow,
 } from "./workflow-security-policy.mjs";
 
@@ -17,6 +18,8 @@ const anonymousGauntletWorkflow = read(".github/workflows/anonymous-consumer-gau
 const websiteWorkflow = read(".github/workflows/website.yml");
 const templateAdoptionWorkflow = read(".github/workflows/adopt-template-release.yml");
 const npmReleaseWorkflow = read(".github/workflows/release-npm.yml");
+const npmVerificationWorkflow = read(".github/workflows/verify-npm-public.yml");
+const attestationWorkflow = read(".github/workflows/attest-public-release.yml");
 
 function indentation(line) {
   return /^\s*/u.exec(line)?.[0].length ?? 0;
@@ -55,6 +58,26 @@ function standaloneWebsiteArtifactRetainsHiddenFiles(workflow) {
 
 test("accepts the narrowly scoped Changesets release-PR workflow", () => {
   assert.deepEqual(validateReleasePrWorkflow(releaseWorkflow, actionPolicy), []);
+});
+
+test("requires the existing repository-scoped App token for Changesets PR mutation", () => {
+  assert.match(
+    validateReleasePrWorkflow(
+      releaseWorkflow.replace(
+        "GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}",
+        "GITHUB_TOKEN: ${{ github.token }}",
+      ),
+      actionPolicy,
+    ).join("\n"),
+    /must not use the workflow token|exact App-token/u,
+  );
+  assert.match(
+    validateReleasePrWorkflow(
+      releaseWorkflow.replace("environment: template-adoption", "environment: package-release"),
+      actionPolicy,
+    ).join("\n"),
+    /protected template-adoption App environment/u,
+  );
 });
 
 test("requires Basic x-access-token authentication for the App-token Git push", () => {
@@ -113,13 +136,24 @@ test("requires runtime-bound GitHub App bot authorship", () => {
   assert.match(validateTemplateAdoptionWorkflow(hardcodedIdentity).join("\n"), /APP_LOGIN|APP_EMAIL/u);
 });
 
-test("preserves confirmed manual npm dispatch while constraining automatic CLI publication", () => {
+test("constrains automatic ecosystem and immutable Template publication without a manual bypass", () => {
   assert.deepEqual(validateNpmTemplatePublicationWorkflow(npmReleaseWorkflow), []);
   assert.match(
     validateNpmTemplatePublicationWorkflow(
-      npmReleaseWorkflow.replace("MANUAL_CONFIRMATION: ${{ inputs.confirmation }}\n", ""),
+      npmReleaseWorkflow.replaceAll("NPM_PUBLICATION_SCOPE:", "REMOVED_PUBLICATION_SCOPE:"),
     ).join("\n"),
-    /manual confirmation/u,
+    /NPM_PUBLICATION_SCOPE/u,
+  );
+});
+
+test("blocks mixed npm publication when Maven or finalization is not successful", () => {
+  const weakened = npmReleaseWorkflow.replace(
+    "needs.plan.outputs.action == 'jvm-then-libraries' && needs.maven.result == 'success' && needs.finalize-jvm.result == 'success'",
+    "needs.plan.outputs.action == 'jvm-then-libraries' && (needs.maven.result == 'success' || needs.maven.result == 'skipped') && (needs.finalize-jvm.result == 'success' || needs.finalize-jvm.result == 'skipped')",
+  );
+  assert.match(
+    validateNpmTemplatePublicationWorkflow(weakened).join("\n"),
+    /must require successful Maven\/finalization/u,
   );
 });
 
@@ -191,6 +225,52 @@ test("requires the protected gauntlet plan to report on every pull request", () 
   );
 });
 
+test("binds post-publication gauntlet runs to the combined ecosystem workflow", () => {
+  const renamed = anonymousGauntletWorkflow.replace(
+    'workflows: ["Publish Vireo ecosystem"]',
+    'workflows: ["Publish npm release"]',
+  );
+  const previous = read(".github/workflows/anonymous-consumer-gauntlet.yml");
+  assert.match(previous, /workflows: \["Publish Vireo ecosystem"\]/u);
+  assert.doesNotMatch(renamed, /workflows: \["Publish Vireo ecosystem"\]/u);
+});
+
+test("fails closed unless downstream workflow_run consumers inspect exact parent release activity", () => {
+  assert.deepEqual(
+    validatePostPublicationActivityGate(anonymousGauntletWorkflow, "anonymous-consumer-gauntlet.yml"),
+    [],
+  );
+  assert.deepEqual(validatePostPublicationActivityGate(npmVerificationWorkflow, "verify-npm-public.yml"), []);
+  assert.deepEqual(validatePostPublicationActivityGate(attestationWorkflow, "attest-public-release.yml"), []);
+  assert.match(
+    validatePostPublicationActivityGate(
+      anonymousGauntletWorkflow.replace(
+        "always() && github.event_name == 'workflow_run'",
+        "github.event_name == 'workflow_run'",
+      ),
+      "anonymous-consumer-gauntlet.yml",
+    ).join("\n"),
+    /manual or scheduled/u,
+  );
+  assert.match(
+    validatePostPublicationActivityGate(
+      anonymousGauntletWorkflow.replace(
+        "always() && github.event_name != 'pull_request'",
+        "github.event_name != 'pull_request'",
+      ),
+      "anonymous-consumer-gauntlet.yml",
+    ).join("\n"),
+    /trusted source must run manual and scheduled/u,
+  );
+  assert.match(
+    validatePostPublicationActivityGate(
+      npmVerificationWorkflow.replace("needs.activity.outputs.npm-active == 'true'", "true"),
+      "verify-npm-public.yml",
+    ).join("\n"),
+    /exact npm activity/u,
+  );
+});
+
 test("rejects release-PR workflow operations outside reviewed version maintenance", () => {
   const withNamedApprovalCommand = releaseWorkflow.replace(
     "      - run: corepack npm ci --ignore-scripts",
@@ -233,7 +313,10 @@ test("rejects named multiline release-PR commands", () => {
 
 test("rejects expanded release-PR triggers and token scopes", () => {
   const withPullRequestTrigger = releaseWorkflow.replace("workflow_dispatch:", "pull_request:");
-  const withAdditionalScope = releaseWorkflow.replace("pull-requests: write", "issues: write");
+  const withAdditionalScope = releaseWorkflow.replace(
+    "      contents: read",
+    "      contents: write\n      issues: write",
+  );
 
   assert.match(
     validateReleasePrWorkflow(withPullRequestTrigger, actionPolicy).join("\n"),
@@ -241,6 +324,6 @@ test("rejects expanded release-PR triggers and token scopes", () => {
   );
   assert.match(
     validateReleasePrWorkflow(withAdditionalScope, actionPolicy).join("\n"),
-    /must grant exactly contents\/pull-requests write permissions/u,
+    /must grant only contents: read/u,
   );
 });

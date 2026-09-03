@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "generatedReleasePullRequest": {
+    "repository": "vireocodedev/vireo",
+    "base": "main",
+    "head": "changeset-release/main",
+    "authorId": 324462250,
+    "authorLogin": "vireo-template-adoption[bot]",
+    "title": "chore(release): version public ecosystem"
+  },
+  "ecosystemWorkflow": {
+    "id": 343525517,
+    "path": ".github/workflows/release-npm.yml",
+    "name": "Publish Vireo ecosystem"
+  },
+  "classicLibraries": [
+    "@vireocodedev/history",
+    "@vireocodedev/infrastructure",
+    "@vireocodedev/localization",
+    "@vireocodedev/query",
+    "@vireocodedev/shell",
+    "@vireocodedev/sqlite",
+    "@vireocodedev/ui"
+  ],
+  "cli": "create-vireo",
+  "jvm": {
+    "group": "com.vireocode",
+    "modules": ["vireo-bom", "vireo-core", "vireo-auth", "vireo-query", "vireo-offline", "vireo-history"],
+    "tagPrefix": "jvm-v",
+    "releaseNamePrefix": "Vireo JVM "
+  }
+}

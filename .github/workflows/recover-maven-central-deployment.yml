@@ -4,7 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Exact validated JVM version from jvm/gradle.properties
+        description: Exact validated JVM version from the authorized release commit
+        required: true
+        type: string
+      source_commit:
+        description: Exact 40-hex authorized generated-release merge commit
+        required: true
+        type: string
+      source_run_id:
+        description: Exact failed/cancelled/timed-out Publish Vireo ecosystem run to resume
         required: true
         type: string
       deployment_id:
@@ -17,7 +25,7 @@ on:
         type: string
 
 concurrency:
-  group: maven-central-recovery-${{ inputs.deployment_id }}
+  group: vireo-ecosystem-public-release-${{ inputs.source_commit }}
   cancel-in-progress: false
 
 permissions: {}
@@ -31,60 +39,223 @@ jobs:
     environment: maven-central
     permissions:
       contents: read
-    defaults:
-      run:
-        working-directory: jvm
+      pull-requests: read
+      actions: read
+    outputs:
+      source-commit: ${{ steps.authorize.outputs.source-commit }}
+      version: ${{ steps.authorize.outputs.version }}
+      promotion-attempt: ${{ steps.authorize.outputs.promotion-attempt }}
     steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 0
           persist-credentials: false
-
       - name: Confirm the explicit recovery request
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
-          if [[ "$CONFIRMATION" != "PUBLISH_VALIDATED_DEPLOYMENT" ]]; then
+          if [ "$CONFIRMATION" != "PUBLISH_VALIDATED_DEPLOYMENT" ]; then
             echo "Confirmation must exactly equal PUBLISH_VALIDATED_DEPLOYMENT." >&2
             exit 1
           fi
-
+      - name: Re-prove the exact authorized JVM release identity
+        id: authorize
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+        run: |
+          if ! printf '%s' "$SOURCE_COMMIT" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "source_commit must be an exact 40-hex commit." >&2
+            exit 1
+          fi
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          git merge-base --is-ancestor "$SOURCE_COMMIT" origin/main
+          if ! printf '%s' "$SOURCE_RUN_ID" | grep -Eq '^[0-9]+$'; then
+            echo "source_run_id must be an exact Actions run id." >&2
+            exit 1
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID" > "$RUNNER_TEMP/source-run.json"
+          SOURCE_RUN="$RUNNER_TEMP/source-run.json" SOURCE_COMMIT="$SOURCE_COMMIT" \
+            node scripts/maven-recovery-source-run.mjs
+          artifacts_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID/artifacts?per_page=100")"
+          artifacts="$(ARTIFACTS_JSON="$artifacts_json" RELEASE_RUN_ID="$SOURCE_RUN_ID" node scripts/release-run-artifacts.mjs)"
+          intent_count="$(printf '%s' "$artifacts" | jq '.intents | length')"
+          receipt_count="$(printf '%s' "$artifacts" | jq '.receipts | length')"
+          if [ "$intent_count" != 1 ]; then
+            echo "source_run_id must retain exactly one signed Maven upload intent." >&2
+            exit 1
+          fi
+          if [ "$receipt_count" -gt 1 ]; then
+            echo "source_run_id has more than one accepted Central receipt." >&2
+            exit 1
+          fi
+          intent_id="$(printf '%s' "$artifacts" | jq -r '.intents[0].id')"
+          intent_name="$(printf '%s' "$artifacts" | jq -r '.intents[0].name')"
+          intent_attempt="${intent_name##*-}"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$intent_id/zip" > "$RUNNER_TEMP/source-intent.zip"
+          mkdir "$RUNNER_TEMP/source-intent"
+          unzip -q "$RUNNER_TEMP/source-intent.zip" -d "$RUNNER_TEMP/source-intent"
+          bundle_count="$(find "$RUNNER_TEMP/source-intent" -type f -name '*.zip' | wc -l | tr -d ' ')"
+          intent_count="$(find "$RUNNER_TEMP/source-intent" -type f -name maven-upload-intent.json | wc -l | tr -d ' ')"
+          if [ "$bundle_count" != 1 ] || [ "$intent_count" != 1 ]; then
+            echo "The retained source upload intent must contain exactly one signed bundle and intent record." >&2
+            exit 1
+          fi
+          bundle="$(find "$RUNNER_TEMP/source-intent" -type f -name '*.zip' -print -quit)"
+          intent="$(find "$RUNNER_TEMP/source-intent" -type f -name maven-upload-intent.json -print -quit)"
+          bundle_sha="$(sha256sum "$bundle" | cut -d ' ' -f 1)"
+          INTENT="$intent" BUNDLE_SHA="$bundle_sha" SOURCE_COMMIT="$SOURCE_COMMIT" SOURCE_RUN_ID="$SOURCE_RUN_ID" SOURCE_RUN_ATTEMPT="$intent_attempt" REQUESTED_VERSION="$REQUESTED_VERSION" node -e '
+            import("./scripts/maven-central-release-state.mjs").then(({validateBundleReceipt}) => validateBundleReceipt(require(process.env.INTENT), {version:process.env.REQUESTED_VERSION,sha:process.env.SOURCE_COMMIT,runId:process.env.SOURCE_RUN_ID,runAttempt:process.env.SOURCE_RUN_ATTEMPT,bundle:process.env.BUNDLE_SHA}));
+          '
+          promotion_count="$(printf '%s' "$artifacts" | jq -r --arg exact "maven-central-promotion-attempt-$SOURCE_RUN_ID-$intent_attempt" '[.promotionAttempts[] | select(.name == $exact)] | length')"
+          if [ "$promotion_count" -gt 1 ]; then
+            echo "source_run_id has more than one exact Central promotion-attempt artifact." >&2
+            exit 1
+          fi
+          if [ "$receipt_count" = 1 ]; then
+            receipt_id="$(printf '%s' "$artifacts" | jq -r '.receipts[0].id')"
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$receipt_id/zip" > "$RUNNER_TEMP/source-receipt.zip"
+            mkdir "$RUNNER_TEMP/source-receipt"
+            unzip -q "$RUNNER_TEMP/source-receipt.zip" -d "$RUNNER_TEMP/source-receipt"
+            receipt_count="$(find "$RUNNER_TEMP/source-receipt" -type f -name maven-deployment-receipt.json | wc -l | tr -d ' ')"
+            if [ "$receipt_count" != 1 ]; then echo "The retained receipt artifact must contain exactly one deployment receipt." >&2; exit 1; fi
+            receipt="$(find "$RUNNER_TEMP/source-receipt" -type f -name maven-deployment-receipt.json -print -quit)"
+            RECEIPT="$receipt" BUNDLE_SHA="$bundle_sha" SOURCE_COMMIT="$SOURCE_COMMIT" SOURCE_RUN_ID="$SOURCE_RUN_ID" SOURCE_RUN_ATTEMPT="$intent_attempt" REQUESTED_VERSION="$REQUESTED_VERSION" DEPLOYMENT_ID="$DEPLOYMENT_ID" node -e '
+              import("./scripts/maven-central-release-state.mjs").then(({validateBundleReceipt}) => { const receipt=require(process.env.RECEIPT); validateBundleReceipt(receipt, {version:process.env.REQUESTED_VERSION,sha:process.env.SOURCE_COMMIT,runId:process.env.SOURCE_RUN_ID,runAttempt:process.env.SOURCE_RUN_ATTEMPT,bundle:process.env.BUNDLE_SHA}); if(receipt.deploymentId !== process.env.DEPLOYMENT_ID) throw new Error("The accepted receipt deployment UUID does not match the requested recovery deployment."); });
+            '
+          fi
+          GITHUB_ACTIONS=true GITHUB_REF=refs/heads/main GITHUB_SHA="$SOURCE_COMMIT" \
+            GITHUB_OUTPUT="$RUNNER_TEMP/ecosystem-recovery-plan.out" \
+            node scripts/ecosystem-publication-plan.mjs
+          action="$(sed -n 's/^action=//p' "$RUNNER_TEMP/ecosystem-recovery-plan.out")"
+          version="$(sed -n 's/^jvm-version=//p' "$RUNNER_TEMP/ecosystem-recovery-plan.out")"
+          if [ "$action" != jvm-only ] && [ "$action" != jvm-then-libraries ]; then
+            echo "source_commit is not an authorized JVM ecosystem release." >&2
+            exit 1
+          fi
+          if [ "$version" != "$REQUESTED_VERSION" ]; then
+            echo "Requested $REQUESTED_VERSION, but the authorized source release is $version." >&2
+            exit 1
+          fi
+          echo "source-commit=$SOURCE_COMMIT" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "promotion-attempt=$([ "$promotion_count" = 1 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - name: Confirm the existing deployment is safe to recover
+        id: central-state
         env:
           REQUESTED_VERSION: ${{ inputs.version }}
         run: |
-          actual_version="$(sed -n 's/^version=//p' gradle.properties)"
-          if [[ "$actual_version" != "$REQUESTED_VERSION" ]]; then
+          actual_version="$(sed -n 's/^version=//p' jvm/gradle.properties)"
+          if [ "$actual_version" != "$REQUESTED_VERSION" ]; then
             echo "Requested $REQUESTED_VERSION, but gradle.properties contains $actual_version." >&2
             exit 1
           fi
-          artifact_url="https://repo1.maven.org/maven2/com/vireocode/vireo-bom/$actual_version/vireo-bom-$actual_version.pom"
-          status="$(curl --silent --show-error --connect-timeout 10 --max-time 30 --output /dev/null --write-out '%{http_code}' "$artifact_url")"
-          case "$status" in
-            404) echo "Version $actual_version is not yet public on Maven Central; recovering the existing validated deployment." ;;
-            200) echo "Version $actual_version is already immutable on Maven Central." >&2; exit 1 ;;
-            *) echo "Could not establish Maven Central publication state (HTTP $status)." >&2; exit 1 ;;
-          esac
-
+          statuses=()
+          for module in vireo-bom vireo-core vireo-auth vireo-query vireo-offline vireo-history; do
+            statuses+=("$(curl --silent --show-error --connect-timeout 10 --max-time 30 --output /dev/null --write-out '%{http_code}' "https://repo1.maven.org/maven2/com/vireocode/$module/$actual_version/$module-$actual_version.pom" || true)")
+          done
+          visibility="$(node -e 'import("./scripts/maven-central-release-state.mjs").then(({classifyCentralVisibility}) => console.log(classifyCentralVisibility(process.argv.slice(1).map(Number))))' "${statuses[@]}")"
+          echo "visibility=$visibility" >> "$GITHUB_OUTPUT"
+          if [ "$visibility" = absent ]; then
+            echo "Version $actual_version is not yet public on Maven Central; recovering the existing validated deployment."
+          else
+            echo "Version $actual_version is already public on Maven Central; requiring the exact requested deployment is already published."
+          fi
       - name: Promote the exact validated Central deployment
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           DEPLOYMENT_ID: ${{ inputs.deployment_id }}
           REQUESTED_VERSION: ${{ inputs.version }}
-        run: ./scripts/publish-central-deployment.sh "$DEPLOYMENT_ID" "$REQUESTED_VERSION"
-
+        run: |
+          if [ "${{ steps.central-state.outputs.visibility }}" = absent ]; then
+            ./jvm/scripts/publish-central-deployment.sh "$DEPLOYMENT_ID" "$REQUESTED_VERSION"
+          else
+            ./jvm/scripts/publish-central-deployment.sh "$DEPLOYMENT_ID" "$REQUESTED_VERSION" --require-published
+          fi
       - name: Record the recovery publication state
         env:
           VERSION: ${{ inputs.version }}
           DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          SOURCE_COMMIT: ${{ steps.authorize.outputs.source-commit }}
         run: |
           {
             echo "## Maven Central deployment recovery"
             echo
             echo "- Version: \`$VERSION\`"
             echo "- Deployment: \`$DEPLOYMENT_ID\`"
+            echo "- Source commit: \`$SOURCE_COMMIT\`"
             echo "- Recovery mode: \`EXISTING_VALIDATED_DEPLOYMENT\`"
             echo "- Publication identity: \`6 artifacts / 7 exact PURLs\`"
             echo
-            echo "Central confirmed this exact deployment is published. Run **Verify Maven Central release** with \`$VERSION\` to prove anonymous consumption."
+            echo "Central confirmed this exact deployment is published. The next no-secret job anonymously verifies it and finalizes immutable JVM evidence."
           } >> "$GITHUB_STEP_SUMMARY"
+
+  finalize:
+    name: Verify and finalize recovered immutable JVM release
+    needs: recover
+    if: github.ref == 'refs/heads/main' && needs.recover.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.recover.outputs.source-commit }}
+          persist-credentials: false
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - name: Prove anonymous Maven Central consumption before immutable finalization
+        run: ./jvm/scripts/verify-central-consumer.sh "${{ needs.recover.outputs.version }}"
+      - name: Create exact immutable JVM tag and GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.recover.outputs.version }}
+          SOURCE_COMMIT: ${{ needs.recover.outputs.source-commit }}
+        run: node scripts/finalize-jvm-release.mjs "$VERSION" "$SOURCE_COMMIT"
+
+  resume:
+    name: Resume exact interrupted ecosystem release run
+    needs: [recover, finalize]
+    if: github.ref == 'refs/heads/main' && needs.recover.result == 'success' && needs.finalize.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: write
+    steps:
+      - name: Rerun only the exact now-safe original release transaction
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          SOURCE_COMMIT: ${{ needs.recover.outputs.source-commit }}
+        run: |
+          run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID")"
+          status="$(printf '%s' "$run" | jq -r '.status')"
+          conclusion="$(printf '%s' "$run" | jq -r '.conclusion // empty')"
+          sha="$(printf '%s' "$run" | jq -r '.head_sha')"
+          test "$sha" = "$SOURCE_COMMIT"
+          case "$status:$conclusion" in
+            queued:*|in_progress:*|completed:success) echo "The exact ecosystem run is already active or successful; no duplicate rerun." ;;
+            completed:failure|completed:cancelled|completed:timed_out)
+              gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID/rerun"
+              echo "Requested one full rerun of the exact interrupted ecosystem release transaction."
+              ;;
+            *) echo "Original ecosystem run entered an unsafe state: $status:$conclusion" >&2; exit 1 ;;
+          esac

@@ -70,7 +70,7 @@ function hasMainOnlyManualDispatchGuard(lines, job) {
         /^ {4}if:/.test(line) &&
         /github\.ref == 'refs\/heads\/main'/.test(line) &&
         (/github\.event_name != 'workflow_dispatch'/.test(line) ||
-          /^ {4}if: github\.ref == 'refs\/heads\/main'\s*$/.test(line)),
+          /^ {4}if: github\.ref == 'refs\/heads\/main'(?:\s*&&|\s*$)/.test(line)),
     );
 }
 
@@ -148,12 +148,9 @@ function releaseRunSteps(lines, job) {
 }
 
 /**
- * The repository setting that permits Actions to create PRs also permits PR
- * approval. This narrow policy keeps ordinary workflow-token PR writing limited
- * to Changesets version-PR maintenance. Template adoption instead uses a
- * repository-scoped GitHub App token from a main-only environment so its PR
- * events trigger normal required checks; it must remain a draft-only, one-PR
- * creator and never receive workflow-token write permissions.
+ * PR-writing automation uses the repository-scoped GitHub App from the protected
+ * template-adoption environment. Its App-created PR events run normal required
+ * checks; the workflow token remains read-only and cannot approve or merge.
  */
 export function validateReleasePrWorkflow(source, actionPolicy) {
   const problems = [];
@@ -172,19 +169,11 @@ export function validateReleasePrWorkflow(source, actionPolicy) {
   if (!lines.slice(versionJob.start, versionJob.end).includes("    if: github.ref == 'refs/heads/main'")) {
     problems.push("release.yml:version must restrict every trigger to main");
   }
-  if (
-    !mapMatches(
-      parseJobPermissions(lines, versionJob),
-      new Map([
-        ["contents", "write"],
-        ["pull-requests", "write"],
-      ]),
-    )
-  ) {
-    problems.push("release.yml:version must grant exactly contents/pull-requests write permissions");
+  if (!mapMatches(parseJobPermissions(lines, versionJob), new Map([["contents", "read"]]))) {
+    problems.push("release.yml:version must grant only contents: read; the reviewed GitHub App owns PR writes");
   }
-  if (lines.slice(versionJob.start, versionJob.end).some(line => /^ {4}environment:/u.test(line))) {
-    problems.push("release.yml:version may not target a deployment environment");
+  if (!lines.slice(versionJob.start, versionJob.end).includes("    environment: template-adoption")) {
+    problems.push("release.yml:version must use the existing protected template-adoption App environment");
   }
 
   const actionReferences = [...source.matchAll(/^[ ]*(?:- )?uses: ([^\s@]+)@[^\s]+/gmu)].map(match => match[1]).sort();
@@ -204,8 +193,8 @@ export function validateReleasePrWorkflow(source, actionPolicy) {
   const changesetsInputs = changesetsWithBlock.match(/^ {10}([A-Za-z][A-Za-z-]*): (.+)$/gmu) ?? [];
   const expectedInputs = [
     "          version: corepack npm run version-packages",
-    '          commit: "chore(npm): version public packages"',
-    '          title: "chore(npm): version public packages"',
+    '          commit: "chore(release): version public ecosystem"',
+    '          title: "chore(release): version public ecosystem"',
   ];
   if (
     changesetsInputs.length !== expectedInputs.length ||
@@ -218,11 +207,27 @@ export function validateReleasePrWorkflow(source, actionPolicy) {
   if (hasMultilineRun) {
     problems.push("release.yml:version may not use multiline run values");
   }
-  if (runCommands.length !== 1 || runCommands[0] !== "corepack npm ci --ignore-scripts") {
+  if (
+    runCommands.length !== 3 ||
+    runCommands[0] !== "corepack npm ci --ignore-scripts" ||
+    runCommands[1] !== "node scripts/prepare-jvm-only-release-trigger.mjs" ||
+    runCommands[2] !== "node scripts/create-template-adoption-app-token.mjs"
+  ) {
     problems.push(
       "release.yml may execute only the lifecycle-script-free install; approval, merge, publication, and deployment commands are prohibited",
     );
   }
+  const versionLines = lines.slice(versionJob.start, versionJob.end).join("\n");
+  for (const fragment of [
+    "TEMPLATE_ADOPTION_APP_ID: ${{ vars.TEMPLATE_ADOPTION_APP_ID }}",
+    "TEMPLATE_ADOPTION_APP_PRIVATE_KEY: ${{ secrets.TEMPLATE_ADOPTION_APP_PRIVATE_KEY }}",
+    "GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}",
+  ]) {
+    if (!versionLines.includes(fragment))
+      problems.push(`release.yml:version must retain exact App-token release-PR mutation: ${fragment}`);
+  }
+  if (/GITHUB_TOKEN:\s*\$\{\{\s*(?:secrets\.GITHUB_TOKEN|github\.token)\s*\}\}/u.test(versionLines))
+    problems.push("release.yml:version must not use the workflow token for Changesets PR mutation");
 
   return problems;
 }
@@ -353,16 +358,35 @@ export function validateTemplateAdoptionWorkflow(source) {
 
 export function validateNpmTemplatePublicationWorkflow(source) {
   const problems = [];
-  if (!source.includes("MANUAL_CONFIRMATION: ${{ inputs.confirmation }}"))
-    problems.push(
-      "release-npm.yml:plan must pass manual confirmation only to preserve the ordinary manual release path",
-    );
+  if (/workflow_dispatch:/u.test(source))
+    problems.push("release-npm.yml must not retain routine manual publication dispatch.");
+  for (const fragment of [
+    "node scripts/ecosystem-publication-plan.mjs",
+    "needs.plan.outputs.action == 'libraries-only'",
+    "needs.plan.outputs.action == 'jvm-then-libraries'",
+    "NPM_PUBLICATION_SCOPE:",
+    "classic-libraries",
+    "template-adoption",
+    "environment: maven-central",
+    './scripts/wait-central-validation.sh "$DEPLOYMENT_ID" VALIDATED',
+    './scripts/publish-central-deployment.sh "$DEPLOYMENT_ID" "$VERSION"',
+    "node scripts/finalize-jvm-release.mjs",
+  ]) {
+    if (!source.includes(fragment)) problems.push(`release-npm.yml must retain ${fragment}`);
+  }
+  if (!source.includes("needs: [plan, maven, finalize-jvm]"))
+    problems.push("release-npm.yml npm verification must wait for Maven publication in mixed releases.");
   if (
     !source.includes(
-      "inputs.confirmation == 'publish' || needs.plan.outputs.action == 'publish-create-vireo' || needs.plan.outputs.action == 'recover-create-vireo'",
+      "needs.plan.outputs.action == 'jvm-then-libraries' && needs.maven.result == 'success' && needs.finalize-jvm.result == 'success'",
+    ) ||
+    !source.includes(
+      "needs.plan.outputs.action == 'libraries-only' && needs.maven.result == 'skipped' && needs.finalize-jvm.result == 'skipped'",
     )
   )
-    problems.push("release-npm.yml:verify must admit confirmed manual releases and only exact automatic CLI actions");
+    problems.push(
+      "release-npm.yml must require successful Maven/finalization for mixed releases and skipped jobs for npm-only releases.",
+    );
   return problems;
 }
 
@@ -377,6 +401,37 @@ export function validateAlwaysReportedPullRequestWorkflow(source, fileName) {
   if (!plan || !lines.slice(plan.start, plan.end).includes("    if: github.event_name == 'pull_request'")) {
     problems.push(`${fileName}:plan must exist and report unconditionally for every pull request`);
   }
+  return problems;
+}
+
+export function validatePostPublicationActivityGate(source, fileName) {
+  const problems = [];
+  if (!source.includes("node scripts/release-workflow-activity.mjs"))
+    problems.push(`${fileName} must classify combined release activity through the authoritative parent jobs API.`);
+  if (!source.includes("actions: read"))
+    problems.push(`${fileName} activity classification must have only the Actions read capability it needs.`);
+  if (fileName === "anonymous-consumer-gauntlet.yml") {
+    if (!source.includes("always() && github.event_name == 'workflow_run'"))
+      problems.push(
+        "anonymous-consumer-gauntlet.yml activity gate must not block manual or scheduled runs after a skipped gate.",
+      );
+    if (
+      !/trusted-source:\n\s+needs: release-activity\n\s+if: >-\n\s+always\(\) && github\.event_name != 'pull_request'/u.test(
+        source,
+      )
+    )
+      problems.push(
+        "anonymous-consumer-gauntlet.yml trusted source must run manual and scheduled requests after skipped activity classification.",
+      );
+    if (!source.includes("needs.release-activity.outputs.any-activity == 'true'"))
+      problems.push("anonymous-consumer-gauntlet.yml must require exact npm or JVM parent release activity.");
+  }
+  if (fileName === "verify-npm-public.yml" && !source.includes("needs.activity.outputs.npm-active == 'true'"))
+    problems.push("verify-npm-public.yml must run after combined publication only when exact npm activity succeeded.");
+  if (fileName === "attest-public-release.yml" && !source.includes("needs.activity.outputs.any-activity == 'true'"))
+    problems.push(
+      "attest-public-release.yml must run after the combined workflow only when exact npm or JVM activity succeeded.",
+    );
   return problems;
 }
 
@@ -399,7 +454,11 @@ for (const fileName of workflowFiles) {
     );
   if (fileName === "anonymous-consumer-gauntlet.yml") {
     problems.push(...validateAlwaysReportedPullRequestWorkflow(source, fileName));
+    if (!source.includes('workflows: ["Publish Vireo ecosystem"]'))
+      problems.push("anonymous-consumer-gauntlet.yml must follow the combined ecosystem publication workflow.");
   }
+  if (["anonymous-consumer-gauntlet.yml", "verify-npm-public.yml", "attest-public-release.yml"].includes(fileName))
+    problems.push(...validatePostPublicationActivityGate(source, fileName));
 
   if (source.includes("pull_request_target:")) {
     problems.push(`${fileName} may not use pull_request_target`);

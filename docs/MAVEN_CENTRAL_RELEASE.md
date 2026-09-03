@@ -1,142 +1,101 @@
 # Maven Central release
 
-Vireo JVM releases use a two-step Central Portal deployment. The protected
-workflow always uploads a `USER_MANAGED` candidate and validates it before any
-publication. Staging is the default; an explicitly selected protected run may
-promote that same validated deployment after it verifies its identity and exact
-set of six artifacts represented by seven PURLs.
+Vireo publishes the BOM and five JVM modules as one immutable Maven Central
+release. Routine publication is fully automated by the protected **Publish Vireo
+ecosystem** workflow; there is no normal staging or Portal approval step.
 
-## One-time controls
+## Routine release
 
-- Keep the `com.vireocode` namespace verified through control of
-  `vireocode.com`.
-- Keep the checked-in public verification key and its pinned fingerprint current;
-  public-consumption verification imports that key in an isolated GPG home and
-  hard-fails on any mismatch. Keep the private key plus recovery material outside
-  the repository.
-- Apply the checked-in [`maven-central` environment desired state](../.github/environments/maven-central.json): restrict it to `main`, add its documented reviewer, and disable administrator bypass. Capture an authenticated API export after applying it.
-- Store only these environment secrets:
-  `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`, `MAVEN_SIGNING_KEY`, and
-  `MAVEN_SIGNING_PASSWORD`.
-- Rotate the Central token and signing key deliberately. Never put either in a
-  Gradle properties file, repository secret, artifact, log, or pull request.
+1. Add a valid `.release-impact` record for each affected JVM module. Do not run
+   `version:jvm-impact` by hand for a normal release.
+2. Merge the feature PR. If there are JVM records but no npm Changeset, the
+   maintained release-PR workflow creates a narrowly scoped ephemeral trigger
+   so Changesets opens the ordinary generated ecosystem release PR without a
+   synthetic npm bump.
+3. Review and merge the exact generated **Maintain ecosystem release PR**. Its
+   merge is the only routine publication authorization.
+4. The coordinator proves all six Central POMs are either absent or public. A
+   mixed or otherwise indeterminate state fails closed.
+5. When absent, the protected `maven-central` job builds and audits the JVM
+   release, signs the exact bundle, records upload intent, uploads one
+   `USER_MANAGED` Central deployment, waits for `VALIDATED`, verifies all seven
+   expected PURLs, requests publication, and waits for `PUBLISHED`.
+6. The credentials-bearing job has `contents: read` only. A separate
+   `contents: write` finalizer, with no Maven credentials, anonymously resolves
+   the public BOM and modules from a fresh Gradle home. Only after that proof it
+   creates or verifies the annotated `jvm-vX` tag and immutable GitHub Release.
+7. In a mixed release, only then does the coordinator verify and publish the
+   planned TypeScript libraries. Template and `create-vireo` adoption remain a
+   later independent flow.
 
-Central's current requirements and Publisher API are documented in its
-[publication requirements](https://central.sonatype.org/publish/requirements/),
-[bundle layout](https://central.sonatype.org/publish/publish-portal-upload/), and
-[Publisher API](https://central.sonatype.org/publish/publish-portal-api/).
+The bundle is never rebuilt after Central accepts it. A job retry first looks for
+one exact prior receipt and its matching retained signed bundle from the same
+workflow run. It resumes that deployment only when the version, release SHA,
+run identity, PURLs, UUID, and bundle SHA-256 all match. While the public version
+is absent, an upload intent without an accepted receipt is ambiguous and fails
+closed. Once all six artifacts are public, the coordinator does not upload again:
+it requires exact immutable finalization evidence (or the separate, strongly
+bound exceptional recovery path) before continuing.
 
-## Prepare the release
+The routine coordinator and exceptional recovery use a source-commit-qualified
+concurrency group. This serializes duplicate work for one transaction without
+letting a later unrelated `main` push replace a pending release run; GitHub keeps
+only one pending run per concurrency group even when cancellation is disabled.
 
-1. Bump `version` in `jvm/gradle.properties`. All six artifacts share it.
-2. Update changed `api-surface.txt` snapshots with
-   `./gradlew apiSurfaceUpdate` and review the public delta.
-3. Run, from `jvm/`:
+## Public-state recovery
 
-   ```bash
-   ./gradlew clean check aggregateJavadoc --no-build-cache
-   ./scripts/verify-publication-consumer.sh
-   ```
+If all six POMs are already public, the coordinator performs no new Central
+upload. An otherwise unbound public version still requires anonymous consumption
+plus an existing exact annotated `jvm-vX` tag at the authorized release SHA and
+an immutable GitHub Release with the exact changelog body. The one exception is
+an exact same-run upload receipt: it binds the release SHA, version, signed bundle
+digest, deployment UUID, and PURLs, allowing the coordinator to idempotently
+resume `PUBLISHED` verification and create the missing finalization metadata.
 
-4. Merge the reviewed version change to `main`. Maven Central releases are
-   immutable; never reuse a version, even after a failed or incorrect release.
+## Exceptional recovery
 
-## Stage, validate, and optionally publish
+The only manual Maven mutation/recovery workflow is **Recover validated Maven
+Central deployment**. **Verify Maven Central release** remains a manual read-only
+verification tool, not a publication path.
+Use it only after an exceptional, documented interruption where the exact Central
+deployment UUID is known and its original release evidence is available. It
+requires the typed `PUBLISH_VALIDATED_DEPLOYMENT` confirmation, the exact
+authorized generated-release merge SHA, and the exact interrupted **Publish
+Vireo ecosystem** run ID. It proves the run is for `release-npm.yml`, a `main`
+push at that SHA, is completed `failure`, `cancelled`, or `timed_out`, and retains
+exactly one signed upload-intent artifact. That artifact must contain one bundle
+and one intent record whose SHA-256, version, SHA, run ID/attempt, and seven PURLs
+all match. If a source run has one accepted Central receipt, exceptional recovery
+downloads and validates it and requires its deployment UUID to equal the typed
+deployment ID; multiple or conflicting receipts fail closed. With no receipt, the
+typed UUID remains the human association assertion. It then proves that SHA is an ancestor of `main`, re-runs the
+exact ecosystem release planner against it, requires the requested JVM version,
+classifies all six Central POMs, rechecks the exact seven-PURL deployment identity,
+and sends at most one promotion request. A rerun
+may observe the version as already public only to finish anonymous verification
+and immutable tag/Release finalization for that same bound deployment. The
+no-secret finalizer then requests one full rerun of that exact original release
+run (or recognizes it already active/successful), so any planned mixed npm
+release resumes from its retained evidence. It never builds or uploads a second
+bundle.
 
-From GitHub Actions, run **Stage Maven Central release** on `main` and enter the
-exact version. Select **Publish the validated deployment** before dispatch when
-the reviewed release is ready to promote as soon as Central validates it; leave
-it unchecked to stage only. The protected job:
+Immediately after Central reports `VALIDATED`, the coordinator retains immutable
+promotion-attempt evidence before sending the irreversible promotion POST. A retry
+with that evidence waits for the exact deployment to become `PUBLISHED`; a still
+`VALIDATED` deployment fails closed into this typed recovery path instead of the
+automatic coordinator issuing a second promotion request. The typed recovery
+confirmation is the explicit human authorization to send that one exact retry
+when its all-artifact and source-run proofs hold.
 
-1. rejects a mismatched or already-public version;
-2. repeats the JVM and isolated-consumer gates;
-3. reads the signing key only from the protected environment and signs in memory;
-4. verifies all POM metadata, JAR contents, sources, Javadoc, checksums, and
-   detached signatures;
-5. preserves the exact signed ZIP as 30-day workflow evidence;
-6. uploads one atomic bundle with `publishingType=USER_MANAGED`; and
-7. waits until Central reports `VALIDATED` or fails with Central's diagnostics.
+Do not use the Central Portal to create a routine release, re-upload an accepted
+version, move or replace a JVM tag, or bypass a failed identity/visibility check.
+Maven Central versions, the tag, and the GitHub Release are immutable release
+evidence.
 
-The workflow deliberately has read-only GitHub permissions. Successful CI means
-the deployment is valid and waiting; it does not mean it is public when
-stage-only mode was selected.
+## Credentials and provider controls
 
-To request publication through the stage workflow, select **Publish the
-validated deployment** on its initial dispatch. After validation, it re-reads
-Central status and requires:
-
-- the requested and reported UUID to match;
-- `VALIDATED` state;
-- the requested non-SNAPSHOT version; and
-- exactly seven expected `pkg:maven/com.vireocode/vireo-*` PURLs for the six
-  artifacts at that version, with no extras. Central reports the BOM in both
-  base `pkg:maven/com.vireocode/vireo-bom@<version>` and canonical
-  `pkg:maven/com.vireocode/vireo-bom@<version>?type=pom` forms; the five
-  libraries use bare default-JAR PURLs.
-
-Only then does it send the authenticated Central `publish` request, accepts only
-HTTP `204`, and waits until Central reports `PUBLISHED`. The upload remains
-`USER_MANAGED`; the opt-in promotion is a separate, auditable protected action.
-
-## Publish and prove consumption
-
-1. An initial dispatch may opt into publication; it promotes only after Central
-   validates the exact deployment checks above.
-2. For a stage-only run, open [Central Portal deployments](https://central.sonatype.com/publishing/deployments),
-   inspect the deployment ID, coordinates, validation result, and file set, then
-   publish or drop it deliberately in the Portal.
-3. If a stage-only run or an opt-in publication run fails after Central accepts
-   the deployment, use the Portal or **Recover validated Maven Central
-   deployment** with that existing ID. Never rerun staging for the same accepted
-   deployment or version.
-4. For an opt-in publication run, inspect the workflow summary and confirm
-   Central reported `PUBLISHED` for the recorded deployment ID.
-5. After Central reports `PUBLISHED`, run **Verify Maven Central release** with
-   the same version. It waits for all six POMs, then resolves the BOM and every
-   versionless module anonymously with a fresh Gradle home.
-6. Create the signed or protected `jvm-v<version>` tag only after this public
-   consumer proof succeeds.
-
-For a coordinated npm release, this anonymous Maven proof is a protected
-prerequisite. Publish and verify the seven npm libraries and Maven artifacts
-first, then prepare and publish the immutable Template. The resulting Vireo
-adoption draft is completed and versioned in the same protected PR; merging it
-may automatically publish only the exact `create-vireo` candidate. Ordinary
-library publication remains a manually dispatched `main` workflow. The npm
-workflow reads the required Maven version from the ecosystem contract and repeats
-this check before its candidate can reach publication.
-
-## Recover an already-validated deployment
-
-If a protected publication run stopped after Central accepted a valid
-`USER_MANAGED` deployment, do not stage a second bundle. Run **Recover validated
-Maven Central deployment** on `main` with the exact version, the deployment UUID
-recorded by the original run, and the typed confirmation
-`PUBLISH_VALIDATED_DEPLOYMENT`. The recovery job confirms the checked-in version
-and that the BOM is still `404` on Central, then asks the existing strict
-promotion helper to re-read that deployment's UUID, state, and exact seven-PURL
-identity for six artifacts before its one publication request. It never builds or
-uploads a new Central bundle, so the original validated candidate remains the
-only deployment under review.
-
-The template's ordinary Gradle build uses only `mavenCentral()` and must remain
-credential-free. Its explicit `-PuseLocalStarter=true` mode is the only supported
-way to substitute Maven Local during coordinated development.
-
-## Failure and recovery
-
-- A build failure before upload creates no Central deployment. Fix forward and
-  rerun the same version only if it has never been uploaded or published.
-- A `FAILED` or incorrect user-managed deployment should remain available while
-  diagnosing it, then be dropped in Central Portal.
-- A `VALIDATED` deployment is still reversible: drop it instead of publishing;
-  do not rerun staging. Use the Portal or the existing-ID recovery workflow when
-  it should be promoted.
-- An opt-in publication run fails closed unless Central returns the exact UUID,
-  versioned six-artifact, seven-exact-PURL set, and HTTP `204` promotion
-  response. It never retries a rejected or ambiguous promotion request
-  automatically.
-- A `PUBLISHED` version cannot be replaced or deleted through the release flow.
-  Correct it with a new version and document the superseded release.
-- If a token or signing secret appears in logs or source, stop the release,
-  revoke/rotate it, run the secret-response process, and build a fresh candidate.
+`MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`, `MAVEN_SIGNING_KEY`, and
+`MAVEN_SIGNING_PASSWORD` remain protected `maven-central` environment secrets.
+The environment is restricted to `main`, has no recurring reviewer, and does not
+allow administrator bypass. GitHub branch protection and the exact generated
+release-PR proof are the routine authorization boundary.
