@@ -114,6 +114,16 @@ test("selected lanes continue after later coordinator policy failures", () => {
   }
 });
 
+test("the required coordinator validates prose without selecting the TypeScript gate", () => {
+  const ci = read(".github/workflows/ci.yml");
+  const coordinator = jobBlock(ci, "changes");
+  assert.match(coordinator, /name: Validate checked-in documentation/u);
+  assert.match(coordinator, /if: steps\.plan\.outputs\.documentation-pages == 'true'/u);
+  assert.match(coordinator, /node scripts\/documentation-policy\.mjs/u);
+  assert.match(coordinator, /node scripts\/public-contract-policy\.mjs/u);
+  assert.match(coordinator, /node --test scripts\/synchronize-documentation-release\.test\.mjs/u);
+});
+
 test("the PR security workflow has no scheduled vulnerability jobs", () => {
   const security = read(".github/workflows/security.yml");
   const secretScan = jobBlock(security, "secret-scan");

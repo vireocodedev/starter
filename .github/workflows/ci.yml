@@ -122,6 +122,12 @@ jobs:
           git worktree add --detach "$gate_root" "$BASE_SHA"
           trap 'git worktree remove --force "$gate_root"' EXIT
           node "$gate_root/scripts/release-impact-policy.mjs" --base "$BASE_SHA" --head "$HEAD_SHA"
+      - name: Validate checked-in documentation
+        if: steps.plan.outputs.documentation-pages == 'true'
+        run: |
+          node scripts/documentation-policy.mjs
+          node scripts/public-contract-policy.mjs
+          node --test scripts/synchronize-documentation-release.test.mjs
       - name: Validate and summarize aggregate public-beta evidence
         if: steps.plan.outputs.public-beta-evidence == 'true'
         run: node scripts/public-beta-evidence.mjs --write

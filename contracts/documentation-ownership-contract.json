@@ -53,11 +53,6 @@
       "category": "historical",
       "paths": [
         "VIREO_THOUSANDS_OF_STARS_MASTER_ROADMAP.md",
-        "docs/API_INVENTORY.md",
-        "docs/BACKEND_PARITY.md",
-        "docs/GAPS_FRED.md",
-        "docs/GAPS_LMS.md",
-        "docs/GAPS_TRIAGE.md",
         "docs/LOADING_STATE_AUDIT.md",
         "docs/security/recovery-exercise-2026-08-27.md"
       ],

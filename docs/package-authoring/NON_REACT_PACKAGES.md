@@ -1,9 +1,7 @@
 # Non-React package authoring
 
-This guide defines the target contract for every Starter frontend package other
-than `@vireocodedev/ui`. It applies to new packages immediately and to
-existing packages as they are migrated. `starter-history` is the pilot that
-proves the rules before they are applied to the remaining packages.
+This guide defines the contract for every Vireo frontend package other than
+`@vireocodedev/ui`. It applies to new and existing packages.
 
 ## Boundary
 
@@ -73,7 +71,7 @@ not need `core`, `capabilities`, `components`, `hooks`, `providers`, or
 
 ## Dependency policy
 
-- A leaf package must not acquire a Starter workspace dependency without an
+- A leaf package must not acquire a Vireo workspace dependency without an
   architecture decision.
 - Runtime dependencies belong in `dependencies`; host-owned compatible runtimes
   belong in `peerDependencies`; test/build-only tools belong in
@@ -112,35 +110,35 @@ The package README must state:
 Examples must compile against the current public API. Generated output and old
 changelog prose are not architectural authority.
 
-Packages contribute live documentation through the shared Vireo Starter
+Packages contribute live documentation through the shared Vireo
 Storybook according to [Non-React live documentation](./NON_REACT_LIVE_DOCUMENTATION.md).
 React rendering remains owned by the UI documentation host; package examples
 remain framework-free TypeScript outside `src`.
 
-## Pilot: `starter-history`
+## History boundary
 
-The history pilot separates these responsibilities:
+The History package separates these responsibilities:
 
 - `records`: validates transport-neutral history records and snapshots;
 - `definitions`: describes typed entity identity, labels, fields, and optional
   string formatting;
 - `diff`: compares validated snapshots and emits framework-neutral nodes whose
   values preserve both `raw` and `formatted` representations;
-- `starter-ui`: exclusively owns React presentation through
+- `@vireocodedev/ui`: exclusively owns React presentation through
   `VireoHistoryEntry`.
 
-The pilot removes React from dependencies and declarations, replaces
-`render(...): ReactNode` with `format(...): string`, makes empty strings real
-values rather than missing values, rejects duplicate array identities, narrows
-the public surface, and establishes focused coverage for all diff modes.
+The package keeps React out of its dependencies and declarations, exposes
+`format(...): string` instead of a React renderer, treats empty strings as real
+values rather than missing values, rejects duplicate array identities, and keeps
+focused coverage for all diff modes.
 
-## Pilot: `starter-localization`
+## Localization boundary
 
-The localization pilot separates resource ownership from React consumption:
+The Localization package separates resource ownership from React consumption:
 
-- `starter-localization` owns namespace constants, translations, resource
+- `@vireocodedev/localization` owns namespace constants, translations, resource
   factories, registration, merge utilities, and locale-neutral formatters;
-- `starter-ui/react-i18next` exclusively owns the `react-i18next` namespace
+- `@vireocodedev/ui/react-i18next` exclusively owns the `react-i18next` namespace
   hooks and other React localization adapters;
 - applications continue to own i18next initialization, locale selection,
   persistence, detection, and provider placement.

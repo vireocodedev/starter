@@ -1,238 +1,73 @@
-# Vireo Framework · by Vireo Code
+# Vireo Framework
 
-Vireo is an opinionated foundation for teams building operational business
-applications with React, with a complete Spring Boot golden path when the same team
-owns both halves. It supplies reusable responsive UI, adapters, cross-stack
-contracts, history, localization, and offline building blocks while leaving
-applications as ordinary React and, when selected, Spring Boot code.
+Vireo is an opinionated foundation for operational React applications, with an
+optional Spring Boot golden path for teams that own both halves. It provides typed
+UI, frontend infrastructure, cross-stack contracts, history, localization, and
+offline primitives while generated applications remain ordinary application code.
 
-The application team owns its domain model, authorization policy, data sensitivity,
-offline eligibility, and conflict resolution. Vireo's offline packages provide
-mechanisms for selected disconnected workflows; they do not make arbitrary business
-logic synchronize safely. The exact primitive guarantees, conflict ownership, and
-adversarial admission checklist are in
-[`docs/OFFLINE_GUARANTEES.md`](docs/OFFLINE_GUARANTEES.md). See the public
-[Vireo Template](https://github.com/vireocodedev/vireo-template) for the
-current runnable full-stack composition.
+Vireo is public `0.x`: its published surfaces and compatibility policy are real
+contracts, but it is not a blanket production-readiness claim. Applications own
+their domain model, authorization, data sensitivity, deployment, offline
+eligibility, and conflict resolution.
 
-[![The current Vireo flagship operational application](https://raw.githubusercontent.com/vireocodedev/vireo-template/0557990f024a8736b6e661f8fc264861deb99b65/docs/assets/flagship-overview.png)](https://demo.vireocode.com)
-
-This is the current Template pinned by the release contract, not a concept render. [Try the disposable live demo](https://demo.vireocode.com), follow the [guided build](https://vireocode.com/docs/getting-started/), or read [who Vireo does and does not fit](https://vireocode.com/docs/getting-started/choose-your-profile/) before installing.
-
-This public `0.x` line is production-shaped, not a production-readiness claim. Project
-creation, doctor diagnostics, and target-aware entity generator are implemented.
-The standalone frontend profile was introduced in `create-vireo@0.4.0` and is current
-in the published release. Its version-aware project upgrade supports the declared
-adjacent public release edge; earlier edges remain retained historical evidence.
-
-## Start here
-
-Choose the shortest path that matches what you are evaluating:
-
-| Goal                            | First step                                                                                      | Expected result                                                            |
-| ------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Learn Vireo                     | Open the [main documentation](https://vireocode.com/docs/)                                      | Task-oriented guides, concepts, examples, CLI and operations documentation |
-| Evaluate the complete stack     | Follow the [guided start](https://vireocode.com/docs/getting-started/)                          | A running authenticated Item workflow backed by React and Spring Boot      |
-| Create a standalone frontend    | Run `npm create vireo@latest app -- --profile frontend`                                         | A mock-backed React app with no Java or database                           |
-| Adopt into an existing frontend | Read the [frontend-only guide](https://vireocode.com/docs/getting-started/frontend-only/)       | Vireo packages and adapters introduced behind an owned API boundary        |
-| Adopt frontend building blocks  | Review the [frontend guide](https://vireocode.com/docs/frontend/) and live Storybook            | A deliberate package/subpath choice rather than an accidental deep import  |
-| Adopt backend building blocks   | Review the [Spring guide](https://vireocode.com/docs/spring/) and BOM example                   | Version-aligned Spring Boot modules resolved from Maven Central            |
-| Assess fit before installing    | Read [profiles and boundaries](https://vireocode.com/docs/getting-started/choose-your-profile/) | An explicit decision based on current `0.x` capabilities and limitations   |
-
-The [public API map](docs/PUBLIC_API.md) is the package-level navigation surface.
-The repository-owned [evaluation evidence](docs/EVALUATION.md) remains available for
-maintainers and auditors after the user-facing guidance moved to vireocode.com.
-Vireo UI has an additional [classified surface](packages/ui/docs/PUBLIC_SURFACE.md)
-covering every exported entry point. Canonical date, time, and timestamp ownership is
-documented in the [temporal values guide](docs/TEMPORAL_VALUES.md).
-
-The framework libraries live in two halves:
-
-- `packages/*` — the frontend libraries. npm workspaces monorepo, published as
-  public npm packages under the `@vireocodedev` scope.
-- `jvm/*` — the Spring Boot backend libraries. A separate Gradle build,
-  published as Maven artifacts under the `com.vireocode` group.
-
-turbo never invokes Gradle and Gradle never invokes npm; CI runs them as
-independent jobs. Keeping them in one repository makes a change that spans both
-halves a single reviewable pull request, which is the only reason they are
-neighbours. See [jvm/](jvm) and [docs/BACKEND_PARITY.md](docs/BACKEND_PARITY.md).
-
-The frontend application-shell package is `@vireocodedev/shell`. The
-Maven artifact `com.vireocode:vireo-core` is the
-backend's base entity/service layer; they are separate contracts.
-
-Public-beta evaluation is open, but readiness and independent adoption are not yet claimed. Use the structured [feedback and aggregate-evidence path](docs/roadmap/phase-5/feedback-and-evidence.md); do not treat downloads, automation, or the maintainer-built flagship as adopter evidence.
-
-## Frontend packages
-
-| Package                                                   | Version | Description                                                                                               |
-| --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| [`create-vireo`](packages/create-vireo)                   | 0.8.7   | Project creation/upgrade plus full-stack and frontend-target entity, contract-check, and ejection CLI.    |
-| [`@vireocodedev/ui`](packages/ui)                         | 0.3.1   | Public Vireo React components, responsive surfaces, form contracts, hooks, and Storybook infrastructure.  |
-| [`@vireocodedev/query`](packages/queryengine)             | 0.2.2   | Framework-agnostic query filtering, sorting, paging, metadata, and saved-filter contracts.                |
-| [`@vireocodedev/shell`](packages/shell)                   | 0.2.2   | Framework-free sitemap, navigation, authentication-redirect, and browser overlay-history contracts.       |
-| [`@vireocodedev/localization`](packages/localization)     | 0.2.2   | Framework-neutral localization runtime, locale definitions, regional formatting, and shared translations. |
-| [`@vireocodedev/sqlite`](packages/sqlite)                 | 0.2.3   | SQLite worker/client runtime primitives for offline persistence and synchronization.                      |
-| [`@vireocodedev/history`](packages/history)               | 0.2.2   | Framework-free history record schemas, diff models, actor contracts, and transformation utilities.        |
-| [`@vireocodedev/infrastructure`](packages/infrastructure) | 0.2.2   | HTTP, connectivity, persistent state, session expiry, and shared application infrastructure.              |
-
-Versions above are the current package lines. `packages/*/package.json` remains the source of truth.
-
-### Dependency graph
-
-Only UI depends on sibling Vireo packages. The other seven can be consumed on their own:
-
-```txt
-ui -> history, infrastructure, localization, query
-
-create-vireo · history · infrastructure · localization · query · shell · sqlite   (no Vireo dependencies)
-```
-
-## Prerequisites
-
-Node.js, npm, Java, and Gradle versions are declared and checked by the repository.
-Installing the public npm and Maven packages requires no Vireo or GitHub
-credential. Publishing is maintainer-only and isolated behind protected GitHub
-environments. Current supported, compatible, experimental, and untested rows are in
-the machine-enforced [platform matrix](docs/PLATFORM_SUPPORT.md).
-Verification duration, peak-RSS thresholds, evidence retention, and exception rules
-are defined by the [performance policy](docs/VERIFICATION_PERFORMANCE.md).
-
-## Develop
+## Create a project
 
 ```bash
-corepack npm ci         # installs the reviewed workspace lockfile
-corepack npm run typecheck
-corepack npm run test
-corepack npm run build
-corepack npm run verify          # authoritative TypeScript gate
-corepack npm run verify:all      # TypeScript + JVM, including aggregate Javadoc
+# Full stack: React, Spring Boot, and the Vireo Template baseline
+npm create vireo@latest operations
+
+# Frontend only: React with mock adapters and no Java or database
+npm create vireo@latest operations-ui -- --profile frontend
 ```
 
-### Live documentation
+Choose a profile before installing: [full stack](https://vireocode.com/docs/getting-started/)
+or [frontend only](https://vireocode.com/docs/getting-started/frontend-only/).
 
-The [Vireo documentation website](https://vireocode.com/docs/) is the canonical
-source for onboarding, concepts, guides, CLI usage, operations, versions, examples,
-and component-use decisions. The GitHub Pages artifact remains the exact-release
-host for interactive Storybook and generated TypeScript/JVM reference:
+## Learn and evaluate
 
-- [Main documentation](https://vireocode.com/docs/)
+- [Vireo documentation](https://vireocode.com/docs/)
+- [Live flagship demo](https://demo.vireocode.com)
+- [Profile and ownership boundaries](https://vireocode.com/docs/getting-started/choose-your-profile/)
 - [Interactive Storybook](https://vireocode.com/storybook/)
 - [TypeScript and Java reference](https://vireocode.com/reference/)
+- [Current package and template versions](https://vireocode.com/versions/)
+- [Vireo Template](https://github.com/vireocodedev/vireo-template)
+
+The documentation site is the canonical adopter guide. Read the
+[offline guarantees](docs/OFFLINE_GUARANTEES.md) before treating SQLite, queues,
+hydration, or server replay as an application-level offline promise.
+
+## Repository map
+
+- `packages/*` — the public npm libraries and `create-vireo` CLI.
+- `jvm/*` — the coordinated Spring Boot libraries published under
+  `com.vireocode`.
+- `site/` — the content and build for [vireocode.com](https://vireocode.com).
+- [Vireo Template](https://github.com/vireocodedev/vireo-template) — the
+  independently versioned full-stack application baseline.
+
+The frontend and JVM builds are intentionally independent; read the
+[architecture](docs/ARCHITECTURE.md) for their package boundaries.
+
+## Contribute
 
 ```bash
-corepack npm run storybook
-corepack npm run build-storybook
-corepack npm run build-docs
+corepack npm ci
+corepack npm run verify
 ```
 
-Monorepo-level material lives under `Documentation`. Each library then owns a top-level section: UI contains its `Documentation`, `Core`, `Capabilities`, and `Integrations` groups, while History owns its executable package guides directly under `History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
+Use `corepack npm run verify:all` instead of `verify` for JVM or cross-stack
+changes. Focused commands and prerequisites are in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-Affected pushes to `main` publish the complete production documentation artifact to
-GitHub Pages. See [documentation deployment](docs/STORYBOOK_DEPLOYMENT.md) for
-repository setup, permissions, local verification, custom-domain guidance, and
-failure handling.
-The [documentation portal contract](docs/DOCUMENTATION_PORTAL.md) defines search,
-version-specific routes, generated API references, and release linkage.
-For repository contributors, [working with Codex](docs/CODEX.md) explains the
-project-root, skill-discovery, trust, and cross-repository workflow.
+For project and release boundaries, see [SUPPORT.md](SUPPORT.md),
+[GOVERNANCE.md](GOVERNANCE.md), and [SECURITY.md](SECURITY.md).
 
-The normative [loading-state and skeleton standard](docs/LOADING_STATE_STANDARD.md)
-defines loading classification, structural skeleton behavior, geometry guarantees,
-accessibility, motion, and verification across Vireo UI and consuming applications.
-The [Phase 2 loading-state audit](docs/LOADING_STATE_AUDIT.md) records the current
-Vireo UI baseline and prioritized remediation queue.
+## Public contracts and evidence
 
-`build` is artifact generation; `typecheck` owns full semantic source checking.
-Keeping those responsibilities separate lets the UI package use TypeScript's
-artifact-only emit without checking the same source graph twice. CI and the
-release command always run both, followed by strict checks of the emitted
-declarations.
-
-`corepack npm run dev` watches every package. Note that watch mode never deletes from
-`dist` — deleting or renaming a source file leaves its old output behind, so take
-a one-shot `corepack npm run build` whenever a file disappears.
-
-To try a change in a consuming app before publishing it, that app aliases the
-package specifiers to these `dist` directories. The consumer side of that loop —
-including why the aliases redirect the runtime but not the types — is documented
-in the leather-production repository under `docs/STARTER_WORKFLOW.md`.
-
-## Release (Changesets)
-
-Every artifact-affecting pull request must declare its release intent according
-to the [release-impact contract](docs/RELEASE_IMPACT.md). For npm packages, a
-Changeset is the release decision; a justified, reviewed `.release-impact` record
-is required when no package release is intended.
-
-1. `corepack npm exec changeset` — describe the change and select each affected
-   package's semver bump.
-2. Merge to `main`. **Release · Prepare version PR** opens or refreshes the
-   generated version PR.
-3. Review and merge that exact PR. It is the routine authorization: the protected
-   coordinator first handles any JVM release, then publishes only its planned
-   library coordinates through npm OIDC.
-4. Require the automatic **Release · Verify npm publication** workflow to pass its
-   anonymous cold-consumer and provenance checks.
-
-Versioning is a contract per package:
-
-| Change                                                | Bump  |
-| ----------------------------------------------------- | ----- |
-| Adding an export, component, prop, i18n key or locale | minor |
-| Removing or renaming any of the above                 | major |
-| Widening a peer dependency range                      | minor |
-| Raising a peer dependency floor                       | major |
-| Behaviour-preserving fixes and internal refactors     | patch |
-
-Contract tests guard the surfaces, so a change that breaks a contract fails CI
-until the bump is made deliberately rather than by accident.
-
-See [the automation map](docs/AUTOMATION.md) for every verification, security,
-release, deployment, and recovery workflow.
-
-The complete bootstrap, trusted-publisher, publication, verification, and
-recovery procedure is in [Public npm release](docs/NPM_RELEASE.md).
-
-## Release (JVM)
-
-The `jvm/` half uses machine-readable `.release-impact` records as its Changesets
-equivalent. One version still covers all six artifacts — they are a set, and the
-BOM exists so a consumer never mixes them.
-
-1. Add a release-impact record for every affected module. The generated ecosystem
-   release PR applies the highest requested bump to `jvm/gradle.properties`,
-   writes module summaries to `jvm/CHANGELOG.md`, and consumes those records.
-2. If the change moved the public API, run `./gradlew apiSurfaceUpdate` in `jvm/`
-   and commit the updated `api-surface.txt` files. This is the forcing function:
-   the check task fails the build until the snapshot matches, so a widened
-   surface always shows up in the diff next to the version bump.
-3. Merge the exact generated ecosystem release PR. For a JVM release, the
-   protected coordinator builds one signed audited `USER_MANAGED` bundle,
-   validates and promotes its exact Central deployment, anonymously consumes it,
-   and only then finalizes the immutable JVM tag and GitHub Release.
-
-The same bump table applies. Note that MapStruct's generated `*Impl` classes are
-part of the recorded surface, because they are genuinely part of the jar.
-
-Run `./gradlew clean check aggregateJavadoc --no-build-cache` for the complete
-source gate and `./scripts/verify-publication-consumer.sh` to prove the local
-Maven publications before opening or merging a release pull request.
-
-The complete credential, signing, automated-publication, and recovery
-procedure is in [Maven Central release](docs/MAVEN_CENTRAL_RELEASE.md).
-
-JVM library work follows the repository's
-[JVM package-authoring](docs/package-authoring/JVM_PACKAGES.md) and
-[JVM live-documentation](docs/package-authoring/JVM_LIVE_DOCUMENTATION.md)
-contracts.
-
-## Contributing and security
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the supported toolchain and pull
-request gate. Public support and issue boundaries are in [SUPPORT.md](SUPPORT.md),
-project decision authority is in [GOVERNANCE.md](GOVERNANCE.md), and release and
-upgrade promises are in the [compatibility policy](docs/COMPATIBILITY.md). Please
-report vulnerabilities according to [SECURITY.md](SECURITY.md), rather than
-opening a public issue.
+- [Compatibility and upgrades](docs/COMPATIBILITY.md)
+- [Evaluation path and public-beta evidence](docs/EVALUATION.md)
+- [Public API map](docs/PUBLIC_API.md) and [UI export surface](packages/ui/docs/PUBLIC_SURFACE.md)
+- [Temporal values](docs/TEMPORAL_VALUES.md) and [platform support](docs/PLATFORM_SUPPORT.md)
+- [Verification performance](docs/VERIFICATION_PERFORMANCE.md) and [documentation portal](docs/DOCUMENTATION_PORTAL.md)
+- [Independent adopter feedback and evidence](docs/roadmap/phase-5/feedback-and-evidence.md)

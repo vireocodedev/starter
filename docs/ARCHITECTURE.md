@@ -1,119 +1,66 @@
 # Architecture
 
-How the `starter` packages are layered, and the decisions that produced the
-current shape.
+Vireo has two independently consumable library families in one repository:
 
-Application-level composition and organizational ownership are documented
-separately in the [frontend-only project profile](architecture/frontend-only-profile.md)
-and [generated wire contracts](architecture/wire-contracts.md).
+- public npm packages and `create-vireo` under `packages/*`; and
+- a coordinated Spring Boot module family under `jvm/*`, published as
+  `com.vireocode` artifacts.
 
-## The dependency graph
+The repository is shared for review and release coordination, not because the
+builds are coupled. npm and Gradle have separate dependency resolution,
+verification, publication, and consumer qualification paths.
 
-Measured from the workspace manifests, not from intent:
+Application-level composition and ownership boundaries are documented in the
+[frontend-only profile](architecture/frontend-only-profile.md),
+[wire-contract guide](architecture/wire-contracts.md), and public
+[Vireo documentation](https://vireocode.com/docs/).
+
+## Frontend package graph
+
+Workspace manifests are the source of truth. The npm package graph is deliberately
+flat: only `@vireocodedev/ui` depends on sibling Vireo packages.
 
 ```mermaid
 graph TD
-  shell --> ui
-  shell --> localization
-  shell --> infrastructure
-  ui --> history
-  ui --> localization
-  history[history]
-  infrastructure[infrastructure]
-  localization[localization]
-  queryengine[queryengine]
-  sqlite[sqlite]
+  ui[@vireocodedev/ui] --> history[@vireocodedev/history]
+  ui --> infrastructure[@vireocodedev/infrastructure]
+  ui --> localization[@vireocodedev/localization]
+  ui --> query[@vireocodedev/query]
+  create[create-vireo]
+  shell[@vireocodedev/shell]
+  sqlite[@vireocodedev/sqlite]
 ```
 
-| Package                  | Depends on                             | Depended on by |
-| ------------------------ | -------------------------------------- | -------------- |
-| `starter-shell`          | `ui`, `localization`, `infrastructure` | —              |
-| `starter-ui`             | `history`, `localization`              | `shell`        |
-| `starter-history`        | —                                      | `ui`           |
-| `starter-infrastructure` | —                                      | `shell`        |
-| `starter-localization`   | —                                      | `ui`, `shell`  |
-| `starter-queryengine`    | —                                      | —              |
-| `starter-sqlite`         | —                                      | —              |
+| Package                        | Vireo sibling dependencies                           |
+| ------------------------------ | ---------------------------------------------------- |
+| `create-vireo`                 | None                                                 |
+| `@vireocodedev/history`        | None                                                 |
+| `@vireocodedev/infrastructure` | None                                                 |
+| `@vireocodedev/localization`   | None                                                 |
+| `@vireocodedev/query`          | None                                                 |
+| `@vireocodedev/shell`          | None                                                 |
+| `@vireocodedev/sqlite`         | None                                                 |
+| `@vireocodedev/ui`             | `history`, `infrastructure`, `localization`, `query` |
 
-The graph is acyclic and has no backward arrows. Five of the seven browser packages have
-no workspace dependencies at all.
+This keeps each non-UI library independently consumable. The public API policy
+and package export maps, rather than source layout, define supported imports.
 
-## Decision: `starter-core` became `starter-shell` (roadmap 1.5)
+## JVM modules
 
-### The problem was the name, not the direction
+The JVM family is aligned through `com.vireocode:vireo-bom`. Applications import
+the BOM and select only the modules they use; no module is an executable
+application. The current modules and consumer guidance are in the
+[Spring Boot guide](https://vireocode.com/docs/spring/) and
+[public API map](PUBLIC_API.md).
 
-Roadmap step 1.5 was written on the assumption that `core` depending on `ui` was
-a layering inversion. Measuring it showed otherwise: nothing imports `core`, so
-there is no cycle and no consumer is forced to take a shell in order to get
-primitives. `starter-ui` in particular has no dependency on it.
+## Contract boundaries
 
-What the package actually contained was an application shell — config and
-sitemap validation, route guards, the responsive shell with its navigation, and
-the layout presets. A shell assembled from primitives depends on those
-primitives. That direction is correct. It only read as backwards because the
-package was called `core`, a name that claims the bottom of the stack while the
-code sat at the top.
+- Applications own domain behavior, authorization, data, deployment, and offline
+  conflict policy.
+- `create-vireo` projects an immutable Vireo Template baseline; generated source
+  becomes application-owned except for explicitly managed surfaces.
+- Public npm exports, JVM declarations, generators, schemas, and documented wire
+  contracts change only with their declared compatibility and release intent.
 
-The coupling was never the issue either. `core` reached into `starter-ui` for
-the icon registry, mobile drawer, and page-content width contracts across ten
-import sites, plus one `declare module` augmentation of the icon registry.
-
-### Options considered
-
-- **(a) Rename `core` to `shell` and keep the dependency.** Chosen.
-- **(b) Move the shell into `ui` so `core` becomes dependency-free.** Rejected:
-  it makes `ui` a 560-symbol package that is simultaneously a primitive library
-  and an app framework, which is a worse version of the problem being solved. It
-  would also force every `ui` consumer to resolve `react-router` and
-  `virtual:pwa-register/react`.
-- **(c) Keep the name and document the exception.** Rejected: the exception
-  would have to be restated in every consumer's head forever, and nothing about
-  the code justified it.
-
-Renaming was cheap precisely because it happened before the first release
-(roadmap 1.7). After publishing, the same change would have cost a deprecated
-package, a migration guide and a permanent changelog scar.
-
-### What moved
-
-`offline/` was the one genuinely foundational area inside the old `core`:
-twenty exports, zero runtime dependencies, no relationship to a shell. It now
-lives in `starter-sqlite` as the `./offline` entry point, next to
-`offlineSyncCommandSqlite` and `hydrationEntityStateSqlite`, which already
-implemented the persistence half of the same feature.
-
-No symbol was renamed, removed or changed. `@vireocodedev/starter-core` becomes
-`@vireocodedev/shell`, and `@vireocodedev/starter-core/offline` becomes
-`@vireocodedev/sqlite/offline`.
-
-## The rule this leaves behind
-
-A package's name is a claim about where it sits in the graph. `shell` sits on
-top and may depend on anything below it. `ui` sits in the middle. `history`,
-`infrastructure`, `localization`, `queryengine` and `sqlite` are leaves and are
-expected to stay that way.
-
-Two consequences are enforced mechanically by
-[`scripts/public-surface.mjs`](../scripts/public-surface.mjs):
-
-- Every declared entry point's export list is frozen against
-  `packages/<pkg>/api-surface.json`, so a layering change cannot land silently.
-- The worker-safe entry points — `starter-history` (`.`), `starter-localization`
-  (`.`), and `starter-sqlite` (`.` and `./offline`) — must stay free of React,
-  MUI and other framework code. SQLite is evaluated inside a Web Worker today;
-  History and Localization deliberately promise the same runtime portability as
-  part of the non-React package contract.
-
-All frontend packages other than `starter-ui` are now being migrated to the
-stricter [non-React package authoring contract](./package-authoring/NON_REACT_PACKAGES.md).
-That contract excludes React from both runtime code and public declarations;
-reusable React presentation belongs in `starter-ui`. `starter-history` and
-`starter-localization` are the completed pilots whose contracts are now applied
-package by package.
-
-## Known imperfection
-
-`starter-ui` depends on `starter-history` and `starter-localization`, so it is
-not a pure primitive layer either. Both dependencies are small and point
-downward, so the graph stays acyclic, but a consumer that wants only components
-still inherits them. This is recorded rather than fixed.
+See [the ecosystem contract](ECOSYSTEM_CONTRACT.md) for cross-repository release
+ownership and [compatibility](COMPATIBILITY.md) for the versioning promise.

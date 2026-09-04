@@ -1,6 +1,6 @@
-# Vireo Starter JVM
+# Vireo JVM modules
 
-The JVM half of Vireo Starter is a family of aligned Spring Boot libraries for
+Vireo's JVM modules are a family of aligned Spring Boot libraries for
 applications that share Vireo's web, persistence, authentication, filtering,
 history, and offline-sync contracts. It is a library build, not an executable
 Spring Boot application: consumers select only the capabilities they need and
@@ -23,7 +23,7 @@ application:
 
 ```groovy
 dependencies {
-    implementation platform("com.vireocode:vireo-bom:0.2.0")
+    implementation platform("com.vireocode:vireo-bom:0.3.1")
     implementation "com.vireocode:vireo-auth"
     implementation "com.vireocode:vireo-history"
 }
@@ -66,5 +66,5 @@ Authoring and release rules live in:
 
 - [`../docs/package-authoring/JVM_PACKAGES.md`](../docs/package-authoring/JVM_PACKAGES.md)
 - [`../docs/package-authoring/JVM_LIVE_DOCUMENTATION.md`](../docs/package-authoring/JVM_LIVE_DOCUMENTATION.md)
-- [`../docs/BACKEND_PARITY.md`](../docs/BACKEND_PARITY.md)
-
+- [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md)
+- [Vireo Spring Boot guide](https://vireocode.com/docs/spring/)
