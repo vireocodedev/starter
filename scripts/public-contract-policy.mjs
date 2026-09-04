@@ -89,6 +89,7 @@ requireText("README.md", [
   "docs/VERIFICATION_PERFORMANCE.md",
   "docs/DOCUMENTATION_PORTAL.md",
   "docs/roadmap/phase-5/feedback-and-evidence.md",
+  "https://vireocode.com/versions/",
 ]);
 requireText("docs/EVALUATION.md", [
   "https://github.com/vireocodedev/vireo/issues/new?template=public_beta_feedback.yml",
@@ -130,7 +131,6 @@ function requireArtifactVersionRow(path, artifact, version) {
 }
 
 for (const entry of currentRelease?.npm ?? []) {
-  requireArtifactVersionRow("README.md", entry.package, entry.version);
   requireArtifactVersionRow("docs/COMPATIBILITY.md", entry.package, entry.version);
 }
 if (currentRelease?.jvm?.version) {
@@ -172,12 +172,6 @@ const executableDocumentationClaims = [
     documentedCommand: "corepack npm run verify",
     evidence: ".github/workflows/ci.yml",
     evidenceCommand: "corepack npm run gate:fast",
-  },
-  {
-    documentation: "README.md",
-    documentedCommand: "corepack npm run build-storybook",
-    evidence: ".github/workflows/storybook-pages.yml",
-    evidenceCommand: "corepack npm run build-storybook",
   },
 ];
 

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "jvm:vireo-core",
+  "decision": "no-release",
+  "justification": "Correct the documented BOM version only; the published vireo-core JAR and public API are unchanged."
+}

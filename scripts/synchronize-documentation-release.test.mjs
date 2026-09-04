@@ -9,6 +9,7 @@ import { synchronizeDocumentationRelease } from "./synchronize-documentation-rel
 test("synchronizes release contracts and public version documentation from source", async () => {
   const root = makeFixture();
   try {
+    const rootReadme = readFileSync(join(root, "README.md"), "utf8");
     await synchronizeFixtureDocumentationRelease(root);
 
     const releaseId = "npm-0.3.0_jvm-0.4.0";
@@ -76,12 +77,20 @@ test("synchronizes release contracts and public version documentation from sourc
       "https://github.com/vireocodedev/vireo-template/releases/tag/starter-template%400.3.0",
     );
     assert.equal(readJson(join(root, "contracts", "release-lifecycle-policy.json")).supportLines[0].release, releaseId);
-    assert.match(readFileSync(join(root, "README.md"), "utf8"), /create-vireo.*0\.3\.0/u);
-    assert.match(readFileSync(join(root, "README.md"), "utf8"), /adjacent 0\.2\.0→0\.3\.0/u);
-    assert.match(
-      readFileSync(join(root, "README.md"), "utf8"),
-      /0\.1\.0→0\.2\.0 remains retained historical evidence/u,
-    );
+    assert.equal(readFileSync(join(root, "README.md"), "utf8"), rootReadme);
+    for (const path of [
+      "docs/PUBLIC_API.md",
+      "jvm/README.md",
+      "jvm/vireo-auth/README.md",
+      "jvm/vireo-bom/README.md",
+      "jvm/vireo-core/README.md",
+      "jvm/vireo-offline/README.md",
+      "jvm/vireo-query/README.md",
+    ]) {
+      const jvmBomDocumentation = readFileSync(join(root, path), "utf8");
+      assert.ok(jvmBomDocumentation.includes("0.4.0"), `${path} advances to the current JVM version`);
+      assert.equal(jvmBomDocumentation.includes("0.3.0"), false, `${path} removes the prior JVM version`);
+    }
     const compatibilityMarkdown = readFileSync(join(root, "docs", "COMPATIBILITY.md"), "utf8");
     assert.match(compatibilityMarkdown, /vireo-\*`.*0\.4\.0/u);
     assert.match(compatibilityMarkdown, /edge is 0\.2\.0→0\.3\.0/u);
@@ -266,6 +275,20 @@ test("synchronizes release contracts and public version documentation from sourc
       readFileSync(humanRecordPath, "utf8"),
       humanRecord,
       "generated intent preserves unrelated human records",
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("fails closed when an exact-version JVM BOM document is missing its prior coordinate", async () => {
+  const root = makeFixture();
+  try {
+    writeFileSync(join(root, "docs", "PUBLIC_API.md"), "# Public API\n\nNo BOM example.\n");
+
+    await assert.rejects(
+      synchronizeFixtureDocumentationRelease(root),
+      /docs\/PUBLIC_API\.md current JVM BOM coordinate must contain exactly 1 current-state reference\(s\)/u,
     );
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -534,19 +557,13 @@ test("documents adjacent edges that preserve application lockfiles", async () =>
   }
 });
 
-test("preserves the repository's stable version-neutral README upgrade guidance during candidate finalization", async () => {
-  const repositoryReadme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
-  const stableReadmeGuidance = repositoryReadme.match(
-    /in the published release\. Its version-aware project upgrade supports the declared\nadjacent public release edge; earlier edges remain retained historical evidence\./u,
-  )?.[0];
-  assert.ok(stableReadmeGuidance, "the repository README declares stable version-neutral upgrade guidance");
-
-  const root = makeFixture({ readmeUpgradeGuidance: stableReadmeGuidance });
+test("leaves an arbitrary concise root README byte-identical during candidate finalization", async () => {
+  const root = makeFixture();
   try {
+    const conciseReadme = "# Vireo\n\nOne concise, maintainer-owned repository overview.\n";
+    writeFileSync(join(root, "README.md"), conciseReadme);
     await synchronizeFixtureDocumentationRelease(root);
-    const readme = readFileSync(join(root, "README.md"), "utf8");
-    assert.ok(readme.includes(stableReadmeGuidance));
-    assert.doesNotMatch(readme, /explicit adjacent 0\.2\.0→0\.3\.0 release/u);
+    assert.equal(readFileSync(join(root, "README.md"), "utf8"), conciseReadme);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -571,12 +588,7 @@ test("preserves the repository's version-neutral Storybook upgrade guidance duri
   }
 });
 
-function makeFixture({
-  managedEdgeScope = "legacy",
-  lockfileRefresh = "required",
-  readmeUpgradeGuidance,
-  storybookGuidance = "",
-} = {}) {
+function makeFixture({ managedEdgeScope = "legacy", lockfileRefresh = "required", storybookGuidance = "" } = {}) {
   const root = mkdtempSync(join(tmpdir(), "vireo-documentation-release-"));
   mkdirSync(join(root, "contracts"));
   mkdirSync(join(root, "packages", "create-vireo", "src"), { recursive: true });
@@ -584,6 +596,9 @@ function makeFixture({
   mkdirSync(join(root, "packages", "create-vireo", "fixtures"));
   mkdirSync(join(root, "packages", "sqlite"));
   mkdirSync(join(root, "jvm"));
+  for (const module of ["vireo-auth", "vireo-bom", "vireo-core", "vireo-offline", "vireo-query"]) {
+    mkdirSync(join(root, "jvm", module));
+  }
   mkdirSync(join(root, "docs"));
   mkdirSync(join(root, "docs", "architecture"));
   mkdirSync(join(root, "docs", "roadmap", "phase-0"), { recursive: true });
@@ -753,13 +768,20 @@ function makeFixture({
   writeJson(join(root, "contracts", "release-lifecycle-policy.json"), {
     supportLines: [{ id: "current", release: "npm-0.2.0_jvm-0.3.0" }],
   });
-  const currentReadmeGuidance =
-    readmeUpgradeGuidance ??
-    "This is current in `create-vireo@0.2.0`. Its version-aware\nproject upgrade currently supports the explicit adjacent 0.1.0→0.2.0 release\npair; other historical edges remain retained.";
-  writeFileSync(
-    join(root, "README.md"),
-    `| Package | Version |\n| --- | --- |\n| \`create-vireo\` | 0.2.0 |\n| \`@vireocodedev/sqlite\` | 0.2.1 |\n\n${currentReadmeGuidance} Template evidence: ${"a".repeat(40)}.\n`,
-  );
+  writeFileSync(join(root, "README.md"), "# Vireo\n\nMaintainer-owned repository overview.\n");
+  const gradleBomExample = 'implementation platform("com.vireocode:vireo-bom:0.3.0")';
+  const mavenBomExample = "<artifactId>vireo-bom</artifactId>\n      <version>0.3.0</version>";
+  writeFileSync(join(root, "docs", "PUBLIC_API.md"), `\`\`\`kotlin\n${gradleBomExample}\n\`\`\`\n`);
+  writeFileSync(join(root, "jvm", "README.md"), `\`\`\`groovy\n${gradleBomExample}\n\`\`\`\n`);
+  for (const module of ["vireo-auth", "vireo-bom", "vireo-core"]) {
+    writeFileSync(
+      join(root, "jvm", module, "README.md"),
+      `\`\`\`groovy\n${gradleBomExample}\n\`\`\`\n\n\`\`\`xml\n${mavenBomExample}\n\`\`\`\n`,
+    );
+  }
+  for (const module of ["vireo-offline", "vireo-query"]) {
+    writeFileSync(join(root, "jvm", module, "README.md"), `\`\`\`groovy\n${gradleBomExample}\n\`\`\`\n`);
+  }
   writeFileSync(
     join(root, "docs", "COMPATIBILITY.md"),
     "| Artifact | Version |\n| --- | --- |\n| `create-vireo` | 0.2.0 |\n| `@vireocodedev/sqlite` | 0.2.1 |\n| `com.vireocode:vireo-*` | 0.3.0 |\n\nThe current supported project-upgrade\nedge is 0.1.0→0.2.0; other historical evidence remains retained.\n\nThe immutable `starter-template@0.2.0` source baseline retains\n`starterVersion=0.3.0`; `create-vireo@0.2.0` normalizes generated and upgraded\nfull-stack consumers to the coordinated `0.4.0` JVM release.\n",
@@ -867,6 +889,7 @@ async function synchronizeFixtureDocumentationRelease(root) {
       };
     },
     serializeSnapshot: archive => archive,
+    formatOutput: ({ content }) => content,
   });
 }
 

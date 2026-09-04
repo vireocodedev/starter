@@ -121,7 +121,7 @@ test("keeps unrelated issue templates lightweight and roadmap prose in ordinary 
 
   const prose = planCiChanges(changed("docs/roadmap/phase-5/public-beta-criteria.md"), policy);
   assert.equal(prose.publicBetaEvidence, false);
-  assert.equal(prose.typescript, true);
+  assert.equal(prose.typescript, false);
   assert.equal(prose.documentationPages, true);
 });
 
@@ -169,6 +169,28 @@ test("routes public and projection contracts through TypeScript while retaining 
   ]) {
     const plan = planCiChanges(changed(path), policy);
     assert.equal(plan.typescript, true, path);
+    assert.equal(plan.full, false, path);
+  }
+});
+
+test("keeps release-synchronized prose in the lightweight documentation lane", () => {
+  for (const path of [
+    "docs/COMPATIBILITY.md",
+    "docs/DOCUMENTATION_PORTAL.md",
+    "docs/NPM_RELEASE.md",
+    "docs/architecture/frontend-only-profile.md",
+    "docs/architecture/generated-code-ownership.md",
+    "docs/roadmap/phase-0/gap-register.md",
+    "docs/roadmap/phase-0/repository-topology.md",
+    "docs/roadmap/phase-2/backlog.md",
+    "docs/roadmap/phase-4/backlog.md",
+    "docs/roadmap/phase-4/production-readiness-criteria.md",
+    "docs/roadmap/public-beta-human-handoff-2026-09-01.md",
+    "docs/roadmap/remaining-non-human-work.md",
+  ]) {
+    const plan = planCiChanges(changed(path), policy);
+    assert.equal(plan.typescript, false, path);
+    assert.equal(plan.documentationPages, true, path);
     assert.equal(plan.full, false, path);
   }
 });
@@ -332,7 +354,7 @@ test("considers both sides of a rename", () => {
   assert.equal(plan.codeqlJava, true);
 });
 
-test("keeps only root Changeset metadata lightweight and routes documentation through the TypeScript policy lane", () => {
+test("keeps release metadata lightweight and routes repository prose only through documentation", () => {
   for (const path of [".changeset/docs-only.md", ".release-impact/docs-only.md"]) {
     const metadataPlan = planCiChanges(changed(path), policy);
     assert.equal(metadataPlan.full, false, path);
@@ -354,15 +376,20 @@ test("keeps only root Changeset metadata lightweight and routes documentation th
 
   const plan = planCiChanges(changed("docs/ARCHITECTURE.md"), policy);
   assert.equal(plan.full, false);
-  assert.equal(plan.typescript, true);
+  assert.equal(plan.typescript, false);
   assert.ok(
     Object.entries(plan)
-      .filter(
-        ([name]) => !["typescript", "documentationPages", "full", "changedPaths", "unclassifiedPaths"].includes(name),
-      )
+      .filter(([name]) => !["documentationPages", "full", "changedPaths", "unclassifiedPaths"].includes(name))
       .every(([, enabled]) => enabled === false),
   );
   assert.equal(plan.documentationPages, true);
+
+  for (const path of ["README.md", "CONTRIBUTING.md", "jvm/README.md", "jvm/vireo-auth/README.md"]) {
+    const prosePlan = planCiChanges(changed(path), policy);
+    assert.equal(prosePlan.documentationPages, true, path);
+    assert.equal(prosePlan.typescript, false, path);
+    assert.equal(prosePlan.full, false, path);
+  }
 });
 
 test("fails closed for unknown and CI-control paths", () => {

@@ -1,12 +1,10 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { format, resolveConfig } from "prettier";
-import { createCurrentSnapshotArchive, serializeSnapshotArchive } from "../site/build.mjs";
 
 export async function synchronizeDocumentationRelease(
   repositoryRoot,
-  { createSnapshotArchive = createCurrentSnapshotArchive, serializeSnapshot = serializeSnapshotArchive } = {},
+  { createSnapshotArchive, serializeSnapshot, formatOutput } = {},
 ) {
   const contractsDirectory = join(repositoryRoot, "contracts");
   const ecosystemPath = join(contractsDirectory, "ecosystem-release-contract.json");
@@ -26,6 +24,10 @@ export async function synchronizeDocumentationRelease(
   const currentDocumentation = documentation.releases?.find(release => release.id === documentation.currentRelease);
   if (!currentDocumentation) {
     throw new Error(`Current documentation release ${documentation.currentRelease} is not declared`);
+  }
+  const priorCurrentJvmVersion = currentDocumentation.jvm?.version;
+  if (!isStableSemver(priorCurrentJvmVersion)) {
+    throw new Error("Current documentation release must declare a stable JVM version");
   }
 
   const publicWorkspacePackages = readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
@@ -191,13 +193,10 @@ export async function synchronizeDocumentationRelease(
   documentation.currentRelease = nextReleaseId;
   updateReleaseReferences(lifecycle.supportLines, oldReleaseId, nextReleaseId);
 
-  const readmePath = join(repositoryRoot, "README.md");
   const compatibilityPath = join(repositoryRoot, "docs", "COMPATIBILITY.md");
   const portalPath = join(repositoryRoot, "docs", "DOCUMENTATION_PORTAL.md");
-  let readme = readFileSync(readmePath, "utf8");
   let compatibilityMarkdown = readFileSync(compatibilityPath, "utf8");
   for (const [name, version] of packageVersions) {
-    readme = replaceMarkdownTableVersion(readme, name, version, readmePath);
     compatibilityMarkdown = replaceMarkdownTableVersion(compatibilityMarkdown, name, version, compatibilityPath);
   }
   compatibilityMarkdown = replaceMarkdownTableVersion(
@@ -207,6 +206,11 @@ export async function synchronizeDocumentationRelease(
     compatibilityPath,
   );
   const portal = readFileSync(portalPath, "utf8").replaceAll(oldReleaseId, nextReleaseId);
+  const jvmBomDocumentationOutputs = synchronizeJvmBomDocumentation({
+    repositoryRoot,
+    priorCurrentJvmVersion,
+    jvmVersion,
+  });
   const siteOutputs = replaceCurrentTemplateReferencesInSite(
     repositoryRoot,
     oldTemplateCommit,
@@ -218,7 +222,6 @@ export async function synchronizeDocumentationRelease(
     candidateUpgradeRelease === createVireoVersion
       ? synchronizeCurrentReleaseGuidance({
           repositoryRoot,
-          readme,
           compatibilityMarkdown,
           oldTemplateCommit,
           templateCommit,
@@ -251,22 +254,68 @@ export async function synchronizeDocumentationRelease(
       }),
     ],
     [packageLockPath, JSON.stringify(packageLock)],
-    [readmePath, currentReleaseGuidance?.readme ?? readme],
     [compatibilityPath, currentReleaseGuidance?.compatibilityMarkdown ?? compatibilityMarkdown],
     [portalPath, portal],
     ...(currentReleaseGuidance?.outputs ?? []),
+    ...jvmBomDocumentationOutputs,
     ...siteOutputs,
   ];
   const formatted = await Promise.all(
-    outputs.map(async ([path, content]) => {
-      const prettierOptions = (await resolveConfig(path)) ?? {};
-      return [path, await format(content, { ...prettierOptions, filepath: path })];
-    }),
+    outputs.map(([path, content]) => formatOutputDocument({ path, content, formatOutput })),
   );
   for (const [path, content] of formatted) writeFileSync(path, content);
 
-  writeCurrentDocumentationSnapshot({ repositoryRoot, currentDocumentation, createSnapshotArchive, serializeSnapshot });
+  const snapshotFunctions = createSnapshotArchive && serializeSnapshot ? undefined : await import("../site/build.mjs");
+  writeCurrentDocumentationSnapshot({
+    repositoryRoot,
+    currentDocumentation,
+    createSnapshotArchive: createSnapshotArchive ?? snapshotFunctions.createCurrentSnapshotArchive,
+    serializeSnapshot: serializeSnapshot ?? snapshotFunctions.serializeSnapshotArchive,
+  });
   writeDocumentationSiteReleaseImpact({ repositoryRoot, currentDocumentation });
+}
+
+async function formatOutputDocument({ path, content, formatOutput }) {
+  if (formatOutput) return [path, await formatOutput({ path, content })];
+  const { format, resolveConfig } = await import("prettier");
+  const prettierOptions = (await resolveConfig(path)) ?? {};
+  return [path, await format(content, { ...prettierOptions, filepath: path })];
+}
+
+function synchronizeJvmBomDocumentation({ repositoryRoot, priorCurrentJvmVersion, jvmVersion }) {
+  const documents = [
+    { path: "docs/PUBLIC_API.md", coordinateReferences: 1, mavenReferences: 0 },
+    { path: "jvm/README.md", coordinateReferences: 1, mavenReferences: 0 },
+    { path: "jvm/vireo-auth/README.md", coordinateReferences: 1, mavenReferences: 1 },
+    { path: "jvm/vireo-bom/README.md", coordinateReferences: 1, mavenReferences: 1 },
+    { path: "jvm/vireo-core/README.md", coordinateReferences: 1, mavenReferences: 1 },
+    { path: "jvm/vireo-offline/README.md", coordinateReferences: 1, mavenReferences: 0 },
+    { path: "jvm/vireo-query/README.md", coordinateReferences: 1, mavenReferences: 0 },
+  ];
+  const priorCoordinate = `com.vireocode:vireo-bom:${priorCurrentJvmVersion}`;
+  const currentCoordinate = `com.vireocode:vireo-bom:${jvmVersion}`;
+  const priorMavenCoordinate = `<artifactId>vireo-bom</artifactId>\n      <version>${priorCurrentJvmVersion}</version>`;
+  const currentMavenCoordinate = `<artifactId>vireo-bom</artifactId>\n      <version>${jvmVersion}</version>`;
+  return documents.map(({ path, coordinateReferences, mavenReferences }) => {
+    const documentPath = join(repositoryRoot, path);
+    let content = replaceExactCount(
+      readFileSync(documentPath, "utf8"),
+      priorCoordinate,
+      currentCoordinate,
+      coordinateReferences,
+      `${path} current JVM BOM coordinate`,
+    );
+    if (mavenReferences > 0) {
+      content = replaceExactCount(
+        content,
+        priorMavenCoordinate,
+        currentMavenCoordinate,
+        mavenReferences,
+        `${path} current Maven BOM coordinate`,
+      );
+    }
+    return [documentPath, content];
+  });
 }
 
 function finalizeTemplateAdoptionIntent({ intent, createVireoVersion, templateCommit, jvmVersion, releaseId }) {
@@ -476,7 +525,6 @@ function replaceCurrentTemplateReferencesInSite(
 
 function synchronizeCurrentReleaseGuidance({
   repositoryRoot,
-  readme,
   compatibilityMarkdown,
   oldTemplateCommit,
   templateCommit,
@@ -494,29 +542,6 @@ function synchronizeCurrentReleaseGuidance({
   }
   const historicalEdge = `${priorPublicUpgradeRelease}→${publicUpgradeRelease}`;
   const currentEdge = `${publicUpgradeRelease}→${candidateUpgradeRelease}`;
-  const legacyReadmeGuidance = `in \`create-vireo@${publicUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${historicalEdge} release\npair;`;
-  const stableReadmeGuidance =
-    "in the published release. Its version-aware project upgrade supports the declared\nadjacent public release edge; earlier edges remain retained historical evidence.";
-  let updatedReadme = readme.replaceAll(oldTemplateCommit, templateCommit);
-  if (updatedReadme.includes(stableReadmeGuidance)) {
-    if (updatedReadme.includes(legacyReadmeGuidance)) {
-      throw new Error("README.md cannot mix stable and legacy current project-upgrade guidance");
-    }
-    updatedReadme = replaceExactCount(
-      updatedReadme,
-      stableReadmeGuidance,
-      stableReadmeGuidance,
-      1,
-      "README.md stable project-upgrade guidance",
-    );
-  } else {
-    updatedReadme = replaceRequired(
-      updatedReadme,
-      legacyReadmeGuidance,
-      `in \`create-vireo@${candidateUpgradeRelease}\`. Its version-aware\nproject upgrade currently supports the explicit adjacent ${currentEdge} release\npair; ${historicalEdge} remains retained historical evidence;`,
-      "README.md current project-upgrade guidance",
-    );
-  }
   let updatedCompatibility = replaceRequired(
     compatibilityMarkdown,
     `edge is ${historicalEdge};`,
@@ -592,7 +617,6 @@ function synchronizeCurrentReleaseGuidance({
     candidateUpgradeRelease,
   });
   return {
-    readme: updatedReadme,
     compatibilityMarkdown: updatedCompatibility,
     outputs: [[createReadmePath, createReadme], [npmReleasePath, npmRelease], ...additionalGuidanceOutputs],
   };

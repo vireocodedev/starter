@@ -1,7 +1,7 @@
 # Non-React live documentation
 
-This guide defines how framework-free Starter packages contribute live
-documentation to the single Vireo Starter Storybook.
+This guide defines how framework-free Vireo packages contribute live
+documentation to the shared Vireo Storybook.
 
 ## Ownership boundary
 

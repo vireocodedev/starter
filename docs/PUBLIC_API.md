@@ -28,8 +28,8 @@ stability and migration classification is in
 [Starter UI public surface](../packages/ui/docs/PUBLIC_SURFACE.md).
 
 Each package owns detailed runnable documentation in its README and in the public
-[Vireo documentation portal](https://vireocodedev.github.io/vireo/docs/). The
-[generated TypeScript reference](https://vireocodedev.github.io/vireo/api/typescript/)
+[Vireo documentation portal](https://vireocode.com/docs/). The
+[generated TypeScript reference](https://vireocode.com/reference/typescript/)
 is searchable across every export in these declared entry points.
 
 ## JVM entry points
@@ -38,7 +38,7 @@ Import the BOM once, then omit versions from individual Vireo modules:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.vireocode:vireo-bom:0.2.0"))
+    implementation(platform("com.vireocode:vireo-bom:0.3.1"))
     implementation("com.vireocode:vireo-core")
     implementation("com.vireocode:vireo-auth")
 }
@@ -57,7 +57,7 @@ Public Java packages and declaration budgets are enforced by API snapshots. Star
 with each module's README under [`jvm/`](../jvm), and use the BOM unless an isolated
 module test deliberately proves a different version arrangement.
 
-The public [aggregate JVM API reference](https://vireocodedev.github.io/vireo/api/jvm/)
+The public [aggregate JVM API reference](https://vireocode.com/reference/java/)
 is generated from the same Java sources that Gradle compiles and validates.
 
 ## Compatibility boundary
