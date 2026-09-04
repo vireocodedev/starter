@@ -8,6 +8,7 @@ import {
   validateNpmTemplatePublicationWorkflow,
   validatePostPublicationActivityGate,
   validateWebsiteDeploymentWorkflow,
+  validateWebsiteVerificationWorkflow,
   validateTemplateAdoptionWorkflow,
 } from "./workflow-security-policy.mjs";
 
@@ -16,6 +17,7 @@ const actionPolicy = JSON.parse(read("contracts/github-actions-policy.json"));
 const releaseWorkflow = read(".github/workflows/release.yml");
 const anonymousGauntletWorkflow = read(".github/workflows/anonymous-consumer-gauntlet.yml");
 const websiteWorkflow = read(".github/workflows/website.yml");
+const websiteDeploymentWorkflow = read(".github/workflows/deploy-website.yml");
 const templateAdoptionWorkflow = read(".github/workflows/adopt-template-release.yml");
 const npmReleaseWorkflow = read(".github/workflows/release-npm.yml");
 const npmVerificationWorkflow = read(".github/workflows/verify-npm-public.yml");
@@ -216,22 +218,29 @@ test("standalone website artifacts retain generated hidden files", () => {
 });
 
 test("website deployment remains artifact-bound and forced-command only", () => {
-  assert.deepEqual(validateWebsiteDeploymentWorkflow(websiteWorkflow), []);
+  assert.deepEqual(validateWebsiteVerificationWorkflow(websiteWorkflow), []);
+  assert.deepEqual(validateWebsiteDeploymentWorkflow(websiteDeploymentWorkflow), []);
+  assert.match(
+    websiteDeploymentWorkflow,
+    /group: website-\$\{\{ github\.ref == 'refs\/heads\/main' && 'production' \|\| github\.ref \}\}/u,
+  );
+  assert.match(websiteDeploymentWorkflow, /name: Reconcile interrupted website deployment/u);
+  assert.match(websiteDeploymentWorkflow, /needs: reconcile/u);
   assert.match(
     validateWebsiteDeploymentWorkflow(
-      websiteWorkflow.replaceAll("StrictHostKeyChecking=yes", "StrictHostKeyChecking=no"),
+      websiteDeploymentWorkflow.replaceAll("StrictHostKeyChecking=yes", "StrictHostKeyChecking=no"),
     ).join("\n"),
     /forced-command/u,
   );
   assert.match(
     validateWebsiteDeploymentWorkflow(
-      websiteWorkflow.replace('"${ssh_command[@]}" status', '"${ssh_command[@]}" "mkdir -p /tmp"'),
+      websiteDeploymentWorkflow.replace('"${ssh_command[@]}" status', '"${ssh_command[@]}" "mkdir -p /tmp"'),
     ).join("\n"),
     /unrestricted remote shell/u,
   );
   assert.match(
     validateWebsiteDeploymentWorkflow(
-      websiteWorkflow.replace("github.event_name == 'workflow_dispatch'", "github.event_name == 'schedule'"),
+      websiteDeploymentWorkflow.replaceAll("github.ref == 'refs/heads/main'", "github.ref == 'refs/heads/unsafe'"),
     ).join("\n"),
     /artifact-bound forced-command/u,
   );

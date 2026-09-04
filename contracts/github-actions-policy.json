@@ -97,7 +97,11 @@
       "cancelInProgress": true
     },
     "website.yml": {
-      "group": "website-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}",
+      "group": "website-verification-${{ github.event.pull_request.number }}",
+      "cancelInProgress": true
+    },
+    "deploy-website.yml": {
+      "group": "website-${{ github.ref == 'refs/heads/main' && 'production' || github.ref }}",
       "cancelInProgress": false
     },
     "anonymous-consumer-gauntlet.yml": {
