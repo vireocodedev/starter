@@ -67,6 +67,8 @@ test("derives friendly and exact release identities from one policy", () => {
     `https://vireocodedev.github.io/vireo/versions/${documentationPolicy.currentRelease}/storybook/`,
   );
   assert.equal(website.links.source, documentationPolicy.releases[0].releaseLinks.source);
+  assert.equal(website.links.flagshipImage, "/assets/flagship-overview.png");
+  assert.equal(website.links.flagshipSocialImage, "https://vireocode.com/assets/flagship-overview.png");
 });
 
 test("renders trusted documentation markdown with headings, code and tables", () => {
@@ -338,6 +340,7 @@ test("builds the complete multi-page, searchable and versioned website artifact"
       "versions.json",
       "site.json",
       "manifest.webmanifest",
+      "assets/flagship-overview.png",
       "sw.js",
       "sitemap.xml",
     ]) {
@@ -374,10 +377,11 @@ test("builds the complete multi-page, searchable and versioned website artifact"
     }
     assert.doesNotMatch(landing, /data-navigation-toggle/u);
     assert.match(landing, /data-search-icon/u);
-    assert.match(landing, /property="og:image"/u);
+    assert.match(landing, /property="og:image" content="https:\/\/vireocode\.com\/assets\/flagship-overview\.png"/u);
     assert.match(landing, /name="twitter:card" content="summary_large_image"/u);
     assert.match(landing, /application\/ld\+json/u);
-    assert.match(landing, /flagship-overview\.png/u);
+    assert.match(landing, /src="\/assets\/flagship-overview\.png"/u);
+    assert.doesNotMatch(landing, /raw\.githubusercontent\.com/u);
     assert.match(landing, /current pinned Starter Template/u);
     assert.match(docs, /Vireo documentation/u);
     assert.match(docs, /On this page/u);

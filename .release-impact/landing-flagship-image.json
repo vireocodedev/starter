@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "release",
+  "bump": "deploy",
+  "summary": "Self-host the landing-page flagship image so the production CSP permits it to render."
+}
