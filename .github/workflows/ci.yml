@@ -421,30 +421,3 @@ jobs:
           scripts/anonymous-consumer-gauntlet.test.mjs
           scripts/verify-anonymous-consumer-signed-sboms.test.mjs
           scripts/lib/anonymous-consumer-*.test.mjs
-
-  # Temporary compatibility checks for the atomic live-ruleset migration.
-  required-context-migration-release-impact:
-    name: Release impact
-    needs: changes
-    if: always() && github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions: {}
-    steps:
-      - name: Propagate the consolidated policy result
-        env:
-          POLICY_RESULT: ${{ needs.changes.result }}
-        run: test "$POLICY_RESULT" = success
-
-  required-context-migration-gauntlet:
-    name: plan
-    needs: consumer-gauntlet-policy
-    if: always() && github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions: {}
-    steps:
-      - name: Propagate the consumer-gauntlet policy result
-        env:
-          POLICY_RESULT: ${{ needs.consumer-gauntlet-policy.result }}
-        run: test "$POLICY_RESULT" = success
