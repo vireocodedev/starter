@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "description": "Fail-closed pull-request verification routing. Unknown and CI-control paths require the complete suite.",
+  "safeNoop": {
+    "pathPrefixes": [".release-impact/"],
+    "patterns": ["^\\.changeset/[^/]+\\.md$"]
+  },
+  "control": {
+    "paths": [
+      "package.json",
+      "package-lock.json",
+      "turbo.json",
+      "eslint.config.mjs",
+      "prettier.config.mjs",
+      ".prettierrc",
+      ".prettierrc.json",
+      ".npmrc",
+      ".prettierignore",
+      ".changeset/config.json",
+      "LICENSE"
+    ],
+    "pathPrefixes": [".github/", "contracts/ci-change-plan-policy.json", "scripts/ci-change-plan"]
+  },
+  "scopes": {
+    "typescript": {
+      "paths": [
+        "package.json",
+        "package-lock.json",
+        "turbo.json",
+        "tsconfig.base.json",
+        "eslint.config.mjs",
+        "prettier.config.mjs",
+        "AGENTS.md",
+        "scripts/test.sh",
+        "scripts/verify.sh",
+        "scripts/verify-all.sh",
+        "scripts/with-declared-npm.sh",
+        "scripts/with-declared-npx.sh",
+        "scripts/secret-scan.sh",
+        "contracts/application-projection-contract.json",
+        "contracts/anonymous-consumer-gauntlet-policy.json",
+        "contracts/documentation-ownership-contract.json",
+        "contracts/documentation-release-policy.json",
+        "contracts/ecosystem-release-contract.json",
+        "contracts/package-portability-policy.json",
+        "contracts/platform-support-policy.json",
+        "contracts/project-upgrade-policy.json",
+        "contracts/public-api-policy.json",
+        "contracts/public-beta-evidence-policy.json",
+        "contracts/public-release-attestation-policy.json",
+        "contracts/template-adoption-intent.json",
+        "contracts/template-adoption-policy.json",
+        "contracts/third-party-license-policy.json"
+      ],
+      "pathPrefixes": [".agents/", "docs/"],
+      "patterns": [
+        "^(?:README|CONTRIBUTING|SECURITY|SUPPORT|GOVERNANCE|CODE_OF_CONDUCT)\\.md$",
+        "^packages/[^/]+/(?:src|tests|fixtures|schema)/",
+        "^packages/[^/]+/(?:api-surface\\.json|package\\.json|tsconfig(?:\\.[^/]+)?\\.json|(?:vite|vitest(?:\\.storybook)?)\\.config\\.(?:[cm]?js|ts))$",
+        "^packages/create-vireo/build\\.mjs$",
+        "^packages/[^/]+/(?:README|CHANGELOG)\\.md$",
+        "^packages/[^/]+/AGENTS\\.md$",
+        "^(?:jvm|scripts)/AGENTS\\.md$",
+        "^packages/[^/]+/LICENSE$",
+        "^packages/[^/]+/docs/",
+        "^packages/ui/(?:storybook/|\\.storybook-vireo/|templates/)",
+        "^packages/ui/(?:architecture\\.allowlist|loading-state-contracts)\\.json$",
+        "^packages/ui/run-storybook-contracts\\.mjs$",
+        "^jvm/(?:README|CHANGELOG)\\.md$",
+        "^jvm/[^/]+/(?:README|CHANGELOG)\\.md$",
+        "^jvm/(?:docs/|[^/]+/docs/)",
+        "^jvm/[^/]+/api-surface\\.txt$",
+        "^scripts/.*\\.(?:[cm]?js|ts|tsx)$"
+      ]
+    },
+    "jvm": {
+      "paths": [
+        "gradle.properties",
+        "settings.gradle",
+        "settings.gradle.kts",
+        "build.gradle",
+        "build.gradle.kts",
+        "jvm/gradle.properties",
+        "jvm/settings.gradle",
+        "jvm/settings.gradle.kts",
+        "jvm/build.gradle",
+        "jvm/build.gradle.kts",
+        "jvm/gradlew",
+        "jvm/gradlew.bat",
+        "scripts/third-party-license-policy.mjs",
+        "scripts/lib/third-party-license-policy.mjs",
+        "contracts/third-party-license-policy.json"
+      ],
+      "pathPrefixes": ["jvm/gradle/", "jvm/buildSrc/"],
+      "patterns": ["^jvm/[^/]+/(?:src/|(?:build|settings)\\.gradle(?:\\.kts)?$|gradle\\.properties$)"]
+    },
+    "generatedFrontend": {
+      "paths": [
+        "package.json",
+        "package-lock.json",
+        "turbo.json",
+        "tsconfig.base.json",
+        "contracts/application-projection-contract.json",
+        "contracts/ecosystem-release-contract.json",
+        "scripts/lib/local-vireo-candidate-fixture.mjs",
+        "scripts/lib/generated-fixture-template-pin.mjs",
+        "scripts/generated-fixture-template-pin.test.mjs",
+        "scripts/lib/generated-project-projection-assertions.mjs",
+        "scripts/generated-project-projection-assertions.test.mjs",
+        "scripts/generated-frontend-fixture.mjs"
+      ],
+      "pathPrefixes": ["scripts/generator/", "packages/create-vireo/schema/"],
+      "patterns": [
+        "^packages/[^/]+/(?:src|tests|fixtures|schema)/",
+        "^packages/[^/]+/(?:package\\.json|tsconfig(?:\\.[^/]+)?\\.json|(?:vite|vitest(?:\\.storybook)?)\\.config\\.(?:[cm]?js|ts))$",
+        "^packages/[^/]+/LICENSE$",
+        "^packages/(?:create-vireo/build\\.mjs|ui/(?:templates/|(?:architecture\\.allowlist|loading-state-contracts)\\.json$))"
+      ]
+    },
+    "generatedFullstack": {
+      "paths": [
+        "package.json",
+        "package-lock.json",
+        "turbo.json",
+        "tsconfig.base.json",
+        "gradle.properties",
+        "settings.gradle",
+        "settings.gradle.kts",
+        "build.gradle",
+        "build.gradle.kts",
+        "jvm/gradle.properties",
+        "jvm/settings.gradle",
+        "jvm/settings.gradle.kts",
+        "jvm/build.gradle",
+        "jvm/build.gradle.kts",
+        "jvm/gradlew",
+        "jvm/gradlew.bat",
+        "contracts/application-projection-contract.json",
+        "contracts/ecosystem-release-contract.json",
+        "scripts/lib/local-vireo-candidate-fixture.mjs",
+        "scripts/lib/local-vireo-maven-candidate-fixture.mjs",
+        "scripts/lib/generated-fixture-template-pin.mjs",
+        "scripts/generated-fixture-template-pin.test.mjs",
+        "scripts/lib/generated-project-projection-assertions.mjs",
+        "scripts/generated-project-projection-assertions.test.mjs",
+        "scripts/generated-entity-fixture.mjs"
+      ],
+      "pathPrefixes": ["scripts/generator/", "packages/create-vireo/schema/"],
+      "patterns": [
+        "^packages/[^/]+/(?:src|tests|fixtures|schema)/",
+        "^packages/[^/]+/(?:package\\.json|tsconfig(?:\\.[^/]+)?\\.json|(?:vite|vitest(?:\\.storybook)?)\\.config\\.(?:[cm]?js|ts))$",
+        "^jvm/[^/]+/(?:src/|(?:build|settings)\\.gradle(?:\\.kts)?$|gradle\\.properties$)",
+        "^jvm/(?:gradle/|buildSrc/)",
+        "^packages/(?:create-vireo/build\\.mjs|ui/(?:templates/|(?:architecture\\.allowlist|loading-state-contracts)\\.json$))"
+      ]
+    },
+    "projectUpgrade": {
+      "paths": [
+        "package.json",
+        "package-lock.json",
+        "turbo.json",
+        "tsconfig.base.json",
+        "contracts/project-upgrade-policy.json",
+        "contracts/application-projection-contract.json",
+        "contracts/template-adoption-intent.json",
+        "contracts/ecosystem-release-contract.json",
+        "scripts/lib/local-vireo-candidate-fixture.mjs",
+        "scripts/lib/generated-fixture-template-pin.mjs",
+        "scripts/generated-fixture-template-pin.test.mjs"
+      ],
+      "pathPrefixes": [
+        "scripts/project-upgrade-",
+        "scripts/check-project-upgrade-baselines.mjs",
+        "scripts/lib/project-upgrade-",
+        "scripts/lib/packed-project-upgrade-",
+        "packages/create-vireo/schema/"
+      ],
+      "patterns": [
+        "^packages/[^/]+/(?:src/|package\\.json$|tsconfig(?:\\.[^/]+)?\\.json$|(?:vite|vitest(?:\\.storybook)?)\\.config\\.(?:[cm]?js|ts)$)",
+        "^packages/create-vireo/(?:tests|fixtures|schema)/",
+        "^packages/(?:create-vireo/build\\.mjs|ui/(?:templates/|(?:architecture\\.allowlist|loading-state-contracts)\\.json$))"
+      ]
+    },
+    "gauntletPlan": {
+      "paths": [
+        "package.json",
+        "package-lock.json",
+        "contracts/anonymous-consumer-gauntlet-policy.json",
+        "contracts/public-release-attestation-policy.json",
+        "contracts/ecosystem-release-contract.json",
+        "contracts/application-projection-contract.json",
+        "scripts/lib/application-projection-contract.mjs",
+        "scripts/lib/release-sbom-evidence.mjs"
+      ],
+      "pathPrefixes": [
+        "scripts/anonymous-consumer-",
+        "scripts/verify-anonymous-consumer-signed-sboms",
+        "scripts/lib/anonymous-",
+        "scripts/lib/public-release-evidence-paths.mjs"
+      ]
+    },
+    "website": {
+      "paths": [
+        "package.json",
+        "package-lock.json",
+        "contracts/documentation-release-policy.json",
+        "scripts/lib/reference-symbol-anchors.mjs"
+      ],
+      "pathPrefixes": ["site/"],
+      "patterns": ["^jvm/[^/]+/api-surface\\.txt$", "^packages/[^/]+/(api-surface\\.json|package\\.json)$"]
+    },
+    "codeqlJava": {
+      "paths": [
+        "gradle.properties",
+        "settings.gradle",
+        "settings.gradle.kts",
+        "build.gradle",
+        "build.gradle.kts",
+        "jvm/gradle.properties",
+        "jvm/settings.gradle",
+        "jvm/settings.gradle.kts",
+        "jvm/build.gradle",
+        "jvm/build.gradle.kts",
+        "jvm/gradlew",
+        "jvm/gradlew.bat"
+      ],
+      "pathPrefixes": ["jvm/gradle/", "jvm/buildSrc/"],
+      "patterns": ["^jvm/[^/]+/(?:src/|(?:build|settings)\\.gradle(?:\\.kts)?$|gradle\\.properties$)"]
+    },
+    "codeqlJavaScript": {
+      "paths": ["tsconfig.base.json"],
+      "patterns": [
+        "^packages/[^/]+/(?:src|tests|fixtures|schema)/.*\\.(?:[cm]?js|ts|tsx)$",
+        "^packages/[^/]+/(?:tsconfig(?:\\.[^/]+)?\\.json|(?:vite|vitest(?:\\.storybook)?)\\.config\\.(?:[cm]?js|ts)|package\\.json|build\\.mjs)$",
+        "^packages/[^/]+/(?:docs|storybook)/.*\\.(?:[cm]?js|ts|tsx|mdx)$",
+        "^packages/ui/(?:storybook/|\\.storybook-vireo/|templates/).*\\.(?:[cm]?js|ts|tsx)(?:\\.template)?$",
+        "^packages/ui/run-storybook-contracts\\.mjs$",
+        "^scripts/.*\\.(?:[cm]?js|ts|tsx)$",
+        "^site/.*\\.(?:[cm]?js|ts|tsx)$"
+      ]
+    },
+    "dependencyReview": {
+      "paths": ["package.json", "package-lock.json", "gradle.properties", "settings.gradle.kts", "build.gradle.kts"],
+      "pathPrefixes": ["jvm/gradle/", "jvm/gradle/wrapper/"],
+      "patterns": [
+        "^packages/[^/]+/package\\.json$",
+        "^(?:|.*/)(?:settings\\.gradle(?:\\.kts)?|build\\.gradle(?:\\.kts)?|gradle\\.properties)$",
+        "^\\.github/workflows/.*\\.ya?ml$",
+        "^(?:|.*/)(?:Dockerfile(?:\\.[^/]+)?|docker-compose(?:\\.[^/]+)?\\.ya?ml)$"
+      ]
+    }
+  }
+}

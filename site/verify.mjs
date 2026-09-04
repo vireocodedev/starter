@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { markupReferencesHostname } from "./url-reference-policy.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sitePolicy = readJson(join(root, "site/site-policy.json"));
@@ -104,6 +105,7 @@ function validateArtifact(release, declaredPages) {
     ".nojekyll",
     "404.html",
     "assets/favicon.svg",
+    "assets/flagship-overview.png",
     "assets/asset-manifest.json",
     "docs/index.html",
     `docs/${release.documentationVersion}/index.html`,
@@ -172,6 +174,8 @@ function validateArtifact(release, declaredPages) {
     problems.push("generated CSS must have a content fingerprint");
   if (!/^\/assets\/site\.[a-f0-9]{12}\.js$/u.test(assetManifest["site.js"] ?? ""))
     problems.push("generated JavaScript must have a content fingerprint");
+  if (assetManifest["flagship-overview.png"] !== "/assets/flagship-overview.png")
+    problems.push("generated website must contain the self-hosted flagship image");
   if (
     !existsSync(join(outputRoot, (assetManifest["site.css"] ?? "").slice(1))) ||
     !existsSync(join(outputRoot, (assetManifest["site.js"] ?? "").slice(1)))
@@ -237,6 +241,12 @@ function validateArtifact(release, declaredPages) {
   ]) {
     if (!landing.includes(expected)) problems.push(`generated landing page is missing ${expected}`);
   }
+  if (!landing.includes('src="/assets/flagship-overview.png"'))
+    problems.push("generated landing page must load the self-hosted flagship image");
+  if (!landing.includes('content="https://vireocode.com/assets/flagship-overview.png"'))
+    problems.push("generated page metadata must use the canonical self-hosted flagship image");
+  if (markupReferencesHostname(landing, "raw.githubusercontent.com", sitePolicy.canonicalUrl))
+    problems.push("generated landing page must not depend on a cross-origin flagship image");
   for (const expected of [
     "Vireo documentation",
     "On this page",
