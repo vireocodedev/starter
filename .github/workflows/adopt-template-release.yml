@@ -1,4 +1,5 @@
-name: Adopt immutable Vireo Template release
+name: Release · Adopt Template release
+run-name: Template adoption · ${{ github.event_name }} · ${{ github.sha }}
 
 on:
   schedule:
@@ -266,3 +267,7 @@ jobs:
           test "$(printf '%s' "$candidate" | jq -r '.pullNumber')" = "$EXPECTED_PULL_NUMBER"
           merge_result="$(GH_TOKEN="$APP_GH_TOKEN" gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$EXPECTED_PULL_NUMBER/merge" -f sha="$EXPECTED_HEAD_SHA" -f merge_method=squash -f commit_title="chore(template): adopt starter-template@$(node -p \"require('./.template-adoption-plan.json').version\")")"
           test "$(printf '%s' "$merge_result" | jq -r '.merged')" = true
+      - name: Summarize Template adoption outcome
+        if: always()
+        run: |
+          printf '## Template adoption\n\n- The GitHub App merges only a revalidated exact candidate head.\n' >> "$GITHUB_STEP_SUMMARY"

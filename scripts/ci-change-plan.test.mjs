@@ -24,6 +24,16 @@ test("rejects a malformed policy before planning", () => {
   assert.throws(() => planCiChanges(changed("site/app.mjs"), { schemaVersion: 1, scopes: {} }), /must define/u);
 });
 
+test("rejects the previous planner schema that lacks new routed outputs", () => {
+  const previousSchema = structuredClone(policy);
+  delete previousSchema.scopes.publicBetaEvidence;
+  delete previousSchema.scopes.documentationPages;
+  assert.deepEqual(validateCiChangePlanPolicy(previousSchema), [
+    "ci change-plan policy must define publicBetaEvidence",
+    "ci change-plan policy must define documentationPages",
+  ]);
+});
+
 test("parses deletion and rename records from NUL-delimited git output", () => {
   assert.deepEqual(
     parseGitNameStatus(Buffer.from("D\0site/old.png\0R100\0site/app.mjs\0jvm/vireo-core/src/main/java/App.java\0")),
@@ -67,6 +77,8 @@ test("routes a website JavaScript change without expensive ecosystem gates", () 
     "gauntletPlan",
     "codeqlJava",
     "dependencyReview",
+    "publicBetaEvidence",
+    "documentationPages",
   ]) {
     assert.equal(plan[name], false, name);
   }
@@ -78,6 +90,65 @@ test("routes a static website asset without CodeQL", () => {
   assert.equal(plan.website, true);
   assert.equal(plan.codeqlJavaScript, false);
   assert.equal(plan.typescript, false);
+  assert.equal(plan.documentationPages, false);
+});
+
+test("routes exact public-beta evidence inputs without forcing unrelated lanes", () => {
+  for (const path of [
+    "contracts/public-beta-evidence-policy.json",
+    "docs/roadmap/phase-5/evidence/aggregate.json",
+    ".github/ISSUE_TEMPLATE/public_beta_feedback.yml",
+    ".github/ISSUE_TEMPLATE/adopter_check_in.yml",
+  ]) {
+    const plan = planCiChanges(changed(path), policy);
+    assert.equal(plan.publicBetaEvidence, true, path);
+    assert.equal(plan.typescript, false, path);
+    assert.equal(plan.documentationPages, false, path);
+    assert.equal(plan.full, false, path);
+  }
+
+  const evidenceScript = planCiChanges(changed("scripts/public-beta-evidence.mjs"), policy);
+  assert.equal(evidenceScript.publicBetaEvidence, true);
+  assert.equal(evidenceScript.typescript, true);
+});
+
+test("keeps unrelated issue templates lightweight and roadmap prose in ordinary documentation lanes", () => {
+  for (const path of [".github/ISSUE_TEMPLATE/feature_request.yml", ".github/ISSUE_TEMPLATE/config.yml"]) {
+    const plan = planCiChanges(changed(path), policy);
+    assert.equal(plan.full, false, path);
+    assert.equal(plan.publicBetaEvidence, false, path);
+  }
+
+  const prose = planCiChanges(changed("docs/roadmap/phase-5/public-beta-criteria.md"), policy);
+  assert.equal(prose.publicBetaEvidence, false);
+  assert.equal(prose.typescript, true);
+  assert.equal(prose.documentationPages, true);
+});
+
+test("routes documentation Pages inputs to their owning lane", () => {
+  for (const path of [
+    "docs/ARCHITECTURE.md",
+    "packages/ui/storybook/VireoStorybookProvider.tsx",
+    "scripts/build-documentation-portal.mjs",
+    "jvm/vireo-core/api-surface.txt",
+    "site/content/getting-started.md",
+    "packages/history/src/index.ts",
+    "packages/ui/tsconfig.build.json",
+    "packages/ui/templates/react-component/files/Component.tsx.template",
+    "packages/create-vireo/src/index.ts",
+    "jvm/vireo-core/src/main/java/example/Health.java",
+    "jvm/vireo-core/build.gradle",
+    "jvm/vireo-core/docs/overview.md",
+    "contracts/documentation-ownership-contract.json",
+    "scripts/documentation-ownership-policy.mjs",
+    "scripts/synchronize-documentation-release.mjs",
+    "scripts/lib/documentation-ownership-contract.mjs",
+    "README.md",
+    "tsconfig.base.json",
+  ]) {
+    const plan = planCiChanges(changed(path), policy);
+    assert.equal(plan.documentationPages, true, path);
+  }
 });
 
 test("routes checked-in API surfaces through the TypeScript policy lane", () => {
@@ -286,9 +357,12 @@ test("keeps only root Changeset metadata lightweight and routes documentation th
   assert.equal(plan.typescript, true);
   assert.ok(
     Object.entries(plan)
-      .filter(([name]) => !["typescript", "full", "changedPaths", "unclassifiedPaths"].includes(name))
+      .filter(
+        ([name]) => !["typescript", "documentationPages", "full", "changedPaths", "unclassifiedPaths"].includes(name),
+      )
       .every(([, enabled]) => enabled === false),
   );
+  assert.equal(plan.documentationPages, true);
 });
 
 test("fails closed for unknown and CI-control paths", () => {
@@ -296,7 +370,6 @@ test("fails closed for unknown and CI-control paths", () => {
     "new-top-level-file",
     ".prettierrc",
     ".github/workflows/ci.yml",
-    ".github/ISSUE_TEMPLATE/bug_report.yml",
     "contracts/ci-change-plan-policy.json",
     "scripts/unclassified-helper.sh",
   ]) {

@@ -1,4 +1,5 @@
-name: Maintain ecosystem release PR
+name: Release · Prepare version PR
+run-name: Release preparation · ${{ github.event_name }} · ${{ github.sha }}
 
 on:
   push:

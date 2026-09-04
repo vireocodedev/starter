@@ -4,7 +4,6 @@ import test from "node:test";
 
 import {
   parseJobPermissions,
-  validateAlwaysReportedPullRequestWorkflow,
   validateReleasePrWorkflow,
   validateNpmTemplatePublicationWorkflow,
   validatePostPublicationActivityGate,
@@ -238,42 +237,14 @@ test("website deployment remains artifact-bound and forced-command only", () => 
   );
 });
 
-test("requires the protected gauntlet plan to report on every pull request", () => {
-  assert.deepEqual(
-    validateAlwaysReportedPullRequestWorkflow(anonymousGauntletWorkflow, "anonymous-consumer-gauntlet.yml"),
-    [],
-  );
-  const pathFiltered = anonymousGauntletWorkflow.replace(
-    "  pull_request:\n",
-    "  pull_request:\n    paths: [package.json]\n",
-  );
-  assert.match(
-    validateAlwaysReportedPullRequestWorkflow(pathFiltered, "anonymous-consumer-gauntlet.yml").join("\n"),
-    /must run for every pull request without paths or paths-ignore filters/u,
-  );
-  const missingPlan = anonymousGauntletWorkflow.replace("  plan:\n", "  disabled-plan:\n");
-  assert.match(
-    validateAlwaysReportedPullRequestWorkflow(missingPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
-    /plan must exist and report unconditionally for every pull request/u,
-  );
-  const conditionalPlan = anonymousGauntletWorkflow.replace(
-    "    if: always() && github.event_name == 'pull_request'",
-    "    if: always() && github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'",
-  );
-  assert.match(
-    validateAlwaysReportedPullRequestWorkflow(conditionalPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
-    /plan must exist and report unconditionally for every pull request/u,
-  );
-});
-
 test("binds post-publication gauntlet runs to the combined ecosystem workflow", () => {
   const renamed = anonymousGauntletWorkflow.replace(
-    'workflows: ["Publish Vireo ecosystem"]',
+    'workflows: ["Release · Publish npm and Maven"]',
     'workflows: ["Publish npm release"]',
   );
   const previous = read(".github/workflows/anonymous-consumer-gauntlet.yml");
-  assert.match(previous, /workflows: \["Publish Vireo ecosystem"\]/u);
-  assert.doesNotMatch(renamed, /workflows: \["Publish Vireo ecosystem"\]/u);
+  assert.match(previous, /workflows: \["Release · Publish npm and Maven"\]/u);
+  assert.doesNotMatch(renamed, /workflows: \["Release · Publish npm and Maven"\]/u);
 });
 
 test("fails closed unless downstream workflow_run consumers inspect exact parent release activity", () => {

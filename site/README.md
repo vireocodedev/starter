@@ -121,7 +121,7 @@ exact transaction. Legacy direct SSH scripts now fail closed.
 If a runner is interrupted after staging or activation, the scheduled protected
 reconciliation job rolls back that old exact-run pending transaction to its last
 accepted (including legacy) target; it does not build or deploy new bytes. A manual
-**Build Vireo website** dispatch from `main` is safe for an already accepted
+**Deploy · Website — vireocode.com** dispatch from `main` is safe for an already accepted
 content identity, but never clears a different pending transaction. On its first
 use, the controller records an existing `current` symlink as a legacy rollback
 predecessor; a failed first qualification restores that symlink before any cleanup.

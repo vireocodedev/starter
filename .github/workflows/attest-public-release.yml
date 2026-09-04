@@ -1,11 +1,12 @@
 name: Attest public release SBOMs
+run-name: Release · Attest public SBOMs · ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   workflow_dispatch:
   workflow_run:
     workflows:
-      - Publish Vireo ecosystem
-      - Verify Maven Central release
+      - Release · Publish npm and Maven
+      - Recovery · Verify Maven publication
     branches: [main]
     types:
       - completed
@@ -44,9 +45,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           PARENT_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
-          if [ "$PARENT_WORKFLOW" = "Verify Maven Central release" ]; then
+          if [ "$PARENT_WORKFLOW" = "Recovery · Verify Maven publication" ]; then
             echo "any-activity=true" >> "$GITHUB_OUTPUT"
-          elif [ "$PARENT_WORKFLOW" = "Publish Vireo ecosystem" ]; then
+          elif [ "$PARENT_WORKFLOW" = "Release · Publish npm and Maven" ]; then
             node scripts/release-workflow-activity.mjs
           else
             echo "Unexpected workflow_run parent: $PARENT_WORKFLOW" >&2
@@ -146,3 +147,9 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
+      - name: Summarize signed SBOM attestation
+        if: always()
+        env:
+          SUBJECT: ${{ matrix.id }}
+        run: |
+          printf '## Signed SBOM attestation\n\n- Subject: `%s`\n- Exact subject evidence is retained for 90 days.\n' "$SUBJECT" >> "$GITHUB_STEP_SUMMARY"

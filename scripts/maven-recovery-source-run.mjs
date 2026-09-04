@@ -7,12 +7,13 @@ const policy = JSON.parse(readFileSync(resolve(root, "contracts/ecosystem-public
 
 export function validateMavenRecoverySourceRun(run, { repository, sourceCommit, workflow = policy.ecosystemWorkflow }) {
   const allowedConclusions = new Set(["failure", "cancelled", "timed_out"]);
+  const acceptedNames = new Set([workflow?.name, ...(workflow?.historicalNames ?? [])]);
   const path = String(run?.path ?? "");
   if (
     run?.repository?.full_name !== repository ||
     run?.workflow_id !== workflow?.id ||
     (path !== workflow?.path && path !== `${workflow?.path}@main` && path !== `${workflow?.path}@refs/heads/main`) ||
-    run?.name !== workflow?.name ||
+    !acceptedNames.has(run?.name) ||
     run?.event !== "push" ||
     run?.head_branch !== "main" ||
     run?.head_sha !== sourceCommit ||

@@ -62,7 +62,7 @@ corepack npm exec changeset
 corepack npm run verify -- silent
 ```
 
-After that pull request merges, the trusted, `main`-only **Maintain ecosystem release
+After that pull request merges, the trusted, `main`-only **Release · Prepare version
 PR** workflow creates or refreshes the version pull request. Review its package
 versions, changelogs, lockfile, and the complete CI result. Its reviewed, pinned
 steps contain no approval or merge operation; merging it is the sole routine
@@ -135,7 +135,7 @@ Actions and records provenance for each publication.
 
 ## Verify the public result
 
-Successful publication automatically starts **Verify public npm release**. It:
+Successful publication automatically starts **Release · Verify npm publication**. It:
 
 - waits for every exact manifest version to become anonymously visible;
 - requires npm distribution metadata and a provenance attestation for each;
@@ -170,7 +170,7 @@ publisher received a success response.
 ## Failure and recovery
 
 - If verification times out while npm is propagating a valid release, rerun
-  **Verify public npm release**. Do not republish the same version.
+  **Release · Verify npm publication**. Do not republish the same version.
 - If only some workspaces publish, inspect npm first. A reviewed retry preflights
   all eight coordinates before mutation and may publish only absent tarballs from
   the unchanged retained candidate. Already-public versions are recovered only

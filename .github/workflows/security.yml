@@ -1,4 +1,5 @@
-name: Security
+name: Security · Secrets and dependencies
+run-name: Security dependencies · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   pull_request:
@@ -7,6 +8,7 @@ on:
     branches: [main]
   schedule:
     - cron: "7 4 * * 1"
+    - cron: "43 3 * * 2"
   workflow_dispatch:
 
 permissions: {}
@@ -14,6 +16,7 @@ permissions: {}
 jobs:
   secret-scan:
     name: Secret history scan
+    if: github.event_name != 'schedule' || github.event.schedule == '7 4 * * 1'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -24,3 +27,169 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - run: ./scripts/secret-scan.sh
+      - name: Summarize secret scan outcome
+        if: always()
+        run: |
+          printf '## Secret history scan\n\n- Scans every pull request, main push, manual run, and Monday schedule.\n' >> "$GITHUB_STEP_SUMMARY"
+
+  changes:
+    name: Plan dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      dependency-review: ${{ steps.plan.outputs.dependency-review }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Plan exact dependency review from trusted base policy
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          planner_root="$RUNNER_TEMP/ci-change-plan-base"
+          if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["publicBetaEvidence","documentationPages"].every(name=>policy.scopes?.[name])?0:1)'; then
+            git worktree add --detach "$planner_root" "$BASE_SHA"
+            trap 'git worktree remove --force "$planner_root"' EXIT
+            node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+          else
+            cat >> "$GITHUB_OUTPUT" <<'EOF'
+          typescript=true
+          jvm=true
+          generated-frontend=true
+          generated-fullstack=true
+          project-upgrade=true
+          gauntlet-plan=true
+          website=true
+          codeql-java=true
+          codeql-javascript=true
+          dependency-review=true
+          public-beta-evidence=true
+          documentation-pages=true
+          full=true
+          reason=base-planner-unavailable; running complete suite
+          EOF
+          fi
+
+  dependency-review-check:
+    name: Dependency review
+    needs: changes
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Require a successful dependency-review plan
+        if: needs.changes.result != 'success'
+        run: exit 1
+      - name: Summarize dependency-review routing
+        if: needs.changes.result == 'success'
+        env:
+          PLAN_SELECTED: ${{ needs.changes.outputs.dependency-review }}
+        run: |
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf '## Dependency review\n\n- Selected: `%s`\n' "$PLAN_SELECTED" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.dependency-review == 'true'
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        if: needs.changes.outputs.dependency-review == 'true'
+        with:
+          fail-on-severity: moderate
+
+  # Compatibility bridge for the existing branch-protection context.
+  dependency-review:
+    name: dependency-review
+    needs: dependency-review-check
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require successful dependency review
+        env:
+          REVIEW_RESULT: ${{ needs.dependency-review-check.result }}
+        run: test "$REVIEW_RESULT" = success
+
+  npm-vulnerability:
+    name: Scheduled npm vulnerability scan
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '43 3 * * 2'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the committed workspace lock graph
+        run: corepack npm ci --ignore-scripts
+      - name: Fail on known moderate-or-higher vulnerabilities
+        run: corepack npm audit --audit-level=moderate
+
+  gradle-vulnerability:
+    name: Scheduled JVM vulnerability scan
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '43 3 * * 2'
+    runs-on: ubuntu-24.04
+    # A cold OWASP database import can exceed 45 minutes. The persisted data
+    # directory makes scheduled runs incremental after the first successful scan.
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            dependency-check-data
+      - name: Require authenticated NVD advisory updates
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          if [ -z "$NVD_API_KEY" ]; then
+            echo "Configure the repository NVD_API_KEY secret before enabling the scheduled JVM scan." >&2
+            exit 1
+          fi
+      - name: Fail on known moderate-or-higher vulnerabilities
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"'
+        run: >-
+          ./jvm/gradlew -p jvm dependencyCheckAggregate
+          --no-build-cache --no-configuration-cache --no-parallel
+          --warning-mode=all
+      - name: Preserve the Dependency-Check reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gradle-dependency-vulnerability-report
+          path: jvm/build/reports/dependency-check/**
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Summarize scheduled vulnerability scan
+        if: always()
+        run: |
+          printf '## Scheduled dependency vulnerability scan\n\n- npm and JVM graphs are scanned with moderate severity as the threshold.\n' >> "$GITHUB_STEP_SUMMARY"

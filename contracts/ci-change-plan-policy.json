@@ -3,7 +3,7 @@
   "description": "Fail-closed pull-request verification routing. Unknown and CI-control paths require the complete suite.",
   "safeNoop": {
     "pathPrefixes": [".release-impact/"],
-    "patterns": ["^\\.changeset/[^/]+\\.md$"]
+    "patterns": ["^\\.changeset/[^/]+\\.md$", "^\\.github/ISSUE_TEMPLATE/(?:bug_report|feature_request|config)\\.yml$"]
   },
   "control": {
     "paths": [
@@ -17,9 +17,20 @@
       ".npmrc",
       ".prettierignore",
       ".changeset/config.json",
-      "LICENSE"
+      "LICENSE",
+      ".github/CODEOWNERS",
+      ".github/dependabot.yml",
+      ".github/pull_request_template.md"
     ],
-    "pathPrefixes": [".github/", "contracts/ci-change-plan-policy.json", "scripts/ci-change-plan"]
+    "pathPrefixes": [
+      ".github/workflows/",
+      ".github/rulesets/",
+      ".github/settings/",
+      ".github/environments/",
+      ".github/labels/",
+      "contracts/ci-change-plan-policy.json",
+      "scripts/ci-change-plan"
+    ]
   },
   "scopes": {
     "typescript": {
@@ -37,6 +48,7 @@
         "scripts/with-declared-npm.sh",
         "scripts/with-declared-npx.sh",
         "scripts/secret-scan.sh",
+        "scripts/public-beta-evidence.mjs",
         "contracts/application-projection-contract.json",
         "contracts/anonymous-consumer-gauntlet-policy.json",
         "contracts/documentation-ownership-contract.json",
@@ -46,11 +58,16 @@
         "contracts/platform-support-policy.json",
         "contracts/project-upgrade-policy.json",
         "contracts/public-api-policy.json",
-        "contracts/public-beta-evidence-policy.json",
         "contracts/public-release-attestation-policy.json",
         "contracts/template-adoption-intent.json",
         "contracts/template-adoption-policy.json",
         "contracts/third-party-license-policy.json"
+      ],
+      "excludePaths": [
+        "contracts/public-beta-evidence-policy.json",
+        "docs/roadmap/phase-5/evidence/aggregate.json",
+        ".github/ISSUE_TEMPLATE/public_beta_feedback.yml",
+        ".github/ISSUE_TEMPLATE/adopter_check_in.yml"
       ],
       "pathPrefixes": [".agents/", "docs/"],
       "patterns": [
@@ -247,6 +264,41 @@
         "^(?:|.*/)(?:settings\\.gradle(?:\\.kts)?|build\\.gradle(?:\\.kts)?|gradle\\.properties)$",
         "^\\.github/workflows/.*\\.ya?ml$",
         "^(?:|.*/)(?:Dockerfile(?:\\.[^/]+)?|docker-compose(?:\\.[^/]+)?\\.ya?ml)$"
+      ]
+    },
+    "publicBetaEvidence": {
+      "paths": [
+        "contracts/public-beta-evidence-policy.json",
+        "scripts/public-beta-evidence.mjs",
+        "docs/roadmap/phase-5/evidence/aggregate.json",
+        ".github/ISSUE_TEMPLATE/public_beta_feedback.yml",
+        ".github/ISSUE_TEMPLATE/adopter_check_in.yml"
+      ]
+    },
+    "documentationPages": {
+      "paths": [
+        "package.json",
+        "package-lock.json",
+        "tsconfig.base.json",
+        "README.md",
+        "contracts/documentation-ownership-contract.json",
+        "contracts/documentation-release-policy.json",
+        "scripts/build-documentation-portal.mjs",
+        "scripts/synchronize-documentation-release.mjs",
+        "scripts/api-inventory.mjs",
+        "scripts/public-contract-policy.mjs",
+        "scripts/documentation-policy.mjs",
+        "scripts/documentation-ownership-policy.mjs",
+        "scripts/lib/reference-symbol-anchors.mjs",
+        "scripts/lib/documentation-ownership-contract.mjs"
+      ],
+      "excludePaths": ["docs/roadmap/phase-5/evidence/aggregate.json"],
+      "pathPrefixes": ["docs/", "site/content/", "packages/ui/storybook/", "packages/ui/.storybook-vireo/"],
+      "patterns": [
+        "^packages/[^/]+/(?:src/|docs/|fixtures/|schema/|templates/|storybook/|\\.storybook-vireo/)",
+        "^packages/[^/]+/(?:api-surface\\.json|package\\.json|tsconfig(?:\\.[^/]+)?\\.json|(?:vite|vitest(?:\\.storybook)?)\\.config\\.(?:[cm]?js|ts)|build\\.mjs|(?:README|CHANGELOG|AGENTS)\\.md)$",
+        "^packages/ui/(?:run-storybook-contracts\\.mjs|(?:architecture\\.allowlist|loading-state-contracts)\\.json)$",
+        "^jvm/(?:[^/]+/(?:api-surface\\.txt|src/|docs/|build\\.gradle(?:\\.kts)?$|gradle\\.properties$|(?:README|CHANGELOG)\\.md$)|(?:build|settings)\\.gradle(?:\\.kts)?$|gradle\\.properties$|gradlew(?:\\.bat)?$|gradle/|buildSrc/|(?:README|CHANGELOG)\\.md$)"
       ]
     }
   }

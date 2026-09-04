@@ -1,4 +1,5 @@
-name: Build Vireo website
+name: Deploy · Website — vireocode.com
+run-name: Website · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   pull_request:
@@ -55,7 +56,7 @@ jobs:
 
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
             planner_root="$RUNNER_TEMP/ci-change-plan-base"
-            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json"; then
+            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["publicBetaEvidence","documentationPages"].every(name=>policy.scopes?.[name])?0:1)'; then
               git worktree add --detach "$planner_root" "$BASE_SHA"
               trap 'git worktree remove --force "$planner_root"' EXIT
               node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
@@ -71,6 +72,8 @@ jobs:
           codeql-java=true
           codeql-javascript=true
           dependency-review=true
+          public-beta-evidence=true
+          documentation-pages=true
           full=true
           reason=base-planner-unavailable; running complete suite
           EOF
@@ -78,6 +81,12 @@ jobs:
           else
             node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
           fi
+      - name: Summarize website routing
+        env:
+          SHOULD_BUILD: ${{ steps.plan.outputs.website }}
+        run: |
+          case "$SHOULD_BUILD" in true|false) ;; *) exit 1 ;; esac
+          printf '## Website routing\n\n- Build and deployment selected: `%s`\n' "$SHOULD_BUILD" >> "$GITHUB_STEP_SUMMARY"
 
   build:
     name: Build standalone website
@@ -237,6 +246,10 @@ jobs:
           curl --fail --silent --show-error --max-time 20 "$PUBLIC_URL/.well-known/vireo-deployment.json" | GITHUB_REPOSITORY="$GITHUB_REPOSITORY" GITHUB_SHA="$GITHUB_SHA" node -e 'const c=[];process.stdin.on("data",x=>c.push(x));process.stdin.on("end",()=>{const p=JSON.parse(Buffer.concat(c));process.exit(p.repository===process.env.GITHUB_REPOSITORY&&p.commit===process.env.GITHUB_SHA?0:1)})'
           "${ssh_command[@]}" "accept $GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT $GITHUB_REPOSITORY $GITHUB_SHA $DIGEST $BYTES $generation"
           trap - ERR INT TERM
+      - name: Summarize website deployment
+        if: always()
+        run: |
+          printf '## Website deployment\n\n- Target: https://vireocode.com\n- Activation is qualified and rolls back on failure.\n' >> "$GITHUB_STEP_SUMMARY"
 
   reconcile:
     name: Reconcile interrupted website deployment

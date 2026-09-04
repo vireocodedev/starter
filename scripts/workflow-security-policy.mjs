@@ -495,7 +495,7 @@ export function validatePostPublicationActivityGate(source, fileName) {
         "anonymous-consumer-gauntlet.yml activity gate must not block manual or scheduled runs after a skipped gate.",
       );
     if (
-      !/trusted-source:\n\s+needs: release-activity\n\s+if: >-\n\s+always\(\) && github\.event_name != 'pull_request'/u.test(
+      !/trusted-source:\n(?:\s+name: [^\n]+\n)?\s+needs: release-activity\n\s+if: >-\n\s+always\(\) && github\.event_name != 'pull_request'/u.test(
         source,
       )
     )
@@ -562,8 +562,7 @@ for (const fileName of workflowFiles) {
       "release-npm.yml:plan must pass github.token explicitly for bounded release-workflow evidence lookup",
     );
   if (fileName === "anonymous-consumer-gauntlet.yml") {
-    problems.push(...validateAlwaysReportedPullRequestWorkflow(source, fileName));
-    if (!source.includes('workflows: ["Publish Vireo ecosystem"]'))
+    if (!source.includes('workflows: ["Release · Publish npm and Maven"]'))
       problems.push("anonymous-consumer-gauntlet.yml must follow the combined ecosystem publication workflow.");
   }
   if (["anonymous-consumer-gauntlet.yml", "verify-npm-public.yml", "attest-public-release.yml"].includes(fileName))

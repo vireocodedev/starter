@@ -1,4 +1,5 @@
-name: CI
+name: Verify · Framework and generated apps
+run-name: Verify · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   pull_request:
@@ -28,6 +29,9 @@ jobs:
       generated-frontend: ${{ steps.plan.outputs.generated-frontend }}
       generated-fullstack: ${{ steps.plan.outputs.generated-fullstack }}
       project-upgrade: ${{ steps.plan.outputs.project-upgrade }}
+      gauntlet-plan: ${{ steps.plan.outputs.gauntlet-plan }}
+      public-beta-evidence: ${{ steps.plan.outputs.public-beta-evidence }}
+      documentation-pages: ${{ steps.plan.outputs.documentation-pages }}
     steps:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -45,7 +49,7 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
             planner_root="$RUNNER_TEMP/ci-change-plan-base"
-            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json"; then
+            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["publicBetaEvidence","documentationPages"].every(name=>policy.scopes?.[name])?0:1)'; then
               git worktree add --detach "$planner_root" "$BASE_SHA"
               trap 'git worktree remove --force "$planner_root"' EXIT
               node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
@@ -61,6 +65,8 @@ jobs:
           codeql-java=true
           codeql-javascript=true
           dependency-review=true
+          public-beta-evidence=true
+          documentation-pages=true
           full=true
           reason=base-planner-unavailable; running complete suite
           EOF
@@ -70,6 +76,34 @@ jobs:
           else
             node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
           fi
+      - name: Summarize verification routing
+        env:
+          TYPESCRIPT: ${{ steps.plan.outputs.typescript }}
+          JVM: ${{ steps.plan.outputs.jvm }}
+          FRONTEND: ${{ steps.plan.outputs.generated-frontend }}
+          FULLSTACK: ${{ steps.plan.outputs.generated-fullstack }}
+          UPGRADE: ${{ steps.plan.outputs.project-upgrade }}
+          GAUNTLET: ${{ steps.plan.outputs.gauntlet-plan }}
+          BETA: ${{ steps.plan.outputs.public-beta-evidence }}
+          DOCUMENTATION_PAGES: ${{ steps.plan.outputs.documentation-pages }}
+        run: |
+          for selected in "$TYPESCRIPT" "$JVM" "$FRONTEND" "$FULLSTACK" "$UPGRADE" "$GAUNTLET" "$BETA" "$DOCUMENTATION_PAGES"; do
+            case "$selected" in true|false) ;; *) exit 1 ;; esac
+          done
+          {
+            echo "## Verification routing"
+            echo
+            echo "| Lane | Selected |"
+            echo "| --- | --- |"
+            echo "| TypeScript | \`$TYPESCRIPT\` |"
+            echo "| JVM | \`$JVM\` |"
+            echo "| Generated frontend | \`$FRONTEND\` |"
+            echo "| Generated full-stack | \`$FULLSTACK\` |"
+            echo "| Supported-release upgrades | \`$UPGRADE\` |"
+            echo "| Consumer-gauntlet policy | \`$GAUNTLET\` |"
+            echo "| Public-beta evidence | \`$BETA\` |"
+            echo "| Documentation Pages | \`$DOCUMENTATION_PAGES\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   release-impact:
     name: Release impact
@@ -143,6 +177,46 @@ jobs:
           name: verification-performance-${{ github.run_id }}-${{ github.run_attempt }}
           path: .verification-evidence/latest.json
           if-no-files-found: ignore
+          retention-days: 90
+
+  public-beta-evidence:
+    name: Public-beta evidence
+    needs: changes
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Require a successful verification plan
+        if: needs.changes.result != 'success'
+        run: exit 1
+      - name: Summarize public-beta evidence routing
+        if: needs.changes.result == 'success'
+        env:
+          PLAN_SELECTED: ${{ needs.changes.outputs.public-beta-evidence }}
+        run: |
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf '## Public-beta evidence\n\n- Selected: `%s`\n' "$PLAN_SELECTED" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: needs.changes.outputs.public-beta-evidence == 'true'
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.public-beta-evidence == 'true'
+        with:
+          persist-credentials: false
+      - name: Validate and summarize aggregate evidence
+        if: needs.changes.outputs.public-beta-evidence == 'true'
+        run: node scripts/public-beta-evidence.mjs --write
+      - name: Upload aggregate summary
+        if: always() && needs.changes.outputs.public-beta-evidence == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-beta-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .public-beta-evidence/latest.json
+          if-no-files-found: error
           retention-days: 90
 
   # Deliberately a sibling of the TypeScript job rather than a step inside it.
@@ -320,3 +394,62 @@ jobs:
         if: needs.changes.outputs.project-upgrade == 'true'
       - run: corepack npm run upgrade:project:fixture
         if: needs.changes.outputs.project-upgrade == 'true'
+
+  consumer-gauntlet-policy:
+    name: Consumer gauntlet policy
+    needs: changes
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Require a successful verification plan
+        if: needs.changes.result != 'success'
+        run: exit 1
+      - name: Summarize consumer-gauntlet routing
+        if: needs.changes.result == 'success'
+        env:
+          PLAN_SELECTED: ${{ needs.changes.outputs.gauntlet-plan }}
+        run: |
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          {
+            echo "## Consumer gauntlet policy"
+            echo
+            echo "- Selected: \`$PLAN_SELECTED\`"
+            echo "- Full production gauntlet: release, scheduled, or manual workflow only"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: needs.changes.outputs.gauntlet-plan == 'true'
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.gauntlet-plan == 'true'
+        with:
+          persist-credentials: false
+      - name: Validate anonymous-consumer policy
+        if: needs.changes.outputs.gauntlet-plan == 'true'
+        run: corepack npm ci --ignore-scripts
+      - name: Run deterministic gauntlet policy checks
+        if: needs.changes.outputs.gauntlet-plan == 'true'
+        run: >-
+          node --test
+          scripts/anonymous-consumer-gauntlet.test.mjs
+          scripts/verify-anonymous-consumer-signed-sboms.test.mjs
+          scripts/lib/anonymous-consumer-*.test.mjs
+
+  # Temporary required-context bridge. GitHub branch protection still requires
+  # the historical `plan` check while the visible policy work now lives above.
+  plan:
+    name: plan
+    needs: consumer-gauntlet-policy
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require successful consumer-gauntlet policy
+        env:
+          POLICY_RESULT: ${{ needs.consumer-gauntlet-policy.result }}
+        run: test "$POLICY_RESULT" = success
