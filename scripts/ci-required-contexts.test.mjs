@@ -68,16 +68,27 @@ test("independent GitHub CodeQL integration remains required separately", () => 
   assert.equal(actionContexts.includes("CodeQL"), false);
 });
 
-test("obsolete bridge contexts are absent while their real policy jobs remain required", () => {
+test("temporary migration bridges propagate their direct replacement results", () => {
   const ci = read(".github/workflows/ci.yml");
-  assert.equal(jobBlock(ci, "plan"), "");
-  assert.doesNotMatch(ci, /^\x20{4}name: Release impact$/mu);
+  const releaseBridge = jobBlock(ci, "required-context-migration-release-impact");
+  assert.match(releaseBridge, /^\x20{4}name: Release impact$/mu);
+  assert.match(releaseBridge, /^\x20{4}needs: changes$/mu);
+  const gauntletBridge = jobBlock(ci, "required-context-migration-gauntlet");
+  assert.match(gauntletBridge, /^\x20{4}name: plan$/mu);
+  assert.match(gauntletBridge, /^\x20{4}needs: consumer-gauntlet-policy$/mu);
   assert.doesNotMatch(ci, /^\x20{2}public-beta-evidence:$/mu);
 
   const security = read(".github/workflows/security.yml");
   assert.equal(jobBlock(security, "changes"), "");
   assert.equal(jobBlock(security, "dependency-review-check"), "");
-  assert.doesNotMatch(security, /^\x20{4}name: dependency-review$/mu);
+  const dependencyBridge = jobBlock(security, "required-context-migration-dependency-review");
+  assert.match(dependencyBridge, /^\x20{4}name: dependency-review$/mu);
+  assert.match(dependencyBridge, /^\x20{4}needs: dependency-review$/mu);
+
+  const website = read(".github/workflows/website.yml");
+  const websiteBridge = jobBlock(website, "required-context-migration-detector");
+  assert.match(websiteBridge, /^\x20{4}name: Detect standalone website changes$/mu);
+  assert.match(websiteBridge, /^\x20{4}needs: build$/mu);
 });
 
 test("selected lanes continue after later coordinator policy failures", () => {

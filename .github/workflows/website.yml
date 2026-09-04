@@ -92,3 +92,17 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
+
+  # Temporary compatibility check for the atomic live-ruleset migration.
+  required-context-migration-detector:
+    name: Detect standalone website changes
+    needs: build
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Propagate the consolidated website verification result
+        env:
+          WEBSITE_RESULT: ${{ needs.build.result }}
+        run: test "$WEBSITE_RESULT" = success

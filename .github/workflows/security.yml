@@ -84,3 +84,17 @@ jobs:
         if: steps.plan.outputs.dependency-review == 'true'
         with:
           fail-on-severity: moderate
+
+  # Temporary compatibility check for the atomic live-ruleset migration.
+  required-context-migration-dependency-review:
+    name: dependency-review
+    needs: dependency-review
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Propagate the direct dependency-review result
+        env:
+          REVIEW_RESULT: ${{ needs.dependency-review.result }}
+        run: test "$REVIEW_RESULT" = success
