@@ -1,4 +1,5 @@
-name: CodeQL
+name: Security · Code scanning
+run-name: Code scanning · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   push:
@@ -38,7 +39,7 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
             planner_root="$RUNNER_TEMP/ci-change-plan-base"
-            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json"; then
+            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["publicBetaEvidence","documentationPages"].every(name=>policy.scopes?.[name])?0:1)'; then
               git worktree add --detach "$planner_root" "$BASE_SHA"
               trap 'git worktree remove --force "$planner_root"' EXIT
               node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
@@ -54,6 +55,8 @@ jobs:
           codeql-java=true
           codeql-javascript=true
           dependency-review=true
+          public-beta-evidence=true
+          documentation-pages=true
           full=true
           reason=base-planner-unavailable; running complete suite
           EOF
@@ -63,6 +66,19 @@ jobs:
           else
             node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
           fi
+      - name: Summarize CodeQL routing
+        env:
+          JAVA: ${{ steps.plan.outputs.codeql-java }}
+          JAVASCRIPT: ${{ steps.plan.outputs.codeql-javascript }}
+        run: |
+          for selected in "$JAVA" "$JAVASCRIPT"; do case "$selected" in true|false) ;; *) exit 1 ;; esac; done
+          {
+            echo "## Code scanning routing"
+            echo
+            echo "- Java: \`$JAVA\`"
+            echo "- JavaScript/TypeScript: \`$JAVASCRIPT\`"
+            echo "- JavaScript scans every pull request while the independent GitHub CodeQL protection remains required."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   analyze-javascript:
     name: CodeQL JavaScript analysis
@@ -174,3 +190,4 @@ jobs:
           case "$JAVASCRIPT_SELECTED" in true|false) ;; *) exit 1 ;; esac
           case "$JAVA_SELECTED" in true|false) ;; *) exit 1 ;; esac
           printf 'Java=%s JavaScript=%s\n' "$JAVA_SELECTED" "$JAVASCRIPT_SELECTED"
+          printf '## Code scanning outcome\n\n- Java: `%s`\n- JavaScript/TypeScript: `%s`\n' "$JAVA_SELECTED" "$JAVASCRIPT_SELECTED" >> "$GITHUB_STEP_SUMMARY"

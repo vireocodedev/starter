@@ -1,6 +1,6 @@
 # Anonymous consumer zero-to-production gauntlet
 
-The scheduled **Anonymous consumer gauntlet** is Vireo's public-consumption
+The scheduled **Release · Anonymous production gauntlet** is Vireo's public-consumption
 qualification. It derives every exact npm, Maven and Template coordinate from
 [`contracts/ecosystem-release-contract.json`](../contracts/ecosystem-release-contract.json),
 then consumes registry/Central artifacts rather than this checkout.

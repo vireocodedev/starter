@@ -290,10 +290,28 @@ test("combined ecosystem workflow keeps USER_MANAGED automatic promotion and rec
 test("anonymous public Maven verification cannot request the protected publication environment", () => {
   assert.doesNotMatch(verifyWorkflow, /environment: maven-central/u);
   assert.match(verifyWorkflow, /permissions:\n\s+contents: read/u);
+  assert.match(verifyWorkflow, /VERSION: \$\{\{ inputs\.version \}\}/u);
+  assert.ok(verifyWorkflow.includes("grep -Eq '^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$'"));
+  assert.match(verifyWorkflow, /verify-central-consumer\.sh "\$VERSION"/u);
+  assert.doesNotMatch(verifyWorkflow, /run: .*\$\{\{ inputs\.version \}\}/u);
+  assert.doesNotMatch(verifyWorkflow, /- name: Summarize Maven publication verification\n\s+if: always\(\)/u);
+});
+
+test("manual Maven verification rejects multiline version input before shell use", () => {
+  assert.match(verifyWorkflow, /case "\$VERSION" in\n\s+\*\$'\\n'\*\|\*\$'\\r'\*\)/u);
+  const validation = spawnSync(
+    "bash",
+    [
+      "-c",
+      "case \"$VERSION\" in *$'\\n'*|*$'\\r'*) exit 1;; esac; printf '%s' \"$VERSION\" | grep -Eq '^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$'",
+    ],
+    { env: { ...process.env, VERSION: "0.3.1\nmalicious" } },
+  );
+  assert.notEqual(validation.status, 0);
 });
 
 test("recovery workflow binds one deployment to an exact release commit and completes no-secret finalization", () => {
-  assert.match(recoveryWorkflow, /^name: Recover validated Maven Central deployment$/mu);
+  assert.match(recoveryWorkflow, /^name: Recovery · Maven Central deployment$/mu);
   assert.match(recoveryWorkflow, /workflow_dispatch:\n\s+inputs:\n\s+version:/u);
   assert.match(recoveryWorkflow, /source_commit:/u);
   assert.match(recoveryWorkflow, /source_run_id:/u);

@@ -8,7 +8,7 @@ const source = (path = ".github/workflows/release-npm.yml") => ({
   repository: { full_name: "vireocodedev/vireo" },
   workflow_id: 343525517,
   path,
-  name: "Publish Vireo ecosystem",
+  name: "Release · Publish npm and Maven",
   event: "push",
   head_branch: "main",
   head_sha: sha,
@@ -24,6 +24,10 @@ test("accepts canonical combined workflow paths, including GitHub main suffixes"
     ".github/workflows/release-npm.yml@refs/heads/main",
   ])
     assert.doesNotThrow(() => validateMavenRecoverySourceRun(source(path), identity));
+});
+
+test("accepts the reviewed historical display name for the same stable workflow identity", () => {
+  assert.doesNotThrow(() => validateMavenRecoverySourceRun({ ...source(), name: "Publish Vireo ecosystem" }, identity));
 });
 
 test("rejects another workflow identity or ref even when the source SHA matches", () => {

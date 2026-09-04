@@ -1,7 +1,7 @@
-name: Anonymous consumer gauntlet
+name: Release · Anonymous production gauntlet
+run-name: Release gauntlet · ${{ github.event_name }} · ${{ github.event.workflow_run.head_sha || inputs.source_commit || github.sha }}
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       release_id:
@@ -11,7 +11,7 @@ on:
         required: false
         type: string
   workflow_run:
-    workflows: ["Publish Vireo ecosystem"]
+    workflows: ["Release · Publish npm and Maven"]
     types: [completed]
   schedule:
     - cron: "17 3 * * 2"
@@ -23,88 +23,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  changes:
-    name: Plan anonymous consumer verification
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    outputs:
-      gauntlet-plan: ${{ steps.plan.outputs.gauntlet-plan }}
-    steps:
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.18.1
-          package-manager-cache: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Plan exact anonymous consumer verification
-        id: plan
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          planner_root="$RUNNER_TEMP/ci-change-plan-base"
-          if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json"; then
-            git worktree add --detach "$planner_root" "$BASE_SHA"
-            trap 'git worktree remove --force "$planner_root"' EXIT
-            node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
-          else
-            cat >> "$GITHUB_OUTPUT" <<'EOF'
-          typescript=true
-          jvm=true
-          generated-frontend=true
-          generated-fullstack=true
-          project-upgrade=true
-          gauntlet-plan=true
-          website=true
-          codeql-java=true
-          codeql-javascript=true
-          dependency-review=true
-          full=true
-          reason=base-planner-unavailable; running complete suite
-          EOF
-          fi
-
-  plan:
-    needs: changes
-    if: always() && github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    permissions:
-      contents: read
-    steps:
-      - name: Require a successful anonymous consumer plan
-        if: needs.changes.result != 'success'
-        run: exit 1
-      - name: Report anonymous consumer routing decision
-        if: needs.changes.result == 'success'
-        env:
-          PLAN_SELECTED: ${{ needs.changes.outputs.gauntlet-plan }}
-        run: |
-          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
-          printf 'Anonymous consumer plan selected=%s\n' "$PLAN_SELECTED"
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: needs.changes.outputs.gauntlet-plan == 'true'
-        with:
-          node-version: 24.18.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.gauntlet-plan == 'true'
-        with:
-          persist-credentials: false
-      - run: corepack npm ci --ignore-scripts
-        if: needs.changes.outputs.gauntlet-plan == 'true'
-      - run: corepack npm run consumer:gauntlet:check
-        if: needs.changes.outputs.gauntlet-plan == 'true'
-      - run: >-
-          node --test
-          scripts/anonymous-consumer-gauntlet.test.mjs
-          scripts/verify-anonymous-consumer-signed-sboms.test.mjs
-          scripts/lib/anonymous-consumer-*.test.mjs
-        if: needs.changes.outputs.gauntlet-plan == 'true'
   release-activity:
     name: Classify exact combined release activity
     if: >-
@@ -133,6 +51,7 @@ jobs:
         run: node scripts/release-workflow-activity.mjs
 
   trusted-source:
+    name: Select trusted public source
     needs: release-activity
     if: >-
       always() && github.event_name != 'pull_request' &&
@@ -178,6 +97,7 @@ jobs:
           echo "source_commit=$candidate" >> "$GITHUB_OUTPUT"
 
   gauntlet:
+    name: Run anonymous zero-to-production gauntlet
     needs: trusted-source
     if: always() && needs.trusted-source.result == 'success'
     runs-on: ubuntu-24.04
@@ -221,6 +141,15 @@ jobs:
           path: ${{ runner.temp }}/anonymous-consumer-evidence
           if-no-files-found: error
           retention-days: 90
+      - name: Summarize gauntlet outcome
+        if: always()
+        run: |
+          {
+            echo "## Anonymous production gauntlet"
+            echo
+            echo "- Evidence is retained for 90 days."
+            echo "- Signed SBOM verification follows only after a successful gauntlet."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   verify-signed-sboms:
     name: Verify signed public SBOM attestations

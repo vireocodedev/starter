@@ -5,8 +5,8 @@ Pages site at <https://vireocodedev.github.io/vireo/docs/>. Storybook remains at
 the site root and is also preserved inside the current version-specific snapshot.
 
 The deployment workflow lives in
-[`storybook-pages.yml`](../.github/workflows/storybook-pages.yml). Every push to
-`main` builds package declarations, Storybook, aggregate JVM Javadocs, generated
+[`storybook-pages.yml`](../.github/workflows/storybook-pages.yml). Affected pushes
+to `main` build package declarations, Storybook, aggregate JVM Javadocs, generated
 TypeScript API references, the unified search index, and the versioned portal. It
 validates and uploads `packages/ui/storybook-static` as the Pages artifact, then
 deploys it to the `github-pages` environment. Maintainers can also start the
@@ -59,6 +59,6 @@ domain in GitHub, and enforce HTTPS before treating it as canonical.
   workflow run summary.
 - A failed build or upload leaves the currently published site untouched.
 
-For a failed deployment, inspect the **Deploy Storybook to GitHub Pages**
+For a failed deployment, inspect the **Deploy · Documentation — GitHub Pages**
 workflow first. The most common setup failure is that the repository's Pages
 source has not yet been changed to **GitHub Actions**.

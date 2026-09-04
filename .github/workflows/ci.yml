@@ -1,4 +1,5 @@
-name: CI
+name: Verify · Framework and generated apps
+run-name: Verify · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   pull_request:
@@ -17,17 +18,21 @@ concurrency:
 
 jobs:
   changes:
-    name: Plan affected verification lanes
+    name: Policy and verification routing
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
     outputs:
+      routing-ready: ${{ steps.plan.outcome == 'success' && 'true' || 'false' }}
       typescript: ${{ steps.plan.outputs.typescript }}
       jvm: ${{ steps.plan.outputs.jvm }}
       generated-frontend: ${{ steps.plan.outputs.generated-frontend }}
       generated-fullstack: ${{ steps.plan.outputs.generated-fullstack }}
       project-upgrade: ${{ steps.plan.outputs.project-upgrade }}
+      gauntlet-plan: ${{ steps.plan.outputs.gauntlet-plan }}
+      public-beta-evidence: ${{ steps.plan.outputs.public-beta-evidence }}
+      documentation-pages: ${{ steps.plan.outputs.documentation-pages }}
     steps:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -45,7 +50,7 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
             planner_root="$RUNNER_TEMP/ci-change-plan-base"
-            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json"; then
+            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["publicBetaEvidence","documentationPages"].every(name=>policy.scopes?.[name])?0:1)'; then
               git worktree add --detach "$planner_root" "$BASE_SHA"
               trap 'git worktree remove --force "$planner_root"' EXIT
               node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
@@ -61,6 +66,8 @@ jobs:
           codeql-java=true
           codeql-javascript=true
           dependency-review=true
+          public-beta-evidence=true
+          documentation-pages=true
           full=true
           reason=base-planner-unavailable; running complete suite
           EOF
@@ -70,30 +77,62 @@ jobs:
           else
             node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
           fi
-
-  release-impact:
-    name: Release impact
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    steps:
-      # This job deliberately installs no dependencies and executes no PR-provided
-      # package scripts. Release declarations are parsed as data from exact SHAs.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.18.1
-          package-manager-cache: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 0
+      - name: Summarize verification routing
+        env:
+          TYPESCRIPT: ${{ steps.plan.outputs.typescript }}
+          JVM: ${{ steps.plan.outputs.jvm }}
+          FRONTEND: ${{ steps.plan.outputs.generated-frontend }}
+          FULLSTACK: ${{ steps.plan.outputs.generated-fullstack }}
+          UPGRADE: ${{ steps.plan.outputs.project-upgrade }}
+          GAUNTLET: ${{ steps.plan.outputs.gauntlet-plan }}
+          BETA: ${{ steps.plan.outputs.public-beta-evidence }}
+          DOCUMENTATION_PAGES: ${{ steps.plan.outputs.documentation-pages }}
+        run: |
+          for selected in "$TYPESCRIPT" "$JVM" "$FRONTEND" "$FULLSTACK" "$UPGRADE" "$GAUNTLET" "$BETA" "$DOCUMENTATION_PAGES"; do
+            case "$selected" in true|false) ;; *) exit 1 ;; esac
+          done
+          {
+            echo "## Verification routing"
+            echo
+            echo "| Lane | Selected |"
+            echo "| --- | --- |"
+            echo "| TypeScript | \`$TYPESCRIPT\` |"
+            echo "| JVM | \`$JVM\` |"
+            echo "| Generated frontend | \`$FRONTEND\` |"
+            echo "| Generated full-stack | \`$FULLSTACK\` |"
+            echo "| Supported-release upgrades | \`$UPGRADE\` |"
+            echo "| Consumer-gauntlet policy | \`$GAUNTLET\` |"
+            echo "| Public-beta evidence | \`$BETA\` |"
+            echo "| Documentation Pages | \`$DOCUMENTATION_PAGES\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      # This executes the trusted base gate, rather than a potentially modified
+      # PR copy. The gate only parses exact revision data; it installs no
+      # dependencies and runs no project-defined package scripts.
       - name: Require release intent for affected artifacts
+        if: github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: node scripts/release-impact-policy.mjs --base "$BASE_SHA" --head "$HEAD_SHA"
+        run: |
+          gate_root="$RUNNER_TEMP/release-impact-base"
+          if ! git cat-file -e "$BASE_SHA:scripts/release-impact-policy.mjs" || ! git cat-file -e "$BASE_SHA:contracts/release-impact-policy.json" || ! git cat-file -e "$BASE_SHA:contracts/ecosystem-release-contract.json"; then
+            echo "trusted base release-impact gate is unavailable" >&2
+            exit 1
+          fi
+          git worktree add --detach "$gate_root" "$BASE_SHA"
+          trap 'git worktree remove --force "$gate_root"' EXIT
+          node "$gate_root/scripts/release-impact-policy.mjs" --base "$BASE_SHA" --head "$HEAD_SHA"
+      - name: Validate and summarize aggregate public-beta evidence
+        if: steps.plan.outputs.public-beta-evidence == 'true'
+        run: node scripts/public-beta-evidence.mjs --write
+      - name: Upload aggregate public-beta evidence
+        if: always() && steps.plan.outputs.public-beta-evidence == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-beta-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .public-beta-evidence/latest.json
+          if-no-files-found: error
+          retention-days: 90
 
   build:
     name: TypeScript
@@ -104,40 +143,43 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Require a successful verification plan
-        if: needs.changes.result != 'success'
-        run: exit 1
       - name: Report TypeScript routing decision
-        if: needs.changes.result == 'success'
+        if: always()
         env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
           PLAN_SELECTED: ${{ needs.changes.outputs.typescript }}
         run: |
+          case "$ROUTING_READY" in true|false) ;; *) exit 1 ;; esac
+          if [ "$ROUTING_READY" != true ]; then
+            printf 'TypeScript verification no-op: routing coordinator did not complete.\n'
+            exit 0
+          fi
           case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
           printf 'TypeScript verification selected=%s\n' "$PLAN_SELECTED"
       # setup-node probes its bundled npm. Run it before checkout so npm 11 does
       # not evaluate the repository's strict npm 12 devEngines declaration.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: needs.changes.outputs.typescript == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.typescript == 'true'
         with:
           node-version: 24.18.1
           package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.typescript == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.typescript == 'true'
         with:
           persist-credentials: false
       - run: corepack npm ci
-        if: needs.changes.outputs.typescript == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.typescript == 'true'
       - name: Install Storybook contract browser
-        if: needs.changes.outputs.typescript == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.typescript == 'true'
         run: corepack npm exec -- playwright install --with-deps chromium
       # This is the same ordered merge gate developers run locally. It includes
       # linting, formatting, package builds, type checking, tests and contract
       # checks, strict consumer declarations, generator tests, and the Vireo
       # Storybook interaction/accessibility contracts and production build.
       - run: corepack npm run gate:fast
-        if: needs.changes.outputs.typescript == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.typescript == 'true'
       - name: Upload verification performance evidence
-        if: always() && needs.changes.outputs.typescript == 'true'
+        if: always() && needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.typescript == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: verification-performance-${{ github.run_id }}-${{ github.run_attempt }}
@@ -158,40 +200,43 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Require a successful verification plan
-        if: needs.changes.result != 'success'
-        run: exit 1
       - name: Report JVM routing decision
-        if: needs.changes.result == 'success'
+        if: always()
         env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
           PLAN_SELECTED: ${{ needs.changes.outputs.jvm }}
         run: |
+          case "$ROUTING_READY" in true|false) ;; *) exit 1 ;; esac
+          if [ "$ROUTING_READY" != true ]; then
+            printf 'JVM verification no-op: routing coordinator did not complete.\n'
+            exit 0
+          fi
           case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
           printf 'JVM verification selected=%s\n' "$PLAN_SELECTED"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: needs.changes.outputs.jvm == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.jvm == 'true'
         with:
           node-version: 24.18.1
           package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.jvm == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.jvm == 'true'
         with:
           persist-credentials: false
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
-        if: needs.changes.outputs.jvm == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.jvm == 'true'
         with:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
-        if: needs.changes.outputs.jvm == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.jvm == 'true'
       - run: ./gradlew build aggregateJavadoc
-        if: needs.changes.outputs.jvm == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.jvm == 'true'
         working-directory: jvm
       - name: Enforce JVM third-party license policy
-        if: needs.changes.outputs.jvm == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.jvm == 'true'
         run: node scripts/third-party-license-policy.mjs --ecosystem jvm
       - name: Verify locally published artifacts through an external consumer
-        if: needs.changes.outputs.jvm == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.jvm == 'true'
         run: ./jvm/scripts/verify-publication-consumer.sh
 
   generated-entity:
@@ -203,36 +248,39 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Require a successful verification plan
-        if: needs.changes.result != 'success'
-        run: exit 1
       - name: Report full-stack fixture routing decision
-        if: needs.changes.result == 'success'
+        if: always()
         env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
           PLAN_SELECTED: ${{ needs.changes.outputs.generated-fullstack }}
         run: |
+          case "$ROUTING_READY" in true|false) ;; *) exit 1 ;; esac
+          if [ "$ROUTING_READY" != true ]; then
+            printf 'Generated full-stack fixture no-op: routing coordinator did not complete.\n'
+            exit 0
+          fi
           case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
           printf 'Generated full-stack fixture selected=%s\n' "$PLAN_SELECTED"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: needs.changes.outputs.generated-fullstack == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-fullstack == 'true'
         with:
           node-version: 24.18.1
           package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.generated-fullstack == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-fullstack == 'true'
         with:
           persist-credentials: false
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
-        if: needs.changes.outputs.generated-fullstack == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-fullstack == 'true'
         with:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
-        if: needs.changes.outputs.generated-fullstack == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-fullstack == 'true'
       - run: corepack npm ci
-        if: needs.changes.outputs.generated-fullstack == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-fullstack == 'true'
       - run: corepack npm run generate:entity:fixture
-        if: needs.changes.outputs.generated-fullstack == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-fullstack == 'true'
 
   generated-frontend:
     name: Generated frontend-only fixture
@@ -243,60 +291,66 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Require a successful verification plan
-        if: needs.changes.result != 'success'
-        run: exit 1
       - name: Report frontend fixture routing decision
-        if: needs.changes.result == 'success'
+        if: always()
         env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
           PLAN_SELECTED: ${{ needs.changes.outputs.generated-frontend }}
         run: |
+          case "$ROUTING_READY" in true|false) ;; *) exit 1 ;; esac
+          if [ "$ROUTING_READY" != true ]; then
+            printf 'Generated frontend-only fixture no-op: routing coordinator did not complete.\n'
+            exit 0
+          fi
           case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
           printf 'Generated frontend-only fixture selected=%s\n' "$PLAN_SELECTED"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: needs.changes.outputs.generated-frontend == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-frontend == 'true'
         with:
           node-version: 24.18.1
           package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.generated-frontend == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-frontend == 'true'
         with:
           persist-credentials: false
       - run: corepack npm ci
-        if: needs.changes.outputs.generated-frontend == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-frontend == 'true'
       - run: corepack npm run generate:frontend:fixture
-        if: needs.changes.outputs.generated-frontend == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.generated-frontend == 'true'
 
   project-upgrade:
     name: Public adjacent project-upgrade fixtures
     needs: changes
     if: always()
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
-      - name: Require a successful verification plan
-        if: needs.changes.result != 'success'
-        run: exit 1
       - name: Report project-upgrade routing decision
-        if: needs.changes.result == 'success'
+        if: always()
         env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
           PLAN_SELECTED: ${{ needs.changes.outputs.project-upgrade }}
         run: |
+          case "$ROUTING_READY" in true|false) ;; *) exit 1 ;; esac
+          if [ "$ROUTING_READY" != true ]; then
+            printf 'Public adjacent project-upgrade fixtures no-op: routing coordinator did not complete.\n'
+            exit 0
+          fi
           case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
           printf 'Public adjacent project-upgrade fixtures selected=%s\n' "$PLAN_SELECTED"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
         with:
           node-version: 24.18.1
           package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
         with:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
         with:
           repository: vireocodedev/vireo-template
           ref: 0557990f024a8736b6e661f8fc264861deb99b65
@@ -304,19 +358,66 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
         with:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
       - run: corepack npm ci
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
       - run: corepack npm exec -- playwright install --with-deps chromium
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
       - run: corepack npm run build
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
       - run: node scripts/check-project-upgrade-baselines.mjs --template-repository "$GITHUB_WORKSPACE/starter-template"
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
       - run: corepack npm run upgrade:project:fixture
-        if: needs.changes.outputs.project-upgrade == 'true'
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.project-upgrade == 'true'
+
+  consumer-gauntlet-policy:
+    name: Consumer gauntlet policy
+    needs: changes
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Summarize consumer-gauntlet routing
+        if: always()
+        env:
+          ROUTING_READY: ${{ needs.changes.outputs.routing-ready }}
+          PLAN_SELECTED: ${{ needs.changes.outputs.gauntlet-plan }}
+        run: |
+          case "$ROUTING_READY" in true|false) ;; *) exit 1 ;; esac
+          if [ "$ROUTING_READY" != true ]; then
+            printf '## Consumer gauntlet policy\n\n- No-op: routing coordinator did not complete.\n' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          {
+            echo "## Consumer gauntlet policy"
+            echo
+            echo "- Selected: \`$PLAN_SELECTED\`"
+            echo "- Full production gauntlet: release, scheduled, or manual workflow only"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.gauntlet-plan == 'true'
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.gauntlet-plan == 'true'
+        with:
+          persist-credentials: false
+      - name: Validate anonymous-consumer policy
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.gauntlet-plan == 'true'
+        run: corepack npm ci --ignore-scripts
+      - name: Run deterministic gauntlet policy checks
+        if: needs.changes.outputs.routing-ready == 'true' && needs.changes.outputs.gauntlet-plan == 'true'
+        run: >-
+          node --test
+          scripts/anonymous-consumer-gauntlet.test.mjs
+          scripts/verify-anonymous-consumer-signed-sboms.test.mjs
+          scripts/lib/anonymous-consumer-*.test.mjs

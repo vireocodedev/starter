@@ -1,4 +1,5 @@
-name: Verify Maven Central release
+name: Recovery · Verify Maven publication
+run-name: Maven publication verification · ${{ inputs.version }}
 
 on:
   workflow_dispatch:
@@ -16,13 +17,24 @@ permissions: {}
 
 jobs:
   verify:
-    name: Verify public ${{ inputs.version }}
+    name: Verify public Maven release
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     permissions:
       contents: read
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
+      - name: Validate exact Maven version input
+        run: |
+          case "$VERSION" in
+            *$'\n'*|*$'\r'*)
+              echo "Maven version must be a single line." >&2
+              exit 1
+              ;;
+          esac
+          printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -32,4 +44,7 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: Resolve and test the public release anonymously
-        run: ./jvm/scripts/verify-central-consumer.sh "${{ inputs.version }}"
+        run: ./jvm/scripts/verify-central-consumer.sh "$VERSION"
+      - name: Summarize Maven publication verification
+        run: |
+          printf '## Maven publication verification\n\n- Exact version: `%s`\n- This workflow is read-only.\n' "$VERSION" >> "$GITHUB_STEP_SUMMARY"

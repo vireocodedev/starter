@@ -16,7 +16,11 @@
         "require_code_owner_review": false,
         "require_last_push_approval": false,
         "required_approving_review_count": 0,
-        "required_review_thread_resolution": true
+        "required_review_thread_resolution": true,
+        "required_reviewers": [],
+        "require_extra_approval_for_unattributed_changes": true,
+        "allowed_merge_methods": ["merge", "squash", "rebase"],
+        "dismissal_restriction": { "enabled": false, "allowed_actors": [] }
       }
     },
     {
@@ -25,18 +29,17 @@
         "strict_required_status_checks_policy": true,
         "do_not_enforce_on_create": false,
         "required_status_checks": [
-          { "context": "Release impact", "integration_id": 15368 },
+          { "context": "Policy and verification routing", "integration_id": 15368 },
           { "context": "TypeScript", "integration_id": 15368 },
           { "context": "JVM", "integration_id": 15368 },
           { "context": "Generated full-stack fixture", "integration_id": 15368 },
           { "context": "Generated frontend-only fixture", "integration_id": 15368 },
           { "context": "Public adjacent project-upgrade fixtures", "integration_id": 15368 },
-          { "context": "plan", "integration_id": 15368 },
-          { "context": "Detect standalone website changes", "integration_id": 15368 },
+          { "context": "Consumer gauntlet policy", "integration_id": 15368 },
           { "context": "Build standalone website", "integration_id": 15368 },
           { "context": "Java and TypeScript analysis", "integration_id": 15368 },
           { "context": "CodeQL", "integration_id": 57789 },
-          { "context": "dependency-review", "integration_id": 15368 },
+          { "context": "Dependency review", "integration_id": 15368 },
           { "context": "Secret history scan", "integration_id": 15368 }
         ]
       }

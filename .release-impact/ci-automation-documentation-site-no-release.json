@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "artifact": "application:documentation-site",
+  "decision": "no-release",
+  "justification": "Document the consolidated CI workflow names and routing behavior without changing deployable website content, runtime code, or the documentation site's public release identity."
+}

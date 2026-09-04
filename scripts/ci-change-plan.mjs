@@ -16,9 +16,12 @@ const scopeNames = [
   "codeqlJava",
   "codeqlJavaScript",
   "dependencyReview",
+  "publicBetaEvidence",
+  "documentationPages",
 ];
 
 function matchesSelector(selector = {}, path) {
+  if ((selector.excludePaths ?? []).includes(path)) return false;
   return (
     (selector.paths ?? []).includes(path) ||
     (selector.pathPrefixes ?? []).some(prefix => path.startsWith(prefix)) ||
@@ -42,7 +45,7 @@ export function validateCiChangePlanPolicy(policy) {
       problems.push(`ci change-plan policy ${name} must be an object`);
       continue;
     }
-    for (const key of ["paths", "pathPrefixes", "extensions", "patterns"]) {
+    for (const key of ["paths", "excludePaths", "pathPrefixes", "extensions", "patterns"]) {
       if (
         selector[key] !== undefined &&
         (!Array.isArray(selector[key]) || !selector[key].every(value => typeof value === "string"))
@@ -182,6 +185,8 @@ export function writeGithubOutput(plan, outputPath) {
     codeqlJava: "codeql-java",
     codeqlJavaScript: "codeql-javascript",
     dependencyReview: "dependency-review",
+    publicBetaEvidence: "public-beta-evidence",
+    documentationPages: "documentation-pages",
   };
   const lines = scopeNames.map(name => `${outputNames[name]}=${plan[name]}`);
   lines.push(`full=${plan.full}`);

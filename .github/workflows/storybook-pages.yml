@@ -1,4 +1,5 @@
-name: Deploy Storybook to GitHub Pages
+name: Deploy · Documentation — GitHub Pages
+run-name: Documentation Pages · ${{ github.event_name }} · ${{ github.sha }}
 
 on:
   push:
@@ -12,64 +13,122 @@ concurrency:
 permissions: {}
 
 jobs:
-  build:
-    name: Build documentation
+  changes:
+    name: Plan documentation Pages deployment
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      documentation-pages: ${{ steps.plan.outputs.documentation-pages }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Plan exact documentation Pages deployment
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = 0000000000000000000000000000000000000000 ]; then
+            node scripts/ci-change-plan.mjs --all --github-output "$GITHUB_OUTPUT"
+          else
+            node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+          fi
+      - name: Summarize documentation Pages routing
+        env:
+          SELECTED: ${{ steps.plan.outputs.documentation-pages }}
+        run: |
+          case "$SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf '## Documentation Pages routing\n\n- Build and deployment selected: `%s`\n' "$SELECTED" >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build documentation portal and Storybook
+    needs: changes
+    if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: read
     steps:
+      - name: Require a successful documentation Pages plan
+        if: needs.changes.result != 'success'
+        run: exit 1
       - name: Set up Node.js
+        if: needs.changes.outputs.documentation-pages == 'true'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.18.1
           package-manager-cache: false
 
       - name: Checkout
+        if: needs.changes.outputs.documentation-pages == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Set up Java
+        if: needs.changes.outputs.documentation-pages == 'true'
         uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: temurin
           java-version: 21
 
       - name: Set up Gradle
+        if: needs.changes.outputs.documentation-pages == 'true'
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
       - name: Install dependencies
+        if: needs.changes.outputs.documentation-pages == 'true'
         run: corepack npm ci
 
       - name: Build workspace packages
+        if: needs.changes.outputs.documentation-pages == 'true'
         run: corepack npm run build
 
       - name: Build Storybook
+        if: needs.changes.outputs.documentation-pages == 'true'
         run: corepack npm run build-storybook
 
       - name: Build aggregate JVM Javadocs
+        if: needs.changes.outputs.documentation-pages == 'true'
         run: ./jvm/gradlew -p jvm aggregateJavadoc
 
       - name: Assemble versioned documentation portal
+        if: needs.changes.outputs.documentation-pages == 'true'
         run: corepack npm run docs:portal
 
       - name: Verify documentation artifact
+        if: needs.changes.outputs.documentation-pages == 'true'
         run: corepack npm run docs:check:artifact
 
       - name: Configure GitHub Pages
+        if: needs.changes.outputs.documentation-pages == 'true'
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Upload GitHub Pages artifact
+        if: needs.changes.outputs.documentation-pages == 'true'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: packages/ui/storybook-static
+      - name: Summarize documentation build outcome
+        if: always()
+        env:
+          SELECTED: ${{ needs.changes.outputs.documentation-pages }}
+        run: |
+          printf '## Documentation build\n\n- Selected: `%s`\n- Includes Storybook, aggregate JVM Javadocs, and the versioned portal.\n' "$SELECTED" >> "$GITHUB_STEP_SUMMARY"
 
   deploy:
-    name: Deploy Storybook
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    name: Deploy documentation to GitHub Pages
+    needs: [changes, build]
+    if: github.ref == 'refs/heads/main' && needs.build.result == 'success' && needs.changes.outputs.documentation-pages == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -82,3 +141,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+      - name: Summarize GitHub Pages deployment
+        if: always()
+        run: |
+          printf '## Documentation deployment\n\n- GitHub Pages received the verified Storybook artifact.\n' >> "$GITHUB_STEP_SUMMARY"

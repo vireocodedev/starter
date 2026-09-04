@@ -164,7 +164,9 @@ professional assessment.
 Core infrastructure was implemented in Starter commit `3c4b08c`: `site/` owns the
 standalone build, Vireo-specific presentation, release-derived public model, VPS
 deployment script and Caddy contract; `.github/workflows/website.yml` builds and
-retains the artifact without replacing the GitHub Pages documentation portal.
+retains the pull-request verification artifact, while
+`.github/workflows/deploy-website.yml` builds and activates selected `main`
+artifacts without replacing the GitHub Pages documentation portal.
 The one-time host bootstrap was added in `7069011` and activated on 2026-08-28 as
 release `706901125c26-20260828T103454Z`. The live TLS, health, metadata, redirect,
 404, cache, demo, documentation, API, registry, quickstart, tutorial, community,

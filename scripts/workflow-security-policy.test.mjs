@@ -4,11 +4,11 @@ import test from "node:test";
 
 import {
   parseJobPermissions,
-  validateAlwaysReportedPullRequestWorkflow,
   validateReleasePrWorkflow,
   validateNpmTemplatePublicationWorkflow,
   validatePostPublicationActivityGate,
   validateWebsiteDeploymentWorkflow,
+  validateWebsiteVerificationWorkflow,
   validateTemplateAdoptionWorkflow,
 } from "./workflow-security-policy.mjs";
 
@@ -17,6 +17,7 @@ const actionPolicy = JSON.parse(read("contracts/github-actions-policy.json"));
 const releaseWorkflow = read(".github/workflows/release.yml");
 const anonymousGauntletWorkflow = read(".github/workflows/anonymous-consumer-gauntlet.yml");
 const websiteWorkflow = read(".github/workflows/website.yml");
+const websiteDeploymentWorkflow = read(".github/workflows/deploy-website.yml");
 const templateAdoptionWorkflow = read(".github/workflows/adopt-template-release.yml");
 const npmReleaseWorkflow = read(".github/workflows/release-npm.yml");
 const npmVerificationWorkflow = read(".github/workflows/verify-npm-public.yml");
@@ -217,63 +218,42 @@ test("standalone website artifacts retain generated hidden files", () => {
 });
 
 test("website deployment remains artifact-bound and forced-command only", () => {
-  assert.deepEqual(validateWebsiteDeploymentWorkflow(websiteWorkflow), []);
+  assert.deepEqual(validateWebsiteVerificationWorkflow(websiteWorkflow), []);
+  assert.deepEqual(validateWebsiteDeploymentWorkflow(websiteDeploymentWorkflow), []);
+  assert.match(
+    websiteDeploymentWorkflow,
+    /group: website-\$\{\{ github\.ref == 'refs\/heads\/main' && 'production' \|\| github\.ref \}\}/u,
+  );
+  assert.match(websiteDeploymentWorkflow, /name: Reconcile interrupted website deployment/u);
+  assert.match(websiteDeploymentWorkflow, /needs: reconcile/u);
   assert.match(
     validateWebsiteDeploymentWorkflow(
-      websiteWorkflow.replaceAll("StrictHostKeyChecking=yes", "StrictHostKeyChecking=no"),
+      websiteDeploymentWorkflow.replaceAll("StrictHostKeyChecking=yes", "StrictHostKeyChecking=no"),
     ).join("\n"),
     /forced-command/u,
   );
   assert.match(
     validateWebsiteDeploymentWorkflow(
-      websiteWorkflow.replace('"${ssh_command[@]}" status', '"${ssh_command[@]}" "mkdir -p /tmp"'),
+      websiteDeploymentWorkflow.replace('"${ssh_command[@]}" status', '"${ssh_command[@]}" "mkdir -p /tmp"'),
     ).join("\n"),
     /unrestricted remote shell/u,
   );
   assert.match(
     validateWebsiteDeploymentWorkflow(
-      websiteWorkflow.replace("github.event_name == 'workflow_dispatch'", "github.event_name == 'schedule'"),
+      websiteDeploymentWorkflow.replaceAll("github.ref == 'refs/heads/main'", "github.ref == 'refs/heads/unsafe'"),
     ).join("\n"),
     /artifact-bound forced-command/u,
   );
 });
 
-test("requires the protected gauntlet plan to report on every pull request", () => {
-  assert.deepEqual(
-    validateAlwaysReportedPullRequestWorkflow(anonymousGauntletWorkflow, "anonymous-consumer-gauntlet.yml"),
-    [],
-  );
-  const pathFiltered = anonymousGauntletWorkflow.replace(
-    "  pull_request:\n",
-    "  pull_request:\n    paths: [package.json]\n",
-  );
-  assert.match(
-    validateAlwaysReportedPullRequestWorkflow(pathFiltered, "anonymous-consumer-gauntlet.yml").join("\n"),
-    /must run for every pull request without paths or paths-ignore filters/u,
-  );
-  const missingPlan = anonymousGauntletWorkflow.replace("  plan:\n", "  disabled-plan:\n");
-  assert.match(
-    validateAlwaysReportedPullRequestWorkflow(missingPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
-    /plan must exist and report unconditionally for every pull request/u,
-  );
-  const conditionalPlan = anonymousGauntletWorkflow.replace(
-    "    if: always() && github.event_name == 'pull_request'",
-    "    if: always() && github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'",
-  );
-  assert.match(
-    validateAlwaysReportedPullRequestWorkflow(conditionalPlan, "anonymous-consumer-gauntlet.yml").join("\n"),
-    /plan must exist and report unconditionally for every pull request/u,
-  );
-});
-
 test("binds post-publication gauntlet runs to the combined ecosystem workflow", () => {
   const renamed = anonymousGauntletWorkflow.replace(
-    'workflows: ["Publish Vireo ecosystem"]',
+    'workflows: ["Release · Publish npm and Maven"]',
     'workflows: ["Publish npm release"]',
   );
   const previous = read(".github/workflows/anonymous-consumer-gauntlet.yml");
-  assert.match(previous, /workflows: \["Publish Vireo ecosystem"\]/u);
-  assert.doesNotMatch(renamed, /workflows: \["Publish Vireo ecosystem"\]/u);
+  assert.match(previous, /workflows: \["Release · Publish npm and Maven"\]/u);
+  assert.doesNotMatch(renamed, /workflows: \["Release · Publish npm and Maven"\]/u);
 });
 
 test("fails closed unless downstream workflow_run consumers inspect exact parent release activity", () => {

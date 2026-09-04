@@ -129,7 +129,7 @@ corepack npm run build-docs
 
 Monorepo-level material lives under `Documentation`. Each library then owns a top-level section: UI contains its `Documentation`, `Core`, `Capabilities`, and `Integrations` groups, while History owns its executable package guides directly under `History`. The non-React package source remains framework-free because MDX rendering belongs to the shared UI-owned host.
 
-Every push to `main` publishes the complete production documentation artifact to
+Affected pushes to `main` publish the complete production documentation artifact to
 GitHub Pages. See [documentation deployment](docs/STORYBOOK_DEPLOYMENT.md) for
 repository setup, permissions, local verification, custom-domain guidance, and
 failure handling.
@@ -168,12 +168,12 @@ is required when no package release is intended.
 
 1. `corepack npm exec changeset` — describe the change and select each affected
    package's semver bump.
-2. Merge to `main`. **Maintain ecosystem release PR** opens or refreshes the
+2. Merge to `main`. **Release · Prepare version PR** opens or refreshes the
    generated version PR.
 3. Review and merge that exact PR. It is the routine authorization: the protected
    coordinator first handles any JVM release, then publishes only its planned
    library coordinates through npm OIDC.
-4. Require the automatic **Verify public npm release** workflow to pass its
+4. Require the automatic **Release · Verify npm publication** workflow to pass its
    anonymous cold-consumer and provenance checks.
 
 Versioning is a contract per package:
@@ -188,6 +188,9 @@ Versioning is a contract per package:
 
 Contract tests guard the surfaces, so a change that breaks a contract fails CI
 until the bump is made deliberately rather than by accident.
+
+See [the automation map](docs/AUTOMATION.md) for every verification, security,
+release, deployment, and recovery workflow.
 
 The complete bootstrap, trusted-publisher, publication, verification, and
 recovery procedure is in [Public npm release](docs/NPM_RELEASE.md).

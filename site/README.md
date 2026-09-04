@@ -89,9 +89,11 @@ python3 -m http.server 4173 --directory site/dist
 
 ## Hosted build
 
-The `website.yml` workflow validates and builds the standalone artifact on every
-relevant `main` change. It uploads the exact static output for inspection and VPS
-deployment; it does not replace or deploy through GitHub Pages.
+The PR-only `website.yml` workflow validates and builds the standalone artifact
+when the trusted-base routing policy selects website work. The
+`deploy-website.yml` workflow runs on `main` pushes or manual dispatches: it
+first reconciles an interrupted protected transaction, then builds and deploys
+the exact selected static artifact. Neither workflow deploys through GitHub Pages.
 
 ## VPS continuous deployment
 
@@ -113,18 +115,18 @@ the accepted and rollback releases only.
 
 Before enabling CI, create protected `website-deployment` with the declared secret
 and variables in `.github/environments/website-deployment.live-assertions.json`.
-The `website.yml` main build downloads its own verified artifact, produces a
-deterministic bounded envelope, verifies public `/healthz`, routes, security
-headers, and `/.well-known/vireo-deployment.json`, then accepts or rolls back the
-exact transaction. Legacy direct SSH scripts now fail closed.
+The protected deployment job in `deploy-website.yml` downloads its own verified
+artifact, produces a deterministic bounded envelope, verifies public `/healthz`,
+routes, security headers, and `/.well-known/vireo-deployment.json`, then accepts
+or rolls back the exact transaction. Legacy direct SSH scripts now fail closed.
 
-If a runner is interrupted after staging or activation, the scheduled protected
-reconciliation job rolls back that old exact-run pending transaction to its last
-accepted (including legacy) target; it does not build or deploy new bytes. A manual
-**Build Vireo website** dispatch from `main` is safe for an already accepted
-content identity, but never clears a different pending transaction. On its first
-use, the controller records an existing `current` symlink as a legacy rollback
-predecessor; a failed first qualification restores that symlink before any cleanup.
+If a runner is interrupted after staging or activation, the next protected
+`main` push or manual **Deploy · Website — vireocode.com** dispatch from `main`
+first reconciles that old exact-run pending transaction to its last accepted
+(including legacy) target; it does not build or deploy new bytes during that
+step. On its first use, the controller records an existing `current` symlink as a
+legacy rollback predecessor; a failed first qualification restores that symlink
+before any cleanup.
 Incoming archives are short-lived, bounded, and copied into a root-private
 controller snapshot by exact byte count before validation; trailing or truncated
 uploads are rejected. The deployment proof's `siteDigest` is SHA-256 over compact

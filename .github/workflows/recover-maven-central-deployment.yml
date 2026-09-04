@@ -1,4 +1,5 @@
-name: Recover validated Maven Central deployment
+name: Recovery · Maven Central deployment
+run-name: Maven Central recovery · ${{ inputs.version || github.sha }}
 
 on:
   workflow_dispatch:
@@ -12,7 +13,7 @@ on:
         required: true
         type: string
       source_run_id:
-        description: Exact failed/cancelled/timed-out Publish Vireo ecosystem run to resume
+        description: Exact failed/cancelled/timed-out Release · Publish npm and Maven run to resume
         required: true
         type: string
       deployment_id:

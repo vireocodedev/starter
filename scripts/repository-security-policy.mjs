@@ -32,7 +32,11 @@ function validateMainRuleset(ruleset, checks) {
     pullRequest.require_code_owner_review !== false ||
     pullRequest.require_last_push_approval !== false ||
     pullRequest.required_approving_review_count !== 0 ||
-    pullRequest.required_review_thread_resolution !== true
+    pullRequest.required_review_thread_resolution !== true ||
+    JSON.stringify(pullRequest.required_reviewers) !== JSON.stringify([]) ||
+    pullRequest.require_extra_approval_for_unattributed_changes !== true ||
+    JSON.stringify(pullRequest.allowed_merge_methods) !== JSON.stringify(["merge", "squash", "rebase"]) ||
+    JSON.stringify(pullRequest.dismissal_restriction) !== JSON.stringify({ enabled: false, allowed_actors: [] })
   )
     problems.push("main ruleset must retain the interim single-maintainer pull-request controls");
   const statusChecks = ruleset.rules?.find(rule => rule.type === "required_status_checks")?.parameters;
@@ -143,18 +147,17 @@ for (const form of ["bug_report.yml", "feature_request.yml", "public_beta_feedba
   }
 }
 validateMainRuleset(readJson(".github/rulesets/main.json"), [
-  "Release impact:15368",
+  "Policy and verification routing:15368",
   "TypeScript:15368",
   "JVM:15368",
   "Generated full-stack fixture:15368",
   "Generated frontend-only fixture:15368",
   "Public adjacent project-upgrade fixtures:15368",
-  "plan:15368",
-  "Detect standalone website changes:15368",
+  "Consumer gauntlet policy:15368",
   "Build standalone website:15368",
   "Java and TypeScript analysis:15368",
   "CodeQL:57789",
-  "dependency-review:15368",
+  "Dependency review:15368",
   "Secret history scan:15368",
 ]);
 validateTagRuleset(readJson(".github/rulesets/release-tags.json"));

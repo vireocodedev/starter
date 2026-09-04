@@ -495,7 +495,7 @@ export function validatePostPublicationActivityGate(source, fileName) {
         "anonymous-consumer-gauntlet.yml activity gate must not block manual or scheduled runs after a skipped gate.",
       );
     if (
-      !/trusted-source:\n\s+needs: release-activity\n\s+if: >-\n\s+always\(\) && github\.event_name != 'pull_request'/u.test(
+      !/trusted-source:\n(?:\s+name: [^\n]+\n)?\s+needs: release-activity\n\s+if: >-\n\s+always\(\) && github\.event_name != 'pull_request'/u.test(
         source,
       )
     )
@@ -516,14 +516,20 @@ export function validatePostPublicationActivityGate(source, fileName) {
 
 export function validateWebsiteDeploymentWorkflow(source) {
   const problems = [];
+  const beforePermissions = source.slice(0, source.indexOf("permissions:"));
+  if (!/^on:\n {2}push:\n {4}branches: \[main\]\n {2}workflow_dispatch:$/mu.test(beforePermissions)) {
+    problems.push("deploy-website.yml must run only for main pushes and manual dispatches");
+  }
   for (const fragment of [
     "name: Deploy verified website artifact",
+    "name: Reconcile interrupted website deployment",
     "environment: website-deployment",
     "actions/download-artifact@",
     "site/build-deployment-bundle.mjs",
     "StrictHostKeyChecking=yes",
     "VIREO_WEBSITE_DEPLOY_SSH_PRIVATE_KEY",
-    "github.event_name == 'workflow_dispatch'",
+    "github.ref == 'refs/heads/main'",
+    "needs: reconcile",
     "Require the build commit is still main before activation",
     "stage $GITHUB_RUN_ID",
     "activate $GITHUB_RUN_ID",
@@ -531,15 +537,39 @@ export function validateWebsiteDeploymentWorkflow(source) {
     "rollback $GITHUB_RUN_ID",
     "/.well-known/vireo-deployment.json",
     "IdentitiesOnly=yes",
-    "github.event_name == 'schedule'",
-    "Reconcile interrupted website deployment",
     'test "$PUBLIC_URL" = "https://vireocode.com"',
-    "cancel-in-progress: false",
   ])
     if (!source.includes(fragment))
-      problems.push(`website.yml must retain artifact-bound forced-command deployment: ${fragment}`);
+      problems.push(`deploy-website.yml must retain artifact-bound forced-command deployment: ${fragment}`);
   if (/ssh[^\n]*(?:mkdir|tar -x|ln -s|bash|sh -c)/u.test(source))
-    problems.push("website.yml must not execute unrestricted remote shell commands");
+    problems.push("deploy-website.yml must not execute unrestricted remote shell commands");
+  return problems;
+}
+
+export function validateWebsiteVerificationWorkflow(source) {
+  const problems = [];
+  const beforePermissions = source.slice(0, source.indexOf("permissions:"));
+  if (!/^on:\n {2}pull_request:\n {4}branches: \[main\]$/mu.test(beforePermissions)) {
+    problems.push("website.yml must be a pull-request-only website verification workflow");
+  }
+  for (const fragment of [
+    "name: Verify · Website",
+    "  build:",
+    "name: Build standalone website",
+    "Plan exact website verification from trusted base policy",
+    'git worktree add --detach "$planner_root" "$BASE_SHA"',
+    "Upload standalone artifact",
+  ]) {
+    if (!source.includes(fragment)) problems.push(`website.yml must retain ${fragment}`);
+  }
+  for (const forbidden of [
+    "website-deployment",
+    "VIREO_WEBSITE_DEPLOY_SSH_PRIVATE_KEY",
+    "Reconcile interrupted website deployment",
+  ]) {
+    if (source.includes(forbidden))
+      problems.push(`website.yml must not contain production deployment authority: ${forbidden}`);
+  }
   return problems;
 }
 
@@ -553,7 +583,8 @@ for (const fileName of workflowFiles) {
   const jobs = parseJobs(lines);
 
   if (fileName === "release.yml") problems.push(...validateReleasePrWorkflow(source, policy));
-  if (fileName === "website.yml") problems.push(...validateWebsiteDeploymentWorkflow(source));
+  if (fileName === "website.yml") problems.push(...validateWebsiteVerificationWorkflow(source));
+  if (fileName === "deploy-website.yml") problems.push(...validateWebsiteDeploymentWorkflow(source));
   if (fileName === "adopt-template-release.yml") problems.push(...validateTemplateAdoptionWorkflow(source));
   if (fileName === "release-npm.yml")
     problems.push(...validateNpmReleaseMavenPrerequisite(source), ...validateNpmTemplatePublicationWorkflow(source));
@@ -562,8 +593,7 @@ for (const fileName of workflowFiles) {
       "release-npm.yml:plan must pass github.token explicitly for bounded release-workflow evidence lookup",
     );
   if (fileName === "anonymous-consumer-gauntlet.yml") {
-    problems.push(...validateAlwaysReportedPullRequestWorkflow(source, fileName));
-    if (!source.includes('workflows: ["Publish Vireo ecosystem"]'))
+    if (!source.includes('workflows: ["Release · Publish npm and Maven"]'))
       problems.push("anonymous-consumer-gauntlet.yml must follow the combined ecosystem publication workflow.");
   }
   if (["anonymous-consumer-gauntlet.yml", "verify-npm-public.yml", "attest-public-release.yml"].includes(fileName))

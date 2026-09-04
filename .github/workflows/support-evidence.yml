@@ -1,4 +1,5 @@
-name: Support evidence
+name: Scheduled · Compatibility evidence
+run-name: Compatibility evidence · ${{ github.event_name }} · ${{ github.sha }}
 
 on:
   schedule:

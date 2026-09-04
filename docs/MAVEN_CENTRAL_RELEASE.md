@@ -1,8 +1,8 @@
 # Maven Central release
 
 Vireo publishes the BOM and five JVM modules as one immutable Maven Central
-release. Routine publication is fully automated by the protected **Publish Vireo
-ecosystem** workflow; there is no normal staging or Portal approval step.
+release. Routine publication is fully automated by the protected **Release ·
+Publish npm and Maven** workflow; there is no normal staging or Portal approval step.
 
 ## Routine release
 
@@ -12,7 +12,7 @@ ecosystem** workflow; there is no normal staging or Portal approval step.
    maintained release-PR workflow creates a narrowly scoped ephemeral trigger
    so Changesets opens the ordinary generated ecosystem release PR without a
    synthetic npm bump.
-3. Review and merge the exact generated **Maintain ecosystem release PR**. Its
+3. Review and merge the exact generated **Release · Prepare version PR**. Its
    merge is the only routine publication authorization.
 4. The coordinator proves all six Central POMs are either absent or public. A
    mixed or otherwise indeterminate state fails closed.
@@ -54,14 +54,14 @@ resume `PUBLISHED` verification and create the missing finalization metadata.
 
 ## Exceptional recovery
 
-The only manual Maven mutation/recovery workflow is **Recover validated Maven
-Central deployment**. **Verify Maven Central release** remains a manual read-only
+The only manual Maven mutation/recovery workflow is **Recovery · Maven Central
+deployment**. **Recovery · Verify Maven publication** remains a manual read-only
 verification tool, not a publication path.
 Use it only after an exceptional, documented interruption where the exact Central
 deployment UUID is known and its original release evidence is available. It
 requires the typed `PUBLISH_VALIDATED_DEPLOYMENT` confirmation, the exact
-authorized generated-release merge SHA, and the exact interrupted **Publish
-Vireo ecosystem** run ID. It proves the run is for `release-npm.yml`, a `main`
+authorized generated-release merge SHA, and the exact interrupted **Release ·
+Publish npm and Maven** run ID. It proves the run is for `release-npm.yml`, a `main`
 push at that SHA, is completed `failure`, `cancelled`, or `timed_out`, and retains
 exactly one signed upload-intent artifact. That artifact must contain one bundle
 and one intent record whose SHA-256, version, SHA, run ID/attempt, and seven PURLs

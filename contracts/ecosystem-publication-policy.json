@@ -11,7 +11,8 @@
   "ecosystemWorkflow": {
     "id": 343525517,
     "path": ".github/workflows/release-npm.yml",
-    "name": "Publish Vireo ecosystem"
+    "name": "Release · Publish npm and Maven",
+    "historicalNames": ["Publish Vireo ecosystem"]
   },
   "classicLibraries": [
     "@vireocodedev/history",

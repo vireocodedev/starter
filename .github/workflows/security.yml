@@ -1,12 +1,11 @@
-name: Security
+name: Security · Secrets and dependencies
+run-name: Security dependencies · ${{ github.event_name }} · ${{ github.event.pull_request.number || github.sha }}
 
 on:
   pull_request:
     branches: [main]
   push:
     branches: [main]
-  schedule:
-    - cron: "7 4 * * 1"
   workflow_dispatch:
 
 permissions: {}
@@ -24,3 +23,64 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - run: ./scripts/secret-scan.sh
+      - name: Summarize secret scan outcome
+        if: always()
+        run: |
+          printf '## Secret history scan\n\n- Scans every pull request, main push, and manual run.\n' >> "$GITHUB_STEP_SUMMARY"
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Plan exact dependency review from trusted base policy
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          planner_root="$RUNNER_TEMP/ci-change-plan-base"
+          if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json" && git show "$BASE_SHA:contracts/ci-change-plan-policy.json" | node -e 'const policy=JSON.parse(require("node:fs").readFileSync(0,"utf8")); process.exit(policy.schemaVersion===1&&["publicBetaEvidence","documentationPages"].every(name=>policy.scopes?.[name])?0:1)'; then
+            git worktree add --detach "$planner_root" "$BASE_SHA"
+            trap 'git worktree remove --force "$planner_root"' EXIT
+            node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+          else
+            cat >> "$GITHUB_OUTPUT" <<'EOF'
+          typescript=true
+          jvm=true
+          generated-frontend=true
+          generated-fullstack=true
+          project-upgrade=true
+          gauntlet-plan=true
+          website=true
+          codeql-java=true
+          codeql-javascript=true
+          dependency-review=true
+          public-beta-evidence=true
+          documentation-pages=true
+          full=true
+          reason=base-planner-unavailable; running complete suite
+          EOF
+          fi
+
+      - name: Summarize dependency-review routing
+        env:
+          PLAN_SELECTED: ${{ steps.plan.outputs.dependency-review }}
+        run: |
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf '## Dependency review\n\n- Selected: `%s`\n' "$PLAN_SELECTED" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        if: steps.plan.outputs.dependency-review == 'true'
+        with:
+          fail-on-severity: moderate

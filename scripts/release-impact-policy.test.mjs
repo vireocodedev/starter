@@ -252,16 +252,19 @@ test("parses metadata as data and rejects executable or ambiguous Changesets syn
 
 test("runs the pull-request gate with exact revisions and no privileged execution", () => {
   const workflow = readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8");
-  const job = workflow.match(/^ {2}release-impact:\n([\s\S]*?)(?=^ {2}[a-z][a-z-]+:\n)/mu)?.[0];
+  const job = workflow.match(/^ {2}changes:\n([\s\S]*?)(?=^ {2}[a-z][a-z-]+:\n)/mu)?.[0];
 
-  assert.ok(job, "CI must define a release-impact job");
+  assert.ok(job, "CI must define the policy and verification routing coordinator");
   assert.match(workflow, /^ {2}pull_request:\n/mu);
   assert.doesNotMatch(workflow, /pull_request_target:/u);
+  assert.match(job, /^ {4}name: Policy and verification routing$/mu);
   assert.match(job, /permissions:\n {6}contents: read/u);
   assert.match(job, /persist-credentials: false/u);
   assert.match(job, /fetch-depth: 0/u);
   assert.match(job, /BASE_SHA: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/u);
   assert.match(job, /HEAD_SHA: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/u);
-  assert.match(job, /--base "\$BASE_SHA" --head "\$HEAD_SHA"/u);
+  assert.match(job, /git worktree add --detach "\$gate_root" "\$BASE_SHA"/u);
+  assert.match(job, /node "\$gate_root\/scripts\/release-impact-policy\.mjs" --base "\$BASE_SHA" --head "\$HEAD_SHA"/u);
+  assert.match(job, /trusted base release-impact gate is unavailable/u);
   assert.doesNotMatch(job, /npm (?:ci|install)|secrets\./u);
 });

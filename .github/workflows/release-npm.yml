@@ -1,4 +1,5 @@
-name: Publish Vireo ecosystem
+name: Release · Publish npm and Maven
+run-name: Public release · ${{ github.sha }}
 
 on:
   push:
@@ -370,3 +371,16 @@ jobs:
           NPM_ALLOWED_LIBRARY_COORDINATES: ${{ needs.plan.outputs.classic-coordinates }}
         run: node scripts/finalize-npm-releases.mjs .release-evidence/npm-publication-result.json
       - run: corepack npm run release:verify-public
+      - name: Summarize public release outcome
+        if: always()
+        env:
+          RELEASE_ACTION: ${{ needs.plan.outputs.action }}
+          PUBLISHED: ${{ steps.publication-result.outputs.published }}
+        run: |
+          {
+            echo "## Public release outcome"
+            echo
+            echo "- Authorized release plan: \`$RELEASE_ACTION\`"
+            echo "- npm publication performed: \`$PUBLISHED\`"
+            echo "- Follow-on anonymous verification and SBOM attestation are triggered only from this exact release activity."
+          } >> "$GITHUB_STEP_SUMMARY"
