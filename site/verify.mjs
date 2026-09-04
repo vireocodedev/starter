@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { markupReferencesHostname } from "./url-reference-policy.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sitePolicy = readJson(join(root, "site/site-policy.json"));
@@ -244,7 +245,7 @@ function validateArtifact(release, declaredPages) {
     problems.push("generated landing page must load the self-hosted flagship image");
   if (!landing.includes('content="https://vireocode.com/assets/flagship-overview.png"'))
     problems.push("generated page metadata must use the canonical self-hosted flagship image");
-  if (landing.includes("raw.githubusercontent.com"))
+  if (markupReferencesHostname(landing, "raw.githubusercontent.com", sitePolicy.canonicalUrl))
     problems.push("generated landing page must not depend on a cross-origin flagship image");
   for (const expected of [
     "Vireo documentation",

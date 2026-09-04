@@ -12,9 +12,64 @@ on:
 permissions: {}
 
 jobs:
-  analyze:
-    name: Java and TypeScript analysis
-    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
+  changes:
+    name: Plan CodeQL languages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      java: ${{ steps.plan.outputs.codeql-java }}
+      javascript: ${{ steps.plan.outputs.codeql-javascript }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Plan exact CodeQL languages
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            planner_root="$RUNNER_TEMP/ci-change-plan-base"
+            if git cat-file -e "$BASE_SHA:scripts/ci-change-plan.mjs" && git cat-file -e "$BASE_SHA:contracts/ci-change-plan-policy.json"; then
+              git worktree add --detach "$planner_root" "$BASE_SHA"
+              trap 'git worktree remove --force "$planner_root"' EXIT
+              node "$planner_root/scripts/ci-change-plan.mjs" --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+            else
+              cat >> "$GITHUB_OUTPUT" <<'EOF'
+          typescript=true
+          jvm=true
+          generated-frontend=true
+          generated-fullstack=true
+          project-upgrade=true
+          gauntlet-plan=true
+          website=true
+          codeql-java=true
+          codeql-javascript=true
+          dependency-review=true
+          full=true
+          reason=base-planner-unavailable; running complete suite
+          EOF
+            fi
+          elif [ "$GITHUB_EVENT_NAME" = schedule ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = 0000000000000000000000000000000000000000 ]; then
+            node scripts/ci-change-plan.mjs --all --github-output "$GITHUB_OUTPUT"
+          else
+            node scripts/ci-change-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --github-output "$GITHUB_OUTPUT"
+          fi
+
+  analyze-javascript:
+    name: CodeQL JavaScript analysis
+    needs: changes
+    # Retain CodeQL's independent required integration result during the staged
+    # rollout. GitHub only creates that result after an analyzer uploads data.
+    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -22,17 +77,100 @@ jobs:
       contents: read
       security-events: write
     steps:
+      - name: Require a successful CodeQL plan
+        if: needs.changes.result != 'success'
+        run: exit 1
+      - name: Report JavaScript analysis routing decision
+        if: needs.changes.result == 'success'
+        env:
+          PLAN_SELECTED: ${{ needs.changes.outputs.javascript }}
+        run: |
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            printf 'CodeQL JavaScript analysis executes on every pull request to preserve the required GitHub CodeQL protection (planner-selected=%s).\n' "$PLAN_SELECTED"
+          else
+            printf 'CodeQL JavaScript analysis selected=%s\n' "$PLAN_SELECTED"
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'pull_request' || needs.changes.outputs.javascript == 'true'
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: github.event_name == 'pull_request' || needs.changes.outputs.javascript == 'true'
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: github.event_name == 'pull_request' || needs.changes.outputs.javascript == 'true'
+
+  analyze-java:
+    name: CodeQL Java analysis
+    needs: changes
+    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Require a successful CodeQL plan
+        if: needs.changes.result != 'success'
+        run: exit 1
+      - name: Report Java analysis routing decision
+        if: needs.changes.result == 'success'
+        env:
+          PLAN_SELECTED: ${{ needs.changes.outputs.java }}
+        run: |
+          case "$PLAN_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf 'CodeQL Java analysis selected=%s\n' "$PLAN_SELECTED"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.java == 'true'
         with:
           persist-credentials: false
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        if: needs.changes.outputs.java == 'true'
         with:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        if: needs.changes.outputs.java == 'true'
       - uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: needs.changes.outputs.java == 'true'
         with:
-          languages: java-kotlin,javascript-typescript
+          languages: java-kotlin
       - name: Compile JVM sources for analysis
+        if: needs.changes.outputs.java == 'true'
         run: ./jvm/gradlew -p jvm classes --no-build-cache
       - uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        if: needs.changes.outputs.java == 'true'
+
+  analyze:
+    name: Java and TypeScript analysis
+    needs: [changes, analyze-javascript, analyze-java]
+    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Require successful planned analysis
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          JAVASCRIPT_RESULT: ${{ needs.analyze-javascript.result }}
+          JAVA_RESULT: ${{ needs.analyze-java.result }}
+          JAVASCRIPT_SELECTED: ${{ needs.changes.outputs.javascript }}
+          JAVA_SELECTED: ${{ needs.changes.outputs.java }}
+        run: |
+          test "$CHANGES_RESULT" = success
+          test "$JAVASCRIPT_RESULT" = success
+          test "$JAVA_RESULT" = success
+          case "$JAVASCRIPT_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          case "$JAVA_SELECTED" in true|false) ;; *) exit 1 ;; esac
+      - name: Report aggregate CodeQL result
+        env:
+          JAVASCRIPT_SELECTED: ${{ needs.changes.outputs.javascript }}
+          JAVA_SELECTED: ${{ needs.changes.outputs.java }}
+        run: |
+          case "$JAVASCRIPT_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          case "$JAVA_SELECTED" in true|false) ;; *) exit 1 ;; esac
+          printf 'Java=%s JavaScript=%s\n' "$JAVA_SELECTED" "$JAVASCRIPT_SELECTED"

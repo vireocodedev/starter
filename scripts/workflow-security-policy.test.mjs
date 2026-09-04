@@ -257,8 +257,8 @@ test("requires the protected gauntlet plan to report on every pull request", () 
     /plan must exist and report unconditionally for every pull request/u,
   );
   const conditionalPlan = anonymousGauntletWorkflow.replace(
-    "    if: github.event_name == 'pull_request'",
-    "    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'",
+    "    if: always() && github.event_name == 'pull_request'",
+    "    if: always() && github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'",
   );
   assert.match(
     validateAlwaysReportedPullRequestWorkflow(conditionalPlan, "anonymous-consumer-gauntlet.yml").join("\n"),

@@ -17,6 +17,7 @@ import {
   validateSnapshotArchiveVersions,
 } from "./build.mjs";
 import { renderMarkdown } from "./markdown.mjs";
+import { markupReferencesHostname } from "./url-reference-policy.mjs";
 
 const sitePolicy = {
   canonicalUrl: "https://vireocode.com/",
@@ -54,6 +55,45 @@ const documentationPolicy = {
   ],
 };
 const contentManifest = JSON.parse(readFileSync(new URL("./content/manifest.json", import.meta.url), "utf8"));
+
+test("checks generated URL attributes by their parsed hostname", () => {
+  for (const reference of [
+    '<img src="https://raw.githubusercontent.com/owner/repository/image.png">',
+    '<img src="//raw.githubusercontent.com/owner/repository/image.png">',
+    '<meta content="https://user@RAW.GITHUBUSERCONTENT.COM/image.png">',
+    '<img srcset="https://example.com/one.png 1x, https://raw.githubusercontent.com/owner/two.png 2x">',
+    '<link imagesrcset="https://raw.githubusercontent.com/owner/image.png 2x">',
+    '<svg><image href="https://raw.githubusercontent.com/owner/image.svg"></image></svg>',
+    '<svg><image xlink:href="https://raw.githubusercontent.com/owner/image.svg"></image></svg>',
+    '<video poster="https://raw.githubusercontent.com/owner/poster.png"></video>',
+    "<IMG SRC = https://raw.githubusercontent.com/owner/image.png>",
+    '<img src="https://raw.githubusercontent.com./owner/image.png">',
+    '<img src="https:&#x2f;&#x2f;raw.githubusercontent.com/owner/image.png">',
+    '<img src="https:&sol;&sol;raw.githubusercontent.com/owner/image.png">',
+    String.raw`<img src="https:\\raw.githubusercontent.com/owner/image.png">`,
+    '<img src="https:/\n/raw.githubusercontent.com/owner/image.png">',
+    '<img src="https:/&#x0a;/raw.githubusercontent.com/owner/image.png">',
+    '<img src="https://user,name@raw.githubusercontent.com/owner/image.png">',
+    '<img src="https://user name@raw.githubusercontent.com/owner/image.png">',
+    '<img src="https://user(name)@raw.githubusercontent.com/owner/image.png">',
+    '<img srcset="https://user,name@raw.githubusercontent.com/owner/image.png 2x">',
+    '<img srcset="https://user(name)@raw.githubusercontent.com/owner/image.png 2x">',
+  ]) {
+    assert.equal(markupReferencesHostname(reference, "raw.githubusercontent.com", sitePolicy.canonicalUrl), true);
+  }
+
+  for (const reference of [
+    '<img src="/assets/raw.githubusercontent.com/image.png">',
+    '<img src="https://example.com/raw.githubusercontent.com/image.png">',
+    '<img src="https://raw.githubusercontent.com.example.com/image.png">',
+    '<img src="https://example.raw.githubusercontent.com/image.png">',
+    '<img src="https://raw.githubusercontent.com@example.com/image.png">',
+    '<img src="http://[">',
+    "<p>raw.githubusercontent.com</p>",
+  ]) {
+    assert.equal(markupReferencesHostname(reference, "raw.githubusercontent.com", sitePolicy.canonicalUrl), false);
+  }
+});
 
 test("derives friendly and exact release identities from one policy", () => {
   const website = createWebsiteModel({ documentationPolicy, sitePolicy });

@@ -477,7 +477,7 @@ export function validateAlwaysReportedPullRequestWorkflow(source, fileName) {
   }
   const lines = source.split(/\r?\n/u);
   const plan = parseJobs(lines).find(job => job.name === "plan");
-  if (!plan || !lines.slice(plan.start, plan.end).includes("    if: github.event_name == 'pull_request'")) {
+  if (!plan || !lines.slice(plan.start, plan.end).includes("    if: always() && github.event_name == 'pull_request'")) {
     problems.push(`${fileName}:plan must exist and report unconditionally for every pull request`);
   }
   return problems;

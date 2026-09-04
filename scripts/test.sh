@@ -24,6 +24,9 @@ node --test \
   scripts/report-npm-publication-result.test.mjs \
   scripts/release-workflow-activity.test.mjs \
   scripts/reference-symbol-anchors.test.mjs \
+  scripts/ci-change-plan.test.mjs \
+  scripts/ci-change-plan-coverage.test.mjs \
+  scripts/ci-required-contexts.test.mjs \
   scripts/release-impact-policy.test.mjs \
   scripts/release-impact-version.test.mjs \
   scripts/release-lifecycle-policy.test.mjs \
